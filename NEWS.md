@@ -12,7 +12,7 @@
 
 * Closed #1456: Added `updateBrushCoords()` function to programatically update the area brushed on a plot, similar to other `update*()` functions. Tested primarily with `ggplot2`, but may work with reduced functionality with base graphics and images. See `help(updateBrushCoords, shiny)` for more details.
 
-* Closed #789: `<script>` loaded from dynamic UI are no longer loaded using synchronous `XMLHttpRequest` (via jQuery). (#3666)
+* Closed #789: Dynamic UI is now rendered asynchronously, thanks in part to the newly exported `Shiny.renderDependenciesAsync()`, `Shiny.renderHtmlAsync()`, and `Shiny.renderContentAsync()`. Importantly, this means `<script>` tags are now loaded asynchronously (the old way used `XMLHttpRequest`, which is synchronous). In addition, `Shiny` now manages a queue of async tasks (exposed via `Shiny.shinyapp.taskQueue`) so that order of execution is preserved. (#3666)
 
 * For `reactiveValues()` objects, whenever the `$names()` or `$values()` methods are called, the keys are now returned in the order that they were inserted. (#3774)
 

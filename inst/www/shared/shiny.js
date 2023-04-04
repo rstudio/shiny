@@ -15824,7 +15824,7 @@
           if (opts.priority === "event") {
             this._sendNow();
           } else if (!this.sendIsEnqueued) {
-            this.shinyapp.actionQueue.enqueue(function() {
+            this.shinyapp.taskQueue.enqueue(function() {
               _this.sendIsEnqueued = false;
               _this._sendNow();
             });
@@ -17907,7 +17907,7 @@
     function ShinyApp2() {
       _classCallCheck36(this, ShinyApp2);
       _defineProperty18(this, "$socket", null);
-      _defineProperty18(this, "actionQueue", new AsyncQueue());
+      _defineProperty18(this, "taskQueue", new AsyncQueue());
       _defineProperty18(this, "config", null);
       _defineProperty18(this, "$inputValues", {});
       _defineProperty18(this, "$initialInput", null);
@@ -18116,7 +18116,7 @@
           _this.startActionQueueLoop();
         };
         socket.onmessage = function(e) {
-          _this.actionQueue.enqueue(/* @__PURE__ */ _asyncToGenerator8(/* @__PURE__ */ _regeneratorRuntime8().mark(function _callee2() {
+          _this.taskQueue.enqueue(/* @__PURE__ */ _asyncToGenerator8(/* @__PURE__ */ _regeneratorRuntime8().mark(function _callee2() {
             return _regeneratorRuntime8().wrap(function _callee2$(_context2) {
               while (1)
                 switch (_context2.prev = _context2.next) {
@@ -18159,7 +18159,7 @@
                     break;
                   }
                   _context3.next = 3;
-                  return this.actionQueue.dequeue();
+                  return this.taskQueue.dequeue();
                 case 3:
                   action = _context3.sent;
                   _context3.prev = 4;

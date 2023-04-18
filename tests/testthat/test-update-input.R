@@ -1,36 +1,19 @@
 test_that("Radio buttons and checkboxes work with modules", {
-  createModuleSession <- function(moduleId) {
-    session <- as.environment(list(
-      ns = NS(moduleId),
-      sendInputMessage = function(inputId, message) {
-        session$lastInputMessage = list(id = inputId, message = message)
-      }
-    ))
-    class(session) <- "ShinySession"
-    session
-  }
+  session <- MockShinySession$new()
 
-  sessA <- createModuleSession("modA")
+  updateRadioButtons(session, "test1", label = "Label", choices = letters[1:5])
+  session$verifyInputMessage("test1",
+    expect_equal(.$label, "Label"),
+    expect_equal(.$value, "a"),
+    expect_true(grepl('"mock-session-test1"', .$options)),
+    !expect_false(grepl('"test1"', .$options)) ## negate returned FALSE from expect_false
+  )
 
-  updateRadioButtons(sessA, "test1", label = "Label", choices = letters[1:5])
-  resultA <- sessA$lastInputMessage
-
-  expect_equal("test1", resultA$id)
-  expect_equal("Label", resultA$message$label)
-  expect_equal("a", resultA$message$value)
-  expect_true(grepl('"modA-test1"', resultA$message$options))
-  expect_false(grepl('"test1"', resultA$message$options))
-
-
-  sessB <- createModuleSession("modB")
-
-  updateCheckboxGroupInput(sessB, "test2", label = "Label", choices = LETTERS[1:5])
-  resultB <- sessB$lastInputMessage
-
-  expect_equal("test2", resultB$id)
-  expect_equal("Label", resultB$message$label)
-  expect_null(resultB$message$value)
-  expect_true(grepl('"modB-test2"', resultB$message$options))
-  expect_false(grepl('"test2"', resultB$message$options))
-
+  updateCheckboxGroupInput(session, "test2", label = "Label", choices = LETTERS[1:5])
+  session$verifyInputMessage("test2",
+     expect_equal(.$label, "Label"),
+     expect_null(.$value),
+     expect_true(grepl('"mock-session-test2"', .$options)),
+     !expect_false(grepl('"test2"', .$options))
+  )
 })

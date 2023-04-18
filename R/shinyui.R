@@ -244,7 +244,12 @@ uiHttpHandler <- function(ui, uiPattern = "^/$") {
       uiValue <- httpResponse(200, content=html)
     }
 
-    if (!"Cache-Control" %in% names(uiValue$headers)) {
+    if (
+      # A {bslib} theme has been set while generating the UI
+      !is.null(getCurrentTheme()) &&
+        # The user has not set a `Cache-Control` policy within their UI func
+        !"Cache-Control" %in% names(uiValue$headers)
+    ) {
       # A custom UI func could set cache-control, otherwise disable UI caching
       uiValue$headers <- utils::modifyList(uiValue$headers, no_cache_headers)
     }

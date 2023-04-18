@@ -231,11 +231,24 @@ uiHttpHandler <- function(ui, uiPattern = "^/$") {
     if (is.null(uiValue))
       return(NULL)
 
-    if (inherits(uiValue, "httpResponse")) {
-      return(uiValue)
-    } else {
+    # Avoid caching the UI response to ensure that UI is always re-evaluated.
+    # This is necessary for getCurrentTheme() to be known, required for BS4+.
+    no_cache_headers <- list(
+      "Cache-Control" = "no-cache, no-store, must-revalidate",
+      "Pragma" = "no-cache",
+      "Expires" = "0"
+    )
+
+    if (!inherits(uiValue, "httpResponse")) {
       html <- renderPage(uiValue, showcaseMode, testMode)
-      return(httpResponse(200, content=html))
+      uiValue <- httpResponse(200, content=html)
     }
+
+    if (!"Cache-Control" %in% names(uiValue$headers)) {
+      # A custom UI func could set cache-control, otherwise disable UI caching
+      uiValue$headers <- utils::modifyList(uiValue$headers, no_cache_headers)
+    }
+
+    uiValue
   }
 }

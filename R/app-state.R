@@ -32,6 +32,9 @@ getCurrentAppState <- function() {
   .globals$appState
 }
 
+getCurrentAppStateOptions <- function() {
+  .globals$appState$options
+}
 clearCurrentAppState <- function() {
   .globals$appState <- NULL
 }

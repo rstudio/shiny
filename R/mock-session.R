@@ -274,7 +274,7 @@ MockShinySession <- R6Class(
       self$token <- createUniqueId(16)
 
       # Copy app-level options
-      self$options <- getCurrentAppState()$options
+      self$options <- getCurrentAppStateOptions()
 
       self$cache <- cachem::cache_mem()
       self$appcache <- cachem::cache_mem()

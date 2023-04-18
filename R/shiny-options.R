@@ -199,11 +199,12 @@ shinyOptions <- function(...) {
 
     # If not in a session, but we have a currently running app, modify options
     # at the app level.
-    app_state <- getCurrentAppState()
-    if (!is.null(app_state)) {
+    if (isRunning()) {
       # Modify app-level options
-      app_state$options <- dropNulls(mergeVectors(app_state$options, newOpts))
-      return(invisible(app_state$options))
+      setCurrentAppStateOptions(
+        dropNulls(mergeVectors(getCurrentAppStateOptions(), newOpts))
+      )
+      return(invisible(getCurrentAppStateOptions()))
     }
 
     # If no currently running app, modify global options and return them.

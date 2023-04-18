@@ -35,6 +35,11 @@ getCurrentAppState <- function() {
 getCurrentAppStateOptions <- function() {
   .globals$appState$options
 }
+setCurrentAppStateOptions <- function(options) {
+  stopifnot(isRunning())
+  .globals$appState$options <- options
+}
+
 clearCurrentAppState <- function() {
   .globals$appState <- NULL
 }

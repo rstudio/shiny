@@ -7,6 +7,17 @@ NULL
 
 .globals$appState <- NULL
 
+#' Check whether a Shiny application is running
+#'
+#' This function tests whether a Shiny application is currently running.
+#'
+#' @return `TRUE` if a Shiny application is currently running. Otherwise,
+#'   `FALSE`.
+#' @export
+isRunning <- function() {
+  !is.null(getCurrentAppState())
+}
+
 initCurrentAppState <- function(appobj) {
   if (!is.null(.globals$appState)) {
     stop("Can't initialize current app state when another is currently active.")

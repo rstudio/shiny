@@ -244,13 +244,16 @@ uiHttpHandler <- function(ui, uiPattern = "^/$") {
       uiValue <- httpResponse(200, content=html)
     }
 
+    # 2023-04-23 jcheng5: Example app in PR comment
+    # https://github.com/rstudio/shiny/pull/3810#issuecomment-1513828996
+    # > I think we should always add the cache-busting headers. Without it,
+    # Connect and ShinyApps.io configurations will have problems in that the
+    # workerId could be a stale value.
     if (
-      # A {bslib} theme has been set while generating the UI
-      !is.null(getCurrentTheme()) &&
-        # The user has not set a `Cache-Control` policy within their UI func
-        !"Cache-Control" %in% names(uiValue$headers)
+      # The user has not set a `Cache-Control` policy within their UI func
+      !"Cache-Control" %in% names(uiValue$headers)
     ) {
-      # A custom UI func could set cache-control, otherwise disable UI caching
+      # Disable caching for the UI's response
       uiValue$headers <- utils::modifyList(uiValue$headers, no_cache_headers)
     }
 

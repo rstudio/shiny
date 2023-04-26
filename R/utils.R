@@ -1515,7 +1515,19 @@ hybrid_chain <- function(expr, ..., catch = NULL, finally = NULL,
 
   do <- function() {
     runFinally <- TRUE
-    tryCatch(
+    on.exit({ if (runFinally && !is.null(finally)) finally() })
+
+    catch_e <- NULL
+    delayedAssign("do_catch",
+      if (!is.null(catch)) {
+        catch(catch_e)
+        return()
+      } else {
+        stop(catch_e)
+      }
+    )
+
+    withCallingHandlers(
       {
         captureStackTraces({
           result <- withVisible(force(expr))
@@ -1543,12 +1555,9 @@ hybrid_chain <- function(expr, ..., catch = NULL, finally = NULL,
         })
       },
       error = function(e) {
-        if (!is.null(catch))
-          catch(e)
-        else
-          stop(e)
-      },
-      finally = if (runFinally && !is.null(finally)) finally()
+        catch_e <<- e
+        do_catch
+      }
     )
   }
 

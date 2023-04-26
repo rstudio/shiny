@@ -8,10 +8,10 @@ interface ShinyEventCommon extends JQuery.Event {
   value: any;
 }
 interface ShinyEventInputChanged extends ShinyEventCommon {
-  value: unknown;
+  el: HTMLElement | null;
   binding: InputBinding | null;
   inputType: string;
-  priority: EventPriority;
+  priority?: EventPriority;
 }
 interface ShinyEventUpdateInput extends ShinyEventCommon {
   message: unknown;

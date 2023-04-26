@@ -81,9 +81,24 @@ class EventInputChanged extends EventCommon {
 }
 
 interface ShinyEventUpdateInput extends ShinyEventCommon {
-  message: unknown;
+  message?: any;
   binding: InputBinding;
 }
+
+class EventUpdateInput extends EventBase {
+  declare event: ShinyEventUpdateInput;
+  message?: any;
+  binding: InputBinding;
+
+  constructor({ message, binding }: { message?: any; binding: InputBinding }) {
+    super("shiny:updateinput");
+    if (message) {
+      this.message = this.event.message = message;
+    }
+    this.binding = this.event.binding = binding;
+  }
+}
+
 interface ShinyEventValue extends ShinyEventCommon {
   value: unknown;
   binding: OutputBindingAdapter;
@@ -106,10 +121,15 @@ declare global {
       events: "shiny:inputchanged",
       handler: EvtFn<ShinyEventInputChanged>
     ): this;
+
+    on(
+      events: "shiny:updateinput",
+      handler: EvtFn<ShinyEventUpdateInput>
+    ): this;
   }
 }
 
-export { EventCommon, EventInputChanged };
+export { EventCommon, EventInputChanged, EventUpdateInput };
 
 export type {
   ShinyEventInputChanged,

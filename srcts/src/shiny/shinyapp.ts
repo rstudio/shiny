@@ -19,8 +19,8 @@ import type {
   ShinyEventError,
   ShinyEventMessage,
   ShinyEventValue,
-  ShinyEventUpdateInput,
 } from "../events/shinyEvents";
+import { EventUpdateInput } from "../events/shinyEvents";
 import type { InputBinding } from "../bindings";
 import { indirectEval } from "../utils/eval";
 import type { WherePosition } from "./singletons";
@@ -720,11 +720,11 @@ class ShinyApp {
           if ($obj.length > 0) {
             if (!$obj.attr("aria-live")) $obj.attr("aria-live", "polite");
             const el = $obj[0];
-            const evt: ShinyEventUpdateInput = $.Event("shiny:updateinput");
-
-            evt.message = message[i].message;
-            evt.binding = inputBinding;
-            $(el).trigger(evt);
+            const evt = new EventUpdateInput({
+              message: message[i].message,
+              binding: inputBinding,
+            });
+            evt.triggerOn(el);
             if (!evt.isDefaultPrevented())
               inputBinding.receiveMessage(el, evt.message);
           }
@@ -1225,10 +1225,10 @@ class ShinyApp {
         // value for the tabset gets updated (i.e. input$tabsetId
         // should be null if there are no tabs).
         const destTabValue = getFirstTab($tabset);
-        const evt: ShinyEventUpdateInput = $.Event("shiny:updateinput");
-
-        evt.binding = inputBinding;
-        $tabset.trigger(evt);
+        const evt = new EventUpdateInput({
+          binding: inputBinding,
+        });
+        $tabset.trigger(evt.event);
         inputBinding.setValue($tabset[0], destTabValue);
       }
     }

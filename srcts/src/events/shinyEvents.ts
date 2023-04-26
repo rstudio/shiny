@@ -2,13 +2,8 @@ import type { InputBinding } from "../bindings/input/inputBinding";
 import type { OutputBindingAdapter } from "../bindings/outputAdapter";
 import type { EventPriority } from "../inputPolicies/inputPolicy";
 import type { ErrorsMessageValue } from "../shiny/shinyapp";
-
+import type { EvtFn } from "./jQueryEvents";
 import "jquery";
-
-type EvtClassFn<T extends ShinyEventCommon> =
-  | ((evt: T["evt"]) => void)
-  | null
-  | undefined;
 
 interface ShinyEventCommon extends JQuery.Event {
   name: string;
@@ -101,7 +96,7 @@ declare global {
   interface JQuery {
     on(
       events: "shiny:inputchanged",
-      handler: EvtClassFn<ShinyEventInputChanged>
+      handler: EvtFn<ShinyEventInputChanged>
     ): this;
   }
 }

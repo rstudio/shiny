@@ -54,3 +54,5 @@ declare global {
     ): this;
   }
 }
+
+export type { EvtFn };

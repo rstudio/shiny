@@ -5,31 +5,39 @@ import type { ErrorsMessageValue } from "../shiny/shinyapp";
 import type { EvtFn } from "./jQueryEvents";
 import "jquery";
 
+// This class implements a common interface for all Shiny events, and provides
+// a layer of abstraction between the Shiny's event and the underlying jQuery
+// event object.
+class EventBase {
+  event: JQuery.Event;
+
+  constructor(type: string) {
+    this.event = $.Event(type);
+  }
+
+  triggerOn(el: HTMLElement | typeof document | null): void {
+    $(el || window.document).trigger(this.event);
+  }
+
+  isDefaultPrevented(): boolean {
+    return this.event.isDefaultPrevented();
+  }
+}
+
 interface ShinyEventCommon extends JQuery.Event {
   name: string;
   value: any;
 }
 
-// This class implements a common interface for all Shiny events, and provides
-// a layer of abstraction between the Shiny's event and the underlying jQuery
-// event object.
-class EventCommon {
-  evt: ShinyEventCommon;
+class EventCommon extends EventBase {
+  declare event: ShinyEventCommon;
   name: string;
   value: any;
 
   constructor(type: string, name: string, value: any) {
-    this.evt = $.Event(type) as ShinyEventCommon;
-    this.evt.name = this.name = name;
-    this.evt.value = this.value = value;
-  }
-
-  triggerOn(el: HTMLElement | typeof document | null): void {
-    $(el || window.document).trigger(this.evt);
-  }
-
-  isDefaultPrevented(): boolean {
-    return this.evt.isDefaultPrevented();
+    super(type);
+    this.event.name = this.name = name;
+    this.event.value = this.value = value;
   }
 }
 
@@ -41,7 +49,7 @@ interface ShinyEventInputChanged extends ShinyEventCommon {
 }
 
 class EventInputChanged extends EventCommon {
-  declare evt: ShinyEventInputChanged;
+  declare event: ShinyEventInputChanged;
   el: HTMLElement | null;
   binding: InputBinding | null;
   inputType: string;
@@ -63,11 +71,11 @@ class EventInputChanged extends EventCommon {
     priority?: EventPriority;
   }) {
     super("shiny:inputchanged", name, value);
-    this.el = this.evt.el = el;
-    this.binding = this.evt.binding = binding;
-    this.inputType = this.evt.inputType = inputType;
+    this.el = this.event.el = el;
+    this.binding = this.event.binding = binding;
+    this.inputType = this.event.inputType = inputType;
     if (priority) {
-      this.priority = this.evt.priority = priority;
+      this.priority = this.event.priority = priority;
     }
   }
 }

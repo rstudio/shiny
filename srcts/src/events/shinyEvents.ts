@@ -15,17 +15,26 @@ interface ShinyEventCommon extends JQuery.Event {
   value: any;
 }
 
+// This class implements a common interface for all Shiny events, and provides
+// a layer of abstraction between the Shiny's event and the underlying jQuery
+// event object.
 class EventCommon {
   evt: ShinyEventCommon;
+  name: string;
+  value: any;
 
-  constructor(type: string, name: string, value: unknown) {
+  constructor(type: string, name: string, value: any) {
     this.evt = $.Event(type) as ShinyEventCommon;
-    this.evt.name = name;
-    this.evt.value = value;
+    this.evt.name = this.name = name;
+    this.evt.value = this.value = value;
   }
 
   triggerOn(el: HTMLElement | typeof document | null): void {
     $(el || window.document).trigger(this.evt);
+  }
+
+  isDefaultPrevented(): boolean {
+    return this.evt.isDefaultPrevented();
   }
 }
 
@@ -38,6 +47,10 @@ interface ShinyEventInputChanged extends ShinyEventCommon {
 
 class EventInputChanged extends EventCommon {
   declare evt: ShinyEventInputChanged;
+  el: HTMLElement | null;
+  binding: InputBinding | null;
+  inputType: string;
+  priority?: EventPriority;
 
   constructor({
     name,
@@ -48,17 +61,19 @@ class EventInputChanged extends EventCommon {
     priority,
   }: {
     name: string;
-    value: unknown;
+    value: any;
     el: HTMLElement | null;
     binding: InputBinding | null;
     inputType: string;
     priority?: EventPriority;
   }) {
     super("shiny:inputchanged", name, value);
-    this.evt.el = el;
-    this.evt.binding = binding;
-    this.evt.inputType = inputType;
-    if (priority) this.evt.priority = priority;
+    this.el = this.evt.el = el;
+    this.binding = this.evt.binding = binding;
+    this.inputType = this.evt.inputType = inputType;
+    if (priority) {
+      this.priority = this.evt.priority = priority;
+    }
   }
 }
 

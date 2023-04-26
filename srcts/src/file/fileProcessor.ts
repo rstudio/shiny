@@ -1,8 +1,8 @@
 import $ from "jquery";
-import { triggerFileInputChanged } from "../events/inputChanged";
 import { $escape } from "../utils";
 import type { ShinyApp } from "../shiny/shinyapp";
 import { getFileInputBinding } from "../shiny/initedMethods";
+import { EventInputChanged } from "../events/shinyEvents";
 
 type JobId = string;
 type UploadUrl = string;
@@ -227,14 +227,14 @@ class FileUploader extends FileProcessor {
     // Trigger shiny:inputchanged. Unlike a normal shiny:inputchanged event,
     // it's not possible to modify the information before the values get
     // sent to the server.
-    const evt = triggerFileInputChanged(
-      this.id,
-      fileInfo,
-      getFileInputBinding(),
-      this.el,
-      "shiny.fileupload",
-      document
-    );
+    const evt = new EventInputChanged({
+      name: this.id,
+      value: fileInfo,
+      el: this.el,
+      binding: getFileInputBinding(),
+      inputType: "shiny.fileupload",
+    });
+    evt.triggerOn(document);
 
     this.makeRequest(
       "uploadEnd",

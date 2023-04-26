@@ -151,6 +151,16 @@ interface ShinyEventMessage extends JQuery.Event {
   message: { [key: string]: unknown };
 }
 
+class EventMessage extends EventBase {
+  declare event: ShinyEventMessage;
+  message: { [key: string]: unknown };
+
+  constructor(message: { [key: string]: unknown }) {
+    super("shiny:message");
+    this.message = this.event.message = message;
+  }
+}
+
 // Augment the JQuery interface ----------------------------------------------
 // This allows extensions to use .on() with Shiny's custom events.
 // E.g. in {bslib}, we use `$(document).on("shiny:value", ...)`
@@ -168,6 +178,7 @@ declare global {
 
     on(events: "shiny:value", handler: EvtFn<ShinyEventValue>): this;
     on(events: "shiny:error", handler: EvtFn<ShinyEventError>): this;
+    on(events: "shiny:message", handler: EvtFn<ShinyEventMessage>): this;
   }
 }
 
@@ -177,6 +188,7 @@ export {
   EventUpdateInput,
   EventValue,
   EventError,
+  EventMessage,
 };
 
 export type {

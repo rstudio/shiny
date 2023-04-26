@@ -15,11 +15,11 @@ import type { HtmlDep } from "./render";
 import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
 import { resetBrush } from "../imageutils/resetBrush";
 import type { OutputBindingAdapter } from "../bindings/outputAdapter";
-import type { ShinyEventMessage } from "../events/shinyEvents";
 import {
   EventValue,
   EventUpdateInput,
   EventError,
+  EventMessage,
 } from "../events/shinyEvents";
 import type { InputBinding } from "../bindings";
 import { indirectEval } from "../utils/eval";
@@ -616,7 +616,7 @@ class ShinyApp {
   // Shiny.addCustomMessageHandler = addCustomMessageHandler;
 
   async dispatchMessage(data: ArrayBufferLike | string): Promise<void> {
-    let msgObj: ShinyEventMessage["message"] = {};
+    let msgObj: EventMessage["message"] = {};
 
     if (typeof data === "string") {
       msgObj = JSON.parse(data);
@@ -637,10 +637,8 @@ class ShinyApp {
       msgObj.custom[type] = data;
     }
 
-    const evt: ShinyEventMessage = $.Event("shiny:message");
-
-    evt.message = msgObj;
-    $(document).trigger(evt);
+    const evt = new EventMessage({ message: msgObj });
+    evt.triggerOn(document);
     if (evt.isDefaultPrevented()) return;
 
     // Send msgObj.foo and msgObj.bar to appropriate handlers

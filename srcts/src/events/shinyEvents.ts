@@ -100,8 +100,25 @@ class EventUpdateInput extends EventBase {
 }
 
 interface ShinyEventValue extends ShinyEventCommon {
-  value: unknown;
   binding: OutputBindingAdapter;
+}
+
+class EventValue extends EventCommon {
+  declare event: ShinyEventValue;
+  binding: OutputBindingAdapter;
+
+  constructor({
+    name,
+    value,
+    binding,
+  }: {
+    name: string;
+    value: any;
+    binding: OutputBindingAdapter;
+  }) {
+    super("shiny:value", name, value);
+    this.binding = this.event.binding = binding;
+  }
 }
 
 interface ShinyEventError extends ShinyEventCommon {
@@ -126,10 +143,12 @@ declare global {
       events: "shiny:updateinput",
       handler: EvtFn<ShinyEventUpdateInput>
     ): this;
+
+    on(events: "shiny:value", handler: EvtFn<ShinyEventValue>): this;
   }
 }
 
-export { EventCommon, EventInputChanged, EventUpdateInput };
+export { EventCommon, EventInputChanged, EventUpdateInput, EventValue };
 
 export type {
   ShinyEventInputChanged,

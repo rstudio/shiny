@@ -15,12 +15,8 @@ import type { HtmlDep } from "./render";
 import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
 import { resetBrush } from "../imageutils/resetBrush";
 import type { OutputBindingAdapter } from "../bindings/outputAdapter";
-import type {
-  ShinyEventError,
-  ShinyEventMessage,
-  ShinyEventValue,
-} from "../events/shinyEvents";
-import { EventUpdateInput } from "../events/shinyEvents";
+import type { ShinyEventError, ShinyEventMessage } from "../events/shinyEvents";
+import { EventValue, EventUpdateInput } from "../events/shinyEvents";
 import type { InputBinding } from "../bindings";
 import { indirectEval } from "../utils/eval";
 import type { WherePosition } from "./singletons";
@@ -484,21 +480,17 @@ class ShinyApp {
 
   async receiveOutput<T>(name: string, value: T): Promise<T | undefined> {
     const binding = this.$bindings[name];
-    const evt: ShinyEventValue = $.Event("shiny:value");
-
-    evt.name = name;
-    evt.value = value;
-    evt.binding = binding;
+    const evt = new EventValue({ name, value, binding });
 
     if (this.$values[name] === value) {
-      $(binding ? binding.el : document).trigger(evt);
+      evt.triggerOn(binding?.el);
       return undefined;
     }
 
     this.$values[name] = value;
     delete this.$errors[name];
 
-    $(binding ? binding.el : document).trigger(evt);
+    evt.triggerOn(binding?.el);
 
     if (!evt.isDefaultPrevented() && binding) {
       await binding.onValueChange(evt.value);

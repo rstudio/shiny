@@ -15,8 +15,12 @@ import type { HtmlDep } from "./render";
 import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
 import { resetBrush } from "../imageutils/resetBrush";
 import type { OutputBindingAdapter } from "../bindings/outputAdapter";
-import type { ShinyEventError, ShinyEventMessage } from "../events/shinyEvents";
-import { EventValue, EventUpdateInput } from "../events/shinyEvents";
+import type { ShinyEventMessage } from "../events/shinyEvents";
+import {
+  EventValue,
+  EventUpdateInput,
+  EventError,
+} from "../events/shinyEvents";
 import type { InputBinding } from "../bindings";
 import { indirectEval } from "../utils/eval";
 import type { WherePosition } from "./singletons";
@@ -467,12 +471,10 @@ class ShinyApp {
     delete this.$values[name];
 
     const binding = this.$bindings[name];
-    const evt: ShinyEventError = $.Event("shiny:error");
 
-    evt.name = name;
-    evt.error = error;
-    evt.binding = binding;
-    $(binding ? binding.el : document).trigger(evt);
+    const evt = new EventError({ name, error, binding });
+    evt.triggerOn(binding?.el);
+
     if (!evt.isDefaultPrevented() && binding && binding.onValueError) {
       binding.onValueError(evt.error);
     }

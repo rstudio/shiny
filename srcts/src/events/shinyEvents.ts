@@ -125,6 +125,28 @@ interface ShinyEventError extends ShinyEventCommon {
   binding: OutputBindingAdapter;
   error: ErrorsMessageValue;
 }
+
+class EventError extends EventCommon {
+  declare event: ShinyEventError;
+  declare value: null;
+  binding: OutputBindingAdapter;
+  error: ErrorsMessageValue;
+
+  constructor({
+    name,
+    binding,
+    error,
+  }: {
+    name: string;
+    binding: OutputBindingAdapter;
+    error: ErrorsMessageValue;
+  }) {
+    super("shiny:error", name, null);
+    this.binding = this.event.binding = binding;
+    this.error = this.event.error = error;
+  }
+}
+
 interface ShinyEventMessage extends JQuery.Event {
   message: { [key: string]: unknown };
 }
@@ -145,10 +167,17 @@ declare global {
     ): this;
 
     on(events: "shiny:value", handler: EvtFn<ShinyEventValue>): this;
+    on(events: "shiny:error", handler: EvtFn<ShinyEventError>): this;
   }
 }
 
-export { EventCommon, EventInputChanged, EventUpdateInput, EventValue };
+export {
+  EventCommon,
+  EventInputChanged,
+  EventUpdateInput,
+  EventValue,
+  EventError,
+};
 
 export type {
   ShinyEventInputChanged,

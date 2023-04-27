@@ -3,7 +3,7 @@ import type { OutputBindingAdapter } from "../bindings/outputAdapter";
 import type { EventPriority } from "../inputPolicies/inputPolicy";
 import type { ErrorsMessageValue } from "../shiny/shinyapp";
 import type { EvtFn } from "./jQueryEvents";
-import "jquery";
+import $ from "jquery";
 
 // This class implements a common interface for all Shiny events, and provides
 // a layer of abstraction between the Shiny's event and the underlying jQuery

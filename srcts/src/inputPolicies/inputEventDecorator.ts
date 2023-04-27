@@ -12,7 +12,7 @@ class InputEventDecorator implements InputPolicy {
   setInput(nameType: string, value: unknown, opts: InputPolicyOpts): void {
     const input = splitInputNameType(nameType);
 
-    const evt = new EventInputChanged({
+    const inputChangedEvent = new EventInputChanged({
       name: input.name,
       value,
       el: opts.el || null,
@@ -25,16 +25,19 @@ class InputEventDecorator implements InputPolicy {
     // input element instead of `document`. Existing event listeners bound to
     // `document` will still detect the event due to event bubbling. #2446
     // If no `el` exists, use `document` instead. #3584
-    evt.triggerOn(opts.el || window.document);
+    inputChangedEvent.triggerOn(opts.el || window.document);
 
-    if (!evt.isDefaultPrevented()) {
-      let name = evt.name;
+    if (!inputChangedEvent.isDefaultPrevented()) {
+      let name = inputChangedEvent.name;
 
-      if (evt.inputType !== "") name += ":" + evt.inputType;
+      if (inputChangedEvent.inputType !== "")
+        name += ":" + inputChangedEvent.inputType;
 
       // Most opts aren't passed along to lower levels in the input decorator
       // stack.
-      this.target.setInput(name, evt.value, { priority: opts.priority });
+      this.target.setInput(name, inputChangedEvent.value, {
+        priority: opts.priority,
+      });
     }
   }
 }

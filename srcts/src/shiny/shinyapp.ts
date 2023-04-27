@@ -472,30 +472,30 @@ class ShinyApp {
 
     const binding = this.$bindings[name];
 
-    const evt = new EventError({ name, error, binding });
-    evt.triggerOn(binding?.el);
+    const errorEvent = new EventError({ name, error, binding });
+    errorEvent.triggerOn(binding?.el);
 
-    if (!evt.isDefaultPrevented() && binding && binding.onValueError) {
-      binding.onValueError(evt.error);
+    if (!errorEvent.isDefaultPrevented() && binding && binding.onValueError) {
+      binding.onValueError(errorEvent.error);
     }
   }
 
   async receiveOutput<T>(name: string, value: T): Promise<T | undefined> {
     const binding = this.$bindings[name];
-    const evt = new EventValue({ name, value, binding });
+    const valueEvent = new EventValue({ name, value, binding });
 
     if (this.$values[name] === value) {
-      evt.triggerOn(binding?.el);
+      valueEvent.triggerOn(binding?.el);
       return undefined;
     }
 
     this.$values[name] = value;
     delete this.$errors[name];
 
-    evt.triggerOn(binding?.el);
+    valueEvent.triggerOn(binding?.el);
 
-    if (!evt.isDefaultPrevented() && binding) {
-      await binding.onValueChange(evt.value);
+    if (!valueEvent.isDefaultPrevented() && binding) {
+      await binding.onValueChange(valueEvent.value);
     }
 
     return value;
@@ -637,13 +637,13 @@ class ShinyApp {
       msgObj.custom[type] = data;
     }
 
-    const evt = new EventMessage({ message: msgObj });
-    evt.triggerOn(document);
-    if (evt.isDefaultPrevented()) return;
+    const messageEvent = new EventMessage({ message: msgObj });
+    messageEvent.triggerOn(document);
+    if (messageEvent.isDefaultPrevented()) return;
 
     // Send msgObj.foo and msgObj.bar to appropriate handlers
     await this._sendMessagesToHandlers(
-      evt.message,
+      messageEvent.message,
       messageHandlers,
       messageHandlerOrder
     );
@@ -712,13 +712,13 @@ class ShinyApp {
           if ($obj.length > 0) {
             if (!$obj.attr("aria-live")) $obj.attr("aria-live", "polite");
             const el = $obj[0];
-            const evt = new EventUpdateInput({
+            const updateInputEvent = new EventUpdateInput({
               message: message[i].message,
               binding: inputBinding,
             });
-            evt.triggerOn(el);
-            if (!evt.isDefaultPrevented())
-              inputBinding.receiveMessage(el, evt.message);
+            updateInputEvent.triggerOn(el);
+            if (!updateInputEvent.isDefaultPrevented())
+              inputBinding.receiveMessage(el, updateInputEvent.message);
           }
         }
       }
@@ -1217,10 +1217,10 @@ class ShinyApp {
         // value for the tabset gets updated (i.e. input$tabsetId
         // should be null if there are no tabs).
         const destTabValue = getFirstTab($tabset);
-        const evt = new EventUpdateInput({
+        const updateInputEvent = new EventUpdateInput({
           binding: inputBinding,
         });
-        $tabset.trigger(evt.event);
+        updateInputEvent.triggerOn($tabset);
         inputBinding.setValue($tabset[0], destTabValue);
       }
     }

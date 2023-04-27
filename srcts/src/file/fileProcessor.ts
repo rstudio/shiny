@@ -227,14 +227,14 @@ class FileUploader extends FileProcessor {
     // Trigger shiny:inputchanged. Unlike a normal shiny:inputchanged event,
     // it's not possible to modify the information before the values get
     // sent to the server.
-    const evt = new EventInputChanged({
+    const inputChangedEvent = new EventInputChanged({
       name: this.id,
       value: fileInfo,
       el: this.el,
       binding: getFileInputBinding(),
       inputType: "shiny.fileupload",
     });
-    evt.triggerOn(document);
+    inputChangedEvent.triggerOn(document);
 
     this.makeRequest(
       "uploadEnd",
@@ -245,7 +245,7 @@ class FileUploader extends FileProcessor {
         this.$bar().text("Upload complete");
         // Reset the file input's value to "". This allows the same file to be
         // uploaded again. https://stackoverflow.com/a/22521275
-        $(evt.el as HTMLElement).val("");
+        $(inputChangedEvent.el as HTMLElement).val("");
       },
       (error) => {
         this.onError(error);

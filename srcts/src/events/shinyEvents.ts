@@ -5,9 +5,13 @@ import type { ErrorsMessageValue } from "../shiny/shinyapp";
 import type { EvtFn } from "./jQueryEvents";
 import $ from "jquery";
 
-// This class implements a common interface for all Shiny events, and provides
-// a layer of abstraction between the Shiny's event and the underlying jQuery
-// event object.
+// This class implements a common interface for all Shiny events, and provides a
+// layer of abstraction between the Shiny event and the underlying jQuery event
+// object. We use a new class, rather than extending JQuery.Event, because
+// jQuery.Event is an old function-style class. Each Event class has a
+// corresponding ShinyEvent interface that describes the event object that is
+// emitted. At the end of this file, we extend JQuery's `on()` method to
+// associate the ShinyEvent interfaces with their corresponding event string.
 class EventBase {
   event: JQuery.Event;
 
@@ -209,8 +213,12 @@ class EventMessage extends EventBase {
 }
 
 // Augment the JQuery interface ----------------------------------------------
-// This allows extensions to use .on() with Shiny's custom events.
-// E.g. in {bslib}, we use `$(document).on("shiny:value", ...)`
+// This allows extensions to use .on() in Typescript with Shiny's custom events.
+// E.g. in {bslib}, we can use the following with complete type information:
+//
+// ```
+// $(document).on("shiny:value", function(event: ShinyEventValue) { })
+// ```
 declare global {
   interface JQuery {
     on(

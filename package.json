@@ -19,6 +19,7 @@
     "yarn": ">= 1.22"
   },
   "dependencies": {
+    "@babel/plugin-transform-typescript": "^7.21.3",
     "@types/bootstrap": "3.4.0",
     "@types/bootstrap-datepicker": "0.0.14",
     "@types/datatables.net": "^1.10.19",

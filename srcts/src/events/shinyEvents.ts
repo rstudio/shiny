@@ -15,7 +15,9 @@ class EventBase {
     this.event = $.Event(type);
   }
 
-  triggerOn(el: HTMLElement | typeof document | null): void {
+  triggerOn(
+    el: HTMLElement | JQuery<HTMLElement> | typeof document | null
+  ): void {
     $(el || window.document).trigger(this.event);
   }
 

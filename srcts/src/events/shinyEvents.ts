@@ -33,13 +33,23 @@ interface ShinyEventCommon extends JQuery.Event {
 
 class EventCommon extends EventBase {
   declare event: ShinyEventCommon;
-  name: string;
-  value: any;
 
-  constructor(type: string, name: string, value: any) {
+  constructor(
+    type: ShinyEventCommon["type"],
+    name: ShinyEventCommon["name"],
+    value: ShinyEventCommon["value"]
+  ) {
     super(type);
-    this.event.name = this.name = name;
-    this.event.value = this.value = value;
+    this.event.name = name;
+    this.event.value = value;
+  }
+
+  get name(): ShinyEventCommon["name"] {
+    return this.event.name;
+  }
+
+  get value(): ShinyEventCommon["value"] {
+    return this.event.value;
   }
 }
 
@@ -52,10 +62,6 @@ interface ShinyEventInputChanged extends ShinyEventCommon {
 
 class EventInputChanged extends EventCommon {
   declare event: ShinyEventInputChanged;
-  el: HTMLElement | null;
-  binding: InputBinding | null;
-  inputType: string;
-  priority?: EventPriority;
 
   constructor({
     name,
@@ -65,20 +71,36 @@ class EventInputChanged extends EventCommon {
     inputType,
     priority,
   }: {
-    name: string;
-    value: any;
-    el: HTMLElement | null;
-    binding: InputBinding | null;
-    inputType: string;
-    priority?: EventPriority;
+    name: ShinyEventInputChanged["name"];
+    value: ShinyEventInputChanged["value"];
+    el: ShinyEventInputChanged["el"];
+    binding: ShinyEventInputChanged["binding"];
+    inputType: ShinyEventInputChanged["inputType"];
+    priority?: ShinyEventInputChanged["priority"];
   }) {
     super("shiny:inputchanged", name, value);
-    this.el = this.event.el = el;
-    this.binding = this.event.binding = binding;
-    this.inputType = this.event.inputType = inputType;
+    this.event.el = el;
+    this.event.binding = binding;
+    this.event.inputType = inputType;
     if (priority) {
-      this.priority = this.event.priority = priority;
+      this.event.priority = priority;
     }
+  }
+
+  get el(): ShinyEventInputChanged["el"] {
+    return this.event.el;
+  }
+
+  get binding(): ShinyEventInputChanged["binding"] {
+    return this.event.binding;
+  }
+
+  get inputType(): ShinyEventInputChanged["inputType"] {
+    return this.event.inputType;
+  }
+
+  get priority(): ShinyEventInputChanged["priority"] {
+    return this.event.priority;
   }
 }
 
@@ -89,15 +111,27 @@ interface ShinyEventUpdateInput extends ShinyEventCommon {
 
 class EventUpdateInput extends EventBase {
   declare event: ShinyEventUpdateInput;
-  message?: any;
-  binding: InputBinding;
 
-  constructor({ message, binding }: { message?: any; binding: InputBinding }) {
+  constructor({
+    message,
+    binding,
+  }: {
+    message?: ShinyEventUpdateInput["message"];
+    binding: ShinyEventUpdateInput["binding"];
+  }) {
     super("shiny:updateinput");
     if (message) {
-      this.message = this.event.message = message;
+      this.event.message = message;
     }
-    this.binding = this.event.binding = binding;
+    this.event.binding = binding;
+  }
+
+  get message(): ShinyEventUpdateInput["message"] {
+    return this.event.message;
+  }
+
+  get binding(): ShinyEventUpdateInput["binding"] {
+    return this.event.binding;
   }
 }
 
@@ -107,19 +141,22 @@ interface ShinyEventValue extends ShinyEventCommon {
 
 class EventValue extends EventCommon {
   declare event: ShinyEventValue;
-  binding: OutputBindingAdapter;
 
   constructor({
     name,
     value,
     binding,
   }: {
-    name: string;
-    value: any;
-    binding: OutputBindingAdapter;
+    name: ShinyEventValue["name"];
+    value: ShinyEventValue["value"];
+    binding: ShinyEventValue["binding"];
   }) {
     super("shiny:value", name, value);
-    this.binding = this.event.binding = binding;
+    this.event.binding = binding;
+  }
+
+  get binding(): ShinyEventValue["binding"] {
+    return this.event.binding;
   }
 }
 
@@ -130,22 +167,27 @@ interface ShinyEventError extends ShinyEventCommon {
 
 class EventError extends EventCommon {
   declare event: ShinyEventError;
-  declare value: null;
-  binding: OutputBindingAdapter;
-  error: ErrorsMessageValue;
 
   constructor({
     name,
     binding,
     error,
   }: {
-    name: string;
-    binding: OutputBindingAdapter;
-    error: ErrorsMessageValue;
+    name: ShinyEventError["name"];
+    binding: ShinyEventError["binding"];
+    error: ShinyEventError["error"];
   }) {
     super("shiny:error", name, null);
-    this.binding = this.event.binding = binding;
-    this.error = this.event.error = error;
+    this.event.binding = binding;
+    this.event.error = error;
+  }
+
+  get binding(): ShinyEventError["binding"] {
+    return this.event.binding;
+  }
+
+  get error(): ShinyEventError["error"] {
+    return this.event.error;
   }
 }
 
@@ -155,11 +197,14 @@ interface ShinyEventMessage extends JQuery.Event {
 
 class EventMessage extends EventBase {
   declare event: ShinyEventMessage;
-  message: { [key: string]: unknown };
 
-  constructor(message: { [key: string]: unknown }) {
+  constructor(message: ShinyEventMessage["message"]) {
     super("shiny:message");
-    this.message = this.event.message = message;
+    this.event.message = message;
+  }
+
+  get message(): ShinyEventMessage["message"] {
+    return this.event.message;
   }
 }
 

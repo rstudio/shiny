@@ -50,6 +50,18 @@ test_that("Setting the private seed explicitly results in identical values", {
   expect_identical(id7, id8)
 })
 
+test_that("Private seed is disabled in testmode", {
+  oldopts <- options(shiny.testmode = TRUE)
+  on.exit(options(oldopts), add = TRUE)
+
+  set.seed(0)
+  id1 <- createUniqueId(4)
+  set.seed(0)
+  id2 <- createUniqueId(4)
+
+  expect_identical(id1, id2)
+})
+
 test_that("Private and 'public' random streams are independent and work the same", {
   set.seed(0)
   public <- c(runif(1), runif(1), runif(1))

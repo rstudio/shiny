@@ -52,6 +52,11 @@ repeatable <- function(rngfunc, seed = stats::runif(1, 0, .Machine$integer.max))
 # Evaluate an expression using Shiny's own private stream of
 # randomness (not affected by set.seed).
 withPrivateSeed <- function(expr) {
+  # Don't use the private seed in testmode for deterministic tests
+  if (isTRUE(getOption("shiny.testmode", getShinyOption("testmode")))) {
+    return(expr)
+  }
+
   # Save the old seed if present.
   if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
     hasOrigSeed <- TRUE

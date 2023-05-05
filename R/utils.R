@@ -1527,38 +1527,32 @@ hybrid_chain <- function(expr, ..., catch = NULL, finally = NULL,
       }
     )
 
-    withCallingHandlers(
-      {
-        captureStackTraces({
-          result <- withVisible(force(expr))
-          if (promises::is.promising(result$value)) {
-            # Purposefully NOT including domain (nor replace), as we're already in
-            # the domain at this point
-            p <- promise_chain(valueWithVisible(result), ..., catch = catch, finally = finally)
-            runFinally <- FALSE
-            p
-          } else {
-            result <- Reduce(
-              function(v, func) {
-                if (v$visible) {
-                  withVisible(func(v$value))
-                } else {
-                  withVisible(func(invisible(v$value)))
-                }
-              },
-              list(...),
-              result
-            )
+    handlers <- list(error = function(e) { catch_e <<- e; do_catch })
+    classes <- names(handlers)
+    .Internal(.addCondHands(classes, handlers, parent.frame(), NULL, TRUE))
 
-            valueWithVisible(result)
+    result <- withVisible(force(expr))
+    if (promises::is.promising(result$value)) {
+      # Purposefully NOT including domain (nor replace), as we're already in
+      # the domain at this point
+      p <- promise_chain(valueWithVisible(result), ..., catch = catch, finally = finally)
+      runFinally <- FALSE
+      p
+    } else {
+      result <- Reduce(
+        function(v, func) {
+          if (v$visible) {
+            withVisible(func(v$value))
+          } else {
+            withVisible(func(invisible(v$value)))
           }
-        })
-      },
-      error = function(e) {
-        catch_e <<- e
-        do_catch
-      }
-    )
+        },
+        list(...),
+        result
+      )
+
+      valueWithVisible(result)
+    }
   }
 
   if (!is.null(domain)) {

@@ -12,6 +12,8 @@
 
 * `Map` objects are now initialized at load time instead of build time. This avoids potential problems that could arise from storing `fastmap` objects into the built Shiny package. (#3775)
 
+* Allow for `shiny:::toJSON()` to respect if `digits=` has class `"AsIs"` which represents if `use_signif=` is `TRUE` or `FALSE`. This is useful for testing to keep the digits smaller. For example, setting `options(shiny.json.digits = 4)` will save 4 digits after the decimal, rather than the default of `I(16)` which will save 16 significant digits. (#3819)
+
 ### Bug fixes
 
 * Fixed #3771: Sometimes the error `ion.rangeSlider.min.js: i.stopPropagation is not a function` would appear in the JavaScript console. (#3772)

@@ -159,8 +159,8 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'   ```
 #'
 #'   To use different settings for a session-scoped cache, you can set
-#'   `self$cache` at the top of your server function. By default, it will create
-#'   a 200 MB memory cache for each session, but you can replace it with
+#'   `session$cache` at the top of your server function. By default, it will
+#'   create a 200 MB memory cache for each session, but you can replace it with
 #'   something different. To use the session-scoped cache, you must also call
 #'   `bindCache()` with `cache="session"`. This will create a 100 MB cache for
 #'   the session:

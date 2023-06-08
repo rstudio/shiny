@@ -172,7 +172,7 @@ needOptgroup <- function(choices) {
 
 #' @rdname selectInput
 #' @param ... Arguments passed to `selectInput()`.
-#' @param options A list of options. See the documentation of \pkg{selectize.js}
+#' @param options A list of options. See the documentation of \pkg{selectize.js}(<https://selectize.dev/docs/usage>)
 #'   for possible options (character option values inside [base::I()] will
 #'   be treated as literal JavaScript code; see [renderDataTable()]
 #'   for details).
@@ -383,7 +383,7 @@ varSelectInput <- function(
 
 #' @rdname varSelectInput
 #' @param ... Arguments passed to `varSelectInput()`.
-#' @param options A list of options. See the documentation of \pkg{selectize.js}
+#' @param options A list of options. See the documentation of \pkg{selectize.js}(<https://selectize.dev/docs/usage>)
 #'   for possible options (character option values inside [base::I()] will
 #'   be treated as literal JavaScript code; see [renderDataTable()]
 #'   for details).

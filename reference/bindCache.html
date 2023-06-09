@@ -97,8 +97,8 @@ sense, namely:</p><ol><li><p>For a given key, the return value is always the sam
 </ol><p>In the example here, the <code>bindCache()</code> key consists of <code>input$x</code> and
 <code>input$y</code> combined, and the value is <code>input$x * input$y</code>. In this simple
 example, for any given key, there is only one possible returned value.</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1"></a>r &lt;-<span class="st"> </span><span class="kw">reactive</span>({ input<span class="op">$</span>x <span class="op">*</span><span class="st"> </span>input<span class="op">$</span>y }) <span class="op">%&gt;%</span></span>
-<span id="cb1-2"><a href="#cb1-2"></a><span class="st">  </span><span class="kw">bindCache</span>(input<span class="op">$</span>x, input<span class="op">$</span>y)</span></code></pre><p></p></div>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>r <span class="ot">&lt;-</span> <span class="fu">reactive</span>({ input<span class="sc">$</span>x <span class="sc">*</span> input<span class="sc">$</span>y }) <span class="sc">%&gt;%</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  <span class="fu">bindCache</span>(input<span class="sc">$</span>x, input<span class="sc">$</span>y)</span></code></pre><p></p></div>
 <p>The largest performance improvements occur when the cache key is fast to
 compute and the reactive expression is slow to compute. To see if the value
 should be computed, a cached reactive evaluates the key, and then serializes
@@ -117,8 +117,8 @@ about whether a value can be retrieved from the cache. For example, if you
 have a large data set with timestamps, it might make sense to extract the
 most recent timestamp and return that. Then, instead of hashing the entire
 data object, the cached reactive only needs to hash the timestamp.</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1"></a>r &lt;-<span class="st"> </span><span class="kw">reactive</span>({ <span class="kw">compute</span>(<span class="kw">bigdata</span>()) } <span class="op">%&gt;%</span></span>
-<span id="cb1-2"><a href="#cb1-2"></a><span class="st">  </span><span class="kw">bindCache</span>({ <span class="kw">extract_most_recent_time</span>(<span class="kw">bigdata</span>()) })</span></code></pre><p></p></div>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>r <span class="ot">&lt;-</span> <span class="fu">reactive</span>({ <span class="fu">compute</span>(<span class="fu">bigdata</span>()) } <span class="sc">%&gt;%</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  <span class="fu">bindCache</span>({ <span class="fu">extract_most_recent_time</span>(<span class="fu">bigdata</span>()) })</span></code></pre><p></p></div>
 <p>For computations that are very slow, it often makes sense to pair
 <code>bindCache()</code> with <code><a href="bindEvent.html">bindEvent()</a></code> so that no computation is performed until
 the user explicitly requests it (for more, see the Details section of
@@ -156,8 +156,8 @@ cache key is not too expensive.</p>
 time that someone accesses the cached reactive. It is only re-executed if
 it has been invalidated by one of the reactives it depends on. For
 example, suppose we have this cached reactive:</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1"></a>r &lt;-<span class="st"> </span><span class="kw">reactive</span>({ input<span class="op">$</span>x <span class="op">*</span><span class="st"> </span>input<span class="op">$</span>y }) <span class="op">%&gt;%</span></span>
-<span id="cb1-2"><a href="#cb1-2"></a><span class="st"> </span><span class="kw">bindCache</span>(input<span class="op">$</span>x, input<span class="op">$</span>y)</span></code></pre><p></p></div>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>r <span class="ot">&lt;-</span> <span class="fu">reactive</span>({ input<span class="sc">$</span>x <span class="sc">*</span> input<span class="sc">$</span>y }) <span class="sc">%&gt;%</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a> <span class="fu">bindCache</span>(input<span class="sc">$</span>x, input<span class="sc">$</span>y)</span></code></pre><p></p></div>
 <p>In this case, the key expression is essentially <code>reactive(list(input$x, input$y))</code> (there's a bit more to it, but that's a good enough
 approximation). The first time <code>r()</code> is called, it executes the key, then
 fails to find it in the cache, so it executes the value expression, <code>{ input$x + input$y }</code>. If <code>r()</code> is called again, then it does not need to
@@ -200,21 +200,21 @@ persists beyond the current R session.</p>
 <code><a href="shinyOptions.html">shinyOptions()</a></code> at the top of your app.R, server.R, or
 global.R. For example, this will create a cache with 500 MB of space
 instead of the default 200 MB:</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">shinyOptions</span>(<span class="dt">cache =</span> cachem<span class="op">::</span><span class="kw">cache_mem</span>(<span class="dt">max_size =</span> <span class="fl">500e6</span>))</span></code></pre><p></p></div>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">shinyOptions</span>(<span class="at">cache =</span> cachem<span class="sc">::</span><span class="fu">cache_mem</span>(<span class="at">max_size =</span> <span class="fl">500e6</span>))</span></code></pre><p></p></div>
 <p>To use different settings for a session-scoped cache, you can set
-<code>self$cache</code> at the top of your server function. By default, it will create
-a 200 MB memory cache for each session, but you can replace it with
+<code>session$cache</code> at the top of your server function. By default, it will
+create a 200 MB memory cache for each session, but you can replace it with
 something different. To use the session-scoped cache, you must also call
 <code>bindCache()</code> with <code>cache="session"</code>. This will create a 100 MB cache for
 the session:</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1"></a><span class="cf">function</span>(input, output, session) {</span>
-<span id="cb1-2"><a href="#cb1-2"></a>  session<span class="op">$</span>cache &lt;-<span class="st"> </span>cachem<span class="op">::</span><span class="kw">cache_mem</span>(<span class="dt">max_size =</span> <span class="fl">100e6</span>)</span>
-<span id="cb1-3"><a href="#cb1-3"></a>  ...</span>
-<span id="cb1-4"><a href="#cb1-4"></a>}</span></code></pre><p></p></div>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="cf">function</span>(input, output, session) {</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  session<span class="sc">$</span>cache <span class="ot">&lt;-</span> cachem<span class="sc">::</span><span class="fu">cache_mem</span>(<span class="at">max_size =</span> <span class="fl">100e6</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>  ...</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>}</span></code></pre><p></p></div>
 <p>If you want to use a cache that is shared across multiple R processes, you
 can use a <code><a href="https://cachem.r-lib.org/reference/cache_disk.html" class="external-link">cachem::cache_disk()</a></code>. You can create a application-level shared
 cache by putting this at the top of your app.R, server.R, or global.R:</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">shinyOptions</span>(<span class="dt">cache =</span> cachem<span class="op">::</span><span class="kw">cache_disk</span>(<span class="kw">file.path</span>(<span class="kw">dirname</span>(<span class="kw">tempdir</span>()), <span class="st">"myapp-cache"</span>))</span></code></pre><p></p></div>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">shinyOptions</span>(<span class="at">cache =</span> cachem<span class="sc">::</span><span class="fu">cache_disk</span>(<span class="fu">file.path</span>(<span class="fu">dirname</span>(<span class="fu">tempdir</span>()), <span class="st">"myapp-cache"</span>))</span></code></pre><p></p></div>
 <p>This will create a subdirectory in your system temp directory named
 <code>myapp-cache</code> (replace <code>myapp-cache</code> with a unique name of
 your choosing). On most platforms, this directory will be removed when
@@ -223,7 +223,7 @@ stops of the R process, as long as you do not reboot.</p>
 <p>To have the cache persist even across multiple reboots, you can create the
 cache in a location outside of the temp directory. For example, it could
 be a subdirectory of the application:</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">shinyOptions</span>(<span class="dt">cache =</span> cachem<span class="op">::</span><span class="kw">cache_disk</span>(<span class="st">"./myapp-cache"</span>))</span></code></pre><p></p></div>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">shinyOptions</span>(<span class="at">cache =</span> cachem<span class="sc">::</span><span class="fu">cache_disk</span>(<span class="st">"./myapp-cache"</span>))</span></code></pre><p></p></div>
 <p>In this case, resetting the cache will have to be done manually, by deleting
 the directory.</p>
 <p>You can also scope a cache to just one item, or selected items. To do that,
@@ -284,8 +284,8 @@ the cache.</p>
 <code><a href="https://rdrr.io/pkg/htmlwidgets/man/htmlwidgets-shiny.html" class="external-link">htmlwidgets::shinyRenderWidget()</a></code>, if you've authored an htmlwidget) in
 order for <code>bindCache()</code> to correctly compute a cache key.</p>
 <p>The potential problem is a cache collision. Consider the following:</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1"></a>output<span class="op">$</span>x1 &lt;-<span class="st"> </span><span class="kw">renderText</span>({ input<span class="op">$</span>x }) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">bindCache</span>(input<span class="op">$</span>x)</span>
-<span id="cb1-2"><a href="#cb1-2"></a>output<span class="op">$</span>x2 &lt;-<span class="st"> </span><span class="kw">renderText</span>({ input<span class="op">$</span>x <span class="op">*</span><span class="st"> </span><span class="dv">2</span> }) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">bindCache</span>(input<span class="op">$</span>x)</span></code></pre><p></p></div>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>output<span class="sc">$</span>x1 <span class="ot">&lt;-</span> <span class="fu">renderText</span>({ input<span class="sc">$</span>x }) <span class="sc">%&gt;%</span> <span class="fu">bindCache</span>(input<span class="sc">$</span>x)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>output<span class="sc">$</span>x2 <span class="ot">&lt;-</span> <span class="fu">renderText</span>({ input<span class="sc">$</span>x <span class="sc">*</span> <span class="dv">2</span> }) <span class="sc">%&gt;%</span> <span class="fu">bindCache</span>(input<span class="sc">$</span>x)</span></code></pre><p></p></div>
 <p>Both <code>output$x1</code> and <code>output$x2</code> use <code>input$x</code> as part of their cache key,
 but if it were the only thing used in the cache key, then the two outputs
 would have a cache collision, and they would have the same output. To avoid
@@ -294,8 +294,8 @@ this, a <em>cache hint</em> is automatically added when <code><a href="renderPri
 cache key, in addition to the one passed to <code>bindCache()</code> by the user. The
 cache hint can be viewed by calling the internal Shiny function
 <code>extractCacheHint()</code>:</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1"></a>r &lt;-<span class="st"> </span><span class="kw">renderText</span>({ input<span class="op">$</span>x })</span>
-<span id="cb1-2"><a href="#cb1-2"></a>shiny<span class="op">:::</span><span class="kw">extractCacheHint</span>(r)</span></code></pre><p></p></div>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>r <span class="ot">&lt;-</span> <span class="fu">renderText</span>({ input<span class="sc">$</span>x })</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>shiny<span class="sc">:::</span><span class="fu">extractCacheHint</span>(r)</span></code></pre><p></p></div>
 <p>This returns a nested list containing an item, <code>$origUserFunc$body</code>, which
 in this case is the expression which was passed to <code><a href="renderPrint.html">renderText()</a></code>:
 <code>{ input$x }</code>. This (quoted)  expression is mixed into the actual cache
@@ -320,16 +320,16 @@ that may influence the final value.</p>
 again, you can inspect the cache hint with <code>shiny:::extractCacheHint()</code> and
 also test it in an application. If you do need to explicitly provide a
 cache hint, pass it to <code>shinyRenderWidget</code>. For example:</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1"></a>renderMyWidget &lt;-<span class="st"> </span><span class="cf">function</span>(expr) {</span>
-<span id="cb1-2"><a href="#cb1-2"></a>  q &lt;-<span class="st"> </span>rlang<span class="op">::</span><span class="kw">enquo0</span>(expr)</span>
-<span id="cb1-3"><a href="#cb1-3"></a></span>
-<span id="cb1-4"><a href="#cb1-4"></a>  htmlwidgets<span class="op">::</span><span class="kw">shinyRenderWidget</span>(</span>
-<span id="cb1-5"><a href="#cb1-5"></a>    q,</span>
-<span id="cb1-6"><a href="#cb1-6"></a>    myWidgetOutput,</span>
-<span id="cb1-7"><a href="#cb1-7"></a>    <span class="dt">quoted =</span> <span class="ot">TRUE</span>,</span>
-<span id="cb1-8"><a href="#cb1-8"></a>    <span class="dt">cacheHint =</span> <span class="kw">list</span>(<span class="dt">label =</span> <span class="st">"myWidget"</span>, <span class="dt">userQuo =</span> q)</span>
-<span id="cb1-9"><a href="#cb1-9"></a>  )</span>
-<span id="cb1-10"><a href="#cb1-10"></a>}</span></code></pre><p></p></div>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>renderMyWidget <span class="ot">&lt;-</span> <span class="cf">function</span>(expr) {</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  q <span class="ot">&lt;-</span> rlang<span class="sc">::</span><span class="fu">enquo0</span>(expr)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>  htmlwidgets<span class="sc">::</span><span class="fu">shinyRenderWidget</span>(</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>    q,</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>    myWidgetOutput,</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>    <span class="at">quoted =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>    <span class="at">cacheHint =</span> <span class="fu">list</span>(<span class="at">label =</span> <span class="st">"myWidget"</span>, <span class="at">userQuo =</span> q)</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>  )</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>}</span></code></pre><p></p></div>
 <p>If your <code>render</code> function sets any internal state, you may find it useful
 in your call to <code><a href="createRenderFunction.html">createRenderFunction()</a></code> to use
 the <code>cacheWriteHook</code> and/or <code>cacheReadHook</code> parameters. These hooks are
@@ -361,7 +361,7 @@ in order to work properly.</p>
 <p>When <code>bindCache()</code> is used with <code><a href="renderPlot.html">renderPlot()</a></code>, the <code>height</code> and <code>width</code>
 passed to the original <code><a href="renderPlot.html">renderPlot()</a></code> are ignored. They are superseded by
 <code>sizePolicy</code> argument passed to `bindCache. The default is:</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1"></a>sizePolicy =<span class="st"> </span><span class="kw">sizeGrowthRatio</span>(<span class="dt">width =</span> <span class="dv">400</span>, <span class="dt">height =</span> <span class="dv">400</span>, <span class="dt">growthRate =</span> <span class="fl">1.2</span>)</span></code></pre><p></p></div>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>sizePolicy <span class="ot">=</span> <span class="fu">sizeGrowthRatio</span>(<span class="at">width =</span> <span class="dv">400</span>, <span class="at">height =</span> <span class="dv">400</span>, <span class="at">growthRate =</span> <span class="fl">1.2</span>)</span></code></pre><p></p></div>
 <p><code>sizePolicy</code> must be a function that takes a two-element numeric vector as
 input, representing the width and height of the <code>&lt;img&gt;</code> element in the
 browser window, and it must return a two-element numeric vector, representing

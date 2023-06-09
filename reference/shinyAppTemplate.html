@@ -81,26 +81,26 @@ files would be written.</p></dd>
     <h2>Details</h2>
     <p>In an interactive R session, this function will, by default, prompt the user
 to select which components to add to the application. Choices are</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1"></a><span class="dv">1</span><span class="op">:</span><span class="st"> </span>All</span>
-<span id="cb1-2"><a href="#cb1-2"></a><span class="dv">2</span><span class="op">:</span><span class="st"> </span>app.R              <span class="op">:</span><span class="st"> </span>Main application file</span>
-<span id="cb1-3"><a href="#cb1-3"></a><span class="dv">3</span><span class="op">:</span><span class="st"> </span>R<span class="op">/</span>example.R        <span class="op">:</span><span class="st"> </span>Helper file with R code</span>
-<span id="cb1-4"><a href="#cb1-4"></a><span class="dv">4</span><span class="op">:</span><span class="st"> </span>R<span class="op">/</span>example<span class="op">-</span>module.R <span class="op">:</span><span class="st"> </span>Example module</span>
-<span id="cb1-5"><a href="#cb1-5"></a><span class="dv">5</span><span class="op">:</span><span class="st"> </span>tests<span class="op">/</span>testthat<span class="op">/</span><span class="st">    </span><span class="er">:</span><span class="st"> </span>Tests using the testthat and shinytest2 package</span></code></pre><p></p></div>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="dv">1</span><span class="sc">:</span> All</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="dv">2</span><span class="sc">:</span> app.R              <span class="sc">:</span> Main application file</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="dv">3</span><span class="sc">:</span> R<span class="sc">/</span>example.R        <span class="sc">:</span> Helper file with R code</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="dv">4</span><span class="sc">:</span> R<span class="sc">/</span>example<span class="sc">-</span>module.R <span class="sc">:</span> Example module</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="dv">5</span><span class="sc">:</span> tests<span class="sc">/</span>testthat<span class="sc">/</span>    <span class="er">:</span> Tests using the testthat and shinytest2 package</span></code></pre><p></p></div>
 <p>If option 1 is selected, the full example application including the
 following files and directories is created:</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1"></a>appdir<span class="op">/</span></span>
-<span id="cb1-2"><a href="#cb1-2"></a><span class="er">|</span><span class="op">-</span><span class="st"> </span>app.R</span>
-<span id="cb1-3"><a href="#cb1-3"></a><span class="op">|-</span><span class="st"> </span>R</span>
-<span id="cb1-4"><a href="#cb1-4"></a><span class="op">|</span><span class="st">   </span><span class="er">|</span><span class="op">-</span><span class="st"> </span>example<span class="op">-</span>module.R</span>
-<span id="cb1-5"><a href="#cb1-5"></a><span class="op">|</span><span class="st">   `</span><span class="dt">- example.R</span></span>
-<span id="cb1-6"><a href="#cb1-6"></a><span class="st">`</span><span class="op">-</span><span class="st"> </span>tests</span>
-<span id="cb1-7"><a href="#cb1-7"></a>    <span class="op">|-</span><span class="st"> </span>testthat.R</span>
-<span id="cb1-8"><a href="#cb1-8"></a>    <span class="st">`</span><span class="dt">- testthat</span></span>
-<span id="cb1-9"><a href="#cb1-9"></a><span class="dt">        |- setup-shinytest2.R</span></span>
-<span id="cb1-10"><a href="#cb1-10"></a><span class="dt">        |- test-examplemodule.R</span></span>
-<span id="cb1-11"><a href="#cb1-11"></a><span class="dt">        |- test-server.R</span></span>
-<span id="cb1-12"><a href="#cb1-12"></a><span class="dt">        |- test-shinytest2.R</span></span>
-<span id="cb1-13"><a href="#cb1-13"></a><span class="dt">        </span><span class="st">`</span><span class="op">-</span><span class="st"> </span>test<span class="op">-</span>sort.R</span></code></pre><p></p></div>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>appdir<span class="sc">/</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="er">|</span><span class="sc">-</span> app.R</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="sc">|-</span> R</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="sc">|</span>   <span class="er">|</span><span class="sc">-</span> example<span class="sc">-</span>module.R</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="sc">|</span>   <span class="st">`</span><span class="at">- example.R</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="st">`</span><span class="sc">-</span> tests</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>    <span class="sc">|-</span> testthat.R</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>    <span class="st">`</span><span class="at">- testthat</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="at">        |- setup-shinytest2.R</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="at">        |- test-examplemodule.R</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="at">        |- test-server.R</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="at">        |- test-shinytest2.R</span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="at">        </span><span class="st">`</span><span class="sc">-</span> test<span class="sc">-</span>sort.R</span></code></pre><p></p></div>
 <p>Some notes about these files:</p><ul><li><p><code>app.R</code> is the main application file.</p></li>
 <li><p>All files in the <code>R/</code> subdirectory are automatically sourced when the
 application is run.</p></li>

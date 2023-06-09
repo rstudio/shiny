@@ -51,7 +51,9 @@
 <h2 class="page-header" data-toc-text="1.7.4.9002" id="shiny-1749002">shiny 1.7.4.9002<a class="anchor" aria-label="anchor" href="#shiny-1749002"></a></h2>
 <div class="section level3">
 <h3 id="full-changelog-1-7-4-9002">Full changelog<a class="anchor" aria-label="anchor" href="#full-changelog-1-7-4-9002"></a></h3>
-<div class="section level4"><h4 id="breaking-changes-1-7-4-9002">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-1-7-4-9002"></a></h4></div>
+<div class="section level4">
+<h4 id="breaking-changes-1-7-4-9002">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-1-7-4-9002"></a></h4>
+</div>
 <div class="section level4">
 <h4 id="new-features-and-improvements-1-7-4-9002">New features and improvements<a class="anchor" aria-label="anchor" href="#new-features-and-improvements-1-7-4-9002"></a></h4>
 <ul><li><p>Closed <a href="https://github.com/rstudio/shiny/issues/789" class="external-link">#789</a>: Dynamic UI is now rendered asynchronously, thanks in part to the newly exported <code>Shiny.renderDependenciesAsync()</code>, <code>Shiny.renderHtmlAsync()</code>, and <code>Shiny.renderContentAsync()</code>. Importantly, this means <code>&lt;script&gt;</code> tags are now loaded asynchronously (the old way used <code>XMLHttpRequest</code>, which is synchronous). In addition, <code>Shiny</code> now manages a queue of async tasks (exposed via <code>Shiny.shinyapp.taskQueue</code>) so that order of execution is preserved. (<a href="https://github.com/rstudio/shiny/issues/3666" class="external-link">#3666</a>)</p></li>
@@ -61,7 +63,8 @@
 </ul></div>
 <div class="section level4">
 <h4 id="bug-fixes-1-7-4-9002">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-7-4-9002"></a></h4>
-<ul><li>Fixed <a href="https://github.com/rstudio/shiny/issues/3771" class="external-link">#3771</a>: Sometimes the error <code>ion.rangeSlider.min.js: i.stopPropagation is not a function</code> would appear in the JavaScript console. (<a href="https://github.com/rstudio/shiny/issues/3772" class="external-link">#3772</a>)</li></ul></div>
+<ul><li>Fixed <a href="https://github.com/rstudio/shiny/issues/3771" class="external-link">#3771</a>: Sometimes the error <code>ion.rangeSlider.min.js: i.stopPropagation is not a function</code> would appear in the JavaScript console. (<a href="https://github.com/rstudio/shiny/issues/3772" class="external-link">#3772</a>)</li>
+</ul></div>
 </div>
 </div>
     <div class="section level2">
@@ -85,7 +88,8 @@
 <h2 class="page-header" data-toc-text="1.7.3" id="shiny-173">shiny 1.7.3<small>2022-10-25</small><a class="anchor" aria-label="anchor" href="#shiny-173"></a></h2>
 <div class="section level4">
 <h4 id="bug-fixes-1-7-3">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-7-3"></a></h4>
-<ul><li>Shiny 1.7.0 changed the <code>icon(lib="fontawesome")</code> implementation from a bundled copy of fontawesome, to the {fontawesome} package. This led to issue <a href="https://github.com/rstudio/shiny/issues/3688" class="external-link">#3688</a>, where icons that were previously working, were now breaking. That’s because {fontawesome} 0.3.0 and earlier did not have support for icon names used in Font Awesome 5 and earlier, only the newest icon names used in Font Awesome 6. Now, {fontawesome} 0.4.0 has restored support for those older icon names, and Shiny 1.7.2.1 has updated its {fontawesome} requirement to &gt;=0.4.0.</li></ul></div>
+<ul><li>Shiny 1.7.0 changed the <code>icon(lib="fontawesome")</code> implementation from a bundled copy of fontawesome, to the {fontawesome} package. This led to issue <a href="https://github.com/rstudio/shiny/issues/3688" class="external-link">#3688</a>, where icons that were previously working, were now breaking. That’s because {fontawesome} 0.3.0 and earlier did not have support for icon names used in Font Awesome 5 and earlier, only the newest icon names used in Font Awesome 6. Now, {fontawesome} 0.4.0 has restored support for those older icon names, and Shiny 1.7.2.1 has updated its {fontawesome} requirement to &gt;=0.4.0.</li>
+</ul></div>
 </div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.7.2" id="shiny-172">shiny 1.7.2<small>2022-07-19</small><a class="anchor" aria-label="anchor" href="#shiny-172"></a></h2>
@@ -93,7 +97,8 @@
 <h3 id="full-changelog-1-7-2">Full changelog<a class="anchor" aria-label="anchor" href="#full-changelog-1-7-2"></a></h3>
 <div class="section level4">
 <h4 id="breaking-changes-1-7-2">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-1-7-2"></a></h4>
-<ul><li>Closed <a href="https://github.com/rstudio/shiny/issues/3626" class="external-link">#3626</a>: <code><a href="../reference/renderPlot.html">renderPlot()</a></code> (and <code><a href="../reference/plotPNG.html">plotPNG()</a></code>) now uses <code><a href="https://ragg.r-lib.org/reference/agg_png.html" class="external-link">ragg::agg_png()</a></code> by default when the <a href="https://github.com/r-lib/ragg" class="external-link"><code>{ragg}</code> package</a> is installed. To restore the previous behavior, set <code>options(shiny.useragg = FALSE)</code>. (<a href="https://github.com/rstudio/shiny/issues/3654" class="external-link">#3654</a>)</li></ul></div>
+<ul><li>Closed <a href="https://github.com/rstudio/shiny/issues/3626" class="external-link">#3626</a>: <code><a href="../reference/renderPlot.html">renderPlot()</a></code> (and <code><a href="../reference/plotPNG.html">plotPNG()</a></code>) now uses <code><a href="https://ragg.r-lib.org/reference/agg_png.html" class="external-link">ragg::agg_png()</a></code> by default when the <a href="https://github.com/r-lib/ragg" class="external-link"><code>{ragg}</code> package</a> is installed. To restore the previous behavior, set <code>options(shiny.useragg = FALSE)</code>. (<a href="https://github.com/rstudio/shiny/issues/3654" class="external-link">#3654</a>)</li>
+</ul></div>
 <div class="section level4">
 <h4 id="new-features-and-improvements-1-7-2">New features and improvements<a class="anchor" aria-label="anchor" href="#new-features-and-improvements-1-7-2"></a></h4>
 <ul><li><p>Closed <a href="https://github.com/rstudio/shiny/issues/1545" class="external-link">#1545</a>: <code><a href="../reference/insertUI.html">insertUI()</a></code> now executes <code>&lt;script&gt;</code> tags. (<a href="https://github.com/rstudio/shiny/issues/3630" class="external-link">#3630</a>)</p></li>
@@ -144,7 +149,8 @@
 <h4 id="new-features-and-improvements-1-7-0">New features and improvements<a class="anchor" aria-label="anchor" href="#new-features-and-improvements-1-7-0"></a></h4>
 <ul><li>
 <p>Bootstrap 5 support. (<a href="https://github.com/rstudio/shiny/issues/3410" class="external-link">#3410</a> and rstudio/bslib#304)</p>
-<ul><li>As explained <a href="https://rstudio.github.io/bslib/index.html#basic-usage" class="external-link">here</a>, to opt-in to Bootstrap 5, provide <code>bslib::bs_theme(version = 5)</code> to a page layout function with a <code>theme</code> argument (e.g., <code><a href="../reference/fluidPage.html">fluidPage()</a></code>, <code><a href="../reference/navbarPage.html">navbarPage()</a></code>, etc).</li></ul></li>
+<ul><li>As explained <a href="https://rstudio.github.io/bslib/index.html#basic-usage" class="external-link">here</a>, to opt-in to Bootstrap 5, provide <code>bslib::bs_theme(version = 5)</code> to a page layout function with a <code>theme</code> argument (e.g., <code><a href="../reference/fluidPage.html">fluidPage()</a></code>, <code><a href="../reference/navbarPage.html">navbarPage()</a></code>, etc).</li>
+</ul></li>
 <li><p>Closed <a href="https://github.com/rstudio/shiny/issues/3322" class="external-link">#3322</a>, <a href="https://github.com/rstudio/shiny/issues/3313" class="external-link">#3313</a>, <a href="https://github.com/rstudio/shiny/issues/1823" class="external-link">#1823</a>, <a href="https://github.com/rstudio/shiny/issues/3321" class="external-link">#3321</a>, <a href="https://github.com/rstudio/shiny/issues/3320" class="external-link">#3320</a>, <a href="https://github.com/rstudio/shiny/issues/1928" class="external-link">#1928</a>, and <a href="https://github.com/rstudio/shiny/issues/2310" class="external-link">#2310</a>: Various improvements to <code><a href="../reference/navbarPage.html">navbarPage()</a></code>, <code><a href="../reference/tabsetPanel.html">tabsetPanel()</a></code>, <code><a href="../reference/tabPanel.html">tabPanel()</a></code>, <code><a href="../reference/navbarPage.html">navbarMenu()</a></code>, etc. Also, these functions are now powered by the <a href="https://rstudio.github.io/bslib/" class="external-link">bslib</a> package’s new <code>nav()</code> API (consider using <a href="https://rstudio.github.io/bslib/" class="external-link">bslib</a>’s API to create better looking and more fully featured navs). (<a href="https://github.com/rstudio/shiny/issues/3388" class="external-link">#3388</a>)</p></li>
 <li><p>All uses of <code>list(...)</code> have been replaced with <code>rlang::list2(...)</code>. This means that you can use trailing <code>,</code> without error and use rlang’s <code>!!!</code> operator to “splice” a list of argument values into <code>...</code>. We think this’ll be particularly useful for passing a list of <code><a href="../reference/tabPanel.html">tabPanel()</a></code> to their consumers (i.e., <code><a href="../reference/tabsetPanel.html">tabsetPanel()</a></code>, <code><a href="../reference/navbarPage.html">navbarPage()</a></code>, etc). For example, <code>tabs &lt;- list(tabPanel("A", "a"), tabPanel("B", "b")); navbarPage(!!!tabs)</code>. (<a href="https://github.com/rstudio/shiny/issues/3315" class="external-link">#3315</a> and <a href="https://github.com/rstudio/shiny/issues/3328" class="external-link">#3328</a>)</p></li>
 <li><p><code><a href="../reference/createRenderFunction.html">installExprFunction()</a></code> and <code><a href="../reference/exprToFunction.html">exprToFunction()</a></code> are now able to handle quosures when <code>quoted = TRUE</code>. So <code>render</code>-functions which call these functions (such as with <code>htmlwidgets</code>) can now understand quosures. Users can also use <code><a href="https://rlang.r-lib.org/reference/inject.html" class="external-link">rlang::inject()</a></code> to unquote a quosure for evaluation. This also means that <code>render</code> function no longer need <code>env</code> and <code>quoted</code> parameters; that information can be embedded into a quosure which is then passed to the <code>render</code> function. Better documentation was added for how to create <code>render</code> functions. (<a href="https://github.com/rstudio/shiny/issues/3472" class="external-link">#3472</a>)</p></li>
@@ -178,14 +184,18 @@
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.6.0" id="shiny-160">shiny 1.6.0<small>2021-01-25</small><a class="anchor" aria-label="anchor" href="#shiny-160"></a></h2>
 <p>This release focuses on improvements in three main areas:</p>
-<ol style="list-style-type: decimal"><li>Better theming (and Bootstrap 4) support:</li></ol><ul><li>The <code>theme</code> argument of <code><a href="../reference/fluidPage.html">fluidPage()</a></code>, <code><a href="../reference/navbarPage.html">navbarPage()</a></code>, and <code><a href="../reference/bootstrapPage.html">bootstrapPage()</a></code> all now understand <code><a href="https://rstudio.github.io/bslib/reference/bs_theme.html" class="external-link">bslib::bs_theme()</a></code> objects, which can be used to opt-into Bootstrap 4, use any Bootswatch theme, and/or implement custom themes without writing any CSS.</li>
+<ol style="list-style-type: decimal"><li>Better theming (and Bootstrap 4) support:</li>
+</ol><ul><li>The <code>theme</code> argument of <code><a href="../reference/fluidPage.html">fluidPage()</a></code>, <code><a href="../reference/navbarPage.html">navbarPage()</a></code>, and <code><a href="../reference/bootstrapPage.html">bootstrapPage()</a></code> all now understand <code><a href="https://rstudio.github.io/bslib/reference/bs_theme.html" class="external-link">bslib::bs_theme()</a></code> objects, which can be used to opt-into Bootstrap 4, use any Bootswatch theme, and/or implement custom themes without writing any CSS.</li>
 <li>The <code>session</code> object now includes <code>$setCurrentTheme()</code> and <code>$getCurrentTheme()</code> methods to dynamically update (or obtain) the page’s <code>theme</code> after initial load, which is useful for things such as <a href="https://rstudio.github.io/bslib/articles/bslib.html#dynamic" class="external-link">adding a dark mode switch to an app</a> or some other “real-time” theming tool like <code><a href="https://rstudio.github.io/bslib/reference/run_with_themer.html" class="external-link">bslib::bs_themer()</a></code>.</li>
 <li>For more details, see <a href="https://rstudio.github.io/bslib/" class="external-link"><code>{bslib}</code>’s website</a>
 </li>
-</ul><ol start="2" style="list-style-type: decimal"><li>Caching of <code><a href="../reference/reactive.html">reactive()</a></code> and <code>render*()</code> (e.g. <code><a href="../reference/renderPrint.html">renderText()</a></code>, <code><a href="../reference/renderTable.html">renderTable()</a></code>, etc) expressions.</li></ol><ul><li>Such expressions automatically cache their <em>most recent value</em>, which helps to avoid redundant computation within a single “flush” of reactivity. The new <code><a href="../reference/bindCache.html">bindCache()</a></code> function can be used to cache <em>all previous values</em> (as long as they fit in the cache). This cache may be optionally scoped within and/or across user sessions, possibly leading to huge performance gains, especially when deployed at scale across user sessions.</li>
+</ul><ol start="2" style="list-style-type: decimal"><li>Caching of <code><a href="../reference/reactive.html">reactive()</a></code> and <code>render*()</code> (e.g. <code><a href="../reference/renderPrint.html">renderText()</a></code>, <code><a href="../reference/renderTable.html">renderTable()</a></code>, etc) expressions.</li>
+</ol><ul><li>Such expressions automatically cache their <em>most recent value</em>, which helps to avoid redundant computation within a single “flush” of reactivity. The new <code><a href="../reference/bindCache.html">bindCache()</a></code> function can be used to cache <em>all previous values</em> (as long as they fit in the cache). This cache may be optionally scoped within and/or across user sessions, possibly leading to huge performance gains, especially when deployed at scale across user sessions.</li>
 <li>For more details, see <code><a href="../reference/bindCache.html">help(bindCache, package = "shiny")</a></code>
 </li>
-</ul><ol start="3" style="list-style-type: decimal"><li>Various improvements to accessibility for screen-reader and keyboard users.</li></ol><ul><li>For more details, see the accessibility section below.</li></ul><div class="section level3">
+</ul><ol start="3" style="list-style-type: decimal"><li>Various improvements to accessibility for screen-reader and keyboard users.</li>
+</ol><ul><li>For more details, see the accessibility section below.</li>
+</ul><div class="section level3">
 <h3 id="full-changelog-1-6-0">Full changelog<a class="anchor" aria-label="anchor" href="#full-changelog-1-6-0"></a></h3>
 <div class="section level4">
 <h4 id="breaking-changes-1-6-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-1-6-0"></a></h4>
@@ -252,7 +262,8 @@
 <h3 id="full-changelog-1-5-0">Full changelog<a class="anchor" aria-label="anchor" href="#full-changelog-1-5-0"></a></h3>
 <div class="section level4">
 <h4 id="breaking-changes-1-5-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-1-5-0"></a></h4>
-<ul><li>Fixed <a href="https://github.com/rstudio/shiny/issues/2869" class="external-link">#2869</a>: Until this release, <code><a href="../reference/renderImage.html">renderImage()</a></code> had a dangerous default of <code>deleteFile = TRUE</code>. (Sorry!) Going forward, calls to <code><a href="../reference/renderImage.html">renderImage()</a></code> will need an explicit <code>deleteFile</code> argument; for now, failing to provide one will result in a warning message, and the file will be deleted if it appears to be within the <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code>. (<a href="https://github.com/rstudio/shiny/issues/2881" class="external-link">#2881</a>)</li></ul></div>
+<ul><li>Fixed <a href="https://github.com/rstudio/shiny/issues/2869" class="external-link">#2869</a>: Until this release, <code><a href="../reference/renderImage.html">renderImage()</a></code> had a dangerous default of <code>deleteFile = TRUE</code>. (Sorry!) Going forward, calls to <code><a href="../reference/renderImage.html">renderImage()</a></code> will need an explicit <code>deleteFile</code> argument; for now, failing to provide one will result in a warning message, and the file will be deleted if it appears to be within the <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code>. (<a href="https://github.com/rstudio/shiny/issues/2881" class="external-link">#2881</a>)</li>
+</ul></div>
 <div class="section level4">
 <h4 id="new-features-1-5-0">New features<a class="anchor" aria-label="anchor" href="#new-features-1-5-0"></a></h4>
 <ul><li><p>The new <code><a href="../reference/shinyAppTemplate.html">shinyAppTemplate()</a></code> function creates a new template Shiny application, where components are optional, such as helper files in an R/ subdirectory, a module, and various kinds of tests. (<a href="https://github.com/rstudio/shiny/issues/2704" class="external-link">#2704</a>)</p></li>
@@ -278,10 +289,13 @@
 <ul><li><p>Fixed <a href="https://github.com/rstudio/shiny/issues/2606" class="external-link">#2606</a>: <code><a href="../reference/debounce.html">debounce()</a></code> would not work properly if the code in the reactive expression threw an error on the first run. (<a href="https://github.com/rstudio/shiny/issues/2652" class="external-link">#2652</a>)</p></li>
 <li><p>Fixed <a href="https://github.com/rstudio/shiny/issues/2653" class="external-link">#2653</a>: The <code><a href="../reference/renderDataTable.html">dataTableOutput()</a></code> could have incorrect output if certain characters were in the column names. (<a href="https://github.com/rstudio/shiny/issues/2658" class="external-link">#2658</a>)</p></li>
 </ul></div>
-<div class="section level4"><h4 id="documentation-updates-1-5-0">Documentation Updates<a class="anchor" aria-label="anchor" href="#documentation-updates-1-5-0"></a></h4></div>
+<div class="section level4">
+<h4 id="documentation-updates-1-5-0">Documentation Updates<a class="anchor" aria-label="anchor" href="#documentation-updates-1-5-0"></a></h4>
+</div>
 <div class="section level4">
 <h4 id="library-updates-1-5-0">Library updates<a class="anchor" aria-label="anchor" href="#library-updates-1-5-0"></a></h4>
-<ul><li>Updated from Font-Awesome 5.3.1 to 5.13.0, which includes icons related to COVID-19. For upgrade notes, see <a href="https://github.com/FortAwesome/Font-Awesome/blob/master/UPGRADING.md" class="external-link uri">https://github.com/FortAwesome/Font-Awesome/blob/master/UPGRADING.md</a>. (<a href="https://github.com/rstudio/shiny/issues/2891" class="external-link">#2891</a>)</li></ul></div>
+<ul><li>Updated from Font-Awesome 5.3.1 to 5.13.0, which includes icons related to COVID-19. For upgrade notes, see <a href="https://github.com/FortAwesome/Font-Awesome/blob/master/UPGRADING.md" class="external-link uri">https://github.com/FortAwesome/Font-Awesome/blob/master/UPGRADING.md</a>. (<a href="https://github.com/rstudio/shiny/issues/2891" class="external-link">#2891</a>)</li>
+</ul></div>
 </div>
 </div>
     <div class="section level2">
@@ -298,7 +312,8 @@
 <h3 id="full-changelog-1-4-0">Full changelog<a class="anchor" aria-label="anchor" href="#full-changelog-1-4-0"></a></h3>
 <div class="section level4">
 <h4 id="breaking-changes-1-4-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-1-4-0"></a></h4>
-<ul><li>Resolved <a href="https://github.com/rstudio/shiny/issues/2554" class="external-link">#2554</a>: Upgraded jQuery from v.1.12.4 to v3.4.1 and bootstrap from v3.3.7 to v3.4.1. (<a href="https://github.com/rstudio/shiny/issues/2557" class="external-link">#2557</a>). Since the jQuery upgrade may introduce breaking changes to user code, there is an option to switch back to the old version by setting <code>options(shiny.jquery.version = 1)</code>. If you’ve hard-coded <code>shared/jquery[.min].js</code> in the HTML of your Shiny app, in order to downgrade, you’ll have to change that filepath to <code>shared/legacy/jquery[.min].js</code>.</li></ul></div>
+<ul><li>Resolved <a href="https://github.com/rstudio/shiny/issues/2554" class="external-link">#2554</a>: Upgraded jQuery from v.1.12.4 to v3.4.1 and bootstrap from v3.3.7 to v3.4.1. (<a href="https://github.com/rstudio/shiny/issues/2557" class="external-link">#2557</a>). Since the jQuery upgrade may introduce breaking changes to user code, there is an option to switch back to the old version by setting <code>options(shiny.jquery.version = 1)</code>. If you’ve hard-coded <code>shared/jquery[.min].js</code> in the HTML of your Shiny app, in order to downgrade, you’ll have to change that filepath to <code>shared/legacy/jquery[.min].js</code>.</li>
+</ul></div>
 <div class="section level4">
 <h4 id="improvements-1-4-0">Improvements<a class="anchor" aria-label="anchor" href="#improvements-1-4-0"></a></h4>
 <ul><li><p>Resolved <a href="https://github.com/rstudio/shiny/issues/1433" class="external-link">#1433</a>: <code><a href="../reference/plotOutput.html">plotOutput()</a></code>’s coordmap info now includes discrete axis limits for <strong>ggplot2</strong> plots. As a result, any <strong>shinytest</strong> tests that contain <strong>ggplot2</strong> plots with discrete axes (that were recorded before this change) will now report differences that can safely be updated. This new coordmap info was added to correctly infer what data points are within an input brush and/or near input click/hover in scenarios where a non-trivial discrete axis scale is involved (e.g., whenever <code>scale_[x/y]_discrete(limits = ...)</code> and/or free scales across multiple discrete axes are used). (<a href="https://github.com/rstudio/shiny/issues/2410" class="external-link">#2410</a>)</p></li>
@@ -346,14 +361,17 @@
 <h3 id="full-changelog-1-3-1">Full changelog<a class="anchor" aria-label="anchor" href="#full-changelog-1-3-1"></a></h3>
 <div class="section level4">
 <h4 id="bug-fixes-1-3-1">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-3-1"></a></h4>
-<ul><li>Fixed a performance issue introduced in v1.3.0 when using large nested lists within Shiny. (<a href="https://github.com/rstudio/shiny/issues/2377" class="external-link">#2377</a>)</li></ul></div>
+<ul><li>Fixed a performance issue introduced in v1.3.0 when using large nested lists within Shiny. (<a href="https://github.com/rstudio/shiny/issues/2377" class="external-link">#2377</a>)</li>
+</ul></div>
 </div>
 </div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.3.0" id="shiny-130">shiny 1.3.0<small>2019-04-07</small><a class="anchor" aria-label="anchor" href="#shiny-130"></a></h2>
 <div class="section level3">
 <h3 id="full-changelog-1-3-0">Full changelog<a class="anchor" aria-label="anchor" href="#full-changelog-1-3-0"></a></h3>
-<div class="section level4"><h4 id="breaking-changes-1-3-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-1-3-0"></a></h4></div>
+<div class="section level4">
+<h4 id="breaking-changes-1-3-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-1-3-0"></a></h4>
+</div>
 <div class="section level4">
 <h4 id="new-features-1-3-0">New features<a class="anchor" aria-label="anchor" href="#new-features-1-3-0"></a></h4>
 <ul><li><p>Revamped Shiny’s <a href="https://github.com/rstudio/reactlog" class="external-link">reactlog</a> viewer which debugs reactivity within a shiny application. This allows users to traverse the reactivity history of a shiny application, filter to the dependency tree of a selected reactive object, and search for matching reactive objects. See <code><a href="../reference/reactlog.html">?reactlogShow</a></code> for more details and how to enable this feature. (<a href="https://github.com/rstudio/shiny/issues/2107" class="external-link">#2107</a>)</p></li>
@@ -361,7 +379,8 @@
 </ul></div>
 <div class="section level4">
 <h4 id="minor-new-features-and-improvements-1-3-0">Minor new features and improvements<a class="anchor" aria-label="anchor" href="#minor-new-features-and-improvements-1-3-0"></a></h4>
-<ul><li>The <code>Shiny-Shared-Secret</code> security header is now checked using constant-time comparison to prevent timing attacks (thanks <a href="https://github.com/dirkschumacher" class="external-link">@dirkschumacher</a>!). (<a href="https://github.com/rstudio/shiny/issues/2319" class="external-link">#2319</a>)</li></ul></div>
+<ul><li>The <code>Shiny-Shared-Secret</code> security header is now checked using constant-time comparison to prevent timing attacks (thanks <a href="https://github.com/dirkschumacher" class="external-link">@dirkschumacher</a>!). (<a href="https://github.com/rstudio/shiny/issues/2319" class="external-link">#2319</a>)</li>
+</ul></div>
 <div class="section level4">
 <h4 id="bug-fixes-1-3-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-3-0"></a></h4>
 <ul><li><p>Fixed <a href="https://github.com/rstudio/shiny/issues/2245" class="external-link">#2245</a>: <code><a href="../reference/updateSelectInput.html">updateSelectizeInput()</a></code> did not update labels. (<a href="https://github.com/rstudio/shiny/issues/2248" class="external-link">#2248</a>)</p></li>
@@ -371,7 +390,8 @@
 </ul></div>
 <div class="section level4">
 <h4 id="documentation-updates-1-3-0">Documentation Updates<a class="anchor" aria-label="anchor" href="#documentation-updates-1-3-0"></a></h4>
-<ul><li>Fixed <a href="https://github.com/rstudio/shiny/issues/2247" class="external-link">#2247</a>: <code>renderCachedPlot</code> now supports using promises for either <code>expr</code> or <code>cacheKeyExpr</code>. (Shiny v1.2.0 supported async <code>expr</code>, but only if <code>cacheKeyExpr</code> was async as well; now you can use any combination of sync/async for <code>expr</code> and <code>cacheKeyExpr</code>.) <a href="https://github.com/rstudio/shiny/issues/2261" class="external-link">#2261</a></li></ul></div>
+<ul><li>Fixed <a href="https://github.com/rstudio/shiny/issues/2247" class="external-link">#2247</a>: <code>renderCachedPlot</code> now supports using promises for either <code>expr</code> or <code>cacheKeyExpr</code>. (Shiny v1.2.0 supported async <code>expr</code>, but only if <code>cacheKeyExpr</code> was async as well; now you can use any combination of sync/async for <code>expr</code> and <code>cacheKeyExpr</code>.) <a href="https://github.com/rstudio/shiny/issues/2261" class="external-link">#2261</a></li>
+</ul></div>
 </div>
 </div>
     <div class="section level2">
@@ -381,10 +401,12 @@
 <h3 id="full-changelog-1-2-0">Full changelog<a class="anchor" aria-label="anchor" href="#full-changelog-1-2-0"></a></h3>
 <div class="section level4">
 <h4 id="breaking-changes-1-2-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-1-2-0"></a></h4>
-<ul><li>The URL paths for FontAwesome CSS/JS/font assets have changed, due to our upgrade from FontAwesome 4 to 5. This shouldn’t affect you unless you’re using <code>www/index.html</code> to provide your UI and have hardcoded the old FontAwesome paths into your HTML. If that’s you, consider switching to <a href="https://shiny.rstudio.com/articles/templates.html" class="external-link">HTML templates</a>, which give you the syntax of raw HTML while still taking advantage of Shiny’s automatic management of web dependencies.</li></ul></div>
+<ul><li>The URL paths for FontAwesome CSS/JS/font assets have changed, due to our upgrade from FontAwesome 4 to 5. This shouldn’t affect you unless you’re using <code>www/index.html</code> to provide your UI and have hardcoded the old FontAwesome paths into your HTML. If that’s you, consider switching to <a href="https://shiny.rstudio.com/articles/templates.html" class="external-link">HTML templates</a>, which give you the syntax of raw HTML while still taking advantage of Shiny’s automatic management of web dependencies.</li>
+</ul></div>
 <div class="section level4">
 <h4 id="new-features-1-2-0">New features<a class="anchor" aria-label="anchor" href="#new-features-1-2-0"></a></h4>
-<ul><li>Added <code><a href="../reference/renderCachedPlot.html">renderCachedPlot()</a></code>, which stores plots in a cache so that they can be served up almost instantly. (<a href="https://github.com/rstudio/shiny/issues/1997" class="external-link">#1997</a>)</li></ul></div>
+<ul><li>Added <code><a href="../reference/renderCachedPlot.html">renderCachedPlot()</a></code>, which stores plots in a cache so that they can be served up almost instantly. (<a href="https://github.com/rstudio/shiny/issues/1997" class="external-link">#1997</a>)</li>
+</ul></div>
 <div class="section level4">
 <h4 id="minor-new-features-and-improvements-1-2-0">Minor new features and improvements<a class="anchor" aria-label="anchor" href="#minor-new-features-and-improvements-1-2-0"></a></h4>
 <ul><li><p>Upgrade FontAwesome from 4.7.0 to 5.3.1 and made <code>icon</code> tags browsable, which means they will display in a web browser or RStudio viewer by default (<a href="https://github.com/rstudio/shiny/issues/2186" class="external-link">#2186</a>). Note that if your application or library depends on FontAwesome directly using custom CSS, you may need to make some or all of the changes recommended in <a href="https://fontawesome.com/how-to-use/on-the-web/setup/upgrading-from-version-4" class="external-link">Upgrade from Version 4</a>. Font Awesome icons can also now be used in static R Markdown documents.</p></li>
@@ -414,7 +436,8 @@
 </ul></div>
 <div class="section level4">
 <h4 id="documentation-updates-1-2-0">Documentation Updates<a class="anchor" aria-label="anchor" href="#documentation-updates-1-2-0"></a></h4>
-<ul><li>Addressed <a href="https://github.com/rstudio/shiny/issues/1864" class="external-link">#1864</a> by changing <code>optgroup</code> documentation to use <code>list</code> instead of <code>c</code>. (<a href="https://github.com/rstudio/shiny/issues/2084" class="external-link">#2084</a>)</li></ul></div>
+<ul><li>Addressed <a href="https://github.com/rstudio/shiny/issues/1864" class="external-link">#1864</a> by changing <code>optgroup</code> documentation to use <code>list</code> instead of <code>c</code>. (<a href="https://github.com/rstudio/shiny/issues/2084" class="external-link">#2084</a>)</li>
+</ul></div>
 </div>
 </div>
     <div class="section level2">
@@ -425,7 +448,8 @@
 <div class="section level4">
 <h4 id="breaking-changes-1-1-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-1-1-0"></a></h4>
 <ul><li>
-<code>extractStackTrace</code> and <code>formatStackTrace</code> are deprecated and will be removed in a future version of Shiny. As far as we can tell, nobody has been using these functions, and a refactor has made them vestigial; if you need this functionality, please file an issue.</li></ul></div>
+<code>extractStackTrace</code> and <code>formatStackTrace</code> are deprecated and will be removed in a future version of Shiny. As far as we can tell, nobody has been using these functions, and a refactor has made them vestigial; if you need this functionality, please file an issue.</li>
+</ul></div>
 <div class="section level4">
 <h4 id="new-features-1-1-0">New features<a class="anchor" aria-label="anchor" href="#new-features-1-1-0"></a></h4>
 <ul><li><p>Support for asynchronous operations! Built-in render functions that expected a certain kind of object to be yielded from their <code>expr</code>, now generally can handle a promise for that kind of object. Reactive expressions and observers are now promise-aware as well. (<a href="https://github.com/rstudio/shiny/issues/1932" class="external-link">#1932</a>)</p></li>
@@ -460,7 +484,8 @@
 </ul></div>
 <div class="section level4">
 <h4 id="library-updates-1-1-0">Library updates<a class="anchor" aria-label="anchor" href="#library-updates-1-1-0"></a></h4>
-<ul><li>Updated to ion.rangeSlider 2.2.0. (<a href="https://github.com/rstudio/shiny/issues/1955" class="external-link">#1955</a>)</li></ul></div>
+<ul><li>Updated to ion.rangeSlider 2.2.0. (<a href="https://github.com/rstudio/shiny/issues/1955" class="external-link">#1955</a>)</li>
+</ul></div>
 </div>
 <div class="section level3">
 <h3 id="known-issues-1-1-0">Known issues<a class="anchor" aria-label="anchor" href="#known-issues-1-1-0"></a></h3>
@@ -544,7 +569,8 @@
 </ul></div>
 <div class="section level4">
 <h4 id="bug-fixes-1-0-2">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-0-2"></a></h4>
-<ul><li>Fixed <a href="https://github.com/rstudio/shiny/issues/1653" class="external-link">#1653</a>: wrong code example in documentation. (<a href="https://github.com/rstudio/shiny/issues/1658" class="external-link">#1658</a>)</li></ul></div>
+<ul><li>Fixed <a href="https://github.com/rstudio/shiny/issues/1653" class="external-link">#1653</a>: wrong code example in documentation. (<a href="https://github.com/rstudio/shiny/issues/1658" class="external-link">#1658</a>)</li>
+</ul></div>
 </div>
 </div>
     <div class="section level2">
@@ -554,10 +580,12 @@
 <h3 id="full-changelog-1-0-1">Full changelog<a class="anchor" aria-label="anchor" href="#full-changelog-1-0-1"></a></h3>
 <div class="section level4">
 <h4 id="breaking-changes-1-0-1">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-1-0-1"></a></h4>
-<ul><li>The functions <code><a href="../reference/radioButtons.html">radioButtons()</a></code>, <code><a href="../reference/checkboxGroupInput.html">checkboxGroupInput()</a></code> and <code><a href="../reference/selectInput.html">selectInput()</a></code> (and the corresponding <code>updateXXX()</code> functions) no longer accept a <code>selected</code> argument whose value is the name of a choice, instead of the value of the choice. This feature had been deprecated since Shiny 0.10 (it printed a warning message, but still tried to match the name to the right choice) and it’s now completely unsupported.</li></ul></div>
+<ul><li>The functions <code><a href="../reference/radioButtons.html">radioButtons()</a></code>, <code><a href="../reference/checkboxGroupInput.html">checkboxGroupInput()</a></code> and <code><a href="../reference/selectInput.html">selectInput()</a></code> (and the corresponding <code>updateXXX()</code> functions) no longer accept a <code>selected</code> argument whose value is the name of a choice, instead of the value of the choice. This feature had been deprecated since Shiny 0.10 (it printed a warning message, but still tried to match the name to the right choice) and it’s now completely unsupported.</li>
+</ul></div>
 <div class="section level4">
 <h4 id="new-features-1-0-1">New features<a class="anchor" aria-label="anchor" href="#new-features-1-0-1"></a></h4>
-<ul><li>Added <code>reactiveVal</code> function, for storing a single value which can be (reactively) read and written. Similar to <code>reactiveValues</code>, except that <code>reactiveVal</code> just lets you store a single value instead of storing multiple values by name. (<a href="https://github.com/rstudio/shiny/issues/1614" class="external-link">#1614</a>)</li></ul></div>
+<ul><li>Added <code>reactiveVal</code> function, for storing a single value which can be (reactively) read and written. Similar to <code>reactiveValues</code>, except that <code>reactiveVal</code> just lets you store a single value instead of storing multiple values by name. (<a href="https://github.com/rstudio/shiny/issues/1614" class="external-link">#1614</a>)</li>
+</ul></div>
 <div class="section level4">
 <h4 id="minor-new-features-and-improvements-1-0-1">Minor new features and improvements<a class="anchor" aria-label="anchor" href="#minor-new-features-and-improvements-1-0-1"></a></h4>
 <ul><li><p>Fixed <a href="https://github.com/rstudio/shiny/issues/1637" class="external-link">#1637</a>: Outputs stay faded on MS Edge. (<a href="https://github.com/rstudio/shiny/issues/1640" class="external-link">#1640</a>)</p></li>
@@ -589,7 +617,8 @@
 </ul></div>
 <div class="section level4">
 <h4 id="library-updates-1-0-1">Library updates<a class="anchor" aria-label="anchor" href="#library-updates-1-0-1"></a></h4>
-<ul><li>Closed <a href="https://github.com/rstudio/shiny/issues/1500" class="external-link">#1500</a>: Updated ion.rangeSlider to 2.1.6. (<a href="https://github.com/rstudio/shiny/issues/1540" class="external-link">#1540</a>)</li></ul></div>
+<ul><li>Closed <a href="https://github.com/rstudio/shiny/issues/1500" class="external-link">#1500</a>: Updated ion.rangeSlider to 2.1.6. (<a href="https://github.com/rstudio/shiny/issues/1540" class="external-link">#1540</a>)</li>
+</ul></div>
 </div>
 </div>
     <div class="section level2">
@@ -608,7 +637,8 @@
 <h3 id="full-changelog-1-0-0">Full changelog<a class="anchor" aria-label="anchor" href="#full-changelog-1-0-0"></a></h3>
 <div class="section level4">
 <h4 id="breaking-changes-1-0-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-1-0-0"></a></h4>
-<ul><li>Added a new <code>placeholder</code> argument to <code><a href="../reference/textOutput.html">verbatimTextOutput()</a></code>. The default is <code>FALSE</code>, which means that, if there is no content for this output, no representation of this slot will be made in the UI. Previsouly, even if there was no content, you’d see an empty rectangle in the UI that served as a placeholder. You can set <code>placeholder = TRUE</code> to revert back to that look. (<a href="https://github.com/rstudio/shiny/issues/1480" class="external-link">#1480</a>)</li></ul></div>
+<ul><li>Added a new <code>placeholder</code> argument to <code><a href="../reference/textOutput.html">verbatimTextOutput()</a></code>. The default is <code>FALSE</code>, which means that, if there is no content for this output, no representation of this slot will be made in the UI. Previsouly, even if there was no content, you’d see an empty rectangle in the UI that served as a placeholder. You can set <code>placeholder = TRUE</code> to revert back to that look. (<a href="https://github.com/rstudio/shiny/issues/1480" class="external-link">#1480</a>)</li>
+</ul></div>
 <div class="section level4">
 <h4 id="new-features-1-0-0">New features<a class="anchor" aria-label="anchor" href="#new-features-1-0-0"></a></h4>
 <ul><li><p>Added support for testing Shiny applications with the shinytest package. (<a href="https://github.com/rstudio/shiny/issues/18" class="external-link">#18</a>, <a href="https://github.com/rstudio/shiny/issues/1464" class="external-link">#1464</a>)</p></li>
@@ -637,7 +667,8 @@
 </ul></div>
 <div class="section level4">
 <h4 id="library-updates-1-0-0">Library updates<a class="anchor" aria-label="anchor" href="#library-updates-1-0-0"></a></h4>
-<ul><li>Updated to Font Awesome 4.7.0.</li></ul></div>
+<ul><li>Updated to Font Awesome 4.7.0.</li>
+</ul></div>
 </div>
 </div>
     <div class="section level2">
@@ -698,7 +729,8 @@
 <div class="section level3">
 <h3 id="notifications-0-14">Notifications<a class="anchor" aria-label="anchor" href="#notifications-0-14"></a></h3>
 <p>Shiny can now display notifications on the client browser by using the <code><a href="../reference/showNotification.html">showNotification()</a></code> function. Use <a href="https://gallery.shinyapps.io/116-notifications/" class="external-link">this demo app</a> to play around with the notification API. Here’s a screenshot of a very simple notification (shown when the button is clicked):</p>
-<p align="center"><img src="http://shiny.rstudio.com/images/notification.png" alt="notification" width="50%"></p>
+<p align="center">
+<img src="http://shiny.rstudio.com/images/notification.png" alt="notification" width="50%"></p>
 <p><a href="https://shiny.rstudio.com/articles/notifications.html" class="external-link">Here</a>’s our article about it, and the <a href="https://shiny.rstudio.com/reference/shiny/latest/showNotification.html" class="external-link">reference documentation</a>.</p>
 </div>
 <div class="section level3">
@@ -714,7 +746,8 @@
 <div class="section level3">
 <h3 id="modal-windows-0-14">Modal windows<a class="anchor" aria-label="anchor" href="#modal-windows-0-14"></a></h3>
 <p>Shiny has now built-in support for displaying modal dialogs like the one below (<a href="https://gallery.shinyapps.io/114-modal-dialog/" class="external-link">live app here</a>):</p>
-<p align="center"><img src="http://shiny.rstudio.com/images/modal-dialog.png" alt="modal-dialog" width="50%"></p>
+<p align="center">
+<img src="http://shiny.rstudio.com/images/modal-dialog.png" alt="modal-dialog" width="50%"></p>
 <p>To learn more about this, read <a href="https://shiny.rstudio.com/articles/modal-dialogs.html" class="external-link">our article</a> and the <a href="https://shiny.rstudio.com/reference/shiny/latest/modalDialog.html" class="external-link">reference documentation</a>.</p>
 </div>
 <div class="section level3">
@@ -738,15 +771,19 @@
 <li><p><strong>Code Diagnostics</strong>: if there is an error parsing <code>ui.R</code>, <code>server.R</code>, <code>app.R</code>, or <code>global.R</code>, Shiny will search the code for missing commas, extra commas, and unmatched braces, parens, and brackets, and will print out messages pointing out those problems. (<a href="https://github.com/rstudio/shiny/issues/1126" class="external-link">#1126</a>)</p></li>
 <li>
 <p><strong>Reactlog visualization</strong>: by default, the <a href="https://shiny.rstudio.com/reference/shiny/latest/reactlog.html" class="external-link"><code>showReactLog()</code> function</a> (which brings up the reactive graph) also displays the time that each reactive and observer were active for:</p>
-<p align="center"></p>
+<p align="center">
+</p>
 <p><img src="http://shiny.rstudio.com/images/reactlog.png" alt="modal-dialog" width="75%"></p>
+
 <p>This new feature can be turned off with <code>showReactLog(time = FALSE)</code>. This may be convenient if you have a large graph and don’t want to have this new information cluttering it up. The elapsed time info shows up above each relevant node’s label, and the time is also coded by color: the slowest reactive will be dark red and the fastest will be light red.</p>
 <p>Additionally, to organize the graph, you can now drag any of the nodes to a specific position and leave it there.</p>
 </li>
 <li>
 <p><strong>Nicer-looking tables</strong>: we’ve made tables generated with <code><a href="../reference/renderTable.html">renderTable()</a></code> look cleaner and more modern. While this won’t break any older code, the finished look of your table will be quite a bit different, as the following image shows:</p>
-<p align="center"></p>
+<p align="center">
+</p>
 <p><img src="http://shiny.rstudio.com/images/render-table.png" alt="render-table" width="75%"></p>
+
 <p>For more, read our <a href="https://shiny.rstudio.com/articles/render-table.html" class="external-link">short article</a> about this update, experiment with all the new features in this <a href="https://gallery.shinyapps.io/109-render-table/" class="external-link">demo app</a>, or check out the <a href="https://shiny.rstudio.com/reference/shiny/latest/renderTable.html" class="external-link">reference documentation</a>.</p>
 </li>
 </ul></div>
@@ -820,7 +857,8 @@
 </div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.13.2" id="shiny-0132">shiny 0.13.2<small>2016-03-28</small><a class="anchor" aria-label="anchor" href="#shiny-0132"></a></h2>
-<ul><li>Updated documentation for <code>htmlTemplate</code>.</li></ul></div>
+<ul><li>Updated documentation for <code>htmlTemplate</code>.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.13.1" id="shiny-0131">shiny 0.13.1<small>2016-02-17</small><a class="anchor" aria-label="anchor" href="#shiny-0131"></a></h2>
 <ul><li><p><code>flexCol</code> did not work on RStudio for Windows or Linux.</p></li>
@@ -927,15 +965,16 @@
 <p>Shiny 0.11 switches away from the Bootstrap 2 web framework to the next version, Bootstrap 3. This is in part because Bootstrap 2 is no longer being developed, and in part because it allows us to tap into the ecosystem of Bootstrap 3 themes.</p>
 <div class="section level4">
 <h4 id="known-issues-for-migration-0-11">Known issues for migration<a class="anchor" aria-label="anchor" href="#known-issues-for-migration-0-11"></a></h4>
-<ul><li>In Bootstrap 3, images in <code>&lt;img&gt;</code> tags are no longer automatically scaled to the width of their container. If you use <code><a href="https://rstudio.github.io/htmltools/reference/builder.html" class="external-link">img()</a></code> in your UI code, or <code>&lt;img&gt;</code> tags in your raw HTML source, it’s possible that they will be too large in the new version of Shiny. To address this you can add the <code>img-responsive</code> class:</li></ul><div class="sourceCode" id="cb1"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="st">```</span><span class="dt">r</span></span>
-<span id="cb1-2"><a href="#cb1-2"></a><span class="dt">img(src = "picture.png", class = "img-responsive")</span></span>
-<span id="cb1-3"><a href="#cb1-3"></a><span class="st">```</span></span>
-<span id="cb1-4"><a href="#cb1-4"></a></span>
-<span id="cb1-5"><a href="#cb1-5"></a>The R code above will generate the following HTML<span class="op">:</span></span>
-<span id="cb1-6"><a href="#cb1-6"></a></span>
-<span id="cb1-7"><a href="#cb1-7"></a><span class="st">```</span><span class="dt">html</span></span>
-<span id="cb1-8"><a href="#cb1-8"></a><span class="dt">&lt;img src="picture.png" class="img-responsive"&gt;</span></span>
-<span id="cb1-9"><a href="#cb1-9"></a><span class="st">```</span></span></code></pre></div>
+<ul><li>In Bootstrap 3, images in <code>&lt;img&gt;</code> tags are no longer automatically scaled to the width of their container. If you use <code><a href="https://rstudio.github.io/htmltools/reference/builder.html" class="external-link">img()</a></code> in your UI code, or <code>&lt;img&gt;</code> tags in your raw HTML source, it’s possible that they will be too large in the new version of Shiny. To address this you can add the <code>img-responsive</code> class:</li>
+</ul><div class="sourceCode" id="cb1"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="st">```</span><span class="at">r</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="at">img(src = "picture.png", class = "img-responsive")</span></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="st">```</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>The R code above will generate the following HTML<span class="sc">:</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="st">```</span><span class="at">html</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="at">&lt;img src="picture.png" class="img-responsive"&gt;</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="st">```</span></span></code></pre></div>
 <ul><li><p>The sliders have been replaced. Previously, Shiny used the <a href="https://github.com/egorkhmelev/jslider" class="external-link">jslider</a> library, but now it uses <a href="https://github.com/IonDen/ion.rangeSlider" class="external-link">ion.RangeSlider</a>. The new sliders have an updated appearance, and they have allowed us to fix many long-standing interface issues with the sliders.</p></li>
 <li><p>The <code><a href="../reference/sliderInput.html">sliderInput()</a></code> function no longer uses the <code>format</code> or <code>locale</code> options. Instead, you can use <code>pre</code>, <code>post</code>, and <code>sep</code> options to control the prefix, postfix, and thousands separator.</p></li>
 <li><p><code><a href="../reference/updateSliderInput.html">updateSliderInput()</a></code> can now control the min, max, value, and step size of a slider. Previously, only the value could be controlled this way, and if you wanted to change other values, you needed to use Shiny’s dynamic UI.</p></li>
@@ -978,10 +1017,12 @@
 </div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.10.2.2" id="shiny-01022">shiny 0.10.2.2<small>2014-12-08</small><a class="anchor" aria-label="anchor" href="#shiny-01022"></a></h2>
-<ul><li>Remove use of <code>rstudio::viewer</code> in a code example, for R CMD check.</li></ul></div>
+<ul><li>Remove use of <code>rstudio::viewer</code> in a code example, for R CMD check.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.10.2.1" id="shiny-01021">shiny 0.10.2.1<small>2014-10-01</small><a class="anchor" aria-label="anchor" href="#shiny-01021"></a></h2>
-<ul><li>Changed some examples to use instead of .</li></ul></div>
+<ul><li>Changed some examples to use instead of .</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.10.2" id="shiny-0102">shiny 0.10.2<small>2014-09-30</small><a class="anchor" aria-label="anchor" href="#shiny-0102"></a></h2>
 <ul><li><p>The minimal version of R required for the shiny package is 3.0.0 now.</p></li>
@@ -1030,7 +1071,8 @@
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.9.1" id="shiny-091">shiny 0.9.1<small>2014-03-19</small><a class="anchor" aria-label="anchor" href="#shiny-091"></a></h2>
-<ul><li>Fixed warning ‘Error in Context$new : could not find function “loadMethod”’ that was happening to dependent packages on “R CMD check”.</li></ul></div>
+<ul><li>Fixed warning ‘Error in Context$new : could not find function “loadMethod”’ that was happening to dependent packages on “R CMD check”.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.9.0" id="shiny-090">shiny 0.9.0<small>2014-03-18</small><a class="anchor" aria-label="anchor" href="#shiny-090"></a></h2>
 <ul><li><p>BREAKING CHANGE: Added a <code>host</code> parameter to runApp() and runExample(), which defaults to the shiny.host option if it is non-NULL, or “127.0.0.1” otherwise. This means that by default, Shiny applications can only be accessed on the same machine from which they are served. To allow other clients to connect, as in previous versions of Shiny, use “0.0.0.0” (or the IP address of one of your network interfaces, if you care to be explicit about it).</p></li>
@@ -1164,22 +1206,28 @@
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.2.3" id="shiny-023">shiny 0.2.3<small>2012-12-01</small><a class="anchor" aria-label="anchor" href="#shiny-023"></a></h2>
-<ul><li>Ignore request variables for routing purposes</li></ul></div>
+<ul><li>Ignore request variables for routing purposes</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.2.2" id="shiny-022">shiny 0.2.2<a class="anchor" aria-label="anchor" href="#shiny-022"></a></h2>
-<ul><li>Fix CRAN warning (assigning to global environment)</li></ul></div>
+<ul><li>Fix CRAN warning (assigning to global environment)</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.2.1" id="shiny-021">shiny 0.2.1<a class="anchor" aria-label="anchor" href="#shiny-021"></a></h2>
-<ul><li>[BREAKING] Modify API of <code>downloadHandler</code>: The <code>content</code> function now takes a file path, not writable connection, as an argument. This makes it much easier to work with APIs that only write to file paths, not connections.</li></ul></div>
+<ul><li>[BREAKING] Modify API of <code>downloadHandler</code>: The <code>content</code> function now takes a file path, not writable connection, as an argument. This makes it much easier to work with APIs that only write to file paths, not connections.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.2.0" id="shiny-020">shiny 0.2.0<a class="anchor" aria-label="anchor" href="#shiny-020"></a></h2>
-<ul><li>Fix subtle name resolution bug–the usual symptom being S4 methods not being invoked correctly when called from inside of ui.R or server.R</li></ul></div>
+<ul><li>Fix subtle name resolution bug–the usual symptom being S4 methods not being invoked correctly when called from inside of ui.R or server.R</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.1.14" id="shiny-0114">shiny 0.1.14<a class="anchor" aria-label="anchor" href="#shiny-0114"></a></h2>
-<ul><li>Fix slider animator, which broke in 0.1.10</li></ul></div>
+<ul><li>Fix slider animator, which broke in 0.1.10</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.1.13" id="shiny-0113">shiny 0.1.13<a class="anchor" aria-label="anchor" href="#shiny-0113"></a></h2>
-<ul><li>Fix temp file leak in reactivePlot</li></ul></div>
+<ul><li>Fix temp file leak in reactivePlot</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.1.12" id="shiny-0112">shiny 0.1.12<a class="anchor" aria-label="anchor" href="#shiny-0112"></a></h2>
 <ul><li><p>Fix problems with runGist on Windows</p></li>
@@ -1253,7 +1301,8 @@
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.1.2" id="shiny-012">shiny 0.1.2<a class="anchor" aria-label="anchor" href="#shiny-012"></a></h2>
-<ul><li>Initial private beta release!</li></ul></div>
+<ul><li>Initial private beta release!</li>
+</ul></div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

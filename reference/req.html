@@ -85,23 +85,23 @@ whatever state it happens to be in.</p></dd>
     <p>The <code>req</code> function was designed to be used in one of two ways. The first
 is to call it like a statement (ignoring its return value) before attempting
 operations using the required values:</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1"></a>rv &lt;-<span class="st"> </span><span class="kw">reactiveValues</span>(<span class="dt">state =</span> <span class="ot">FALSE</span>)</span>
-<span id="cb1-2"><a href="#cb1-2"></a>r &lt;-<span class="st"> </span><span class="kw">reactive</span>({</span>
-<span id="cb1-3"><a href="#cb1-3"></a>  <span class="kw">req</span>(input<span class="op">$</span>a, input<span class="op">$</span>b, rv<span class="op">$</span>state)</span>
-<span id="cb1-4"><a href="#cb1-4"></a>  <span class="co"># Code that uses input$a, input$b, and/or rv$state...</span></span>
-<span id="cb1-5"><a href="#cb1-5"></a>})</span></code></pre><p></p></div>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>rv <span class="ot">&lt;-</span> <span class="fu">reactiveValues</span>(<span class="at">state =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>r <span class="ot">&lt;-</span> <span class="fu">reactive</span>({</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>  <span class="fu">req</span>(input<span class="sc">$</span>a, input<span class="sc">$</span>b, rv<span class="sc">$</span>state)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>  <span class="co"># Code that uses input$a, input$b, and/or rv$state...</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>})</span></code></pre><p></p></div>
 <p>In this example, if <code>r()</code> is called and any of <code>input$a</code>,
 <code>input$b</code>, and <code>rv$state</code> are <code>NULL</code>, <code>FALSE</code>, <code>""</code>,
 etc., then the <code>req</code> call will trigger an error that propagates all the
 way up to whatever render block or observer is executing.</p>
 <p>The second is to use it to wrap an expression that must be truthy:</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1"></a>output<span class="op">$</span>plot &lt;-<span class="st"> </span><span class="kw">renderPlot</span>({</span>
-<span id="cb1-2"><a href="#cb1-2"></a>  <span class="cf">if</span> (<span class="kw">req</span>(input<span class="op">$</span>plotType) <span class="op">==</span><span class="st"> "histogram"</span>) {</span>
-<span id="cb1-3"><a href="#cb1-3"></a>    <span class="kw">hist</span>(<span class="kw">dataset</span>())</span>
-<span id="cb1-4"><a href="#cb1-4"></a>  } <span class="cf">else</span> <span class="cf">if</span> (input<span class="op">$</span>plotType <span class="op">==</span><span class="st"> "scatter"</span>) {</span>
-<span id="cb1-5"><a href="#cb1-5"></a>    <span class="kw">qplot</span>(<span class="kw">dataset</span>(), <span class="kw">aes</span>(<span class="dt">x =</span> x, <span class="dt">y =</span> y))</span>
-<span id="cb1-6"><a href="#cb1-6"></a>  }</span>
-<span id="cb1-7"><a href="#cb1-7"></a>})</span></code></pre><p></p></div>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>output<span class="sc">$</span>plot <span class="ot">&lt;-</span> <span class="fu">renderPlot</span>({</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">req</span>(input<span class="sc">$</span>plotType) <span class="sc">==</span> <span class="st">"histogram"</span>) {</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>    <span class="fu">hist</span>(<span class="fu">dataset</span>())</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (input<span class="sc">$</span>plotType <span class="sc">==</span> <span class="st">"scatter"</span>) {</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>    <span class="fu">qplot</span>(<span class="fu">dataset</span>(), <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y))</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>  }</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>})</span></code></pre><p></p></div>
 <p>In this example, <code>req(input$plotType)</code> first checks that
 <code>input$plotType</code> is truthy, and if so, returns it. This is a convenient
 way to check for a value "inline" with its first use.</p>

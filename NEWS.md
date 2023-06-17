@@ -16,6 +16,8 @@
 
 ### Bug fixes
 
+* Partial fix for #3664: `dateInput` and `dateRangeInput` will not send spurious values to the server while typing until the user presses enter or clicks out of the field, except for `null` or `NA` when the field is completely empty.
+
 * Fixed #3771: Sometimes the error `ion.rangeSlider.min.js: i.stopPropagation is not a function` would appear in the JavaScript console. (#3772)
 
 * Fixed #3833: When `width` is provided to `textAreaInput()`, we now correctly set the width of the `<textarea>` element. (#3838)

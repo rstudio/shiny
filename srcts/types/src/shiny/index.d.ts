@@ -1,5 +1,6 @@
 import { InputBinding, OutputBinding } from "../bindings";
 import { resetBrush } from "../imageutils/resetBrush";
+import { setBrush } from "../imageutils/setBrush";
 import { $escape, compareVersion } from "../utils";
 import { showNotification, removeNotification } from "./notifications";
 import { showModal, removeModal } from "./modal";
@@ -19,6 +20,7 @@ interface Shiny {
     outputBindings: ReturnType<typeof initOutputBindings>["outputBindings"];
     OutputBinding: typeof OutputBinding;
     resetBrush: typeof resetBrush;
+    setBrush: typeof setBrush;
     notifications: {
         show: typeof showNotification;
         remove: typeof removeNotification;

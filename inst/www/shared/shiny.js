@@ -65,8 +65,8 @@
   // node_modules/core-js/internals/descriptors.js
   var require_descriptors = __commonJS({
     "node_modules/core-js/internals/descriptors.js": function(exports, module) {
-      var fails12 = require_fails();
-      module.exports = !fails12(function() {
+      var fails13 = require_fails();
+      module.exports = !fails13(function() {
         return Object.defineProperty({}, 1, { get: function() {
           return 7;
         } })[1] != 7;
@@ -77,8 +77,8 @@
   // node_modules/core-js/internals/function-bind-native.js
   var require_function_bind_native = __commonJS({
     "node_modules/core-js/internals/function-bind-native.js": function(exports, module) {
-      var fails12 = require_fails();
-      module.exports = !fails12(function() {
+      var fails13 = require_fails();
+      module.exports = !fails13(function() {
         var test2 = function() {
         }.bind();
         return typeof test2 != "function" || test2.hasOwnProperty("prototype");
@@ -143,11 +143,11 @@
   // node_modules/core-js/internals/classof-raw.js
   var require_classof_raw = __commonJS({
     "node_modules/core-js/internals/classof-raw.js": function(exports, module) {
-      var uncurryThis11 = require_function_uncurry_this();
-      var toString9 = uncurryThis11({}.toString);
-      var stringSlice4 = uncurryThis11("".slice);
+      var uncurryThis12 = require_function_uncurry_this();
+      var toString9 = uncurryThis12({}.toString);
+      var stringSlice5 = uncurryThis12("".slice);
       module.exports = function(it) {
-        return stringSlice4(toString9(it), 8, -1);
+        return stringSlice5(toString9(it), 8, -1);
       };
     }
   });
@@ -155,12 +155,12 @@
   // node_modules/core-js/internals/indexed-object.js
   var require_indexed_object = __commonJS({
     "node_modules/core-js/internals/indexed-object.js": function(exports, module) {
-      var uncurryThis11 = require_function_uncurry_this();
-      var fails12 = require_fails();
+      var uncurryThis12 = require_function_uncurry_this();
+      var fails13 = require_fails();
       var classof = require_classof_raw();
       var $Object = Object;
-      var split = uncurryThis11("".split);
-      module.exports = fails12(function() {
+      var split = uncurryThis12("".split);
+      module.exports = fails13(function() {
         return !$Object("z").propertyIsEnumerable(0);
       }) ? function(it) {
         return classof(it) == "String" ? split(it, "") : $Object(it);
@@ -257,8 +257,8 @@
   // node_modules/core-js/internals/object-is-prototype-of.js
   var require_object_is_prototype_of = __commonJS({
     "node_modules/core-js/internals/object-is-prototype-of.js": function(exports, module) {
-      var uncurryThis11 = require_function_uncurry_this();
-      module.exports = uncurryThis11({}.isPrototypeOf);
+      var uncurryThis12 = require_function_uncurry_this();
+      module.exports = uncurryThis12({}.isPrototypeOf);
     }
   });
 
@@ -300,8 +300,8 @@
   var require_symbol_constructor_detection = __commonJS({
     "node_modules/core-js/internals/symbol-constructor-detection.js": function(exports, module) {
       var V8_VERSION2 = require_engine_v8_version();
-      var fails12 = require_fails();
-      module.exports = !!Object.getOwnPropertySymbols && !fails12(function() {
+      var fails13 = require_fails();
+      module.exports = !!Object.getOwnPropertySymbols && !fails13(function() {
         var symbol = Symbol();
         return !String(symbol) || !(Object(symbol) instanceof Symbol) || !Symbol.sham && V8_VERSION2 && V8_VERSION2 < 41;
       });
@@ -336,10 +336,10 @@
   // node_modules/core-js/internals/try-to-string.js
   var require_try_to_string = __commonJS({
     "node_modules/core-js/internals/try-to-string.js": function(exports, module) {
-      var $String = String;
+      var $String2 = String;
       module.exports = function(argument) {
         try {
-          return $String(argument);
+          return $String2(argument);
         } catch (error) {
           return "Object";
         }
@@ -458,9 +458,9 @@
   // node_modules/core-js/internals/has-own-property.js
   var require_has_own_property = __commonJS({
     "node_modules/core-js/internals/has-own-property.js": function(exports, module) {
-      var uncurryThis11 = require_function_uncurry_this();
+      var uncurryThis12 = require_function_uncurry_this();
       var toObject5 = require_to_object();
-      var hasOwnProperty2 = uncurryThis11({}.hasOwnProperty);
+      var hasOwnProperty2 = uncurryThis12({}.hasOwnProperty);
       module.exports = Object.hasOwn || function hasOwn4(it, key) {
         return hasOwnProperty2(toObject5(it), key);
       };
@@ -470,10 +470,10 @@
   // node_modules/core-js/internals/uid.js
   var require_uid = __commonJS({
     "node_modules/core-js/internals/uid.js": function(exports, module) {
-      var uncurryThis11 = require_function_uncurry_this();
+      var uncurryThis12 = require_function_uncurry_this();
       var id = 0;
       var postfix = Math.random();
-      var toString9 = uncurryThis11(1 .toString);
+      var toString9 = uncurryThis12(1 .toString);
       module.exports = function(key) {
         return "Symbol(" + (key === void 0 ? "" : key) + ")_" + toString9(++id + postfix, 36);
       };
@@ -561,9 +561,9 @@
   var require_ie8_dom_define = __commonJS({
     "node_modules/core-js/internals/ie8-dom-define.js": function(exports, module) {
       var DESCRIPTORS8 = require_descriptors();
-      var fails12 = require_fails();
+      var fails13 = require_fails();
       var createElement = require_document_create_element();
-      module.exports = !DESCRIPTORS8 && !fails12(function() {
+      module.exports = !DESCRIPTORS8 && !fails13(function() {
         return Object.defineProperty(createElement("div"), "a", {
           get: function() {
             return 7;
@@ -603,8 +603,8 @@
   var require_v8_prototype_define_bug = __commonJS({
     "node_modules/core-js/internals/v8-prototype-define-bug.js": function(exports, module) {
       var DESCRIPTORS8 = require_descriptors();
-      var fails12 = require_fails();
-      module.exports = DESCRIPTORS8 && fails12(function() {
+      var fails13 = require_fails();
+      module.exports = DESCRIPTORS8 && fails13(function() {
         return Object.defineProperty(function() {
         }, "prototype", {
           value: 42,
@@ -618,12 +618,12 @@
   var require_an_object = __commonJS({
     "node_modules/core-js/internals/an-object.js": function(exports, module) {
       var isObject5 = require_is_object();
-      var $String = String;
+      var $String2 = String;
       var $TypeError = TypeError;
       module.exports = function(argument) {
         if (isObject5(argument))
           return argument;
-        throw $TypeError($String(argument) + " is not an object");
+        throw $TypeError($String2(argument) + " is not an object");
       };
     }
   });
@@ -713,10 +713,10 @@
   // node_modules/core-js/internals/inspect-source.js
   var require_inspect_source = __commonJS({
     "node_modules/core-js/internals/inspect-source.js": function(exports, module) {
-      var uncurryThis11 = require_function_uncurry_this();
+      var uncurryThis12 = require_function_uncurry_this();
       var isCallable4 = require_is_callable();
       var store = require_shared_store();
-      var functionToString2 = uncurryThis11(Function.toString);
+      var functionToString2 = uncurryThis12(Function.toString);
       if (!isCallable4(store.inspectSource)) {
         store.inspectSource = function(it) {
           return functionToString2(it);
@@ -834,8 +834,8 @@
   // node_modules/core-js/internals/make-built-in.js
   var require_make_built_in = __commonJS({
     "node_modules/core-js/internals/make-built-in.js": function(exports, module) {
-      var uncurryThis11 = require_function_uncurry_this();
-      var fails12 = require_fails();
+      var uncurryThis12 = require_function_uncurry_this();
+      var fails13 = require_fails();
       var isCallable4 = require_is_callable();
       var hasOwn4 = require_has_own_property();
       var DESCRIPTORS8 = require_descriptors();
@@ -844,19 +844,19 @@
       var InternalStateModule2 = require_internal_state();
       var enforceInternalState = InternalStateModule2.enforce;
       var getInternalState2 = InternalStateModule2.get;
-      var $String = String;
+      var $String2 = String;
       var defineProperty3 = Object.defineProperty;
-      var stringSlice4 = uncurryThis11("".slice);
-      var replace = uncurryThis11("".replace);
-      var join2 = uncurryThis11([].join);
-      var CONFIGURABLE_LENGTH = DESCRIPTORS8 && !fails12(function() {
+      var stringSlice5 = uncurryThis12("".slice);
+      var replace = uncurryThis12("".replace);
+      var join2 = uncurryThis12([].join);
+      var CONFIGURABLE_LENGTH = DESCRIPTORS8 && !fails13(function() {
         return defineProperty3(function() {
         }, "length", { value: 8 }).length !== 8;
       });
       var TEMPLATE = String(String).split("String");
       var makeBuiltIn = module.exports = function(value, name, options) {
-        if (stringSlice4($String(name), 0, 7) === "Symbol(") {
-          name = "[" + replace($String(name), /^Symbol\(([^)]*)\)/, "$1") + "]";
+        if (stringSlice5($String2(name), 0, 7) === "Symbol(") {
+          name = "[" + replace($String2(name), /^Symbol\(([^)]*)\)/, "$1") + "]";
         }
         if (options && options.getter)
           name = "get " + name;
@@ -937,10 +937,10 @@
   var require_math_trunc = __commonJS({
     "node_modules/core-js/internals/math-trunc.js": function(exports, module) {
       var ceil = Math.ceil;
-      var floor = Math.floor;
+      var floor2 = Math.floor;
       module.exports = Math.trunc || function trunc(x) {
         var n = +x;
-        return (n > 0 ? floor : ceil)(n);
+        return (n > 0 ? floor2 : ceil)(n);
       };
     }
   });
@@ -959,11 +959,11 @@
   // node_modules/core-js/internals/to-absolute-index.js
   var require_to_absolute_index = __commonJS({
     "node_modules/core-js/internals/to-absolute-index.js": function(exports, module) {
-      var toIntegerOrInfinity3 = require_to_integer_or_infinity();
+      var toIntegerOrInfinity4 = require_to_integer_or_infinity();
       var max4 = Math.max;
       var min4 = Math.min;
       module.exports = function(index, length) {
-        var integer = toIntegerOrInfinity3(index);
+        var integer = toIntegerOrInfinity4(index);
         return integer < 0 ? max4(integer + length, 0) : min4(integer, length);
       };
     }
@@ -972,10 +972,10 @@
   // node_modules/core-js/internals/to-length.js
   var require_to_length = __commonJS({
     "node_modules/core-js/internals/to-length.js": function(exports, module) {
-      var toIntegerOrInfinity3 = require_to_integer_or_infinity();
+      var toIntegerOrInfinity4 = require_to_integer_or_infinity();
       var min4 = Math.min;
       module.exports = function(argument) {
-        return argument > 0 ? min4(toIntegerOrInfinity3(argument), 9007199254740991) : 0;
+        return argument > 0 ? min4(toIntegerOrInfinity4(argument), 9007199254740991) : 0;
       };
     }
   });
@@ -1026,12 +1026,12 @@
   // node_modules/core-js/internals/object-keys-internal.js
   var require_object_keys_internal = __commonJS({
     "node_modules/core-js/internals/object-keys-internal.js": function(exports, module) {
-      var uncurryThis11 = require_function_uncurry_this();
+      var uncurryThis12 = require_function_uncurry_this();
       var hasOwn4 = require_has_own_property();
       var toIndexedObject5 = require_to_indexed_object();
       var indexOf2 = require_array_includes().indexOf;
       var hiddenKeys = require_hidden_keys();
-      var push4 = uncurryThis11([].push);
+      var push4 = uncurryThis12([].push);
       module.exports = function(object, names) {
         var O = toIndexedObject5(object);
         var i = 0;
@@ -1086,11 +1086,11 @@
   var require_own_keys = __commonJS({
     "node_modules/core-js/internals/own-keys.js": function(exports, module) {
       var getBuiltIn3 = require_get_built_in();
-      var uncurryThis11 = require_function_uncurry_this();
+      var uncurryThis12 = require_function_uncurry_this();
       var getOwnPropertyNamesModule = require_object_get_own_property_names();
       var getOwnPropertySymbolsModule = require_object_get_own_property_symbols();
       var anObject10 = require_an_object();
-      var concat3 = uncurryThis11([].concat);
+      var concat3 = uncurryThis12([].concat);
       module.exports = getBuiltIn3("Reflect", "ownKeys") || function ownKeys4(it) {
         var keys2 = getOwnPropertyNamesModule.f(anObject10(it));
         var getOwnPropertySymbols = getOwnPropertySymbolsModule.f;
@@ -1123,12 +1123,12 @@
   // node_modules/core-js/internals/is-forced.js
   var require_is_forced = __commonJS({
     "node_modules/core-js/internals/is-forced.js": function(exports, module) {
-      var fails12 = require_fails();
+      var fails13 = require_fails();
       var isCallable4 = require_is_callable();
       var replacement = /#|\.prototype\./;
       var isForced2 = function(feature, detection) {
         var value = data[normalize(feature)];
-        return value == POLYFILL ? true : value == NATIVE ? false : isCallable4(detection) ? fails12(detection) : !!detection;
+        return value == POLYFILL ? true : value == NATIVE ? false : isCallable4(detection) ? fails13(detection) : !!detection;
       };
       var normalize = isForced2.normalize = function(string) {
         return String(string).replace(replacement, ".").toLowerCase();
@@ -1154,7 +1154,7 @@
         var TARGET = options.target;
         var GLOBAL = options.global;
         var STATIC = options.stat;
-        var FORCED9, target, key, targetProperty, sourceProperty, descriptor;
+        var FORCED10, target, key, targetProperty, sourceProperty, descriptor;
         if (GLOBAL) {
           target = global9;
         } else if (STATIC) {
@@ -1170,8 +1170,8 @@
               targetProperty = descriptor && descriptor.value;
             } else
               targetProperty = target[key];
-            FORCED9 = isForced2(GLOBAL ? key : TARGET + (STATIC ? "." : "#") + key, options.forced);
-            if (!FORCED9 && targetProperty !== void 0) {
+            FORCED10 = isForced2(GLOBAL ? key : TARGET + (STATIC ? "." : "#") + key, options.forced);
+            if (!FORCED10 && targetProperty !== void 0) {
               if (typeof sourceProperty == typeof targetProperty)
                 continue;
               copyConstructorProperties3(sourceProperty, targetProperty);
@@ -1189,10 +1189,10 @@
   var require_function_uncurry_this_clause = __commonJS({
     "node_modules/core-js/internals/function-uncurry-this-clause.js": function(exports, module) {
       var classofRaw = require_classof_raw();
-      var uncurryThis11 = require_function_uncurry_this();
+      var uncurryThis12 = require_function_uncurry_this();
       module.exports = function(fn) {
         if (classofRaw(fn) === "Function")
-          return uncurryThis11(fn);
+          return uncurryThis12(fn);
       };
     }
   });
@@ -1201,10 +1201,10 @@
   var require_array_method_is_strict = __commonJS({
     "node_modules/core-js/internals/array-method-is-strict.js": function(exports, module) {
       "use strict";
-      var fails12 = require_fails();
+      var fails13 = require_fails();
       module.exports = function(METHOD_NAME, argument) {
         var method = [][METHOD_NAME];
-        return !!method && fails12(function() {
+        return !!method && fails13(function() {
           method.call(null, argument || function() {
             return 1;
           }, 1);
@@ -1253,11 +1253,11 @@
   var require_to_string = __commonJS({
     "node_modules/core-js/internals/to-string.js": function(exports, module) {
       var classof = require_classof();
-      var $String = String;
+      var $String2 = String;
       module.exports = function(argument) {
         if (classof(argument) === "Symbol")
           throw TypeError("Cannot convert a Symbol value to a string");
-        return $String(argument);
+        return $String2(argument);
       };
     }
   });
@@ -1272,11 +1272,11 @@
   // node_modules/core-js/internals/string-trim.js
   var require_string_trim = __commonJS({
     "node_modules/core-js/internals/string-trim.js": function(exports, module) {
-      var uncurryThis11 = require_function_uncurry_this();
+      var uncurryThis12 = require_function_uncurry_this();
       var requireObjectCoercible5 = require_require_object_coercible();
       var toString9 = require_to_string();
       var whitespaces = require_whitespaces();
-      var replace = uncurryThis11("".replace);
+      var replace = uncurryThis12("".replace);
       var ltrim = RegExp("^[" + whitespaces + "]+");
       var rtrim = RegExp("(^|[^" + whitespaces + "])[" + whitespaces + "]+$");
       var createMethod = function(TYPE) {
@@ -1301,8 +1301,8 @@
   var require_number_parse_int = __commonJS({
     "node_modules/core-js/internals/number-parse-int.js": function(exports, module) {
       var global9 = require_global();
-      var fails12 = require_fails();
-      var uncurryThis11 = require_function_uncurry_this();
+      var fails13 = require_fails();
+      var uncurryThis12 = require_function_uncurry_this();
       var toString9 = require_to_string();
       var trim3 = require_string_trim().trim;
       var whitespaces = require_whitespaces();
@@ -1310,11 +1310,11 @@
       var Symbol2 = global9.Symbol;
       var ITERATOR2 = Symbol2 && Symbol2.iterator;
       var hex = /^[+-]?0x/i;
-      var exec2 = uncurryThis11(hex.exec);
-      var FORCED9 = $parseInt2(whitespaces + "08") !== 8 || $parseInt2(whitespaces + "0x16") !== 22 || ITERATOR2 && !fails12(function() {
+      var exec2 = uncurryThis12(hex.exec);
+      var FORCED10 = $parseInt2(whitespaces + "08") !== 8 || $parseInt2(whitespaces + "0x16") !== 22 || ITERATOR2 && !fails13(function() {
         $parseInt2(Object(ITERATOR2));
       });
-      module.exports = FORCED9 ? function parseInt2(string, radix) {
+      module.exports = FORCED10 ? function parseInt2(string, radix) {
         var S = trim3(toString9(string));
         return $parseInt2(S, radix >>> 0 || (exec2(hex, S) ? 16 : 10));
       } : $parseInt2;
@@ -1353,18 +1353,18 @@
   // node_modules/core-js/internals/regexp-sticky-helpers.js
   var require_regexp_sticky_helpers = __commonJS({
     "node_modules/core-js/internals/regexp-sticky-helpers.js": function(exports, module) {
-      var fails12 = require_fails();
+      var fails13 = require_fails();
       var global9 = require_global();
       var $RegExp = global9.RegExp;
-      var UNSUPPORTED_Y2 = fails12(function() {
+      var UNSUPPORTED_Y2 = fails13(function() {
         var re = $RegExp("a", "y");
         re.lastIndex = 2;
         return re.exec("abcd") != null;
       });
-      var MISSED_STICKY = UNSUPPORTED_Y2 || fails12(function() {
+      var MISSED_STICKY = UNSUPPORTED_Y2 || fails13(function() {
         return !$RegExp("a", "y").sticky;
       });
-      var BROKEN_CARET = UNSUPPORTED_Y2 || fails12(function() {
+      var BROKEN_CARET = UNSUPPORTED_Y2 || fails13(function() {
         var re = $RegExp("^r", "gy");
         re.lastIndex = 2;
         return re.exec("str") != null;
@@ -1489,10 +1489,10 @@
   // node_modules/core-js/internals/regexp-unsupported-dot-all.js
   var require_regexp_unsupported_dot_all = __commonJS({
     "node_modules/core-js/internals/regexp-unsupported-dot-all.js": function(exports, module) {
-      var fails12 = require_fails();
+      var fails13 = require_fails();
       var global9 = require_global();
       var $RegExp = global9.RegExp;
-      module.exports = fails12(function() {
+      module.exports = fails13(function() {
         var re = $RegExp(".", "s");
         return !(re.dotAll && re.exec("\n") && re.flags === "s");
       });
@@ -1502,10 +1502,10 @@
   // node_modules/core-js/internals/regexp-unsupported-ncg.js
   var require_regexp_unsupported_ncg = __commonJS({
     "node_modules/core-js/internals/regexp-unsupported-ncg.js": function(exports, module) {
-      var fails12 = require_fails();
+      var fails13 = require_fails();
       var global9 = require_global();
       var $RegExp = global9.RegExp;
-      module.exports = fails12(function() {
+      module.exports = fails13(function() {
         var re = $RegExp("(?<a>b)", "g");
         return re.exec("b").groups.a !== "b" || "b".replace(re, "$<a>c") !== "bc";
       });
@@ -1517,7 +1517,7 @@
     "node_modules/core-js/internals/regexp-exec.js": function(exports, module) {
       "use strict";
       var call8 = require_function_call();
-      var uncurryThis11 = require_function_uncurry_this();
+      var uncurryThis12 = require_function_uncurry_this();
       var toString9 = require_to_string();
       var regexpFlags = require_regexp_flags();
       var stickyHelpers2 = require_regexp_sticky_helpers();
@@ -1529,10 +1529,10 @@
       var nativeReplace = shared("native-string-replace", String.prototype.replace);
       var nativeExec = RegExp.prototype.exec;
       var patchedExec = nativeExec;
-      var charAt2 = uncurryThis11("".charAt);
-      var indexOf2 = uncurryThis11("".indexOf);
-      var replace = uncurryThis11("".replace);
-      var stringSlice4 = uncurryThis11("".slice);
+      var charAt2 = uncurryThis12("".charAt);
+      var indexOf2 = uncurryThis12("".indexOf);
+      var replace = uncurryThis12("".replace);
+      var stringSlice5 = uncurryThis12("".slice);
       var UPDATES_LAST_INDEX_WRONG = function() {
         var re1 = /a/;
         var re2 = /b*/g;
@@ -1567,7 +1567,7 @@
             if (indexOf2(flags, "g") === -1) {
               flags += "g";
             }
-            strCopy = stringSlice4(str, re.lastIndex);
+            strCopy = stringSlice5(str, re.lastIndex);
             if (re.lastIndex > 0 && (!re.multiline || re.multiline && charAt2(str, re.lastIndex - 1) !== "\n")) {
               source = "(?: " + source + ")";
               strCopy = " " + strCopy;
@@ -1583,8 +1583,8 @@
           match = call8(nativeExec, sticky ? reCopy : re, strCopy);
           if (sticky) {
             if (match) {
-              match.input = stringSlice4(match.input, charsAdded);
-              match[0] = stringSlice4(match[0], charsAdded);
+              match.input = stringSlice5(match.input, charsAdded);
+              match[0] = stringSlice5(match[0], charsAdded);
               match.index = re.lastIndex;
               re.lastIndex += match[0].length;
             } else
@@ -1618,9 +1618,9 @@
   var require_es_regexp_exec = __commonJS({
     "node_modules/core-js/modules/es.regexp.exec.js": function() {
       "use strict";
-      var $77 = require_export();
+      var $79 = require_export();
       var exec2 = require_regexp_exec();
-      $77({ target: "RegExp", proto: true, forced: /./.exec !== exec2 }, {
+      $79({ target: "RegExp", proto: true, forced: /./.exec !== exec2 }, {
         exec: exec2
       });
     }
@@ -1792,10 +1792,10 @@
   // node_modules/core-js/internals/function-bind-context.js
   var require_function_bind_context = __commonJS({
     "node_modules/core-js/internals/function-bind-context.js": function(exports, module) {
-      var uncurryThis11 = require_function_uncurry_this_clause();
+      var uncurryThis12 = require_function_uncurry_this_clause();
       var aCallable2 = require_a_callable();
       var NATIVE_BIND = require_function_bind_native();
-      var bind2 = uncurryThis11(uncurryThis11.bind);
+      var bind2 = uncurryThis12(uncurryThis12.bind);
       module.exports = function(fn, that) {
         aCallable2(fn);
         return that === void 0 ? fn : NATIVE_BIND ? bind2(fn, that) : function() {
@@ -1818,8 +1818,8 @@
   // node_modules/core-js/internals/is-constructor.js
   var require_is_constructor = __commonJS({
     "node_modules/core-js/internals/is-constructor.js": function(exports, module) {
-      var uncurryThis11 = require_function_uncurry_this();
-      var fails12 = require_fails();
+      var uncurryThis12 = require_function_uncurry_this();
+      var fails13 = require_fails();
       var isCallable4 = require_is_callable();
       var classof = require_classof();
       var getBuiltIn3 = require_get_built_in();
@@ -1829,7 +1829,7 @@
       var empty = [];
       var construct2 = getBuiltIn3("Reflect", "construct");
       var constructorRegExp = /^\s*(?:class|function)\b/;
-      var exec2 = uncurryThis11(constructorRegExp.exec);
+      var exec2 = uncurryThis12(constructorRegExp.exec);
       var INCORRECT_TO_STRING = !constructorRegExp.exec(noop);
       var isConstructorModern = function isConstructor2(argument) {
         if (!isCallable4(argument))
@@ -1857,7 +1857,7 @@
         }
       };
       isConstructorLegacy.sham = true;
-      module.exports = !construct2 || fails12(function() {
+      module.exports = !construct2 || fails13(function() {
         var called;
         return isConstructorModern(isConstructorModern.call) || !isConstructorModern(Object) || !isConstructorModern(function() {
           called = true;
@@ -1906,12 +1906,12 @@
   var require_array_iteration = __commonJS({
     "node_modules/core-js/internals/array-iteration.js": function(exports, module) {
       var bind2 = require_function_bind_context();
-      var uncurryThis11 = require_function_uncurry_this();
+      var uncurryThis12 = require_function_uncurry_this();
       var IndexedObject2 = require_indexed_object();
       var toObject5 = require_to_object();
       var lengthOfArrayLike4 = require_length_of_array_like();
       var arraySpeciesCreate3 = require_array_species_create();
-      var push4 = uncurryThis11([].push);
+      var push4 = uncurryThis12([].push);
       var createMethod = function(TYPE) {
         var IS_MAP = TYPE == 1;
         var IS_FILTER = TYPE == 2;
@@ -1976,14 +1976,14 @@
   var require_es_symbol_constructor = __commonJS({
     "node_modules/core-js/modules/es.symbol.constructor.js": function() {
       "use strict";
-      var $77 = require_export();
+      var $79 = require_export();
       var global9 = require_global();
       var call8 = require_function_call();
-      var uncurryThis11 = require_function_uncurry_this();
+      var uncurryThis12 = require_function_uncurry_this();
       var IS_PURE2 = require_is_pure();
       var DESCRIPTORS8 = require_descriptors();
       var NATIVE_SYMBOL = require_symbol_constructor_detection();
-      var fails12 = require_fails();
+      var fails13 = require_fails();
       var hasOwn4 = require_has_own_property();
       var isPrototypeOf3 = require_object_is_prototype_of();
       var anObject10 = require_an_object();
@@ -2027,12 +2027,12 @@
       var nativeDefineProperty = definePropertyModule.f;
       var nativeGetOwnPropertyNames = getOwnPropertyNamesExternal.f;
       var nativePropertyIsEnumerable = propertyIsEnumerableModule.f;
-      var push4 = uncurryThis11([].push);
+      var push4 = uncurryThis12([].push);
       var AllSymbols = shared("symbols");
       var ObjectPrototypeSymbols = shared("op-symbols");
       var WellKnownSymbolsStore = shared("wks");
       var USE_SETTER = !QObject || !QObject[PROTOTYPE] || !QObject[PROTOTYPE].findChild;
-      var setSymbolDescriptor = DESCRIPTORS8 && fails12(function() {
+      var setSymbolDescriptor = DESCRIPTORS8 && fails13(function() {
         return nativeObjectCreate(nativeDefineProperty({}, "a", {
           get: function() {
             return nativeDefineProperty(this, "a", { value: 7 }).a;
@@ -2174,13 +2174,13 @@
           }
         }
       }
-      $77({ global: true, constructor: true, wrap: true, forced: !NATIVE_SYMBOL, sham: !NATIVE_SYMBOL }, {
+      $79({ global: true, constructor: true, wrap: true, forced: !NATIVE_SYMBOL, sham: !NATIVE_SYMBOL }, {
         Symbol: $Symbol
       });
       $forEach(objectKeys(WellKnownSymbolsStore), function(name) {
         defineWellKnownSymbol5(name);
       });
-      $77({ target: SYMBOL, stat: true, forced: !NATIVE_SYMBOL }, {
+      $79({ target: SYMBOL, stat: true, forced: !NATIVE_SYMBOL }, {
         useSetter: function() {
           USE_SETTER = true;
         },
@@ -2188,13 +2188,13 @@
           USE_SETTER = false;
         }
       });
-      $77({ target: "Object", stat: true, forced: !NATIVE_SYMBOL, sham: !DESCRIPTORS8 }, {
+      $79({ target: "Object", stat: true, forced: !NATIVE_SYMBOL, sham: !DESCRIPTORS8 }, {
         create: $create,
         defineProperty: $defineProperty,
         defineProperties: $defineProperties,
         getOwnPropertyDescriptor: $getOwnPropertyDescriptor
       });
-      $77({ target: "Object", stat: true, forced: !NATIVE_SYMBOL }, {
+      $79({ target: "Object", stat: true, forced: !NATIVE_SYMBOL }, {
         getOwnPropertyNames: $getOwnPropertyNames
       });
       defineSymbolToPrimitive2();
@@ -2214,7 +2214,7 @@
   // node_modules/core-js/modules/es.symbol.for.js
   var require_es_symbol_for = __commonJS({
     "node_modules/core-js/modules/es.symbol.for.js": function() {
-      var $77 = require_export();
+      var $79 = require_export();
       var getBuiltIn3 = require_get_built_in();
       var hasOwn4 = require_has_own_property();
       var toString9 = require_to_string();
@@ -2222,7 +2222,7 @@
       var NATIVE_SYMBOL_REGISTRY = require_symbol_registry_detection();
       var StringToSymbolRegistry = shared("string-to-symbol-registry");
       var SymbolToStringRegistry = shared("symbol-to-string-registry");
-      $77({ target: "Symbol", stat: true, forced: !NATIVE_SYMBOL_REGISTRY }, {
+      $79({ target: "Symbol", stat: true, forced: !NATIVE_SYMBOL_REGISTRY }, {
         "for": function(key) {
           var string = toString9(key);
           if (hasOwn4(StringToSymbolRegistry, string))
@@ -2239,14 +2239,14 @@
   // node_modules/core-js/modules/es.symbol.key-for.js
   var require_es_symbol_key_for = __commonJS({
     "node_modules/core-js/modules/es.symbol.key-for.js": function() {
-      var $77 = require_export();
+      var $79 = require_export();
       var hasOwn4 = require_has_own_property();
       var isSymbol2 = require_is_symbol();
       var tryToString = require_try_to_string();
       var shared = require_shared();
       var NATIVE_SYMBOL_REGISTRY = require_symbol_registry_detection();
       var SymbolToStringRegistry = shared("symbol-to-string-registry");
-      $77({ target: "Symbol", stat: true, forced: !NATIVE_SYMBOL_REGISTRY }, {
+      $79({ target: "Symbol", stat: true, forced: !NATIVE_SYMBOL_REGISTRY }, {
         keyFor: function keyFor(sym) {
           if (!isSymbol2(sym))
             throw TypeError(tryToString(sym) + " is not a symbol");
@@ -2273,20 +2273,20 @@
   // node_modules/core-js/internals/array-slice.js
   var require_array_slice = __commonJS({
     "node_modules/core-js/internals/array-slice.js": function(exports, module) {
-      var uncurryThis11 = require_function_uncurry_this();
-      module.exports = uncurryThis11([].slice);
+      var uncurryThis12 = require_function_uncurry_this();
+      module.exports = uncurryThis12([].slice);
     }
   });
 
   // node_modules/core-js/internals/get-json-replacer-function.js
   var require_get_json_replacer_function = __commonJS({
     "node_modules/core-js/internals/get-json-replacer-function.js": function(exports, module) {
-      var uncurryThis11 = require_function_uncurry_this();
+      var uncurryThis12 = require_function_uncurry_this();
       var isArray4 = require_is_array();
       var isCallable4 = require_is_callable();
       var classof = require_classof_raw();
       var toString9 = require_to_string();
-      var push4 = uncurryThis11([].push);
+      var push4 = uncurryThis12([].push);
       module.exports = function(replacer) {
         if (isCallable4(replacer))
           return replacer;
@@ -2321,32 +2321,32 @@
   // node_modules/core-js/modules/es.json.stringify.js
   var require_es_json_stringify = __commonJS({
     "node_modules/core-js/modules/es.json.stringify.js": function() {
-      var $77 = require_export();
+      var $79 = require_export();
       var getBuiltIn3 = require_get_built_in();
       var apply4 = require_function_apply();
       var call8 = require_function_call();
-      var uncurryThis11 = require_function_uncurry_this();
-      var fails12 = require_fails();
+      var uncurryThis12 = require_function_uncurry_this();
+      var fails13 = require_fails();
       var isCallable4 = require_is_callable();
       var isSymbol2 = require_is_symbol();
       var arraySlice2 = require_array_slice();
       var getReplacerFunction = require_get_json_replacer_function();
       var NATIVE_SYMBOL = require_symbol_constructor_detection();
-      var $String = String;
+      var $String2 = String;
       var $stringify = getBuiltIn3("JSON", "stringify");
-      var exec2 = uncurryThis11(/./.exec);
-      var charAt2 = uncurryThis11("".charAt);
-      var charCodeAt2 = uncurryThis11("".charCodeAt);
-      var replace = uncurryThis11("".replace);
-      var numberToString = uncurryThis11(1 .toString);
+      var exec2 = uncurryThis12(/./.exec);
+      var charAt2 = uncurryThis12("".charAt);
+      var charCodeAt2 = uncurryThis12("".charCodeAt);
+      var replace = uncurryThis12("".replace);
+      var numberToString = uncurryThis12(1 .toString);
       var tester = /[\uD800-\uDFFF]/g;
       var low = /^[\uD800-\uDBFF]$/;
       var hi = /^[\uDC00-\uDFFF]$/;
-      var WRONG_SYMBOLS_CONVERSION = !NATIVE_SYMBOL || fails12(function() {
+      var WRONG_SYMBOLS_CONVERSION = !NATIVE_SYMBOL || fails13(function() {
         var symbol = getBuiltIn3("Symbol")();
         return $stringify([symbol]) != "[null]" || $stringify({ a: symbol }) != "{}" || $stringify(Object(symbol)) != "{}";
       });
-      var ILL_FORMED_UNICODE = fails12(function() {
+      var ILL_FORMED_UNICODE = fails13(function() {
         return $stringify("\uDF06\uD834") !== '"\\udf06\\ud834"' || $stringify("\uDEAD") !== '"\\udead"';
       });
       var stringifyWithSymbolsFix = function(it, replacer) {
@@ -2356,7 +2356,7 @@
           return;
         args[1] = function(key, value) {
           if (isCallable4($replacer))
-            value = call8($replacer, this, $String(key), value);
+            value = call8($replacer, this, $String2(key), value);
           if (!isSymbol2(value))
             return value;
         };
@@ -2371,7 +2371,7 @@
         return match;
       };
       if ($stringify) {
-        $77({ target: "JSON", stat: true, arity: 3, forced: WRONG_SYMBOLS_CONVERSION || ILL_FORMED_UNICODE }, {
+        $79({ target: "JSON", stat: true, arity: 3, forced: WRONG_SYMBOLS_CONVERSION || ILL_FORMED_UNICODE }, {
           stringify: function stringify(it, replacer, space) {
             var args = arraySlice2(arguments);
             var result = apply4(WRONG_SYMBOLS_CONVERSION ? stringifyWithSymbolsFix : $stringify, null, args);
@@ -2385,15 +2385,15 @@
   // node_modules/core-js/modules/es.object.get-own-property-symbols.js
   var require_es_object_get_own_property_symbols = __commonJS({
     "node_modules/core-js/modules/es.object.get-own-property-symbols.js": function() {
-      var $77 = require_export();
+      var $79 = require_export();
       var NATIVE_SYMBOL = require_symbol_constructor_detection();
-      var fails12 = require_fails();
+      var fails13 = require_fails();
       var getOwnPropertySymbolsModule = require_object_get_own_property_symbols();
       var toObject5 = require_to_object();
-      var FORCED9 = !NATIVE_SYMBOL || fails12(function() {
+      var FORCED10 = !NATIVE_SYMBOL || fails13(function() {
         getOwnPropertySymbolsModule.f(1);
       });
-      $77({ target: "Object", stat: true, forced: FORCED9 }, {
+      $79({ target: "Object", stat: true, forced: FORCED10 }, {
         getOwnPropertySymbols: function getOwnPropertySymbols(it) {
           var $getOwnPropertySymbols = getOwnPropertySymbolsModule.f;
           return $getOwnPropertySymbols ? $getOwnPropertySymbols(toObject5(it)) : [];
@@ -2417,11 +2417,11 @@
   // node_modules/core-js/internals/function-uncurry-this-accessor.js
   var require_function_uncurry_this_accessor = __commonJS({
     "node_modules/core-js/internals/function-uncurry-this-accessor.js": function(exports, module) {
-      var uncurryThis11 = require_function_uncurry_this();
+      var uncurryThis12 = require_function_uncurry_this();
       var aCallable2 = require_a_callable();
       module.exports = function(object, key, method) {
         try {
-          return uncurryThis11(aCallable2(Object.getOwnPropertyDescriptor(object, key)[method]));
+          return uncurryThis12(aCallable2(Object.getOwnPropertyDescriptor(object, key)[method]));
         } catch (error) {
         }
       };
@@ -2432,12 +2432,12 @@
   var require_a_possible_prototype = __commonJS({
     "node_modules/core-js/internals/a-possible-prototype.js": function(exports, module) {
       var isCallable4 = require_is_callable();
-      var $String = String;
+      var $String2 = String;
       var $TypeError = TypeError;
       module.exports = function(argument) {
         if (typeof argument == "object" || isCallable4(argument))
           return argument;
-        throw $TypeError("Can't set " + $String(argument) + " as a prototype");
+        throw $TypeError("Can't set " + $String2(argument) + " as a prototype");
       };
     }
   });
@@ -2489,8 +2489,8 @@
   // node_modules/core-js/internals/this-number-value.js
   var require_this_number_value = __commonJS({
     "node_modules/core-js/internals/this-number-value.js": function(exports, module) {
-      var uncurryThis11 = require_function_uncurry_this();
-      module.exports = uncurryThis11(1 .valueOf);
+      var uncurryThis12 = require_function_uncurry_this();
+      module.exports = uncurryThis12(1 .valueOf);
     }
   });
 
@@ -2524,8 +2524,8 @@
   // node_modules/core-js/internals/correct-prototype-getter.js
   var require_correct_prototype_getter = __commonJS({
     "node_modules/core-js/internals/correct-prototype-getter.js": function(exports, module) {
-      var fails12 = require_fails();
-      module.exports = !fails12(function() {
+      var fails13 = require_fails();
+      module.exports = !fails13(function() {
         function F() {
         }
         F.prototype.constructor = null;
@@ -2562,7 +2562,7 @@
   var require_iterators_core = __commonJS({
     "node_modules/core-js/internals/iterators-core.js": function(exports, module) {
       "use strict";
-      var fails12 = require_fails();
+      var fails13 = require_fails();
       var isCallable4 = require_is_callable();
       var isObject5 = require_is_object();
       var create3 = require_object_create();
@@ -2585,7 +2585,7 @@
             IteratorPrototype = PrototypeOfArrayIteratorPrototype;
         }
       }
-      var NEW_ITERATOR_PROTOTYPE = !isObject5(IteratorPrototype) || fails12(function() {
+      var NEW_ITERATOR_PROTOTYPE = !isObject5(IteratorPrototype) || fails13(function() {
         var test2 = {};
         return IteratorPrototype[ITERATOR2].call(test2) !== test2;
       });
@@ -2631,7 +2631,7 @@
   var require_iterator_define = __commonJS({
     "node_modules/core-js/internals/iterator-define.js": function(exports, module) {
       "use strict";
-      var $77 = require_export();
+      var $79 = require_export();
       var call8 = require_function_call();
       var IS_PURE2 = require_is_pure();
       var FunctionName = require_function_name();
@@ -2656,7 +2656,7 @@
       var returnThis = function() {
         return this;
       };
-      module.exports = function(Iterable, NAME2, IteratorConstructor, next2, DEFAULT, IS_SET, FORCED9) {
+      module.exports = function(Iterable, NAME2, IteratorConstructor, next2, DEFAULT, IS_SET, FORCED10) {
         createIteratorConstructor(IteratorConstructor, NAME2, next2);
         var getIterationMethod = function(KIND) {
           if (KIND === DEFAULT && defaultIterator)
@@ -2719,16 +2719,16 @@
             keys: IS_SET ? defaultIterator : getIterationMethod(KEYS),
             entries: getIterationMethod(ENTRIES)
           };
-          if (FORCED9)
+          if (FORCED10)
             for (KEY in methods) {
               if (BUGGY_SAFARI_ITERATORS || INCORRECT_VALUES_NAME || !(KEY in IterablePrototype)) {
                 defineBuiltIn4(IterablePrototype, KEY, methods[KEY]);
               }
             }
           else
-            $77({ target: NAME2, proto: true, forced: BUGGY_SAFARI_ITERATORS || INCORRECT_VALUES_NAME }, methods);
+            $79({ target: NAME2, proto: true, forced: BUGGY_SAFARI_ITERATORS || INCORRECT_VALUES_NAME }, methods);
         }
-        if ((!IS_PURE2 || FORCED9) && IterablePrototype[ITERATOR2] !== defaultIterator) {
+        if ((!IS_PURE2 || FORCED10) && IterablePrototype[ITERATOR2] !== defaultIterator) {
           defineBuiltIn4(IterablePrototype, ITERATOR2, defaultIterator, { name: DEFAULT });
         }
         Iterators[NAME2] = defaultIterator;
@@ -2799,23 +2799,23 @@
   // node_modules/core-js/internals/string-multibyte.js
   var require_string_multibyte = __commonJS({
     "node_modules/core-js/internals/string-multibyte.js": function(exports, module) {
-      var uncurryThis11 = require_function_uncurry_this();
-      var toIntegerOrInfinity3 = require_to_integer_or_infinity();
+      var uncurryThis12 = require_function_uncurry_this();
+      var toIntegerOrInfinity4 = require_to_integer_or_infinity();
       var toString9 = require_to_string();
       var requireObjectCoercible5 = require_require_object_coercible();
-      var charAt2 = uncurryThis11("".charAt);
-      var charCodeAt2 = uncurryThis11("".charCodeAt);
-      var stringSlice4 = uncurryThis11("".slice);
+      var charAt2 = uncurryThis12("".charAt);
+      var charCodeAt2 = uncurryThis12("".charCodeAt);
+      var stringSlice5 = uncurryThis12("".slice);
       var createMethod = function(CONVERT_TO_STRING) {
         return function($this, pos) {
           var S = toString9(requireObjectCoercible5($this));
-          var position = toIntegerOrInfinity3(pos);
+          var position = toIntegerOrInfinity4(pos);
           var size = S.length;
           var first, second;
           if (position < 0 || position >= size)
             return CONVERT_TO_STRING ? "" : void 0;
           first = charCodeAt2(S, position);
-          return first < 55296 || first > 56319 || position + 1 === size || (second = charCodeAt2(S, position + 1)) < 56320 || second > 57343 ? CONVERT_TO_STRING ? charAt2(S, position) : first : CONVERT_TO_STRING ? stringSlice4(S, position, position + 2) : (first - 55296 << 10) + (second - 56320) + 65536;
+          return first < 55296 || first > 56319 || position + 1 === size || (second = charCodeAt2(S, position + 1)) < 56320 || second > 57343 ? CONVERT_TO_STRING ? charAt2(S, position) : first : CONVERT_TO_STRING ? stringSlice5(S, position, position + 2) : (first - 55296 << 10) + (second - 56320) + 65536;
         };
       };
       module.exports = {
@@ -2879,24 +2879,24 @@
     "node_modules/core-js/internals/fix-regexp-well-known-symbol-logic.js": function(exports, module) {
       "use strict";
       require_es_regexp_exec();
-      var uncurryThis11 = require_function_uncurry_this_clause();
+      var uncurryThis12 = require_function_uncurry_this_clause();
       var defineBuiltIn4 = require_define_built_in();
       var regexpExec2 = require_regexp_exec();
-      var fails12 = require_fails();
+      var fails13 = require_fails();
       var wellKnownSymbol6 = require_well_known_symbol();
       var createNonEnumerableProperty3 = require_create_non_enumerable_property();
       var SPECIES2 = wellKnownSymbol6("species");
       var RegExpPrototype2 = RegExp.prototype;
-      module.exports = function(KEY, exec2, FORCED9, SHAM) {
+      module.exports = function(KEY, exec2, FORCED10, SHAM) {
         var SYMBOL = wellKnownSymbol6(KEY);
-        var DELEGATES_TO_SYMBOL = !fails12(function() {
+        var DELEGATES_TO_SYMBOL = !fails13(function() {
           var O = {};
           O[SYMBOL] = function() {
             return 7;
           };
           return ""[KEY](O) != 7;
         });
-        var DELEGATES_TO_EXEC2 = DELEGATES_TO_SYMBOL && !fails12(function() {
+        var DELEGATES_TO_EXEC2 = DELEGATES_TO_SYMBOL && !fails13(function() {
           var execCalled = false;
           var re = /a/;
           if (KEY === "split") {
@@ -2915,10 +2915,10 @@
           re[SYMBOL]("");
           return !execCalled;
         });
-        if (!DELEGATES_TO_SYMBOL || !DELEGATES_TO_EXEC2 || FORCED9) {
-          var uncurriedNativeRegExpMethod = uncurryThis11(/./[SYMBOL]);
+        if (!DELEGATES_TO_SYMBOL || !DELEGATES_TO_EXEC2 || FORCED10) {
+          var uncurriedNativeRegExpMethod = uncurryThis12(/./[SYMBOL]);
           var methods = exec2(SYMBOL, ""[KEY], function(nativeMethod, regexp, str, arg2, forceStringMethod) {
-            var uncurriedNativeMethod = uncurryThis11(nativeMethod);
+            var uncurriedNativeMethod = uncurryThis12(nativeMethod);
             var $exec = regexp.exec;
             if ($exec === regexpExec2 || $exec === RegExpPrototype2.exec) {
               if (DELEGATES_TO_SYMBOL && !forceStringMethod) {
@@ -2951,12 +2951,12 @@
   // node_modules/core-js/internals/get-substitution.js
   var require_get_substitution = __commonJS({
     "node_modules/core-js/internals/get-substitution.js": function(exports, module) {
-      var uncurryThis11 = require_function_uncurry_this();
+      var uncurryThis12 = require_function_uncurry_this();
       var toObject5 = require_to_object();
-      var floor = Math.floor;
-      var charAt2 = uncurryThis11("".charAt);
-      var replace = uncurryThis11("".replace);
-      var stringSlice4 = uncurryThis11("".slice);
+      var floor2 = Math.floor;
+      var charAt2 = uncurryThis12("".charAt);
+      var replace = uncurryThis12("".replace);
+      var stringSlice5 = uncurryThis12("".slice);
       var SUBSTITUTION_SYMBOLS = /\$([$&'`]|\d{1,2}|<[^>]*>)/g;
       var SUBSTITUTION_SYMBOLS_NO_NAMED = /\$([$&'`]|\d{1,2})/g;
       module.exports = function(matched, str, position, captures, namedCaptures, replacement) {
@@ -2975,18 +2975,18 @@
             case "&":
               return matched;
             case "`":
-              return stringSlice4(str, 0, position);
+              return stringSlice5(str, 0, position);
             case "'":
-              return stringSlice4(str, tailPos);
+              return stringSlice5(str, tailPos);
             case "<":
-              capture = namedCaptures[stringSlice4(ch, 1, -1)];
+              capture = namedCaptures[stringSlice5(ch, 1, -1)];
               break;
             default:
               var n = +ch;
               if (n === 0)
                 return match;
               if (n > m) {
-                var f = floor(n / 10);
+                var f = floor2(n / 10);
                 if (f === 0)
                   return match;
                 if (f <= m)
@@ -3044,23 +3044,56 @@
   var require_number_parse_float = __commonJS({
     "node_modules/core-js/internals/number-parse-float.js": function(exports, module) {
       var global9 = require_global();
-      var fails12 = require_fails();
-      var uncurryThis11 = require_function_uncurry_this();
+      var fails13 = require_fails();
+      var uncurryThis12 = require_function_uncurry_this();
       var toString9 = require_to_string();
       var trim3 = require_string_trim().trim;
       var whitespaces = require_whitespaces();
-      var charAt2 = uncurryThis11("".charAt);
+      var charAt2 = uncurryThis12("".charAt);
       var $parseFloat2 = global9.parseFloat;
       var Symbol2 = global9.Symbol;
       var ITERATOR2 = Symbol2 && Symbol2.iterator;
-      var FORCED9 = 1 / $parseFloat2(whitespaces + "-0") !== -Infinity || ITERATOR2 && !fails12(function() {
+      var FORCED10 = 1 / $parseFloat2(whitespaces + "-0") !== -Infinity || ITERATOR2 && !fails13(function() {
         $parseFloat2(Object(ITERATOR2));
       });
-      module.exports = FORCED9 ? function parseFloat2(string) {
+      module.exports = FORCED10 ? function parseFloat2(string) {
         var trimmedString = trim3(toString9(string));
         var result = $parseFloat2(trimmedString);
         return result === 0 && charAt2(trimmedString, 0) == "-" ? -0 : result;
       } : $parseFloat2;
+    }
+  });
+
+  // node_modules/core-js/internals/string-repeat.js
+  var require_string_repeat = __commonJS({
+    "node_modules/core-js/internals/string-repeat.js": function(exports, module) {
+      "use strict";
+      var toIntegerOrInfinity4 = require_to_integer_or_infinity();
+      var toString9 = require_to_string();
+      var requireObjectCoercible5 = require_require_object_coercible();
+      var $RangeError2 = RangeError;
+      module.exports = function repeat2(count) {
+        var str = toString9(requireObjectCoercible5(this));
+        var result = "";
+        var n = toIntegerOrInfinity4(count);
+        if (n < 0 || n == Infinity)
+          throw $RangeError2("Wrong number of repetitions");
+        for (; n > 0; (n >>>= 1) && (str += str))
+          if (n & 1)
+            result += str;
+        return result;
+      };
+    }
+  });
+
+  // node_modules/core-js/internals/math-log10.js
+  var require_math_log10 = __commonJS({
+    "node_modules/core-js/internals/math-log10.js": function(exports, module) {
+      var log2 = Math.log;
+      var LOG10E = Math.LOG10E;
+      module.exports = Math.log10 || function log102(x) {
+        return log2(x) * LOG10E;
+      };
     }
   });
 
@@ -3080,12 +3113,12 @@
   // node_modules/core-js/internals/array-method-has-species-support.js
   var require_array_method_has_species_support = __commonJS({
     "node_modules/core-js/internals/array-method-has-species-support.js": function(exports, module) {
-      var fails12 = require_fails();
+      var fails13 = require_fails();
       var wellKnownSymbol6 = require_well_known_symbol();
       var V8_VERSION2 = require_engine_v8_version();
       var SPECIES2 = wellKnownSymbol6("species");
       module.exports = function(METHOD_NAME) {
-        return V8_VERSION2 >= 51 || !fails12(function() {
+        return V8_VERSION2 >= 51 || !fails13(function() {
           var array = [];
           var constructor = array.constructor = {};
           constructor[SPECIES2] = function() {
@@ -3155,15 +3188,15 @@
   var require_function_bind = __commonJS({
     "node_modules/core-js/internals/function-bind.js": function(exports, module) {
       "use strict";
-      var uncurryThis11 = require_function_uncurry_this();
+      var uncurryThis12 = require_function_uncurry_this();
       var aCallable2 = require_a_callable();
       var isObject5 = require_is_object();
       var hasOwn4 = require_has_own_property();
       var arraySlice2 = require_array_slice();
       var NATIVE_BIND = require_function_bind_native();
       var $Function = Function;
-      var concat3 = uncurryThis11([].concat);
-      var join2 = uncurryThis11([].join);
+      var concat3 = uncurryThis12([].concat);
+      var join2 = uncurryThis12([].join);
       var factories = {};
       var construct2 = function(C, argsLength, args) {
         if (!hasOwn4(factories, argsLength)) {
@@ -3206,11 +3239,11 @@
   var require_string_trim_forced = __commonJS({
     "node_modules/core-js/internals/string-trim-forced.js": function(exports, module) {
       var PROPER_FUNCTION_NAME2 = require_function_name().PROPER;
-      var fails12 = require_fails();
+      var fails13 = require_fails();
       var whitespaces = require_whitespaces();
       var non = "\u200B\x85\u180E";
       module.exports = function(METHOD_NAME) {
-        return fails12(function() {
+        return fails13(function() {
           return !!whitespaces[METHOD_NAME]() || non[METHOD_NAME]() !== non || PROPER_FUNCTION_NAME2 && whitespaces[METHOD_NAME].name !== METHOD_NAME;
         });
       };
@@ -3503,7 +3536,7 @@
       var bind2 = require_function_bind_context();
       var isCallable4 = require_is_callable();
       var hasOwn4 = require_has_own_property();
-      var fails12 = require_fails();
+      var fails13 = require_fails();
       var html = require_html();
       var arraySlice2 = require_array_slice();
       var createElement = require_document_create_element();
@@ -3524,7 +3557,7 @@
       var defer;
       var channel;
       var port;
-      fails12(function() {
+      fails13(function() {
         $location = global9.location;
       });
       var run = function(id) {
@@ -3572,7 +3605,7 @@
           port = channel.port2;
           channel.port1.onmessage = eventListener;
           defer = bind2(port.postMessage, port);
-        } else if (global9.addEventListener && isCallable4(global9.postMessage) && !global9.importScripts && $location && $location.protocol !== "file:" && !fails12(globalPostMessageDefer)) {
+        } else if (global9.addEventListener && isCallable4(global9.postMessage) && !global9.importScripts && $location && $location.protocol !== "file:" && !fails13(globalPostMessageDefer)) {
           defer = globalPostMessageDefer;
           global9.addEventListener("message", eventListener, false);
         } else if (ONREADYSTATECHANGE in createElement("script")) {
@@ -3844,7 +3877,7 @@
   var require_es_promise_constructor = __commonJS({
     "node_modules/core-js/modules/es.promise.constructor.js": function() {
       "use strict";
-      var $77 = require_export();
+      var $79 = require_export();
       var IS_PURE2 = require_is_pure();
       var IS_NODE2 = require_engine_is_node();
       var global9 = require_global();
@@ -4115,7 +4148,7 @@
           }
         }
       }
-      $77({ global: true, constructor: true, wrap: true, forced: FORCED_PROMISE_CONSTRUCTOR }, {
+      $79({ global: true, constructor: true, wrap: true, forced: FORCED_PROMISE_CONSTRUCTOR }, {
         Promise: PromiseConstructor
       });
       setToStringTag5(PromiseConstructor, PROMISE, false, true);
@@ -4212,14 +4245,14 @@
   var require_es_promise_all = __commonJS({
     "node_modules/core-js/modules/es.promise.all.js": function() {
       "use strict";
-      var $77 = require_export();
+      var $79 = require_export();
       var call8 = require_function_call();
       var aCallable2 = require_a_callable();
       var newPromiseCapabilityModule2 = require_new_promise_capability();
       var perform2 = require_perform();
       var iterate2 = require_iterate();
       var PROMISE_STATICS_INCORRECT_ITERATION2 = require_promise_statics_incorrect_iteration();
-      $77({ target: "Promise", stat: true, forced: PROMISE_STATICS_INCORRECT_ITERATION2 }, {
+      $79({ target: "Promise", stat: true, forced: PROMISE_STATICS_INCORRECT_ITERATION2 }, {
         all: function all(iterable) {
           var C = this;
           var capability = newPromiseCapabilityModule2.f(C);
@@ -4256,7 +4289,7 @@
   var require_es_promise_catch = __commonJS({
     "node_modules/core-js/modules/es.promise.catch.js": function() {
       "use strict";
-      var $77 = require_export();
+      var $79 = require_export();
       var IS_PURE2 = require_is_pure();
       var FORCED_PROMISE_CONSTRUCTOR = require_promise_constructor_detection().CONSTRUCTOR;
       var NativePromiseConstructor = require_promise_native_constructor();
@@ -4264,7 +4297,7 @@
       var isCallable4 = require_is_callable();
       var defineBuiltIn4 = require_define_built_in();
       var NativePromisePrototype = NativePromiseConstructor && NativePromiseConstructor.prototype;
-      $77({ target: "Promise", proto: true, forced: FORCED_PROMISE_CONSTRUCTOR, real: true }, {
+      $79({ target: "Promise", proto: true, forced: FORCED_PROMISE_CONSTRUCTOR, real: true }, {
         "catch": function(onRejected) {
           return this.then(void 0, onRejected);
         }
@@ -4283,14 +4316,14 @@
   var require_es_promise_race = __commonJS({
     "node_modules/core-js/modules/es.promise.race.js": function() {
       "use strict";
-      var $77 = require_export();
+      var $79 = require_export();
       var call8 = require_function_call();
       var aCallable2 = require_a_callable();
       var newPromiseCapabilityModule2 = require_new_promise_capability();
       var perform2 = require_perform();
       var iterate2 = require_iterate();
       var PROMISE_STATICS_INCORRECT_ITERATION2 = require_promise_statics_incorrect_iteration();
-      $77({ target: "Promise", stat: true, forced: PROMISE_STATICS_INCORRECT_ITERATION2 }, {
+      $79({ target: "Promise", stat: true, forced: PROMISE_STATICS_INCORRECT_ITERATION2 }, {
         race: function race(iterable) {
           var C = this;
           var capability = newPromiseCapabilityModule2.f(C);
@@ -4313,11 +4346,11 @@
   var require_es_promise_reject = __commonJS({
     "node_modules/core-js/modules/es.promise.reject.js": function() {
       "use strict";
-      var $77 = require_export();
+      var $79 = require_export();
       var call8 = require_function_call();
       var newPromiseCapabilityModule2 = require_new_promise_capability();
       var FORCED_PROMISE_CONSTRUCTOR = require_promise_constructor_detection().CONSTRUCTOR;
-      $77({ target: "Promise", stat: true, forced: FORCED_PROMISE_CONSTRUCTOR }, {
+      $79({ target: "Promise", stat: true, forced: FORCED_PROMISE_CONSTRUCTOR }, {
         reject: function reject(r) {
           var capability = newPromiseCapabilityModule2.f(this);
           call8(capability.reject, void 0, r);
@@ -4349,7 +4382,7 @@
   var require_es_promise_resolve = __commonJS({
     "node_modules/core-js/modules/es.promise.resolve.js": function() {
       "use strict";
-      var $77 = require_export();
+      var $79 = require_export();
       var getBuiltIn3 = require_get_built_in();
       var IS_PURE2 = require_is_pure();
       var NativePromiseConstructor = require_promise_native_constructor();
@@ -4357,7 +4390,7 @@
       var promiseResolve = require_promise_resolve();
       var PromiseConstructorWrapper = getBuiltIn3("Promise");
       var CHECK_WRAPPER = IS_PURE2 && !FORCED_PROMISE_CONSTRUCTOR;
-      $77({ target: "Promise", stat: true, forced: IS_PURE2 || FORCED_PROMISE_CONSTRUCTOR }, {
+      $79({ target: "Promise", stat: true, forced: IS_PURE2 || FORCED_PROMISE_CONSTRUCTOR }, {
         resolve: function resolve(x) {
           return promiseResolve(CHECK_WRAPPER && this === PromiseConstructorWrapper ? NativePromiseConstructor : this, x);
         }
@@ -4378,12 +4411,12 @@
   var require_object_to_array = __commonJS({
     "node_modules/core-js/internals/object-to-array.js": function(exports, module) {
       var DESCRIPTORS8 = require_descriptors();
-      var uncurryThis11 = require_function_uncurry_this();
+      var uncurryThis12 = require_function_uncurry_this();
       var objectKeys = require_object_keys();
       var toIndexedObject5 = require_to_indexed_object();
       var $propertyIsEnumerable = require_object_property_is_enumerable().f;
-      var propertyIsEnumerable = uncurryThis11($propertyIsEnumerable);
-      var push4 = uncurryThis11([].push);
+      var propertyIsEnumerable = uncurryThis12($propertyIsEnumerable);
+      var push4 = uncurryThis12([].push);
       var createMethod = function(TO_ENTRIES) {
         return function(it) {
           var O = toIndexedObject5(it);
@@ -4444,16 +4477,16 @@
   // node_modules/core-js/internals/to-index.js
   var require_to_index = __commonJS({
     "node_modules/core-js/internals/to-index.js": function(exports, module) {
-      var toIntegerOrInfinity3 = require_to_integer_or_infinity();
+      var toIntegerOrInfinity4 = require_to_integer_or_infinity();
       var toLength5 = require_to_length();
-      var $RangeError = RangeError;
+      var $RangeError2 = RangeError;
       module.exports = function(it) {
         if (it === void 0)
           return 0;
-        var number = toIntegerOrInfinity3(it);
+        var number = toIntegerOrInfinity4(it);
         var length = toLength5(number);
         if (number !== length)
-          throw $RangeError("Wrong length or index");
+          throw $RangeError2("Wrong length or index");
         return length;
       };
     }
@@ -4464,16 +4497,16 @@
     "node_modules/core-js/internals/ieee754.js": function(exports, module) {
       var $Array2 = Array;
       var abs = Math.abs;
-      var pow = Math.pow;
-      var floor = Math.floor;
-      var log = Math.log;
+      var pow2 = Math.pow;
+      var floor2 = Math.floor;
+      var log2 = Math.log;
       var LN2 = Math.LN2;
       var pack = function(number, mantissaLength, bytes) {
         var buffer = $Array2(bytes);
         var exponentLength = bytes * 8 - mantissaLength - 1;
         var eMax = (1 << exponentLength) - 1;
         var eBias = eMax >> 1;
-        var rt = mantissaLength === 23 ? pow(2, -24) - pow(2, -77) : 0;
+        var rt = mantissaLength === 23 ? pow2(2, -24) - pow2(2, -77) : 0;
         var sign = number < 0 || number === 0 && 1 / number < 0 ? 1 : 0;
         var index = 0;
         var exponent, mantissa, c;
@@ -4482,8 +4515,8 @@
           mantissa = number != number ? 1 : 0;
           exponent = eMax;
         } else {
-          exponent = floor(log(number) / LN2);
-          c = pow(2, -exponent);
+          exponent = floor2(log2(number) / LN2);
+          c = pow2(2, -exponent);
           if (number * c < 1) {
             exponent--;
             c *= 2;
@@ -4491,7 +4524,7 @@
           if (exponent + eBias >= 1) {
             number += rt / c;
           } else {
-            number += rt * pow(2, 1 - eBias);
+            number += rt * pow2(2, 1 - eBias);
           }
           if (number * c >= 2) {
             exponent++;
@@ -4501,10 +4534,10 @@
             mantissa = 0;
             exponent = eMax;
           } else if (exponent + eBias >= 1) {
-            mantissa = (number * c - 1) * pow(2, mantissaLength);
+            mantissa = (number * c - 1) * pow2(2, mantissaLength);
             exponent = exponent + eBias;
           } else {
-            mantissa = number * pow(2, eBias - 1) * pow(2, mantissaLength);
+            mantissa = number * pow2(2, eBias - 1) * pow2(2, mantissaLength);
             exponent = 0;
           }
         }
@@ -4550,10 +4583,10 @@
         } else if (exponent === eMax) {
           return mantissa ? NaN : sign ? -Infinity : Infinity;
         } else {
-          mantissa = mantissa + pow(2, mantissaLength);
+          mantissa = mantissa + pow2(2, mantissaLength);
           exponent = exponent - eBias;
         }
-        return (sign ? -1 : 1) * mantissa * pow(2, exponent - mantissaLength);
+        return (sign ? -1 : 1) * mantissa * pow2(2, exponent - mantissaLength);
       };
       module.exports = {
         pack: pack,
@@ -4588,16 +4621,16 @@
     "node_modules/core-js/internals/array-buffer.js": function(exports, module) {
       "use strict";
       var global9 = require_global();
-      var uncurryThis11 = require_function_uncurry_this();
+      var uncurryThis12 = require_function_uncurry_this();
       var DESCRIPTORS8 = require_descriptors();
       var NATIVE_ARRAY_BUFFER = require_array_buffer_basic_detection();
       var FunctionName = require_function_name();
       var createNonEnumerableProperty3 = require_create_non_enumerable_property();
       var defineBuiltInAccessor3 = require_define_built_in_accessor();
       var defineBuiltIns = require_define_built_ins();
-      var fails12 = require_fails();
+      var fails13 = require_fails();
       var anInstance = require_an_instance();
-      var toIntegerOrInfinity3 = require_to_integer_or_infinity();
+      var toIntegerOrInfinity4 = require_to_integer_or_infinity();
       var toLength5 = require_to_length();
       var toIndex = require_to_index();
       var IEEE754 = require_ieee754();
@@ -4626,8 +4659,8 @@
       var ObjectPrototype2 = Object.prototype;
       var Array2 = global9.Array;
       var RangeError2 = global9.RangeError;
-      var fill = uncurryThis11(arrayFill);
-      var reverse2 = uncurryThis11([].reverse);
+      var fill = uncurryThis12(arrayFill);
+      var reverse2 = uncurryThis12([].reverse);
       var packIEEE754 = IEEE754.pack;
       var unpackIEEE754 = IEEE754.unpack;
       var packInt8 = function(number) {
@@ -4697,7 +4730,7 @@
           anInstance(buffer, ArrayBufferPrototype);
           var bufferState = getInternalArrayBufferState(buffer);
           var bufferLength = bufferState.byteLength;
-          var offset = toIntegerOrInfinity3(byteOffset);
+          var offset = toIntegerOrInfinity4(byteOffset);
           if (offset < 0 || offset > bufferLength)
             throw RangeError2("Wrong offset");
           byteLength = byteLength === void 0 ? bufferLength - offset : toLength5(byteLength);
@@ -4777,11 +4810,11 @@
         });
       } else {
         INCORRECT_ARRAY_BUFFER_NAME = PROPER_FUNCTION_NAME2 && NativeArrayBuffer2.name !== ARRAY_BUFFER2;
-        if (!fails12(function() {
+        if (!fails13(function() {
           NativeArrayBuffer2(1);
-        }) || !fails12(function() {
+        }) || !fails13(function() {
           new NativeArrayBuffer2(-1);
-        }) || fails12(function() {
+        }) || fails13(function() {
           new NativeArrayBuffer2();
           new NativeArrayBuffer2(1.5);
           new NativeArrayBuffer2(NaN);
@@ -4805,7 +4838,7 @@
           setPrototypeOf2(DataViewPrototype2, ObjectPrototype2);
         }
         testView = new $DataView(new $ArrayBuffer(2));
-        $setInt8 = uncurryThis11(DataViewPrototype2.setInt8);
+        $setInt8 = uncurryThis12(DataViewPrototype2.setInt8);
         testView.setInt8(0, 2147483648);
         testView.setInt8(1, 2147483649);
         if (testView.getInt8(0) || !testView.getInt8(1))
@@ -4836,10 +4869,10 @@
   // node_modules/core-js/modules/es.data-view.constructor.js
   var require_es_data_view_constructor = __commonJS({
     "node_modules/core-js/modules/es.data-view.constructor.js": function() {
-      var $77 = require_export();
+      var $79 = require_export();
       var ArrayBufferModule2 = require_array_buffer();
       var NATIVE_ARRAY_BUFFER = require_array_buffer_basic_detection();
-      $77({ global: true, constructor: true, forced: !NATIVE_ARRAY_BUFFER }, {
+      $79({ global: true, constructor: true, forced: !NATIVE_ARRAY_BUFFER }, {
         DataView: ArrayBufferModule2.DataView
       });
     }
@@ -5116,7 +5149,7 @@
     symbolDescriptiveString = uncurryThis3(SymbolPrototype.toString);
     regexp = /^Symbol\((.*)\)[^)]+$/;
     replace = uncurryThis3("".replace);
-    stringSlice4 = uncurryThis3("".slice);
+    stringSlice5 = uncurryThis3("".slice);
     defineBuiltInAccessor2(SymbolPrototype, "description", {
       configurable: true,
       get: function description() {
@@ -5124,7 +5157,7 @@
         if (hasOwn2(EmptyStringDescriptionStore, symbol))
           return "";
         var string = symbolDescriptiveString(symbol);
-        var desc = NATIVE_SYMBOL ? stringSlice4(string, 7, -1) : replace(string, regexp, "$1");
+        var desc = NATIVE_SYMBOL ? stringSlice5(string, 7, -1) : replace(string, regexp, "$1");
         return desc === "" ? void 0 : desc;
       }
     });
@@ -5139,7 +5172,7 @@
   var symbolDescriptiveString;
   var regexp;
   var replace;
-  var stringSlice4;
+  var stringSlice5;
 
   // node_modules/core-js/modules/es.object.to-string.js
   var TO_STRING_TAG_SUPPORT = require_to_string_tag_support();
@@ -5486,9 +5519,135 @@
     }
   });
 
-  // node_modules/core-js/modules/es.array.concat.js
+  // node_modules/core-js/modules/es.number.to-fixed.js
   var $12 = require_export();
+  var uncurryThis7 = require_function_uncurry_this();
+  var toIntegerOrInfinity2 = require_to_integer_or_infinity();
+  var thisNumberValue3 = require_this_number_value();
+  var $repeat = require_string_repeat();
   var fails5 = require_fails();
+  var $RangeError = RangeError;
+  var $String = String;
+  var floor = Math.floor;
+  var repeat = uncurryThis7($repeat);
+  var stringSlice3 = uncurryThis7("".slice);
+  var nativeToFixed = uncurryThis7(1 .toFixed);
+  var pow = function(x, n, acc) {
+    return n === 0 ? acc : n % 2 === 1 ? pow(x, n - 1, acc * x) : pow(x * x, n / 2, acc);
+  };
+  var log = function(x) {
+    var n = 0;
+    var x2 = x;
+    while (x2 >= 4096) {
+      n += 12;
+      x2 /= 4096;
+    }
+    while (x2 >= 2) {
+      n += 1;
+      x2 /= 2;
+    }
+    return n;
+  };
+  var multiply = function(data, n, c) {
+    var index = -1;
+    var c2 = c;
+    while (++index < 6) {
+      c2 += n * data[index];
+      data[index] = c2 % 1e7;
+      c2 = floor(c2 / 1e7);
+    }
+  };
+  var divide = function(data, n) {
+    var index = 6;
+    var c = 0;
+    while (--index >= 0) {
+      c += data[index];
+      data[index] = floor(c / n);
+      c = c % n * 1e7;
+    }
+  };
+  var dataToString = function(data) {
+    var index = 6;
+    var s = "";
+    while (--index >= 0) {
+      if (s !== "" || index === 0 || data[index] !== 0) {
+        var t = $String(data[index]);
+        s = s === "" ? t : s + repeat("0", 7 - t.length) + t;
+      }
+    }
+    return s;
+  };
+  var FORCED4 = fails5(function() {
+    return nativeToFixed(8e-5, 3) !== "0.000" || nativeToFixed(0.9, 0) !== "1" || nativeToFixed(1.255, 2) !== "1.25" || nativeToFixed(1000000000000000100, 0) !== "1000000000000000128";
+  }) || !fails5(function() {
+    nativeToFixed({});
+  });
+  $12({ target: "Number", proto: true, forced: FORCED4 }, {
+    toFixed: function toFixed(fractionDigits) {
+      var number = thisNumberValue3(this);
+      var fractDigits = toIntegerOrInfinity2(fractionDigits);
+      var data = [0, 0, 0, 0, 0, 0];
+      var sign = "";
+      var result = "0";
+      var e, z, j, k;
+      if (fractDigits < 0 || fractDigits > 20)
+        throw $RangeError("Incorrect fraction digits");
+      if (number != number)
+        return "NaN";
+      if (number <= -1e21 || number >= 1e21)
+        return $String(number);
+      if (number < 0) {
+        sign = "-";
+        number = -number;
+      }
+      if (number > 1e-21) {
+        e = log(number * pow(2, 69, 1)) - 69;
+        z = e < 0 ? number * pow(2, -e, 1) : number / pow(2, e, 1);
+        z *= 4503599627370496;
+        e = 52 - e;
+        if (e > 0) {
+          multiply(data, 0, z);
+          j = fractDigits;
+          while (j >= 7) {
+            multiply(data, 1e7, 0);
+            j -= 7;
+          }
+          multiply(data, pow(10, j, 1), 0);
+          j = e - 1;
+          while (j >= 23) {
+            divide(data, 1 << 23);
+            j -= 23;
+          }
+          divide(data, 1 << j);
+          multiply(data, 1, 1);
+          divide(data, 2);
+          result = dataToString(data);
+        } else {
+          multiply(data, 0, z);
+          multiply(data, 1 << -e, 0);
+          result = dataToString(data) + repeat("0", fractDigits);
+        }
+      }
+      if (fractDigits > 0) {
+        k = result.length;
+        result = sign + (k <= fractDigits ? "0." + repeat("0", fractDigits - k) + result : stringSlice3(result, 0, k - fractDigits) + "." + stringSlice3(result, k - fractDigits));
+      } else {
+        result = sign + result;
+      }
+      return result;
+    }
+  });
+
+  // node_modules/core-js/modules/es.math.log10.js
+  var $13 = require_export();
+  var log10 = require_math_log10();
+  $13({ target: "Math", stat: true }, {
+    log10: log10
+  });
+
+  // node_modules/core-js/modules/es.array.concat.js
+  var $14 = require_export();
+  var fails6 = require_fails();
   var isArray = require_is_array();
   var isObject = require_is_object();
   var toObject = require_to_object();
@@ -5500,7 +5659,7 @@
   var wellKnownSymbol4 = require_well_known_symbol();
   var V8_VERSION = require_engine_v8_version();
   var IS_CONCAT_SPREADABLE = wellKnownSymbol4("isConcatSpreadable");
-  var IS_CONCAT_SPREADABLE_SUPPORT = V8_VERSION >= 51 || !fails5(function() {
+  var IS_CONCAT_SPREADABLE_SUPPORT = V8_VERSION >= 51 || !fails6(function() {
     var array = [];
     array[IS_CONCAT_SPREADABLE] = false;
     return array.concat()[0] !== array;
@@ -5511,8 +5670,8 @@
     var spreadable = O[IS_CONCAT_SPREADABLE];
     return spreadable !== void 0 ? !!spreadable : isArray(O);
   };
-  var FORCED4 = !IS_CONCAT_SPREADABLE_SUPPORT || !arrayMethodHasSpeciesSupport("concat");
-  $12({ target: "Array", proto: true, arity: 1, forced: FORCED4 }, {
+  var FORCED5 = !IS_CONCAT_SPREADABLE_SUPPORT || !arrayMethodHasSpeciesSupport("concat");
+  $14({ target: "Array", proto: true, arity: 1, forced: FORCED5 }, {
     concat: function concat2(arg) {
       var O = toObject(this);
       var A = arraySpeciesCreate(O, 0);
@@ -5537,7 +5696,7 @@
   });
 
   // node_modules/core-js/modules/es.array.slice.js
-  var $13 = require_export();
+  var $15 = require_export();
   var isArray2 = require_is_array();
   var isConstructor = require_is_constructor();
   var isObject2 = require_is_object();
@@ -5552,7 +5711,7 @@
   var SPECIES = wellKnownSymbol5("species");
   var $Array = Array;
   var max2 = Math.max;
-  $13({ target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT }, {
+  $15({ target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT }, {
     slice: function slice(start, end) {
       var O = toIndexedObject(this);
       var length = lengthOfArrayLike2(O);
@@ -5582,10 +5741,10 @@
   });
 
   // node_modules/core-js/modules/es.array.splice.js
-  var $14 = require_export();
+  var $16 = require_export();
   var toObject2 = require_to_object();
   var toAbsoluteIndex2 = require_to_absolute_index();
-  var toIntegerOrInfinity2 = require_to_integer_or_infinity();
+  var toIntegerOrInfinity3 = require_to_integer_or_infinity();
   var lengthOfArrayLike3 = require_length_of_array_like();
   var setArrayLength = require_array_set_length();
   var doesNotExceedSafeInteger2 = require_does_not_exceed_safe_integer();
@@ -5596,7 +5755,7 @@
   var HAS_SPECIES_SUPPORT2 = arrayMethodHasSpeciesSupport3("splice");
   var max3 = Math.max;
   var min2 = Math.min;
-  $14({ target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT2 }, {
+  $16({ target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT2 }, {
     splice: function splice(start, deleteCount) {
       var O = toObject2(this);
       var len = lengthOfArrayLike3(O);
@@ -5610,7 +5769,7 @@
         actualDeleteCount = len - actualStart;
       } else {
         insertCount = argumentsLength - 2;
-        actualDeleteCount = min2(max3(toIntegerOrInfinity2(deleteCount), 0), len - actualStart);
+        actualDeleteCount = min2(max3(toIntegerOrInfinity3(deleteCount), 0), len - actualStart);
       }
       doesNotExceedSafeInteger2(len + insertCount - actualDeleteCount);
       A = arraySpeciesCreate2(O, actualDeleteCount);
@@ -5650,9 +5809,9 @@
   });
 
   // node_modules/core-js/modules/es.array.for-each.js
-  var $15 = require_export();
+  var $17 = require_export();
   var forEach = require_array_for_each();
-  $15({ target: "Array", proto: true, forced: [].forEach != forEach }, {
+  $17({ target: "Array", proto: true, forced: [].forEach != forEach }, {
     forEach: forEach
   });
 
@@ -5679,14 +5838,14 @@
   handlePrototype2(DOMTokenListPrototype2);
 
   // node_modules/core-js/modules/es.object.keys.js
-  var $16 = require_export();
+  var $18 = require_export();
   var toObject3 = require_to_object();
   var nativeKeys = require_object_keys();
-  var fails6 = require_fails();
-  var FAILS_ON_PRIMITIVES = fails6(function() {
+  var fails7 = require_fails();
+  var FAILS_ON_PRIMITIVES = fails7(function() {
     nativeKeys(1);
   });
-  $16({ target: "Object", stat: true, forced: FAILS_ON_PRIMITIVES }, {
+  $18({ target: "Object", stat: true, forced: FAILS_ON_PRIMITIVES }, {
     keys: function keys(it) {
       return nativeKeys(toObject3(it));
     }
@@ -5765,6 +5924,23 @@
     if (digits < 1)
       throw "Significant digits must be at least 1.";
     return parseFloat(x.toPrecision(digits));
+  }
+  function roundDigits(x) {
+    var digits = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : 0;
+    try {
+      return parseFloat(x.toFixed(digits));
+    } catch (e) {
+      try {
+        var oom = Math.floor(Math.log10(Math.abs(x)));
+        var precision = oom + digits + 1;
+        if (precision < 1) {
+          return 0;
+        }
+        return parseFloat(x.toPrecision(precision));
+      } catch (e2) {
+        return x;
+      }
+    }
   }
   function parseDate(dateString) {
     var date = new Date(dateString);
@@ -6202,7 +6378,7 @@
   }();
 
   // node_modules/core-js/modules/es.array.find.js
-  var $18 = require_export();
+  var $20 = require_export();
   var $find = require_array_iteration().find;
   var addToUnscopables = require_add_to_unscopables();
   var FIND = "find";
@@ -6211,7 +6387,7 @@
     Array(1)[FIND](function() {
       SKIPS_HOLES = false;
     });
-  $18({ target: "Array", proto: true, forced: SKIPS_HOLES }, {
+  $20({ target: "Array", proto: true, forced: SKIPS_HOLES }, {
     find: function find(callbackfn) {
       return $find(this, callbackfn, arguments.length > 1 ? arguments[1] : void 0);
     }
@@ -6219,36 +6395,36 @@
   addToUnscopables(FIND);
 
   // node_modules/core-js/modules/es.object.set-prototype-of.js
-  var $19 = require_export();
+  var $21 = require_export();
   var setPrototypeOf = require_object_set_prototype_of();
-  $19({ target: "Object", stat: true }, {
+  $21({ target: "Object", stat: true }, {
     setPrototypeOf: setPrototypeOf
   });
 
   // node_modules/core-js/modules/es.object.get-prototype-of.js
-  var $20 = require_export();
-  var fails7 = require_fails();
+  var $22 = require_export();
+  var fails8 = require_fails();
   var toObject4 = require_to_object();
   var nativeGetPrototypeOf = require_object_get_prototype_of();
   var CORRECT_PROTOTYPE_GETTER = require_correct_prototype_getter();
-  var FAILS_ON_PRIMITIVES2 = fails7(function() {
+  var FAILS_ON_PRIMITIVES2 = fails8(function() {
     nativeGetPrototypeOf(1);
   });
-  $20({ target: "Object", stat: true, forced: FAILS_ON_PRIMITIVES2, sham: !CORRECT_PROTOTYPE_GETTER }, {
+  $22({ target: "Object", stat: true, forced: FAILS_ON_PRIMITIVES2, sham: !CORRECT_PROTOTYPE_GETTER }, {
     getPrototypeOf: function getPrototypeOf(it) {
       return nativeGetPrototypeOf(toObject4(it));
     }
   });
 
   // node_modules/core-js/modules/es.reflect.to-string-tag.js
-  var $21 = require_export();
+  var $23 = require_export();
   var global6 = require_global();
   var setToStringTag = require_set_to_string_tag();
-  $21({ global: true }, { Reflect: {} });
+  $23({ global: true }, { Reflect: {} });
   setToStringTag(global6.Reflect, "Reflect", true);
 
   // node_modules/core-js/modules/es.reflect.construct.js
-  var $22 = require_export();
+  var $24 = require_export();
   var getBuiltIn = require_get_built_in();
   var apply2 = require_function_apply();
   var bind = require_function_bind();
@@ -6256,22 +6432,22 @@
   var anObject4 = require_an_object();
   var isObject3 = require_is_object();
   var create = require_object_create();
-  var fails8 = require_fails();
+  var fails9 = require_fails();
   var nativeConstruct = getBuiltIn("Reflect", "construct");
   var ObjectPrototype = Object.prototype;
   var push2 = [].push;
-  var NEW_TARGET_BUG = fails8(function() {
+  var NEW_TARGET_BUG = fails9(function() {
     function F() {
     }
     return !(nativeConstruct(function() {
     }, [], F) instanceof F);
   });
-  var ARGS_BUG = !fails8(function() {
+  var ARGS_BUG = !fails9(function() {
     nativeConstruct(function() {
     });
   });
-  var FORCED5 = NEW_TARGET_BUG || ARGS_BUG;
-  $22({ target: "Reflect", stat: true, forced: FORCED5, sham: FORCED5 }, {
+  var FORCED6 = NEW_TARGET_BUG || ARGS_BUG;
+  $24({ target: "Reflect", stat: true, forced: FORCED6, sham: FORCED6 }, {
     construct: function construct(Target, args) {
       aConstructor(Target);
       anObject4(args);
@@ -6474,10 +6650,10 @@
   }(InputBinding);
 
   // node_modules/core-js/modules/es.string.trim.js
-  var $24 = require_export();
+  var $26 = require_export();
   var $trim = require_string_trim().trim;
   var forcedStringTrimMethod = require_string_trim_forced();
-  $24({ target: "String", proto: true, forced: forcedStringTrimMethod("trim") }, {
+  $26({ target: "String", proto: true, forced: forcedStringTrimMethod("trim") }, {
     trim: function trim2() {
       return $trim(this);
     }
@@ -6697,7 +6873,7 @@
   var import_jquery8 = __toESM(require_jquery());
 
   // node_modules/core-js/modules/es.reflect.get.js
-  var $26 = require_export();
+  var $28 = require_export();
   var call3 = require_function_call();
   var isObject4 = require_is_object();
   var anObject5 = require_an_object();
@@ -6715,20 +6891,20 @@
     if (isObject4(prototype = getPrototypeOf2(target)))
       return get(prototype, propertyKey, receiver);
   }
-  $26({ target: "Reflect", stat: true }, {
+  $28({ target: "Reflect", stat: true }, {
     get: get
   });
 
   // node_modules/core-js/modules/es.object.get-own-property-descriptor.js
-  var $27 = require_export();
-  var fails9 = require_fails();
+  var $29 = require_export();
+  var fails10 = require_fails();
   var toIndexedObject2 = require_to_indexed_object();
   var nativeGetOwnPropertyDescriptor = require_object_get_own_property_descriptor().f;
   var DESCRIPTORS5 = require_descriptors();
-  var FORCED6 = !DESCRIPTORS5 || fails9(function() {
+  var FORCED7 = !DESCRIPTORS5 || fails10(function() {
     nativeGetOwnPropertyDescriptor(1);
   });
-  $27({ target: "Object", stat: true, forced: FORCED6, sham: !DESCRIPTORS5 }, {
+  $29({ target: "Object", stat: true, forced: FORCED7, sham: !DESCRIPTORS5 }, {
     getOwnPropertyDescriptor: function getOwnPropertyDescriptor2(it, key) {
       return nativeGetOwnPropertyDescriptor(toIndexedObject2(it), key);
     }
@@ -9370,22 +9546,22 @@
   var import_jquery20 = __toESM(require_jquery());
 
   // node_modules/core-js/modules/es.array.from.js
-  var $39 = require_export();
+  var $41 = require_export();
   var from = require_array_from();
   var checkCorrectnessOfIteration = require_check_correctness_of_iteration();
   var INCORRECT_ITERATION = !checkCorrectnessOfIteration(function(iterable) {
     Array.from(iterable);
   });
-  $39({ target: "Array", stat: true, forced: INCORRECT_ITERATION }, {
+  $41({ target: "Array", stat: true, forced: INCORRECT_ITERATION }, {
     from: from
   });
 
   // node_modules/core-js/modules/es.array.map.js
-  var $40 = require_export();
+  var $42 = require_export();
   var $map = require_array_iteration().map;
   var arrayMethodHasSpeciesSupport4 = require_array_method_has_species_support();
   var HAS_SPECIES_SUPPORT3 = arrayMethodHasSpeciesSupport4("map");
-  $40({ target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT3 }, {
+  $42({ target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT3 }, {
     map: function map(callbackfn) {
       return $map(this, callbackfn, arguments.length > 1 ? arguments[1] : void 0);
     }
@@ -10163,15 +10339,15 @@
   var import_jquery22 = __toESM(require_jquery());
 
   // node_modules/core-js/modules/es.array.join.js
-  var $44 = require_export();
-  var uncurryThis7 = require_function_uncurry_this();
+  var $46 = require_export();
+  var uncurryThis8 = require_function_uncurry_this();
   var IndexedObject = require_indexed_object();
   var toIndexedObject3 = require_to_indexed_object();
   var arrayMethodIsStrict2 = require_array_method_is_strict();
-  var nativeJoin = uncurryThis7([].join);
+  var nativeJoin = uncurryThis8([].join);
   var ES3_STRINGS = IndexedObject != Object;
-  var FORCED7 = ES3_STRINGS || !arrayMethodIsStrict2("join", ",");
-  $44({ target: "Array", proto: true, forced: FORCED7 }, {
+  var FORCED8 = ES3_STRINGS || !arrayMethodIsStrict2("join", ",");
+  $46({ target: "Array", proto: true, forced: FORCED8 }, {
     join: function join(separator) {
       return nativeJoin(toIndexedObject3(this), separator === void 0 ? "," : separator);
     }
@@ -10212,12 +10388,12 @@
   setToStringTag4(Math, "Math", true);
 
   // node_modules/core-js/modules/es.array.reverse.js
-  var $45 = require_export();
-  var uncurryThis8 = require_function_uncurry_this();
+  var $47 = require_export();
+  var uncurryThis9 = require_function_uncurry_this();
   var isArray3 = require_is_array();
-  var nativeReverse = uncurryThis8([].reverse);
+  var nativeReverse = uncurryThis9([].reverse);
   var test = [1, 2];
-  $45({ target: "Array", proto: true, forced: String(test) === String(test.reverse()) }, {
+  $47({ target: "Array", proto: true, forced: String(test) === String(test.reverse()) }, {
     reverse: function reverse() {
       if (isArray3(this))
         this.length = this.length;
@@ -11544,9 +11720,9 @@
   var import_es_regexp_exec8 = __toESM(require_es_regexp_exec());
 
   // node_modules/core-js/modules/es.object.entries.js
-  var $50 = require_export();
+  var $52 = require_export();
   var $entries = require_object_to_array().entries;
-  $50({ target: "Object", stat: true }, {
+  $52({ target: "Object", stat: true }, {
     entries: function entries(O) {
       return $entries(O);
     }
@@ -11556,14 +11732,14 @@
   var import_es_array_iterator26 = __toESM(require_es_array_iterator());
 
   // node_modules/core-js/modules/es.promise.all-settled.js
-  var $51 = require_export();
+  var $53 = require_export();
   var call5 = require_function_call();
   var aCallable = require_a_callable();
   var newPromiseCapabilityModule = require_new_promise_capability();
   var perform = require_perform();
   var iterate = require_iterate();
   var PROMISE_STATICS_INCORRECT_ITERATION = require_promise_statics_incorrect_iteration();
-  $51({ target: "Promise", stat: true, forced: PROMISE_STATICS_INCORRECT_ITERATION }, {
+  $53({ target: "Promise", stat: true, forced: PROMISE_STATICS_INCORRECT_ITERATION }, {
     allSettled: function allSettled(iterable) {
       var C = this;
       var capability = newPromiseCapabilityModule.f(C);
@@ -13123,11 +13299,11 @@
   }(OutputBinding);
 
   // node_modules/core-js/modules/es.array.filter.js
-  var $55 = require_export();
+  var $57 = require_export();
   var $filter = require_array_iteration().filter;
   var arrayMethodHasSpeciesSupport5 = require_array_method_has_species_support();
   var HAS_SPECIES_SUPPORT4 = arrayMethodHasSpeciesSupport5("filter");
-  $55({ target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT4 }, {
+  $57({ target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT4 }, {
     filter: function filter(callbackfn) {
       return $filter(this, callbackfn, arguments.length > 1 ? arguments[1] : void 0);
     }
@@ -13138,33 +13314,33 @@
   var import_jquery32 = __toESM(require_jquery());
 
   // node_modules/core-js/modules/es.array.some.js
-  var $56 = require_export();
+  var $58 = require_export();
   var $some = require_array_iteration().some;
   var arrayMethodIsStrict3 = require_array_method_is_strict();
   var STRICT_METHOD = arrayMethodIsStrict3("some");
-  $56({ target: "Array", proto: true, forced: !STRICT_METHOD }, {
+  $58({ target: "Array", proto: true, forced: !STRICT_METHOD }, {
     some: function some(callbackfn) {
       return $some(this, callbackfn, arguments.length > 1 ? arguments[1] : void 0);
     }
   });
 
   // node_modules/core-js/modules/es.object.values.js
-  var $57 = require_export();
+  var $59 = require_export();
   var $values = require_object_to_array().values;
-  $57({ target: "Object", stat: true }, {
+  $59({ target: "Object", stat: true }, {
     values: function values(O) {
       return $values(O);
     }
   });
 
   // node_modules/core-js/modules/es.object.get-own-property-descriptors.js
-  var $58 = require_export();
+  var $60 = require_export();
   var DESCRIPTORS6 = require_descriptors();
   var ownKeys = require_own_keys();
   var toIndexedObject4 = require_to_indexed_object();
   var getOwnPropertyDescriptorModule2 = require_object_get_own_property_descriptor();
   var createProperty4 = require_create_property();
-  $58({ target: "Object", stat: true, sham: !DESCRIPTORS6 }, {
+  $60({ target: "Object", stat: true, sham: !DESCRIPTORS6 }, {
     getOwnPropertyDescriptors: function getOwnPropertyDescriptors(object) {
       var O = toIndexedObject4(object);
       var getOwnPropertyDescriptor3 = getOwnPropertyDescriptorModule2.f;
@@ -13182,10 +13358,10 @@
   });
 
   // node_modules/core-js/modules/es.object.define-properties.js
-  var $59 = require_export();
+  var $61 = require_export();
   var DESCRIPTORS7 = require_descriptors();
   var defineProperties = require_object_define_properties().f;
-  $59({ target: "Object", stat: true, forced: Object.defineProperties !== defineProperties, sham: !DESCRIPTORS7 }, {
+  $61({ target: "Object", stat: true, forced: Object.defineProperties !== defineProperties, sham: !DESCRIPTORS7 }, {
     defineProperties: defineProperties
   });
 
@@ -13199,7 +13375,6 @@
   // srcts/src/imageutils/initPanelScales.ts
   function mapLinear(x, domainMin, domainMax, rangeMin, rangeMax) {
     var clip = arguments.length > 5 && arguments[5] !== void 0 ? arguments[5] : true;
-    clip = clip || true;
     var factor = (rangeMax - rangeMin) / (domainMax - domainMin);
     var val = x - domainMin;
     var newval = val * factor + rangeMin;
@@ -13610,42 +13785,44 @@
         ymin: NaN,
         ymax: NaN
       };
-      if ($div)
+      if ($div) {
         $div.remove();
+        $div = null;
+      }
     }
-    function hasOldBrush() {
-      var oldDiv = $el.find("#" + el.id + "_brush");
-      return oldDiv.length > 0;
-    }
-    function importOldBrush() {
-      var oldDiv = $el.find("#" + el.id + "_brush");
-      if (oldDiv.length === 0)
+    function updateCoordmap(newCoordmap) {
+      coordmap = newCoordmap;
+      cssToImg = coordmap.scaleCssToImg;
+      imgToCss = coordmap.scaleImgToCss;
+      var oldBoundsData = boundsData();
+      var oldPanel = state.panel;
+      if (!oldBoundsData || !oldPanel) {
+        reset();
         return;
-      var oldBoundsData = oldDiv.data("bounds-data");
-      var oldPanel = oldDiv.data("panel");
-      if (!oldBoundsData || !oldPanel)
+      }
+      if (Object.values(oldBoundsData).some(isnan)) {
+        reset();
         return;
+      }
+      var foundPanel = false;
       for (var i = 0; i < coordmap.panels.length; i++) {
         var curPanel = coordmap.panels[i];
         if (equal(oldPanel.mapping, curPanel.mapping) && equal(oldPanel.panel_vars, curPanel.panel_vars)) {
           state.panel = coordmap.panels[i];
+          boundsData(oldBoundsData);
+          foundPanel = true;
           break;
         }
       }
-      if (state.panel === null) {
-        oldDiv.remove();
-        return;
+      if (!foundPanel) {
+        reset();
       }
-      $div = oldDiv;
-      boundsData(oldBoundsData);
-      updateDiv();
     }
-    function onResize() {
+    function onImgResize() {
       var boundsDataVal = boundsData();
       if (Object.values(boundsDataVal).some(isnan))
         return;
       boundsData(boundsDataVal);
-      updateDiv();
     }
     function isInsideBrush(offsetCss) {
       var bounds = state.boundsCss;
@@ -13687,6 +13864,12 @@
       if (boxCss === void 0) {
         return _objectSpread({}, state.boundsCss);
       }
+      if (!state.panel) {
+        reset();
+        return;
+      }
+      var panel = state.panel;
+      var panelBoundsImg = panel.range;
       var minCss = {
         x: boxCss.xmin,
         y: boxCss.ymin
@@ -13695,8 +13878,6 @@
         x: boxCss.xmax,
         y: boxCss.ymax
       };
-      var panel = state.panel;
-      var panelBoundsImg = panel.range;
       if (opts.brushClip) {
         minCss = imgToCss(panel.clipImg(cssToImg(minCss)));
         maxCss = imgToCss(panel.clipImg(cssToImg(maxCss)));
@@ -13723,24 +13904,24 @@
         ymin: minCss.y,
         ymax: maxCss.y
       };
-      var minData = panel.scaleImgToData(cssToImg(minCss));
-      var maxData = panel.scaleImgToData(cssToImg(maxCss));
+      var minData = panel.scaleImgToData(cssToImg(minCss), opts.brushClip);
+      var maxData = panel.scaleImgToData(cssToImg(maxCss), opts.brushClip);
       state.boundsData = findBox(minData, maxData);
-      state.boundsData = mapValues(state.boundsData, function(val) {
-        return roundSignif(val, 14);
-      });
-      $div.data("bounds-data", state.boundsData);
-      $div.data("panel", state.panel);
+      if (!$div) {
+        addDiv();
+      }
+      updateDiv();
       return void 0;
     }
     function boundsData(boxData) {
       if (typeof boxData === "undefined") {
         return _objectSpread({}, state.boundsData);
       }
-      var boxCss = imgToCss(state.panel.scaleDataToImg(boxData));
-      boxCss = mapValues(boxCss, function(val) {
-        return roundSignif(val, 13);
-      });
+      if (!state.panel) {
+        reset();
+        return;
+      }
+      var boxCss = imgToCss(state.panel.scaleDataToImg(boxData, opts.brushClip));
       boundsCss({
         xmin: Math.min(boxCss.xmin, boxCss.xmax),
         xmax: Math.max(boxCss.xmin, boxCss.xmax),
@@ -13752,15 +13933,16 @@
     function getPanel2() {
       return state.panel;
     }
+    function setPanelIdx(idx) {
+      state.panel = coordmap.panels[idx];
+    }
     function addDiv() {
-      if ($div)
-        $div.remove();
       $div = (0, import_jquery29.default)(document.createElement("div")).attr("id", el.id + "_brush").css({
         "background-color": opts.brushFill,
         opacity: opts.brushOpacity,
         "pointer-events": "none",
         position: "absolute"
-      }).hide();
+      });
       var borderStyle = "1px solid " + opts.brushStroke;
       if (opts.brushDirection === "xy") {
         $div.css({
@@ -13778,12 +13960,10 @@
         });
       }
       $el.append($div);
-      $div.offset(
-        {
-          x: 0,
-          y: 0
-        }
-      ).width(0).outerHeight(0);
+      $div.offset({
+        top: 0,
+        left: 0
+      }).width(0).outerHeight(0);
     }
     function updateDiv() {
       var imgOffsetCss = findOrigin($el.find("img"));
@@ -13810,15 +13990,14 @@
     }
     function startBrushing() {
       state.brushing = true;
-      addDiv();
+      if ($div) {
+        $div.remove();
+        $div = null;
+      }
       state.panel = coordmap.getPanelCss(state.down, expandPixels);
-      boundsCss(findBox(state.down, state.down));
-      updateDiv();
     }
     function brushTo(offsetCss) {
       boundsCss(findBox(state.down, offsetCss));
-      $div.show();
-      updateDiv();
     }
     function stopBrushing() {
       state.brushing = false;
@@ -13857,7 +14036,6 @@
         });
       }
       boundsCss(newBoundsCss);
-      updateDiv();
     }
     function stopDragging() {
       state.dragging = false;
@@ -13894,22 +14072,21 @@
         bImg.ymax = ymaxImg;
       }
       boundsCss(imgToCss(bImg));
-      updateDiv();
     }
     function stopResizing() {
       state.resizing = false;
     }
     return {
+      updateCoordmap: updateCoordmap,
       reset: reset,
-      hasOldBrush: hasOldBrush,
-      importOldBrush: importOldBrush,
       isInsideBrush: isInsideBrush,
       isInResizeArea: isInResizeArea,
       whichResizeSides: whichResizeSides,
-      onResize: onResize,
+      onImgResize: onImgResize,
       boundsCss: boundsCss,
       boundsData: boundsData,
       getPanel: getPanel2,
+      setPanelIdx: setPanelIdx,
       down: down,
       up: up,
       isBrushing: isBrushing,
@@ -13996,16 +14173,22 @@
       onResetImg: function onResetImg() {
         clickInfoSender(null);
       },
+      updateCoordmap: function updateCoordmap(newMap) {
+        clickInfoSender = newMap.mouseCoordinateSender(inputId, clip);
+      },
       onResize: null
     };
   }
   function createHoverHandler(inputId, delay, delayType, clip, nullOutside, coordmap) {
-    var sendHoverInfo = coordmap.mouseCoordinateSender(inputId, clip, nullOutside);
     var hoverInfoSender;
-    if (delayType === "throttle")
-      hoverInfoSender = new Throttler(null, sendHoverInfo, delay);
-    else
-      hoverInfoSender = new Debouncer(null, sendHoverInfo, delay);
+    function updateHoverInfoSender(newCoordmap) {
+      var sendHoverInfo = newCoordmap.mouseCoordinateSender(inputId, clip, nullOutside);
+      if (delayType === "throttle")
+        hoverInfoSender = new Throttler(null, sendHoverInfo, delay);
+      else
+        hoverInfoSender = new Debouncer(null, sendHoverInfo, delay);
+    }
+    updateHoverInfoSender(coordmap);
     hoverInfoSender.immediateCall(null);
     var mouseout;
     if (nullOutside)
@@ -14023,17 +14206,41 @@
       onResetImg: function onResetImg() {
         hoverInfoSender.immediateCall(null);
       },
+      updateCoordmap: updateHoverInfoSender,
       onResize: null
     };
   }
-  function createBrushHandler(inputId, $el, opts, coordmap, outputId) {
+  function createBrushHandler(inputId, $el, opts, initCoordmap2, outputId) {
     var expandPixels = 20;
+    var coordmap = initCoordmap2;
     var brush = createBrush($el, opts, coordmap, expandPixels);
+    function updateCoordmap(newCoordmap) {
+      coordmap = newCoordmap;
+      brush.updateCoordmap(coordmap);
+      if ($el.data("mostRecentBrush")) {
+        brushInfoSender.normalCall();
+      }
+    }
     $el.on("shiny-internal:brushed.image_output", function(e, coords) {
       if (coords.brushId === inputId && coords.outputId !== outputId) {
         $el.data("mostRecentBrush", false);
+        if (brush.isBrushing() || brush.isDragging() || brush.isResizing()) {
+          (0, import_jquery31.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
+        }
         brush.reset();
       }
+    });
+    $el.on("shiny-internal:setBrush.image_output", function(e, data) {
+      if (data.brushId !== inputId)
+        return;
+      if (data.outputId && data.outputId !== outputId)
+        return;
+      if (brush.isBrushing() || brush.isDragging() || brush.isResizing()) {
+        (0, import_jquery31.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
+      }
+      brush.setPanelIdx(data.panelIdx);
+      brush.boundsData(data.imgCoords);
+      brushInfoSender.immediateCall();
     });
     function setCursorStyle(style) {
       $el.removeClass("crosshair grabbable grabbing ns-resize ew-resize nesw-resize nwse-resize");
@@ -14041,7 +14248,9 @@
         $el.addClass(style);
     }
     function sendBrushInfo() {
-      var coords = brush.boundsData();
+      var coords = mapValues(brush.boundsData(), function(val) {
+        return roundSignif(val, 13);
+      });
       if (isNaN(coords.xmin)) {
         shinySetInputValue(inputId, null);
         imageOutputBinding.find(document.documentElement).trigger("shiny-internal:brushed", {
@@ -14051,8 +14260,18 @@
         return;
       }
       var panel = brush.getPanel();
+      var dataDomainX = Math.abs(panel.domain.right - panel.domain.left);
+      var xDigits = 13 - Math.floor(Math.log10(dataDomainX));
+      var dataDomainY = Math.abs(panel.domain.top - panel.domain.bottom);
+      var yDigits = 13 - Math.floor(Math.log10(dataDomainY));
+      coords.xmin = roundDigits(coords.xmin, xDigits);
+      coords.xmax = roundDigits(coords.xmax, xDigits);
+      coords.ymin = roundDigits(coords.ymin, yDigits);
+      coords.ymax = roundDigits(coords.ymax, yDigits);
       import_jquery31.default.extend(coords, panel.panel_vars);
-      coords.coords_css = brush.boundsCss();
+      coords.coords_css = mapValues(brush.boundsCss(), function(val) {
+        return Math.round(val * 8) / 8;
+      });
       coords.coords_img = coordmap.scaleCssToImg(coords.coords_css);
       coords.img_css_ratio = coordmap.cssToImgScalingRatio();
       coords.mapping = panel.mapping;
@@ -14072,9 +14291,7 @@
     } else {
       brushInfoSender = new Debouncer(null, sendBrushInfo, opts.brushDelay);
     }
-    if (!brush.hasOldBrush()) {
-      brushInfoSender.immediateCall();
-    }
+    brushInfoSender.immediateCall();
     function mousedown(e) {
       if (brush.isBrushing() || brush.isDragging() || brush.isResizing())
         return;
@@ -14089,15 +14306,14 @@
       });
       brush.down(offsetCss);
       if (brush.isInResizeArea(offsetCss)) {
-        brush.startResizing(offsetCss);
+        brush.startResizing();
         (0, import_jquery31.default)(document).on("mousemove.image_brush", mousemoveResizing).on("mouseup.image_brush", mouseupResizing);
       } else if (brush.isInsideBrush(offsetCss)) {
-        brush.startDragging(offsetCss);
+        brush.startDragging();
         setCursorStyle("grabbing");
         (0, import_jquery31.default)(document).on("mousemove.image_brush", mousemoveDragging).on("mouseup.image_brush", mouseupDragging);
       } else {
-        var panel = coordmap.getPanelCss(offsetCss, expandPixels);
-        brush.startBrushing(panel.clipImg(coordmap.scaleCssToImg(offsetCss)));
+        brush.startBrushing();
         (0, import_jquery31.default)(document).on("mousemove.image_brush", mousemoveBrushing).on("mouseup.image_brush", mouseupBrushing);
       }
     }
@@ -14148,8 +14364,7 @@
         brushInfoSender.immediateCall();
         return;
       }
-      if (brushInfoSender.isPending())
-        brushInfoSender.immediateCall();
+      brushInfoSender.immediateCall();
     }
     function mouseupDragging(e) {
       if (e.which !== 1)
@@ -14158,8 +14373,7 @@
       brush.up(coordmap.mouseOffsetCss(e));
       brush.stopDragging();
       setCursorStyle("grabbable");
-      if (brushInfoSender.isPending())
-        brushInfoSender.immediateCall();
+      brushInfoSender.immediateCall();
     }
     function mouseupResizing(e) {
       if (e.which !== 1)
@@ -14167,31 +14381,28 @@
       (0, import_jquery31.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
       brush.up(coordmap.mouseOffsetCss(e));
       brush.stopResizing();
-      if (brushInfoSender.isPending())
-        brushInfoSender.immediateCall();
+      brushInfoSender.immediateCall();
     }
     function onResetImg() {
-      if (opts.brushResetOnNew) {
+      if (opts.brushResetOnNew || $el.data("errorState")) {
+        if (brush.isBrushing() || brush.isDragging() || brush.isResizing()) {
+          (0, import_jquery31.default)(document).off("mousemove.image_brush").off("mouseup.image_brush");
+        }
+        brush.reset();
         if ($el.data("mostRecentBrush")) {
-          brush.reset();
           brushInfoSender.immediateCall();
         }
       }
     }
-    if (!opts.brushResetOnNew) {
-      if ($el.data("mostRecentBrush")) {
-        brush.importOldBrush();
-        brushInfoSender.immediateCall();
-      }
-    }
     function onResize() {
-      brush.onResize();
+      brush.onImgResize();
       brushInfoSender.immediateCall();
     }
     return {
       mousedown: mousedown,
       mousemove: mousemove,
       onResetImg: onResetImg,
+      updateCoordmap: updateCoordmap,
       onResize: onResize
     };
   }
@@ -14404,8 +14615,6 @@
             }
           };
         }
-        $el.off(".image_output");
-        $img.off(".image_output");
         $img.off("load.shiny_image_interaction");
         $img.one("load.shiny_image_interaction", function() {
           var optsCoordmap = opts.coordmap = initCoordmap($el, opts.coordmap);
@@ -14416,33 +14625,50 @@
           }
           if (opts.clickId) {
             disableDrag($el, $img);
-            var clickHandler = createClickHandler(opts.clickId, opts.clickClip, optsCoordmap);
-            $el.on("mousedown2.image_output", clickHandler.mousedown);
-            $el.on("resize.image_output", clickHandler.onResize);
-            $img.on("reset.image_output", clickHandler.onResetImg);
+            if ($el.data("clickHandler")) {
+              $el.data("clickHandler").updateCoordmap(optsCoordmap);
+            } else {
+              var clickHandler = createClickHandler(opts.clickId, opts.clickClip, optsCoordmap);
+              $el.on("mousedown2.image_output", clickHandler.mousedown);
+              $el.on("reset.image_output", clickHandler.onResetImg);
+              $el.data("clickHandler", clickHandler);
+            }
           }
           if (opts.dblclickId) {
             disableDrag($el, $img);
-            var dblclickHandler = createClickHandler(opts.dblclickId, opts.clickClip, optsCoordmap);
-            $el.on("dblclick2.image_output", dblclickHandler.mousedown);
-            $el.on("resize.image_output", dblclickHandler.onResize);
-            $img.on("reset.image_output", dblclickHandler.onResetImg);
+            if ($el.data("dblclickHandler")) {
+              $el.data("dblclickHandler").updateCoordmap(optsCoordmap);
+            } else {
+              var dblclickHandler = createClickHandler(opts.dblclickId, opts.clickClip, optsCoordmap);
+              $el.on("dblclick2.image_output", dblclickHandler.mousedown);
+              $el.on("reset.image_output", dblclickHandler.onResetImg);
+              $el.data("dblclickHandler", dblclickHandler);
+            }
           }
           if (opts.hoverId) {
             disableDrag($el, $img);
-            var hoverHandler = createHoverHandler(opts.hoverId, opts.hoverDelay, opts.hoverDelayType, opts.hoverClip, opts.hoverNullOutside, optsCoordmap);
-            $el.on("mousemove.image_output", hoverHandler.mousemove);
-            $el.on("mouseout.image_output", hoverHandler.mouseout);
-            $el.on("resize.image_output", hoverHandler.onResize);
-            $img.on("reset.image_output", hoverHandler.onResetImg);
+            if ($el.data("hoverHandler")) {
+              $el.data("hoverHandler").updateCoordmap(optsCoordmap);
+            } else {
+              var hoverHandler = createHoverHandler(opts.hoverId, opts.hoverDelay, opts.hoverDelayType, opts.hoverClip, opts.hoverNullOutside, optsCoordmap);
+              $el.on("mousemove.image_output", hoverHandler.mousemove);
+              $el.on("mouseout.image_output", hoverHandler.mouseout);
+              $el.on("reset.image_output", hoverHandler.onResetImg);
+              $el.data("hoverHandler", hoverHandler);
+            }
           }
           if (opts.brushId) {
             disableDrag($el, $img);
-            var brushHandler = createBrushHandler(opts.brushId, $el, opts, optsCoordmap, outputId);
-            $el.on("mousedown.image_output", brushHandler.mousedown);
-            $el.on("mousemove.image_output", brushHandler.mousemove);
-            $el.on("resize.image_output", brushHandler.onResize);
-            $img.on("reset.image_output", brushHandler.onResetImg);
+            if ($el.data("brushHandler")) {
+              $el.data("brushHandler").updateCoordmap(optsCoordmap);
+            } else {
+              var brushHandler = createBrushHandler(opts.brushId, $el, opts, optsCoordmap, outputId);
+              $el.on("mousedown.image_output", brushHandler.mousedown);
+              $el.on("mousemove.image_output", brushHandler.mousemove);
+              $el.on("resize.image_output", brushHandler.onResize);
+              $el.on("reset.image_output", brushHandler.onResetImg);
+              $el.data("brushHandler", brushHandler);
+            }
           }
           if (opts.clickId || opts.dblclickId || opts.hoverId || opts.brushId) {
             $el.addClass("crosshair");
@@ -14454,6 +14680,7 @@
     }, {
       key: "renderError",
       value: function renderError(el, err) {
+        (0, import_jquery32.default)(el).data("errorState", true);
         (0, import_jquery32.default)(el).find("img").trigger("reset");
         OutputBinding.prototype.renderError.call(this, el, err);
       }
@@ -14463,12 +14690,16 @@
         (0, import_jquery32.default)(el).contents().filter(function() {
           return !(this instanceof HTMLElement && (this.tagName === "IMG" || this.id === el.id + "_brush"));
         }).remove();
+        (0, import_jquery32.default)(el).data("errorState", false);
         OutputBinding.prototype.clearError.call(this, el);
       }
     }, {
       key: "resize",
       value: function resize(el, width, height) {
-        (0, import_jquery32.default)(el).find("img").trigger("resize");
+        var img = (0, import_jquery32.default)(el).find("img");
+        if (img.hasClass("shiny-scalable")) {
+          img.trigger("resize");
+        }
         return;
         width;
         height;
@@ -14500,13 +14731,23 @@
     });
   }
 
+  // srcts/src/imageutils/setBrush.ts
+  function setBrush(brushId, coords, panel, outputId) {
+    imageOutputBinding.find(document.documentElement).trigger("shiny-internal:setBrush", {
+      brushId: brushId,
+      imgCoords: coords,
+      panelIdx: panel,
+      outputId: outputId
+    });
+  }
+
   // srcts/src/shiny/notifications.ts
   var import_es_regexp_exec9 = __toESM(require_es_regexp_exec());
 
   // node_modules/core-js/modules/es.string.split.js
   var apply3 = require_function_apply();
   var call6 = require_function_call();
-  var uncurryThis9 = require_function_uncurry_this();
+  var uncurryThis10 = require_function_uncurry_this();
   var fixRegExpWellKnownSymbolLogic3 = require_fix_regexp_well_known_symbol_logic();
   var anObject7 = require_an_object();
   var isNullOrUndefined3 = require_is_null_or_undefined();
@@ -14521,15 +14762,15 @@
   var callRegExpExec = require_regexp_exec_abstract();
   var regexpExec = require_regexp_exec();
   var stickyHelpers = require_regexp_sticky_helpers();
-  var fails10 = require_fails();
+  var fails11 = require_fails();
   var UNSUPPORTED_Y = stickyHelpers.UNSUPPORTED_Y;
   var MAX_UINT32 = 4294967295;
   var min3 = Math.min;
   var $push = [].push;
-  var exec = uncurryThis9(/./.exec);
-  var push3 = uncurryThis9($push);
-  var stringSlice3 = uncurryThis9("".slice);
-  var SPLIT_WORKS_WITH_OVERWRITTEN_EXEC = !fails10(function() {
+  var exec = uncurryThis10(/./.exec);
+  var push3 = uncurryThis10($push);
+  var stringSlice4 = uncurryThis10("".slice);
+  var SPLIT_WORKS_WITH_OVERWRITTEN_EXEC = !fails11(function() {
     var re = /(?:)/;
     var originalExec = re.exec;
     re.exec = function() {
@@ -14559,7 +14800,7 @@
         while (match = call6(regexpExec, separatorCopy, string)) {
           lastIndex = separatorCopy.lastIndex;
           if (lastIndex > lastLastIndex) {
-            push3(output, stringSlice3(string, lastLastIndex, match.index));
+            push3(output, stringSlice4(string, lastLastIndex, match.index));
             if (match.length > 1 && match.index < string.length)
               apply3($push, output, arraySlice(match, 1));
             lastLength = match[0].length;
@@ -14574,7 +14815,7 @@
           if (lastLength || !exec(separatorCopy, ""))
             push3(output, "");
         } else
-          push3(output, stringSlice3(string, lastLastIndex));
+          push3(output, stringSlice4(string, lastLastIndex));
         return output.length > lim ? arraySlice(output, 0, lim) : output;
       };
     } else if ("0".split(void 0, 0).length) {
@@ -14609,12 +14850,12 @@
         var A = [];
         while (q < S.length) {
           splitter.lastIndex = UNSUPPORTED_Y ? 0 : q;
-          var z = callRegExpExec(splitter, UNSUPPORTED_Y ? stringSlice3(S, q) : S);
+          var z = callRegExpExec(splitter, UNSUPPORTED_Y ? stringSlice4(S, q) : S);
           var e;
           if (z === null || (e = min3(toLength2(splitter.lastIndex + (UNSUPPORTED_Y ? q : 0)), S.length)) === p) {
             q = advanceStringIndex2(S, q, unicodeMatching);
           } else {
-            push3(A, stringSlice3(S, p, q));
+            push3(A, stringSlice4(S, p, q));
             if (A.length === lim)
               return A;
             for (var i = 1; i <= z.length - 1; i++) {
@@ -14625,7 +14866,7 @@
             q = p = e;
           }
         }
-        push3(A, stringSlice3(S, p));
+        push3(A, stringSlice4(S, p));
         return A;
       }
     ];
@@ -16723,22 +16964,22 @@
   var import_es_json_stringify3 = __toESM(require_es_json_stringify());
 
   // node_modules/core-js/modules/es.array-buffer.constructor.js
-  var $70 = require_export();
+  var $72 = require_export();
   var global8 = require_global();
   var arrayBufferModule = require_array_buffer();
   var setSpecies = require_set_species();
   var ARRAY_BUFFER = "ArrayBuffer";
   var ArrayBuffer2 = arrayBufferModule[ARRAY_BUFFER];
   var NativeArrayBuffer = global8[ARRAY_BUFFER];
-  $70({ global: true, constructor: true, forced: NativeArrayBuffer !== ArrayBuffer2 }, {
+  $72({ global: true, constructor: true, forced: NativeArrayBuffer !== ArrayBuffer2 }, {
     ArrayBuffer: ArrayBuffer2
   });
   setSpecies(ARRAY_BUFFER);
 
   // node_modules/core-js/modules/es.array-buffer.slice.js
-  var $71 = require_export();
-  var uncurryThis10 = require_function_uncurry_this_clause();
-  var fails11 = require_fails();
+  var $73 = require_export();
+  var uncurryThis11 = require_function_uncurry_this_clause();
+  var fails12 = require_fails();
   var ArrayBufferModule = require_array_buffer();
   var anObject9 = require_an_object();
   var toAbsoluteIndex3 = require_to_absolute_index();
@@ -16747,13 +16988,13 @@
   var ArrayBuffer3 = ArrayBufferModule.ArrayBuffer;
   var DataView2 = ArrayBufferModule.DataView;
   var DataViewPrototype = DataView2.prototype;
-  var nativeArrayBufferSlice = uncurryThis10(ArrayBuffer3.prototype.slice);
-  var getUint8 = uncurryThis10(DataViewPrototype.getUint8);
-  var setUint8 = uncurryThis10(DataViewPrototype.setUint8);
-  var INCORRECT_SLICE = fails11(function() {
+  var nativeArrayBufferSlice = uncurryThis11(ArrayBuffer3.prototype.slice);
+  var getUint8 = uncurryThis11(DataViewPrototype.getUint8);
+  var setUint8 = uncurryThis11(DataViewPrototype.setUint8);
+  var INCORRECT_SLICE = fails12(function() {
     return !new ArrayBuffer3(2).slice(1, void 0).byteLength;
   });
-  $71({ target: "ArrayBuffer", proto: true, unsafe: true, forced: INCORRECT_SLICE }, {
+  $73({ target: "ArrayBuffer", proto: true, unsafe: true, forced: INCORRECT_SLICE }, {
     slice: function slice2(start, end) {
       if (nativeArrayBufferSlice && end === void 0) {
         return nativeArrayBufferSlice(anObject9(this), start);
@@ -16776,14 +17017,14 @@
   require_es_data_view_constructor();
 
   // node_modules/core-js/modules/es.array.reduce.js
-  var $72 = require_export();
+  var $74 = require_export();
   var $reduce = require_array_reduce().left;
   var arrayMethodIsStrict4 = require_array_method_is_strict();
   var CHROME_VERSION = require_engine_v8_version();
   var IS_NODE = require_engine_is_node();
   var CHROME_BUG = !IS_NODE && CHROME_VERSION > 79 && CHROME_VERSION < 83;
-  var FORCED8 = CHROME_BUG || !arrayMethodIsStrict4("reduce");
-  $72({ target: "Array", proto: true, forced: FORCED8 }, {
+  var FORCED9 = CHROME_BUG || !arrayMethodIsStrict4("reduce");
+  $74({ target: "Array", proto: true, forced: FORCED9 }, {
     reduce: function reduce(callbackfn) {
       var length = arguments.length;
       return $reduce(this, callbackfn, length, length > 1 ? arguments[1] : void 0);
@@ -18854,6 +19095,9 @@
         addMessageHandler("resetBrush", function(message) {
           resetBrush(message.brushId);
         });
+        addMessageHandler("setBrush", function(message) {
+          setBrush(message.brushId, message.coords, message.panel, message.outputId);
+        });
       }
     }, {
       key: "getTestSnapshotBaseUrl",
@@ -19195,6 +19439,7 @@
     windowShiny2.outputBindings = outputBindings;
     windowShiny2.OutputBinding = OutputBinding;
     windowShiny2.resetBrush = resetBrush;
+    windowShiny2.setBrush = setBrush;
     windowShiny2.notifications = {
       show: show,
       remove: remove

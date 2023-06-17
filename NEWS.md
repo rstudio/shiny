@@ -4,7 +4,13 @@
 
 ### Breaking changes
 
+* Closed #2866: `session$resetBrush()` now properly namespaces the brush ID automatically within a module. This breaks previous workarounds, which will now result in a doubly-namespaced brush ID. This function has also been supplemented with the slightly more user-friendly `shiny::resetBrush()`; see details below.
+
 ### New features and improvements
+
+* Added `resetBrush()` function for a slightly more user-friendly alternative to `session$resetBrush()` with syntax similar to the `update*()` functions.
+
+* Closed #1456: Added `updateBrushCoords()` function to programatically update the area brushed on a plot, similar to other `update*()` functions. Tested primarily with `ggplot2`, but may work with reduced functionality with base graphics and images. See `help(updateBrushCoords, shiny)` for more details.
 
 * Closed #789: Dynamic UI is now rendered asynchronously, thanks in part to the newly exported `Shiny.renderDependenciesAsync()`, `Shiny.renderHtmlAsync()`, and `Shiny.renderContentAsync()`. Importantly, this means `<script>` tags are now loaded asynchronously (the old way used `XMLHttpRequest`, which is synchronous). In addition, `Shiny` now manages a queue of async tasks (exposed via `Shiny.shinyapp.taskQueue`) so that order of execution is preserved. (#3666)
 
@@ -15,6 +21,8 @@
 * Allow for `shiny:::toJSON()` to respect if `digits=` has class `"AsIs"` which represents if `use_signif=` is `TRUE` or `FALSE`. This is useful for testing to keep the digits smaller. For example, setting `options(shiny.json.digits = 4)` will save 4 digits after the decimal, rather than the default of `I(16)` which will save 16 significant digits. (#3819)
 
 ### Bug fixes
+
+* Closed #2344 and #1642: Overhauled brush code so that brush handlers (as well as click/hover handlers) persist when a plot is redrawn, and consistently move any drawn brushes to the correct location if the plot is resized. This fixes an issue where a plot that's redrawn in response to a brush would circumvent the debouncer and sometimes update twice each time the brush was moved--or worse, constantly re-update itself as the brush was being dragged. This also fixes a frustrating-to-replicate bug where the rectangle drawn on the plot could become duplicated and desynced from the coordinates sent to the server with a series of rapid user inputs.
 
 * Fixed #3771: Sometimes the error `ion.rangeSlider.min.js: i.stopPropagation is not a function` would appear in the JavaScript console. (#3772)
 

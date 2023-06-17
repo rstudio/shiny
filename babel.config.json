@@ -1,4 +1,12 @@
 {
+  "plugins": [
+    [
+      "@babel/plugin-transform-typescript",
+      {
+        "allowDeclareFields": true
+      }
+    ]
+  ],
   "presets": [
     "@babel/preset-typescript",
     [
@@ -9,7 +17,7 @@
       }
     ]
   ],
-  "ignore":[
+  "ignore": [
     "node_modules/core-js"
   ]
 }

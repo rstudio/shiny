@@ -27,6 +27,7 @@ rules:
     - off
   "@typescript-eslint/explicit-module-boundary-types":
     - error
+    - allowArgumentsExplicitlyTypedAsAny: true
 
   default-case:
     - error

@@ -17,4 +17,4 @@ declare global {
         on(events: `shown.bs.${string}.sendImageSize`, selector: string, handler: (this: HTMLElement, e: JQueryEventHandlerBase<HTMLElement, any>) => void): this;
     }
 }
-export {};
+export type { EvtFn };

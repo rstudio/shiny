@@ -8241,7 +8241,7 @@
             msg.to = data.value[1];
           } else {
             if (Array.isArray(data.value)) {
-              throw "Slider only contains a single value and cannot be updated with an array";
+              throw data.value.length > 0 ? "Slider requires two values to update with an array, but requested value was a single-value array" : "Slider requested value can't be an empty array";
             }
             msg.from = data.value;
           }
@@ -18337,8 +18337,17 @@
               evt.message = message[i].message;
               evt.binding = inputBinding;
               (0, import_jquery38.default)(el).trigger(evt);
-              if (!evt.isDefaultPrevented())
-                inputBinding.receiveMessage(el, evt.message);
+              if (!evt.isDefaultPrevented()) {
+                try {
+                  inputBinding.receiveMessage(el, evt.message);
+                } catch (error) {
+                  console.error("[shiny] Error in inputBinding.receiveMessage()", {
+                    error: error,
+                    binding: inputBinding,
+                    message: evt.message
+                  });
+                }
+              }
             }
           }
         });

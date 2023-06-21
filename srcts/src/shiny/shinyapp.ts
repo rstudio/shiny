@@ -725,8 +725,16 @@ class ShinyApp {
             evt.message = message[i].message;
             evt.binding = inputBinding;
             $(el).trigger(evt);
-            if (!evt.isDefaultPrevented())
-              inputBinding.receiveMessage(el, evt.message);
+            if (!evt.isDefaultPrevented()) {
+              try {
+                inputBinding.receiveMessage(el, evt.message);
+              } catch (error) {
+                console.error(
+                  "[shiny] Error in inputBinding.receiveMessage()",
+                  { error, binding: inputBinding, message: evt.message }
+                );
+              }
+            }
           }
         }
       }

@@ -87,6 +87,17 @@ return an empty string as its value. This is the default behavior of
 value when it is a single choice input and the empty string is not in the
 \code{choices} argument. This is to keep compatibility with
 \code{selectInput(..., selectize = FALSE)}.
+
+When \code{multiple = TRUE} is used with \code{selectizeInput()}, users can select
+multiple options as well as delete all selected options. When no options
+are selected, the server will receive a value of \code{NULL}. Because the
+default behavior of an \code{observeEvent()} is to ignore expressions that
+evaluate to NULL, a change from a single selected option to no selected
+options in such a \code{selectizeInput()} will not invalidate (cause to update)
+an \code{observeEvent()} by default. If this behavior is undesirable in your
+context, it may be useful to set \code{ignoreNULL = TRUE} in \code{observeEvent()}
+(and possibly also \code{ignoreInit = TRUE} as well). See \code{\link[=observeEvent]{observeEvent()}} for
+details.
 }
 \section{Server value}{
  A vector of character strings, usually of length

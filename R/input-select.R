@@ -186,6 +186,7 @@ needOptgroup <- function(choices) {
 #'   value when it is a single choice input and the empty string is not in the
 #'   `choices` argument. This is to keep compatibility with
 #'   `selectInput(..., selectize = FALSE)`.
+#'   The selectize input created from `selectInput(..., selectize = TRUE, multiple = TRUE)` allows deletion of all selected options, which will then return NULL as its value. Because the default behavior of an `observeEvent()` is to ignore expressions that evaluate to NULL, a change from a single selected option to no selected options in such a `selectInput()` would not constitute an event that would trigger an `observeEvent()` by default. If this behavior is undesirable in your context, it may be useful to set the `ignoreNULL` (and perhaps also the `ignoreInit`) parameter of `observeEvent()` to TRUE; see [observeEvent()] for details. 
 #' @export
 selectizeInput <- function(inputId, ..., options = NULL, width = NULL) {
   selectizeIt(

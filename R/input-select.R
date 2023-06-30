@@ -4,7 +4,7 @@
 #' from a list of values.
 #'
 #' By default, `selectInput()` and `selectizeInput()` use the JavaScript library
-#' \pkg{selectize.js} (<https://github.com/selectize/selectize.js>) instead of
+#' \pkg{selectize.js} (<https://selectize.dev/) instead of
 #' the basic select input element. To use the standard HTML select input
 #' element, use `selectInput()` with `selectize=FALSE`.
 #'
@@ -172,7 +172,7 @@ needOptgroup <- function(choices) {
 
 #' @rdname selectInput
 #' @param ... Arguments passed to `selectInput()`.
-#' @param options A list of options. See the documentation of \pkg{selectize.js}
+#' @param options A list of options. See the documentation of \pkg{selectize.js}(<https://selectize.dev/docs/usage>)
 #'   for possible options (character option values inside [base::I()] will
 #'   be treated as literal JavaScript code; see [renderDataTable()]
 #'   for details).
@@ -287,7 +287,7 @@ selectizeStaticDependency <- function(version) {
 #'
 #' By default, `varSelectInput()` and `selectizeInput()` use the
 #' JavaScript library \pkg{selectize.js}
-#' (<https://github.com/selectize/selectize.js>) to instead of the basic
+#' (<https://selectize.dev/>) to instead of the basic
 #' select input element. To use the standard HTML select input element, use
 #' `selectInput()` with `selectize=FALSE`.
 #'
@@ -383,7 +383,7 @@ varSelectInput <- function(
 
 #' @rdname varSelectInput
 #' @param ... Arguments passed to `varSelectInput()`.
-#' @param options A list of options. See the documentation of \pkg{selectize.js}
+#' @param options A list of options. See the documentation of \pkg{selectize.js}(<https://selectize.dev/docs/usage>)
 #'   for possible options (character option values inside [base::I()] will
 #'   be treated as literal JavaScript code; see [renderDataTable()]
 #'   for details).

@@ -272,10 +272,10 @@ test_that("quoToFunction handles nested quosures", {
 
 
 test_that("toJSON can set digits using options - default", {
-  # withr::local_options(list())
+  withr::local_options(list(shiny.json.digits = NULL))
   expect_equal(
     as.character(toJSON(pi)),
-    "[3.14159265358979]"
+    "[3.141592653589793]"
   )
 })
 test_that("toJSON can set digits using options - number", {

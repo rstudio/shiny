@@ -48,32 +48,6 @@ is_installed <- function(pkg, version = NULL) {
   installed && isTRUE(get_package_version(pkg) >= version)
 }
 
-register_upgrade_message <- function(pkg, version, error = FALSE) {
-
-  msg <- sprintf(
-    "This version of '%s' is designed to work with '%s' >= %s.
-    Please upgrade via install.packages('%s').",
-    environmentName(environment(register_upgrade_message)),
-    pkg, version, pkg
-  )
-
-  cond <- if (error) stop else packageStartupMessage
-
-  if (pkg %in% loadedNamespaces() && !is_installed(pkg, version)) {
-    cond(msg)
-  }
-
-  # Always register hook in case pkg is loaded at some
-  # point the future (or, potentially, but less commonly,
-  # unloaded & reloaded)
-  setHook(
-    packageEvent(pkg, "onLoad"),
-    function(...) {
-      if (!is_installed(pkg, version)) cond(msg)
-    }
-  )
-}
-
 # Simplified version rlang:::s3_register() that just uses
 # warning() instead of rlang::warn() when registration fails
 # https://github.com/r-lib/rlang/blob/main/R/compat-s3-register.R
@@ -190,11 +164,9 @@ system_file <- function(..., package = "base") {
   normalizePath(files, winslash = "/")
 }
 
-# A wrapper for `system.file()`, which caches the results, because
-# `system.file()` can be slow. Note that because of caching, if
-# `system_file_cached()` is called on a package that isn't installed, then the
-# package is installed, and then `system_file_cached()` is called again, it will
-# still return "".
+# A wrapper for `system.file()`, which caches the package path because
+# `system.file()` can be slow. If a package is not installed, the result won't
+# be cached.
 system_file_cached <- local({
   pkg_dir_cache <- character()
 
@@ -206,7 +178,9 @@ system_file_cached <- local({
     not_cached <- is.na(match(package, names(pkg_dir_cache)))
     if (not_cached) {
       pkg_dir <- system.file(package = package)
-      pkg_dir_cache[[package]] <<- pkg_dir
+      if (nzchar(pkg_dir)) {
+        pkg_dir_cache[[package]] <<- pkg_dir
+      }
     } else {
       pkg_dir <- pkg_dir_cache[[package]]
     }

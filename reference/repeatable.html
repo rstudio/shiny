@@ -19,7 +19,7 @@ be passed in explicitly if desired; otherwise, a random number is used."><meta p
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.4.1</span>
       </span>
     </div>
 
@@ -88,13 +88,13 @@ current seed by snapshotting and restoring
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">rnormA</span> <span class="op">&lt;-</span> <span class="fu">repeatable</span><span class="op">(</span><span class="va">rnorm</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">rnormB</span> <span class="op">&lt;-</span> <span class="fu">repeatable</span><span class="op">(</span><span class="va">rnorm</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">rnormA</span><span class="op">(</span><span class="fl">3</span><span class="op">)</span>  <span class="co"># [1]  1.8285879 -0.7468041 -0.4639111</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  0.08313151 -0.46888218  1.47745247</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  0.3118876 -0.6051341 -0.6587273</span>
 <span class="r-in"><span><span class="fu">rnormA</span><span class="op">(</span><span class="fl">3</span><span class="op">)</span>  <span class="co"># [1]  1.8285879 -0.7468041 -0.4639111</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  0.08313151 -0.46888218  1.47745247</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  0.3118876 -0.6051341 -0.6587273</span>
 <span class="r-in"><span><span class="fu">rnormA</span><span class="op">(</span><span class="fl">5</span><span class="op">)</span>  <span class="co"># [1]  1.8285879 -0.7468041 -0.4639111 -1.6510126 -1.4686924</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  0.08313151 -0.46888218  1.47745247 -0.94967524  1.21982959</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  0.3118876 -0.6051341 -0.6587273  1.0972098  1.4104816</span>
 <span class="r-in"><span><span class="fu">rnormB</span><span class="op">(</span><span class="fl">5</span><span class="op">)</span>  <span class="co"># [1] -0.7946034  0.2568374 -0.6567597  1.2451387 -0.8375699</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -2.5018828 -3.0153637  1.6302513  0.4663987  0.8517662</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.4980923  1.8057764  0.4091506  0.1696047 -0.1061213</span>
 </code></pre></div>
     </div>
   </div>

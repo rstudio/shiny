@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.4.9002</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.4</span>
       </span>
     </div>
 
@@ -48,25 +48,11 @@
     </div>
 
     <div class="section level2">
-<h2 class="page-header" data-toc-text="1.7.4.9002" id="shiny-1749002">shiny 1.7.4.9002<a class="anchor" aria-label="anchor" href="#shiny-1749002"></a></h2>
+<h2 class="page-header" data-toc-text="1.7.4.1" id="shiny-1741">shiny 1.7.4.1<a class="anchor" aria-label="anchor" href="#shiny-1741"></a></h2>
 <div class="section level3">
-<h3 id="full-changelog-1-7-4-9002">Full changelog<a class="anchor" aria-label="anchor" href="#full-changelog-1-7-4-9002"></a></h3>
-<div class="section level4">
-<h4 id="breaking-changes-1-7-4-9002">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-1-7-4-9002"></a></h4>
-</div>
-<div class="section level4">
-<h4 id="new-features-and-improvements-1-7-4-9002">New features and improvements<a class="anchor" aria-label="anchor" href="#new-features-and-improvements-1-7-4-9002"></a></h4>
-<ul><li><p>Closed <a href="https://github.com/rstudio/shiny/issues/789" class="external-link">#789</a>: Dynamic UI is now rendered asynchronously, thanks in part to the newly exported <code>Shiny.renderDependenciesAsync()</code>, <code>Shiny.renderHtmlAsync()</code>, and <code>Shiny.renderContentAsync()</code>. Importantly, this means <code>&lt;script&gt;</code> tags are now loaded asynchronously (the old way used <code>XMLHttpRequest</code>, which is synchronous). In addition, <code>Shiny</code> now manages a queue of async tasks (exposed via <code>Shiny.shinyapp.taskQueue</code>) so that order of execution is preserved. (<a href="https://github.com/rstudio/shiny/issues/3666" class="external-link">#3666</a>)</p></li>
-<li><p>For <code><a href="../reference/reactiveValues.html">reactiveValues()</a></code> objects, whenever the <code>$names()</code> or <code>$values()</code> methods are called, the keys are now returned in the order that they were inserted. (<a href="https://github.com/rstudio/shiny/issues/3774" class="external-link">#3774</a>)</p></li>
-<li><p><code>Map</code> objects are now initialized at load time instead of build time. This avoids potential problems that could arise from storing <code>fastmap</code> objects into the built Shiny package. (<a href="https://github.com/rstudio/shiny/issues/3775" class="external-link">#3775</a>)</p></li>
-<li><p>Allow for <code>shiny:::toJSON()</code> to respect if <code>digits=</code> has class <code>"AsIs"</code> which represents if <code>use_signif=</code> is <code>TRUE</code> or <code>FALSE</code>. This is useful for testing to keep the digits smaller. For example, setting <code>options(shiny.json.digits = 4)</code> will save 4 digits after the decimal, rather than the default of <code>I(16)</code> which will save 16 significant digits. (<a href="https://github.com/rstudio/shiny/issues/3819" class="external-link">#3819</a>)</p></li>
+<h3 id="full-changelog-1-7-4-1">Full changelog<a class="anchor" aria-label="anchor" href="#full-changelog-1-7-4-1"></a></h3>
+<ul><li>Closed <a href="https://github.com/rstudio/shiny/issues/3849" class="external-link">#3849</a>: In R-devel, a warning was raised when Shiny was loaded because <code><a href="https://rdrr.io/r/base/numeric_version.html" class="external-link">as.numeric_version()</a></code> was called with a number instead of a string. (<a href="https://github.com/rstudio/shiny/issues/3850" class="external-link">#3850</a>)</li>
 </ul></div>
-<div class="section level4">
-<h4 id="bug-fixes-1-7-4-9002">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-7-4-9002"></a></h4>
-<ul><li><p>Fixed <a href="https://github.com/rstudio/shiny/issues/3771" class="external-link">#3771</a>: Sometimes the error <code>ion.rangeSlider.min.js: i.stopPropagation is not a function</code> would appear in the JavaScript console. (<a href="https://github.com/rstudio/shiny/issues/3772" class="external-link">#3772</a>)</p></li>
-<li><p>Fixed <a href="https://github.com/rstudio/shiny/issues/3833" class="external-link">#3833</a>: When <code>width</code> is provided to <code><a href="../reference/textAreaInput.html">textAreaInput()</a></code>, we now correctly set the width of the <code>&lt;textarea&gt;</code> element. (<a href="https://github.com/rstudio/shiny/issues/3838" class="external-link">#3838</a>)</p></li>
-</ul></div>
-</div>
 </div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.7.4" id="shiny-174">shiny 1.7.4<small>2022-12-15</small><a class="anchor" aria-label="anchor" href="#shiny-174"></a></h2>

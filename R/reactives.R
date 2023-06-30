@@ -2187,8 +2187,8 @@ maskReactiveContext <- function(expr) {
 #' @param autoDestroy If `TRUE` (the default), the observer will be
 #'   automatically destroyed when its domain (if any) ends.
 #' @param ignoreNULL Whether the action should be triggered (or value
-#'   calculated, in the case of `eventReactive`) when the input is
-#'   `NULL`. See Details.
+#'   calculated, in the case of `eventReactive`) when the input event expression
+#'   is `NULL`. See Details.
 #' @param ignoreInit If `TRUE`, then, when this `observeEvent` is
 #'   first created/initialized, ignore the `handlerExpr` (the second
 #'   argument), whether it is otherwise supposed to run or not. The default is

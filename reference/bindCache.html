@@ -23,7 +23,7 @@ bindCache() to dramatically improve performance when used correctly."><meta prop
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.4.9002</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.4.1</span>
       </span>
     </div>
 
@@ -202,8 +202,8 @@ global.R. For example, this will create a cache with 500 MB of space
 instead of the default 200 MB:</p>
 <p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">shinyOptions</span>(<span class="at">cache =</span> cachem<span class="sc">::</span><span class="fu">cache_mem</span>(<span class="at">max_size =</span> <span class="fl">500e6</span>))</span></code></pre><p></p></div>
 <p>To use different settings for a session-scoped cache, you can set
-<code>session$cache</code> at the top of your server function. By default, it will
-create a 200 MB memory cache for each session, but you can replace it with
+<code>self$cache</code> at the top of your server function. By default, it will create
+a 200 MB memory cache for each session, but you can replace it with
 something different. To use the session-scoped cache, you must also call
 <code>bindCache()</code> with <code>cache="session"</code>. This will create a 100 MB cache for
 the session:</p>

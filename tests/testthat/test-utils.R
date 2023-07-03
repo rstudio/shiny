@@ -295,5 +295,5 @@ test_that("toJSON can set digits using options - asis number", {
 
 
 test_that("warning is not thrown when loading htmlwidgets", {
-  expect_warnings(library(htmlwidgets), NA)
+  expect_warning(library(htmlwidgets), NA)
 })

@@ -207,5 +207,4 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RdMacros: lifecycle
 Config/testthat/edition: 3
-Config/Needs/check:
-  shinytest2
+Config/Needs/check: shinytest2

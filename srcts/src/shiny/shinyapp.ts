@@ -1,5 +1,11 @@
 import $ from "jquery";
-import { $escape, hasOwnProperty, randomId, scopeExprToFunc } from "../utils";
+import {
+  $escape,
+  escapedIdSelector,
+  hasOwnProperty,
+  randomId,
+  scopeExprToFunc,
+} from "../utils";
 import {
   getShinyCreateWebsocket,
   getShinyOnCustomMessage,
@@ -713,7 +719,9 @@ class ShinyApp {
       (message: Array<{ id: string; message: unknown }>) => {
         // inputMessages should be an array
         for (let i = 0; i < message.length; i++) {
-          const $obj = $(".shiny-bound-input#" + $escape(message[i].id));
+          const inputSelector =
+            ".shiny-bound-input" + escapedIdSelector(message[i].id);
+          const $obj = $(inputSelector);
           const inputBinding: InputBinding = $obj.data("shiny-input-binding");
 
           // Dispatch the message to the appropriate input object
@@ -940,7 +948,7 @@ class ShinyApp {
     });
 
     function getTabset(id: string) {
-      const $tabset = $("#" + $escape(id));
+      const $tabset = escapedIdSelector(id);
 
       if ($tabset.length === 0)
         throw (

@@ -5859,6 +5859,15 @@
       return val;
     return val.replace(/([!"#$%&'()*+,./:;<=>?@[\\\]^`{|}~])/g, "\\$1");
   }
+  function escapedIdSelector(val) {
+    val = $escape(val);
+    if (val.indexOf(" ") === -1)
+      return "#" + val;
+    console.warn("[shiny] Invalid ID, should not include spaces.", {
+      id: val
+    });
+    return '[id="'.concat(val, '"]');
+  }
   function mapValues(obj, f) {
     var newObj = {};
     Object.keys(obj).forEach(function(key) {
@@ -18328,7 +18337,8 @@
         });
         addMessageHandler("inputMessages", function(message) {
           for (var i = 0; i < message.length; i++) {
-            var $obj = (0, import_jquery38.default)(".shiny-bound-input#" + $escape(message[i].id));
+            var inputSelector = ".shiny-bound-input" + escapedIdSelector(message[i].id);
+            var $obj = (0, import_jquery38.default)(inputSelector);
             var inputBinding = $obj.data("shiny-input-binding");
             if ($obj.length > 0) {
               if (!$obj.attr("aria-live"))
@@ -18593,7 +18603,7 @@
           }
         });
         function getTabset(id) {
-          var $tabset = (0, import_jquery38.default)("#" + $escape(id));
+          var $tabset = escapedIdSelector(id);
           if ($tabset.length === 0)
             throw "There is no tabsetPanel (or navbarPage or navlistPanel) with id equal to '" + id + "'";
           return $tabset;

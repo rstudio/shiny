@@ -16,12 +16,6 @@
   s3_register("knitr::knit_print", "reactive")
   s3_register("knitr::knit_print", "shiny.appobj")
   s3_register("knitr::knit_print", "shiny.render.function")
-
-  # Shiny 1.4.0 bumps jQuery 1.x to 3.x, which caused a problem
-  # with static-rendering of htmlwidgets, and htmlwidgets 1.5
-  # includes a fix for this problem
-  # https://github.com/rstudio/shiny/issues/2630
-  register_upgrade_message("htmlwidgets", 1.5)
 }
 
 

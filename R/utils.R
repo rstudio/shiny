@@ -4,7 +4,7 @@ NULL
 
 # @staticimports pkg:staticimports
 #   is_installed get_package_version system_file
-#   s3_register register_upgrade_message
+#   s3_register
 #   any_named any_unnamed
 
 #' Make a random number generator repeatable

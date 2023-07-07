@@ -121,6 +121,30 @@ insertUI <- function(selector,
 
 #' @rdname insertUI
 #' @export
+replaceUI <- function(selector, ui, multiple = FALSE, immediate = FALSE, session = getDefaultReactiveDomain()) {
+  
+  force(selector)
+  force(ui)
+  force(session)
+  force(multiple)
+  
+  content <- shiny:::processDeps(ui, session)
+  
+  callback <- function() {
+    session$sendInsertUI(selector = selector,
+                         multiple = multiple,
+                         where = "replace",
+                         content = shiny:::processDeps(ui, session))
+  }
+  
+  if (!immediate) session$onFlushed(callback, once = TRUE)
+  else callback()
+  
+}
+
+
+#' @rdname insertUI
+#' @export
 removeUI <- function(selector,
   multiple = FALSE,
   immediate = FALSE,

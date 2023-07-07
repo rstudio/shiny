@@ -15,6 +15,7 @@ declare function asArray<T>(value: T | T[] | null | undefined): T[];
 declare function mergeSort<Item>(list: Item[], sortfunc: (a: Item, b: Item) => boolean | number): Item[];
 declare function $escape(val: undefined): undefined;
 declare function $escape(val: string): string;
+declare function escapedIdSelector(val: string): string;
 declare function mapValues<T extends {
     [key: string]: any;
 }, R>(obj: T, f: (value: MapValuesUnion<T>, key: string, object: typeof obj) => R): MapWithResult<T, R>;
@@ -26,4 +27,4 @@ declare function updateLabel(labelTxt: string | undefined, labelNode: JQuery<HTM
 declare function getComputedLinkColor(el: HTMLElement): string;
 declare function isBS3(): boolean;
 declare function toLowerCase<T extends string>(str: T): Lowercase<T>;
-export { escapeHTML, randomId, strToBool, getStyle, padZeros, roundSignif, parseDate, formatDateUTC, makeResizeFilter, pixelRatio, scopeExprToFunc, asArray, mergeSort, $escape, mapValues, isnan, _equal, equal, compareVersion, updateLabel, getComputedLinkColor, hasOwnProperty, hasDefinedProperty, isBS3, toLowerCase, };
+export { escapeHTML, randomId, strToBool, getStyle, padZeros, roundSignif, parseDate, formatDateUTC, makeResizeFilter, pixelRatio, scopeExprToFunc, asArray, mergeSort, $escape, escapedIdSelector, mapValues, isnan, _equal, equal, compareVersion, updateLabel, getComputedLinkColor, hasOwnProperty, hasDefinedProperty, isBS3, toLowerCase, };

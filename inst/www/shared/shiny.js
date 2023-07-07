@@ -18603,7 +18603,7 @@
           }
         });
         function getTabset(id) {
-          var $tabset = escapedIdSelector(id);
+          var $tabset = (0, import_jquery38.default)(escapedIdSelector(id));
           if ($tabset.length === 0)
             throw "There is no tabsetPanel (or navbarPage or navlistPanel) with id equal to '" + id + "'";
           return $tabset;

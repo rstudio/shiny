@@ -948,7 +948,7 @@ class ShinyApp {
     });
 
     function getTabset(id: string) {
-      const $tabset = escapedIdSelector(id);
+      const $tabset = $(escapedIdSelector(id));
 
       if ($tabset.length === 0)
         throw (

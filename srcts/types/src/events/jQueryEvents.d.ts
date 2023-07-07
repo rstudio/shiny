@@ -1,7 +1,7 @@
 import type { JQueryEventHandlerBase } from "bootstrap";
 import "jquery";
-declare type EvtPrefix<T extends string> = `${T}.${string}`;
-declare type EvtFn<T extends JQuery.Event> = ((evt: T) => void) | null | undefined;
+type EvtPrefix<T extends string> = `${T}.${string}`;
+type EvtFn<T extends JQuery.Event> = ((evt: T) => void) | null | undefined;
 declare global {
     interface JQuery {
         on(events: EvtPrefix<"change">, handler: EvtFn<JQuery.DragEvent>): this;

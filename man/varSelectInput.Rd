@@ -42,7 +42,7 @@ but when \code{size} is set, it will be a box instead.}
 
 \item{...}{Arguments passed to \code{varSelectInput()}.}
 
-\item{options}{A list of options. See the documentation of \pkg{selectize.js}
+\item{options}{A list of options. See the documentation of \pkg{selectize.js}(\url{https://selectize.dev/docs/usage})
 for possible options (character option values inside \code{\link[base:AsIs]{base::I()}} will
 be treated as literal JavaScript code; see \code{\link[=renderDataTable]{renderDataTable()}}
 for details).}
@@ -57,7 +57,7 @@ from the column names of a data frame.
 \details{
 By default, \code{varSelectInput()} and \code{selectizeInput()} use the
 JavaScript library \pkg{selectize.js}
-(\url{https://github.com/selectize/selectize.js}) to instead of the basic
+(\url{https://selectize.dev/}) to instead of the basic
 select input element. To use the standard HTML select input element, use
 \code{selectInput()} with \code{selectize=FALSE}.
 }

@@ -1,6 +1,6 @@
 import { TextInputBindingBase } from "./text";
-declare type NumberHTMLElement = HTMLInputElement;
-declare type NumberReceiveMessageData = {
+type NumberHTMLElement = HTMLInputElement;
+type NumberReceiveMessageData = {
     label: string;
     value?: string | null;
     min?: string | null;

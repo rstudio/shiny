@@ -45,6 +45,10 @@ For more examples and inspiration, check out the [Shiny User Gallery](https://sh
 
 For help with learning fundamental Shiny programming concepts, check out the [Mastering Shiny](https://mastering-shiny.org/) book and the [Shiny Tutorial](https://shiny.rstudio.com/tutorial/). The former is currently more up-to-date with modern Shiny features, whereas the latter takes a deeper, more visual, dive into fundamental concepts.
 
+## Join the conversation
+
+If you want to chat about Shiny, meet other developers, or help us decide what to work on next, [join us on Discord](https://discord.gg/yMGCamUMnS).
+
 ## Getting Help
 
 To ask a question about Shiny, please use the [RStudio Community website](https://community.rstudio.com/new-topic?category=shiny&tags=shiny).

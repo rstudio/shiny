@@ -1,5 +1,5 @@
 import { InputBinding } from "./inputBinding";
-declare type ActionButtonReceiveMessageData = {
+type ActionButtonReceiveMessageData = {
     label?: string;
     icon?: string | [];
 };

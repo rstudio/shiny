@@ -1,15 +1,15 @@
 import type { Coordmap } from "./initCoordmap";
 import type { Panel } from "./initPanelScales";
 import type { Offset } from "./findbox";
-declare type Bounds = {
+type Bounds = {
     xmin: number;
     xmax: number;
     ymin: number;
     ymax: number;
 };
-declare type BoundsCss = Bounds;
-declare type BoundsData = Bounds;
-declare type ImageState = {
+type BoundsCss = Bounds;
+type BoundsData = Bounds;
+type ImageState = {
     brushing: boolean;
     dragging: boolean;
     resizing: boolean;
@@ -26,7 +26,7 @@ declare type ImageState = {
     panel: Panel | null;
     changeStartBounds: Bounds;
 };
-declare type BrushOpts = {
+type BrushOpts = {
     brushDirection: "x" | "xy" | "y";
     brushClip: boolean;
     brushFill: string;
@@ -36,8 +36,9 @@ declare type BrushOpts = {
     brushDelay?: number;
     brushResetOnNew?: boolean;
 };
-declare type Brush = {
+type Brush = {
     reset: () => void;
+    hasOldBrush: () => boolean;
     importOldBrush: () => void;
     isInsideBrush: (offsetCss: Offset) => boolean;
     isInResizeArea: (offsetCss: Offset) => boolean;

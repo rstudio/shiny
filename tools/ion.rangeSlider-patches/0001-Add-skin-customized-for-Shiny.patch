@@ -3,8 +3,9 @@ new file mode 100644
 index 00000000..ba052f8b
 --- /dev/null
 +++ b/inst/www/shared/ionrangeslider/scss/shiny.scss
-@@ -0,0 +1,201 @@
+@@ -0,0 +1,202 @@
 +/* 'shiny' skin for Ion.RangeSlider, largely based on the 'big' skin, but with smaller dimensions, grayscale grid text, and without gradients
++© Posit, PBC, 2023
 +© RStudio, Inc, 2014
 +© Denis Ineshin, 2014  https://github.com/IonDen
 +© guybowden, 2014  https://github.com/guybowden

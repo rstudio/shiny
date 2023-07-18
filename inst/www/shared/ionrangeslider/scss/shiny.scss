@@ -79,6 +79,20 @@ $font-family: $font-family-base !default;
     background-color: $line_bg_color;
     border: $line_border;
     @include border-radius-shim($line_height);
+
+    // Increase the touch target area of the slider line
+    overflow: visible;
+    &::before {
+      content: "";
+      display: block;
+      position: relative;
+      cursor: pointer;
+      width: 100%;
+      height: $handle_height + $line_height / 2;
+      top: -($handle_height / 2);
+      bottom: $handle_height / 2;
+      z-index: 1; // raise touch area above grid
+    }
   }
 
   .#{$name}-bar {
@@ -87,9 +101,22 @@ $font-family: $font-family-base !default;
     border-top: 1px solid $bar_color;
     border-bottom: 1px solid $bar_color;
     background: $bar_color;
+    z-index: 2;
 
     &--single {
       @include border-radius-shim($line_height 0 0 $line_height);
+    }
+
+    // Increase the touch target area of the slider bar
+    &::before {
+      content: "";
+      display: block;
+      position: relative;
+      width: 100%;
+      height: $handle_height + $line_height / 2;
+      top: -($handle_height / 2);
+      bottom: $handle_height / 2;
+      z-index: 2; // raise touch area above line touch target
     }
   }
 
@@ -114,6 +141,7 @@ $font-family: $font-family-base !default;
     background-color: $handle_color;
     box-shadow: $handle_box_shadow;
     border-radius: $handle_width;
+    z-index: 2;
 
     &.state_hover,
     &:hover {

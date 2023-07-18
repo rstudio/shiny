@@ -3,7 +3,7 @@ new file mode 100644
 index 00000000..ba052f8b
 --- /dev/null
 +++ b/inst/www/shared/ionrangeslider/scss/shiny.scss
-@@ -0,0 +1,202 @@
+@@ -0,0 +1,201 @@
 +/* 'shiny' skin for Ion.RangeSlider, largely based on the 'big' skin, but with smaller dimensions, grayscale grid text, and without gradients
 +© Posit, PBC, 2023
 +© RStudio, Inc, 2014
@@ -93,11 +93,10 @@ index 00000000..ba052f8b
 +      content: "";
 +      display: block;
 +      position: relative;
-+      cursor: pointer;
++      cursor: s-resize; // downward arrow
 +      width: 100%;
-+      height: $handle_height + $line_height / 2;
-+      top: -($handle_height / 2);
-+      bottom: $handle_height / 2;
++      height: $handle_height;
++      top: -(($handle_height - $line_height / 2) / 2);
 +      z-index: 1; // raise touch area above grid
 +    }
 +  }
@@ -119,10 +118,10 @@ index 00000000..ba052f8b
 +      content: "";
 +      display: block;
 +      position: relative;
++      cursor: s-resize; // downard arrow, overwritten when a range
 +      width: 100%;
-+      height: $handle_height + $line_height / 2;
-+      top: -($handle_height / 2);
-+      bottom: $handle_height / 2;
++      height: $handle_height;
++      top: -(($handle_height - $line_height / 2) / 2);
 +      z-index: 2; // raise touch area above line touch target
 +    }
 +  }

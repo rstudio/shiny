@@ -87,11 +87,10 @@ $font-family: $font-family-base !default;
       content: "";
       display: block;
       position: relative;
-      cursor: pointer;
+      cursor: s-resize; // downward arrow
       width: 100%;
-      height: $handle_height + $line_height / 2;
-      top: -($handle_height / 2);
-      bottom: $handle_height / 2;
+      height: $handle_height;
+      top: -(($handle_height - $line_height / 2) / 2);
       z-index: 1; // raise touch area above grid
     }
   }
@@ -113,10 +112,10 @@ $font-family: $font-family-base !default;
       content: "";
       display: block;
       position: relative;
+      cursor: s-resize; // downard arrow, overwritten when a range
       width: 100%;
-      height: $handle_height + $line_height / 2;
-      top: -($handle_height / 2);
-      bottom: $handle_height / 2;
+      height: $handle_height;
+      top: -(($handle_height - $line_height / 2) / 2);
       z-index: 2; // raise touch area above line touch target
     }
   }

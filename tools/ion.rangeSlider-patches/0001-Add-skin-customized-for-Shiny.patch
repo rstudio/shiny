@@ -107,6 +107,7 @@ index 00000000..ba052f8b
 +    border-top: 1px solid $bar_color;
 +    border-bottom: 1px solid $bar_color;
 +    background: $bar_color;
++    cursor: s-resize; // downard arrow, overwritten when a range
 +    z-index: 2;
 +
 +    &--single {
@@ -118,7 +119,6 @@ index 00000000..ba052f8b
 +      content: "";
 +      display: block;
 +      position: relative;
-+      cursor: s-resize; // downard arrow, overwritten when a range
 +      width: 100%;
 +      height: $handle_height;
 +      top: -(($handle_height - $line_height / 2) / 2);

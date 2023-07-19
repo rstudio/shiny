@@ -1,4 +1,4 @@
-/*! shiny 1.7.4.9002 | (c) 2012-2023 RStudio, PBC. | License: GPL-3 | file LICENSE */
+/*! shiny 1.7.4.9003 | (c) 2012-2023 RStudio, PBC. | License: GPL-3 | file LICENSE */
 "use strict";
 (function() {
   var __create = Object.create;
@@ -19194,7 +19194,7 @@
   var windowShiny2;
   function setShiny(windowShiny_) {
     windowShiny2 = windowShiny_;
-    windowShiny2.version = "1.7.4.9002";
+    windowShiny2.version = "1.7.4.9003";
     var _initInputBindings = initInputBindings(), inputBindings = _initInputBindings.inputBindings, fileInputBinding2 = _initInputBindings.fileInputBinding;
     var _initOutputBindings = initOutputBindings(), outputBindings = _initOutputBindings.outputBindings;
     setFileInputBinding(fileInputBinding2);

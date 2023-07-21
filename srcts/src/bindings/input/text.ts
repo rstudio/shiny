@@ -33,7 +33,7 @@ class TextInputBindingBase extends InputBinding {
 
       return $inputs.not('input[type="text"][id$="-selectized"]');
     } else {
-      return $(scope).find('input.shiny-input-text');
+      return $(scope).find("input.shiny-input-text");
     }
   }
 

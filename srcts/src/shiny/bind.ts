@@ -8,6 +8,7 @@ import type {
 } from "../inputPolicies";
 import { shinyAppBindOutput, shinyAppUnbindOutput } from "./initedMethods";
 import { sendImageSizeFns } from "./sendImageSize";
+import { filterBindingMatchesAllowedOnly } from "../bindings/input/_filterBindingMatches";
 
 const boundInputs: {
   [key: string]: { binding: InputBinding; node: HTMLElement };
@@ -78,7 +79,10 @@ function bindInputs(
 
   for (let i = 0; i < bindings.length; i++) {
     const binding = bindings[i].binding;
-    const matches = binding.find(scope) || [];
+    let matches = binding.find(scope) || [];
+
+    matches = filterBindingMatchesAllowedOnly(matches);
+    if (matches.length === 0) continue;
 
     for (let j = 0; j < matches.length; j++) {
       const el = matches[j];

@@ -3,6 +3,7 @@ import { InputBinding } from "./inputBinding";
 import { $escape, hasDefinedProperty, updateLabel } from "../../utils";
 import { indirectEval } from "../../utils/eval";
 import type { NotUndefined } from "../../utils/extraTypes";
+import { filterBindingMatchesIfStrict } from "./_filterBindingMatches";
 
 type SelectHTMLElement = HTMLSelectElement & { nonempty: boolean };
 
@@ -42,11 +43,8 @@ function isSelectize(el: HTMLElement): boolean {
 
 class SelectInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
-    if (exports.bindGenericInputs) {
-      return $(scope).find("select");
-    } else {
-      return $(scope).find("select.shiny-input-select");
-    }
+    const matches = $(scope).find("select");
+    return filterBindingMatchesIfStrict(matches, "shiny-input-select");
   }
   getType(el: HTMLElement): string | null {
     const $el = $(el);

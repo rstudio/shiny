@@ -1,6 +1,7 @@
 import $ from "jquery";
 import { InputBinding } from "./inputBinding";
 import { hasDefinedProperty } from "../../utils";
+import { filterBindingMatchesIfStrict } from "./_filterBindingMatches";
 
 type CheckedHTMLElement = HTMLInputElement;
 
@@ -9,11 +10,8 @@ type CheckboxReceiveMessageData = { value?: CheckboxChecked; label?: string };
 
 class CheckboxInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
-    if (exports.bindGenericInputs) {
-      return $(scope).find('input[type="checkbox"]');
-    } else {
-      return $(scope).find('input[type="checkbox"].shiny-input-checkbox');
-    }
+    const matches = $(scope).find('input[type="checkbox"]');
+    return filterBindingMatchesIfStrict(matches, "shiny-input-checkbox");
   }
   getValue(el: CheckedHTMLElement): CheckboxChecked {
     return el.checked;

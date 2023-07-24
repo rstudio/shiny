@@ -1,14 +1,12 @@
 import $ from "jquery";
 
 import { TextInputBinding } from "./text";
+import { filterBindingMatchesIfStrict } from "./_filterBindingMatches";
 
 class TextareaInputBinding extends TextInputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
-    if (exports.bindGenericInputs) {
-      return $(scope).find("textarea");
-    } else {
-      return $(scope).find("textarea.shiny-input-textarea");
-    }
+    const matches = $(scope).find("textarea");
+    return filterBindingMatchesIfStrict(matches, "shiny-input-textarea");
   }
 }
 

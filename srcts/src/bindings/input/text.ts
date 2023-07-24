@@ -2,6 +2,7 @@ import $ from "jquery";
 import { $escape, updateLabel, hasDefinedProperty } from "../../utils";
 
 import { InputBinding } from "./inputBinding";
+import { filterBindingMatchesIfStrict } from "./_filterBindingMatches";
 
 // interface TextHTMLElement extends NameValueHTMLElement {
 //   placeholder: any;
@@ -22,19 +23,15 @@ function getLabelNode(el: HTMLElement): JQuery<HTMLElement> {
 
 class TextInputBindingBase extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
-    if (exports.bindGenericInputs) {
-      const $inputs = $(scope).find(
-        'input[type="text"], input[type="search"], input[type="url"], input[type="email"]'
-      );
-      // selectize.js 0.12.4 inserts a hidden text input with an
-      // id that ends in '-selectized'. The .not() selector below
-      // is to prevent textInputBinding from accidentally picking up
-      // this hidden element as a shiny input (#2396)
-
-      return $inputs.not('input[type="text"][id$="-selectized"]');
-    } else {
-      return $(scope).find("input.shiny-input-text");
-    }
+    let matches = $(scope).find(
+      'input[type="text"], input[type="search"], input[type="url"], input[type="email"]'
+    );
+    // selectize.js 0.12.4 inserts a hidden text input with an
+    // id that ends in '-selectized'. The .not() selector below
+    // is to prevent textInputBinding from accidentally picking up
+    // this hidden element as a shiny input (#2396)
+    matches = matches.not('input[type="text"][id$="-selectized"]');
+    return filterBindingMatchesIfStrict(matches, "shiny-input-text");
   }
 
   getId(el: TextHTMLElement): string {

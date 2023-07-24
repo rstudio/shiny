@@ -3202,31 +3202,6 @@
     }
   });
 
-  // node_modules/core-js/internals/string-trim-forced.js
-  var require_string_trim_forced = __commonJS({
-    "node_modules/core-js/internals/string-trim-forced.js": function(exports, module) {
-      var PROPER_FUNCTION_NAME2 = require_function_name().PROPER;
-      var fails12 = require_fails();
-      var whitespaces = require_whitespaces();
-      var non = "\u200B\x85\u180E";
-      module.exports = function(METHOD_NAME) {
-        return fails12(function() {
-          return !!whitespaces[METHOD_NAME]() || non[METHOD_NAME]() !== non || PROPER_FUNCTION_NAME2 && whitespaces[METHOD_NAME].name !== METHOD_NAME;
-        });
-      };
-    }
-  });
-
-  // node_modules/core-js/internals/is-data-descriptor.js
-  var require_is_data_descriptor = __commonJS({
-    "node_modules/core-js/internals/is-data-descriptor.js": function(exports, module) {
-      var hasOwn4 = require_has_own_property();
-      module.exports = function(descriptor) {
-        return descriptor !== void 0 && (hasOwn4(descriptor, "value") || hasOwn4(descriptor, "writable"));
-      };
-    }
-  });
-
   // node_modules/core-js/internals/iterator-close.js
   var require_iterator_close = __commonJS({
     "node_modules/core-js/internals/iterator-close.js": function(exports, module) {
@@ -3411,6 +3386,31 @@
         } catch (error) {
         }
         return ITERATION_SUPPORT;
+      };
+    }
+  });
+
+  // node_modules/core-js/internals/string-trim-forced.js
+  var require_string_trim_forced = __commonJS({
+    "node_modules/core-js/internals/string-trim-forced.js": function(exports, module) {
+      var PROPER_FUNCTION_NAME2 = require_function_name().PROPER;
+      var fails12 = require_fails();
+      var whitespaces = require_whitespaces();
+      var non = "\u200B\x85\u180E";
+      module.exports = function(METHOD_NAME) {
+        return fails12(function() {
+          return !!whitespaces[METHOD_NAME]() || non[METHOD_NAME]() !== non || PROPER_FUNCTION_NAME2 && whitespaces[METHOD_NAME].name !== METHOD_NAME;
+        });
+      };
+    }
+  });
+
+  // node_modules/core-js/internals/is-data-descriptor.js
+  var require_is_data_descriptor = __commonJS({
+    "node_modules/core-js/internals/is-data-descriptor.js": function(exports, module) {
+      var hasOwn4 = require_has_own_property();
+      module.exports = function(descriptor) {
+        return descriptor !== void 0 && (hasOwn4(descriptor, "value") || hasOwn4(descriptor, "writable"));
       };
     }
   });
@@ -6306,12 +6306,23 @@
   var import_es_array_iterator3 = __toESM(require_es_array_iterator());
   var import_jquery5 = __toESM(require_jquery());
 
-  // node_modules/core-js/modules/es.array.filter.js
+  // node_modules/core-js/modules/es.array.from.js
   var $23 = require_export();
+  var from = require_array_from();
+  var checkCorrectnessOfIteration = require_check_correctness_of_iteration();
+  var INCORRECT_ITERATION = !checkCorrectnessOfIteration(function(iterable) {
+    Array.from(iterable);
+  });
+  $23({ target: "Array", stat: true, forced: INCORRECT_ITERATION }, {
+    from: from
+  });
+
+  // node_modules/core-js/modules/es.array.filter.js
+  var $24 = require_export();
   var $filter = require_array_iteration().filter;
   var arrayMethodHasSpeciesSupport4 = require_array_method_has_species_support();
   var HAS_SPECIES_SUPPORT3 = arrayMethodHasSpeciesSupport4("filter");
-  $23({ target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT3 }, {
+  $24({ target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT3 }, {
     filter: function filter(callbackfn) {
       return $filter(this, callbackfn, arguments.length > 1 ? arguments[1] : void 0);
     }
@@ -6324,11 +6335,22 @@
     if (el.dataset.shinyBindInputs) {
       return el.dataset.shinyBindInputs;
     }
-    var ancestorBindSetting2 = el.closest("[data-shiny-bind-inputs]");
-    if (!ancestorBindSetting2 || !(ancestorBindSetting2 instanceof HTMLElement)) {
+    if (!document.querySelector("[data-shiny-bind-inputs]")) {
       return "eager";
     }
-    return ancestorBindSetting2.dataset.shinyBindInputs;
+    var setAreas = Array.from(document.querySelectorAll("[data-shiny-bind-inputs]"));
+    for (var _i = 0, _setAreas = setAreas; _i < _setAreas.length; _i++) {
+      var area = _setAreas[_i];
+      if (area.contains(el)) {
+        var _ancestorBindSetting = el.closest("[data-shiny-bind-inputs]");
+        if (!(_ancestorBindSetting instanceof HTMLElement))
+          continue;
+        if (_ancestorBindSetting.dataset.shinyBindInputs) {
+          return _ancestorBindSetting.dataset.shinyBindInputs;
+        }
+      }
+    }
+    return "eager";
   }
   function filterBindingMatchesAllowedOnly(matches) {
     return matches.filter(function() {
@@ -6517,10 +6539,10 @@
   }(InputBinding);
 
   // node_modules/core-js/modules/es.string.trim.js
-  var $25 = require_export();
+  var $26 = require_export();
   var $trim = require_string_trim().trim;
   var forcedStringTrimMethod = require_string_trim_forced();
-  $25({ target: "String", proto: true, forced: forcedStringTrimMethod("trim") }, {
+  $26({ target: "String", proto: true, forced: forcedStringTrimMethod("trim") }, {
     trim: function trim2() {
       return $trim(this);
     }
@@ -6740,7 +6762,7 @@
   var import_jquery8 = __toESM(require_jquery());
 
   // node_modules/core-js/modules/es.reflect.get.js
-  var $27 = require_export();
+  var $28 = require_export();
   var call3 = require_function_call();
   var isObject4 = require_is_object();
   var anObject5 = require_an_object();
@@ -6758,12 +6780,12 @@
     if (isObject4(prototype = getPrototypeOf2(target)))
       return get(prototype, propertyKey, receiver);
   }
-  $27({ target: "Reflect", stat: true }, {
+  $28({ target: "Reflect", stat: true }, {
     get: get
   });
 
   // node_modules/core-js/modules/es.object.get-own-property-descriptor.js
-  var $28 = require_export();
+  var $29 = require_export();
   var fails9 = require_fails();
   var toIndexedObject2 = require_to_indexed_object();
   var nativeGetOwnPropertyDescriptor = require_object_get_own_property_descriptor().f;
@@ -6771,7 +6793,7 @@
   var FORCED6 = !DESCRIPTORS5 || fails9(function() {
     nativeGetOwnPropertyDescriptor(1);
   });
-  $28({ target: "Object", stat: true, forced: FORCED6, sham: !DESCRIPTORS5 }, {
+  $29({ target: "Object", stat: true, forced: FORCED6, sham: !DESCRIPTORS5 }, {
     getOwnPropertyDescriptor: function getOwnPropertyDescriptor2(it, key) {
       return nativeGetOwnPropertyDescriptor(toIndexedObject2(it), key);
     }
@@ -9417,17 +9439,6 @@
   // srcts/src/bindings/input/fileinput.ts
   var import_es_array_iterator17 = __toESM(require_es_array_iterator());
   var import_jquery20 = __toESM(require_jquery());
-
-  // node_modules/core-js/modules/es.array.from.js
-  var $40 = require_export();
-  var from = require_array_from();
-  var checkCorrectnessOfIteration = require_check_correctness_of_iteration();
-  var INCORRECT_ITERATION = !checkCorrectnessOfIteration(function(iterable) {
-    Array.from(iterable);
-  });
-  $40({ target: "Array", stat: true, forced: INCORRECT_ITERATION }, {
-    from: from
-  });
 
   // node_modules/core-js/modules/es.array.map.js
   var $41 = require_export();

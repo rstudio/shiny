@@ -6305,6 +6305,48 @@
   // srcts/src/bindings/input/checkbox.ts
   var import_es_array_iterator3 = __toESM(require_es_array_iterator());
   var import_jquery5 = __toESM(require_jquery());
+
+  // node_modules/core-js/modules/es.array.filter.js
+  var $23 = require_export();
+  var $filter = require_array_iteration().filter;
+  var arrayMethodHasSpeciesSupport4 = require_array_method_has_species_support();
+  var HAS_SPECIES_SUPPORT3 = arrayMethodHasSpeciesSupport4("filter");
+  $23({ target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT3 }, {
+    filter: function filter(callbackfn) {
+      return $filter(this, callbackfn, arguments.length > 1 ? arguments[1] : void 0);
+    }
+  });
+
+  // srcts/src/bindings/input/_filterBindingMatches.ts
+  function ancestorBindSetting(el) {
+    if (!(el instanceof HTMLElement))
+      return "eager";
+    if (el.dataset.shinyBindInputs) {
+      return el.dataset.shinyBindInputs;
+    }
+    var ancestorBindSetting2 = el.closest("[data-shiny-bind-inputs]");
+    if (!ancestorBindSetting2 || !(ancestorBindSetting2 instanceof HTMLElement)) {
+      return "eager";
+    }
+    return ancestorBindSetting2.dataset.shinyBindInputs;
+  }
+  function filterBindingMatchesAllowedOnly(matches) {
+    return matches.filter(function() {
+      return ancestorBindSetting(this) !== "none";
+    });
+  }
+  function filterBindingMatchesIfStrict(matches, inputClass) {
+    return matches.filter(function() {
+      var bindSetting = ancestorBindSetting(this);
+      if (bindSetting === "eager")
+        return true;
+      if (bindSetting === "strict")
+        return this.classList.contains(inputClass);
+      return false;
+    });
+  }
+
+  // srcts/src/bindings/input/checkbox.ts
   function _typeof3(obj) {
     "@babel/helpers - typeof";
     return _typeof3 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
@@ -6426,7 +6468,8 @@
     _createClass3(CheckboxInputBinding2, [{
       key: "find",
       value: function find2(scope) {
-        return (0, import_jquery5.default)(scope).find('input[type="checkbox"]');
+        var matches = (0, import_jquery5.default)(scope).find('input[type="checkbox"]');
+        return filterBindingMatchesIfStrict(matches, "shiny-input-checkbox");
       }
     }, {
       key: "getValue",
@@ -6474,10 +6517,10 @@
   }(InputBinding);
 
   // node_modules/core-js/modules/es.string.trim.js
-  var $24 = require_export();
+  var $25 = require_export();
   var $trim = require_string_trim().trim;
   var forcedStringTrimMethod = require_string_trim_forced();
-  $24({ target: "String", proto: true, forced: forcedStringTrimMethod("trim") }, {
+  $25({ target: "String", proto: true, forced: forcedStringTrimMethod("trim") }, {
     trim: function trim2() {
       return $trim(this);
     }
@@ -6697,7 +6740,7 @@
   var import_jquery8 = __toESM(require_jquery());
 
   // node_modules/core-js/modules/es.reflect.get.js
-  var $26 = require_export();
+  var $27 = require_export();
   var call3 = require_function_call();
   var isObject4 = require_is_object();
   var anObject5 = require_an_object();
@@ -6715,12 +6758,12 @@
     if (isObject4(prototype = getPrototypeOf2(target)))
       return get(prototype, propertyKey, receiver);
   }
-  $26({ target: "Reflect", stat: true }, {
+  $27({ target: "Reflect", stat: true }, {
     get: get
   });
 
   // node_modules/core-js/modules/es.object.get-own-property-descriptor.js
-  var $27 = require_export();
+  var $28 = require_export();
   var fails9 = require_fails();
   var toIndexedObject2 = require_to_indexed_object();
   var nativeGetOwnPropertyDescriptor = require_object_get_own_property_descriptor().f;
@@ -6728,7 +6771,7 @@
   var FORCED6 = !DESCRIPTORS5 || fails9(function() {
     nativeGetOwnPropertyDescriptor(1);
   });
-  $27({ target: "Object", stat: true, forced: FORCED6, sham: !DESCRIPTORS5 }, {
+  $28({ target: "Object", stat: true, forced: FORCED6, sham: !DESCRIPTORS5 }, {
     getOwnPropertyDescriptor: function getOwnPropertyDescriptor2(it, key) {
       return nativeGetOwnPropertyDescriptor(toIndexedObject2(it), key);
     }
@@ -6886,8 +6929,9 @@
     _createClass5(TextInputBindingBase2, [{
       key: "find",
       value: function find2(scope) {
-        var $inputs = (0, import_jquery7.default)(scope).find('input[type="text"], input[type="search"], input[type="url"], input[type="email"]');
-        return $inputs.not('input[type="text"][id$="-selectized"]');
+        var matches = (0, import_jquery7.default)(scope).find('input[type="text"], input[type="search"], input[type="url"], input[type="email"]');
+        matches = matches.not('input[type="text"][id$="-selectized"]');
+        return filterBindingMatchesIfStrict(matches, "shiny-input-text");
       }
     }, {
       key: "getId",
@@ -7118,7 +7162,8 @@
     _createClass6(NumberInputBinding2, [{
       key: "find",
       value: function find2(scope) {
-        return (0, import_jquery8.default)(scope).find('input[type="number"]');
+        var matches = (0, import_jquery8.default)(scope).find('input[type="number"]');
+        return filterBindingMatchesIfStrict(matches, "shiny-input-number");
       }
     }, {
       key: "getValue",
@@ -7299,7 +7344,8 @@
     _createClass7(PasswordInputBinding2, [{
       key: "find",
       value: function find2(scope) {
-        return (0, import_jquery9.default)(scope).find('input[type="password"]');
+        var matches = (0, import_jquery9.default)(scope).find('input[type="password"]');
+        return filterBindingMatchesIfStrict(matches, "shiny-input-password");
       }
     }, {
       key: "getType",
@@ -7435,7 +7481,8 @@
     _createClass8(TextareaInputBinding2, [{
       key: "find",
       value: function find2(scope) {
-        return (0, import_jquery10.default)(scope).find("textarea");
+        var matches = (0, import_jquery10.default)(scope).find("textarea");
+        return filterBindingMatchesIfStrict(matches, "shiny-input-textarea");
       }
     }]);
     return TextareaInputBinding2;
@@ -8795,7 +8842,8 @@
     _createClass13(SelectInputBinding2, [{
       key: "find",
       value: function find2(scope) {
-        return (0, import_jquery15.default)(scope).find("select");
+        var matches = (0, import_jquery15.default)(scope).find("select");
+        return filterBindingMatchesIfStrict(matches, "shiny-input-select");
       }
     }, {
       key: "getType",
@@ -9371,22 +9419,22 @@
   var import_jquery20 = __toESM(require_jquery());
 
   // node_modules/core-js/modules/es.array.from.js
-  var $39 = require_export();
+  var $40 = require_export();
   var from = require_array_from();
   var checkCorrectnessOfIteration = require_check_correctness_of_iteration();
   var INCORRECT_ITERATION = !checkCorrectnessOfIteration(function(iterable) {
     Array.from(iterable);
   });
-  $39({ target: "Array", stat: true, forced: INCORRECT_ITERATION }, {
+  $40({ target: "Array", stat: true, forced: INCORRECT_ITERATION }, {
     from: from
   });
 
   // node_modules/core-js/modules/es.array.map.js
-  var $40 = require_export();
+  var $41 = require_export();
   var $map = require_array_iteration().map;
-  var arrayMethodHasSpeciesSupport4 = require_array_method_has_species_support();
-  var HAS_SPECIES_SUPPORT3 = arrayMethodHasSpeciesSupport4("map");
-  $40({ target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT3 }, {
+  var arrayMethodHasSpeciesSupport5 = require_array_method_has_species_support();
+  var HAS_SPECIES_SUPPORT4 = arrayMethodHasSpeciesSupport5("map");
+  $41({ target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT4 }, {
     map: function map(callbackfn) {
       return $map(this, callbackfn, arguments.length > 1 ? arguments[1] : void 0);
     }
@@ -10054,7 +10102,8 @@
     _createClass17(FileInputBinding2, [{
       key: "find",
       value: function find2(scope) {
-        return (0, import_jquery20.default)(scope).find('input[type="file"]');
+        var matches = (0, import_jquery20.default)(scope).find('input[type="file"]');
+        return filterBindingMatchesIfStrict(matches, "shiny-input-file");
       }
     }, {
       key: "getId",
@@ -10164,7 +10213,7 @@
   var import_jquery22 = __toESM(require_jquery());
 
   // node_modules/core-js/modules/es.array.join.js
-  var $44 = require_export();
+  var $45 = require_export();
   var uncurryThis7 = require_function_uncurry_this();
   var IndexedObject = require_indexed_object();
   var toIndexedObject3 = require_to_indexed_object();
@@ -10172,7 +10221,7 @@
   var nativeJoin = uncurryThis7([].join);
   var ES3_STRINGS = IndexedObject != Object;
   var FORCED7 = ES3_STRINGS || !arrayMethodIsStrict2("join", ",");
-  $44({ target: "Array", proto: true, forced: FORCED7 }, {
+  $45({ target: "Array", proto: true, forced: FORCED7 }, {
     join: function join(separator) {
       return nativeJoin(toIndexedObject3(this), separator === void 0 ? "," : separator);
     }
@@ -10213,12 +10262,12 @@
   setToStringTag4(Math, "Math", true);
 
   // node_modules/core-js/modules/es.array.reverse.js
-  var $45 = require_export();
+  var $46 = require_export();
   var uncurryThis8 = require_function_uncurry_this();
   var isArray3 = require_is_array();
   var nativeReverse = uncurryThis8([].reverse);
   var test = [1, 2];
-  $45({ target: "Array", proto: true, forced: String(test) === String(test.reverse()) }, {
+  $46({ target: "Array", proto: true, forced: String(test) === String(test.reverse()) }, {
     reverse: function reverse() {
       if (isArray3(this))
         this.length = this.length;
@@ -11545,9 +11594,9 @@
   var import_es_regexp_exec8 = __toESM(require_es_regexp_exec());
 
   // node_modules/core-js/modules/es.object.entries.js
-  var $50 = require_export();
+  var $51 = require_export();
   var $entries = require_object_to_array().entries;
-  $50({ target: "Object", stat: true }, {
+  $51({ target: "Object", stat: true }, {
     entries: function entries(O) {
       return $entries(O);
     }
@@ -11557,14 +11606,14 @@
   var import_es_array_iterator26 = __toESM(require_es_array_iterator());
 
   // node_modules/core-js/modules/es.promise.all-settled.js
-  var $51 = require_export();
+  var $52 = require_export();
   var call5 = require_function_call();
   var aCallable = require_a_callable();
   var newPromiseCapabilityModule = require_new_promise_capability();
   var perform = require_perform();
   var iterate = require_iterate();
   var PROMISE_STATICS_INCORRECT_ITERATION = require_promise_statics_incorrect_iteration();
-  $51({ target: "Promise", stat: true, forced: PROMISE_STATICS_INCORRECT_ITERATION }, {
+  $52({ target: "Promise", stat: true, forced: PROMISE_STATICS_INCORRECT_ITERATION }, {
     allSettled: function allSettled(iterable) {
       var C = this;
       var capability = newPromiseCapabilityModule.f(C);
@@ -13122,17 +13171,6 @@
     }]);
     return HtmlOutputBinding2;
   }(OutputBinding);
-
-  // node_modules/core-js/modules/es.array.filter.js
-  var $55 = require_export();
-  var $filter = require_array_iteration().filter;
-  var arrayMethodHasSpeciesSupport5 = require_array_method_has_species_support();
-  var HAS_SPECIES_SUPPORT4 = arrayMethodHasSpeciesSupport5("filter");
-  $55({ target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT4 }, {
-    filter: function filter(callbackfn) {
-      return $filter(this, callbackfn, arguments.length > 1 ? arguments[1] : void 0);
-    }
-  });
 
   // srcts/src/bindings/output/image.ts
   var import_es_array_iterator29 = __toESM(require_es_array_iterator());
@@ -16566,6 +16604,9 @@
     var _loop = function _loop2() {
       var binding = bindings[i].binding;
       var matches = binding.find(scope) || [];
+      matches = filterBindingMatchesAllowedOnly(matches);
+      if (matches.length === 0)
+        return "continue";
       var _loop22 = function _loop23() {
         var el = matches[j];
         var id = binding.getId(el);
@@ -16606,13 +16647,15 @@
         });
       };
       for (var j = 0; j < matches.length; j++) {
-        var _ret = _loop22();
-        if (_ret === "continue")
+        var _ret2 = _loop22();
+        if (_ret2 === "continue")
           continue;
       }
     };
     for (var i = 0; i < bindings.length; i++) {
-      _loop();
+      var _ret = _loop();
+      if (_ret === "continue")
+        continue;
     }
     return inputItems;
   }

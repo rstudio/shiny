@@ -1,4 +1,4 @@
-function ancestorBindSetting(el: HTMLElement) {
+function ancestorBindSetting(el: HTMLElement): string {
   if (!(el instanceof HTMLElement)) return "eager";
 
   if (el.dataset.shinyBindInputs) {

@@ -16566,13 +16566,10 @@
     var _loop = function _loop2() {
       var binding = bindings[i].binding;
       var matches = binding.find(scope) || [];
-      matches = matches.filter(function() {
-        return !this.hasAttribute("data-shiny-no-bind-input");
-      });
-      if (matches.length === 0)
-        return "continue";
       var _loop22 = function _loop23() {
         var el = matches[j];
+        if (el.hasAttribute("data-shiny-no-bind-input"))
+          return "continue";
         var id = binding.getId(el);
         if (!id || boundInputs[id])
           return "continue";
@@ -16611,15 +16608,13 @@
         });
       };
       for (var j = 0; j < matches.length; j++) {
-        var _ret2 = _loop22();
-        if (_ret2 === "continue")
+        var _ret = _loop22();
+        if (_ret === "continue")
           continue;
       }
     };
     for (var i = 0; i < bindings.length; i++) {
-      var _ret = _loop();
-      if (_ret === "continue")
-        continue;
+      _loop();
     }
     return inputItems;
   }

@@ -78,17 +78,11 @@ function bindInputs(
 
   for (let i = 0; i < bindings.length; i++) {
     const binding = bindings[i].binding;
-    let matches = binding.find(scope) || [];
-
-    // Don't bind at all if the matched element has the "no-bind" attribute
-    matches = matches.filter(function () {
-      return !this.hasAttribute("data-shiny-no-bind-input");
-    });
-
-    if (matches.length === 0) continue;
+    const matches = binding.find(scope) || [];
 
     for (let j = 0; j < matches.length; j++) {
       const el = matches[j];
+      if (el.hasAttribute("data-shiny-no-bind-input")) continue;
       const id = binding.getId(el);
 
       // Check if ID is falsy, or if already bound

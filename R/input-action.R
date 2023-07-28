@@ -56,7 +56,7 @@ actionButton <- function(inputId, label, icon = NULL, width = NULL, ...) {
   tags$button(id=inputId,
     style = css(width = validateCssUnit(width)),
     type="button",
-    class="shiny-input-button btn btn-default action-button",
+    class="btn btn-default action-button",
     `data-val` = value,
     list(validateIcon(icon), label),
     ...
@@ -70,7 +70,7 @@ actionLink <- function(inputId, label, icon = NULL, ...) {
 
   tags$a(id=inputId,
     href="#",
-    class="shiny-input-link action-button",
+    class="action-button",
     `data-val` = value,
     list(validateIcon(icon), label),
     ...

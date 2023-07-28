@@ -104,7 +104,7 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
   value <- restoreInput(id = inputId, default = value)
 
   tags$div(id = inputId,
-    class = "shiny-date-input form-group shiny-input-container",
+    class = "shiny-input-date shiny-date-input form-group shiny-input-container",
     style = css(width = validateCssUnit(width)),
 
     shinyInputLabel(inputId, label),

@@ -1,7 +1,6 @@
 import $ from "jquery";
 import { $escape, hasDefinedProperty, updateLabel } from "../../utils";
 import { TextInputBindingBase } from "./text";
-import { filterBindingMatchesIfStrict } from "./_filterBindingMatches";
 
 type NumberHTMLElement = HTMLInputElement;
 
@@ -21,8 +20,8 @@ function getLabelNode(el: NumberHTMLElement): JQuery<HTMLElement> {
 
 class NumberInputBinding extends TextInputBindingBase {
   find(scope: HTMLElement): JQuery<HTMLElement> {
-    const matches = $(scope).find('input[type="number"]');
-    return filterBindingMatchesIfStrict(matches, "shiny-input-number");
+    // Inputs also have .shiny-input-number class
+    return $(scope).find('input[type="number"]');
   }
 
   getValue(

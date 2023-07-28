@@ -8,7 +8,6 @@ import type {
 } from "../inputPolicies";
 import { shinyAppBindOutput, shinyAppUnbindOutput } from "./initedMethods";
 import { sendImageSizeFns } from "./sendImageSize";
-import { filterBindingMatchesAllowedOnly } from "../bindings/input/_filterBindingMatches";
 
 const boundInputs: {
   [key: string]: { binding: InputBinding; node: HTMLElement };
@@ -81,7 +80,11 @@ function bindInputs(
     const binding = bindings[i].binding;
     let matches = binding.find(scope) || [];
 
-    matches = filterBindingMatchesAllowedOnly(matches);
+    // Don't bind at all if the matched element has the "no-bind" attribute
+    matches = matches.filter(function () {
+      return !this.hasAttribute("data-shiny-no-bind-input");
+    });
+
     if (matches.length === 0) continue;
 
     for (let j = 0; j < matches.length; j++) {

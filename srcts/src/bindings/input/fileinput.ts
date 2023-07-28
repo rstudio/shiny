@@ -2,7 +2,6 @@ import $ from "jquery";
 import { InputBinding } from "./inputBinding";
 import { FileUploader } from "../../file/fileProcessor";
 import { shinyShinyApp } from "../../shiny/initedMethods";
-import { filterBindingMatchesIfStrict } from "./_filterBindingMatches";
 
 const zoneActive = "shiny-file-input-active";
 const zoneOver = "shiny-file-input-over";
@@ -196,8 +195,8 @@ function fileInputBindingGetId(this: any, el: HTMLInputElement): string {
 
 class FileInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
-    const matches = $(scope).find('input[type="file"]');
-    return filterBindingMatchesIfStrict(matches, "shiny-input-file");
+    // Inputs also have .shiny-input-file class
+    return $(scope).find('input[type="file"]');
   }
   getId(el: HTMLInputElement): string {
     return fileInputBindingGetId(el);

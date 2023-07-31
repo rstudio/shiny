@@ -22,7 +22,7 @@ function getLabelNode(el: HTMLElement): JQuery<HTMLElement> {
 
 class TextInputBindingBase extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
-    const matches = $(scope).find(
+    const $inputs = $(scope).find(
       'input[type="text"], input[type="search"], input[type="url"], input[type="email"]'
     );
     // selectize.js 0.12.4 inserts a hidden text input with an
@@ -31,7 +31,7 @@ class TextInputBindingBase extends InputBinding {
     // this hidden element as a shiny input (#2396)
     //
     // Inputs also now have .shiny-input-text class
-    return matches.not('input[type="text"][id$="-selectized"]');
+    return $inputs.not('input[type="text"][id$="-selectized"]');
   }
 
   getId(el: TextHTMLElement): string {

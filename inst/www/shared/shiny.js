@@ -6886,8 +6886,8 @@
     _createClass5(TextInputBindingBase2, [{
       key: "find",
       value: function find2(scope) {
-        var matches = (0, import_jquery7.default)(scope).find('input[type="text"], input[type="search"], input[type="url"], input[type="email"]');
-        return matches.not('input[type="text"][id$="-selectized"]');
+        var $inputs = (0, import_jquery7.default)(scope).find('input[type="text"], input[type="search"], input[type="url"], input[type="email"]');
+        return $inputs.not('input[type="text"][id$="-selectized"]');
       }
     }, {
       key: "getId",

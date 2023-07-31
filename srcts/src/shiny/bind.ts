@@ -82,6 +82,7 @@ function bindInputs(
 
     for (let j = 0; j < matches.length; j++) {
       const el = matches[j];
+      if (el.hasAttribute("data-shiny-no-bind-input")) continue;
       const id = binding.getId(el);
 
       // Check if ID is falsy, or if already bound

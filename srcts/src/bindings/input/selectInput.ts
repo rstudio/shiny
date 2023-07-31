@@ -42,6 +42,7 @@ function isSelectize(el: HTMLElement): boolean {
 
 class SelectInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
+    // Inputs also have .shiny-input-select class
     return $(scope).find("select");
   }
   getType(el: HTMLElement): string | null {

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.4.9002</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.4.9003</span>
       </span>
     </div>
 
@@ -60,6 +60,7 @@
 <li><p>For <code><a href="../reference/reactiveValues.html">reactiveValues()</a></code> objects, whenever the <code>$names()</code> or <code>$values()</code> methods are called, the keys are now returned in the order that they were inserted. (<a href="https://github.com/rstudio/shiny/issues/3774" class="external-link">#3774</a>)</p></li>
 <li><p><code>Map</code> objects are now initialized at load time instead of build time. This avoids potential problems that could arise from storing <code>fastmap</code> objects into the built Shiny package. (<a href="https://github.com/rstudio/shiny/issues/3775" class="external-link">#3775</a>)</p></li>
 <li><p>Allow for <code>shiny:::toJSON()</code> to respect if <code>digits=</code> has class <code>"AsIs"</code> which represents if <code>use_signif=</code> is <code>TRUE</code> or <code>FALSE</code>. This is useful for testing to keep the digits smaller. For example, setting <code>options(shiny.json.digits = 4)</code> will save 4 digits after the decimal, rather than the default of <code>I(16)</code> which will save 16 significant digits. (<a href="https://github.com/rstudio/shiny/issues/3819" class="external-link">#3819</a>)</p></li>
+<li><p>Closed <a href="https://github.com/rstudio/shiny/issues/2956" class="external-link">#2956</a>: Component authors can now prevent Shiny from creating an input binding on specific elements by adding the <code>data-shiny-no-bind-input</code> attribute to the element. The attribute may have any or no value; its presence will prevent binding. This feature is primarily useful for input component authors who want to use standard HTML input elements without causing Shiny to create an input binding for them. Additionally, Shiny now adds custom classes to its inputs. For example, <code><a href="../reference/checkboxInput.html">checkboxInput()</a></code> now has a <code>shiny-input-checkbox</code> class. These custom classes may be utilized in future updates to Shiny’s input binding logic. (<a href="https://github.com/rstudio/shiny/issues/3861" class="external-link">#3861</a>)</p></li>
 </ul></div>
 <div class="section level4">
 <h4 id="bug-fixes-1-7-4-9002">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-7-4-9002"></a></h4>

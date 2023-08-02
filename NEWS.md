@@ -14,7 +14,10 @@
 
 * Allow for `shiny:::toJSON()` to respect if `digits=` has class `"AsIs"` which represents if `use_signif=` is `TRUE` or `FALSE`. This is useful for testing to keep the digits smaller. For example, setting `options(shiny.json.digits = 4)` will save 4 digits after the decimal, rather than the default of `I(16)` which will save 16 significant digits. (#3819)
 
+* Closed #2956: Component authors can now prevent Shiny from creating an input binding on specific elements by adding the `data-shiny-no-bind-input` attribute to the element. The attribute may have any or no value; its presence will prevent binding. This feature is primarily useful for input component authors who want to use standard HTML input elements without causing Shiny to create an input binding for them. Additionally, Shiny now adds custom classes to its inputs. For example, `checkboxInput()` now has a `shiny-input-checkbox` class. These custom classes may be utilized in future updates to Shiny's input binding logic. (#3861)
+
 * Slider inputs created with `sliderInput()` now have a larger target area for clicking or tapping on the slider line or the slider bar. (#3859)
+
 
 ### Bug fixes
 

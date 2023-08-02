@@ -29,7 +29,8 @@ class TextInputBindingBase extends InputBinding {
     // id that ends in '-selectized'. The .not() selector below
     // is to prevent textInputBinding from accidentally picking up
     // this hidden element as a shiny input (#2396)
-
+    //
+    // Inputs also now have .shiny-input-text class
     return $inputs.not('input[type="text"][id$="-selectized"]');
   }
 

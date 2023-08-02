@@ -20,6 +20,7 @@ function getLabelNode(el: NumberHTMLElement): JQuery<HTMLElement> {
 
 class NumberInputBinding extends TextInputBindingBase {
   find(scope: HTMLElement): JQuery<HTMLElement> {
+    // Inputs also have .shiny-input-number class
     return $(scope).find('input[type="number"]');
   }
 

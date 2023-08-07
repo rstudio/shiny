@@ -157,6 +157,9 @@ pre.shiny-text-output {
   margin-top: -9px;
 }
 .slider-animate-button {
+  /* Ensure controls above slider line touch target */
+  position: relative;
+  z-index: 1;
   opacity: 0.5;
   .pause {
     display: none;

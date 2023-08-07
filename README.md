@@ -47,7 +47,7 @@ For help with learning fundamental Shiny programming concepts, check out the [Ma
 
 ## Join the conversation
 
-If you want to chat about Shiny, meet other developers, or help us decide what to work on next, [join us on Discord](https://discord.gg/yMGCamUMnS).
+If you want to chat about Shiny, meet other developers, or help us decide what to work on next, [join us on Discord](https://discord.com/invite/yMGCamUMnS).
 
 ## Getting Help
 

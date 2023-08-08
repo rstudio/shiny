@@ -141,9 +141,10 @@ be done 100% correctly.</p></dd>
 Currently only values of <code>3</code> or <code>1</code> are supported. If <code>1</code>, then jQuery 1.12.4 is used. If <code>3</code>,
 then jQuery 3.6.0 is used.</p></dd>
 
-<dt>shiny.json.digits (defaults to <code>16</code>)</dt>
-<dd><p>The number of digits to use when converting
-numbers to JSON format to send to the client web browser.</p></dd>
+<dt>shiny.json.digits (defaults to <code>I(16)</code>)</dt>
+<dd><p>Max number of digits to use when converting
+numbers to JSON format to send to the client web browser. Use <code><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I()</a></code> to specify significant digits.
+Use <code>NA</code> for max precision.</p></dd>
 
 <dt>shiny.launch.browser (defaults to <code><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive()</a></code>)</dt>
 <dd><p>A boolean which controls the default behavior
@@ -276,7 +277,7 @@ used.</p></dd>
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Winston Chang, Joe Cheng, JJ Allaire, Carson Sievert, Barret Schloerke, Yihui Xie, Jeff Allen, Jonathan McPherson, Alan Dipert, Barbara Borges.</p>
+  <p></p><p>Developed by Winston Chang, Joe Cheng, JJ Allaire, Carson Sievert, Barret Schloerke, Yihui Xie, Jeff Allen, Jonathan McPherson, Alan Dipert, Barbara Borges, Posit Software, PBC.</p>
 </div>
 
 <div class="pkgdown">

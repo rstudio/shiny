@@ -13,7 +13,7 @@ $select-color-disabled: $input-bg;
 $select-color-item: #efefef;
 $select-color-item-border: rgba(0, 0, 0, 0);
 $select-color-item-active: $component-active-bg;
-$select-color-item-active-text: #fff;
+$select-color-item-active-text: color-contrast($select-color-item-active);
 $select-color-item-active-border: rgba(0, 0, 0, 0);
 $select-color-optgroup: $dropdown-bg;
 $select-color-optgroup-text: $dropdown-header-color;

@@ -17,7 +17,7 @@ $select-color-disabled: $input-bg !default;
 $select-color-item: #efefef !default;
 $select-color-item-border: $border-color !default;
 $select-color-item-active: $component-active-bg !default;
-$select-color-item-active-text: #fff !default;
+$select-color-item-active-text: color-contrast($select-color-item-active) !default;
 $select-color-item-active-border: rgba(0, 0, 0, 0) !default;
 $select-color-optgroup: $dropdown-bg !default;
 $select-color-optgroup-text: $dropdown-header-color !default;

@@ -1,7 +1,7 @@
-diff --git a/inst/www/shared/selectize/plugins/auto_position/plugin.scss b/inst/www/shared/selectize/plugins/auto_position/plugin.scss
+diff --git a/inst/www/shared/selectize/scss/plugins/auto_position.scss b/inst/www/shared/selectize/scss/plugins/auto_position.scss
 index 89c5cf008..01bd45cf6 100644
---- a/inst/www/shared/selectize/plugins/auto_position/plugin.scss
-+++ b/inst/www/shared/selectize/plugins/auto_position/plugin.scss
+--- a/inst/www/shared/selectize/scss/plugins/auto_position.scss
++++ b/inst/www/shared/selectize/scss/plugins/auto_position.scss
 @@ -2,7 +2,7 @@
    border-top: 1px solid $select-color-border;
    border-bottom: 0 none;
@@ -11,10 +11,10 @@ index 89c5cf008..01bd45cf6 100644
  }
  
  .#{selectize}-control.plugin-auto_position .#{selectize}-input.#{$selectize}-position-top.dropdown-active {
-diff --git a/inst/www/shared/selectize/plugins/clear_button/plugin.scss b/inst/www/shared/selectize/plugins/clear_button/plugin.scss
+diff --git a/inst/www/shared/selectize/scss/plugins/clear_button.scss b/inst/www/shared/selectize/scss/plugins/clear_button.scss
 index 4f0d1d815..566ffd281 100644
---- a/inst/www/shared/selectize/plugins/clear_button/plugin.scss
-+++ b/inst/www/shared/selectize/plugins/clear_button/plugin.scss
+--- a/inst/www/shared/selectize/scss/plugins/clear_button.scss
++++ b/inst/www/shared/selectize/scss/plugins/clear_button.scss
 @@ -7,7 +7,7 @@
          width: 25px;
          top: 0;
@@ -24,10 +24,10 @@ index 4f0d1d815..566ffd281 100644
          opacity: 0.4;
          font-weight: bold;
          border: none;
-diff --git a/inst/www/shared/selectize/plugins/dropdown_header/plugin.scss b/inst/www/shared/selectize/plugins/dropdown_header/plugin.scss
+diff --git a/inst/www/shared/selectize/scss/plugins/dropdown_header.scss b/inst/www/shared/selectize/scss/plugins/dropdown_header.scss
 index 90846cd12..c60d9f326 100644
---- a/inst/www/shared/selectize/plugins/dropdown_header/plugin.scss
-+++ b/inst/www/shared/selectize/plugins/dropdown_header/plugin.scss
+--- a/inst/www/shared/selectize/scss/plugins/dropdown_header.scss
++++ b/inst/www/shared/selectize/scss/plugins/dropdown_header.scss
 @@ -4,7 +4,7 @@
      padding: ($select-padding-dropdown-item-y * 2)
        $select-padding-dropdown-item-x;

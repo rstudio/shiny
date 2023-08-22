@@ -184,6 +184,12 @@ pre.shiny-text-output {
   }
 }
 
+// fileInput()
+.btn-file {
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+
 /* Make sure the filename doesn't extend past the bounds of the container */
 .shiny-input-container input[type=file] {
   overflow: hidden;

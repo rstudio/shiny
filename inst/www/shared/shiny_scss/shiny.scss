@@ -184,7 +184,7 @@ pre.shiny-text-output {
   }
 }
 
-// fileInput()
+// fileInput()'s button should never have a top-right or bottom-right border-radius
 .btn-file {
   border-top-right-radius: 0 !important;
   border-bottom-right-radius: 0 !important;

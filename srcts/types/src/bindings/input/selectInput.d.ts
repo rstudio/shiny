@@ -14,6 +14,7 @@ type SelectInputReceiveMessageData = {
 type SelectizeOptions = Selectize.IOptions<string, unknown>;
 type SelectizeInfo = Selectize.IApi<string, unknown> & {
     settings: SelectizeOptions;
+    $control_input: JQuery<HTMLElement>;
 };
 declare class SelectInputBinding extends InputBinding {
     find(scope: HTMLElement): JQuery<HTMLElement>;

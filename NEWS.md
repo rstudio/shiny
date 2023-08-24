@@ -1,5 +1,10 @@
 # shiny (development version)
 
+## New features and improvements
+
+## Bug fixes
+
+* `fileInput()` no longer has unwanted round corners applied to the `buttonLabel`. (#3879)
 
 # shiny 1.7.5
 

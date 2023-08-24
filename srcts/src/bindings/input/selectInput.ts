@@ -297,7 +297,7 @@ class SelectInputBinding extends InputBinding {
 
     // (Hopefully temporary) workaround for a v0.15.2 selectize bug where the
     // dropdown (instead of the <input>) gets focus after an item added via
-    // click. 
+    // click.
     // FIXME: https://github.com/selectize/selectize.js/issues/2032
     if (this._isMultipleSelect($el)) {
       control.on("item_add", function () {

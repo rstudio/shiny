@@ -4,7 +4,7 @@
     padding: ($select-padding-dropdown-item-y * 2)
       $select-padding-dropdown-item-x;
     border-bottom: 1px solid $select-color-border;
-    background: rgba($select-color-dropdown, 0.15);
+    background: RGBA($select-color-dropdown, 0.15);
     border-radius: $select-border-radius $select-border-radius 0 0;
   }
   .#{$selectize}-dropdown-header-close {
@@ -19,6 +19,6 @@
     text-decoration: none;
   }
   .#{$selectize}-dropdown-header-close:hover {
-    color: darken($select-color-text, 25%);
+    color: RGB($select-color-rgb);
   }
 }

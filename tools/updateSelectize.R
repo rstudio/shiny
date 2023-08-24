@@ -40,17 +40,19 @@ file.copy(
   recursive = TRUE
 )
 
-# Remove the unnecessary imports of Bootstrap from scss files
-remove_bootstrap_imports <- function(f) {
+
+sanitize_scss <- function(f) {
   txt <- readLines(f)
+  # Remove the unnecessary imports of Bootstrap from scss files
   txt <- txt[!grepl('@import\\s+"lib/bootstrap', txt)]
   writeLines(txt, f)
 }
 
 lapply(
   dir(file.path(inst_dir, "scss"), full.names = TRUE, recursive = TRUE),
-  remove_bootstrap_imports
+  sanitize_scss
 )
+
 
 ## -----------------------------------------------------------------
 ## Second, download accessibility plugin
@@ -85,7 +87,7 @@ for (patch in list.files(patch_dir, full.names = TRUE)) {
   tryCatch(
     {
       message(sprintf("Applying %s", basename(patch)))
-      with_dir(find_package_root_file(), system(sprintf("git apply %s", patch)))
+      with_dir(find_package_root_file(), system(sprintf("git apply %s --reject", patch)))
     },
     error = function(e) {
       quit(save = "no", status = 1)

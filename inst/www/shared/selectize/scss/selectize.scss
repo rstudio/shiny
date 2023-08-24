@@ -7,7 +7,8 @@ $select-font-smoothing: inherit !default;
 $select-font-size: 13px !default;
 $select-line-height: 18px !default;
 
-$select-color-text: #303030 !default;
+$select-color-rgb: 0,0,0 !default;
+$select-color-text: RGBA($select-color-rgb, 0.83) !default;
 $select-color-border: #d0d0d0 !default;
 $select-color-highlight: rgba(125, 168, 208, 0.2) !default;
 $select-color-input: #fff !default;
@@ -24,12 +25,7 @@ $select-color-dropdown-border: $select-color-border !default;
 $select-color-dropdown-border-top: #f0f0f0 !default;
 $select-color-dropdown-item-active: #f5fafd !default;
 $select-color-dropdown-item-active-text: #495c68 !default;
-$select-color-dropdown-item-create-text: rgba(
-  red($select-color-text),
-  green($select-color-text),
-  blue($select-color-text),
-  0.5
-) !default;
+$select-color-dropdown-item-create-text: RGBA($select-color-rgb, 0.5) !default;
 $select-color-dropdown-item-create-active-text: $select-color-dropdown-item-active-text !default;
 $select-color-optgroup: $select-color-dropdown !default;
 $select-color-optgroup-text: $select-color-text !default;
@@ -161,19 +157,10 @@ $select-spinner-border-color: $select-color-border;
   .#{$selectize}-control.multi &.disabled > div {
     &,
     &.active {
-      color: lighten(
-        desaturate($select-color-item-text, 100%),
-        $select-lighten-disabled-item-text
-      );
-      background: lighten(
-        desaturate($select-color-item, 100%),
-        $select-lighten-disabled-item
-      );
+      color: lighten(gray, $select-lighten-disabled-item-text);
+      background: lighten(gray, $select-lighten-disabled-item);
       border: $select-width-item-border solid
-        lighten(
-          desaturate($select-color-item-border, 100%),
-          $select-lighten-disabled-item-border
-        );
+        lighten(gray, $select-lighten-disabled-item-border);
     }
   }
   > input {

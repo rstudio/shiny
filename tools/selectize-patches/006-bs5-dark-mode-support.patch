@@ -40,8 +40,8 @@ diff --git a/inst/www/shared/selectize/scss/selectize.bootstrap5.scss b/inst/www
 index 44fff4ae4..8364d3123 100644
 --- a/inst/www/shared/selectize/scss/selectize.bootstrap5.scss
 +++ b/inst/www/shared/selectize/scss/selectize.bootstrap5.scss
-@@ -4,7 +4,8 @@ $select-font-family: inherit !default;
- $select-font-size: inherit !default;
+@@ -4,7 +4,8 @@ $select-font-family: if($input-btn-font-family, $input-btn-font-family, inherit) !default;
+ $select-font-size: $input-btn-font-size !default;
  $select-line-height: $input-btn-line-height !default; //formerly line-height-computed
  
 -$select-color-text: $gray-800 !default; //$gray-800

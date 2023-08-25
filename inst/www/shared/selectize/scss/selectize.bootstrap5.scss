@@ -1,7 +1,7 @@
 
 $enable-shadows: true !default;
-$select-font-family: inherit !default;
-$select-font-size: inherit !default;
+$select-font-family: if($input-btn-font-family, $input-btn-font-family, inherit) !default;
+$select-font-size: $input-btn-font-size !default;
 $select-line-height: $input-btn-line-height !default; //formerly line-height-computed
 
 $select-color-rgb: var(--bs-emphasis-color-rgb, 0, 0, 0) !default;

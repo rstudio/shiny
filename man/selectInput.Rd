@@ -62,7 +62,7 @@ from a list of values.
 }
 \details{
 By default, \code{selectInput()} and \code{selectizeInput()} use the JavaScript library
-\pkg{selectize.js} (<https://selectize.dev/) instead of
+\pkg{selectize.js} (\url{https://selectize.dev/}) instead of
 the basic select input element. To use the standard HTML select input
 element, use \code{selectInput()} with \code{selectize=FALSE}.
 

@@ -1,0 +1,39 @@
+diff --git a/inst/www/shared/selectize/scss/plugins/auto_position.scss b/inst/www/shared/selectize/scss/plugins/auto_position.scss
+index 89c5cf008..01bd45cf6 100644
+--- a/inst/www/shared/selectize/scss/plugins/auto_position.scss
++++ b/inst/www/shared/selectize/scss/plugins/auto_position.scss
+@@ -2,7 +2,7 @@
+   border-top: 1px solid $select-color-border;
+   border-bottom: 0 none;
+   border-radius: 3px 3px 0 0;
+-  box-shadow: 0 -6px 12px rgb(0 0 0 / 18%);
++  box-shadow: 0 -6px 12px rgba(var(--bs-body-color-rgb, 0,0,0), .18);
+ }
+ 
+ .#{selectize}-control.plugin-auto_position .#{selectize}-input.#{$selectize}-position-top.dropdown-active {
+diff --git a/inst/www/shared/selectize/scss/plugins/clear_button.scss b/inst/www/shared/selectize/scss/plugins/clear_button.scss
+index 4f0d1d815..566ffd281 100644
+--- a/inst/www/shared/selectize/scss/plugins/clear_button.scss
++++ b/inst/www/shared/selectize/scss/plugins/clear_button.scss
+@@ -7,7 +7,7 @@
+         width: 25px;
+         top: 0;
+         right: calc(#{$select-padding-x} - #{$select-padding-item-x});
+-        color: rgba(0, 0, 0);
++        color: var(--bs-body-color, black);
+         opacity: 0.4;
+         font-weight: bold;
+         border: none;
+diff --git a/inst/www/shared/selectize/scss/selectize.scss b/inst/www/shared/selectize/scss/selectize.scss
+index aec43bb43..30619ba9b 100644
+--- a/inst/www/shared/selectize/scss/selectize.scss
++++ b/inst/www/shared/selectize/scss/selectize.scss
+@@ -346,7 +346,7 @@ $select-spinner-border-color: $select-color-border;
+     position: absolute;
+     top: 50%;
+     right: $select-arrow-offset;
+-    margin-top: round(math.div(-1 * $select-arrow-size, 2));
++    margin-top: round(divide(-1 * $select-arrow-size, 2));
+     width: 0;
+     height: 0;
+     border-style: solid;

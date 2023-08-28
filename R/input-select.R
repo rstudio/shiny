@@ -4,7 +4,7 @@
 #' from a list of values.
 #'
 #' By default, `selectInput()` and `selectizeInput()` use the JavaScript library
-#' \pkg{selectize.js} (<https://selectize.dev/) instead of
+#' \pkg{selectize.js} (<https://selectize.dev/>) instead of
 #' the basic select input element. To use the standard HTML select input
 #' element, use `selectInput()` with `selectize=FALSE`.
 #'

@@ -2,6 +2,8 @@
 
 ## New features and improvements
 
+* Shiny's CSS styling for things like `showNotification()`, `withProgress()`, `inputPanel()`, etc., now integrate better with `{bslib}`'s upcoming CSS-only dark mode. (#3882)    
+
 ## Bug fixes
 
 * `fileInput()` no longer has unwanted round corners applied to the `buttonLabel`. (#3879)

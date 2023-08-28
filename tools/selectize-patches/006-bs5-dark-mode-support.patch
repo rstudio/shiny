@@ -46,7 +46,7 @@ index 44fff4ae4..8364d3123 100644
  
 -$select-color-text: $gray-800 !default; //$gray-800
 +$select-color-rgb: var(--bs-emphasis-color-rgb, 0, 0, 0) !default;
-+$select-color-text: rgba($select-color-rgb, 0.83) !default;
++$select-color-text: RGBA($select-color-rgb, 0.83) !default;
  $select-color-highlight: rgba(255, 237, 40, 0.4) !default;
  $select-color-input: $input-bg !default;
  $select-color-input-full: $input-bg !default;

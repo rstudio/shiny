@@ -8804,7 +8804,7 @@
         if (!$el.hasClass("symbol")) {
           return null;
         }
-        if ($el.attr("multiple") === "multiple") {
+        if (this._isMultipleSelect($el)) {
           return "shiny.symbolList";
         } else {
           return "shiny.symbol";
@@ -8976,7 +8976,19 @@
           control.destroy();
           control = $el.selectize(settings)[0].selectize;
         }
+        if (this._isMultipleSelect($el)) {
+          control.on("item_add", function() {
+            var input = control.$control_input;
+            if (input && input.length)
+              input[0].focus();
+          });
+        }
         return control;
+      }
+    }, {
+      key: "_isMultipleSelect",
+      value: function _isMultipleSelect($el) {
+        return $el.attr("multiple") === "multiple";
       }
     }]);
     return SelectInputBinding2;

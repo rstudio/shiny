@@ -2,6 +2,8 @@
 
 ## New features and improvements
 
+* Updated `selectizeInput()`'s selectize.js dependency from v0.12.4 to v0.15.2. In addition to many bug fixes and improvements, this update also adds several new [plugin options](https://selectize.dev/docs/demos/plugins). (#3875)
+
 ## Bug fixes
 
 * `fileInput()` no longer has unwanted round corners applied to the `buttonLabel`. (#3879)

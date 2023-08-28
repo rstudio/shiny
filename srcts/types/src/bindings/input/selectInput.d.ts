@@ -14,6 +14,7 @@ type SelectInputReceiveMessageData = {
 type SelectizeOptions = Selectize.IOptions<string, unknown>;
 type SelectizeInfo = Selectize.IApi<string, unknown> & {
     settings: SelectizeOptions;
+    $control_input?: JQuery<HTMLElement>;
 };
 declare class SelectInputBinding extends InputBinding {
     find(scope: HTMLElement): JQuery<HTMLElement>;
@@ -34,6 +35,7 @@ declare class SelectInputBinding extends InputBinding {
     unsubscribe(el: HTMLElement): void;
     initialize(el: SelectHTMLElement): void;
     protected _selectize(el: SelectHTMLElement, update?: boolean): SelectizeInfo | undefined;
+    protected _isMultipleSelect($el: JQuery<HTMLElement>): boolean;
 }
 export { SelectInputBinding };
 export type { SelectInputReceiveMessageData };

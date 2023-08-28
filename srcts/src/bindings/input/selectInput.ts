@@ -17,6 +17,8 @@ type SelectInputReceiveMessageData = {
 type SelectizeOptions = Selectize.IOptions<string, unknown>;
 type SelectizeInfo = Selectize.IApi<string, unknown> & {
   settings: SelectizeOptions;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  $control_input?: JQuery<HTMLElement>;
 };
 
 function getLabelNode(el: SelectHTMLElement): JQuery<HTMLElement> {
@@ -52,7 +54,7 @@ class SelectInputBinding extends InputBinding {
       // default character type
       return null;
     }
-    if ($el.attr("multiple") === "multiple") {
+    if (this._isMultipleSelect($el)) {
       return "shiny.symbolList";
     } else {
       return "shiny.symbol";
@@ -292,7 +294,22 @@ class SelectInputBinding extends InputBinding {
       control.destroy();
       control = $el.selectize(settings)[0].selectize as SelectizeInfo;
     }
+
+    // (Hopefully temporary) workaround for a v0.15.2 selectize bug where the
+    // dropdown (instead of the <input>) gets focus after an item added via
+    // click.
+    // FIXME: https://github.com/selectize/selectize.js/issues/2032
+    if (this._isMultipleSelect($el)) {
+      control.on("item_add", function () {
+        const input = control.$control_input;
+        if (input && input.length) input[0].focus();
+      });
+    }
+
     return control;
+  }
+  protected _isMultipleSelect($el: JQuery<HTMLElement>): boolean {
+    return $el.attr("multiple") === "multiple";
   }
 }
 

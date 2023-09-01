@@ -82,9 +82,9 @@ Internet Explorer 9 and earlier.</strong></p></dd>
 
 
 <dt>accept</dt>
-<dd><p>A character vector of "unique file type specifiers" which
-gives the browser a hint as to the type of file the server expects.
-Many browsers use this prevent the user from selecting an invalid file.</p>
+<dd><p>A character vector of "unique file type specifiers" which gives
+the browser a hint as to the type of file the server expects. Many browsers
+use this prevent the user from selecting an invalid file.</p>
 <p>A unique file type specifier can be:</p><ul><li><p>A case insensitive extension like <code>.csv</code> or <code>.rds</code>.</p></li>
 <li><p>A valid MIME type, like <code>text/plain</code> or <code>application/pdf</code></p></li>
 <li><p>One of <code>audio/*</code>, <code>video/*</code>, or <code>image/*</code> meaning any audio, video,
@@ -121,14 +121,20 @@ still photos only, also use <code>accept="image/*"</code>. For video only, use
 </dl></div>
     <div id="details">
     <h2>Details</h2>
-    <p>Whenever a file upload completes, the corresponding input variable is set
-to a dataframe. See the <code>Server value</code> section.</p>
+    <p>Whenever a file upload completes, the corresponding input variable is set to
+a dataframe. See the <code>Server value</code> section.</p>
+<p>Each time files are uploaded, they are written to a new random subdirectory
+inside of R's process-level temporary directory. The Shiny user session keeps
+track of all uploads in the session, and when the session ends, Shiny deletes
+all of the subdirectories where files where uploaded to.</p>
     </div>
     <div id="server-value">
     <h2>Server value</h2>
     
 
-<p>A <code>data.frame</code> that contains one row for each selected file, and following columns:</p><dl><dt><code>name</code></dt>
+
+<p>A <code>data.frame</code> that contains one row for each selected file, and following
+columns:</p><dl><dt><code>name</code></dt>
 <dd><p>The filename provided by the web browser. This is
 <strong>not</strong> the path to read to get at the actual data that was uploaded
 (see

@@ -5,8 +5,10 @@
 #' Whenever a file upload completes, the corresponding input variable is set to
 #' a dataframe. See the `Server value` section.
 #'
-#' Uploaded files are written to a temporary directory. When the user's session
-#' ends, all of the files uploaded in that session will be deleted.
+#' Each time files are uploaded, they are written to a new random subdirectory
+#' inside of R's process-level temporary directory. The Shiny user session keeps
+#' track of all uploads in the session, and when the session ends, Shiny deletes
+#' all of the subdirectories where files where uploaded to.
 #'
 #' @family input elements
 #'

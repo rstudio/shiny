@@ -2,6 +2,7 @@ import $ from "jquery";
 import { InputBinding } from "./inputBinding";
 import { $escape, hasDefinedProperty, updateLabel } from "../../utils";
 import { indirectEval } from "../../utils/eval";
+import { shinyBindAll, shinyUnbindAll } from "../../shiny/initedMethods";
 import type { NotUndefined } from "../../utils/extraTypes";
 
 type SelectHTMLElement = HTMLSelectElement & { nonempty: boolean };
@@ -285,7 +286,11 @@ class SelectInputBinding extends InputBinding {
         // @ts-expect-error; Need to type `options` keys to know exactly which values are accessed.
         options[x] = indirectEval("(" + options[x] + ")");
       });
+
+    const binding = $el.data("shiny-input-binding");
+    if (binding) shinyUnbindAll($el.closest(".shiny-input-container"));
     let control = $el.selectize(options)[0].selectize as SelectizeInfo;
+
     // .selectize() does not really update settings; must destroy and rebuild
 
     if (update) {
@@ -294,6 +299,8 @@ class SelectInputBinding extends InputBinding {
       control.destroy();
       control = $el.selectize(settings)[0].selectize as SelectizeInfo;
     }
+
+    if (binding) shinyBindAll($el.closest(".shiny-input-container"));
 
     // (Hopefully temporary) workaround for a v0.15.2 selectize bug where the
     // dropdown (instead of the <input>) gets focus after an item added via

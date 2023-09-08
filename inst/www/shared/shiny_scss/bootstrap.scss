@@ -1,9 +1,13 @@
 $prefix: bs- !default; // BS5 CSS variable prefix
 
-// No $border-width, $border-radius, or $border-color in BS3
+// For BS3, which doesn't have these Sass variables (but has other, similar ones)
 $border-width: 1px !default;
 $border-radius: $border-radius-base !default;
 $border-color: mix($body-bg, $text-color, 70%) !default;
+$primary: $brand-primary !default;
+$info: $brand-info !default;
+$warning: $brand-warning !default;
+$danger: $brand-danger !default;
 
 // No rgb CSS vars available in BS3-4
 $primary-rgb: var(--#{$prefix}primary-rgb, red($primary),green($primary),blue($primary)) !default;

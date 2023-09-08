@@ -9023,17 +9023,12 @@
           import_jquery15.default.each(config.data("eval"), function(i, x) {
             options[x] = indirectEval("(" + options[x] + ")");
           });
-        var binding = $el.data("shiny-input-binding");
-        if (binding)
-          shinyUnbindAll($el.closest(".shiny-input-container"));
-        var control = $el.selectize(options)[0].selectize;
+        var control = this._newSelectize($el, options);
         if (update) {
           var settings = import_jquery15.default.extend(control.settings, options);
           control.destroy();
-          control = $el.selectize(settings)[0].selectize;
+          control = this._newSelectize($el, settings);
         }
-        if (binding)
-          shinyBindAll($el.closest(".shiny-input-container"));
         if (this._isMultipleSelect($el)) {
           control.on("item_add", function() {
             var input = control.$control_input;
@@ -9041,6 +9036,17 @@
               input[0].focus();
           });
         }
+        return control;
+      }
+    }, {
+      key: "_newSelectize",
+      value: function _newSelectize($el, options) {
+        var binding = $el.data("shiny-input-binding");
+        if (binding)
+          shinyUnbindAll($el.parent());
+        var control = $el.selectize(options)[0].selectize;
+        if (binding)
+          shinyBindAll($el.parent());
         return control;
       }
     }, {

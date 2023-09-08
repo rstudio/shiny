@@ -287,20 +287,15 @@ class SelectInputBinding extends InputBinding {
         options[x] = indirectEval("(" + options[x] + ")");
       });
 
-    const binding = $el.data("shiny-input-binding");
-    if (binding) shinyUnbindAll($el.closest(".shiny-input-container"));
-    let control = $el.selectize(options)[0].selectize as SelectizeInfo;
+    let control = this._newSelectize($el, options);
 
     // .selectize() does not really update settings; must destroy and rebuild
-
     if (update) {
       const settings = $.extend(control.settings, options);
 
       control.destroy();
-      control = $el.selectize(settings)[0].selectize as SelectizeInfo;
+      control = this._newSelectize($el, settings);
     }
-
-    if (binding) shinyBindAll($el.closest(".shiny-input-container"));
 
     // (Hopefully temporary) workaround for a v0.15.2 selectize bug where the
     // dropdown (instead of the <input>) gets focus after an item added via
@@ -313,6 +308,21 @@ class SelectInputBinding extends InputBinding {
       });
     }
 
+    return control;
+  }
+
+  protected _newSelectize(
+    $el: JQuery<HTMLSelectElement>,
+    options: SelectizeOptions
+  ): SelectizeInfo {
+    // Starting with selectize v0.15.2, $el.selectize() can prune the <select>
+    // element from the DOM, meaning that if we're already bound to it, we'll
+    // lose the binding. So if we are bound, unbind first, then rebind after.
+    // (Note this is quite similar to how Shiny.renderContent() works.)
+    const binding = $el.data("shiny-input-binding");
+    if (binding) shinyUnbindAll($el.parent());
+    const control = $el.selectize(options)[0].selectize as SelectizeInfo;
+    if (binding) shinyBindAll($el.parent());
     return control;
   }
   protected _isMultipleSelect($el: JQuery<HTMLElement>): boolean {

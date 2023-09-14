@@ -8857,7 +8857,7 @@
         if (!$el.hasClass("symbol")) {
           return null;
         }
-        if (this._isMultipleSelect($el)) {
+        if ($el.attr("multiple") === "multiple") {
           return "shiny.symbolList";
         } else {
           return "shiny.symbol";
@@ -9029,13 +9029,6 @@
           control.destroy();
           control = this._newSelectize($el, settings);
         }
-        if (this._isMultipleSelect($el)) {
-          control.on("item_add", function() {
-            var input = control.$control_input;
-            if (input && input.length)
-              input[0].focus();
-          });
-        }
         return control;
       }
     }, {
@@ -9048,11 +9041,6 @@
         if (binding)
           shinyBindAll($el.parent());
         return control;
-      }
-    }, {
-      key: "_isMultipleSelect",
-      value: function _isMultipleSelect($el) {
-        return $el.attr("multiple") === "multiple";
       }
     }]);
     return SelectInputBinding2;

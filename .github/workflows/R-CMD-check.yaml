@@ -16,7 +16,7 @@ jobs:
   website:
     uses: rstudio/shiny-workflows/.github/workflows/website.yaml@v1
   routine:
-    uses: rstudio/shiny-workflows/.github/workflows/routine.yaml@v2
+    uses: rstudio/shiny-workflows/.github/workflows/routine.yaml@v1
     with:
       node-version: "14.x"
   R-CMD-check:

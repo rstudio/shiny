@@ -1828,17 +1828,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@selectize/selectize@npm:0.15.2":
+"@selectize/selectize@https://github.com/selectize/selectize.js.git#e3f2e0b4aa251375bc21b5fcd8ca7d374a921f08":
   version: 0.15.2
-  resolution: "@selectize/selectize@npm:0.15.2"
-  dependencies:
-    jquery-ui: ^1.13.2
+  resolution: "@selectize/selectize@https://github.com/selectize/selectize.js.git#commit=e3f2e0b4aa251375bc21b5fcd8ca7d374a921f08"
   peerDependencies:
     jquery: ^1.7.0 || ^2 || ^3
-  dependenciesMeta:
+    jquery-ui: ^1.13.2
+  peerDependenciesMeta:
     jquery-ui:
       optional: true
-  checksum: 114f63a430b44a41e87d38364d17367d405b84f0e93baf48aca016f25fc449a21b876699d8ae0ebba5fca05a0ccb3564ed9d4ade0440404c15901eb08933a773
+  checksum: 8718ebda1068894fc1267459b603f492045723ed1000fdbe798f2fab78fed8536b1906f56c53e9bd0ff9dce24aed176045618d0a1eddcf48f7d0313ad4ad67e9
   languageName: node
   linkType: hard
 
@@ -2198,7 +2197,7 @@ __metadata:
     "@babel/preset-typescript": ^7.13.0
     "@babel/runtime": ^7.14.0
     "@deanc/esbuild-plugin-postcss": ^1.0.2
-    "@selectize/selectize": 0.15.2
+    "@selectize/selectize": "https://github.com/selectize/selectize.js.git#e3f2e0b4aa251375bc21b5fcd8ca7d374a921f08"
     "@testing-library/dom": ^7.31.0
     "@testing-library/jest-dom": ^5.12.0
     "@testing-library/user-event": ^13.1.9
@@ -6738,22 +6737,6 @@ __metadata:
   bin:
     jest: bin/jest.js
   checksum: 3a9b4c70e9bd5391e7367a0036045c1d3545c2a39e1439a71fb4b59b1748bc34e2ccb324faa1046b99bffc8dc2ed7b3c59016c462255b2646f5fa9300351f914
-  languageName: node
-  linkType: hard
-
-"jquery-ui@npm:^1.13.2":
-  version: 1.13.2
-  resolution: "jquery-ui@npm:1.13.2"
-  dependencies:
-    jquery: ">=1.8.0 <4.0.0"
-  checksum: 0d04a4b86e703d6ff71bcc37335f99be137b03fa24fa22f00f61f5aac132e7143b7d6dd9973ad4f72366e102826e417bc3d88c1640f7dd824961a7131bd3966a
-  languageName: node
-  linkType: hard
-
-"jquery@npm:>=1.8.0 <4.0.0":
-  version: 3.7.0
-  resolution: "jquery@npm:3.7.0"
-  checksum: 907785e133afc427650a131af5fccef66a404885037513b3d4d7d63aee6409bcc32a39836868c60e59b05aa0fb8ace8961c18b2ee3ffdf6ffdb571d6d7cd88ff
   languageName: node
   linkType: hard
 

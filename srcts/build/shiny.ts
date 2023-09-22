@@ -3,7 +3,7 @@
 // yarn build
 // ```
 
-import { banner, build, outDir, shinyDesc, babelPlugin } from "./_build";
+import { banner, build, outDir, shinyDesc } from "./_build";
 import globalsPlugin from "esbuild-plugin-globals";
 import type { BuildOptions } from "esbuild";
 import { verifyJqueryImport } from "./_jquery";
@@ -18,7 +18,6 @@ const opts: BuildOptions = {
       //// Loaded dynamically. MUST use `window.strftime` within code
       // strftime: "window.strftime",
     }),
-    babelPlugin(),
   ],
   define: {
     // eslint-disable-next-line @typescript-eslint/naming-convention

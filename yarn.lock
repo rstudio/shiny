@@ -1837,7 +1837,7 @@ __metadata:
   peerDependenciesMeta:
     jquery-ui:
       optional: true
-  checksum: ba260ba5804c16b1455ff79f9d00ce860e12ae36e29d7a5f702da6b384c9454497421b8e06fe683d10fac53e2dc6ec008da4fa129a153cbbfe5396e027eb4247
+  checksum: 8718ebda1068894fc1267459b603f492045723ed1000fdbe798f2fab78fed8536b1906f56c53e9bd0ff9dce24aed176045618d0a1eddcf48f7d0313ad4ad67e9
   languageName: node
   linkType: hard
 
@@ -2220,7 +2220,6 @@ __metadata:
     caniuse-lite: ^1.0.30001312
     core-js: ^3.13.0
     esbuild: ^0.15.10
-    esbuild-plugin-babel: "https://github.com/schloerke/esbuild-plugin-babel#patch-2"
     esbuild-plugin-globals: ^0.1.1
     esbuild-plugin-sass: ^1.0.1
     eslint: ^8.24.0
@@ -4221,15 +4220,6 @@ __metadata:
   version: 0.15.18
   resolution: "esbuild-openbsd-64@npm:0.15.18"
   conditions: os=openbsd & cpu=x64
-  languageName: node
-  linkType: hard
-
-"esbuild-plugin-babel@https://github.com/schloerke/esbuild-plugin-babel#patch-2":
-  version: 0.2.3
-  resolution: "esbuild-plugin-babel@https://github.com/schloerke/esbuild-plugin-babel.git#commit=40106e72776cf4e2e4da8e52926632ceed378da0"
-  peerDependencies:
-    "@babel/core": ^7.0.0
-  checksum: c89e123bc1944efcee5628ea6d8cb878384a4de5c19b4b598b660c03dd6429dd11e9120b5cbf54722331c69cb3bc25183b63ef1c28174ed44787228a44a58684
   languageName: node
   linkType: hard
 

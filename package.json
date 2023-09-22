@@ -50,7 +50,6 @@
     "caniuse-lite": "^1.0.30001312",
     "core-js": "^3.13.0",
     "esbuild": "^0.15.10",
-    "esbuild-plugin-babel": "https://github.com/schloerke/esbuild-plugin-babel#patch-2",
     "esbuild-plugin-globals": "^0.1.1",
     "esbuild-plugin-sass": "^1.0.1",
     "eslint": "^8.24.0",

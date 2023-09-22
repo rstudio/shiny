@@ -26,7 +26,6 @@
 ^\.vscode$
 ^\.madgerc$
 ^\.prettierrc\.yml$
-^babel\.config\.json$
 ^jest\.config\.js$
 ^package\.json$
 ^tsconfig\.json$

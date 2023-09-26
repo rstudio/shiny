@@ -1431,6 +1431,12 @@ wrapFunctionLabel <- function(func, name, ..stacktraceon = FALSE, dots = TRUE) {
   if (name == "name" || name == "func" || name == "relabelWrapper") {
     stop("Invalid name for wrapFunctionLabel: ", name)
   }
+  if (nchar(name, "bytes") > 10000) {
+    # Max variable length in R is 10000 bytes. Truncate to a shorter number of
+    # chars because some characters could be multi-byte.
+    name <- substr(name, 1, 5000)
+  }
+
   assign(name, func, environment())
   registerDebugHook(name, environment(), name)
 

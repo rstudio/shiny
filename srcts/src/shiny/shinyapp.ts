@@ -507,12 +507,16 @@ class ShinyApp {
     return value;
   }
 
-  bindOutput(id: string, binding: OutputBindingAdapter): OutputBindingAdapter {
+  async bindOutput(
+    id: string,
+    binding: OutputBindingAdapter
+  ): Promise<OutputBindingAdapter> {
     if (!id) throw "Can't bind an element with no ID";
     if (this.$bindings[id]) throw "Duplicate binding for ID " + id;
     this.$bindings[id] = binding;
 
-    if (this.$values[id] !== undefined) binding.onValueChange(this.$values[id]);
+    if (this.$values[id] !== undefined)
+      await binding.onValueChange(this.$values[id]);
     else if (this.$errors[id] !== undefined)
       binding.onValueError(this.$errors[id]);
 

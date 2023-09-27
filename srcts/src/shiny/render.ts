@@ -62,7 +62,7 @@ async function renderContentAsync(
 
   if (where === "replace") {
     shinyInitializeInputs(el);
-    shinyBindAll(el);
+    await shinyBindAll(el);
   } else {
     const $parent = $(el).parent();
 
@@ -75,7 +75,7 @@ async function renderContentAsync(
       }
     }
     shinyInitializeInputs(scope);
-    shinyBindAll(scope);
+    await shinyBindAll(scope);
   }
 }
 

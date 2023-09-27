@@ -55,8 +55,8 @@ function setShinyUser(user: string): void {
 function shinyForgetLastInputValue(name: string): void {
   validateShinyHasBeenSet().forgetLastInputValue(name);
 }
-function shinyBindAll(scope: BindScope): void {
-  validateShinyHasBeenSet().bindAll(scope);
+async function shinyBindAll(scope: BindScope): Promise<void> {
+  await validateShinyHasBeenSet().bindAll(scope);
 }
 function shinyUnbindAll(scope: BindScope, includeSelf = false): void {
   validateShinyHasBeenSet().unbindAll(scope, includeSelf);
@@ -65,8 +65,11 @@ function shinyInitializeInputs(scope: BindScope): void {
   validateShinyHasBeenSet().initializeInputs(scope);
 }
 
-function shinyAppBindOutput(id: string, binding: OutputBindingAdapter): void {
-  shinyShinyApp().bindOutput(id, binding);
+async function shinyAppBindOutput(
+  id: string,
+  binding: OutputBindingAdapter
+): Promise<void> {
+  await shinyShinyApp().bindOutput(id, binding);
 }
 
 function shinyAppUnbindOutput(

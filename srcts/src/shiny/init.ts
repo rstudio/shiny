@@ -95,8 +95,8 @@ function initShiny(windowShiny: Shiny): void {
     };
   }
 
-  windowShiny.bindAll = function (scope: BindScope) {
-    bindAll(shinyBindCtx(), scope);
+  windowShiny.bindAll = async function (scope: BindScope) {
+    await bindAll(shinyBindCtx(), scope);
   };
   windowShiny.unbindAll = function (scope: BindScope, includeSelf = false) {
     unbindAll(shinyBindCtx(), scope, includeSelf);

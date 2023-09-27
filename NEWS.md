@@ -10,6 +10,8 @@
 
 * `fileInput()` no longer has unwanted round corners applied to the `buttonLabel`. (#3879)
 
+* Fixed #3898: `wrapFunctionLabel()` no longer throws an error if the `name` is longer than 10000 bytes. (#3903)
+
 # shiny 1.7.5
 
 ## Possibly breaking changes

@@ -79,7 +79,7 @@ Imports:
     jsonlite (>= 0.9.16),
     xtable,
     fontawesome (>= 0.4.0),
-    htmltools (>= 0.5.4),
+    htmltools (> 0.5.6),
     R6 (>= 2.0),
     sourcetools,
     later (>= 1.0.0),
@@ -210,3 +210,5 @@ RdMacros: lifecycle
 Config/testthat/edition: 3
 Config/Needs/check:
   shinytest2
+Remotes:
+  rstudio/htmltools@null-is-atomic

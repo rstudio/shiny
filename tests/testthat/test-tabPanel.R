@@ -18,6 +18,9 @@ expect_snapshot2 <- function(...) {
   if (getRversion() < "3.6.0") {
     skip("Skipping snapshots on R < 3.6 because of different RNG method")
   }
+  if (packageVersion("htmltools") <= "0.5.6") {
+    skip("Skipping snapshots since htmltools is 'outdated'")
+  }
   expect_snapshot(...)
 }
 

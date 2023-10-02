@@ -1240,15 +1240,12 @@ dotloop <- function(fun_, ...) {
 #' @param x An expression whose truthiness value we want to determine
 #' @export
 isTruthy <- function(x) {
-  if (inherits(x, 'try-error'))
-    return(FALSE)
-
   if (is.null(x))
     return(FALSE)
-
+  if (inherits(x, 'try-error'))
+    return(FALSE)
   if (!is.atomic(x))
     return(TRUE)
-
   if (length(x) == 0)
     return(FALSE)
   if (all(is.na(x)))

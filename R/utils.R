@@ -1243,11 +1243,12 @@ isTruthy <- function(x) {
   if (inherits(x, 'try-error'))
     return(FALSE)
 
+  if (is.null(x))
+    return(FALSE)
+
   if (!is.atomic(x))
     return(TRUE)
 
-  if (is.null(x))
-    return(FALSE)
   if (length(x) == 0)
     return(FALSE)
   if (all(is.na(x)))

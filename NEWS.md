@@ -1,3 +1,9 @@
+# shiny 1.7.5.1
+
+## Bug fixes
+
+* On r-devel (R > 4.3.1), `isTruthy(NULL)` now returns `FALSE` (as it does with older versions of R). (#3906)
+
 # shiny 1.7.5
 
 ## Possibly breaking changes

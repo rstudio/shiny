@@ -2,6 +2,7 @@ import $ from "jquery";
 import { InputBinding } from "./inputBinding";
 import { $escape, hasDefinedProperty, updateLabel } from "../../utils";
 import { indirectEval } from "../../utils/eval";
+import { shinyBindAll, shinyUnbindAll } from "../../shiny/initedMethods";
 import type { NotUndefined } from "../../utils/extraTypes";
 
 type SelectHTMLElement = HTMLSelectElement & { nonempty: boolean };
@@ -17,8 +18,6 @@ type SelectInputReceiveMessageData = {
 type SelectizeOptions = Selectize.IOptions<string, unknown>;
 type SelectizeInfo = Selectize.IApi<string, unknown> & {
   settings: SelectizeOptions;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  $control_input?: JQuery<HTMLElement>;
 };
 
 function getLabelNode(el: SelectHTMLElement): JQuery<HTMLElement> {
@@ -54,7 +53,7 @@ class SelectInputBinding extends InputBinding {
       // default character type
       return null;
     }
-    if (this._isMultipleSelect($el)) {
+    if ($el.attr("multiple") === "multiple") {
       return "shiny.symbolList";
     } else {
       return "shiny.symbol";
@@ -285,31 +284,33 @@ class SelectInputBinding extends InputBinding {
         // @ts-expect-error; Need to type `options` keys to know exactly which values are accessed.
         options[x] = indirectEval("(" + options[x] + ")");
       });
-    let control = $el.selectize(options)[0].selectize as SelectizeInfo;
-    // .selectize() does not really update settings; must destroy and rebuild
 
+    let control = this._newSelectize($el, options);
+
+    // .selectize() does not really update settings; must destroy and rebuild
     if (update) {
       const settings = $.extend(control.settings, options);
 
       control.destroy();
-      control = $el.selectize(settings)[0].selectize as SelectizeInfo;
-    }
-
-    // (Hopefully temporary) workaround for a v0.15.2 selectize bug where the
-    // dropdown (instead of the <input>) gets focus after an item added via
-    // click.
-    // FIXME: https://github.com/selectize/selectize.js/issues/2032
-    if (this._isMultipleSelect($el)) {
-      control.on("item_add", function () {
-        const input = control.$control_input;
-        if (input && input.length) input[0].focus();
-      });
+      control = this._newSelectize($el, settings);
     }
 
     return control;
   }
-  protected _isMultipleSelect($el: JQuery<HTMLElement>): boolean {
-    return $el.attr("multiple") === "multiple";
+
+  protected _newSelectize(
+    $el: JQuery<HTMLSelectElement>,
+    options: SelectizeOptions
+  ): SelectizeInfo {
+    // Starting with selectize v0.15.2, $el.selectize() can prune the <select>
+    // element from the DOM, meaning that if we're already bound to it, we'll
+    // lose the binding. So if we are bound, unbind first, then rebind after.
+    // (Note this is quite similar to how Shiny.renderContent() works.)
+    const binding = $el.data("shiny-input-binding");
+    if (binding) shinyUnbindAll($el.parent());
+    const control = $el.selectize(options)[0].selectize as SelectizeInfo;
+    if (binding) shinyBindAll($el.parent());
+    return control;
   }
 }
 

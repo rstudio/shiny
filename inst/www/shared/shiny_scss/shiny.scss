@@ -88,15 +88,23 @@ pre.shiny-text-output {
 
 #shiny-disconnected-overlay {
   position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  inset: 0;
   background-color: $shiny-disconnected-bg;
   opacity: 0.5;
   overflow: hidden;
   z-index: 99998;
   pointer-events: none;
+}
+
+.autoreload:not(.autoreload-closed) #shiny-disconnected-overlay {
+  opacity: 0;
+  animation: fadeIn 250ms forwards;
+  animation-delay: 1s;
+}
+@keyframes fadeIn {
+  to {
+    opacity: 0.1;
+  }
 }
 
 .table.shiny-table {

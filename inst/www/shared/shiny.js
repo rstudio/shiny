@@ -1,4 +1,4 @@
-/*! shiny 1.7.5.1 | (c) 2012-2023 RStudio, PBC. | License: GPL-3 | file LICENSE */
+/*! shiny 1.7.5.9000 | (c) 2012-2023 RStudio, PBC. | License: GPL-3 | file LICENSE */
 "use strict";
 (function() {
   var __create = Object.create;
@@ -8662,6 +8662,59 @@
   // srcts/src/utils/eval.ts
   var indirectEval = eval;
 
+  // srcts/src/shiny/initedMethods.ts
+  var fullShinyObj;
+  function setShinyObj(shiny) {
+    fullShinyObj = shiny;
+  }
+  function validateShinyHasBeenSet() {
+    if (typeof fullShinyObj === "undefined") {
+      throw "Shiny has not finish initialization yet. Please wait for the 'shiny-initialized' event.";
+    }
+    return fullShinyObj;
+  }
+  function shinySetInputValue(name, value, opts) {
+    validateShinyHasBeenSet().setInputValue(name, value, opts);
+  }
+  function shinyShinyApp() {
+    return validateShinyHasBeenSet().shinyapp;
+  }
+  function setShinyUser(user) {
+    validateShinyHasBeenSet().user = user;
+  }
+  function shinyForgetLastInputValue(name) {
+    validateShinyHasBeenSet().forgetLastInputValue(name);
+  }
+  function shinyBindAll(scope) {
+    validateShinyHasBeenSet().bindAll(scope);
+  }
+  function shinyUnbindAll(scope) {
+    var includeSelf = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
+    validateShinyHasBeenSet().unbindAll(scope, includeSelf);
+  }
+  function shinyInitializeInputs(scope) {
+    validateShinyHasBeenSet().initializeInputs(scope);
+  }
+  function shinyAppBindOutput(id, binding) {
+    shinyShinyApp().bindOutput(id, binding);
+  }
+  function shinyAppUnbindOutput(id, binding) {
+    return shinyShinyApp().unbindOutput(id, binding);
+  }
+  function getShinyOnCustomMessage() {
+    return validateShinyHasBeenSet().oncustommessage;
+  }
+  var fileInputBinding;
+  function getFileInputBinding() {
+    return fileInputBinding;
+  }
+  function setFileInputBinding(fileInputBinding_) {
+    fileInputBinding = fileInputBinding_;
+  }
+  function getShinyCreateWebsocket() {
+    return validateShinyHasBeenSet().createSocket;
+  }
+
   // srcts/src/bindings/input/selectInput.ts
   function _typeof13(obj) {
     "@babel/helpers - typeof";
@@ -8970,12 +9023,23 @@
           import_jquery15.default.each(config.data("eval"), function(i, x) {
             options[x] = indirectEval("(" + options[x] + ")");
           });
-        var control = $el.selectize(options)[0].selectize;
+        var control = this._newSelectize($el, options);
         if (update) {
           var settings = import_jquery15.default.extend(control.settings, options);
           control.destroy();
-          control = $el.selectize(settings)[0].selectize;
+          control = this._newSelectize($el, settings);
         }
+        return control;
+      }
+    }, {
+      key: "_newSelectize",
+      value: function _newSelectize($el, options) {
+        var binding = $el.data("shiny-input-binding");
+        if (binding)
+          shinyUnbindAll($el.parent());
+        var control = $el.selectize(options)[0].selectize;
+        if (binding)
+          shinyBindAll($el.parent());
         return control;
       }
     }]);
@@ -9407,59 +9471,6 @@
     evt.inputType = inputType;
     (0, import_jquery18.default)(onEl).trigger(evt);
     return evt;
-  }
-
-  // srcts/src/shiny/initedMethods.ts
-  var fullShinyObj;
-  function setShinyObj(shiny) {
-    fullShinyObj = shiny;
-  }
-  function validateShinyHasBeenSet() {
-    if (typeof fullShinyObj === "undefined") {
-      throw "Shiny has not finish initialization yet. Please wait for the 'shiny-initialized' event.";
-    }
-    return fullShinyObj;
-  }
-  function shinySetInputValue(name, value, opts) {
-    validateShinyHasBeenSet().setInputValue(name, value, opts);
-  }
-  function shinyShinyApp() {
-    return validateShinyHasBeenSet().shinyapp;
-  }
-  function setShinyUser(user) {
-    validateShinyHasBeenSet().user = user;
-  }
-  function shinyForgetLastInputValue(name) {
-    validateShinyHasBeenSet().forgetLastInputValue(name);
-  }
-  function shinyBindAll(scope) {
-    validateShinyHasBeenSet().bindAll(scope);
-  }
-  function shinyUnbindAll(scope) {
-    var includeSelf = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
-    validateShinyHasBeenSet().unbindAll(scope, includeSelf);
-  }
-  function shinyInitializeInputs(scope) {
-    validateShinyHasBeenSet().initializeInputs(scope);
-  }
-  function shinyAppBindOutput(id, binding) {
-    shinyShinyApp().bindOutput(id, binding);
-  }
-  function shinyAppUnbindOutput(id, binding) {
-    return shinyShinyApp().unbindOutput(id, binding);
-  }
-  function getShinyOnCustomMessage() {
-    return validateShinyHasBeenSet().oncustommessage;
-  }
-  var fileInputBinding;
-  function getFileInputBinding() {
-    return fileInputBinding;
-  }
-  function setFileInputBinding(fileInputBinding_) {
-    fileInputBinding = fileInputBinding_;
-  }
-  function getShinyCreateWebsocket() {
-    return validateShinyHasBeenSet().createSocket;
   }
 
   // srcts/src/file/fileProcessor.ts
@@ -19196,7 +19207,7 @@
   var windowShiny2;
   function setShiny(windowShiny_) {
     windowShiny2 = windowShiny_;
-    windowShiny2.version = "1.7.5.1";
+    windowShiny2.version = "1.7.5.9000";
     var _initInputBindings = initInputBindings(), inputBindings = _initInputBindings.inputBindings, fileInputBinding2 = _initInputBindings.fileInputBinding;
     var _initOutputBindings = initOutputBindings(), outputBindings = _initOutputBindings.outputBindings;
     setFileInputBinding(fileInputBinding2);

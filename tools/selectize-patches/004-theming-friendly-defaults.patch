@@ -1,0 +1,26 @@
+diff --git a/inst/www/shared/selectize/scss/selectize.bootstrap3.scss b/inst/www/shared/selectize/scss/selectize.bootstrap3.scss
+index 7f847b39b..8bd94d42a 100644
+--- a/inst/www/shared/selectize/scss/selectize.bootstrap3.scss
++++ b/inst/www/shared/selectize/scss/selectize.bootstrap3.scss
+@@ -10,7 +10,7 @@ $select-color-input-full: $input-bg;
+ $select-color-input-error: $state-danger-text;
+ $select-color-input-error-focus: darken($select-color-input-error, 10%);
+ $select-color-disabled: $input-bg;
+-$select-color-item: #efefef;
++$select-color-item: RGBA($select-color-text, 0.1);
+ $select-color-item-border: rgba(0, 0, 0, 0);
+ $select-color-item-active: $component-active-bg;
+ $select-color-item-active-text: color-contrast($select-color-item-active);
+diff --git a/inst/www/shared/selectize/scss/selectize.bootstrap4.scss b/inst/www/shared/selectize/scss/selectize.bootstrap4.scss
+index a797a62da..624ab9138 100644
+--- a/inst/www/shared/selectize/scss/selectize.bootstrap4.scss
++++ b/inst/www/shared/selectize/scss/selectize.bootstrap4.scss
+@@ -14,7 +14,7 @@ $select-color-input-error-focus: darken(
+   10%
+ ) !default;
+ $select-color-disabled: $input-bg !default;
+-$select-color-item: #efefef !default;
++$select-color-item: RGBA($select-color-text, 0.1) !default;
+ $select-color-item-border: $border-color !default;
+ $select-color-item-active: $component-active-bg !default;
+ $select-color-item-active-text: color-contrast($select-color-item-active) !default;

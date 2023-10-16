@@ -1828,6 +1828,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@selectize/selectize@https://github.com/selectize/selectize.js.git#e3f2e0b4aa251375bc21b5fcd8ca7d374a921f08":
+  version: 0.15.2
+  resolution: "@selectize/selectize@https://github.com/selectize/selectize.js.git#commit=e3f2e0b4aa251375bc21b5fcd8ca7d374a921f08"
+  peerDependencies:
+    jquery: ^1.7.0 || ^2 || ^3
+    jquery-ui: ^1.13.2
+  peerDependenciesMeta:
+    jquery-ui:
+      optional: true
+  checksum: ba260ba5804c16b1455ff79f9d00ce860e12ae36e29d7a5f702da6b384c9454497421b8e06fe683d10fac53e2dc6ec008da4fa129a153cbbfe5396e027eb4247
+  languageName: node
+  linkType: hard
+
 "@sinclair/typebox@npm:^0.25.16":
   version: 0.25.24
   resolution: "@sinclair/typebox@npm:0.25.24"
@@ -2184,6 +2197,7 @@ __metadata:
     "@babel/preset-typescript": ^7.13.0
     "@babel/runtime": ^7.14.0
     "@deanc/esbuild-plugin-postcss": ^1.0.2
+    "@selectize/selectize": "https://github.com/selectize/selectize.js.git#e3f2e0b4aa251375bc21b5fcd8ca7d374a921f08"
     "@testing-library/dom": ^7.31.0
     "@testing-library/jest-dom": ^5.12.0
     "@testing-library/user-event": ^13.1.9

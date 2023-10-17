@@ -96,7 +96,7 @@ pre.shiny-text-output {
   pointer-events: none;
 }
 
-#shiny-disconnected-overlay.reloading {
+html.autoreload-enabled #shiny-disconnected-overlay.reloading {
   opacity: 0;
   animation: fadeIn 250ms forwards;
   animation-delay: 1s;

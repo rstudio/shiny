@@ -1,5 +1,7 @@
 /* eslint-disable unicorn/filename-case */
 
+document.documentElement.classList.add("autoreload-enabled");
+
 const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
 // Add trailing slash to path, if necessary, before appending "autoreload"
 const defaultPath =

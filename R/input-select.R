@@ -253,9 +253,8 @@ selectizeDependencyFunc <- function(theme) {
   # name, the JS/CSS would be loaded/included twice, which leads to
   # strange issues, especially since we now include a 3rd party
   # accessibility plugin https://github.com/rstudio/shiny/pull/3153
-  script <- file.path(
-    selectizeDir, c("js/selectize.min.js", "accessibility/js/selectize-plugin-a11y.min.js")
-  )
+  script <- file.path(selectizeDir, selectizeScripts())
+
   bslib::bs_dependency(
     input = sass::sass_file(stylesheet),
     theme = theme,
@@ -273,10 +272,18 @@ selectizeStaticDependency <- function(version) {
     src = "www/shared/selectize",
     package = "shiny",
     stylesheet = "css/selectize.bootstrap3.css",
-    script = c(
-      "js/selectize.min.js",
-      "accessibility/js/selectize-plugin-a11y.min.js"
-    )
+    script = selectizeScripts()
+  )
+}
+
+selectizeScripts <- function() {
+  isMinified <- isTRUE(get_devmode_option("shiny.minified", TRUE))
+  paste0(
+    c(
+      "js/selectize",
+      "accessibility/js/selectize-plugin-a11y"
+    ),
+    if (isMinified) ".min.js" else ".js"
   )
 }
 

@@ -20,7 +20,7 @@ unlink(inst_dir, recursive = TRUE)
 
 dir.create(file.path(inst_dir, "js"), recursive = TRUE)
 file.copy(
-  file.path(node_dir, "js", "selectize.min.js"),
+  file.path(node_dir, "js", c("selectize.js", "selectize.min.js")),
   file.path(inst_dir, "js"),
   overwrite = TRUE
 )

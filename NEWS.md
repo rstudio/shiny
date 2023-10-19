@@ -6,6 +6,8 @@
 
 * Shiny's CSS styling for things like `showNotification()`, `withProgress()`, `inputPanel()`, etc., now looks better with `{bslib}`'s upcoming CSS-only dark mode. (#3882)
 
+* Shiny's Sass variables are now set specifically for major versions of Bootstrap. Bootstrap versions 3 and 4 are unaffected by this change, and the Bootstrap 5 variables now target Bootstrap 5.3 to take advantage of Bootstrap's dark mode and client-side theming via CSS variables. (#3914)
+
 ## Bug fixes
 
 * `fileInput()` no longer has unwanted round corners applied to the `buttonLabel`. (#3879)

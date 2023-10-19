@@ -6,8 +6,8 @@
 #' @return A character string specifying the path of the example
 #' OR a data frame containing information about all available Shiny examples
 #'
-#' @export
-example_api <- function(package = NULL, name = NULL) {
+#' @noRd
+run_example_app_dir <- function(package = NULL, name = NULL) {
     # arg checking
     if (is.null(package)) {
         if (is.null(name)) {
@@ -24,10 +24,6 @@ example_api <- function(package = NULL, name = NULL) {
             examples <- available_examples(package = package)
             example_path <- examples[examples$name == name, "source_directory"]
             if (length(example_path) > 0) {
-                if (edit) {
-                    # open the example in an editor
-                    rstudioapi::navigateToFile(example_path)
-                }
                 return(example_path)
             } else {
                 stop("No matching example found within the package")
@@ -66,7 +62,7 @@ available_examples <- function(package = NULL) {
 #'
 #' @return A data frame containing information about all
 #'  available Shiny examples for the package
-#'
+#' @noRd
 available_examples_for_package <- function(package) {
     an_error <- function(...) {
         list(
@@ -119,7 +115,7 @@ available_examples_for_package <- function(package) {
 #'
 #' @return A data frame containing information about
 #'  all available Shiny examples for all installed packages
-#'
+#' @noRd
 all_available_examples <- function() {
     ret <- list()
     all_pkgs <- installed.packages()[, "Package"]
@@ -167,12 +163,12 @@ print.shiny_available_examples <- function(x, ...) {
     cat(format(x, ...), "\n", sep = "")
 }
 
-# example_api()
-# example_api(package = "shiny")
-# example_api(package = "tidyverse")
+# run_example_app_dir()
+# run_example_app_dir(package = "shiny")
+# run_example_app_dir(package = "tidyverse")
 
-# example_api(package = c("shiny", "tidyverse"))
-# example_api(package = "shuny")
-# example_api(name = "01_hello")
-example_api(package = "shiny", name = "01_hello")
-# example_api(package = "shiny", name = "05_hello")
+# run_example_app_dir(package = c("shiny", "tidyverse"))
+# run_example_app_dir(package = "shuny")
+# run_example_app_dir(name = "01_hello")
+# run_example_app_dir(package = "shiny", name = "01_hello")
+# run_example_app_dir(package = "shiny", name = "05_hello")

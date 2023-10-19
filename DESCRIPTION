@@ -177,6 +177,7 @@ Collate:
     'render-plot.R'
     'render-table.R'
     'run-url.R'
+    'run_example.R'
     'runapp.R'
     'serializers.R'
     'server-input-handlers.R'

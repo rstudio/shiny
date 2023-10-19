@@ -1,11 +1,21 @@
-example_api <- function(package = NULL, name = NULL, edit = FALSE) {
+#' Function to get the path of a Shiny example in a package
+#'
+#' @param package A character string specifying the name of the package
+#' @param name A character string specifying the name of the example
+#'
+#' @return A character string specifying the path of the example
+#' OR a data frame containing information about all available Shiny examples
+#'
+#' @export
+example_api <- function(package = NULL, name = NULL) {
     # arg checking
     if (is.null(package)) {
         if (is.null(name)) {
             # neither package nor name is specified
             return(available_examples(package = NULL))
         } else {
-            stop("Please provide a package name when specifying an example name.")
+            stop("Please provide a package name
+            when specifying an example name.")
         }
     } else {
         stopifnot(length(package) == 1 && is.character(package))
@@ -14,9 +24,11 @@ example_api <- function(package = NULL, name = NULL, edit = FALSE) {
             examples <- available_examples(package = package)
             example_path <- examples[examples$name == name, "source_directory"]
             if (length(example_path) > 0) {
-                return(
-                    example_path
-                )
+                if (edit) {
+                    # open the example in an editor
+                    rstudioapi::navigateToFile(example_path)
+                }
+                return(example_path)
             } else {
                 stop("No matching example found within the package")
             }
@@ -26,7 +38,14 @@ example_api <- function(package = NULL, name = NULL, edit = FALSE) {
     }
 }
 
-
+#' Function to get a data frame of all available Shiny examples
+#'
+#' @param package A character string specifying the name of the package
+#'
+#' @return A data frame containing information
+#' about all available Shiny examples
+#'
+#' @export
 available_examples <- function(package = NULL) {
     info <-
         if (is.null(package)) {
@@ -41,7 +60,13 @@ available_examples <- function(package = NULL) {
     return(examples)
 }
 
-
+#' Function to get a data frame of all available Shiny examples for a package
+#'
+#' @param package A character string specifying the name of the package
+#'
+#' @return A data frame containing information about all
+#'  available Shiny examples for the package
+#'
 available_examples_for_package <- function(package) {
     an_error <- function(...) {
         list(
@@ -80,12 +105,8 @@ available_examples_for_package <- function(package) {
         )
     })
 
-
     examples <- do.call(rbind, example_info)
     class(examples) <- c("shiny_available_examples", class(examples))
-    # remove the row names from the data frame which comes by default
-    # rownames(examples) <- NULL
-
 
     list(
         examples = examples,
@@ -93,7 +114,12 @@ available_examples_for_package <- function(package) {
     )
 }
 
-
+#' Function to get a data frame of all available Shiny examples
+#'  for all installed packages
+#'
+#' @return A data frame containing information about
+#'  all available Shiny examples for all installed packages
+#'
 all_available_examples <- function() {
     ret <- list()
     all_pkgs <- installed.packages()[, "Package"]
@@ -135,7 +161,6 @@ format.shiny_available_examples <- function(x, ...) {
         paste0(pkg_examples, collapse = "\n")
     )
 }
-
 
 #' @export
 print.shiny_available_examples <- function(x, ...) {

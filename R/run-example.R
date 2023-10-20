@@ -7,12 +7,12 @@
 #' OR a data frame containing information about all available Shiny examples
 #'
 #' @noRd
-run_example_app_dir <- function(package = NULL, name = NULL) {
+runExampleAppDir <- function(package = NULL, name = NULL) {
     # arg checking
     if (is.null(package)) {
         if (is.null(name)) {
             # neither package nor name is specified
-            return(available_examples(package = NULL))
+            return(availableExamples(package = NULL))
         } else {
             stop("Please provide a package name
             when specifying an example name.")
@@ -21,7 +21,7 @@ run_example_app_dir <- function(package = NULL, name = NULL) {
         stopifnot(length(package) == 1 && is.character(package))
         # Search for a Shiny example with a given name in a package
         if (!is.null(name)) {
-            examples <- available_examples(package = package)
+            examples <- availableExamples(package = package)
             example_path <- examples[examples$name == name, "source_directory"]
             if (length(example_path) > 0) {
                 return(example_path)
@@ -30,7 +30,7 @@ run_example_app_dir <- function(package = NULL, name = NULL) {
             }
         }
         # only package is specified
-        return(available_examples(package = package))
+        return(availableExamples(package = package))
     }
 }
 
@@ -42,12 +42,12 @@ run_example_app_dir <- function(package = NULL, name = NULL) {
 #' about all available Shiny examples
 #'
 #' @export
-available_examples <- function(package = NULL) {
+availableExamples <- function(package = NULL) {
     info <-
         if (is.null(package)) {
-            all_available_examples()
+            allAvailableExamples()
         } else {
-            available_examples_for_package(package)
+            availableExamplesForPackage(package)
         }
     if (!is.null(info$error)) {
         stop(info$error, call. = FALSE)
@@ -63,7 +63,7 @@ available_examples <- function(package = NULL) {
 #' @return A data frame containing information about all
 #'  available Shiny examples for the package
 #' @noRd
-available_examples_for_package <- function(package) {
+availableExamplesForPackage <- function(package) {
     an_error <- function(...) {
         list(
             examples = NULL,
@@ -116,12 +116,12 @@ available_examples_for_package <- function(package) {
 #' @return A data frame containing information about
 #'  all available Shiny examples for all installed packages
 #' @noRd
-all_available_examples <- function() {
+allAvailableExamples <- function() {
     ret <- list()
     all_pkgs <- installed.packages()[, "Package"]
 
     for (pkg in all_pkgs) {
-        info <- available_examples_for_package(pkg)
+        info <- availableExamplesForPackage(pkg)
         if (!is.null(info$examples)) {
             ret[[length(ret) + 1]] <- info$examples
         }
@@ -163,12 +163,12 @@ print.shiny_available_examples <- function(x, ...) {
     cat(format(x, ...), "\n", sep = "")
 }
 
-# run_example_app_dir()
-# run_example_app_dir(package = "shiny")
-# run_example_app_dir(package = "tidyverse")
+# runExampleAppDir()
+# runExampleAppDir(package = "shiny")
+# runExampleAppDir(package = "tidyverse")
 
-# run_example_app_dir(package = c("shiny", "tidyverse"))
-# run_example_app_dir(package = "shuny")
-# run_example_app_dir(name = "01_hello")
-# run_example_app_dir(package = "shiny", name = "01_hello")
-# run_example_app_dir(package = "shiny", name = "05_hello")
+# runExampleAppDir(package = c("shiny", "tidyverse"))
+# runExampleAppDir(package = "shuny")
+# runExampleAppDir(name = "01_hello")
+# runExampleAppDir(package = "shiny", name = "01_hello")
+# runExampleAppDir(package = "shiny", name = "05_hello")

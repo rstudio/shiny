@@ -4,9 +4,9 @@
 
 * Updated `selectizeInput()`'s selectize.js dependency from v0.12.4 to v0.15.2. In addition to many bug fixes and improvements, this update also adds several new [plugin options](https://selectize.dev/docs/demos/plugins). (#3875)
 
-* Shiny's CSS styling for things like `showNotification()`, `withProgress()`, `inputPanel()`, etc., now looks better with `{bslib}`'s upcoming CSS-only dark mode. (#3882)
+* Shiny's CSS styling (for things like `showNotification()`, `withProgress()`, `inputPanel()`, etc.), has been updated with `{bslib}`'s upcoming CSS-only dark mode feature in mind. (#3882, #3914)
 
-* Shiny's Sass variables are now set specifically for major versions of Bootstrap. Bootstrap versions 3 and 4 are unaffected by this change, and the Bootstrap 5 variables now target Bootstrap 5.3 to take advantage of Bootstrap's dark mode and client-side theming via CSS variables. (#3914)
+* Default styles for `showNotification()` were tweaked slightly to improve accessibility, sizing, and padding. (#3913) 
 
 ## Bug fixes
 

@@ -61,7 +61,7 @@ declare class ShinyApp {
         next: () => number;
         reset: () => void;
     };
-    onDisconnected(): void;
+    onDisconnected(reloading?: boolean): void;
     onConnected(): void;
     makeRequest(method: string, args: unknown[], onSuccess: OnSuccessRequest, onError: OnErrorRequest, blobs: Array<ArrayBuffer | Blob | string> | undefined): void;
     $sendMsg(msg: MessageValue): void;

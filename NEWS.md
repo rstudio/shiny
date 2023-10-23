@@ -4,13 +4,21 @@
 
 * Updated `selectizeInput()`'s selectize.js dependency from v0.12.4 to v0.15.2. In addition to many bug fixes and improvements, this update also adds several new [plugin options](https://selectize.dev/docs/demos/plugins). (#3875)
 
-* Shiny's CSS styling for things like `showNotification()`, `withProgress()`, `inputPanel()`, etc., now looks better with `{bslib}`'s upcoming CSS-only dark mode. (#3882)
+* Shiny's CSS styling (for things like `showNotification()`, `withProgress()`, `inputPanel()`, etc.), has been updated with `{bslib}`'s upcoming CSS-only dark mode feature in mind. (#3882, #3914)
+
+* Default styles for `showNotification()` were tweaked slightly to improve accessibility, sizing, and padding. (#3913) 
 
 ## Bug fixes
 
 * `fileInput()` no longer has unwanted round corners applied to the `buttonLabel`. (#3879)
 
 * Fixed #3898: `wrapFunctionLabel()` no longer throws an error if the `name` is longer than 10000 bytes. (#3903)
+
+# shiny 1.7.5.1
+
+## Bug fixes
+
+* On r-devel (R > 4.3.1), `isTruthy(NULL)` now returns `FALSE` (as it does with older versions of R). (#3906)
 
 # shiny 1.7.5
 

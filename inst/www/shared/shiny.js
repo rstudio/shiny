@@ -17905,7 +17905,8 @@
             }, _callee2);
           })));
         };
-        socket.onclose = function() {
+        socket.onclose = function(e) {
+          var restarting = e.code === 1012;
           if (hasOpened) {
             (0, import_jquery38.default)(document).trigger({
               type: "shiny:disconnected",
@@ -17913,7 +17914,7 @@
             });
             _this.$notifyDisconnected();
           }
-          _this.onDisconnected();
+          _this.onDisconnected(restarting);
           _this.$removeSocket();
         };
         return socket;
@@ -17993,10 +17994,11 @@
     }, {
       key: "onDisconnected",
       value: function onDisconnected() {
-        var $overlay = (0, import_jquery38.default)("#shiny-disconnected-overlay");
-        if ($overlay.length === 0) {
+        var reloading = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : false;
+        if ((0, import_jquery38.default)("#shiny-disconnected-overlay").length === 0) {
           (0, import_jquery38.default)(document.body).append('<div id="shiny-disconnected-overlay"></div>');
         }
+        (0, import_jquery38.default)("#shiny-disconnected-overlay").toggleClass("reloading", reloading);
         if (this.$allowReconnect === true && this.$socket.allowReconnect === true || this.$allowReconnect === "force") {
           var delay = this.reconnectDelay.next();
           showReconnectDialog(delay);

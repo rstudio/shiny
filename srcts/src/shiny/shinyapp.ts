@@ -244,7 +244,8 @@ class ShinyApp {
     };
     // Called when a successfully-opened websocket is closed, or when an
     // attempt to open a connection fails.
-    socket.onclose = () => {
+    socket.onclose = (e) => {
+      const restarting = e.code === 1012; // Uvicorn sets this code when autoreloading
       // These things are needed only if we've successfully opened the
       // websocket.
       if (hasOpened) {
@@ -257,7 +258,7 @@ class ShinyApp {
         this.$notifyDisconnected();
       }
 
-      this.onDisconnected(); // Must be run before this.$removeSocket()
+      this.onDisconnected(restarting); // Must be run before this.$removeSocket()
       this.$removeSocket();
     };
     return socket;
@@ -333,13 +334,12 @@ class ShinyApp {
     };
   })();
 
-  onDisconnected(): void {
+  onDisconnected(reloading = false): void {
     // Add gray-out overlay, if not already present
-    const $overlay = $("#shiny-disconnected-overlay");
-
-    if ($overlay.length === 0) {
+    if ($("#shiny-disconnected-overlay").length === 0) {
       $(document.body).append('<div id="shiny-disconnected-overlay"></div>');
     }
+    $("#shiny-disconnected-overlay").toggleClass("reloading", reloading);
 
     // To try a reconnect, both the app (this.$allowReconnect) and the
     // server (this.$socket.allowReconnect) must allow reconnections, or

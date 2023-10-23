@@ -237,6 +237,9 @@ class ShinyApp {
         socket.send(msg as string);
       }
 
+      // This launches the action queue loop, which just runs in the background,
+      // so we don't need to await it.
+      /* eslint-disable @typescript-eslint/no-floating-promises */
       this.startActionQueueLoop();
     };
     socket.onmessage = (e) => {
@@ -823,15 +826,15 @@ class ShinyApp {
       }
     });
 
-    addMessageHandler("custom", (message: { [key: string]: unknown }) => {
+    addMessageHandler("custom", async (message: { [key: string]: unknown }) => {
       // For old-style custom messages - should deprecate and migrate to new
       // method
       const shinyOnCustomMessage = getShinyOnCustomMessage();
 
-      if (shinyOnCustomMessage) shinyOnCustomMessage(message);
+      if (shinyOnCustomMessage) await shinyOnCustomMessage(message);
 
       // Send messages.foo and messages.bar to appropriate handlers
-      this._sendMessagesToHandlers(
+      await this._sendMessagesToHandlers(
         message,
         customMessageHandlers,
         customMessageHandlerOrder

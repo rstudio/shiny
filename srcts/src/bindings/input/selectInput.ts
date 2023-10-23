@@ -146,6 +146,7 @@ class SelectInputBinding extends InputBinding {
       selectize.settings.load = function (query: string, callback: CallbackFn) {
         const settings = selectize.settings;
 
+        /* eslint-disable @typescript-eslint/no-floating-promises */
         $.ajax({
           url: data.url,
           data: {
@@ -309,6 +310,7 @@ class SelectInputBinding extends InputBinding {
     const binding = $el.data("shiny-input-binding");
     if (binding) shinyUnbindAll($el.parent());
     const control = $el.selectize(options)[0].selectize as SelectizeInfo;
+    /* eslint-disable @typescript-eslint/no-floating-promises */
     if (binding) shinyBindAll($el.parent());
     return control;
   }

@@ -35,7 +35,7 @@ import type { WherePosition } from "./singletons";
 // Render HTML in a DOM element, add dependencies, and bind Shiny
 // inputs/outputs. `content` can be null, a string, or an object with
 // properties 'html' and 'deps'.
-async function renderContentAsync(
+async function renderContent(
   el: BindScope,
   content: string | { html: string; deps?: HtmlDep[] } | null,
   where: WherePosition = "replace"
@@ -79,48 +79,15 @@ async function renderContentAsync(
   }
 }
 
-function renderContent(
+async function renderContentAsync(
   el: BindScope,
   content: string | { html: string; deps?: HtmlDep[] } | null,
   where: WherePosition = "replace"
-): void {
-  if (where === "replace") {
-    shinyUnbindAll(el);
-  }
-
-  let html = "";
-  let dependencies: HtmlDep[] = [];
-
-  if (content === null) {
-    html = "";
-  } else if (typeof content === "string") {
-    html = content;
-  } else if (typeof content === "object") {
-    html = content.html;
-    dependencies = content.deps || [];
-  }
-
-  renderHtml(html, el, dependencies, where);
-
-  let scope: BindScope = el;
-
-  if (where === "replace") {
-    shinyInitializeInputs(el);
-    shinyBindAll(el);
-  } else {
-    const $parent = $(el).parent();
-
-    if ($parent.length > 0) {
-      scope = $parent;
-      if (where === "beforeBegin" || where === "afterEnd") {
-        const $grandparent = $parent.parent();
-
-        if ($grandparent.length > 0) scope = $grandparent;
-      }
-    }
-    shinyInitializeInputs(scope);
-    shinyBindAll(scope);
-  }
+): Promise<void> {
+  console.warn(
+    "renderContentAsync() is deprecated. Use renderContent() instead."
+  );
+  await renderContent(el, content, where);
 }
 
 // =============================================================================

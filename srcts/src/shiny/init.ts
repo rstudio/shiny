@@ -28,7 +28,7 @@ import { registerNames as singletonsRegisterNames } from "./singletons";
 import type { InputPolicyOpts } from "../inputPolicies/inputPolicy";
 
 // "init_shiny.js"
-function initShiny(windowShiny: Shiny): void {
+async function initShiny(windowShiny: Shiny): Promise<void> {
   setShinyObj(windowShiny);
   const shinyapp = (windowShiny.shinyapp = new ShinyApp());
 
@@ -146,7 +146,7 @@ function initShiny(windowShiny: Shiny): void {
   // have a reference to the DOM element, which would prevent it from being
   // GC'd.
   const initialValues = mapValues(
-    _bindAll(shinyBindCtx(), document.documentElement),
+    await _bindAll(shinyBindCtx(), document.documentElement),
     (x) => x.value
   );
 

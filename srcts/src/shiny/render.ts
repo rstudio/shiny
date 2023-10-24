@@ -35,7 +35,7 @@ import type { WherePosition } from "./singletons";
 // Render HTML in a DOM element, add dependencies, and bind Shiny
 // inputs/outputs. `content` can be null, a string, or an object with
 // properties 'html' and 'deps'.
-async function renderContentAsync(
+async function renderContent(
   el: BindScope,
   content: string | { html: string; deps?: HtmlDep[] } | null,
   where: WherePosition = "replace"
@@ -62,7 +62,7 @@ async function renderContentAsync(
 
   if (where === "replace") {
     shinyInitializeInputs(el);
-    shinyBindAll(el);
+    await shinyBindAll(el);
   } else {
     const $parent = $(el).parent();
 
@@ -75,52 +75,26 @@ async function renderContentAsync(
       }
     }
     shinyInitializeInputs(scope);
-    shinyBindAll(scope);
+    await shinyBindAll(scope);
   }
 }
 
-function renderContent(
+// This function was introduced in v1.7.5, then deprecated in v1.8.0 once we
+// realized renderContent() should really be async, partly as a consequence of
+// bindAll() wanting to be async, as well as there being (seemingly) a small
+// amount of risk in breaking existing behavior. We haven't (yet) decided to do
+// something similar with renderDependencies()/renderHtml() since there is more
+// obvious risk with doing so (e.g., it's very likely a lot of user code is
+// relying on dependencies to be rendering syncronously)
+async function renderContentAsync(
   el: BindScope,
   content: string | { html: string; deps?: HtmlDep[] } | null,
   where: WherePosition = "replace"
-): void {
-  if (where === "replace") {
-    shinyUnbindAll(el);
-  }
-
-  let html = "";
-  let dependencies: HtmlDep[] = [];
-
-  if (content === null) {
-    html = "";
-  } else if (typeof content === "string") {
-    html = content;
-  } else if (typeof content === "object") {
-    html = content.html;
-    dependencies = content.deps || [];
-  }
-
-  renderHtml(html, el, dependencies, where);
-
-  let scope: BindScope = el;
-
-  if (where === "replace") {
-    shinyInitializeInputs(el);
-    shinyBindAll(el);
-  } else {
-    const $parent = $(el).parent();
-
-    if ($parent.length > 0) {
-      scope = $parent;
-      if (where === "beforeBegin" || where === "afterEnd") {
-        const $grandparent = $parent.parent();
-
-        if ($grandparent.length > 0) scope = $grandparent;
-      }
-    }
-    shinyInitializeInputs(scope);
-    shinyBindAll(scope);
-  }
+): Promise<void> {
+  console.warn(
+    "renderContentAsync() is deprecated. Use renderContent() instead."
+  );
+  await renderContent(el, content, where);
 }
 
 // =============================================================================

@@ -1,5 +1,9 @@
 # shiny (development version)
 
+## Possibly breaking changes
+
+* Closed #3899: The JS functions `Shiny.renderContent()` and `Shiny.bindAll()` are now asynchronous. These changes were motivated by the recent push toward making dynamic UI rendering asynchronous (and should've happened when it was first introduced in Shiny v1.7.5). The vast majority of user code using these functions should continue to work as before, but some code may break if it relies on these functions being synchronous (i.e., blocking downstream operations until completion). In this case, consider `await`-ing the downstream operations (or placing in a `.then()` callback). (#3929)
+
 ## New features and improvements
 
 * Updated `selectizeInput()`'s selectize.js dependency from v0.12.4 to v0.15.2. In addition to many bug fixes and improvements, this update also adds several new [plugin options](https://selectize.dev/docs/demos/plugins). (#3875)

@@ -140,14 +140,14 @@ function bindInputs(
   return inputItems;
 }
 
-function bindOutputs(
+async function bindOutputs(
   {
     sendOutputHiddenState,
     maybeAddThemeObserver,
     outputBindings,
   }: BindInputsCtx,
   scope: BindScope = document.documentElement
-): void {
+): Promise<void> {
   const $scope = $(scope);
 
   const bindings = outputBindings.getBindings();
@@ -184,7 +184,7 @@ function bindOutputs(
 
       const bindingAdapter = new OutputBindingAdapter(el, binding);
 
-      shinyAppBindOutput(id, bindingAdapter);
+      await shinyAppBindOutput(id, bindingAdapter);
       $el.data("shiny-output-binding", bindingAdapter);
       $el.addClass("shiny-bound-output");
       if (!$el.attr("aria-live")) $el.attr("aria-live", "polite");
@@ -270,11 +270,11 @@ function unbindOutputs(
 
 // (Named used before TS conversion)
 // eslint-disable-next-line @typescript-eslint/naming-convention
-function _bindAll(
+async function _bindAll(
   shinyCtx: BindInputsCtx,
   scope: BindScope
-): ReturnType<typeof bindInputs> {
-  bindOutputs(shinyCtx, scope);
+): Promise<ReturnType<typeof bindInputs>> {
+  await bindOutputs(shinyCtx, scope);
   return bindInputs(shinyCtx, scope);
 }
 function unbindAll(
@@ -285,10 +285,13 @@ function unbindAll(
   unbindInputs(scope, includeSelf);
   unbindOutputs(shinyCtx, scope, includeSelf);
 }
-function bindAll(shinyCtx: BindInputsCtx, scope: BindScope): void {
+async function bindAll(
+  shinyCtx: BindInputsCtx,
+  scope: BindScope
+): Promise<void> {
   // _bindAll returns input values; it doesn't send them to the server.
   // Shiny.bindAll needs to send the values to the server.
-  const currentInputItems = _bindAll(shinyCtx, scope);
+  const currentInputItems = await _bindAll(shinyCtx, scope);
 
   const inputs = shinyCtx.inputs;
 

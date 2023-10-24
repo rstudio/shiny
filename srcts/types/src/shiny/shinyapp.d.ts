@@ -67,7 +67,7 @@ declare class ShinyApp {
     $sendMsg(msg: MessageValue): void;
     receiveError(name: string, error: ErrorsMessageValue): void;
     receiveOutput<T>(name: string, value: T): Promise<T | undefined>;
-    bindOutput(id: string, binding: OutputBindingAdapter): OutputBindingAdapter;
+    bindOutput(id: string, binding: OutputBindingAdapter): Promise<OutputBindingAdapter>;
     unbindOutput(id: string, binding: OutputBindingAdapter): boolean;
     private _narrowScopeComponent;
     private _narrowScope;

@@ -1,14 +1,14 @@
 import type { BindScope } from "./bind";
 import { renderHtml as singletonsRenderHtml } from "./singletons";
 import type { WherePosition } from "./singletons";
+declare function renderContent(el: BindScope, content: string | {
+    html: string;
+    deps?: HtmlDep[];
+} | null, where?: WherePosition): Promise<void>;
 declare function renderContentAsync(el: BindScope, content: string | {
     html: string;
     deps?: HtmlDep[];
 } | null, where?: WherePosition): Promise<void>;
-declare function renderContent(el: BindScope, content: string | {
-    html: string;
-    deps?: HtmlDep[];
-} | null, where?: WherePosition): void;
 declare function renderHtmlAsync(html: string, el: BindScope, dependencies: HtmlDep[], where?: WherePosition): Promise<ReturnType<typeof singletonsRenderHtml>>;
 declare function renderHtml(html: string, el: BindScope, dependencies: HtmlDep[], where?: WherePosition): ReturnType<typeof singletonsRenderHtml>;
 declare function renderDependenciesAsync(dependencies: HtmlDep[] | null): Promise<void>;

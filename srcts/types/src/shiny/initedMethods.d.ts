@@ -11,10 +11,10 @@ declare function shinySetInputValue(name: string, value: unknown, opts?: {
 declare function shinyShinyApp(): ShinyApp;
 declare function setShinyUser(user: string): void;
 declare function shinyForgetLastInputValue(name: string): void;
-declare function shinyBindAll(scope: BindScope): void;
+declare function shinyBindAll(scope: BindScope): Promise<void>;
 declare function shinyUnbindAll(scope: BindScope, includeSelf?: boolean): void;
 declare function shinyInitializeInputs(scope: BindScope): void;
-declare function shinyAppBindOutput(id: string, binding: OutputBindingAdapter): void;
+declare function shinyAppBindOutput(id: string, binding: OutputBindingAdapter): Promise<void>;
 declare function shinyAppUnbindOutput(id: string, binding: OutputBindingAdapter): boolean;
 declare function getShinyOnCustomMessage(): Handler | null;
 declare function getFileInputBinding(): FileInputBinding;

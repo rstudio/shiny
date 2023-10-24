@@ -17,9 +17,9 @@ parserOptions:
   sourceType: module
   project:
     - './tsconfig.json'
-ignorePatterns: # matches the exclude in tsconfig.json
+ignorePatterns: # mirrors tsconfig.json's exclude
     - '**/__tests__'
-    - 'srcts/src/testing/extendJQuery.d.ts'
+    - '**/*.d.ts'
 plugins:
   - '@typescript-eslint'
   - prettier

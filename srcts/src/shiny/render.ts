@@ -79,6 +79,13 @@ async function renderContent(
   }
 }
 
+// This function was introduced in v1.7.5, then deprecated in v1.8.0 once we
+// realized renderContent() should really be async, partly as a consequence of
+// bindAll() wanting to be async, as well as there being (seemingly) a small
+// amount of risk in breaking existing behavior. We haven't (yet) decided to do
+// something similar with renderDependencies()/renderHtml() since there is more
+// obvious risk with doing so (e.g., it's very likely a lot of user code is
+// relying on dependencies to be rendering syncronously)
 async function renderContentAsync(
   el: BindScope,
   content: string | { html: string; deps?: HtmlDep[] } | null,

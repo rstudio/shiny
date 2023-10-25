@@ -34,7 +34,11 @@ declare class SelectInputBinding extends InputBinding {
     unsubscribe(el: HTMLElement): void;
     initialize(el: SelectHTMLElement): void;
     protected _selectize(el: SelectHTMLElement, update?: boolean): SelectizeInfo | undefined;
+<<<<<<< HEAD
     protected _newSelectize($el: JQuery<HTMLSelectElement>, options: SelectizeOptions): SelectizeInfo;
+=======
+    protected _isMultipleSelect($el: JQuery<HTMLElement>): boolean;
+>>>>>>> parent of eddc3047d (Fix regression in `updateSelectizeInput()` (#3890))
 }
 export { SelectInputBinding };
 export type { SelectInputReceiveMessageData };

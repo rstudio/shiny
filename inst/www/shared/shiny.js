@@ -3227,6 +3227,194 @@
     }
   });
 
+  // node_modules/core-js/internals/iterator-close.js
+  var require_iterator_close = __commonJS({
+    "node_modules/core-js/internals/iterator-close.js": function(exports, module) {
+      var call8 = require_function_call();
+      var anObject10 = require_an_object();
+      var getMethod5 = require_get_method();
+      module.exports = function(iterator, kind, value) {
+        var innerResult, innerError;
+        anObject10(iterator);
+        try {
+          innerResult = getMethod5(iterator, "return");
+          if (!innerResult) {
+            if (kind === "throw")
+              throw value;
+            return value;
+          }
+          innerResult = call8(innerResult, iterator);
+        } catch (error) {
+          innerError = true;
+          innerResult = error;
+        }
+        if (kind === "throw")
+          throw value;
+        if (innerError)
+          throw innerResult;
+        anObject10(innerResult);
+        return value;
+      };
+    }
+  });
+
+  // node_modules/core-js/internals/call-with-safe-iteration-closing.js
+  var require_call_with_safe_iteration_closing = __commonJS({
+    "node_modules/core-js/internals/call-with-safe-iteration-closing.js": function(exports, module) {
+      var anObject10 = require_an_object();
+      var iteratorClose = require_iterator_close();
+      module.exports = function(iterator, fn, value, ENTRIES) {
+        try {
+          return ENTRIES ? fn(anObject10(value)[0], value[1]) : fn(value);
+        } catch (error) {
+          iteratorClose(iterator, "throw", error);
+        }
+      };
+    }
+  });
+
+  // node_modules/core-js/internals/is-array-iterator-method.js
+  var require_is_array_iterator_method = __commonJS({
+    "node_modules/core-js/internals/is-array-iterator-method.js": function(exports, module) {
+      var wellKnownSymbol6 = require_well_known_symbol();
+      var Iterators = require_iterators();
+      var ITERATOR2 = wellKnownSymbol6("iterator");
+      var ArrayPrototype = Array.prototype;
+      module.exports = function(it) {
+        return it !== void 0 && (Iterators.Array === it || ArrayPrototype[ITERATOR2] === it);
+      };
+    }
+  });
+
+  // node_modules/core-js/internals/get-iterator-method.js
+  var require_get_iterator_method = __commonJS({
+    "node_modules/core-js/internals/get-iterator-method.js": function(exports, module) {
+      var classof = require_classof();
+      var getMethod5 = require_get_method();
+      var isNullOrUndefined5 = require_is_null_or_undefined();
+      var Iterators = require_iterators();
+      var wellKnownSymbol6 = require_well_known_symbol();
+      var ITERATOR2 = wellKnownSymbol6("iterator");
+      module.exports = function(it) {
+        if (!isNullOrUndefined5(it))
+          return getMethod5(it, ITERATOR2) || getMethod5(it, "@@iterator") || Iterators[classof(it)];
+      };
+    }
+  });
+
+  // node_modules/core-js/internals/get-iterator.js
+  var require_get_iterator = __commonJS({
+    "node_modules/core-js/internals/get-iterator.js": function(exports, module) {
+      var call8 = require_function_call();
+      var aCallable2 = require_a_callable();
+      var anObject10 = require_an_object();
+      var tryToString = require_try_to_string();
+      var getIteratorMethod = require_get_iterator_method();
+      var $TypeError = TypeError;
+      module.exports = function(argument, usingIterator) {
+        var iteratorMethod = arguments.length < 2 ? getIteratorMethod(argument) : usingIterator;
+        if (aCallable2(iteratorMethod))
+          return anObject10(call8(iteratorMethod, argument));
+        throw $TypeError(tryToString(argument) + " is not iterable");
+      };
+    }
+  });
+
+  // node_modules/core-js/internals/array-from.js
+  var require_array_from = __commonJS({
+    "node_modules/core-js/internals/array-from.js": function(exports, module) {
+      "use strict";
+      var bind2 = require_function_bind_context();
+      var call8 = require_function_call();
+      var toObject5 = require_to_object();
+      var callWithSafeIterationClosing = require_call_with_safe_iteration_closing();
+      var isArrayIteratorMethod = require_is_array_iterator_method();
+      var isConstructor2 = require_is_constructor();
+      var lengthOfArrayLike4 = require_length_of_array_like();
+      var createProperty5 = require_create_property();
+      var getIterator = require_get_iterator();
+      var getIteratorMethod = require_get_iterator_method();
+      var $Array2 = Array;
+      module.exports = function from2(arrayLike) {
+        var O = toObject5(arrayLike);
+        var IS_CONSTRUCTOR = isConstructor2(this);
+        var argumentsLength = arguments.length;
+        var mapfn = argumentsLength > 1 ? arguments[1] : void 0;
+        var mapping = mapfn !== void 0;
+        if (mapping)
+          mapfn = bind2(mapfn, argumentsLength > 2 ? arguments[2] : void 0);
+        var iteratorMethod = getIteratorMethod(O);
+        var index = 0;
+        var length, result, step, iterator, next2, value;
+        if (iteratorMethod && !(this === $Array2 && isArrayIteratorMethod(iteratorMethod))) {
+          iterator = getIterator(O, iteratorMethod);
+          next2 = iterator.next;
+          result = IS_CONSTRUCTOR ? new this() : [];
+          for (; !(step = call8(next2, iterator)).done; index++) {
+            value = mapping ? callWithSafeIterationClosing(iterator, mapfn, [step.value, index], true) : step.value;
+            createProperty5(result, index, value);
+          }
+        } else {
+          length = lengthOfArrayLike4(O);
+          result = IS_CONSTRUCTOR ? new this(length) : $Array2(length);
+          for (; length > index; index++) {
+            value = mapping ? mapfn(O[index], index) : O[index];
+            createProperty5(result, index, value);
+          }
+        }
+        result.length = index;
+        return result;
+      };
+    }
+  });
+
+  // node_modules/core-js/internals/check-correctness-of-iteration.js
+  var require_check_correctness_of_iteration = __commonJS({
+    "node_modules/core-js/internals/check-correctness-of-iteration.js": function(exports, module) {
+      var wellKnownSymbol6 = require_well_known_symbol();
+      var ITERATOR2 = wellKnownSymbol6("iterator");
+      var SAFE_CLOSING = false;
+      try {
+        called = 0;
+        iteratorWithReturn = {
+          next: function() {
+            return { done: !!called++ };
+          },
+          "return": function() {
+            SAFE_CLOSING = true;
+          }
+        };
+        iteratorWithReturn[ITERATOR2] = function() {
+          return this;
+        };
+        Array.from(iteratorWithReturn, function() {
+          throw 2;
+        });
+      } catch (error) {
+      }
+      var called;
+      var iteratorWithReturn;
+      module.exports = function(exec2, SKIP_CLOSING) {
+        if (!SKIP_CLOSING && !SAFE_CLOSING)
+          return false;
+        var ITERATION_SUPPORT = false;
+        try {
+          var object = {};
+          object[ITERATOR2] = function() {
+            return {
+              next: function() {
+                return { done: ITERATION_SUPPORT = true };
+              }
+            };
+          };
+          exec2(object);
+        } catch (error) {
+        }
+        return ITERATION_SUPPORT;
+      };
+    }
+  });
+
   // node_modules/core-js/internals/engine-is-node.js
   var require_engine_is_node = __commonJS({
     "node_modules/core-js/internals/engine-is-node.js": function(exports, module) {
@@ -3935,84 +4123,6 @@
     }
   });
 
-  // node_modules/core-js/internals/is-array-iterator-method.js
-  var require_is_array_iterator_method = __commonJS({
-    "node_modules/core-js/internals/is-array-iterator-method.js": function(exports, module) {
-      var wellKnownSymbol6 = require_well_known_symbol();
-      var Iterators = require_iterators();
-      var ITERATOR2 = wellKnownSymbol6("iterator");
-      var ArrayPrototype = Array.prototype;
-      module.exports = function(it) {
-        return it !== void 0 && (Iterators.Array === it || ArrayPrototype[ITERATOR2] === it);
-      };
-    }
-  });
-
-  // node_modules/core-js/internals/get-iterator-method.js
-  var require_get_iterator_method = __commonJS({
-    "node_modules/core-js/internals/get-iterator-method.js": function(exports, module) {
-      var classof = require_classof();
-      var getMethod5 = require_get_method();
-      var isNullOrUndefined5 = require_is_null_or_undefined();
-      var Iterators = require_iterators();
-      var wellKnownSymbol6 = require_well_known_symbol();
-      var ITERATOR2 = wellKnownSymbol6("iterator");
-      module.exports = function(it) {
-        if (!isNullOrUndefined5(it))
-          return getMethod5(it, ITERATOR2) || getMethod5(it, "@@iterator") || Iterators[classof(it)];
-      };
-    }
-  });
-
-  // node_modules/core-js/internals/get-iterator.js
-  var require_get_iterator = __commonJS({
-    "node_modules/core-js/internals/get-iterator.js": function(exports, module) {
-      var call8 = require_function_call();
-      var aCallable2 = require_a_callable();
-      var anObject10 = require_an_object();
-      var tryToString = require_try_to_string();
-      var getIteratorMethod = require_get_iterator_method();
-      var $TypeError = TypeError;
-      module.exports = function(argument, usingIterator) {
-        var iteratorMethod = arguments.length < 2 ? getIteratorMethod(argument) : usingIterator;
-        if (aCallable2(iteratorMethod))
-          return anObject10(call8(iteratorMethod, argument));
-        throw $TypeError(tryToString(argument) + " is not iterable");
-      };
-    }
-  });
-
-  // node_modules/core-js/internals/iterator-close.js
-  var require_iterator_close = __commonJS({
-    "node_modules/core-js/internals/iterator-close.js": function(exports, module) {
-      var call8 = require_function_call();
-      var anObject10 = require_an_object();
-      var getMethod5 = require_get_method();
-      module.exports = function(iterator, kind, value) {
-        var innerResult, innerError;
-        anObject10(iterator);
-        try {
-          innerResult = getMethod5(iterator, "return");
-          if (!innerResult) {
-            if (kind === "throw")
-              throw value;
-            return value;
-          }
-          innerResult = call8(innerResult, iterator);
-        } catch (error) {
-          innerError = true;
-          innerResult = error;
-        }
-        if (kind === "throw")
-          throw value;
-        if (innerError)
-          throw innerResult;
-        anObject10(innerResult);
-        return value;
-      };
-    }
-  });
-
   // node_modules/core-js/internals/iterate.js
   var require_iterate = __commonJS({
     "node_modules/core-js/internals/iterate.js": function(exports, module) {
@@ -4081,53 +4191,6 @@
             return result;
         }
         return new Result(false);
-      };
-    }
-  });
-
-  // node_modules/core-js/internals/check-correctness-of-iteration.js
-  var require_check_correctness_of_iteration = __commonJS({
-    "node_modules/core-js/internals/check-correctness-of-iteration.js": function(exports, module) {
-      var wellKnownSymbol6 = require_well_known_symbol();
-      var ITERATOR2 = wellKnownSymbol6("iterator");
-      var SAFE_CLOSING = false;
-      try {
-        called = 0;
-        iteratorWithReturn = {
-          next: function() {
-            return { done: !!called++ };
-          },
-          "return": function() {
-            SAFE_CLOSING = true;
-          }
-        };
-        iteratorWithReturn[ITERATOR2] = function() {
-          return this;
-        };
-        Array.from(iteratorWithReturn, function() {
-          throw 2;
-        });
-      } catch (error) {
-      }
-      var called;
-      var iteratorWithReturn;
-      module.exports = function(exec2, SKIP_CLOSING) {
-        if (!SKIP_CLOSING && !SAFE_CLOSING)
-          return false;
-        var ITERATION_SUPPORT = false;
-        try {
-          var object = {};
-          object[ITERATOR2] = function() {
-            return {
-              next: function() {
-                return { done: ITERATION_SUPPORT = true };
-              }
-            };
-          };
-          exec2(object);
-        } catch (error) {
-        }
-        return ITERATION_SUPPORT;
       };
     }
   });
@@ -4299,69 +4362,6 @@
           return promiseResolve(CHECK_WRAPPER && this === PromiseConstructorWrapper ? NativePromiseConstructor : this, x);
         }
       });
-    }
-  });
-
-  // node_modules/core-js/internals/call-with-safe-iteration-closing.js
-  var require_call_with_safe_iteration_closing = __commonJS({
-    "node_modules/core-js/internals/call-with-safe-iteration-closing.js": function(exports, module) {
-      var anObject10 = require_an_object();
-      var iteratorClose = require_iterator_close();
-      module.exports = function(iterator, fn, value, ENTRIES) {
-        try {
-          return ENTRIES ? fn(anObject10(value)[0], value[1]) : fn(value);
-        } catch (error) {
-          iteratorClose(iterator, "throw", error);
-        }
-      };
-    }
-  });
-
-  // node_modules/core-js/internals/array-from.js
-  var require_array_from = __commonJS({
-    "node_modules/core-js/internals/array-from.js": function(exports, module) {
-      "use strict";
-      var bind2 = require_function_bind_context();
-      var call8 = require_function_call();
-      var toObject5 = require_to_object();
-      var callWithSafeIterationClosing = require_call_with_safe_iteration_closing();
-      var isArrayIteratorMethod = require_is_array_iterator_method();
-      var isConstructor2 = require_is_constructor();
-      var lengthOfArrayLike4 = require_length_of_array_like();
-      var createProperty5 = require_create_property();
-      var getIterator = require_get_iterator();
-      var getIteratorMethod = require_get_iterator_method();
-      var $Array2 = Array;
-      module.exports = function from2(arrayLike) {
-        var O = toObject5(arrayLike);
-        var IS_CONSTRUCTOR = isConstructor2(this);
-        var argumentsLength = arguments.length;
-        var mapfn = argumentsLength > 1 ? arguments[1] : void 0;
-        var mapping = mapfn !== void 0;
-        if (mapping)
-          mapfn = bind2(mapfn, argumentsLength > 2 ? arguments[2] : void 0);
-        var iteratorMethod = getIteratorMethod(O);
-        var index = 0;
-        var length, result, step, iterator, next2, value;
-        if (iteratorMethod && !(this === $Array2 && isArrayIteratorMethod(iteratorMethod))) {
-          iterator = getIterator(O, iteratorMethod);
-          next2 = iterator.next;
-          result = IS_CONSTRUCTOR ? new this() : [];
-          for (; !(step = call8(next2, iterator)).done; index++) {
-            value = mapping ? callWithSafeIterationClosing(iterator, mapfn, [step.value, index], true) : step.value;
-            createProperty5(result, index, value);
-          }
-        } else {
-          length = lengthOfArrayLike4(O);
-          result = IS_CONSTRUCTOR ? new this(length) : $Array2(length);
-          for (; length > index; index++) {
-            value = mapping ? mapfn(O[index], index) : O[index];
-            createProperty5(result, index, value);
-          }
-        }
-        result.length = index;
-        return result;
-      };
     }
   });
 
@@ -8656,11 +8656,758 @@
 
   // srcts/src/bindings/input/selectInput.ts
   var import_es_json_stringify = __toESM(require_es_json_stringify());
-  var import_es_array_iterator14 = __toESM(require_es_array_iterator());
+  var import_es_array_iterator13 = __toESM(require_es_array_iterator());
   var import_jquery15 = __toESM(require_jquery());
 
   // srcts/src/utils/eval.ts
   var indirectEval = eval;
+
+  // srcts/src/bindings/input/selectInput.ts
+  function _typeof13(obj) {
+    "@babel/helpers - typeof";
+    return _typeof13 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
+      return typeof obj2;
+    } : function(obj2) {
+      return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+    }, _typeof13(obj);
+  }
+  function _classCallCheck13(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties13(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, _toPropertyKey13(descriptor.key), descriptor);
+    }
+  }
+  function _createClass13(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties13(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties13(Constructor, staticProps);
+    Object.defineProperty(Constructor, "prototype", { writable: false });
+    return Constructor;
+  }
+  function _toPropertyKey13(arg) {
+    var key = _toPrimitive13(arg, "string");
+    return _typeof13(key) === "symbol" ? key : String(key);
+  }
+  function _toPrimitive13(input, hint) {
+    if (_typeof13(input) !== "object" || input === null)
+      return input;
+    var prim = input[Symbol.toPrimitive];
+    if (prim !== void 0) {
+      var res = prim.call(input, hint || "default");
+      if (_typeof13(res) !== "object")
+        return res;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return (hint === "string" ? String : Number)(input);
+  }
+  function _inherits11(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } });
+    Object.defineProperty(subClass, "prototype", { writable: false });
+    if (superClass)
+      _setPrototypeOf11(subClass, superClass);
+  }
+  function _setPrototypeOf11(o, p) {
+    _setPrototypeOf11 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf21(o2, p2) {
+      o2.__proto__ = p2;
+      return o2;
+    };
+    return _setPrototypeOf11(o, p);
+  }
+  function _createSuper11(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct11();
+    return function _createSuperInternal() {
+      var Super = _getPrototypeOf11(Derived), result;
+      if (hasNativeReflectConstruct) {
+        var NewTarget = _getPrototypeOf11(this).constructor;
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+      return _possibleConstructorReturn11(this, result);
+    };
+  }
+  function _possibleConstructorReturn11(self2, call8) {
+    if (call8 && (_typeof13(call8) === "object" || typeof call8 === "function")) {
+      return call8;
+    } else if (call8 !== void 0) {
+      throw new TypeError("Derived constructors may only return object or undefined");
+    }
+    return _assertThisInitialized11(self2);
+  }
+  function _assertThisInitialized11(self2) {
+    if (self2 === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+    return self2;
+  }
+  function _isNativeReflectConstruct11() {
+    if (typeof Reflect === "undefined" || !Reflect.construct)
+      return false;
+    if (Reflect.construct.sham)
+      return false;
+    if (typeof Proxy === "function")
+      return true;
+    try {
+      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
+      }));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  function _getPrototypeOf11(o) {
+    _getPrototypeOf11 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf21(o2) {
+      return o2.__proto__ || Object.getPrototypeOf(o2);
+    };
+    return _getPrototypeOf11(o);
+  }
+  function getLabelNode7(el) {
+    var escapedId = $escape(el.id);
+    if (isSelectize(el)) {
+      escapedId += "-selectized";
+    }
+    return (0, import_jquery15.default)(el).parent().parent().find('label[for="' + escapedId + '"]');
+  }
+  function isSelectize(el) {
+    var config = (0, import_jquery15.default)(el).parent().find('script[data-for="' + $escape(el.id) + '"]');
+    return config.length > 0;
+  }
+  var SelectInputBinding = /* @__PURE__ */ function(_InputBinding) {
+    _inherits11(SelectInputBinding2, _InputBinding);
+    var _super = _createSuper11(SelectInputBinding2);
+    function SelectInputBinding2() {
+      _classCallCheck13(this, SelectInputBinding2);
+      return _super.apply(this, arguments);
+    }
+    _createClass13(SelectInputBinding2, [{
+      key: "find",
+      value: function find2(scope) {
+        return (0, import_jquery15.default)(scope).find("select");
+      }
+    }, {
+      key: "getType",
+      value: function getType(el) {
+        var $el = (0, import_jquery15.default)(el);
+        if (!$el.hasClass("symbol")) {
+          return null;
+        }
+        if ($el.attr("multiple") === "multiple") {
+          return "shiny.symbolList";
+        } else {
+          return "shiny.symbol";
+        }
+      }
+    }, {
+      key: "getId",
+      value: function getId(el) {
+        return InputBinding.prototype.getId.call(this, el) || el.name;
+      }
+    }, {
+      key: "getValue",
+      value: function getValue(el) {
+        return (0, import_jquery15.default)(el).val();
+      }
+    }, {
+      key: "setValue",
+      value: function setValue(el, value) {
+        if (!isSelectize(el)) {
+          (0, import_jquery15.default)(el).val(value);
+        } else {
+          var selectize = this._selectize(el);
+          selectize === null || selectize === void 0 ? void 0 : selectize.setValue(value);
+        }
+      }
+    }, {
+      key: "getState",
+      value: function getState(el) {
+        var options = new Array(el.length);
+        for (var i = 0; i < el.length; i++) {
+          options[i] = {
+            value: el[i].value,
+            label: el[i].label
+          };
+        }
+        return {
+          label: getLabelNode7(el),
+          value: this.getValue(el),
+          options: options
+        };
+      }
+    }, {
+      key: "receiveMessage",
+      value: function receiveMessage(el, data) {
+        var $el = (0, import_jquery15.default)(el);
+        if (hasDefinedProperty(data, "options")) {
+          var selectize = this._selectize(el);
+          selectize === null || selectize === void 0 ? void 0 : selectize.destroy();
+          $el.empty().append(data.options);
+          this._selectize(el);
+        }
+        if (hasDefinedProperty(data, "config")) {
+          $el.parent().find('script[data-for="' + $escape(el.id) + '"]').replaceWith(data.config);
+          this._selectize(el, true);
+        }
+        if (hasDefinedProperty(data, "url")) {
+          var _selectize2 = this._selectize(el);
+          _selectize2.clearOptions();
+          var loaded = false;
+          _selectize2.settings.load = function(query, callback) {
+            var settings = _selectize2.settings;
+            import_jquery15.default.ajax({
+              url: data.url,
+              data: {
+                query: query,
+                field: JSON.stringify([settings.searchField]),
+                value: settings.valueField,
+                conju: settings.searchConjunction,
+                maxop: settings.maxOptions
+              },
+              type: "GET",
+              error: function error() {
+                callback();
+              },
+              success: function success(res) {
+                import_jquery15.default.each(res, function(index, elem) {
+                  var optgroupId = elem[settings.optgroupField || "optgroup"];
+                  var optgroup = {};
+                  optgroup[settings.optgroupLabelField || "label"] = optgroupId;
+                  optgroup[settings.optgroupValueField || "value"] = optgroupId;
+                  _selectize2.addOptionGroup(optgroupId, optgroup);
+                });
+                callback(res);
+                if (!loaded) {
+                  if (hasDefinedProperty(data, "value")) {
+                    _selectize2.setValue(data.value);
+                  } else if (settings.maxItems === 1) {
+                    _selectize2.setValue(res[0].value);
+                  }
+                }
+                loaded = true;
+              }
+            });
+          };
+          _selectize2.load(function(callback) {
+            _selectize2.settings.load.apply(_selectize2, ["", callback]);
+          });
+        } else if (hasDefinedProperty(data, "value")) {
+          this.setValue(el, data.value);
+        }
+        updateLabel(data.label, getLabelNode7(el));
+        (0, import_jquery15.default)(el).trigger("change");
+      }
+    }, {
+      key: "subscribe",
+      value: function subscribe(el, callback) {
+        var _this = this;
+        (0, import_jquery15.default)(el).on(
+          "change.selectInputBinding",
+          function() {
+            if (el.nonempty && _this.getValue(el) === "") {
+              return;
+            }
+            callback(false);
+          }
+        );
+      }
+    }, {
+      key: "unsubscribe",
+      value: function unsubscribe(el) {
+        (0, import_jquery15.default)(el).off(".selectInputBinding");
+      }
+    }, {
+      key: "initialize",
+      value: function initialize(el) {
+        this._selectize(el);
+      }
+    }, {
+      key: "_selectize",
+      value: function _selectize(el) {
+        var update = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
+        if (!import_jquery15.default.fn.selectize)
+          return void 0;
+        var $el = (0, import_jquery15.default)(el);
+        var config = $el.parent().find('script[data-for="' + $escape(el.id) + '"]');
+        if (config.length === 0)
+          return void 0;
+        var options = import_jquery15.default.extend({
+          labelField: "label",
+          valueField: "value",
+          searchField: ["label"]
+        }, JSON.parse(config.html()));
+        if (typeof config.data("nonempty") !== "undefined") {
+          el.nonempty = true;
+          options = import_jquery15.default.extend(options, {
+            onItemRemove: function onItemRemove(value) {
+              if (this.getValue() === "")
+                (0, import_jquery15.default)("select#" + $escape(el.id)).empty().append((0, import_jquery15.default)("<option/>", {
+                  value: value,
+                  selected: true
+                })).trigger("change");
+            },
+            onDropdownClose: function onDropdownClose() {
+              if (this.getValue() === "") {
+                this.setValue((0, import_jquery15.default)("select#" + $escape(el.id)).val());
+              }
+            }
+          });
+        } else {
+          el.nonempty = false;
+        }
+        if (config.data("eval") instanceof Array)
+          import_jquery15.default.each(config.data("eval"), function(i, x) {
+            options[x] = indirectEval("(" + options[x] + ")");
+          });
+        var control = $el.selectize(options)[0].selectize;
+        if (update) {
+          var settings = import_jquery15.default.extend(control.settings, options);
+          control.destroy();
+          control = $el.selectize(settings)[0].selectize;
+        }
+        return control;
+      }
+    }]);
+    return SelectInputBinding2;
+  }(InputBinding);
+
+  // srcts/src/bindings/input/actionbutton.ts
+  var import_es_array_iterator14 = __toESM(require_es_array_iterator());
+  var import_jquery16 = __toESM(require_jquery());
+  function _typeof14(obj) {
+    "@babel/helpers - typeof";
+    return _typeof14 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
+      return typeof obj2;
+    } : function(obj2) {
+      return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+    }, _typeof14(obj);
+  }
+  function _classCallCheck14(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties14(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, _toPropertyKey14(descriptor.key), descriptor);
+    }
+  }
+  function _createClass14(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties14(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties14(Constructor, staticProps);
+    Object.defineProperty(Constructor, "prototype", { writable: false });
+    return Constructor;
+  }
+  function _toPropertyKey14(arg) {
+    var key = _toPrimitive14(arg, "string");
+    return _typeof14(key) === "symbol" ? key : String(key);
+  }
+  function _toPrimitive14(input, hint) {
+    if (_typeof14(input) !== "object" || input === null)
+      return input;
+    var prim = input[Symbol.toPrimitive];
+    if (prim !== void 0) {
+      var res = prim.call(input, hint || "default");
+      if (_typeof14(res) !== "object")
+        return res;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return (hint === "string" ? String : Number)(input);
+  }
+  function _inherits12(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } });
+    Object.defineProperty(subClass, "prototype", { writable: false });
+    if (superClass)
+      _setPrototypeOf12(subClass, superClass);
+  }
+  function _setPrototypeOf12(o, p) {
+    _setPrototypeOf12 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf21(o2, p2) {
+      o2.__proto__ = p2;
+      return o2;
+    };
+    return _setPrototypeOf12(o, p);
+  }
+  function _createSuper12(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct12();
+    return function _createSuperInternal() {
+      var Super = _getPrototypeOf12(Derived), result;
+      if (hasNativeReflectConstruct) {
+        var NewTarget = _getPrototypeOf12(this).constructor;
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+      return _possibleConstructorReturn12(this, result);
+    };
+  }
+  function _possibleConstructorReturn12(self2, call8) {
+    if (call8 && (_typeof14(call8) === "object" || typeof call8 === "function")) {
+      return call8;
+    } else if (call8 !== void 0) {
+      throw new TypeError("Derived constructors may only return object or undefined");
+    }
+    return _assertThisInitialized12(self2);
+  }
+  function _assertThisInitialized12(self2) {
+    if (self2 === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+    return self2;
+  }
+  function _isNativeReflectConstruct12() {
+    if (typeof Reflect === "undefined" || !Reflect.construct)
+      return false;
+    if (Reflect.construct.sham)
+      return false;
+    if (typeof Proxy === "function")
+      return true;
+    try {
+      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
+      }));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  function _getPrototypeOf12(o) {
+    _getPrototypeOf12 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf21(o2) {
+      return o2.__proto__ || Object.getPrototypeOf(o2);
+    };
+    return _getPrototypeOf12(o);
+  }
+  var ActionButtonInputBinding = /* @__PURE__ */ function(_InputBinding) {
+    _inherits12(ActionButtonInputBinding2, _InputBinding);
+    var _super = _createSuper12(ActionButtonInputBinding2);
+    function ActionButtonInputBinding2() {
+      _classCallCheck14(this, ActionButtonInputBinding2);
+      return _super.apply(this, arguments);
+    }
+    _createClass14(ActionButtonInputBinding2, [{
+      key: "find",
+      value: function find2(scope) {
+        return (0, import_jquery16.default)(scope).find(".action-button");
+      }
+    }, {
+      key: "getValue",
+      value: function getValue(el) {
+        return (0, import_jquery16.default)(el).data("val") || 0;
+      }
+    }, {
+      key: "setValue",
+      value: function setValue(el, value) {
+        (0, import_jquery16.default)(el).data("val", value);
+      }
+    }, {
+      key: "getType",
+      value: function getType(el) {
+        return "shiny.action";
+        el;
+      }
+    }, {
+      key: "subscribe",
+      value: function subscribe(el, callback) {
+        (0, import_jquery16.default)(el).on(
+          "click.actionButtonInputBinding",
+          function() {
+            var $el = (0, import_jquery16.default)(this);
+            var val = $el.data("val") || 0;
+            $el.data("val", val + 1);
+            callback(false);
+          }
+        );
+      }
+    }, {
+      key: "getState",
+      value: function getState(el) {
+        return {
+          value: this.getValue(el)
+        };
+      }
+    }, {
+      key: "receiveMessage",
+      value: function receiveMessage(el, data) {
+        var $el = (0, import_jquery16.default)(el);
+        var label = $el.text();
+        var icon = "";
+        if ($el.find("i[class]").length > 0) {
+          var iconHtml = $el.find("i[class]")[0];
+          if (iconHtml === $el.children()[0]) {
+            icon = (0, import_jquery16.default)(iconHtml).prop("outerHTML");
+          }
+        }
+        if (hasDefinedProperty(data, "label")) {
+          label = data.label;
+        }
+        if (hasDefinedProperty(data, "icon")) {
+          var _data$icon;
+          icon = Array.isArray(data.icon) ? "" : (_data$icon = data.icon) !== null && _data$icon !== void 0 ? _data$icon : "";
+        }
+        $el.html(icon + " " + label);
+      }
+    }, {
+      key: "unsubscribe",
+      value: function unsubscribe(el) {
+        (0, import_jquery16.default)(el).off(".actionButtonInputBinding");
+      }
+    }]);
+    return ActionButtonInputBinding2;
+  }(InputBinding);
+  (0, import_jquery16.default)(document).on("click", "a.action-button", function(e) {
+    e.preventDefault();
+  });
+
+  // srcts/src/bindings/input/tabinput.ts
+  var import_es_array_iterator15 = __toESM(require_es_array_iterator());
+  var import_jquery17 = __toESM(require_jquery());
+  function _typeof15(obj) {
+    "@babel/helpers - typeof";
+    return _typeof15 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
+      return typeof obj2;
+    } : function(obj2) {
+      return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+    }, _typeof15(obj);
+  }
+  function _classCallCheck15(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties15(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, _toPropertyKey15(descriptor.key), descriptor);
+    }
+  }
+  function _createClass15(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties15(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties15(Constructor, staticProps);
+    Object.defineProperty(Constructor, "prototype", { writable: false });
+    return Constructor;
+  }
+  function _toPropertyKey15(arg) {
+    var key = _toPrimitive15(arg, "string");
+    return _typeof15(key) === "symbol" ? key : String(key);
+  }
+  function _toPrimitive15(input, hint) {
+    if (_typeof15(input) !== "object" || input === null)
+      return input;
+    var prim = input[Symbol.toPrimitive];
+    if (prim !== void 0) {
+      var res = prim.call(input, hint || "default");
+      if (_typeof15(res) !== "object")
+        return res;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return (hint === "string" ? String : Number)(input);
+  }
+  function _inherits13(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } });
+    Object.defineProperty(subClass, "prototype", { writable: false });
+    if (superClass)
+      _setPrototypeOf13(subClass, superClass);
+  }
+  function _setPrototypeOf13(o, p) {
+    _setPrototypeOf13 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf21(o2, p2) {
+      o2.__proto__ = p2;
+      return o2;
+    };
+    return _setPrototypeOf13(o, p);
+  }
+  function _createSuper13(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct13();
+    return function _createSuperInternal() {
+      var Super = _getPrototypeOf13(Derived), result;
+      if (hasNativeReflectConstruct) {
+        var NewTarget = _getPrototypeOf13(this).constructor;
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+      return _possibleConstructorReturn13(this, result);
+    };
+  }
+  function _possibleConstructorReturn13(self2, call8) {
+    if (call8 && (_typeof15(call8) === "object" || typeof call8 === "function")) {
+      return call8;
+    } else if (call8 !== void 0) {
+      throw new TypeError("Derived constructors may only return object or undefined");
+    }
+    return _assertThisInitialized13(self2);
+  }
+  function _assertThisInitialized13(self2) {
+    if (self2 === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+    return self2;
+  }
+  function _isNativeReflectConstruct13() {
+    if (typeof Reflect === "undefined" || !Reflect.construct)
+      return false;
+    if (Reflect.construct.sham)
+      return false;
+    if (typeof Proxy === "function")
+      return true;
+    try {
+      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
+      }));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  function _getPrototypeOf13(o) {
+    _getPrototypeOf13 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf21(o2) {
+      return o2.__proto__ || Object.getPrototypeOf(o2);
+    };
+    return _getPrototypeOf13(o);
+  }
+  function getTabName(anchor) {
+    return anchor.attr("data-value") || anchor.text();
+  }
+  var BootstrapTabInputBinding = /* @__PURE__ */ function(_InputBinding) {
+    _inherits13(BootstrapTabInputBinding2, _InputBinding);
+    var _super = _createSuper13(BootstrapTabInputBinding2);
+    function BootstrapTabInputBinding2() {
+      _classCallCheck15(this, BootstrapTabInputBinding2);
+      return _super.apply(this, arguments);
+    }
+    _createClass15(BootstrapTabInputBinding2, [{
+      key: "find",
+      value: function find2(scope) {
+        return (0, import_jquery17.default)(scope).find("ul.nav.shiny-tab-input");
+      }
+    }, {
+      key: "getValue",
+      value: function getValue(el) {
+        var anchor = isBS3() ? (0, import_jquery17.default)(el).find("li:not(.dropdown).active > a") : (0, import_jquery17.default)(el).find(".nav-link:not(.dropdown-toggle).active, .dropdown-menu .dropdown-item.active");
+        if (anchor.length === 1)
+          return getTabName(anchor);
+        return null;
+      }
+    }, {
+      key: "setValue",
+      value: function setValue(el, value) {
+        var success = false;
+        if (value) {
+          var anchors = isBS3() ? (0, import_jquery17.default)(el).find("li:not(.dropdown) > a") : (0, import_jquery17.default)(el).find(".nav-link:not(.dropdown-toggle), .dropdown-menu .dropdown-item");
+          anchors.each(function() {
+            if (getTabName((0, import_jquery17.default)(this)) === value) {
+              (0, import_jquery17.default)(this).tab("show");
+              success = true;
+              return false;
+            }
+            return;
+          });
+        }
+        if (!success) {
+          (0, import_jquery17.default)(el).trigger("change");
+        }
+      }
+    }, {
+      key: "getState",
+      value: function getState(el) {
+        return {
+          value: this.getValue(el)
+        };
+      }
+    }, {
+      key: "receiveMessage",
+      value: function receiveMessage(el, data) {
+        if (hasDefinedProperty(data, "value"))
+          this.setValue(el, data.value);
+        (0, import_jquery17.default)(el).trigger("change");
+      }
+    }, {
+      key: "subscribe",
+      value: function subscribe(el, callback) {
+        (0, import_jquery17.default)(el).on(
+          "change shown.bootstrapTabInputBinding shown.bs.tab.bootstrapTabInputBinding",
+          function() {
+            callback(false);
+          }
+        );
+      }
+    }, {
+      key: "unsubscribe",
+      value: function unsubscribe(el) {
+        (0, import_jquery17.default)(el).off(".bootstrapTabInputBinding");
+      }
+    }]);
+    return BootstrapTabInputBinding2;
+  }(InputBinding);
+
+  // srcts/src/bindings/input/fileinput.ts
+  var import_es_array_iterator18 = __toESM(require_es_array_iterator());
+  var import_jquery20 = __toESM(require_jquery());
+
+  // node_modules/core-js/modules/es.array.from.js
+  var $39 = require_export();
+  var from = require_array_from();
+  var checkCorrectnessOfIteration = require_check_correctness_of_iteration();
+  var INCORRECT_ITERATION = !checkCorrectnessOfIteration(function(iterable) {
+    Array.from(iterable);
+  });
+  $39({ target: "Array", stat: true, forced: INCORRECT_ITERATION }, {
+    from: from
+  });
+
+  // node_modules/core-js/modules/es.array.map.js
+  var $40 = require_export();
+  var $map = require_array_iteration().map;
+  var arrayMethodHasSpeciesSupport4 = require_array_method_has_species_support();
+  var HAS_SPECIES_SUPPORT3 = arrayMethodHasSpeciesSupport4("map");
+  $40({ target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT3 }, {
+    map: function map(callbackfn) {
+      return $map(this, callbackfn, arguments.length > 1 ? arguments[1] : void 0);
+    }
+  });
+
+  // srcts/src/file/fileProcessor.ts
+  var import_es_array_iterator17 = __toESM(require_es_array_iterator());
+  var import_jquery19 = __toESM(require_jquery());
+
+  // srcts/src/events/inputChanged.ts
+  var import_jquery18 = __toESM(require_jquery());
+  function triggerFileInputChanged(name, value, binding, el, inputType, onEl) {
+    var evt = import_jquery18.default.Event("shiny:inputchanged");
+    evt.name = name;
+    evt.value = value;
+    evt.binding = binding;
+    evt.el = el;
+    evt.inputType = inputType;
+    (0, import_jquery18.default)(onEl).trigger(evt);
+    return evt;
+  }
 
   // node_modules/core-js/modules/es.promise.js
   require_es_promise_constructor();
@@ -8671,7 +9418,7 @@
   require_es_promise_resolve();
 
   // srcts/src/shiny/initedMethods.ts
-  var import_es_array_iterator13 = __toESM(require_es_array_iterator());
+  var import_es_array_iterator16 = __toESM(require_es_array_iterator());
 
   // node_modules/core-js/modules/es.symbol.async-iterator.js
   var defineWellKnownSymbol3 = require_well_known_symbol_define();
@@ -8694,12 +9441,12 @@
   setToStringTag4(Math, "Math", true);
 
   // node_modules/core-js/modules/es.array.reverse.js
-  var $36 = require_export();
+  var $42 = require_export();
   var uncurryThis7 = require_function_uncurry_this();
   var isArray3 = require_is_array();
   var nativeReverse = uncurryThis7([].reverse);
   var test = [1, 2];
-  $36({ target: "Array", proto: true, forced: String(test) === String(test.reverse()) }, {
+  $42({ target: "Array", proto: true, forced: String(test) === String(test.reverse()) }, {
     reverse: function reverse() {
       if (isArray3(this))
         this.length = this.length;
@@ -8708,13 +9455,13 @@
   });
 
   // srcts/src/shiny/initedMethods.ts
-  function _typeof13(obj) {
+  function _typeof16(obj) {
     "@babel/helpers - typeof";
-    return _typeof13 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
+    return _typeof16 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
       return typeof obj2;
     } : function(obj2) {
       return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-    }, _typeof13(obj);
+    }, _typeof16(obj);
   }
   function _regeneratorRuntime() {
     "use strict";
@@ -8772,7 +9519,7 @@
         var record = tryCatch(generator[method], generator, arg);
         if ("throw" !== record.type) {
           var result = record.arg, value = result.value;
-          return value && "object" == _typeof13(value) && hasOwn4.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function(value2) {
+          return value && "object" == _typeof16(value) && hasOwn4.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function(value2) {
             invoke("next", value2, resolve, reject);
           }, function(err) {
             invoke("throw", err, resolve, reject);
@@ -9095,764 +9842,6 @@
   }
   function getShinyCreateWebsocket() {
     return validateShinyHasBeenSet().createSocket;
-  }
-
-  // srcts/src/bindings/input/selectInput.ts
-  function _typeof14(obj) {
-    "@babel/helpers - typeof";
-    return _typeof14 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
-      return typeof obj2;
-    } : function(obj2) {
-      return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-    }, _typeof14(obj);
-  }
-  function _classCallCheck13(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties13(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, _toPropertyKey13(descriptor.key), descriptor);
-    }
-  }
-  function _createClass13(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties13(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties13(Constructor, staticProps);
-    Object.defineProperty(Constructor, "prototype", { writable: false });
-    return Constructor;
-  }
-  function _toPropertyKey13(arg) {
-    var key = _toPrimitive13(arg, "string");
-    return _typeof14(key) === "symbol" ? key : String(key);
-  }
-  function _toPrimitive13(input, hint) {
-    if (_typeof14(input) !== "object" || input === null)
-      return input;
-    var prim = input[Symbol.toPrimitive];
-    if (prim !== void 0) {
-      var res = prim.call(input, hint || "default");
-      if (_typeof14(res) !== "object")
-        return res;
-      throw new TypeError("@@toPrimitive must return a primitive value.");
-    }
-    return (hint === "string" ? String : Number)(input);
-  }
-  function _inherits11(subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } });
-    Object.defineProperty(subClass, "prototype", { writable: false });
-    if (superClass)
-      _setPrototypeOf11(subClass, superClass);
-  }
-  function _setPrototypeOf11(o, p) {
-    _setPrototypeOf11 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf21(o2, p2) {
-      o2.__proto__ = p2;
-      return o2;
-    };
-    return _setPrototypeOf11(o, p);
-  }
-  function _createSuper11(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct11();
-    return function _createSuperInternal() {
-      var Super = _getPrototypeOf11(Derived), result;
-      if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf11(this).constructor;
-        result = Reflect.construct(Super, arguments, NewTarget);
-      } else {
-        result = Super.apply(this, arguments);
-      }
-      return _possibleConstructorReturn11(this, result);
-    };
-  }
-  function _possibleConstructorReturn11(self2, call8) {
-    if (call8 && (_typeof14(call8) === "object" || typeof call8 === "function")) {
-      return call8;
-    } else if (call8 !== void 0) {
-      throw new TypeError("Derived constructors may only return object or undefined");
-    }
-    return _assertThisInitialized11(self2);
-  }
-  function _assertThisInitialized11(self2) {
-    if (self2 === void 0) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-    return self2;
-  }
-  function _isNativeReflectConstruct11() {
-    if (typeof Reflect === "undefined" || !Reflect.construct)
-      return false;
-    if (Reflect.construct.sham)
-      return false;
-    if (typeof Proxy === "function")
-      return true;
-    try {
-      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
-      }));
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  function _getPrototypeOf11(o) {
-    _getPrototypeOf11 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf21(o2) {
-      return o2.__proto__ || Object.getPrototypeOf(o2);
-    };
-    return _getPrototypeOf11(o);
-  }
-  function getLabelNode7(el) {
-    var escapedId = $escape(el.id);
-    if (isSelectize(el)) {
-      escapedId += "-selectized";
-    }
-    return (0, import_jquery15.default)(el).parent().parent().find('label[for="' + escapedId + '"]');
-  }
-  function isSelectize(el) {
-    var config = (0, import_jquery15.default)(el).parent().find('script[data-for="' + $escape(el.id) + '"]');
-    return config.length > 0;
-  }
-  var SelectInputBinding = /* @__PURE__ */ function(_InputBinding) {
-    _inherits11(SelectInputBinding2, _InputBinding);
-    var _super = _createSuper11(SelectInputBinding2);
-    function SelectInputBinding2() {
-      _classCallCheck13(this, SelectInputBinding2);
-      return _super.apply(this, arguments);
-    }
-    _createClass13(SelectInputBinding2, [{
-      key: "find",
-      value: function find2(scope) {
-        return (0, import_jquery15.default)(scope).find("select");
-      }
-    }, {
-      key: "getType",
-      value: function getType(el) {
-        var $el = (0, import_jquery15.default)(el);
-        if (!$el.hasClass("symbol")) {
-          return null;
-        }
-        if ($el.attr("multiple") === "multiple") {
-          return "shiny.symbolList";
-        } else {
-          return "shiny.symbol";
-        }
-      }
-    }, {
-      key: "getId",
-      value: function getId(el) {
-        return InputBinding.prototype.getId.call(this, el) || el.name;
-      }
-    }, {
-      key: "getValue",
-      value: function getValue(el) {
-        return (0, import_jquery15.default)(el).val();
-      }
-    }, {
-      key: "setValue",
-      value: function setValue(el, value) {
-        if (!isSelectize(el)) {
-          (0, import_jquery15.default)(el).val(value);
-        } else {
-          var selectize = this._selectize(el);
-          selectize === null || selectize === void 0 ? void 0 : selectize.setValue(value);
-        }
-      }
-    }, {
-      key: "getState",
-      value: function getState(el) {
-        var options = new Array(el.length);
-        for (var i = 0; i < el.length; i++) {
-          options[i] = {
-            value: el[i].value,
-            label: el[i].label
-          };
-        }
-        return {
-          label: getLabelNode7(el),
-          value: this.getValue(el),
-          options: options
-        };
-      }
-    }, {
-      key: "receiveMessage",
-      value: function receiveMessage(el, data) {
-        var $el = (0, import_jquery15.default)(el);
-        if (hasDefinedProperty(data, "options")) {
-          var selectize = this._selectize(el);
-          selectize === null || selectize === void 0 ? void 0 : selectize.destroy();
-          $el.empty().append(data.options);
-          this._selectize(el);
-        }
-        if (hasDefinedProperty(data, "config")) {
-          $el.parent().find('script[data-for="' + $escape(el.id) + '"]').replaceWith(data.config);
-          this._selectize(el, true);
-        }
-        if (hasDefinedProperty(data, "url")) {
-          var _selectize2 = this._selectize(el);
-          _selectize2.clearOptions();
-          var loaded = false;
-          _selectize2.settings.load = function(query, callback) {
-            var settings = _selectize2.settings;
-            import_jquery15.default.ajax({
-              url: data.url,
-              data: {
-                query: query,
-                field: JSON.stringify([settings.searchField]),
-                value: settings.valueField,
-                conju: settings.searchConjunction,
-                maxop: settings.maxOptions
-              },
-              type: "GET",
-              error: function error() {
-                callback();
-              },
-              success: function success(res) {
-                import_jquery15.default.each(res, function(index, elem) {
-                  var optgroupId = elem[settings.optgroupField || "optgroup"];
-                  var optgroup = {};
-                  optgroup[settings.optgroupLabelField || "label"] = optgroupId;
-                  optgroup[settings.optgroupValueField || "value"] = optgroupId;
-                  _selectize2.addOptionGroup(optgroupId, optgroup);
-                });
-                callback(res);
-                if (!loaded) {
-                  if (hasDefinedProperty(data, "value")) {
-                    _selectize2.setValue(data.value);
-                  } else if (settings.maxItems === 1) {
-                    _selectize2.setValue(res[0].value);
-                  }
-                }
-                loaded = true;
-              }
-            });
-          };
-          _selectize2.load(function(callback) {
-            _selectize2.settings.load.apply(_selectize2, ["", callback]);
-          });
-        } else if (hasDefinedProperty(data, "value")) {
-          this.setValue(el, data.value);
-        }
-        updateLabel(data.label, getLabelNode7(el));
-        (0, import_jquery15.default)(el).trigger("change");
-      }
-    }, {
-      key: "subscribe",
-      value: function subscribe(el, callback) {
-        var _this = this;
-        (0, import_jquery15.default)(el).on(
-          "change.selectInputBinding",
-          function() {
-            if (el.nonempty && _this.getValue(el) === "") {
-              return;
-            }
-            callback(false);
-          }
-        );
-      }
-    }, {
-      key: "unsubscribe",
-      value: function unsubscribe(el) {
-        (0, import_jquery15.default)(el).off(".selectInputBinding");
-      }
-    }, {
-      key: "initialize",
-      value: function initialize(el) {
-        this._selectize(el);
-      }
-    }, {
-      key: "_selectize",
-      value: function _selectize(el) {
-        var update = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
-        if (!import_jquery15.default.fn.selectize)
-          return void 0;
-        var $el = (0, import_jquery15.default)(el);
-        var config = $el.parent().find('script[data-for="' + $escape(el.id) + '"]');
-        if (config.length === 0)
-          return void 0;
-        var options = import_jquery15.default.extend({
-          labelField: "label",
-          valueField: "value",
-          searchField: ["label"]
-        }, JSON.parse(config.html()));
-        if (typeof config.data("nonempty") !== "undefined") {
-          el.nonempty = true;
-          options = import_jquery15.default.extend(options, {
-            onItemRemove: function onItemRemove(value) {
-              if (this.getValue() === "")
-                (0, import_jquery15.default)("select#" + $escape(el.id)).empty().append((0, import_jquery15.default)("<option/>", {
-                  value: value,
-                  selected: true
-                })).trigger("change");
-            },
-            onDropdownClose: function onDropdownClose() {
-              if (this.getValue() === "") {
-                this.setValue((0, import_jquery15.default)("select#" + $escape(el.id)).val());
-              }
-            }
-          });
-        } else {
-          el.nonempty = false;
-        }
-        if (config.data("eval") instanceof Array)
-          import_jquery15.default.each(config.data("eval"), function(i, x) {
-            options[x] = indirectEval("(" + options[x] + ")");
-          });
-        var control = this._newSelectize($el, options);
-        if (update) {
-          var settings = import_jquery15.default.extend(control.settings, options);
-          control.destroy();
-          control = this._newSelectize($el, settings);
-        }
-        return control;
-      }
-    }, {
-      key: "_newSelectize",
-      value: function _newSelectize($el, options) {
-        var binding = $el.data("shiny-input-binding");
-        if (binding)
-          shinyUnbindAll($el.parent());
-        var control = $el.selectize(options)[0].selectize;
-        if (binding)
-          shinyBindAll($el.parent());
-        return control;
-      }
-    }]);
-    return SelectInputBinding2;
-  }(InputBinding);
-
-  // srcts/src/bindings/input/actionbutton.ts
-  var import_es_array_iterator15 = __toESM(require_es_array_iterator());
-  var import_jquery16 = __toESM(require_jquery());
-  function _typeof15(obj) {
-    "@babel/helpers - typeof";
-    return _typeof15 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
-      return typeof obj2;
-    } : function(obj2) {
-      return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-    }, _typeof15(obj);
-  }
-  function _classCallCheck14(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties14(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, _toPropertyKey14(descriptor.key), descriptor);
-    }
-  }
-  function _createClass14(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties14(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties14(Constructor, staticProps);
-    Object.defineProperty(Constructor, "prototype", { writable: false });
-    return Constructor;
-  }
-  function _toPropertyKey14(arg) {
-    var key = _toPrimitive14(arg, "string");
-    return _typeof15(key) === "symbol" ? key : String(key);
-  }
-  function _toPrimitive14(input, hint) {
-    if (_typeof15(input) !== "object" || input === null)
-      return input;
-    var prim = input[Symbol.toPrimitive];
-    if (prim !== void 0) {
-      var res = prim.call(input, hint || "default");
-      if (_typeof15(res) !== "object")
-        return res;
-      throw new TypeError("@@toPrimitive must return a primitive value.");
-    }
-    return (hint === "string" ? String : Number)(input);
-  }
-  function _inherits12(subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } });
-    Object.defineProperty(subClass, "prototype", { writable: false });
-    if (superClass)
-      _setPrototypeOf12(subClass, superClass);
-  }
-  function _setPrototypeOf12(o, p) {
-    _setPrototypeOf12 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf21(o2, p2) {
-      o2.__proto__ = p2;
-      return o2;
-    };
-    return _setPrototypeOf12(o, p);
-  }
-  function _createSuper12(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct12();
-    return function _createSuperInternal() {
-      var Super = _getPrototypeOf12(Derived), result;
-      if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf12(this).constructor;
-        result = Reflect.construct(Super, arguments, NewTarget);
-      } else {
-        result = Super.apply(this, arguments);
-      }
-      return _possibleConstructorReturn12(this, result);
-    };
-  }
-  function _possibleConstructorReturn12(self2, call8) {
-    if (call8 && (_typeof15(call8) === "object" || typeof call8 === "function")) {
-      return call8;
-    } else if (call8 !== void 0) {
-      throw new TypeError("Derived constructors may only return object or undefined");
-    }
-    return _assertThisInitialized12(self2);
-  }
-  function _assertThisInitialized12(self2) {
-    if (self2 === void 0) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-    return self2;
-  }
-  function _isNativeReflectConstruct12() {
-    if (typeof Reflect === "undefined" || !Reflect.construct)
-      return false;
-    if (Reflect.construct.sham)
-      return false;
-    if (typeof Proxy === "function")
-      return true;
-    try {
-      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
-      }));
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  function _getPrototypeOf12(o) {
-    _getPrototypeOf12 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf21(o2) {
-      return o2.__proto__ || Object.getPrototypeOf(o2);
-    };
-    return _getPrototypeOf12(o);
-  }
-  var ActionButtonInputBinding = /* @__PURE__ */ function(_InputBinding) {
-    _inherits12(ActionButtonInputBinding2, _InputBinding);
-    var _super = _createSuper12(ActionButtonInputBinding2);
-    function ActionButtonInputBinding2() {
-      _classCallCheck14(this, ActionButtonInputBinding2);
-      return _super.apply(this, arguments);
-    }
-    _createClass14(ActionButtonInputBinding2, [{
-      key: "find",
-      value: function find2(scope) {
-        return (0, import_jquery16.default)(scope).find(".action-button");
-      }
-    }, {
-      key: "getValue",
-      value: function getValue(el) {
-        return (0, import_jquery16.default)(el).data("val") || 0;
-      }
-    }, {
-      key: "setValue",
-      value: function setValue(el, value) {
-        (0, import_jquery16.default)(el).data("val", value);
-      }
-    }, {
-      key: "getType",
-      value: function getType(el) {
-        return "shiny.action";
-        el;
-      }
-    }, {
-      key: "subscribe",
-      value: function subscribe(el, callback) {
-        (0, import_jquery16.default)(el).on(
-          "click.actionButtonInputBinding",
-          function() {
-            var $el = (0, import_jquery16.default)(this);
-            var val = $el.data("val") || 0;
-            $el.data("val", val + 1);
-            callback(false);
-          }
-        );
-      }
-    }, {
-      key: "getState",
-      value: function getState(el) {
-        return {
-          value: this.getValue(el)
-        };
-      }
-    }, {
-      key: "receiveMessage",
-      value: function receiveMessage(el, data) {
-        var $el = (0, import_jquery16.default)(el);
-        var label = $el.text();
-        var icon = "";
-        if ($el.find("i[class]").length > 0) {
-          var iconHtml = $el.find("i[class]")[0];
-          if (iconHtml === $el.children()[0]) {
-            icon = (0, import_jquery16.default)(iconHtml).prop("outerHTML");
-          }
-        }
-        if (hasDefinedProperty(data, "label")) {
-          label = data.label;
-        }
-        if (hasDefinedProperty(data, "icon")) {
-          var _data$icon;
-          icon = Array.isArray(data.icon) ? "" : (_data$icon = data.icon) !== null && _data$icon !== void 0 ? _data$icon : "";
-        }
-        $el.html(icon + " " + label);
-      }
-    }, {
-      key: "unsubscribe",
-      value: function unsubscribe(el) {
-        (0, import_jquery16.default)(el).off(".actionButtonInputBinding");
-      }
-    }]);
-    return ActionButtonInputBinding2;
-  }(InputBinding);
-  (0, import_jquery16.default)(document).on("click", "a.action-button", function(e) {
-    e.preventDefault();
-  });
-
-  // srcts/src/bindings/input/tabinput.ts
-  var import_es_array_iterator16 = __toESM(require_es_array_iterator());
-  var import_jquery17 = __toESM(require_jquery());
-  function _typeof16(obj) {
-    "@babel/helpers - typeof";
-    return _typeof16 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
-      return typeof obj2;
-    } : function(obj2) {
-      return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-    }, _typeof16(obj);
-  }
-  function _classCallCheck15(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties15(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, _toPropertyKey15(descriptor.key), descriptor);
-    }
-  }
-  function _createClass15(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties15(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties15(Constructor, staticProps);
-    Object.defineProperty(Constructor, "prototype", { writable: false });
-    return Constructor;
-  }
-  function _toPropertyKey15(arg) {
-    var key = _toPrimitive15(arg, "string");
-    return _typeof16(key) === "symbol" ? key : String(key);
-  }
-  function _toPrimitive15(input, hint) {
-    if (_typeof16(input) !== "object" || input === null)
-      return input;
-    var prim = input[Symbol.toPrimitive];
-    if (prim !== void 0) {
-      var res = prim.call(input, hint || "default");
-      if (_typeof16(res) !== "object")
-        return res;
-      throw new TypeError("@@toPrimitive must return a primitive value.");
-    }
-    return (hint === "string" ? String : Number)(input);
-  }
-  function _inherits13(subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } });
-    Object.defineProperty(subClass, "prototype", { writable: false });
-    if (superClass)
-      _setPrototypeOf13(subClass, superClass);
-  }
-  function _setPrototypeOf13(o, p) {
-    _setPrototypeOf13 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf21(o2, p2) {
-      o2.__proto__ = p2;
-      return o2;
-    };
-    return _setPrototypeOf13(o, p);
-  }
-  function _createSuper13(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct13();
-    return function _createSuperInternal() {
-      var Super = _getPrototypeOf13(Derived), result;
-      if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf13(this).constructor;
-        result = Reflect.construct(Super, arguments, NewTarget);
-      } else {
-        result = Super.apply(this, arguments);
-      }
-      return _possibleConstructorReturn13(this, result);
-    };
-  }
-  function _possibleConstructorReturn13(self2, call8) {
-    if (call8 && (_typeof16(call8) === "object" || typeof call8 === "function")) {
-      return call8;
-    } else if (call8 !== void 0) {
-      throw new TypeError("Derived constructors may only return object or undefined");
-    }
-    return _assertThisInitialized13(self2);
-  }
-  function _assertThisInitialized13(self2) {
-    if (self2 === void 0) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-    return self2;
-  }
-  function _isNativeReflectConstruct13() {
-    if (typeof Reflect === "undefined" || !Reflect.construct)
-      return false;
-    if (Reflect.construct.sham)
-      return false;
-    if (typeof Proxy === "function")
-      return true;
-    try {
-      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
-      }));
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  function _getPrototypeOf13(o) {
-    _getPrototypeOf13 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf21(o2) {
-      return o2.__proto__ || Object.getPrototypeOf(o2);
-    };
-    return _getPrototypeOf13(o);
-  }
-  function getTabName(anchor) {
-    return anchor.attr("data-value") || anchor.text();
-  }
-  var BootstrapTabInputBinding = /* @__PURE__ */ function(_InputBinding) {
-    _inherits13(BootstrapTabInputBinding2, _InputBinding);
-    var _super = _createSuper13(BootstrapTabInputBinding2);
-    function BootstrapTabInputBinding2() {
-      _classCallCheck15(this, BootstrapTabInputBinding2);
-      return _super.apply(this, arguments);
-    }
-    _createClass15(BootstrapTabInputBinding2, [{
-      key: "find",
-      value: function find2(scope) {
-        return (0, import_jquery17.default)(scope).find("ul.nav.shiny-tab-input");
-      }
-    }, {
-      key: "getValue",
-      value: function getValue(el) {
-        var anchor = isBS3() ? (0, import_jquery17.default)(el).find("li:not(.dropdown).active > a") : (0, import_jquery17.default)(el).find(".nav-link:not(.dropdown-toggle).active, .dropdown-menu .dropdown-item.active");
-        if (anchor.length === 1)
-          return getTabName(anchor);
-        return null;
-      }
-    }, {
-      key: "setValue",
-      value: function setValue(el, value) {
-        var success = false;
-        if (value) {
-          var anchors = isBS3() ? (0, import_jquery17.default)(el).find("li:not(.dropdown) > a") : (0, import_jquery17.default)(el).find(".nav-link:not(.dropdown-toggle), .dropdown-menu .dropdown-item");
-          anchors.each(function() {
-            if (getTabName((0, import_jquery17.default)(this)) === value) {
-              (0, import_jquery17.default)(this).tab("show");
-              success = true;
-              return false;
-            }
-            return;
-          });
-        }
-        if (!success) {
-          (0, import_jquery17.default)(el).trigger("change");
-        }
-      }
-    }, {
-      key: "getState",
-      value: function getState(el) {
-        return {
-          value: this.getValue(el)
-        };
-      }
-    }, {
-      key: "receiveMessage",
-      value: function receiveMessage(el, data) {
-        if (hasDefinedProperty(data, "value"))
-          this.setValue(el, data.value);
-        (0, import_jquery17.default)(el).trigger("change");
-      }
-    }, {
-      key: "subscribe",
-      value: function subscribe(el, callback) {
-        (0, import_jquery17.default)(el).on(
-          "change shown.bootstrapTabInputBinding shown.bs.tab.bootstrapTabInputBinding",
-          function() {
-            callback(false);
-          }
-        );
-      }
-    }, {
-      key: "unsubscribe",
-      value: function unsubscribe(el) {
-        (0, import_jquery17.default)(el).off(".bootstrapTabInputBinding");
-      }
-    }]);
-    return BootstrapTabInputBinding2;
-  }(InputBinding);
-
-  // srcts/src/bindings/input/fileinput.ts
-  var import_es_array_iterator18 = __toESM(require_es_array_iterator());
-  var import_jquery20 = __toESM(require_jquery());
-
-  // node_modules/core-js/modules/es.array.from.js
-  var $40 = require_export();
-  var from = require_array_from();
-  var checkCorrectnessOfIteration = require_check_correctness_of_iteration();
-  var INCORRECT_ITERATION = !checkCorrectnessOfIteration(function(iterable) {
-    Array.from(iterable);
-  });
-  $40({ target: "Array", stat: true, forced: INCORRECT_ITERATION }, {
-    from: from
-  });
-
-  // node_modules/core-js/modules/es.array.map.js
-  var $41 = require_export();
-  var $map = require_array_iteration().map;
-  var arrayMethodHasSpeciesSupport4 = require_array_method_has_species_support();
-  var HAS_SPECIES_SUPPORT3 = arrayMethodHasSpeciesSupport4("map");
-  $41({ target: "Array", proto: true, forced: !HAS_SPECIES_SUPPORT3 }, {
-    map: function map(callbackfn) {
-      return $map(this, callbackfn, arguments.length > 1 ? arguments[1] : void 0);
-    }
-  });
-
-  // srcts/src/file/fileProcessor.ts
-  var import_es_array_iterator17 = __toESM(require_es_array_iterator());
-  var import_jquery19 = __toESM(require_jquery());
-
-  // srcts/src/events/inputChanged.ts
-  var import_jquery18 = __toESM(require_jquery());
-  function triggerFileInputChanged(name, value, binding, el, inputType, onEl) {
-    var evt = import_jquery18.default.Event("shiny:inputchanged");
-    evt.name = name;
-    evt.value = value;
-    evt.binding = binding;
-    evt.el = el;
-    evt.inputType = inputType;
-    (0, import_jquery18.default)(onEl).trigger(evt);
-    return evt;
   }
 
   // srcts/src/file/fileProcessor.ts

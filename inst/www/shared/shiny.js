@@ -8818,7 +8818,12 @@
     }, {
       key: "getValue",
       value: function getValue(el) {
-        return (0, import_jquery15.default)(el).val();
+        if (!isSelectize(el)) {
+          return (0, import_jquery15.default)(el).val();
+        } else {
+          var selectize = this._selectize(el);
+          return selectize === null || selectize === void 0 ? void 0 : selectize.getValue();
+        }
       }
     }, {
       key: "setValue",

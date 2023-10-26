@@ -1064,14 +1064,8 @@ $.extend(Selectize.prototype, {
       self.ignoreHover = self.settings.ignoreHover;
 		});
 
-    var inputPlaceholder = $('<div></div>');
-		var inputChildren = $input.children().detach();
-
-    $input.replaceWith(inputPlaceholder);
-    inputPlaceholder.replaceWith($input);
-
     this.revertSettings = {
-			$children : inputChildren,
+			$children : $input.children().detach(),
 			tabindex  : $input.attr('tabindex')
 		};
 

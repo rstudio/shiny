@@ -3,7 +3,6 @@ import { InputBinding } from "./inputBinding";
 import { $escape, hasDefinedProperty, updateLabel } from "../../utils";
 import { indirectEval } from "../../utils/eval";
 import { shinyBindAll, shinyUnbindAll } from "../../shiny/initedMethods";
-import type { NotUndefined } from "../../utils/extraTypes";
 
 type SelectHTMLElement = HTMLSelectElement & { nonempty: boolean };
 
@@ -62,10 +61,14 @@ class SelectInputBinding extends InputBinding {
   getId(el: SelectHTMLElement): string {
     return InputBinding.prototype.getId.call(this, el) || el.name;
   }
-  getValue(
-    el: HTMLElement
-  ): NotUndefined<ReturnType<JQuery<HTMLElement>["val"]>> {
-    return $(el).val() as NotUndefined<ReturnType<JQuery<HTMLElement>["val"]>>;
+  getValue(el: SelectHTMLElement): any {
+    if (!isSelectize(el)) {
+      return $(el).val();
+    } else {
+      const selectize = this._selectize(el);
+
+      return selectize?.getValue();
+    }
   }
   setValue(el: SelectHTMLElement, value: string): void {
     if (!isSelectize(el)) {

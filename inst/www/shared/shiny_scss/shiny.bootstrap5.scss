@@ -1,3 +1,5 @@
+$body-emphasis-color: $body-color !default; // introduced in BS 5.3
+
 $shiny-emphasis-color-rgb:          var(--#{$prefix}emphasis-color-rgb, 0,0,0) !default;
 
 $shiny-disconnected-bg:             RGBA($shiny-emphasis-color-rgb, 0.42) !default;

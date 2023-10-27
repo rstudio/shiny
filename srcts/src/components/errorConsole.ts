@@ -1,43 +1,54 @@
+/* eslint-disable indent */
 import { LitElement, html, css } from "lit";
 
 export class ErrorConsole extends LitElement {
-  /**
-   * Message to show to user
-   */
   static properties = {
-    description: {},
+    headline: {},
     message: {},
   };
 
-  description = "";
+  headline = "";
   message = "";
 
   static styles = [
     css`
       :host {
+        /* Height and width of the error icon and close button icon */
+        --icon-size: 2rem;
+
+        /* How rounded corners should be. */
+        --rounded: 0.5rem;
+
+        /* How much padding should be around all elements in error "card" */
+        --container-padding: 1.5rem;
+
+        /* How much space should be between the various parts of the card */
+        --content-gaps: 1rem;
+
+        /* How fast should the message pop in and out of the screen? */
+        --animation-speed: 0.5s;
+
         /* Taken from open-props */
         --ease-3: cubic-bezier(0.25, 0, 0.3, 1);
-        --animation-slide-in-left: slide-in-left 0.5s var(--ease-3);
-        --animation-slide-out-left: slide-out-left 0.5s var(--ease-3);
+        --animation-slide-in-left: slide-in-left var(--animation-speed)
+          var(--ease-3);
+        --animation-slide-out-left: slide-out-left var(--animation-speed)
+          var(--ease-3);
         --red-2: #ffc9c9;
         --red-6: #fa5252;
         --red-7: #f03e3e;
         --red-8: #e03131;
-        --red-9: #c92a2a;
         --red-10: #b02525;
         --red-11: #962020;
         --red-12: #7d1a1a;
-
-        --icon-size: 2rem;
-        --rounded: 0.5rem;
 
         color: var(--red-11);
         display: block;
         position: fixed;
         top: 0.5rem;
         right: 0.5rem;
-        width: 40ch;
         animation: var(--animation-slide-in-left);
+        font-size: 1.4rem;
       }
 
       :host(.leaving) {
@@ -55,40 +66,62 @@ export class ErrorConsole extends LitElement {
         }
       }
 
-      .description {
-        /* font-weight: bold; */
-      }
-
-      .error-message {
-        font-family: "Courier New", Courier, monospace;
-      }
-
-      .error-icon {
-        height: 2rem;
-        width: 2rem;
-        color: var(--red-7);
-      }
-
       .container {
         background-color: var(--red-2);
 
         display: flex;
-        gap: 1rem;
-        padding: 1rem;
+        gap: var(--content-gaps);
+        padding: var(--container-padding);
         border-radius: var(--rounded);
+      }
+
+      .contents {
+        max-width: 60ch;
+        display: flex;
+        flex-direction: column;
+        gap: var(--content-gaps);
+      }
+
+      .contents > h3 {
+        font-size: 1em;
+        font-weight: 500;
+        color: var(--red-12);
+      }
+
+      .contents > * {
+        margin-block: 0;
+      }
+
+      .error-message {
+        color: var(--red-11);
+        font-family: "Courier New", Courier, monospace;
       }
 
       .icon-container,
       .close-button-container {
+        --pad: 0.375rem;
         flex-shrink: 0;
       }
 
+      .close-icon,
+      .error-icon {
+        height: var(--icon-size);
+        width: var(--icon-size);
+      }
+
+      .error-icon {
+        color: var(--red-6);
+      }
+
+      .icon-container {
+        padding-inline: var(--pad);
+      }
+
       .close-button {
-        --pad: 0.375rem;
-        /* inline-flex rounded-md bg-green-50 p-1.5 text-green-500 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-green-50 */
         display: inline-flex;
         padding: var(--pad);
 
+        /* Shift up and out a bit to offset the invisible button padding */
         margin-right: calc(-1 * var(--pad));
         margin-top: calc(-1 * var(--pad));
 
@@ -100,14 +133,12 @@ export class ErrorConsole extends LitElement {
       }
 
       .close-button:hover {
-        /* bg-green-100 text-green-600 */
         background-color: var(--red-6);
         color: var(--red-10);
       }
 
-      .close-icon {
-        height: var(--icon-size);
-        width: var(--icon-size);
+      .close-button:focus {
+        outline: 1px solid var(--red-10);
       }
 
       .sr-only {
@@ -151,12 +182,17 @@ export class ErrorConsole extends LitElement {
             />
           </svg>
         </div>
-        <div class="msg-container">
-          <p class="description">${this.description}</p>
+        <div class="contents">
+          <h3>${this.headline}</h3>
           <p class="error-message">${this.message}</p>
         </div>
         <div class="close-button-container">
-          <button @click=${this.handleClose} type="button" class="close-button">
+          <button
+            @click=${this.handleClose}
+            type="button"
+            class="close-button"
+            title="Dismiss error console"
+          >
             <span class="sr-only">Dismiss</span>
             <svg
               class="close-icon"
@@ -185,10 +221,14 @@ customElements.define("shiny-error-console", ErrorConsole);
  * object.
  */
 export function showErrorInClientConsole(e: unknown): void {
-  let errorMsg: string;
+  let errorMsg: string | null = null;
+  let headline: string | null = null;
 
   if (typeof e === "string") {
     errorMsg = e;
+  } else if (e instanceof ShinyDuplicateBindingIdError) {
+    errorMsg = e.message;
+    headline = `Duplicate ${e.bindingType} IDs`;
   } else if (e instanceof Error) {
     errorMsg = e.message;
   } else {
@@ -196,7 +236,27 @@ export function showErrorInClientConsole(e: unknown): void {
   }
 
   const errorConsole = document.createElement("shiny-error-console");
-  errorConsole.setAttribute("description", "Error on page");
+  errorConsole.setAttribute("headline", headline || "");
   errorConsole.setAttribute("message", errorMsg);
+
   document.body.appendChild(errorConsole);
+}
+
+/**
+ * Custom error to throw when a duplicate binding ids are found.
+ * @param message - Error message to show to user
+ * @param bindingType - Either "input" or "output"
+ */
+export class ShinyDuplicateBindingIdError extends Error {
+  // Can either be input or output id that is duplicated
+  bindingType: "input" | "output";
+  duplicatedId: string;
+
+  constructor(bindingType: "input" | "output", duplicatedId: string) {
+    super(`More than one ${bindingType} with ID "${duplicatedId}" found`);
+    this.name = "ShinyDuplicateBindingIdError";
+    this.duplicatedId = duplicatedId;
+
+    this.bindingType = bindingType;
+  }
 }

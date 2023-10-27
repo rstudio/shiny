@@ -26,6 +26,7 @@ import { indirectEval } from "../utils/eval";
 import type { WherePosition } from "./singletons";
 import type { UploadInitValue, UploadEndValue } from "../file/fileProcessor";
 import { AsyncQueue } from "../utils/asyncQueue";
+import { ShinyDuplicateBindingIdError } from "../components/errorConsole";
 
 type ResponseValue = UploadEndValue | UploadInitValue;
 type Handler = (message: any) => Promise<void> | void;
@@ -514,8 +515,9 @@ class ShinyApp {
     id: string,
     binding: OutputBindingAdapter
   ): Promise<OutputBindingAdapter> {
-    if (!id) throw "Can't bind an element with no ID";
-    if (this.$bindings[id]) throw "Duplicate binding for ID " + id;
+    if (!id) throw new Error("Can't bind an element with no ID");
+    if (this.$bindings[id])
+      throw new ShinyDuplicateBindingIdError("output", id);
     this.$bindings[id] = binding;
 
     if (this.$values[id] !== undefined)

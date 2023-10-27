@@ -2,7 +2,8 @@
 
 ## Possibly breaking changes
 
-* Closed #3899: The JS functions `Shiny.renderContent()` and `Shiny.bindAll()` are now asynchronous. These changes were motivated by the recent push toward making dynamic UI rendering asynchronous (and should've happened when it was first introduced in Shiny v1.7.5). The vast majority of user code using these functions should continue to work as before, but some code may break if it relies on these functions being synchronous (i.e., blocking downstream operations until completion). In this case, consider `await`-ing the downstream operations (or placing in a `.then()` callback). (#3929)
+* Closed #3899: The JS function `Shiny.bindAll()` is now asynchronous. This change is driven by the recent push toward making dynamic UI rendering asynchronous (and should've happened when it was first introduced in Shiny v1.7.5). The vast majority of existing `Shiny.bindAll()` uses should continue to work as before, but some cases may break if downstream code relies on it being synchronous (i.e., blocking the main thread). In this case, consider placing any downstream code in a `.then()` callback (or `await` the result in a `async` function). (#3929)
+  * Since `renderContent()` calls `bindAll()` (after it inserts content), it now returns a `Promise<void>` instead of `void`, which can be useful if downstream code needs to wait for the binding to complete.
 
 ## New features and improvements
 

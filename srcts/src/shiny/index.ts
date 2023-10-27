@@ -27,6 +27,7 @@ import type { Handler, ShinyApp } from "./shinyapp";
 import { addCustomMessageHandler } from "./shinyapp";
 import { initInputBindings } from "../bindings/input";
 import { initOutputBindings } from "../bindings/output";
+import { showErrorInClientConsole } from "../components/errorConsole";
 
 interface Shiny {
   version: string;
@@ -110,9 +111,16 @@ function setShiny(windowShiny_: Shiny): void {
   $(function () {
     // Init Shiny a little later than document ready, so user code can
     // run first (i.e. to register bindings)
-    setTimeout(function () {
+    setTimeout(async function () {
       /* eslint-disable @typescript-eslint/no-floating-promises */
-      initShiny(windowShiny);
+      try {
+        await initShiny(windowShiny);
+      } catch (e) {
+        // TODO: Test with dynamic UI
+        // TODO: Look for duplicate input bindings
+
+        showErrorInClientConsole(e);
+      }
     }, 1);
   });
 }

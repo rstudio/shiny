@@ -1,4 +1,4 @@
-# shiny (development version)
+# shiny 1.8.0
 
 ## Possibly breaking changes
 

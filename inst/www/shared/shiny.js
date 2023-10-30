@@ -12382,14 +12382,6 @@
       return this.delegate = { iterator: values2(iterable), resultName: resultName, nextLoc: nextLoc }, "next" === this.method && (this.arg = void 0), ContinueSentinel;
     } }, exports;
   }
-  function _typeof27(obj) {
-    "@babel/helpers - typeof";
-    return _typeof27 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
-      return typeof obj2;
-    } : function(obj2) {
-      return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-    }, _typeof27(obj);
-  }
   function _slicedToArray(arr, i) {
     return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
   }
@@ -12485,6 +12477,14 @@
       arr2[i] = arr[i];
     return arr2;
   }
+  function _typeof27(obj) {
+    "@babel/helpers - typeof";
+    return _typeof27 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
+      return typeof obj2;
+    } : function(obj2) {
+      return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+    }, _typeof27(obj);
+  }
   function asyncGeneratorStep3(gen, resolve, reject, _next, _throw, key, arg) {
     try {
       var info = gen[key](arg);
@@ -12514,11 +12514,11 @@
       });
     };
   }
-  function renderContent(_x, _x2) {
-    return _renderContent.apply(this, arguments);
+  function renderContentAsync(_x, _x2) {
+    return _renderContentAsync.apply(this, arguments);
   }
-  function _renderContent() {
-    _renderContent = _asyncToGenerator3(/* @__PURE__ */ _regeneratorRuntime3().mark(function _callee(el, content) {
+  function _renderContentAsync() {
+    _renderContentAsync = _asyncToGenerator3(/* @__PURE__ */ _regeneratorRuntime3().mark(function _callee(el, content) {
       var where, html, dependencies, scope, $parent, $grandparent, _args = arguments;
       return _regeneratorRuntime3().wrap(function _callee$(_context) {
         while (1)
@@ -12571,50 +12571,62 @@
           }
       }, _callee);
     }));
-    return _renderContent.apply(this, arguments);
-  }
-  function renderContentAsync(_x3, _x4) {
     return _renderContentAsync.apply(this, arguments);
   }
-  function _renderContentAsync() {
-    _renderContentAsync = _asyncToGenerator3(/* @__PURE__ */ _regeneratorRuntime3().mark(function _callee2(el, content) {
+  function renderContent(el, content) {
+    var where = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : "replace";
+    if (where === "replace") {
+      shinyUnbindAll(el);
+    }
+    var html = "";
+    var dependencies = [];
+    if (content === null) {
+      html = "";
+    } else if (typeof content === "string") {
+      html = content;
+    } else if (_typeof27(content) === "object") {
+      html = content.html;
+      dependencies = content.deps || [];
+    }
+    renderHtml2(html, el, dependencies, where);
+    var scope = el;
+    if (where === "replace") {
+      shinyInitializeInputs(el);
+      return shinyBindAll(el);
+    } else {
+      var $parent = (0, import_jquery26.default)(el).parent();
+      if ($parent.length > 0) {
+        scope = $parent;
+        if (where === "beforeBegin" || where === "afterEnd") {
+          var $grandparent = $parent.parent();
+          if ($grandparent.length > 0)
+            scope = $grandparent;
+        }
+      }
+      shinyInitializeInputs(scope);
+      return shinyBindAll(scope);
+    }
+  }
+  function renderHtmlAsync(_x3, _x4, _x5) {
+    return _renderHtmlAsync.apply(this, arguments);
+  }
+  function _renderHtmlAsync() {
+    _renderHtmlAsync = _asyncToGenerator3(/* @__PURE__ */ _regeneratorRuntime3().mark(function _callee2(html, el, dependencies) {
       var where, _args2 = arguments;
       return _regeneratorRuntime3().wrap(function _callee2$(_context2) {
         while (1)
           switch (_context2.prev = _context2.next) {
             case 0:
-              where = _args2.length > 2 && _args2[2] !== void 0 ? _args2[2] : "replace";
-              console.warn("renderContentAsync() is deprecated. Use renderContent() instead.");
-              _context2.next = 4;
-              return renderContent(el, content, where);
+              where = _args2.length > 3 && _args2[3] !== void 0 ? _args2[3] : "replace";
+              _context2.next = 3;
+              return renderDependenciesAsync(dependencies);
+            case 3:
+              return _context2.abrupt("return", renderHtml(html, el, where));
             case 4:
             case "end":
               return _context2.stop();
           }
       }, _callee2);
-    }));
-    return _renderContentAsync.apply(this, arguments);
-  }
-  function renderHtmlAsync(_x5, _x6, _x7) {
-    return _renderHtmlAsync.apply(this, arguments);
-  }
-  function _renderHtmlAsync() {
-    _renderHtmlAsync = _asyncToGenerator3(/* @__PURE__ */ _regeneratorRuntime3().mark(function _callee3(html, el, dependencies) {
-      var where, _args3 = arguments;
-      return _regeneratorRuntime3().wrap(function _callee3$(_context3) {
-        while (1)
-          switch (_context3.prev = _context3.next) {
-            case 0:
-              where = _args3.length > 3 && _args3[3] !== void 0 ? _args3[3] : "replace";
-              _context3.next = 3;
-              return renderDependenciesAsync(dependencies);
-            case 3:
-              return _context3.abrupt("return", renderHtml(html, el, where));
-            case 4:
-            case "end":
-              return _context3.stop();
-          }
-      }, _callee3);
     }));
     return _renderHtmlAsync.apply(this, arguments);
   }
@@ -12623,50 +12635,50 @@
     renderDependencies(dependencies);
     return renderHtml(html, el, where);
   }
-  function renderDependenciesAsync(_x8) {
+  function renderDependenciesAsync(_x6) {
     return _renderDependenciesAsync.apply(this, arguments);
   }
   function _renderDependenciesAsync() {
-    _renderDependenciesAsync = _asyncToGenerator3(/* @__PURE__ */ _regeneratorRuntime3().mark(function _callee4(dependencies) {
+    _renderDependenciesAsync = _asyncToGenerator3(/* @__PURE__ */ _regeneratorRuntime3().mark(function _callee3(dependencies) {
       var _iterator2, _step2, dep;
-      return _regeneratorRuntime3().wrap(function _callee4$(_context4) {
+      return _regeneratorRuntime3().wrap(function _callee3$(_context3) {
         while (1)
-          switch (_context4.prev = _context4.next) {
+          switch (_context3.prev = _context3.next) {
             case 0:
               if (!dependencies) {
-                _context4.next = 18;
+                _context3.next = 18;
                 break;
               }
               _iterator2 = _createForOfIteratorHelper(dependencies);
-              _context4.prev = 2;
+              _context3.prev = 2;
               _iterator2.s();
             case 4:
               if ((_step2 = _iterator2.n()).done) {
-                _context4.next = 10;
+                _context3.next = 10;
                 break;
               }
               dep = _step2.value;
-              _context4.next = 8;
+              _context3.next = 8;
               return renderDependencyAsync(dep);
             case 8:
-              _context4.next = 4;
+              _context3.next = 4;
               break;
             case 10:
-              _context4.next = 15;
+              _context3.next = 15;
               break;
             case 12:
-              _context4.prev = 12;
-              _context4.t0 = _context4["catch"](2);
-              _iterator2.e(_context4.t0);
+              _context3.prev = 12;
+              _context3.t0 = _context3["catch"](2);
+              _iterator2.e(_context3.t0);
             case 15:
-              _context4.prev = 15;
+              _context3.prev = 15;
               _iterator2.f();
-              return _context4.finish(15);
+              return _context3.finish(15);
             case 18:
             case "end":
-              return _context4.stop();
+              return _context3.stop();
           }
-      }, _callee4, null, [[2, 12, 15, 18]]);
+      }, _callee3, null, [[2, 12, 15, 18]]);
     }));
     return _renderDependenciesAsync.apply(this, arguments);
   }
@@ -12798,15 +12810,15 @@
       $head.append(script);
     });
   }
-  function appendScriptTagsAsync(_x9) {
+  function appendScriptTagsAsync(_x7) {
     return _appendScriptTagsAsync.apply(this, arguments);
   }
   function _appendScriptTagsAsync() {
-    _appendScriptTagsAsync = _asyncToGenerator3(/* @__PURE__ */ _regeneratorRuntime3().mark(function _callee5(dep) {
+    _appendScriptTagsAsync = _asyncToGenerator3(/* @__PURE__ */ _regeneratorRuntime3().mark(function _callee4(dep) {
       var scriptPromises;
-      return _regeneratorRuntime3().wrap(function _callee5$(_context5) {
+      return _regeneratorRuntime3().wrap(function _callee4$(_context4) {
         while (1)
-          switch (_context5.prev = _context5.next) {
+          switch (_context4.prev = _context4.next) {
             case 0:
               scriptPromises = [];
               dep.script.forEach(function(x) {
@@ -12832,13 +12844,13 @@
                 scriptPromises.push(p);
                 document.head.append(script);
               });
-              _context5.next = 4;
+              _context4.next = 4;
               return Promise.allSettled(scriptPromises);
             case 4:
             case "end":
-              return _context5.stop();
+              return _context4.stop();
           }
-      }, _callee5);
+      }, _callee4);
     }));
     return _appendScriptTagsAsync.apply(this, arguments);
   }
@@ -12865,45 +12877,45 @@
       $head.append($newHead.children());
     }
   }
-  function renderDependencyAsync(_x10) {
+  function renderDependencyAsync(_x8) {
     return _renderDependencyAsync.apply(this, arguments);
   }
   function _renderDependencyAsync() {
-    _renderDependencyAsync = _asyncToGenerator3(/* @__PURE__ */ _regeneratorRuntime3().mark(function _callee6(dep_) {
+    _renderDependencyAsync = _asyncToGenerator3(/* @__PURE__ */ _regeneratorRuntime3().mark(function _callee5(dep_) {
       var dep, $head;
-      return _regeneratorRuntime3().wrap(function _callee6$(_context6) {
+      return _regeneratorRuntime3().wrap(function _callee5$(_context5) {
         while (1)
-          switch (_context6.prev = _context6.next) {
+          switch (_context5.prev = _context5.next) {
             case 0:
               dep = normalizeHtmlDependency(dep_);
               if (!needsRestyle(dep)) {
-                _context6.next = 4;
+                _context5.next = 4;
                 break;
               }
               addStylesheetsAndRestyle(getStylesheetLinkTags(dep));
-              return _context6.abrupt("return", true);
+              return _context5.abrupt("return", true);
             case 4:
               if (!hasDefinedProperty(htmlDependencies, dep.name)) {
-                _context6.next = 6;
+                _context5.next = 6;
                 break;
               }
-              return _context6.abrupt("return", false);
+              return _context5.abrupt("return", false);
             case 6:
               registerDependency(dep.name, dep.version);
               $head = (0, import_jquery26.default)("head").first();
               appendMetaTags(dep, $head);
               appendStylesheetLinkTags(dep, $head);
-              _context6.next = 12;
+              _context5.next = 12;
               return appendScriptTagsAsync(dep);
             case 12:
               appendAttachmentLinkTags(dep, $head);
               appendExtraHeadContent(dep, $head);
-              return _context6.abrupt("return", true);
+              return _context5.abrupt("return", true);
             case 15:
             case "end":
-              return _context6.stop();
+              return _context5.stop();
           }
-      }, _callee6);
+      }, _callee5);
     }));
     return _renderDependencyAsync.apply(this, arguments);
   }

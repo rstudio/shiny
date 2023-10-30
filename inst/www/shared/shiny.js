@@ -1,4 +1,4 @@
-/*! shiny 1.7.5.9000 | (c) 2012-2023 RStudio, PBC. | License: GPL-3 | file LICENSE */
+/*! shiny 1.7.5.9001 | (c) 2012-2023 RStudio, PBC. | License: GPL-3 | file LICENSE */
 "use strict";
 (function() {
   var __create = Object.create;
@@ -19427,32 +19427,64 @@
               _this3.receiveError(_key2, message[_key2]);
           }
         });
-        addMessageHandler("inputMessages", function(message) {
-          for (var i = 0; i < message.length; i++) {
-            var $obj = (0, import_jquery38.default)(".shiny-bound-input#" + $escape(message[i].id));
-            var inputBinding = $obj.data("shiny-input-binding");
-            if ($obj.length > 0) {
-              if (!$obj.attr("aria-live"))
-                $obj.attr("aria-live", "polite");
-              var el = $obj[0];
-              var evt = import_jquery38.default.Event("shiny:updateinput");
-              evt.message = message[i].message;
-              evt.binding = inputBinding;
-              (0, import_jquery38.default)(el).trigger(evt);
-              if (!evt.isDefaultPrevented()) {
-                try {
-                  inputBinding.receiveMessage(el, evt.message);
-                } catch (error) {
-                  console.error("[shiny] Error in inputBinding.receiveMessage()", {
-                    error: error,
-                    binding: inputBinding,
-                    message: evt.message
-                  });
+        addMessageHandler("inputMessages", /* @__PURE__ */ function() {
+          var _ref4 = _asyncToGenerator11(/* @__PURE__ */ _regeneratorRuntime11().mark(function _callee9(message) {
+            var i, $obj, inputBinding, el, evt;
+            return _regeneratorRuntime11().wrap(function _callee9$(_context9) {
+              while (1)
+                switch (_context9.prev = _context9.next) {
+                  case 0:
+                    i = 0;
+                  case 1:
+                    if (!(i < message.length)) {
+                      _context9.next = 23;
+                      break;
+                    }
+                    $obj = (0, import_jquery38.default)(".shiny-bound-input#" + $escape(message[i].id));
+                    inputBinding = $obj.data("shiny-input-binding");
+                    if (!($obj.length > 0)) {
+                      _context9.next = 20;
+                      break;
+                    }
+                    if (!$obj.attr("aria-live"))
+                      $obj.attr("aria-live", "polite");
+                    el = $obj[0];
+                    evt = import_jquery38.default.Event("shiny:updateinput");
+                    evt.message = message[i].message;
+                    evt.binding = inputBinding;
+                    (0, import_jquery38.default)(el).trigger(evt);
+                    if (evt.isDefaultPrevented()) {
+                      _context9.next = 20;
+                      break;
+                    }
+                    _context9.prev = 12;
+                    _context9.next = 15;
+                    return inputBinding.receiveMessage(el, evt.message);
+                  case 15:
+                    _context9.next = 20;
+                    break;
+                  case 17:
+                    _context9.prev = 17;
+                    _context9.t0 = _context9["catch"](12);
+                    console.error("[shiny] Error in inputBinding.receiveMessage()", {
+                      error: _context9.t0,
+                      binding: inputBinding,
+                      message: evt.message
+                    });
+                  case 20:
+                    i++;
+                    _context9.next = 1;
+                    break;
+                  case 23:
+                  case "end":
+                    return _context9.stop();
                 }
-              }
-            }
-          }
-        });
+            }, _callee9, null, [[12, 17]]);
+          }));
+          return function(_x11) {
+            return _ref4.apply(this, arguments);
+          };
+        }());
         addMessageHandler("javascript", function(message) {
           indirectEval(message);
         });
@@ -19463,58 +19495,23 @@
           }
         });
         addMessageHandler("progress", /* @__PURE__ */ function() {
-          var _ref4 = _asyncToGenerator11(/* @__PURE__ */ _regeneratorRuntime11().mark(function _callee9(message) {
-            var handler;
-            return _regeneratorRuntime11().wrap(function _callee9$(_context9) {
-              while (1)
-                switch (_context9.prev = _context9.next) {
-                  case 0:
-                    if (!(message.type && message.message)) {
-                      _context9.next = 5;
-                      break;
-                    }
-                    _context9.next = 3;
-                    return _this3.progressHandlers[message.type];
-                  case 3:
-                    handler = _context9.sent;
-                    if (handler)
-                      handler.call(_this3, message.message);
-                  case 5:
-                  case "end":
-                    return _context9.stop();
-                }
-            }, _callee9);
-          }));
-          return function(_x11) {
-            return _ref4.apply(this, arguments);
-          };
-        }());
-        addMessageHandler("notification", /* @__PURE__ */ function() {
           var _ref5 = _asyncToGenerator11(/* @__PURE__ */ _regeneratorRuntime11().mark(function _callee10(message) {
+            var handler;
             return _regeneratorRuntime11().wrap(function _callee10$(_context10) {
               while (1)
                 switch (_context10.prev = _context10.next) {
                   case 0:
-                    if (!(message.type === "show")) {
+                    if (!(message.type && message.message)) {
                       _context10.next = 5;
                       break;
                     }
                     _context10.next = 3;
-                    return show(message.message);
+                    return _this3.progressHandlers[message.type];
                   case 3:
-                    _context10.next = 10;
-                    break;
+                    handler = _context10.sent;
+                    if (handler)
+                      handler.call(_this3, message.message);
                   case 5:
-                    if (!(message.type === "remove")) {
-                      _context10.next = 9;
-                      break;
-                    }
-                    remove(message.message);
-                    _context10.next = 10;
-                    break;
-                  case 9:
-                    throw "Unkown notification type: " + message.type;
-                  case 10:
                   case "end":
                     return _context10.stop();
                 }
@@ -19524,7 +19521,7 @@
             return _ref5.apply(this, arguments);
           };
         }());
-        addMessageHandler("modal", /* @__PURE__ */ function() {
+        addMessageHandler("notification", /* @__PURE__ */ function() {
           var _ref6 = _asyncToGenerator11(/* @__PURE__ */ _regeneratorRuntime11().mark(function _callee11(message) {
             return _regeneratorRuntime11().wrap(function _callee11$(_context11) {
               while (1)
@@ -19535,7 +19532,7 @@
                       break;
                     }
                     _context11.next = 3;
-                    return show2(message.message);
+                    return show(message.message);
                   case 3:
                     _context11.next = 10;
                     break;
@@ -19544,11 +19541,11 @@
                       _context11.next = 9;
                       break;
                     }
-                    remove2();
+                    remove(message.message);
                     _context11.next = 10;
                     break;
                   case 9:
-                    throw "Unkown modal type: " + message.type;
+                    throw "Unkown notification type: " + message.type;
                   case 10:
                   case "end":
                     return _context11.stop();
@@ -19557,6 +19554,41 @@
           }));
           return function(_x13) {
             return _ref6.apply(this, arguments);
+          };
+        }());
+        addMessageHandler("modal", /* @__PURE__ */ function() {
+          var _ref7 = _asyncToGenerator11(/* @__PURE__ */ _regeneratorRuntime11().mark(function _callee12(message) {
+            return _regeneratorRuntime11().wrap(function _callee12$(_context12) {
+              while (1)
+                switch (_context12.prev = _context12.next) {
+                  case 0:
+                    if (!(message.type === "show")) {
+                      _context12.next = 5;
+                      break;
+                    }
+                    _context12.next = 3;
+                    return show2(message.message);
+                  case 3:
+                    _context12.next = 10;
+                    break;
+                  case 5:
+                    if (!(message.type === "remove")) {
+                      _context12.next = 9;
+                      break;
+                    }
+                    remove2();
+                    _context12.next = 10;
+                    break;
+                  case 9:
+                    throw "Unkown modal type: " + message.type;
+                  case 10:
+                  case "end":
+                    return _context12.stop();
+                }
+            }, _callee12);
+          }));
+          return function(_x14) {
+            return _ref7.apply(this, arguments);
           };
         }());
         addMessageHandler("response", function(message) {
@@ -19582,30 +19614,30 @@
           }
         });
         addMessageHandler("custom", /* @__PURE__ */ function() {
-          var _ref7 = _asyncToGenerator11(/* @__PURE__ */ _regeneratorRuntime11().mark(function _callee12(message) {
+          var _ref8 = _asyncToGenerator11(/* @__PURE__ */ _regeneratorRuntime11().mark(function _callee13(message) {
             var shinyOnCustomMessage;
-            return _regeneratorRuntime11().wrap(function _callee12$(_context12) {
+            return _regeneratorRuntime11().wrap(function _callee13$(_context13) {
               while (1)
-                switch (_context12.prev = _context12.next) {
+                switch (_context13.prev = _context13.next) {
                   case 0:
                     shinyOnCustomMessage = getShinyOnCustomMessage();
                     if (!shinyOnCustomMessage) {
-                      _context12.next = 4;
+                      _context13.next = 4;
                       break;
                     }
-                    _context12.next = 4;
+                    _context13.next = 4;
                     return shinyOnCustomMessage(message);
                   case 4:
-                    _context12.next = 6;
+                    _context13.next = 6;
                     return _this3._sendMessagesToHandlers(message, customMessageHandlers, customMessageHandlerOrder);
                   case 6:
                   case "end":
-                    return _context12.stop();
+                    return _context13.stop();
                 }
-            }, _callee12);
+            }, _callee13);
           }));
-          return function(_x14) {
-            return _ref7.apply(this, arguments);
+          return function(_x15) {
+            return _ref8.apply(this, arguments);
           };
         }());
         addMessageHandler("config", function(message) {
@@ -19642,63 +19674,63 @@
           message;
         });
         addMessageHandler("shiny-insert-ui", /* @__PURE__ */ function() {
-          var _ref8 = _asyncToGenerator11(/* @__PURE__ */ _regeneratorRuntime11().mark(function _callee13(message) {
+          var _ref9 = _asyncToGenerator11(/* @__PURE__ */ _regeneratorRuntime11().mark(function _callee14(message) {
             var targets, _iterator, _step, target;
-            return _regeneratorRuntime11().wrap(function _callee13$(_context13) {
+            return _regeneratorRuntime11().wrap(function _callee14$(_context14) {
               while (1)
-                switch (_context13.prev = _context13.next) {
+                switch (_context14.prev = _context14.next) {
                   case 0:
                     targets = (0, import_jquery38.default)(message.selector);
                     if (!(targets.length === 0)) {
-                      _context13.next = 7;
+                      _context14.next = 7;
                       break;
                     }
                     console.warn('The selector you chose ("' + message.selector + '") could not be found in the DOM.');
-                    _context13.next = 5;
+                    _context14.next = 5;
                     return renderHtmlAsync(message.content.html, (0, import_jquery38.default)([]), message.content.deps);
                   case 5:
-                    _context13.next = 26;
+                    _context14.next = 26;
                     break;
                   case 7:
                     _iterator = _createForOfIteratorHelper2(targets);
-                    _context13.prev = 8;
+                    _context14.prev = 8;
                     _iterator.s();
                   case 10:
                     if ((_step = _iterator.n()).done) {
-                      _context13.next = 18;
+                      _context14.next = 18;
                       break;
                     }
                     target = _step.value;
-                    _context13.next = 14;
+                    _context14.next = 14;
                     return renderContentAsync(target, message.content, message.where);
                   case 14:
                     if (!(message.multiple === false)) {
-                      _context13.next = 16;
+                      _context14.next = 16;
                       break;
                     }
-                    return _context13.abrupt("break", 18);
+                    return _context14.abrupt("break", 18);
                   case 16:
-                    _context13.next = 10;
+                    _context14.next = 10;
                     break;
                   case 18:
-                    _context13.next = 23;
+                    _context14.next = 23;
                     break;
                   case 20:
-                    _context13.prev = 20;
-                    _context13.t0 = _context13["catch"](8);
-                    _iterator.e(_context13.t0);
+                    _context14.prev = 20;
+                    _context14.t0 = _context14["catch"](8);
+                    _iterator.e(_context14.t0);
                   case 23:
-                    _context13.prev = 23;
+                    _context14.prev = 23;
                     _iterator.f();
-                    return _context13.finish(23);
+                    return _context14.finish(23);
                   case 26:
                   case "end":
-                    return _context13.stop();
+                    return _context14.stop();
                 }
-            }, _callee13, null, [[8, 20, 23, 26]]);
+            }, _callee14, null, [[8, 20, 23, 26]]);
           }));
-          return function(_x15) {
-            return _ref8.apply(this, arguments);
+          return function(_x16) {
+            return _ref9.apply(this, arguments);
           };
         }());
         addMessageHandler("shiny-remove-ui", function(message) {
@@ -19756,11 +19788,11 @@
           };
         }
         addMessageHandler("shiny-insert-tab", /* @__PURE__ */ function() {
-          var _ref9 = _asyncToGenerator11(/* @__PURE__ */ _regeneratorRuntime11().mark(function _callee14(message) {
+          var _ref10 = _asyncToGenerator11(/* @__PURE__ */ _regeneratorRuntime11().mark(function _callee15(message) {
             var $parentTabset, $tabset, $tabContent, tabsetId, $divTag, $liTag, $aTag, $targetLiTag, targetInfo, dropdown, index, tabId, _iterator2, _step2, el, getTabIndex, getDropdown;
-            return _regeneratorRuntime11().wrap(function _callee14$(_context14) {
+            return _regeneratorRuntime11().wrap(function _callee15$(_context15) {
               while (1)
-                switch (_context14.prev = _context14.next) {
+                switch (_context15.prev = _context15.next) {
                   case 0:
                     getDropdown = function _getDropdown() {
                       if (message.menuName !== null) {
@@ -19812,11 +19844,11 @@
                     }
                     dropdown = getDropdown();
                     if (!(dropdown !== null)) {
-                      _context14.next = 18;
+                      _context15.next = 18;
                       break;
                     }
                     if (!($aTag.attr("data-toggle") === "dropdown")) {
-                      _context14.next = 15;
+                      _context15.next = 15;
                       break;
                     }
                     throw "Cannot insert a navbarMenu inside another one";
@@ -19844,13 +19876,13 @@
                         $tabset.append($liTag);
                       }
                     }
-                    _context14.next = 22;
+                    _context15.next = 22;
                     return renderContentAsync($liTag[0], {
                       html: $liTag.html(),
                       deps: message.liTag.deps
                     });
                   case 22:
-                    _context14.next = 24;
+                    _context15.next = 24;
                     return renderContentAsync(
                       $tabContent[0],
                       {
@@ -19861,43 +19893,43 @@
                     );
                   case 24:
                     _iterator2 = _createForOfIteratorHelper2($divTag.get());
-                    _context14.prev = 25;
+                    _context15.prev = 25;
                     _iterator2.s();
                   case 27:
                     if ((_step2 = _iterator2.n()).done) {
-                      _context14.next = 34;
+                      _context15.next = 34;
                       break;
                     }
                     el = _step2.value;
                     $tabContent[0].appendChild(el);
-                    _context14.next = 32;
+                    _context15.next = 32;
                     return renderContentAsync(el, el.innerHTML || el.textContent);
                   case 32:
-                    _context14.next = 27;
+                    _context15.next = 27;
                     break;
                   case 34:
-                    _context14.next = 39;
+                    _context15.next = 39;
                     break;
                   case 36:
-                    _context14.prev = 36;
-                    _context14.t0 = _context14["catch"](25);
-                    _iterator2.e(_context14.t0);
+                    _context15.prev = 36;
+                    _context15.t0 = _context15["catch"](25);
+                    _iterator2.e(_context15.t0);
                   case 39:
-                    _context14.prev = 39;
+                    _context15.prev = 39;
                     _iterator2.f();
-                    return _context14.finish(39);
+                    return _context15.finish(39);
                   case 42:
                     if (message.select) {
                       $liTag.find("a").tab("show");
                     }
                   case 43:
                   case "end":
-                    return _context14.stop();
+                    return _context15.stop();
                 }
-            }, _callee14, null, [[25, 36, 39, 42]]);
+            }, _callee15, null, [[25, 36, 39, 42]]);
           }));
-          return function(_x16) {
-            return _ref9.apply(this, arguments);
+          return function(_x17) {
+            return _ref10.apply(this, arguments);
           };
         }());
         function ensureTabsetHasVisibleTab($tabset) {
@@ -19990,7 +20022,7 @@
     }, {
       key: "getTestSnapshotBaseUrl",
       value: function getTestSnapshotBaseUrl() {
-        var _ref10 = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {}, _ref10$fullUrl = _ref10.fullUrl, fullUrl = _ref10$fullUrl === void 0 ? true : _ref10$fullUrl;
+        var _ref11 = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {}, _ref11$fullUrl = _ref11.fullUrl, fullUrl = _ref11$fullUrl === void 0 ? true : _ref11$fullUrl;
         var loc = window.location;
         var url = "";
         if (fullUrl) {
@@ -20657,7 +20689,7 @@
   var windowShiny2;
   function setShiny(windowShiny_) {
     windowShiny2 = windowShiny_;
-    windowShiny2.version = "1.7.5.9000";
+    windowShiny2.version = "1.7.5.9001";
     var _initInputBindings = initInputBindings(), inputBindings = _initInputBindings.inputBindings, fileInputBinding2 = _initInputBindings.fileInputBinding;
     var _initOutputBindings = initOutputBindings(), outputBindings = _initOutputBindings.outputBindings;
     setFileInputBinding(fileInputBinding2);

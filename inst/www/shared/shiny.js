@@ -21410,20 +21410,27 @@
         while (1)
           switch (_context3.prev = _context3.next) {
             case 0:
-              _context3.next = 2;
+              _context3.prev = 0;
+              _context3.next = 3;
               return _bindAll(shinyCtx, scope);
-            case 2:
+            case 3:
               currentInputItems = _context3.sent;
               inputs = shinyCtx.inputs;
               import_jquery37.default.each(currentInputItems, function(name, item) {
                 inputs.setInput(name, item.value, item.opts);
               });
               shinyCtx.initDeferredIframes();
-            case 6:
+              _context3.next = 12;
+              break;
+            case 9:
+              _context3.prev = 9;
+              _context3.t0 = _context3["catch"](0);
+              showErrorInClientConsole(_context3.t0);
+            case 12:
             case "end":
               return _context3.stop();
           }
-      }, _callee3);
+      }, _callee3, null, [[0, 9]]);
     }));
     return _bindAll3.apply(this, arguments);
   }
@@ -24621,14 +24628,13 @@
                 _context.next = 3;
                 return initShiny(windowShiny2);
               case 3:
-                _context.next = 9;
+                _context.next = 8;
                 break;
               case 5:
                 _context.prev = 5;
                 _context.t0 = _context["catch"](0);
                 showErrorInClientConsole(_context.t0);
-                showErrorInClientConsole("Another error occured!");
-              case 9:
+              case 8:
               case "end":
                 return _context.stop();
             }

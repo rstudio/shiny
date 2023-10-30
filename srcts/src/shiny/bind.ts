@@ -8,7 +8,10 @@ import type {
 } from "../inputPolicies";
 import { shinyAppBindOutput, shinyAppUnbindOutput } from "./initedMethods";
 import { sendImageSizeFns } from "./sendImageSize";
-import { ShinyClientError } from "../components/errorConsole";
+import {
+  ShinyClientError,
+  showErrorInClientConsole,
+} from "../components/errorConsole";
 
 const boundInputs: {
   [key: string]: { binding: InputBinding; node: HTMLElement };
@@ -339,21 +342,25 @@ async function bindAll(
   shinyCtx: BindInputsCtx,
   scope: BindScope
 ): Promise<void> {
-  // _bindAll returns input values; it doesn't send them to the server.
-  // Shiny.bindAll needs to send the values to the server.
-  const currentInputItems = await _bindAll(shinyCtx, scope);
+  try {
+    // _bindAll returns input values; it doesn't send them to the server.
+    // Shiny.bindAll needs to send the values to the server.
+    const currentInputItems = await _bindAll(shinyCtx, scope);
 
-  const inputs = shinyCtx.inputs;
+    const inputs = shinyCtx.inputs;
 
-  $.each(currentInputItems, function (name: string, item) {
-    inputs.setInput(name, item.value, item.opts);
-  });
+    $.each(currentInputItems, function (name: string, item) {
+      inputs.setInput(name, item.value, item.opts);
+    });
 
-  // Not sure if the iframe stuff is an intrinsic part of bindAll, but bindAll
-  // is a convenient place to hang it. bindAll will be called anytime new HTML
-  // appears that might contain inputs/outputs; it's reasonable to assume that
-  // any such HTML may contain iframes as well.
-  shinyCtx.initDeferredIframes();
+    // Not sure if the iframe stuff is an intrinsic part of bindAll, but bindAll
+    // is a convenient place to hang it. bindAll will be called anytime new HTML
+    // appears that might contain inputs/outputs; it's reasonable to assume that
+    // any such HTML may contain iframes as well.
+    shinyCtx.initDeferredIframes();
+  } catch (e) {
+    showErrorInClientConsole(e);
+  }
 }
 
 export { unbindAll, bindAll, _bindAll };

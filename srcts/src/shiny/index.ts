@@ -116,11 +116,7 @@ function setShiny(windowShiny_: Shiny): void {
       try {
         await initShiny(windowShiny);
       } catch (e) {
-        // TODO: Test with dynamic UI
-        // TODO: Look for duplicate input bindings
-
         showErrorInClientConsole(e);
-        showErrorInClientConsole("Another error occured!");
       }
     }, 1);
   });

@@ -226,9 +226,9 @@ export function showErrorInClientConsole(e: unknown): void {
 
   if (typeof e === "string") {
     errorMsg = e;
-  } else if (e instanceof ShinyDuplicateBindingIdError) {
+  } else if (e instanceof ShinyClientError) {
     errorMsg = e.message;
-    headline = `Duplicate ${e.bindingType} IDs`;
+    headline = e.headline;
   } else if (e instanceof Error) {
     errorMsg = e.message;
   } else {
@@ -243,20 +243,18 @@ export function showErrorInClientConsole(e: unknown): void {
 }
 
 /**
- * Custom error to throw when a duplicate binding ids are found.
- * @param message - Error message to show to user
- * @param bindingType - Either "input" or "output"
+ * Custom error to throw when a we detect a known error type on the client
+ * @param headline - Error headline to show to user. Will be shown in normal
+ * font and should be used to give plain language description of problem
+ * @param message - Error message to show to user. Will be shown in monospaced
+ * font
  */
-export class ShinyDuplicateBindingIdError extends Error {
-  // Can either be input or output id that is duplicated
-  bindingType: "input" | "output";
-  duplicatedId: string;
+export class ShinyClientError extends Error {
+  headline: string;
 
-  constructor(bindingType: "input" | "output", duplicatedId: string) {
-    super(`More than one ${bindingType} with ID "${duplicatedId}" found`);
-    this.name = "ShinyDuplicateBindingIdError";
-    this.duplicatedId = duplicatedId;
-
-    this.bindingType = bindingType;
+  constructor({ headline, message }: { headline: string; message: string }) {
+    super(message);
+    this.name = "ShinyClientError";
+    this.headline = headline;
   }
 }

@@ -246,7 +246,7 @@ customElements.define("shiny-error-console", ErrorConsole);
  */
 export function showErrorInClientConsole(e: unknown): void {
   let errorMsg: string | null = null;
-  let headline: string | null = null;
+  let headline = "Error on client while running Shiny app";
 
   if (typeof e === "string") {
     errorMsg = e;

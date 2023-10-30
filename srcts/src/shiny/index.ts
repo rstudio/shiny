@@ -120,6 +120,7 @@ function setShiny(windowShiny_: Shiny): void {
         // TODO: Look for duplicate input bindings
 
         showErrorInClientConsole(e);
+        showErrorInClientConsole("Another error occured!");
       }
     }, 1);
   });

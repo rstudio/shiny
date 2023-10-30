@@ -20682,7 +20682,7 @@
   customElements.define("shiny-error-console", ErrorConsole);
   function showErrorInClientConsole(e4) {
     var errorMsg = null;
-    var headline = null;
+    var headline = "Error on client while running Shiny app";
     if (typeof e4 === "string") {
       errorMsg = e4;
     } else if (e4 instanceof ShinyClientError) {
@@ -24621,13 +24621,14 @@
                 _context.next = 3;
                 return initShiny(windowShiny2);
               case 3:
-                _context.next = 8;
+                _context.next = 9;
                 break;
               case 5:
                 _context.prev = 5;
                 _context.t0 = _context["catch"](0);
                 showErrorInClientConsole(_context.t0);
-              case 8:
+                showErrorInClientConsole("Another error occured!");
+              case 9:
               case "end":
                 return _context.stop();
             }

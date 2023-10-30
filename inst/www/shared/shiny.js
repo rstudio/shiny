@@ -16946,7 +16946,7 @@
   }
 
   // srcts/src/shiny/init.ts
-  var import_es_regexp_exec16 = __toESM(require_es_regexp_exec());
+  var import_es_regexp_exec15 = __toESM(require_es_regexp_exec());
   var import_es_array_iterator49 = __toESM(require_es_array_iterator());
   var import_jquery39 = __toESM(require_jquery());
 
@@ -17576,11 +17576,7 @@
   // node_modules/core-js/modules/es.set.js
   require_es_set_constructor();
 
-  // node_modules/core-js/modules/es.map.js
-  require_es_map_constructor();
-
   // srcts/src/shiny/bind.ts
-  var import_es_regexp_exec14 = __toESM(require_es_regexp_exec());
   var import_jquery37 = __toESM(require_jquery());
 
   // srcts/src/bindings/outputAdapter.ts
@@ -18013,6 +18009,9 @@
 
   // srcts/src/components/errorConsole.ts
   var import_es_array_iterator45 = __toESM(require_es_array_iterator());
+
+  // node_modules/core-js/modules/es.map.js
+  require_es_map_constructor();
 
   // node_modules/@lit/reactive-element/reactive-element.js
   var import_es_regexp_exec12 = __toESM(require_es_regexp_exec(), 1);
@@ -20996,101 +20995,6 @@
       return this.delegate = { iterator: values2(iterable), resultName: resultName, nextLoc: nextLoc }, "next" === this.method && (this.arg = void 0), ContinueSentinel;
     } }, exports;
   }
-  function _slicedToArray4(arr, i5) {
-    return _arrayWithHoles4(arr) || _iterableToArrayLimit4(arr, i5) || _unsupportedIterableToArray5(arr, i5) || _nonIterableRest4();
-  }
-  function _nonIterableRest4() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _iterableToArrayLimit4(arr, i5) {
-    var _i = null == arr ? null : "undefined" != typeof Symbol && arr[Symbol.iterator] || arr["@@iterator"];
-    if (null != _i) {
-      var _s, _e, _x, _r, _arr = [], _n = true, _d = false;
-      try {
-        if (_x = (_i = _i.call(arr)).next, 0 === i5) {
-          if (Object(_i) !== _i)
-            return;
-          _n = false;
-        } else
-          for (; !(_n = (_s = _x.call(_i)).done) && (_arr.push(_s.value), _arr.length !== i5); _n = true)
-            ;
-      } catch (err) {
-        _d = true, _e = err;
-      } finally {
-        try {
-          if (!_n && null != _i.return && (_r = _i.return(), Object(_r) !== _r))
-            return;
-        } finally {
-          if (_d)
-            throw _e;
-        }
-      }
-      return _arr;
-    }
-  }
-  function _arrayWithHoles4(arr) {
-    if (Array.isArray(arr))
-      return arr;
-  }
-  function _createForOfIteratorHelper5(o4, allowArrayLike) {
-    var it = typeof Symbol !== "undefined" && o4[Symbol.iterator] || o4["@@iterator"];
-    if (!it) {
-      if (Array.isArray(o4) || (it = _unsupportedIterableToArray5(o4)) || allowArrayLike && o4 && typeof o4.length === "number") {
-        if (it)
-          o4 = it;
-        var i5 = 0;
-        var F = function F2() {
-        };
-        return { s: F, n: function n4() {
-          if (i5 >= o4.length)
-            return { done: true };
-          return { done: false, value: o4[i5++] };
-        }, e: function e4(_e2) {
-          throw _e2;
-        }, f: F };
-      }
-      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-    }
-    var normalCompletion = true, didErr = false, err;
-    return { s: function s4() {
-      it = it.call(o4);
-    }, n: function n4() {
-      var step = it.next();
-      normalCompletion = step.done;
-      return step;
-    }, e: function e4(_e3) {
-      didErr = true;
-      err = _e3;
-    }, f: function f4() {
-      try {
-        if (!normalCompletion && it.return != null)
-          it.return();
-      } finally {
-        if (didErr)
-          throw err;
-      }
-    } };
-  }
-  function _unsupportedIterableToArray5(o4, minLen) {
-    if (!o4)
-      return;
-    if (typeof o4 === "string")
-      return _arrayLikeToArray5(o4, minLen);
-    var n4 = Object.prototype.toString.call(o4).slice(8, -1);
-    if (n4 === "Object" && o4.constructor)
-      n4 = o4.constructor.name;
-    if (n4 === "Map" || n4 === "Set")
-      return Array.from(o4);
-    if (n4 === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n4))
-      return _arrayLikeToArray5(o4, minLen);
-  }
-  function _arrayLikeToArray5(arr, len) {
-    if (len == null || len > arr.length)
-      len = arr.length;
-    for (var i5 = 0, arr2 = new Array(len); i5 < len; i5++)
-      arr2[i5] = arr[i5];
-    return arr2;
-  }
   function asyncGeneratorStep10(gen, resolve, reject, _next, _throw, key, arg) {
     try {
       var info = gen[key](arg);
@@ -21136,13 +21040,16 @@
       inputs.setInput(id, value, opts);
     }
   }
+  var bindingIds = {
+    outputs: /* @__PURE__ */ new Set(),
+    inputs: /* @__PURE__ */ new Set()
+  };
   function bindInputs(shinyCtx) {
     var scope = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : document.documentElement;
     var inputs = shinyCtx.inputs, inputsRate = shinyCtx.inputsRate, inputBindings = shinyCtx.inputBindings;
     var bindings = inputBindings.getBindings();
+    var inputDuplicateIds = /* @__PURE__ */ new Set();
     var inputItems = {};
-    var bindingIds = /* @__PURE__ */ new Set();
-    var duplicateIds = /* @__PURE__ */ new Set();
     var _loop = function _loop2() {
       var binding = bindings[i5].binding;
       var matches = binding.find(scope) || [];
@@ -21151,13 +21058,13 @@
         if (el.hasAttribute("data-shiny-no-bind-input"))
           return "continue";
         var id = binding.getId(el);
-        var duplicateId = id && bindingIds.has(id);
+        var duplicateId = id && bindingIds.inputs.has(id);
         if (duplicateId) {
-          duplicateIds.add(id);
+          inputDuplicateIds.add(id);
         }
         if (!id || boundInputs[id] || duplicateId)
           return "continue";
-        bindingIds.add(id);
+        bindingIds.inputs.add(id);
         var type = binding.getType(el);
         var effectiveId = type ? id + ":" + type : id;
         inputItems[effectiveId] = {
@@ -21201,10 +21108,10 @@
     for (var i5 = 0; i5 < bindings.length; i5++) {
       _loop();
     }
-    if (duplicateIds.size > 0) {
+    if (inputDuplicateIds.size > 0) {
       throw new ShinyClientError({
         headline: "Duplicate input IDs found",
-        message: "The following ".concat(duplicateIds.size === 1 ? "ID was" : "IDs were", " repeated: ").concat(Array.from(duplicateIds).map(function(id) {
+        message: "The following ".concat(inputDuplicateIds.size === 1 ? "ID was" : "IDs were", " repeated: ").concat(Array.from(inputDuplicateIds).map(function(id) {
           return '"'.concat(id, '"');
         }).join(", "), ".")
       });
@@ -21216,77 +21123,60 @@
   }
   function _bindOutputs() {
     _bindOutputs = _asyncToGenerator10(/* @__PURE__ */ _regeneratorRuntime10().mark(function _callee(_ref) {
-      var sendOutputHiddenState, maybeAddThemeObserver, outputBindings, scope, $scope, bindings, i5, binding, matches, bindingIds, duplicateIds, j3, _el2, id, _iterator, _step, _step$value, _id, _el3, $el, bindingAdapter, _args = arguments;
+      var sendOutputHiddenState, maybeAddThemeObserver, outputBindings, scope, outputDuplicateIds, $scope, bindings, i5, binding, matches, j3, _el2, id, $el, bindingAdapter, _args = arguments;
       return _regeneratorRuntime10().wrap(function _callee$(_context) {
         while (1)
           switch (_context.prev = _context.next) {
             case 0:
               sendOutputHiddenState = _ref.sendOutputHiddenState, maybeAddThemeObserver = _ref.maybeAddThemeObserver, outputBindings = _ref.outputBindings;
               scope = _args.length > 1 && _args[1] !== void 0 ? _args[1] : document.documentElement;
+              outputDuplicateIds = /* @__PURE__ */ new Set();
               $scope = (0, import_jquery37.default)(scope);
               bindings = outputBindings.getBindings();
               i5 = 0;
-            case 5:
+            case 6:
               if (!(i5 < bindings.length)) {
-                _context.next = 46;
+                _context.next = 36;
                 break;
               }
               binding = bindings[i5].binding;
               matches = binding.find($scope) || [];
-              bindingIds = /* @__PURE__ */ new Map();
-              duplicateIds = /* @__PURE__ */ new Set();
-              for (j3 = 0; j3 < matches.length; j3++) {
-                _el2 = matches[j3];
-                id = binding.getId(_el2);
-                if (id && bindingIds.has(id)) {
-                  duplicateIds.add(id);
-                }
-                bindingIds.set(id, _el2);
-              }
-              if (!(duplicateIds.size > 0)) {
-                _context.next = 13;
+              j3 = 0;
+            case 10:
+              if (!(j3 < matches.length)) {
+                _context.next = 33;
                 break;
               }
-              throw new ShinyClientError({
-                headline: "Duplicate output IDs found",
-                message: "The following ".concat(duplicateIds.size === 1 ? "ID was" : "IDs were", " repeated: ").concat(Array.from(duplicateIds).map(function(id2) {
-                  return '"'.concat(id2, '"');
-                }).join(", "), ".")
-              });
-            case 13:
-              _iterator = _createForOfIteratorHelper5(bindingIds);
-              _context.prev = 14;
-              _iterator.s();
-            case 16:
-              if ((_step = _iterator.n()).done) {
-                _context.next = 35;
+              _el2 = matches[j3];
+              id = binding.getId(_el2);
+              if (id) {
+                _context.next = 15;
                 break;
               }
-              _step$value = _slicedToArray4(_step.value, 2), _id = _step$value[0], _el3 = _step$value[1];
-              if (_id) {
-                _context.next = 20;
+              return _context.abrupt("continue", 30);
+            case 15:
+              if (id && bindingIds.outputs.has(id)) {
+                outputDuplicateIds.add(id);
+              }
+              bindingIds.outputs.add(id);
+              if (import_jquery37.default.contains(document.documentElement, _el2)) {
+                _context.next = 19;
                 break;
               }
-              return _context.abrupt("continue", 33);
-            case 20:
-              if (import_jquery37.default.contains(document.documentElement, _el3)) {
+              return _context.abrupt("continue", 30);
+            case 19:
+              $el = (0, import_jquery37.default)(_el2);
+              if (!$el.hasClass("shiny-bound-output")) {
                 _context.next = 22;
                 break;
               }
-              return _context.abrupt("continue", 33);
+              return _context.abrupt("continue", 30);
             case 22:
-              $el = (0, import_jquery37.default)(_el3);
-              if (!$el.hasClass("shiny-bound-output")) {
-                _context.next = 25;
-                break;
-              }
-              return _context.abrupt("continue", 33);
-            case 25:
-              maybeAddThemeObserver(_el3);
-              bindingAdapter = new OutputBindingAdapter(_el3, binding);
-              _context.next = 29;
-              return shinyAppBindOutput(_id, bindingAdapter);
-            case 29:
+              maybeAddThemeObserver(_el2);
+              bindingAdapter = new OutputBindingAdapter(_el2, binding);
+              _context.next = 26;
+              return shinyAppBindOutput(id, bindingAdapter);
+            case 26:
               $el.data("shiny-output-binding", bindingAdapter);
               $el.addClass("shiny-bound-output");
               if (!$el.attr("aria-live"))
@@ -21296,32 +21186,33 @@
                 binding: binding,
                 bindingType: "output"
               });
+            case 30:
+              j3++;
+              _context.next = 10;
+              break;
             case 33:
-              _context.next = 16;
-              break;
-            case 35:
-              _context.next = 40;
-              break;
-            case 37:
-              _context.prev = 37;
-              _context.t0 = _context["catch"](14);
-              _iterator.e(_context.t0);
-            case 40:
-              _context.prev = 40;
-              _iterator.f();
-              return _context.finish(40);
-            case 43:
               i5++;
-              _context.next = 5;
+              _context.next = 6;
               break;
-            case 46:
+            case 36:
+              if (!(outputDuplicateIds.size > 0)) {
+                _context.next = 38;
+                break;
+              }
+              throw new ShinyClientError({
+                headline: "Duplicate output IDs found",
+                message: "The following ".concat(outputDuplicateIds.size === 1 ? "ID was" : "IDs were", " repeated: ").concat(Array.from(outputDuplicateIds).map(function(id2) {
+                  return '"'.concat(id2, '"');
+                }).join(", "), ".")
+              });
+            case 38:
               setTimeout(sendImageSizeFns.regular, 0);
               setTimeout(sendOutputHiddenState, 0);
-            case 48:
+            case 40:
             case "end":
               return _context.stop();
           }
-      }, _callee, null, [[14, 37, 40, 43]]);
+      }, _callee);
     }));
     return _bindOutputs.apply(this, arguments);
   }
@@ -21340,6 +21231,7 @@
       var id = binding.getId(_el);
       (0, import_jquery37.default)(_el).removeClass("shiny-bound-input");
       delete boundInputs[id];
+      bindingIds.inputs.delete(id);
       binding.unsubscribe(_el);
       (0, import_jquery37.default)(_el).trigger({
         type: "shiny:unbound",
@@ -21363,6 +21255,7 @@
         continue;
       var id = bindingAdapter.binding.getId(outputs[i5]);
       shinyAppUnbindOutput(id, bindingAdapter);
+      bindingIds.outputs.delete(id);
       $el.removeClass("shiny-bound-output");
       $el.removeData("shiny-output-binding");
       $el.trigger({
@@ -21436,7 +21329,7 @@
   }
 
   // srcts/src/shiny/shinyapp.ts
-  var import_es_regexp_exec15 = __toESM(require_es_regexp_exec());
+  var import_es_regexp_exec14 = __toESM(require_es_regexp_exec());
   var import_es_json_stringify4 = __toESM(require_es_json_stringify());
 
   // node_modules/core-js/modules/es.array-buffer.constructor.js
@@ -21926,10 +21819,10 @@
       return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
     }, _typeof48(obj);
   }
-  function _createForOfIteratorHelper6(o4, allowArrayLike) {
+  function _createForOfIteratorHelper5(o4, allowArrayLike) {
     var it = typeof Symbol !== "undefined" && o4[Symbol.iterator] || o4["@@iterator"];
     if (!it) {
-      if (Array.isArray(o4) || (it = _unsupportedIterableToArray6(o4)) || allowArrayLike && o4 && typeof o4.length === "number") {
+      if (Array.isArray(o4) || (it = _unsupportedIterableToArray5(o4)) || allowArrayLike && o4 && typeof o4.length === "number") {
         if (it)
           o4 = it;
         var i5 = 0;
@@ -21965,20 +21858,20 @@
       }
     } };
   }
-  function _unsupportedIterableToArray6(o4, minLen) {
+  function _unsupportedIterableToArray5(o4, minLen) {
     if (!o4)
       return;
     if (typeof o4 === "string")
-      return _arrayLikeToArray6(o4, minLen);
+      return _arrayLikeToArray5(o4, minLen);
     var n4 = Object.prototype.toString.call(o4).slice(8, -1);
     if (n4 === "Object" && o4.constructor)
       n4 = o4.constructor.name;
     if (n4 === "Map" || n4 === "Set")
       return Array.from(o4);
     if (n4 === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n4))
-      return _arrayLikeToArray6(o4, minLen);
+      return _arrayLikeToArray5(o4, minLen);
   }
-  function _arrayLikeToArray6(arr, len) {
+  function _arrayLikeToArray5(arr, len) {
     if (len == null || len > arr.length)
       len = arr.length;
     for (var i5 = 0, arr2 = new Array(len); i5 < len; i5++)
@@ -23288,7 +23181,7 @@
                     _context13.next = 26;
                     break;
                   case 7:
-                    _iterator = _createForOfIteratorHelper6(targets);
+                    _iterator = _createForOfIteratorHelper5(targets);
                     _context13.prev = 8;
                     _iterator.s();
                   case 10:
@@ -23488,7 +23381,7 @@
                       "beforeend"
                     );
                   case 24:
-                    _iterator2 = _createForOfIteratorHelper6($divTag.get());
+                    _iterator2 = _createForOfIteratorHelper5($divTag.get());
                     _context14.prev = 25;
                     _iterator2.s();
                   case 27:

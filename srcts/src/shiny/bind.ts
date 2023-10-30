@@ -48,6 +48,23 @@ function valueChangeCallback(
   }
 }
 
+/**
+ * Sets for input and outputs to keep track of what IDs are bound so we can
+ * detect duplicates and warn users. This is done outside of the
+ * bindOutputs()/bindInputs() functions so that we can check for duplicate IDs
+ * across all bindings and dynamically generated outputs.
+ */
+const bindingIds = {
+  /**
+   * Set of IDs for output bindings
+   */
+  outputs: new Set<string>(),
+  /**
+   * Set of IDs for input bindings
+   */
+  inputs: new Set<string>(),
+};
+
 type BindInputsCtx = {
   inputs: InputValidateDecorator;
   inputsRate: InputRateDecorator;
@@ -69,6 +86,9 @@ function bindInputs(
   const { inputs, inputsRate, inputBindings } = shinyCtx;
   const bindings = inputBindings.getBindings();
 
+  // Keep track of duplicate IDs for input bindings so we can warn users
+  const inputDuplicateIds = new Set<string>();
+
   const inputItems: {
     [key: string]: {
       value: any;
@@ -80,9 +100,6 @@ function bindInputs(
     };
   } = {};
 
-  const bindingIds = new Set<string>();
-  const duplicateIds = new Set<string>();
-
   for (let i = 0; i < bindings.length; i++) {
     const binding = bindings[i].binding;
     const matches = binding.find(scope) || [];
@@ -93,15 +110,15 @@ function bindInputs(
       const id = binding.getId(el);
 
       // Check for duplicates in bindingIds array and keep track of them
-      const duplicateId = id && bindingIds.has(id);
+      const duplicateId = id && bindingIds.inputs.has(id);
       if (duplicateId) {
-        duplicateIds.add(id);
+        inputDuplicateIds.add(id);
       }
       // Check if ID is falsy, or if already bound, or has the same ID as
       // another input binding and if it is, skip
       if (!id || boundInputs[id] || duplicateId) continue;
 
-      bindingIds.add(id);
+      bindingIds.inputs.add(id);
       const type = binding.getType(el);
       const effectiveId = type ? id + ":" + type : id;
 
@@ -152,12 +169,12 @@ function bindInputs(
   }
 
   // Send error message to the user if duplicate IDs are found
-  if (duplicateIds.size > 0) {
+  if (inputDuplicateIds.size > 0) {
     throw new ShinyClientError({
       headline: "Duplicate input IDs found",
       message: `The following ${
-        duplicateIds.size === 1 ? "ID was" : "IDs were"
-      } repeated: ${Array.from(duplicateIds)
+        inputDuplicateIds.size === 1 ? "ID was" : "IDs were"
+      } repeated: ${Array.from(inputDuplicateIds)
         .map((id) => `"${id}"`)
         .join(", ")}.`,
     });
@@ -174,6 +191,9 @@ async function bindOutputs(
   }: BindInputsCtx,
   scope: BindScope = document.documentElement
 ): Promise<void> {
+  // Keep track of duplicate IDs for output bindings so we can warn users
+  const outputDuplicateIds = new Set<string>();
+
   const $scope = $(scope);
 
   const bindings = outputBindings.getBindings();
@@ -182,39 +202,21 @@ async function bindOutputs(
     const binding = bindings[i].binding;
     const matches = binding.find($scope) || [];
 
-    const bindingIds = new Map<string, HTMLElement>();
-    const duplicateIds = new Set<string>();
-
     // First loop over the matches and assemble map of id->element and also note
     // any duplicates
     for (let j = 0; j < matches.length; j++) {
       const el = matches[j];
       const id = binding.getId(el);
 
-      // Check for duplicates in bindingIds array and keep track of them
-      if (id && bindingIds.has(id)) {
-        duplicateIds.add(id);
-      }
-
-      bindingIds.set(id, el);
-    }
-
-    // Send error message to the user if duplicate IDs are found
-    if (duplicateIds.size > 0) {
-      throw new ShinyClientError({
-        headline: "Duplicate output IDs found",
-        message: `The following ${
-          duplicateIds.size === 1 ? "ID was" : "IDs were"
-        } repeated: ${Array.from(duplicateIds)
-          .map((id) => `"${id}"`)
-          .join(", ")}.`,
-      });
-    }
-
-    // Loop over the bindingIds map and bind each element
-    for (const [id, el] of bindingIds) {
       // Check if ID is falsy
       if (!id) continue;
+
+      // Check for duplicates in bindingIds array and keep track of them
+      if (id && bindingIds.outputs.has(id)) {
+        outputDuplicateIds.add(id);
+      }
+
+      bindingIds.outputs.add(id);
 
       // In some uncommon cases, elements that are later in the
       // matches array can be removed from the document by earlier
@@ -250,6 +252,18 @@ async function bindOutputs(
     }
   }
 
+  // Send error message to the user if duplicate IDs are found
+  if (outputDuplicateIds.size > 0) {
+    throw new ShinyClientError({
+      headline: "Duplicate output IDs found",
+      message: `The following ${
+        outputDuplicateIds.size === 1 ? "ID was" : "IDs were"
+      } repeated: ${Array.from(outputDuplicateIds)
+        .map((id) => `"${id}"`)
+        .join(", ")}.`,
+    });
+  }
+
   // Send later in case DOM layout isn't final yet.
   setTimeout(sendImageSizeFns.regular, 0);
   setTimeout(sendOutputHiddenState, 0);
@@ -276,6 +290,8 @@ function unbindInputs(
 
     $(el).removeClass("shiny-bound-input");
     delete boundInputs[id];
+
+    bindingIds.inputs.delete(id);
     binding.unsubscribe(el);
     $(el).trigger({
       type: "shiny:unbound",
@@ -306,6 +322,8 @@ function unbindOutputs(
     const id = bindingAdapter.binding.getId(outputs[i]);
 
     shinyAppUnbindOutput(id, bindingAdapter);
+
+    bindingIds.outputs.delete(id);
     $el.removeClass("shiny-bound-output");
     $el.removeData("shiny-output-binding");
     $el.trigger({

@@ -21204,7 +21204,9 @@
     if (duplicateIds.size > 0) {
       throw new ShinyClientError({
         headline: "Duplicate input IDs found",
-        message: "Duplicate IDs found: ".concat(Array.from(duplicateIds).join(", "))
+        message: "The following ".concat(duplicateIds.size === 1 ? "ID was" : "IDs were", " repeated: ").concat(Array.from(duplicateIds).map(function(id) {
+          return '"'.concat(id, '"');
+        }).join(", "), ".")
       });
     }
     return inputItems;
@@ -21247,7 +21249,9 @@
               }
               throw new ShinyClientError({
                 headline: "Duplicate output IDs found",
-                message: "Duplicate IDs found: ".concat(Array.from(duplicateIds).join(", "))
+                message: "The following ".concat(duplicateIds.size === 1 ? "ID was" : "IDs were", " repeated: ").concat(Array.from(duplicateIds).map(function(id2) {
+                  return '"'.concat(id2, '"');
+                }).join(", "), ".")
               });
             case 13:
               _iterator = _createForOfIteratorHelper5(bindingIds);

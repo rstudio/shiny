@@ -152,7 +152,11 @@ function bindInputs(
   if (duplicateIds.size > 0) {
     throw new ShinyClientError({
       headline: "Duplicate input IDs found",
-      message: `Duplicate IDs found: ${Array.from(duplicateIds).join(", ")}`,
+      message: `The following ${
+        duplicateIds.size === 1 ? "ID was" : "IDs were"
+      } repeated: ${Array.from(duplicateIds)
+        .map((id) => `"${id}"`)
+        .join(", ")}.`,
     });
   }
 
@@ -196,7 +200,11 @@ async function bindOutputs(
     if (duplicateIds.size > 0) {
       throw new ShinyClientError({
         headline: "Duplicate output IDs found",
-        message: `Duplicate IDs found: ${Array.from(duplicateIds).join(", ")}`,
+        message: `The following ${
+          duplicateIds.size === 1 ? "ID was" : "IDs were"
+        } repeated: ${Array.from(duplicateIds)
+          .map((id) => `"${id}"`)
+          .join(", ")}.`,
       });
     }
 

@@ -20458,6 +20458,8 @@
   // srcts/src/components/errorConsole.ts
   var _templateObject;
   var _templateObject2;
+  var _templateObject3;
+  var _templateObject4;
   function _typeof45(obj) {
     "@babel/helpers - typeof";
     return _typeof45 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
@@ -20624,16 +20626,33 @@
     }
     return (hint === "string" ? String : Number)(input);
   }
-  var ErrorConsole = /* @__PURE__ */ function(_LitElement) {
-    _inherits24(ErrorConsole2, _LitElement);
-    var _super = _createSuper24(ErrorConsole2);
+  var ErrorConsoleContainer = /* @__PURE__ */ function(_LitElement) {
+    _inherits24(ErrorConsoleContainer2, _LitElement);
+    var _super = _createSuper24(ErrorConsoleContainer2);
+    function ErrorConsoleContainer2() {
+      _classCallCheck39(this, ErrorConsoleContainer2);
+      return _super.apply(this, arguments);
+    }
+    _createClass39(ErrorConsoleContainer2, [{
+      key: "render",
+      value: function render() {
+        return x(_templateObject || (_templateObject = _taggedTemplateLiteral(["<slot></slot>"])));
+      }
+    }]);
+    return ErrorConsoleContainer2;
+  }(s3);
+  _defineProperty17(ErrorConsoleContainer, "styles", [i(_templateObject3 || (_templateObject3 = _taggedTemplateLiteral(["\n      :host {\n        --spacing: 0.5rem;\n\n        position: fixed;\n        top: var(--spacing);\n        right: var(--spacing);\n        z-index: 1000;\n\n        display: flex;\n        flex-direction: column;\n        gap: var(--spacing);\n      }\n    "])))]);
+  customElements.define("shiny-error-console-container", ErrorConsoleContainer);
+  var ErrorConsole = /* @__PURE__ */ function(_LitElement2) {
+    _inherits24(ErrorConsole2, _LitElement2);
+    var _super2 = _createSuper24(ErrorConsole2);
     function ErrorConsole2() {
       var _this;
       _classCallCheck39(this, ErrorConsole2);
       for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
         args[_key] = arguments[_key];
       }
-      _this = _super.call.apply(_super, [this].concat(args));
+      _this = _super2.call.apply(_super2, [this].concat(args));
       _defineProperty17(_assertThisInitialized24(_this), "headline", "");
       _defineProperty17(_assertThisInitialized24(_this), "message", "");
       return _this;
@@ -20650,7 +20669,7 @@
     }, {
       key: "render",
       value: function render() {
-        return x(_templateObject || (_templateObject = _taggedTemplateLiteral(['\n      <div class="container">\n        <div class="icon-container">\n          <svg\n            class="error-icon"\n            viewBox="0 0 20 20"\n            fill="currentColor"\n            aria-hidden="true"\n          >\n            <path\n              fill-rule="evenodd"\n              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"\n              clip-rule="evenodd"\n            />\n          </svg>\n        </div>\n        <div class="contents">\n          <h3>', '</h3>\n          <p class="error-message">', '</p>\n        </div>\n        <div class="close-button-container">\n          <button\n            @click=', '\n            type="button"\n            class="close-button"\n            title="Dismiss error console"\n          >\n            <span class="sr-only">Dismiss</span>\n            <svg\n              class="close-icon"\n              viewBox="0 0 20 20"\n              fill="currentColor"\n              aria-hidden="true"\n            >\n              <path\n                d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"\n              />\n            </svg>\n          </button>\n        </div>\n      </div>\n    '])), this.headline, this.message, this.handleClose);
+        return x(_templateObject2 || (_templateObject2 = _taggedTemplateLiteral(['\n      <div class="container">\n        <div class="icon-container">\n          <svg\n            class="error-icon"\n            viewBox="0 0 20 20"\n            fill="currentColor"\n            aria-hidden="true"\n          >\n            <path\n              fill-rule="evenodd"\n              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"\n              clip-rule="evenodd"\n            />\n          </svg>\n        </div>\n        <div class="contents">\n          <h3>', '</h3>\n          <p class="error-message">', '</p>\n        </div>\n        <div class="close-button-container">\n          <button\n            @click=', '\n            type="button"\n            class="close-button"\n            title="Dismiss error console"\n          >\n            <span class="sr-only">Dismiss</span>\n            <svg\n              class="close-icon"\n              viewBox="0 0 20 20"\n              fill="currentColor"\n              aria-hidden="true"\n            >\n              <path\n                d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"\n              />\n            </svg>\n          </button>\n        </div>\n      </div>\n    '])), this.headline, this.message, this.handleClose);
       }
     }]);
     return ErrorConsole2;
@@ -20659,7 +20678,7 @@
     headline: {},
     message: {}
   });
-  _defineProperty17(ErrorConsole, "styles", [i(_templateObject2 || (_templateObject2 = _taggedTemplateLiteral(['\n      :host {\n        /* Height and width of the error icon and close button icon */\n        --icon-size: 2rem;\n\n        /* How rounded corners should be. */\n        --rounded: 0.5rem;\n\n        /* How much padding should be around all elements in error "card" */\n        --container-padding: 1.5rem;\n\n        /* How much space should be between the various parts of the card */\n        --content-gaps: 1rem;\n\n        /* How fast should the message pop in and out of the screen? */\n        --animation-speed: 0.5s;\n\n        /* Taken from open-props */\n        --ease-3: cubic-bezier(0.25, 0, 0.3, 1);\n        --animation-slide-in-left: slide-in-left var(--animation-speed)\n          var(--ease-3);\n        --animation-slide-out-left: slide-out-left var(--animation-speed)\n          var(--ease-3);\n        --red-2: #ffc9c9;\n        --red-6: #fa5252;\n        --red-7: #f03e3e;\n        --red-8: #e03131;\n        --red-10: #b02525;\n        --red-11: #962020;\n        --red-12: #7d1a1a;\n\n        color: var(--red-11);\n        display: block;\n        position: fixed;\n        top: 0.5rem;\n        right: 0.5rem;\n        animation: var(--animation-slide-in-left);\n        font-size: 1.4rem;\n      }\n\n      :host(.leaving) {\n        animation: var(--animation-slide-out-left);\n      }\n\n      @keyframes slide-in-left {\n        from {\n          transform: translateX(100%);\n        }\n      }\n      @keyframes slide-out-left {\n        to {\n          transform: translateX(100%);\n        }\n      }\n\n      .container {\n        background-color: var(--red-2);\n\n        display: flex;\n        gap: var(--content-gaps);\n        padding: var(--container-padding);\n        border-radius: var(--rounded);\n      }\n\n      .contents {\n        max-width: 60ch;\n        display: flex;\n        flex-direction: column;\n        gap: var(--content-gaps);\n      }\n\n      .contents > h3 {\n        font-size: 1em;\n        font-weight: 500;\n        color: var(--red-12);\n      }\n\n      .contents > * {\n        margin-block: 0;\n      }\n\n      .error-message {\n        color: var(--red-11);\n        font-family: "Courier New", Courier, monospace;\n      }\n\n      .icon-container,\n      .close-button-container {\n        --pad: 0.375rem;\n        flex-shrink: 0;\n      }\n\n      .close-icon,\n      .error-icon {\n        height: var(--icon-size);\n        width: var(--icon-size);\n      }\n\n      .error-icon {\n        color: var(--red-6);\n      }\n\n      .icon-container {\n        padding-inline: var(--pad);\n      }\n\n      .close-button {\n        display: inline-flex;\n        padding: var(--pad);\n\n        /* Shift up and out a bit to offset the invisible button padding */\n        margin-right: calc(-1 * var(--pad));\n        margin-top: calc(-1 * var(--pad));\n\n        color: var(--red-7);\n        background-color: inherit;\n        outline: none;\n        border: none;\n        border-radius: var(--rounded);\n      }\n\n      .close-button:hover {\n        background-color: var(--red-6);\n        color: var(--red-10);\n      }\n\n      .close-button:focus {\n        outline: 1px solid var(--red-10);\n      }\n\n      .sr-only {\n        position: absolute;\n        width: 1px;\n        height: 1px;\n        padding: 0;\n        margin: -1px;\n        overflow: hidden;\n        clip: rect(0, 0, 0, 0);\n        white-space: nowrap;\n        border-width: 0;\n      }\n    '])))]);
+  _defineProperty17(ErrorConsole, "styles", [i(_templateObject4 || (_templateObject4 = _taggedTemplateLiteral(['\n      :host {\n        /* Height and width of the error icon and close button icon */\n        --icon-size: 2rem;\n\n        /* How rounded corners should be. */\n        --rounded: 0.5rem;\n\n        /* How much padding should be around all elements in error "card" */\n        --container-padding: 1.5rem;\n\n        /* How much space should be between the various parts of the card */\n        --content-gaps: 1rem;\n\n        /* How fast should the message pop in and out of the screen? */\n        --animation-speed: 1s;\n\n        /* Taken from open-props */\n        --ease-3: cubic-bezier(0.25, 0, 0.3, 1);\n        --animation-slide-in-left: slide-in-left var(--animation-speed)\n          var(--ease-3);\n        --animation-slide-out-left: slide-out-left var(--animation-speed)\n          var(--ease-3);\n        --red-2: #ffc9c9;\n        --red-6: #fa5252;\n        --red-7: #f03e3e;\n        --red-8: #e03131;\n        --red-10: #b02525;\n        --red-11: #962020;\n        --red-12: #7d1a1a;\n\n        color: var(--red-11);\n        display: block;\n        animation: var(--animation-slide-in-left);\n        font-size: 1.4rem;\n      }\n\n      :host(.leaving) {\n        animation: var(--animation-slide-out-left);\n      }\n\n      @keyframes slide-in-left {\n        from {\n          transform: translateX(100%);\n        }\n      }\n\n      @keyframes slide-out-left {\n        to {\n          transform: translateX(100%);\n        }\n      }\n\n      .container {\n        background-color: var(--red-2);\n\n        display: flex;\n        gap: var(--content-gaps);\n        padding: var(--container-padding);\n        border-radius: var(--rounded);\n      }\n\n      .contents {\n        width: 40ch;\n        display: flex;\n        flex-direction: column;\n        gap: var(--content-gaps);\n      }\n\n      .contents > h3 {\n        font-size: 1em;\n        font-weight: 500;\n        color: var(--red-12);\n      }\n\n      .contents > * {\n        margin-block: 0;\n      }\n\n      .error-message {\n        color: var(--red-11);\n        font-family: "Courier New", Courier, monospace;\n      }\n\n      .icon-container,\n      .close-button-container {\n        --pad: 0.375rem;\n        flex-shrink: 0;\n      }\n\n      .close-icon,\n      .error-icon {\n        height: var(--icon-size);\n        width: var(--icon-size);\n      }\n\n      .error-icon {\n        color: var(--red-6);\n      }\n\n      .icon-container {\n        padding-inline: var(--pad);\n      }\n\n      .close-button {\n        display: inline-flex;\n        padding: var(--pad);\n\n        /* Shift up and out a bit to offset the invisible button padding */\n        margin-right: calc(-1 * var(--pad));\n        margin-top: calc(-1 * var(--pad));\n\n        color: var(--red-7);\n        background-color: inherit;\n        outline: none;\n        border: none;\n        border-radius: var(--rounded);\n      }\n\n      .close-button:hover {\n        background-color: var(--red-6);\n        color: var(--red-10);\n      }\n\n      .close-button:focus {\n        outline: 1px solid var(--red-10);\n      }\n\n      .sr-only {\n        position: absolute;\n        width: 1px;\n        height: 1px;\n        padding: 0;\n        margin: -1px;\n        overflow: hidden;\n        clip: rect(0, 0, 0, 0);\n        white-space: nowrap;\n        border-width: 0;\n      }\n    '])))]);
   customElements.define("shiny-error-console", ErrorConsole);
   function showErrorInClientConsole(e4) {
     var errorMsg = null;
@@ -20674,19 +20693,24 @@
     } else {
       errorMsg = "Unknown error";
     }
+    var errorConsoleContainer = document.querySelector("shiny-error-console-container");
+    if (!errorConsoleContainer) {
+      errorConsoleContainer = document.createElement("shiny-error-console-container");
+      document.body.appendChild(errorConsoleContainer);
+    }
     var errorConsole = document.createElement("shiny-error-console");
     errorConsole.setAttribute("headline", headline || "");
     errorConsole.setAttribute("message", errorMsg);
-    document.body.appendChild(errorConsole);
+    errorConsoleContainer.appendChild(errorConsole);
   }
   var ShinyClientError = /* @__PURE__ */ function(_Error) {
     _inherits24(ShinyClientError2, _Error);
-    var _super2 = _createSuper24(ShinyClientError2);
+    var _super3 = _createSuper24(ShinyClientError2);
     function ShinyClientError2(_ref) {
       var _this3;
       var headline = _ref.headline, message = _ref.message;
       _classCallCheck39(this, ShinyClientError2);
-      _this3 = _super2.call(this, message);
+      _this3 = _super3.call(this, message);
       _defineProperty17(_assertThisInitialized24(_this3), "headline", void 0);
       _this3.name = "ShinyClientError";
       _this3.headline = headline;

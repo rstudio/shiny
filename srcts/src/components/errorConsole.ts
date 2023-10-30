@@ -1,6 +1,32 @@
 /* eslint-disable indent */
 import { LitElement, html, css } from "lit";
 
+class ErrorConsoleContainer extends LitElement {
+  static styles = [
+    css`
+      :host {
+        --spacing: 0.5rem;
+
+        position: fixed;
+        top: var(--spacing);
+        right: var(--spacing);
+        z-index: 1000;
+
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing);
+      }
+    `,
+  ];
+
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  render() {
+    return html`<slot></slot>`;
+  }
+}
+
+customElements.define("shiny-error-console-container", ErrorConsoleContainer);
+
 export class ErrorConsole extends LitElement {
   static properties = {
     headline: {},
@@ -26,7 +52,7 @@ export class ErrorConsole extends LitElement {
         --content-gaps: 1rem;
 
         /* How fast should the message pop in and out of the screen? */
-        --animation-speed: 0.5s;
+        --animation-speed: 1s;
 
         /* Taken from open-props */
         --ease-3: cubic-bezier(0.25, 0, 0.3, 1);
@@ -44,9 +70,6 @@ export class ErrorConsole extends LitElement {
 
         color: var(--red-11);
         display: block;
-        position: fixed;
-        top: 0.5rem;
-        right: 0.5rem;
         animation: var(--animation-slide-in-left);
         font-size: 1.4rem;
       }
@@ -60,6 +83,7 @@ export class ErrorConsole extends LitElement {
           transform: translateX(100%);
         }
       }
+
       @keyframes slide-out-left {
         to {
           transform: translateX(100%);
@@ -76,7 +100,7 @@ export class ErrorConsole extends LitElement {
       }
 
       .contents {
-        max-width: 60ch;
+        width: 40ch;
         display: flex;
         flex-direction: column;
         gap: var(--content-gaps);
@@ -235,11 +259,23 @@ export function showErrorInClientConsole(e: unknown): void {
     errorMsg = "Unknown error";
   }
 
+  // Check to see if an Error Console Container element already exists. If it
+  // doesn't we need to add it before putting an error on the screen
+  let errorConsoleContainer = document.querySelector(
+    "shiny-error-console-container"
+  );
+  if (!errorConsoleContainer) {
+    errorConsoleContainer = document.createElement(
+      "shiny-error-console-container"
+    );
+    document.body.appendChild(errorConsoleContainer);
+  }
+
   const errorConsole = document.createElement("shiny-error-console");
   errorConsole.setAttribute("headline", headline || "");
   errorConsole.setAttribute("message", errorMsg);
 
-  document.body.appendChild(errorConsole);
+  errorConsoleContainer.appendChild(errorConsole);
 }
 
 /**

@@ -453,7 +453,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'       bindEvent(input$go)
 #'       # The cached, eventified reactive takes a reactive dependency on
 #'       # input$go, but doesn't use it for the cache key. It uses input$x and
-#'       # input$y for the cache key, but doesn't take a reactive depdency on
+#'       # input$y for the cache key, but doesn't take a reactive dependency on
 #'       # them, because the reactive dependency is superseded by addEvent().
 #'
 #'     output$txt <- renderText(r())

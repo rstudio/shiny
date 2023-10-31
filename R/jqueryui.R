@@ -76,16 +76,25 @@ absolutePanel <- function(...,
 
   style <- paste(paste(names(cssProps), cssProps, sep = ':', collapse = ';'), ';', sep='')
   divTag <- tags$div(style=style, ...)
-  if (isTRUE(draggable)) {
-    divTag <- tagAppendAttributes(divTag, class='draggable')
-    return(tagList(
-      divTag,
-      jqueryuiDependency(),
-      tags$script('$(".draggable").draggable();')
-    ))
-  } else {
+
+  if (identical(draggable, FALSE)) {
     return(divTag)
   }
+
+  # CPS (2023-10-31): it'd be nice if draggable could be a list of options for
+  # the draggable() method, but to do that properly (i.e., support JS functions,
+  # per element options, etc) would be non-trivial. For now, we'll just add a
+  # smart cancel option default to prevent dragging on input/output elements.
+  # This is particularly important for widgets (e.g. plotly, leaflet) and
+  # selectize.js https://github.com/rstudio/shiny/issues/3752
+  # https://github.com/rstudio/shiny/issues/3933
+  dragOpts <- "{cancel: '.shiny-input-container, .html-widget'}"
+  dragJS <- sprintf('$(".draggable").draggable(%s);', dragOpts)
+  tagList(
+    tagAppendAttributes(divTag, class='draggable'),
+    jqueryuiDependency(),
+    tags$script(HTML(dragJS))
+  )
 }
 
 #' @rdname absolutePanel

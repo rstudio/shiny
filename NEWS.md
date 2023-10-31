@@ -13,6 +13,8 @@
 
 * Default styles for `showNotification()` were tweaked slightly to improve accessibility, sizing, and padding. (#3913)
 
+* `absolutePanel()`/`fixedPanel()` with `draggable = TRUE` no longer interfere with click events on children that are inputs or `{htmlwidgets}`, meaning that things like zooming and panning now work as expected with widgets like `{plotly}` and `{leaflet}`. (#3752, #3933) 
+
 * For `InputBinding`s, the `.receiveMessage()` method can now be asynchronous or synchronous (previously it could only be synchronous). (#3930)
 
 ## Bug fixes

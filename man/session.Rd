@@ -121,7 +121,7 @@ any \code{imageOutput} or \code{plotOutput} in the app.
 Sends a custom message to the web page. \code{type} must be a
 single-element character vector giving the type of message, while
 \code{message} can be any jsonlite-encodable value. Custom messages
-have no meaning to Shiny itself; they are used soley to convey information
+have no meaning to Shiny itself; they are used solely to convey information
 to custom JavaScript logic in the browser. You can do this by adding
 JavaScript code to the browser that calls
 \code{Shiny.addCustomMessageHandler(type, function(message){...})}

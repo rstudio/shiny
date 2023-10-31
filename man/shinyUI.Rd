@@ -7,7 +7,7 @@
 shinyUI(ui)
 }
 \arguments{
-\item{ui}{A user interace definition}
+\item{ui}{A user interface definition}
 }
 \value{
 The user interface definition, without modifications or side effects.

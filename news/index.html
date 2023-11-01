@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.7.5.9001</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.8.0</span>
       </span>
     </div>
 
@@ -48,15 +48,15 @@
     </div>
 
     <div class="section level2">
-<h2 class="page-header" data-toc-text="development version" id="shiny-development-version">shiny (development version)<a class="anchor" aria-label="anchor" href="#shiny-development-version"></a></h2>
+<h2 class="page-header" data-toc-text="1.8.0" id="shiny-180">shiny 1.8.0<a class="anchor" aria-label="anchor" href="#shiny-180"></a></h2>
 <div class="section level3">
-<h3 id="possibly-breaking-changes-development-version">Possibly breaking changes<a class="anchor" aria-label="anchor" href="#possibly-breaking-changes-development-version"></a></h3>
+<h3 id="possibly-breaking-changes-1-8-0">Possibly breaking changes<a class="anchor" aria-label="anchor" href="#possibly-breaking-changes-1-8-0"></a></h3>
 <ul><li>Closed <a href="https://github.com/rstudio/shiny/issues/3899" class="external-link">#3899</a>: The JS function <code>Shiny.bindAll()</code> is now asynchronous. This change is driven by the recent push toward making dynamic UI rendering asynchronous (and should’ve happened when it was first introduced in Shiny v1.7.5). The vast majority of existing <code>Shiny.bindAll()</code> uses should continue to work as before, but some cases may break if downstream code relies on it being synchronous (i.e., blocking the main thread). In this case, consider placing any downstream code in a <code>.then()</code> callback (or <code>await</code> the result in a <code>async</code> function). (<a href="https://github.com/rstudio/shiny/issues/3929" class="external-link">#3929</a>)
 <ul><li>Since <code>renderContent()</code> calls <code>bindAll()</code> (after it inserts content), it now returns a <code>Promise&lt;void&gt;</code> instead of <code>void</code>, which can be useful if downstream code needs to wait for the binding to complete.</li>
 </ul></li>
 </ul></div>
 <div class="section level3">
-<h3 id="new-features-and-improvements-development-version">New features and improvements<a class="anchor" aria-label="anchor" href="#new-features-and-improvements-development-version"></a></h3>
+<h3 id="new-features-and-improvements-1-8-0">New features and improvements<a class="anchor" aria-label="anchor" href="#new-features-and-improvements-1-8-0"></a></h3>
 <ul><li><p>Updated <code><a href="../reference/selectInput.html">selectizeInput()</a></code>’s selectize.js dependency from v0.12.4 to v0.15.2. In addition to many bug fixes and improvements, this update also adds several new <a href="https://selectize.dev/docs/demos/plugins" class="external-link">plugin options</a>. (<a href="https://github.com/rstudio/shiny/issues/3875" class="external-link">#3875</a>)</p></li>
 <li><p>Shiny’s CSS styling (for things like <code><a href="../reference/showNotification.html">showNotification()</a></code>, <code><a href="../reference/withProgress.html">withProgress()</a></code>, <code><a href="../reference/inputPanel.html">inputPanel()</a></code>, etc.), has been updated with <a href="https://rstudio.github.io/bslib/" class="external-link">bslib</a>’s upcoming CSS-only dark mode feature in mind. (<a href="https://github.com/rstudio/shiny/issues/3882" class="external-link">#3882</a>, <a href="https://github.com/rstudio/shiny/issues/3914" class="external-link">#3914</a>)</p></li>
 <li><p>Default styles for <code><a href="../reference/showNotification.html">showNotification()</a></code> were tweaked slightly to improve accessibility, sizing, and padding. (<a href="https://github.com/rstudio/shiny/issues/3913" class="external-link">#3913</a>)</p></li>
@@ -64,7 +64,7 @@
 <li><p>For <code>InputBinding</code>s, the <code>.receiveMessage()</code> method can now be asynchronous or synchronous (previously it could only be synchronous). (<a href="https://github.com/rstudio/shiny/issues/3930" class="external-link">#3930</a>)</p></li>
 </ul></div>
 <div class="section level3">
-<h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>
+<h3 id="bug-fixes-1-8-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-8-0"></a></h3>
 <ul><li><p><code><a href="../reference/fileInput.html">fileInput()</a></code> no longer has unwanted round corners applied to the <code>buttonLabel</code>. (<a href="https://github.com/rstudio/shiny/issues/3879" class="external-link">#3879</a>)</p></li>
 <li><p>Fixed <a href="https://github.com/rstudio/shiny/issues/3898" class="external-link">#3898</a>: <code>wrapFunctionLabel()</code> no longer throws an error if the <code>name</code> is longer than 10000 bytes. (<a href="https://github.com/rstudio/shiny/issues/3903" class="external-link">#3903</a>)</p></li>
 </ul></div>

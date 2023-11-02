@@ -7,7 +7,6 @@ export declare class ErrorConsole extends LitElement {
     headline: string;
     message: string;
     static styles: import("lit").CSSResult[];
-    handleClose(): void;
     render(): import("lit-html").TemplateResult<1>;
 }
 /**

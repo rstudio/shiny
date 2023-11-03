@@ -23,8 +23,10 @@ class ErrorConsoleContainer extends LitElement {
         --red-11: #962020;
         --red-12: #7d1a1a;
 
+        --gray-1: #f8f9fa;
         --gray-2: #e9ecef;
         --gray-3: #dee2e6;
+        --gray-4: #ced4da;
         --gray-6: #868e96;
         --gray-8: #6c757d;
 
@@ -49,7 +51,8 @@ class ErrorConsoleContainer extends LitElement {
         display: flex;
         flex-direction: column;
 
-        background-color: var(--gray-2);
+        background-color: var(--gray-1);
+        outline: 1px solid var(--gray-4);
         border-radius: var(--space-1);
 
         animation: var(--animation-slide-in-left);
@@ -84,6 +87,7 @@ class ErrorConsoleContainer extends LitElement {
 
       :host(.collapsed) {
         background-color: transparent;
+        outline: none;
       }
 
       .header {
@@ -102,7 +106,7 @@ class ErrorConsoleContainer extends LitElement {
 
         border-radius: var(--space-1);
         font-size: 1.5rem;
-        background-color: var(--gray-2);
+        background-color: inherit;
       }
 
       .header > button:hover {
@@ -113,7 +117,7 @@ class ErrorConsoleContainer extends LitElement {
         width: fit-content;
         border: none;
         aspect-ratio: 1;
-        border-color: var(--gray-6);
+        border-color: var(--gray-4);
       }
 
       .close-button {

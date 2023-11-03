@@ -1,0 +1,19 @@
+# Workflow derived from https://github.com/r-wasm/actions/tree/v1/examples
+# Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
+on:
+  release:
+    # Must republish release to update assets
+    types: [ published ]
+
+name: Build and deploy wasm R package image
+
+jobs:
+  release-file-system-image:
+    uses: r-wasm/actions/.github/workflows/release-file-system-image.yml@v1
+    permissions:
+      # For publishing artifact files to the release
+      contents: write
+      # To download GitHub Packages within action
+      repository-projects: read
+    with:
+      strip: "demo, doc, examples, help, html, include, tests, vignette"

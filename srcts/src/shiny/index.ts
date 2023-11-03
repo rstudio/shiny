@@ -117,6 +117,7 @@ function setShiny(windowShiny_: Shiny): void {
         await initShiny(windowShiny);
       } catch (e) {
         showErrorInClientConsole(e);
+        throw e;
       }
     }, 1);
   });

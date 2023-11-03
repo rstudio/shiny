@@ -20656,7 +20656,7 @@
     }]);
     return ErrorConsoleContainer2;
   }(s3);
-  _defineProperty17(ErrorConsoleContainer, "styles", [i(_templateObject3 || (_templateObject3 = _taggedTemplateLiteral(["\n      :host {\n        /* These are all taken from open-props */\n        --space-1: 0.5rem;\n        --space-2: calc(var(--space-1) * 2);\n        --space-3: calc(var(--space-1) * 3);\n        --space-4: calc(var(--space-1) * 4);\n\n        --red-2: #ffc9c9;\n        --red-6: #fa5252;\n        --red-7: #f03e3e;\n        --red-8: #e03131;\n        --red-10: #b02525;\n        --red-11: #962020;\n        --red-12: #7d1a1a;\n\n        --gray-2: #e9ecef;\n        --gray-3: #dee2e6;\n        --gray-6: #868e96;\n        --gray-8: #6c757d;\n\n        --shadow-color: 220 3% 15%;\n        --shadow-strength: 1%;\n        --shadow-3: 0 -1px 3px 0 hsl(var(--shadow-color) /\n                calc(var(--shadow-strength) + 2%)),\n          0 1px 2px -5px hsl(var(--shadow-color) /\n                calc(var(--shadow-strength) + 2%)),\n          0 2px 5px -5px hsl(var(--shadow-color) /\n                calc(var(--shadow-strength) + 4%)),\n          0 4px 12px -5px hsl(var(--shadow-color) /\n                calc(var(--shadow-strength) + 5%)),\n          0 12px 15px -5px hsl(var(--shadow-color) /\n                calc(var(--shadow-strength) + 7%));\n\n        position: fixed;\n        top: var(--space-1);\n        right: var(--space-1);\n        z-index: 1000;\n\n        display: flex;\n        flex-direction: column;\n\n        background-color: var(--gray-2);\n        border-radius: var(--space-1);\n\n        animation: var(--animation-slide-in-left);\n        /* How fast should the message pop in and out of the screen? */\n        --animation-speed: 1s;\n\n        /* Taken from open-props */\n        --ease-3: cubic-bezier(0.25, 0, 0.3, 1);\n        --animation-slide-in-left: slide-in-left var(--animation-speed)\n          var(--ease-3);\n\n        --animation-slide-out-left: slide-out-left var(--animation-speed)\n          var(--ease-3);\n\n        box-shadow: var(--shadow-3);\n      }\n\n      @keyframes slide-in-left {\n        from {\n          transform: translateX(100%);\n        }\n      }\n      @keyframes slide-out-left {\n        to {\n          transform: translateX(100%);\n        }\n      }\n\n      :host(.leaving) {\n        animation: var(--animation-slide-out-left);\n      }\n\n      :host(.collapsed) {\n        background-color: transparent;\n      }\n\n      .header {\n        display: flex;\n        justify-content: flex-end;\n        gap: var(--space-2);\n        padding-top: var(--space-1);\n        padding-right: var(--space-1);\n      }\n\n      .header > button {\n        background-color: transparent;\n        outline: none;\n        border-width: 1px;\n        border-style: solid;\n\n        border-radius: var(--space-1);\n        font-size: 1.5rem;\n        background-color: var(--gray-2);\n      }\n\n      .header > button:hover {\n        background-color: var(--gray-3);\n      }\n\n      .toggle-button {\n        width: fit-content;\n        border: none;\n        aspect-ratio: 1;\n        border-color: var(--gray-6);\n      }\n\n      .close-button {\n        display: flex;\n        align-items: center;\n        color: var(--red-11);\n        border-color: var(--red-11);\n      }\n\n      .close-button > svg {\n        margin-right: 3px;\n      }\n\n      .toggle-button:focus {\n        outline: 1px solid black;\n      }\n\n      .toggle-icon {\n        transition: transform 0.2s ease-in-out;\n      }\n\n      :host(.collapsed) .toggle-icon {\n        transform: scaleX(-1) scaleY(-1);\n      }\n\n      :host(.collapsed) .close-button {\n        display: none;\n      }\n\n      .content {\n        display: block;\n        padding: var(--space-4);\n        padding-top: var(--space-2);\n      }\n\n      :host(.collapsed) .content {\n        display: none;\n      }\n    "])))]);
+  _defineProperty17(ErrorConsoleContainer, "styles", [i(_templateObject3 || (_templateObject3 = _taggedTemplateLiteral(["\n      :host {\n        /* These are all taken from open-props */\n        --space-1: 0.5rem;\n        --space-2: calc(var(--space-1) * 2);\n        --space-3: calc(var(--space-1) * 3);\n        --space-4: calc(var(--space-1) * 4);\n\n        --red-2: #ffc9c9;\n        --red-6: #fa5252;\n        --red-7: #f03e3e;\n        --red-8: #e03131;\n        --red-10: #b02525;\n        --red-11: #962020;\n        --red-12: #7d1a1a;\n\n        --gray-1: #f8f9fa;\n        --gray-2: #e9ecef;\n        --gray-3: #dee2e6;\n        --gray-4: #ced4da;\n        --gray-6: #868e96;\n        --gray-8: #6c757d;\n\n        --shadow-color: 220 3% 15%;\n        --shadow-strength: 1%;\n        --shadow-3: 0 -1px 3px 0 hsl(var(--shadow-color) /\n                calc(var(--shadow-strength) + 2%)),\n          0 1px 2px -5px hsl(var(--shadow-color) /\n                calc(var(--shadow-strength) + 2%)),\n          0 2px 5px -5px hsl(var(--shadow-color) /\n                calc(var(--shadow-strength) + 4%)),\n          0 4px 12px -5px hsl(var(--shadow-color) /\n                calc(var(--shadow-strength) + 5%)),\n          0 12px 15px -5px hsl(var(--shadow-color) /\n                calc(var(--shadow-strength) + 7%));\n\n        position: fixed;\n        top: var(--space-1);\n        right: var(--space-1);\n        z-index: 1000;\n\n        display: flex;\n        flex-direction: column;\n\n        background-color: var(--gray-1);\n        outline: 1px solid var(--gray-4);\n        border-radius: var(--space-1);\n\n        animation: var(--animation-slide-in-left);\n        /* How fast should the message pop in and out of the screen? */\n        --animation-speed: 1s;\n\n        /* Taken from open-props */\n        --ease-3: cubic-bezier(0.25, 0, 0.3, 1);\n        --animation-slide-in-left: slide-in-left var(--animation-speed)\n          var(--ease-3);\n\n        --animation-slide-out-left: slide-out-left var(--animation-speed)\n          var(--ease-3);\n\n        box-shadow: var(--shadow-3);\n      }\n\n      @keyframes slide-in-left {\n        from {\n          transform: translateX(100%);\n        }\n      }\n      @keyframes slide-out-left {\n        to {\n          transform: translateX(100%);\n        }\n      }\n\n      :host(.leaving) {\n        animation: var(--animation-slide-out-left);\n      }\n\n      :host(.collapsed) {\n        background-color: transparent;\n        outline: none;\n      }\n\n      .header {\n        display: flex;\n        justify-content: flex-end;\n        gap: var(--space-2);\n        padding-top: var(--space-1);\n        padding-right: var(--space-1);\n      }\n\n      .header > button {\n        background-color: transparent;\n        outline: none;\n        border-width: 1px;\n        border-style: solid;\n\n        border-radius: var(--space-1);\n        font-size: 1.5rem;\n        background-color: inherit;\n      }\n\n      .header > button:hover {\n        background-color: var(--gray-3);\n      }\n\n      .toggle-button {\n        width: fit-content;\n        border: none;\n        aspect-ratio: 1;\n        border-color: var(--gray-4);\n      }\n\n      .close-button {\n        display: flex;\n        align-items: center;\n        color: var(--red-11);\n        border-color: var(--red-11);\n      }\n\n      .close-button > svg {\n        margin-right: 3px;\n      }\n\n      .toggle-button:focus {\n        outline: 1px solid black;\n      }\n\n      .toggle-icon {\n        transition: transform 0.2s ease-in-out;\n      }\n\n      :host(.collapsed) .toggle-icon {\n        transform: scaleX(-1) scaleY(-1);\n      }\n\n      :host(.collapsed) .close-button {\n        display: none;\n      }\n\n      .content {\n        display: block;\n        padding: var(--space-4);\n        padding-top: var(--space-2);\n      }\n\n      :host(.collapsed) .content {\n        display: none;\n      }\n    "])))]);
   customElements.define("shiny-error-console-container", ErrorConsoleContainer);
   var ErrorConsole = /* @__PURE__ */ function(_LitElement2) {
     _inherits24(ErrorConsole2, _LitElement2);
@@ -21310,27 +21310,20 @@
         while (1)
           switch (_context3.prev = _context3.next) {
             case 0:
-              _context3.prev = 0;
-              _context3.next = 3;
+              _context3.next = 2;
               return _bindAll(shinyCtx, scope);
-            case 3:
+            case 2:
               currentInputItems = _context3.sent;
               inputs = shinyCtx.inputs;
               import_jquery37.default.each(currentInputItems, function(name, item) {
                 inputs.setInput(name, item.value, item.opts);
               });
               shinyCtx.initDeferredIframes();
-              _context3.next = 12;
-              break;
-            case 9:
-              _context3.prev = 9;
-              _context3.t0 = _context3["catch"](0);
-              showErrorInClientConsole(_context3.t0);
-            case 12:
+            case 6:
             case "end":
               return _context3.stop();
           }
-      }, _callee3, null, [[0, 9]]);
+      }, _callee3);
     }));
     return _bindAll3.apply(this, arguments);
   }
@@ -22517,31 +22510,32 @@
               switch (_context3.prev = _context3.next) {
                 case 0:
                   if (false) {
-                    _context3.next = 14;
+                    _context3.next = 15;
                     break;
                   }
-                  _context3.next = 3;
+                  _context3.prev = 1;
+                  _context3.next = 4;
                   return this.taskQueue.dequeue();
-                case 3:
+                case 4:
                   action = _context3.sent;
-                  _context3.prev = 4;
                   _context3.next = 7;
                   return action();
                 case 7:
-                  _context3.next = 12;
+                  _context3.next = 13;
                   break;
                 case 9:
                   _context3.prev = 9;
-                  _context3.t0 = _context3["catch"](4);
+                  _context3.t0 = _context3["catch"](1);
+                  showErrorInClientConsole(_context3.t0);
                   console.error(_context3.t0);
-                case 12:
+                case 13:
                   _context3.next = 0;
                   break;
-                case 14:
+                case 15:
                 case "end":
                   return _context3.stop();
               }
-          }, _callee3, this, [[4, 9]]);
+          }, _callee3, this, [[1, 9]]);
         }));
         function startActionQueueLoop() {
           return _startActionQueueLoop.apply(this, arguments);
@@ -24528,13 +24522,14 @@
                 _context.next = 3;
                 return initShiny(windowShiny2);
               case 3:
-                _context.next = 8;
+                _context.next = 9;
                 break;
               case 5:
                 _context.prev = 5;
                 _context.t0 = _context["catch"](0);
                 showErrorInClientConsole(_context.t0);
-              case 8:
+                throw _context.t0;
+              case 9:
               case "end":
                 return _context.stop();
             }

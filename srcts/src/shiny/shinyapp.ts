@@ -26,6 +26,7 @@ import { indirectEval } from "../utils/eval";
 import type { WherePosition } from "./singletons";
 import type { UploadInitValue, UploadEndValue } from "../file/fileProcessor";
 import { AsyncQueue } from "../utils/asyncQueue";
+import { showErrorInClientConsole } from "../components/errorConsole";
 
 type ResponseValue = UploadEndValue | UploadInitValue;
 type Handler = (message: any) => Promise<void> | void;
@@ -270,11 +271,12 @@ class ShinyApp {
   async startActionQueueLoop(): Promise<void> {
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      const action = await this.taskQueue.dequeue();
-
       try {
+        const action = await this.taskQueue.dequeue();
+
         await action();
       } catch (e) {
+        showErrorInClientConsole(e);
         console.error(e);
       }
     }

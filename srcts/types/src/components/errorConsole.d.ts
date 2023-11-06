@@ -7,6 +7,7 @@ export declare class ErrorConsole extends LitElement {
     headline: string;
     message: string;
     static styles: import("lit").CSSResult[];
+    copyErrorToClipboard(): Promise<void>;
     render(): import("lit-html").TemplateResult<1>;
 }
 /**

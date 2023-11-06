@@ -62,6 +62,15 @@ const bindingIds = {
   inputs: new Set<string>(),
 };
 
+/**
+ * Check if a binding id already exists in the bindingIds set across both inputs and outputs
+ * @param id Id to check
+ * @returns boolean indicating if that binding Id has already been added to app
+ */
+function bindingIdExists(id: string): boolean {
+  return bindingIds.outputs.has(id) || bindingIds.inputs.has(id);
+}
+
 type BindInputsCtx = {
   inputs: InputValidateDecorator;
   inputsRate: InputRateDecorator;
@@ -107,7 +116,7 @@ function bindInputs(
       const id = binding.getId(el);
 
       // Check for duplicates in bindingIds array and keep track of them
-      const duplicateId = id && bindingIds.inputs.has(id);
+      const duplicateId = bindingIdExists(id);
       if (duplicateId) {
         inputDuplicateIds.add(id);
       }
@@ -209,7 +218,7 @@ async function bindOutputs(
       if (!id) continue;
 
       // Check for duplicates in bindingIds array and keep track of them
-      if (id && bindingIds.outputs.has(id)) {
+      if (bindingIdExists(id)) {
         outputDuplicateIds.add(id);
       }
 

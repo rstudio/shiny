@@ -21381,6 +21381,9 @@
     outputs: /* @__PURE__ */ new Set(),
     inputs: /* @__PURE__ */ new Set()
   };
+  function bindingIdExists(id) {
+    return bindingIds.outputs.has(id) || bindingIds.inputs.has(id);
+  }
   function bindInputs(shinyCtx) {
     var scope = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : document.documentElement;
     var inputs = shinyCtx.inputs, inputsRate = shinyCtx.inputsRate, inputBindings = shinyCtx.inputBindings;
@@ -21395,7 +21398,7 @@
         if (el.hasAttribute("data-shiny-no-bind-input"))
           return "continue";
         var id = binding.getId(el);
-        var duplicateId = id && bindingIds.inputs.has(id);
+        var duplicateId = bindingIdExists(id);
         if (duplicateId) {
           inputDuplicateIds.add(id);
         }
@@ -21492,7 +21495,7 @@
               }
               return _context.abrupt("continue", 30);
             case 15:
-              if (id && bindingIds.outputs.has(id)) {
+              if (bindingIdExists(id)) {
                 outputDuplicateIds.add(id);
               }
               bindingIds.outputs.add(id);

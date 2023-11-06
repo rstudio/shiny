@@ -1,19 +1,26 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
-// Disable bable for this file because it's not needed and it causes
-// problems with the way we're importing lit-element
-
 import { LitElement, html, css } from "lit";
 
 const buttonStyles = css`
-  background-color: transparent;
-  outline: none;
-  border-width: 1px;
-  border-style: solid;
+  button {
+    background-color: transparent;
+    outline: none;
+    border-style: none;
+    padding: var(--space-2);
+    border-radius: var(--space-1);
+    font-size: 1.5rem;
+    background-color: inherit;
+    display: block;
+  }
 
-  border-radius: var(--space-1);
-  font-size: 1.5rem;
-  background-color: inherit;
+  button:hover {
+    background-color: var(--gray-2);
+  }
+
+  button > svg {
+    display: block;
+  }
 `;
 class ErrorConsoleContainer extends LitElement {
   static styles = [
@@ -53,17 +60,7 @@ class ErrorConsoleContainer extends LitElement {
           0 12px 15px -5px hsl(var(--shadow-color) /
                 calc(var(--shadow-strength) + 7%));
 
-        position: fixed;
-        top: var(--space-1);
-        right: var(--space-1);
-        z-index: 1000;
-
-        display: flex;
-        flex-direction: column;
-
-        background-color: var(--gray-1);
-        outline: 1px solid var(--gray-4);
-        border-radius: var(--space-1);
+        --ring-shadow: 0 0 0 1px var(--gray-2);
 
         /* How fast should the message pop in and out of the screen? */
         --animation-speed: 1s;
@@ -75,9 +72,21 @@ class ErrorConsoleContainer extends LitElement {
 
         --animation-slide-out-left: slide-out-left var(--animation-speed)
           var(--ease-3);
+        --modal-bg-color: white;
+
+        position: fixed;
+        top: var(--space-1);
+        right: var(--space-1);
+        z-index: 1000;
+
+        display: flex;
+        flex-direction: column;
+
+        background-color: var(--modal-bg-color);
+        border-radius: var(--space-1);
 
         animation: var(--animation-slide-in-left);
-        box-shadow: var(--shadow-3);
+        box-shadow: var(--shadow-3), var(--ring-shadow);
       }
 
       @keyframes slide-in-left {
@@ -95,26 +104,14 @@ class ErrorConsoleContainer extends LitElement {
         animation: var(--animation-slide-out-left);
       }
 
-      :host(.collapsed) {
-        background-color: transparent;
-        outline: none;
-      }
-
       .header {
         display: flex;
         justify-content: flex-end;
+        align-items: flex-start;
         gap: var(--space-2);
-        padding-top: var(--space-1);
-        padding-right: var(--space-1);
       }
 
-      .header > button {
-        ${buttonStyles}
-      }
-
-      .header > button:hover {
-        background-color: var(--gray-3);
-      }
+      ${buttonStyles}
 
       .toggle-button {
         width: fit-content;
@@ -127,7 +124,6 @@ class ErrorConsoleContainer extends LitElement {
         display: flex;
         align-items: center;
         color: var(--red-11);
-        border-color: var(--red-11);
       }
 
       .close-button > svg {
@@ -179,7 +175,11 @@ class ErrorConsoleContainer extends LitElement {
 
   render() {
     return html` <div class="header">
-        <button class="close-button" @click=${this.handleDismissAll}>
+        <button
+          class="close-button"
+          @click=${this.handleDismissAll}
+          title="Dismiss all console messages and close console"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -327,8 +327,9 @@ export class ErrorConsole extends LitElement {
         transform: scaleX(1);
       }
 
+      ${buttonStyles}
+
       .actions > button {
-        ${buttonStyles}
         aspect-ratio: 1;
       }
 
@@ -336,7 +337,6 @@ export class ErrorConsole extends LitElement {
         animation: slide-in-and-out-left 2s ease-in-out;
         position: absolute;
         height: 100%;
-        /* width: 100%; */
         display: grid;
         place-content: center;
 

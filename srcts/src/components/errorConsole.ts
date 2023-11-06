@@ -5,6 +5,16 @@
 
 import { LitElement, html, css } from "lit";
 
+const buttonStyles = css`
+  background-color: transparent;
+  outline: none;
+  border-width: 1px;
+  border-style: solid;
+
+  border-radius: var(--space-1);
+  font-size: 1.5rem;
+  background-color: inherit;
+`;
 class ErrorConsoleContainer extends LitElement {
   static styles = [
     css`
@@ -55,7 +65,6 @@ class ErrorConsoleContainer extends LitElement {
         outline: 1px solid var(--gray-4);
         border-radius: var(--space-1);
 
-        animation: var(--animation-slide-in-left);
         /* How fast should the message pop in and out of the screen? */
         --animation-speed: 1s;
 
@@ -67,6 +76,7 @@ class ErrorConsoleContainer extends LitElement {
         --animation-slide-out-left: slide-out-left var(--animation-speed)
           var(--ease-3);
 
+        animation: var(--animation-slide-in-left);
         box-shadow: var(--shadow-3);
       }
 
@@ -99,14 +109,7 @@ class ErrorConsoleContainer extends LitElement {
       }
 
       .header > button {
-        background-color: transparent;
-        outline: none;
-        border-width: 1px;
-        border-style: solid;
-
-        border-radius: var(--space-1);
-        font-size: 1.5rem;
-        background-color: inherit;
+        ${buttonStyles}
       }
 
       .header > button:hover {
@@ -136,7 +139,7 @@ class ErrorConsoleContainer extends LitElement {
       }
 
       .toggle-icon {
-        transition: transform 0.2s ease-in-out;
+        transition: transform var(--anim-speed) ease-in-out;
       }
 
       :host(.collapsed) .toggle-icon {
@@ -236,6 +239,10 @@ export class ErrorConsole extends LitElement {
         color: var(--red-11);
         display: block;
         font-size: 1.4rem;
+
+        position: relative;
+        --anim-speed: 0.2s;
+        --icon-size: 1.5rem;
       }
 
       .container {
@@ -271,30 +278,129 @@ export class ErrorConsole extends LitElement {
         flex-shrink: 0;
         padding-inline: var(0.375rem);
         position: relative;
+
+        --line-w: 2px;
+        --dot-size: 1rem;
+      }
+
+      :host(:hover) .decoration-container {
+        --scale: 1.25;
       }
 
       .vertical-line {
         margin-inline: auto;
-        width: 2px;
+        width: var(--line-w);
         height: 100%;
 
         background-color: var(--red-10);
+
+        transform: scaleX(var(--scale, 1));
+
+        transition: transform var(--anim-speed) ease-in-out;
       }
 
       .dot {
-        --dot-size: 1rem;
         position: absolute;
         width: var(--dot-size);
         height: var(--dot-size);
         top: calc(50% - var(--dot-size) / 2);
         left: calc(50% - var(--dot-size) / 2);
         border-radius: 100%;
+        transform: scale(var(--scale, 1));
 
         color: var(--red-6);
         background-color: var(--red-10);
       }
+
+      .actions {
+        transform: scaleX(0);
+        transition: transform var(--anim-speed) ease-in-out;
+      }
+
+      /* Delay transition on mouseout so the buttons don't jump away if the user
+      overshoots them with their mouse */
+      :host(:not(:hover)) .actions {
+        transition-delay: 0.5s;
+      }
+
+      :host(:hover) .actions {
+        transform: scaleX(1);
+      }
+
+      .actions > button {
+        ${buttonStyles}
+        aspect-ratio: 1;
+      }
+
+      .copy-success-msg {
+        animation: slide-in-and-out-left 2s ease-in-out;
+        position: absolute;
+        height: 100%;
+        /* width: 100%; */
+        display: grid;
+        place-content: center;
+
+        right: 0;
+        top: 0;
+      }
+      .copy-success-msg > div {
+        /* Blur content behind div */
+        backdrop-filter: blur(3px);
+        padding: var(--space-1);
+      }
+
+      @keyframes slide-in-and-out-left {
+        0% {
+          opacity: 0;
+          filter: brightness(1) blur(20px);
+        }
+        5% {
+          opacity: 1;
+          filter: brightness(2) blur(10px);
+        }
+        40% {
+          opacity: 1;
+          filter: brightness(1) blur(0);
+        }
+        60% {
+          opacity: 1;
+          filter: brightness(1) blur(0);
+        }
+        95% {
+          opacity: 1;
+          filter: brightness(2) blur(10px);
+        }
+        100% {
+          opacity: 0;
+          filter: brightness(1) blur(20px);
+        }
+
+        /* 0% {
+          transform: translateX(100%);
+        }
+        50% {
+          transform: translateX(0);
+        }
+        100% {
+          transform: translateX(100%);
+        } */
+      }
     `,
   ];
+
+  async copyErrorToClipboard(): Promise<void> {
+    await navigator.clipboard.writeText(this.message);
+
+    const copySuccessMsg = document.createElement("div");
+    copySuccessMsg.classList.add("copy-success-msg");
+    copySuccessMsg.innerHTML = "<div>Copied error!</div>";
+    this.shadowRoot?.appendChild(copySuccessMsg);
+
+    // Remove after animation finishes
+    copySuccessMsg.addEventListener("animationend", () => {
+      copySuccessMsg.remove();
+    });
+  }
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   render() {
@@ -307,6 +413,29 @@ export class ErrorConsole extends LitElement {
         <div class="contents">
           <h3>${this.headline}</h3>
           <p class="error-message">${this.message}</p>
+        </div>
+
+        <div class="actions">
+          <button
+            @click=${this.copyErrorToClipboard}
+            title="Copy error to clipboard"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              height="1em"
+              width="1em"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184"
+              />
+            </svg>
+          </button>
         </div>
       </div>
     `;

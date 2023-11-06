@@ -9491,7 +9491,7 @@
   }
   function _regeneratorRuntime() {
     "use strict";
-    _regeneratorRuntime = function _regeneratorRuntime15() {
+    _regeneratorRuntime = function _regeneratorRuntime16() {
       return exports;
     };
     var exports = {}, Op = Object.prototype, hasOwn5 = Op.hasOwnProperty, defineProperty3 = Object.defineProperty || function(obj, key, desc) {
@@ -11358,7 +11358,7 @@
   }
   function _regeneratorRuntime2() {
     "use strict";
-    _regeneratorRuntime2 = function _regeneratorRuntime15() {
+    _regeneratorRuntime2 = function _regeneratorRuntime16() {
       return exports;
     };
     var exports = {}, Op = Object.prototype, hasOwn5 = Op.hasOwnProperty, defineProperty3 = Object.defineProperty || function(obj, key, desc) {
@@ -12895,7 +12895,7 @@
   // srcts/src/shiny/render.ts
   function _regeneratorRuntime3() {
     "use strict";
-    _regeneratorRuntime3 = function _regeneratorRuntime15() {
+    _regeneratorRuntime3 = function _regeneratorRuntime16() {
       return exports;
     };
     var exports = {}, Op = Object.prototype, hasOwn5 = Op.hasOwnProperty, defineProperty3 = Object.defineProperty || function(obj, key, desc) {
@@ -13797,7 +13797,7 @@
   }
   function _regeneratorRuntime4() {
     "use strict";
-    _regeneratorRuntime4 = function _regeneratorRuntime15() {
+    _regeneratorRuntime4 = function _regeneratorRuntime16() {
       return exports;
     };
     var exports = {}, Op = Object.prototype, hasOwn5 = Op.hasOwnProperty, defineProperty3 = Object.defineProperty || function(obj, key, desc) {
@@ -15803,7 +15803,7 @@
   }
   function _regeneratorRuntime5() {
     "use strict";
-    _regeneratorRuntime5 = function _regeneratorRuntime15() {
+    _regeneratorRuntime5 = function _regeneratorRuntime16() {
       return exports;
     };
     var exports = {}, Op = Object.prototype, hasOwn5 = Op.hasOwnProperty, defineProperty3 = Object.defineProperty || function(obj, key, desc) {
@@ -16229,7 +16229,7 @@
   }
   function _regeneratorRuntime6() {
     "use strict";
-    _regeneratorRuntime6 = function _regeneratorRuntime15() {
+    _regeneratorRuntime6 = function _regeneratorRuntime16() {
       return exports;
     };
     var exports = {}, Op = Object.prototype, hasOwn5 = Op.hasOwnProperty, defineProperty3 = Object.defineProperty || function(obj, key, desc) {
@@ -16594,7 +16594,7 @@
   }
   function _regeneratorRuntime7() {
     "use strict";
-    _regeneratorRuntime7 = function _regeneratorRuntime15() {
+    _regeneratorRuntime7 = function _regeneratorRuntime16() {
       return exports;
     };
     var exports = {}, Op = Object.prototype, hasOwn5 = Op.hasOwnProperty, defineProperty3 = Object.defineProperty || function(obj, key, desc) {
@@ -17591,7 +17591,7 @@
   }
   function _regeneratorRuntime8() {
     "use strict";
-    _regeneratorRuntime8 = function _regeneratorRuntime15() {
+    _regeneratorRuntime8 = function _regeneratorRuntime16() {
       return exports;
     };
     var exports = {}, Op = Object.prototype, hasOwn5 = Op.hasOwnProperty, defineProperty3 = Object.defineProperty || function(obj, key, desc) {
@@ -18348,7 +18348,7 @@
   }
   function _regeneratorRuntime9() {
     "use strict";
-    _regeneratorRuntime9 = function _regeneratorRuntime15() {
+    _regeneratorRuntime9 = function _regeneratorRuntime16() {
       return exports;
     };
     var exports = {}, Op = Object.prototype, hasOwn5 = Op.hasOwnProperty, defineProperty3 = Object.defineProperty || function(obj, key, desc) {
@@ -20455,10 +20455,6 @@
   ((_globalThis$litElemen2 = globalThis.litElementVersions) !== null && _globalThis$litElemen2 !== void 0 ? _globalThis$litElemen2 : globalThis.litElementVersions = []).push("4.0.0");
 
   // srcts/src/components/errorConsole.ts
-  var _templateObject;
-  var _templateObject2;
-  var _templateObject3;
-  var _templateObject4;
   function _typeof45(obj) {
     "@babel/helpers - typeof";
     return _typeof45 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
@@ -20467,6 +20463,11 @@
       return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
     }, _typeof45(obj);
   }
+  var _templateObject;
+  var _templateObject2;
+  var _templateObject3;
+  var _templateObject4;
+  var _templateObject5;
   function _wrapNativeSuper2(Class) {
     var _cache = typeof Map === "function" ? /* @__PURE__ */ new Map() : void 0;
     _wrapNativeSuper2 = function _wrapNativeSuper3(Class2) {
@@ -20507,11 +20508,302 @@
   function _isNativeFunction2(fn) {
     return Function.toString.call(fn).indexOf("[native code]") !== -1;
   }
-  function _taggedTemplateLiteral(strings, raw) {
-    if (!raw) {
-      raw = strings.slice(0);
+  function _regeneratorRuntime10() {
+    "use strict";
+    _regeneratorRuntime10 = function _regeneratorRuntime16() {
+      return exports;
+    };
+    var exports = {}, Op = Object.prototype, hasOwn5 = Op.hasOwnProperty, defineProperty3 = Object.defineProperty || function(obj, key, desc) {
+      obj[key] = desc.value;
+    }, $Symbol = "function" == typeof Symbol ? Symbol : {}, iteratorSymbol = $Symbol.iterator || "@@iterator", asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator", toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
+    function define(obj, key, value) {
+      return Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }), obj[key];
     }
-    return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } }));
+    try {
+      define({}, "");
+    } catch (err) {
+      define = function define2(obj, key, value) {
+        return obj[key] = value;
+      };
+    }
+    function wrap(innerFn, outerFn, self2, tryLocsList) {
+      var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator, generator = Object.create(protoGenerator.prototype), context = new Context(tryLocsList || []);
+      return defineProperty3(generator, "_invoke", { value: makeInvokeMethod(innerFn, self2, context) }), generator;
+    }
+    function tryCatch(fn, obj, arg) {
+      try {
+        return { type: "normal", arg: fn.call(obj, arg) };
+      } catch (err) {
+        return { type: "throw", arg: err };
+      }
+    }
+    exports.wrap = wrap;
+    var ContinueSentinel = {};
+    function Generator() {
+    }
+    function GeneratorFunction() {
+    }
+    function GeneratorFunctionPrototype() {
+    }
+    var IteratorPrototype = {};
+    define(IteratorPrototype, iteratorSymbol, function() {
+      return this;
+    });
+    var getProto = Object.getPrototypeOf, NativeIteratorPrototype = getProto && getProto(getProto(values2([])));
+    NativeIteratorPrototype && NativeIteratorPrototype !== Op && hasOwn5.call(NativeIteratorPrototype, iteratorSymbol) && (IteratorPrototype = NativeIteratorPrototype);
+    var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(IteratorPrototype);
+    function defineIteratorMethods(prototype) {
+      ["next", "throw", "return"].forEach(function(method) {
+        define(prototype, method, function(arg) {
+          return this._invoke(method, arg);
+        });
+      });
+    }
+    function AsyncIterator(generator, PromiseImpl) {
+      function invoke(method, arg, resolve, reject) {
+        var record = tryCatch(generator[method], generator, arg);
+        if ("throw" !== record.type) {
+          var result = record.arg, value = result.value;
+          return value && "object" == _typeof45(value) && hasOwn5.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function(value2) {
+            invoke("next", value2, resolve, reject);
+          }, function(err) {
+            invoke("throw", err, resolve, reject);
+          }) : PromiseImpl.resolve(value).then(function(unwrapped) {
+            result.value = unwrapped, resolve(result);
+          }, function(error) {
+            return invoke("throw", error, resolve, reject);
+          });
+        }
+        reject(record.arg);
+      }
+      var previousPromise;
+      defineProperty3(this, "_invoke", { value: function value(method, arg) {
+        function callInvokeWithMethodAndArg() {
+          return new PromiseImpl(function(resolve, reject) {
+            invoke(method, arg, resolve, reject);
+          });
+        }
+        return previousPromise = previousPromise ? previousPromise.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg();
+      } });
+    }
+    function makeInvokeMethod(innerFn, self2, context) {
+      var state = "suspendedStart";
+      return function(method, arg) {
+        if ("executing" === state)
+          throw new Error("Generator is already running");
+        if ("completed" === state) {
+          if ("throw" === method)
+            throw arg;
+          return doneResult();
+        }
+        for (context.method = method, context.arg = arg; ; ) {
+          var delegate = context.delegate;
+          if (delegate) {
+            var delegateResult = maybeInvokeDelegate(delegate, context);
+            if (delegateResult) {
+              if (delegateResult === ContinueSentinel)
+                continue;
+              return delegateResult;
+            }
+          }
+          if ("next" === context.method)
+            context.sent = context._sent = context.arg;
+          else if ("throw" === context.method) {
+            if ("suspendedStart" === state)
+              throw state = "completed", context.arg;
+            context.dispatchException(context.arg);
+          } else
+            "return" === context.method && context.abrupt("return", context.arg);
+          state = "executing";
+          var record = tryCatch(innerFn, self2, context);
+          if ("normal" === record.type) {
+            if (state = context.done ? "completed" : "suspendedYield", record.arg === ContinueSentinel)
+              continue;
+            return { value: record.arg, done: context.done };
+          }
+          "throw" === record.type && (state = "completed", context.method = "throw", context.arg = record.arg);
+        }
+      };
+    }
+    function maybeInvokeDelegate(delegate, context) {
+      var methodName = context.method, method = delegate.iterator[methodName];
+      if (void 0 === method)
+        return context.delegate = null, "throw" === methodName && delegate.iterator.return && (context.method = "return", context.arg = void 0, maybeInvokeDelegate(delegate, context), "throw" === context.method) || "return" !== methodName && (context.method = "throw", context.arg = new TypeError("The iterator does not provide a '" + methodName + "' method")), ContinueSentinel;
+      var record = tryCatch(method, delegate.iterator, context.arg);
+      if ("throw" === record.type)
+        return context.method = "throw", context.arg = record.arg, context.delegate = null, ContinueSentinel;
+      var info = record.arg;
+      return info ? info.done ? (context[delegate.resultName] = info.value, context.next = delegate.nextLoc, "return" !== context.method && (context.method = "next", context.arg = void 0), context.delegate = null, ContinueSentinel) : info : (context.method = "throw", context.arg = new TypeError("iterator result is not an object"), context.delegate = null, ContinueSentinel);
+    }
+    function pushTryEntry(locs) {
+      var entry = { tryLoc: locs[0] };
+      1 in locs && (entry.catchLoc = locs[1]), 2 in locs && (entry.finallyLoc = locs[2], entry.afterLoc = locs[3]), this.tryEntries.push(entry);
+    }
+    function resetTryEntry(entry) {
+      var record = entry.completion || {};
+      record.type = "normal", delete record.arg, entry.completion = record;
+    }
+    function Context(tryLocsList) {
+      this.tryEntries = [{ tryLoc: "root" }], tryLocsList.forEach(pushTryEntry, this), this.reset(true);
+    }
+    function values2(iterable) {
+      if (iterable) {
+        var iteratorMethod = iterable[iteratorSymbol];
+        if (iteratorMethod)
+          return iteratorMethod.call(iterable);
+        if ("function" == typeof iterable.next)
+          return iterable;
+        if (!isNaN(iterable.length)) {
+          var i5 = -1, next2 = function next3() {
+            for (; ++i5 < iterable.length; )
+              if (hasOwn5.call(iterable, i5))
+                return next3.value = iterable[i5], next3.done = false, next3;
+            return next3.value = void 0, next3.done = true, next3;
+          };
+          return next2.next = next2;
+        }
+      }
+      return { next: doneResult };
+    }
+    function doneResult() {
+      return { value: void 0, done: true };
+    }
+    return GeneratorFunction.prototype = GeneratorFunctionPrototype, defineProperty3(Gp, "constructor", { value: GeneratorFunctionPrototype, configurable: true }), defineProperty3(GeneratorFunctionPrototype, "constructor", { value: GeneratorFunction, configurable: true }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, toStringTagSymbol, "GeneratorFunction"), exports.isGeneratorFunction = function(genFun) {
+      var ctor = "function" == typeof genFun && genFun.constructor;
+      return !!ctor && (ctor === GeneratorFunction || "GeneratorFunction" === (ctor.displayName || ctor.name));
+    }, exports.mark = function(genFun) {
+      return Object.setPrototypeOf ? Object.setPrototypeOf(genFun, GeneratorFunctionPrototype) : (genFun.__proto__ = GeneratorFunctionPrototype, define(genFun, toStringTagSymbol, "GeneratorFunction")), genFun.prototype = Object.create(Gp), genFun;
+    }, exports.awrap = function(arg) {
+      return { __await: arg };
+    }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, asyncIteratorSymbol, function() {
+      return this;
+    }), exports.AsyncIterator = AsyncIterator, exports.async = function(innerFn, outerFn, self2, tryLocsList, PromiseImpl) {
+      void 0 === PromiseImpl && (PromiseImpl = Promise);
+      var iter = new AsyncIterator(wrap(innerFn, outerFn, self2, tryLocsList), PromiseImpl);
+      return exports.isGeneratorFunction(outerFn) ? iter : iter.next().then(function(result) {
+        return result.done ? result.value : iter.next();
+      });
+    }, defineIteratorMethods(Gp), define(Gp, toStringTagSymbol, "Generator"), define(Gp, iteratorSymbol, function() {
+      return this;
+    }), define(Gp, "toString", function() {
+      return "[object Generator]";
+    }), exports.keys = function(val) {
+      var object = Object(val), keys2 = [];
+      for (var key in object)
+        keys2.push(key);
+      return keys2.reverse(), function next2() {
+        for (; keys2.length; ) {
+          var key2 = keys2.pop();
+          if (key2 in object)
+            return next2.value = key2, next2.done = false, next2;
+        }
+        return next2.done = true, next2;
+      };
+    }, exports.values = values2, Context.prototype = { constructor: Context, reset: function reset(skipTempReset) {
+      if (this.prev = 0, this.next = 0, this.sent = this._sent = void 0, this.done = false, this.delegate = null, this.method = "next", this.arg = void 0, this.tryEntries.forEach(resetTryEntry), !skipTempReset)
+        for (var name in this)
+          "t" === name.charAt(0) && hasOwn5.call(this, name) && !isNaN(+name.slice(1)) && (this[name] = void 0);
+    }, stop: function stop() {
+      this.done = true;
+      var rootRecord = this.tryEntries[0].completion;
+      if ("throw" === rootRecord.type)
+        throw rootRecord.arg;
+      return this.rval;
+    }, dispatchException: function dispatchException(exception) {
+      if (this.done)
+        throw exception;
+      var context = this;
+      function handle(loc, caught) {
+        return record.type = "throw", record.arg = exception, context.next = loc, caught && (context.method = "next", context.arg = void 0), !!caught;
+      }
+      for (var i5 = this.tryEntries.length - 1; i5 >= 0; --i5) {
+        var entry = this.tryEntries[i5], record = entry.completion;
+        if ("root" === entry.tryLoc)
+          return handle("end");
+        if (entry.tryLoc <= this.prev) {
+          var hasCatch = hasOwn5.call(entry, "catchLoc"), hasFinally = hasOwn5.call(entry, "finallyLoc");
+          if (hasCatch && hasFinally) {
+            if (this.prev < entry.catchLoc)
+              return handle(entry.catchLoc, true);
+            if (this.prev < entry.finallyLoc)
+              return handle(entry.finallyLoc);
+          } else if (hasCatch) {
+            if (this.prev < entry.catchLoc)
+              return handle(entry.catchLoc, true);
+          } else {
+            if (!hasFinally)
+              throw new Error("try statement without catch or finally");
+            if (this.prev < entry.finallyLoc)
+              return handle(entry.finallyLoc);
+          }
+        }
+      }
+    }, abrupt: function abrupt(type, arg) {
+      for (var i5 = this.tryEntries.length - 1; i5 >= 0; --i5) {
+        var entry = this.tryEntries[i5];
+        if (entry.tryLoc <= this.prev && hasOwn5.call(entry, "finallyLoc") && this.prev < entry.finallyLoc) {
+          var finallyEntry = entry;
+          break;
+        }
+      }
+      finallyEntry && ("break" === type || "continue" === type) && finallyEntry.tryLoc <= arg && arg <= finallyEntry.finallyLoc && (finallyEntry = null);
+      var record = finallyEntry ? finallyEntry.completion : {};
+      return record.type = type, record.arg = arg, finallyEntry ? (this.method = "next", this.next = finallyEntry.finallyLoc, ContinueSentinel) : this.complete(record);
+    }, complete: function complete(record, afterLoc) {
+      if ("throw" === record.type)
+        throw record.arg;
+      return "break" === record.type || "continue" === record.type ? this.next = record.arg : "return" === record.type ? (this.rval = this.arg = record.arg, this.method = "return", this.next = "end") : "normal" === record.type && afterLoc && (this.next = afterLoc), ContinueSentinel;
+    }, finish: function finish(finallyLoc) {
+      for (var i5 = this.tryEntries.length - 1; i5 >= 0; --i5) {
+        var entry = this.tryEntries[i5];
+        if (entry.finallyLoc === finallyLoc)
+          return this.complete(entry.completion, entry.afterLoc), resetTryEntry(entry), ContinueSentinel;
+      }
+    }, catch: function _catch(tryLoc) {
+      for (var i5 = this.tryEntries.length - 1; i5 >= 0; --i5) {
+        var entry = this.tryEntries[i5];
+        if (entry.tryLoc === tryLoc) {
+          var record = entry.completion;
+          if ("throw" === record.type) {
+            var thrown = record.arg;
+            resetTryEntry(entry);
+          }
+          return thrown;
+        }
+      }
+      throw new Error("illegal catch attempt");
+    }, delegateYield: function delegateYield(iterable, resultName, nextLoc) {
+      return this.delegate = { iterator: values2(iterable), resultName: resultName, nextLoc: nextLoc }, "next" === this.method && (this.arg = void 0), ContinueSentinel;
+    } }, exports;
+  }
+  function asyncGeneratorStep10(gen, resolve, reject, _next, _throw, key, arg) {
+    try {
+      var info = gen[key](arg);
+      var value = info.value;
+    } catch (error) {
+      reject(error);
+      return;
+    }
+    if (info.done) {
+      resolve(value);
+    } else {
+      Promise.resolve(value).then(_next, _throw);
+    }
+  }
+  function _asyncToGenerator10(fn) {
+    return function() {
+      var self2 = this, args = arguments;
+      return new Promise(function(resolve, reject) {
+        var gen = fn.apply(self2, args);
+        function _next(value) {
+          asyncGeneratorStep10(gen, resolve, reject, _next, _throw, "next", value);
+        }
+        function _throw(err) {
+          asyncGeneratorStep10(gen, resolve, reject, _next, _throw, "throw", err);
+        }
+        _next(void 0);
+      });
+    };
   }
   function _classCallCheck39(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
@@ -20625,6 +20917,13 @@
     }
     return (hint === "string" ? String : Number)(input);
   }
+  function _taggedTemplateLiteral(strings, raw) {
+    if (!raw) {
+      raw = strings.slice(0);
+    }
+    return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } }));
+  }
+  var buttonStyles = i(_templateObject || (_templateObject = _taggedTemplateLiteral(["\n  background-color: transparent;\n  outline: none;\n  border-width: 1px;\n  border-style: solid;\n\n  border-radius: var(--space-1);\n  font-size: 1.5rem;\n  background-color: inherit;\n"])));
   var ErrorConsoleContainer = /* @__PURE__ */ function(_LitElement) {
     _inherits24(ErrorConsoleContainer2, _LitElement);
     var _super = _createSuper24(ErrorConsoleContainer2);
@@ -20651,12 +20950,12 @@
     }, {
       key: "render",
       value: function render() {
-        return x(_templateObject || (_templateObject = _taggedTemplateLiteral([' <div class="header">\n        <button class="close-button" @click=', '>\n          <svg\n            xmlns="http://www.w3.org/2000/svg"\n            fill="none"\n            viewBox="0 0 24 24"\n            stroke-width="1.5"\n            height="1em"\n            width="1em"\n            stroke="currentColor"\n            class="close-icon"\n          >\n            <path\n              stroke-linecap="round"\n              stroke-linejoin="round"\n              d="M6 18L18 6M6 6l12 12"\n            />\n          </svg>\n          Dismiss all\n        </button>\n        <button class="toggle-button" @click=', '>\n          <svg\n            xmlns="http://www.w3.org/2000/svg"\n            fill="none"\n            viewBox="0 0 24 24"\n            stroke-width="1.5"\n            height="1em"\n            width="1em"\n            stroke="currentColor"\n            class="toggle-icon"\n          >\n            <path\n              class="collapse"\n              stroke-linecap="round"\n              stroke-linejoin="round"\n              d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"\n            />\n          </svg>\n        </button>\n      </div>\n      <slot class="content"></slot>'])), this.handleDismissAll, this.toggleCollapsed);
+        return x(_templateObject2 || (_templateObject2 = _taggedTemplateLiteral([' <div class="header">\n        <button class="close-button" @click=', '>\n          <svg\n            xmlns="http://www.w3.org/2000/svg"\n            fill="none"\n            viewBox="0 0 24 24"\n            stroke-width="1.5"\n            height="1em"\n            width="1em"\n            stroke="currentColor"\n            class="close-icon"\n          >\n            <path\n              stroke-linecap="round"\n              stroke-linejoin="round"\n              d="M6 18L18 6M6 6l12 12"\n            />\n          </svg>\n          Dismiss all\n        </button>\n        <button class="toggle-button" @click=', '>\n          <svg\n            xmlns="http://www.w3.org/2000/svg"\n            fill="none"\n            viewBox="0 0 24 24"\n            stroke-width="1.5"\n            height="1em"\n            width="1em"\n            stroke="currentColor"\n            class="toggle-icon"\n          >\n            <path\n              class="collapse"\n              stroke-linecap="round"\n              stroke-linejoin="round"\n              d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"\n            />\n          </svg>\n        </button>\n      </div>\n      <slot class="content"></slot>'])), this.handleDismissAll, this.toggleCollapsed);
       }
     }]);
     return ErrorConsoleContainer2;
   }(s3);
-  _defineProperty17(ErrorConsoleContainer, "styles", [i(_templateObject3 || (_templateObject3 = _taggedTemplateLiteral(["\n      :host {\n        /* These are all taken from open-props */\n        --space-1: 0.5rem;\n        --space-2: calc(var(--space-1) * 2);\n        --space-3: calc(var(--space-1) * 3);\n        --space-4: calc(var(--space-1) * 4);\n\n        --red-2: #ffc9c9;\n        --red-6: #fa5252;\n        --red-7: #f03e3e;\n        --red-8: #e03131;\n        --red-10: #b02525;\n        --red-11: #962020;\n        --red-12: #7d1a1a;\n\n        --gray-1: #f8f9fa;\n        --gray-2: #e9ecef;\n        --gray-3: #dee2e6;\n        --gray-4: #ced4da;\n        --gray-6: #868e96;\n        --gray-8: #6c757d;\n\n        --shadow-color: 220 3% 15%;\n        --shadow-strength: 1%;\n        --shadow-3: 0 -1px 3px 0 hsl(var(--shadow-color) /\n                calc(var(--shadow-strength) + 2%)),\n          0 1px 2px -5px hsl(var(--shadow-color) /\n                calc(var(--shadow-strength) + 2%)),\n          0 2px 5px -5px hsl(var(--shadow-color) /\n                calc(var(--shadow-strength) + 4%)),\n          0 4px 12px -5px hsl(var(--shadow-color) /\n                calc(var(--shadow-strength) + 5%)),\n          0 12px 15px -5px hsl(var(--shadow-color) /\n                calc(var(--shadow-strength) + 7%));\n\n        position: fixed;\n        top: var(--space-1);\n        right: var(--space-1);\n        z-index: 1000;\n\n        display: flex;\n        flex-direction: column;\n\n        background-color: var(--gray-1);\n        outline: 1px solid var(--gray-4);\n        border-radius: var(--space-1);\n\n        animation: var(--animation-slide-in-left);\n        /* How fast should the message pop in and out of the screen? */\n        --animation-speed: 1s;\n\n        /* Taken from open-props */\n        --ease-3: cubic-bezier(0.25, 0, 0.3, 1);\n        --animation-slide-in-left: slide-in-left var(--animation-speed)\n          var(--ease-3);\n\n        --animation-slide-out-left: slide-out-left var(--animation-speed)\n          var(--ease-3);\n\n        box-shadow: var(--shadow-3);\n      }\n\n      @keyframes slide-in-left {\n        from {\n          transform: translateX(100%);\n        }\n      }\n      @keyframes slide-out-left {\n        to {\n          transform: translateX(100%);\n        }\n      }\n\n      :host(.leaving) {\n        animation: var(--animation-slide-out-left);\n      }\n\n      :host(.collapsed) {\n        background-color: transparent;\n        outline: none;\n      }\n\n      .header {\n        display: flex;\n        justify-content: flex-end;\n        gap: var(--space-2);\n        padding-top: var(--space-1);\n        padding-right: var(--space-1);\n      }\n\n      .header > button {\n        background-color: transparent;\n        outline: none;\n        border-width: 1px;\n        border-style: solid;\n\n        border-radius: var(--space-1);\n        font-size: 1.5rem;\n        background-color: inherit;\n      }\n\n      .header > button:hover {\n        background-color: var(--gray-3);\n      }\n\n      .toggle-button {\n        width: fit-content;\n        border: none;\n        aspect-ratio: 1;\n        border-color: var(--gray-4);\n      }\n\n      .close-button {\n        display: flex;\n        align-items: center;\n        color: var(--red-11);\n        border-color: var(--red-11);\n      }\n\n      .close-button > svg {\n        margin-right: 3px;\n      }\n\n      .toggle-button:focus {\n        outline: 1px solid black;\n      }\n\n      .toggle-icon {\n        transition: transform 0.2s ease-in-out;\n      }\n\n      :host(.collapsed) .toggle-icon {\n        transform: scaleX(-1) scaleY(-1);\n      }\n\n      :host(.collapsed) .close-button {\n        display: none;\n      }\n\n      .content {\n        display: block;\n        padding: var(--space-4);\n        padding-top: var(--space-2);\n      }\n\n      :host(.collapsed) .content {\n        display: none;\n      }\n    "])))]);
+  _defineProperty17(ErrorConsoleContainer, "styles", [i(_templateObject4 || (_templateObject4 = _taggedTemplateLiteral(["\n      :host {\n        /* These are all taken from open-props */\n        --space-1: 0.5rem;\n        --space-2: calc(var(--space-1) * 2);\n        --space-3: calc(var(--space-1) * 3);\n        --space-4: calc(var(--space-1) * 4);\n\n        --red-2: #ffc9c9;\n        --red-6: #fa5252;\n        --red-7: #f03e3e;\n        --red-8: #e03131;\n        --red-10: #b02525;\n        --red-11: #962020;\n        --red-12: #7d1a1a;\n\n        --gray-1: #f8f9fa;\n        --gray-2: #e9ecef;\n        --gray-3: #dee2e6;\n        --gray-4: #ced4da;\n        --gray-6: #868e96;\n        --gray-8: #6c757d;\n\n        --shadow-color: 220 3% 15%;\n        --shadow-strength: 1%;\n        --shadow-3: 0 -1px 3px 0 hsl(var(--shadow-color) /\n                calc(var(--shadow-strength) + 2%)),\n          0 1px 2px -5px hsl(var(--shadow-color) /\n                calc(var(--shadow-strength) + 2%)),\n          0 2px 5px -5px hsl(var(--shadow-color) /\n                calc(var(--shadow-strength) + 4%)),\n          0 4px 12px -5px hsl(var(--shadow-color) /\n                calc(var(--shadow-strength) + 5%)),\n          0 12px 15px -5px hsl(var(--shadow-color) /\n                calc(var(--shadow-strength) + 7%));\n\n        position: fixed;\n        top: var(--space-1);\n        right: var(--space-1);\n        z-index: 1000;\n\n        display: flex;\n        flex-direction: column;\n\n        background-color: var(--gray-1);\n        outline: 1px solid var(--gray-4);\n        border-radius: var(--space-1);\n\n        /* How fast should the message pop in and out of the screen? */\n        --animation-speed: 1s;\n\n        /* Taken from open-props */\n        --ease-3: cubic-bezier(0.25, 0, 0.3, 1);\n        --animation-slide-in-left: slide-in-left var(--animation-speed)\n          var(--ease-3);\n\n        --animation-slide-out-left: slide-out-left var(--animation-speed)\n          var(--ease-3);\n\n        animation: var(--animation-slide-in-left);\n        box-shadow: var(--shadow-3);\n      }\n\n      @keyframes slide-in-left {\n        from {\n          transform: translateX(100%);\n        }\n      }\n      @keyframes slide-out-left {\n        to {\n          transform: translateX(100%);\n        }\n      }\n\n      :host(.leaving) {\n        animation: var(--animation-slide-out-left);\n      }\n\n      :host(.collapsed) {\n        background-color: transparent;\n        outline: none;\n      }\n\n      .header {\n        display: flex;\n        justify-content: flex-end;\n        gap: var(--space-2);\n        padding-top: var(--space-1);\n        padding-right: var(--space-1);\n      }\n\n      .header > button {\n        ", "\n      }\n\n      .header > button:hover {\n        background-color: var(--gray-3);\n      }\n\n      .toggle-button {\n        width: fit-content;\n        border: none;\n        aspect-ratio: 1;\n        border-color: var(--gray-4);\n      }\n\n      .close-button {\n        display: flex;\n        align-items: center;\n        color: var(--red-11);\n        border-color: var(--red-11);\n      }\n\n      .close-button > svg {\n        margin-right: 3px;\n      }\n\n      .toggle-button:focus {\n        outline: 1px solid black;\n      }\n\n      .toggle-icon {\n        transition: transform var(--anim-speed) ease-in-out;\n      }\n\n      :host(.collapsed) .toggle-icon {\n        transform: scaleX(-1) scaleY(-1);\n      }\n\n      :host(.collapsed) .close-button {\n        display: none;\n      }\n\n      .content {\n        display: block;\n        padding: var(--space-4);\n        padding-top: var(--space-2);\n      }\n\n      :host(.collapsed) .content {\n        display: none;\n      }\n    "])), buttonStyles)]);
   customElements.define("shiny-error-console-container", ErrorConsoleContainer);
   var ErrorConsole = /* @__PURE__ */ function(_LitElement2) {
     _inherits24(ErrorConsole2, _LitElement2);
@@ -20673,9 +20972,40 @@
       return _this2;
     }
     _createClass39(ErrorConsole2, [{
+      key: "copyErrorToClipboard",
+      value: function() {
+        var _copyErrorToClipboard = _asyncToGenerator10(/* @__PURE__ */ _regeneratorRuntime10().mark(function _callee() {
+          var _this$shadowRoot;
+          var copySuccessMsg;
+          return _regeneratorRuntime10().wrap(function _callee$(_context) {
+            while (1)
+              switch (_context.prev = _context.next) {
+                case 0:
+                  _context.next = 2;
+                  return navigator.clipboard.writeText(this.message);
+                case 2:
+                  copySuccessMsg = document.createElement("div");
+                  copySuccessMsg.classList.add("copy-success-msg");
+                  copySuccessMsg.innerHTML = "<div>Copied error!</div>";
+                  (_this$shadowRoot = this.shadowRoot) === null || _this$shadowRoot === void 0 ? void 0 : _this$shadowRoot.appendChild(copySuccessMsg);
+                  copySuccessMsg.addEventListener("animationend", function() {
+                    copySuccessMsg.remove();
+                  });
+                case 7:
+                case "end":
+                  return _context.stop();
+              }
+          }, _callee, this);
+        }));
+        function copyErrorToClipboard() {
+          return _copyErrorToClipboard.apply(this, arguments);
+        }
+        return copyErrorToClipboard;
+      }()
+    }, {
       key: "render",
       value: function render() {
-        return x(_templateObject2 || (_templateObject2 = _taggedTemplateLiteral(['\n      <div class="container">\n        <div class="decoration-container">\n          <div class="vertical-line"></div>\n          <div class="dot"></div>\n        </div>\n        <div class="contents">\n          <h3>', '</h3>\n          <p class="error-message">', "</p>\n        </div>\n      </div>\n    "])), this.headline, this.message);
+        return x(_templateObject3 || (_templateObject3 = _taggedTemplateLiteral(['\n      <div class="container">\n        <div class="decoration-container">\n          <div class="vertical-line"></div>\n          <div class="dot"></div>\n        </div>\n        <div class="contents">\n          <h3>', '</h3>\n          <p class="error-message">', '</p>\n        </div>\n\n        <div class="actions">\n          <button\n            @click=', '\n            title="Copy error to clipboard"\n          >\n            <svg\n              xmlns="http://www.w3.org/2000/svg"\n              fill="none"\n              viewBox="0 0 24 24"\n              stroke-width="1.5"\n              stroke="currentColor"\n              height="1em"\n              width="1em"\n            >\n              <path\n                stroke-linecap="round"\n                stroke-linejoin="round"\n                d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184"\n              />\n            </svg>\n          </button>\n        </div>\n      </div>\n    '])), this.headline, this.message, this.copyErrorToClipboard);
       }
     }]);
     return ErrorConsole2;
@@ -20684,7 +21014,7 @@
     headline: {},
     message: {}
   });
-  _defineProperty17(ErrorConsole, "styles", [i(_templateObject4 || (_templateObject4 = _taggedTemplateLiteral(['\n      :host {\n        color: var(--red-11);\n        display: block;\n        font-size: 1.4rem;\n      }\n\n      .container {\n        display: flex;\n        gap: var(--space-2);\n      }\n\n      .contents {\n        width: 40ch;\n        display: flex;\n        flex-direction: column;\n        gap: var(--space-1);\n        padding-bottom: 1.5rem;\n        padding-top: 0.5rem;\n      }\n\n      .contents > h3 {\n        font-size: 1em;\n        font-weight: 500;\n        color: var(--red-12);\n      }\n\n      .contents > * {\n        margin-block: 0;\n      }\n\n      .error-message {\n        color: var(--red-11);\n        font-family: "Courier New", Courier, monospace;\n      }\n\n      .decoration-container {\n        flex-shrink: 0;\n        padding-inline: var(0.375rem);\n        position: relative;\n      }\n\n      .vertical-line {\n        margin-inline: auto;\n        width: 2px;\n        height: 100%;\n\n        background-color: var(--red-10);\n      }\n\n      .dot {\n        --dot-size: 1rem;\n        position: absolute;\n        width: var(--dot-size);\n        height: var(--dot-size);\n        top: calc(50% - var(--dot-size) / 2);\n        left: calc(50% - var(--dot-size) / 2);\n        border-radius: 100%;\n\n        color: var(--red-6);\n        background-color: var(--red-10);\n      }\n    '])))]);
+  _defineProperty17(ErrorConsole, "styles", [i(_templateObject5 || (_templateObject5 = _taggedTemplateLiteral(['\n      :host {\n        color: var(--red-11);\n        display: block;\n        font-size: 1.4rem;\n\n        position: relative;\n        --anim-speed: 0.2s;\n        --icon-size: 1.5rem;\n      }\n\n      .container {\n        display: flex;\n        gap: var(--space-2);\n      }\n\n      .contents {\n        width: 40ch;\n        display: flex;\n        flex-direction: column;\n        gap: var(--space-1);\n        padding-bottom: 1.5rem;\n        padding-top: 0.5rem;\n      }\n\n      .contents > h3 {\n        font-size: 1em;\n        font-weight: 500;\n        color: var(--red-12);\n      }\n\n      .contents > * {\n        margin-block: 0;\n      }\n\n      .error-message {\n        color: var(--red-11);\n        font-family: "Courier New", Courier, monospace;\n      }\n\n      .decoration-container {\n        flex-shrink: 0;\n        padding-inline: var(0.375rem);\n        position: relative;\n\n        --line-w: 2px;\n        --dot-size: 1rem;\n      }\n\n      :host(:hover) .decoration-container {\n        --scale: 1.25;\n      }\n\n      .vertical-line {\n        margin-inline: auto;\n        width: var(--line-w);\n        height: 100%;\n\n        background-color: var(--red-10);\n\n        transform: scaleX(var(--scale, 1));\n\n        transition: transform var(--anim-speed) ease-in-out;\n      }\n\n      .dot {\n        position: absolute;\n        width: var(--dot-size);\n        height: var(--dot-size);\n        top: calc(50% - var(--dot-size) / 2);\n        left: calc(50% - var(--dot-size) / 2);\n        border-radius: 100%;\n        transform: scale(var(--scale, 1));\n\n        color: var(--red-6);\n        background-color: var(--red-10);\n      }\n\n      .actions {\n        transform: scaleX(0);\n        transition: transform var(--anim-speed) ease-in-out;\n      }\n\n      /* Delay transition on mouseout so the buttons don\'t jump away if the user\n      overshoots them with their mouse */\n      :host(:not(:hover)) .actions {\n        transition-delay: 0.5s;\n      }\n\n      :host(:hover) .actions {\n        transform: scaleX(1);\n      }\n\n      .actions > button {\n        ', "\n        aspect-ratio: 1;\n      }\n\n      .copy-success-msg {\n        animation: slide-in-and-out-left 2s ease-in-out;\n        position: absolute;\n        height: 100%;\n        /* width: 100%; */\n        display: grid;\n        place-content: center;\n\n        right: 0;\n        top: 0;\n      }\n      .copy-success-msg > div {\n        /* Blur content behind div */\n        backdrop-filter: blur(3px);\n        padding: var(--space-1);\n      }\n\n      @keyframes slide-in-and-out-left {\n        0% {\n          opacity: 0;\n          filter: brightness(1) blur(20px);\n        }\n        5% {\n          opacity: 1;\n          filter: brightness(2) blur(10px);\n        }\n        40% {\n          opacity: 1;\n          filter: brightness(1) blur(0);\n        }\n        60% {\n          opacity: 1;\n          filter: brightness(1) blur(0);\n        }\n        95% {\n          opacity: 1;\n          filter: brightness(2) blur(10px);\n        }\n        100% {\n          opacity: 0;\n          filter: brightness(1) blur(20px);\n        }\n\n        /* 0% {\n          transform: translateX(100%);\n        }\n        50% {\n          transform: translateX(0);\n        }\n        100% {\n          transform: translateX(100%);\n        } */\n      }\n    "])), buttonStyles)]);
   customElements.define("shiny-error-console", ErrorConsole);
   function showErrorInClientConsole(e4) {
     var errorMsg = null;
@@ -20734,9 +21064,9 @@
       return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
     }, _typeof46(obj);
   }
-  function _regeneratorRuntime10() {
+  function _regeneratorRuntime11() {
     "use strict";
-    _regeneratorRuntime10 = function _regeneratorRuntime15() {
+    _regeneratorRuntime11 = function _regeneratorRuntime16() {
       return exports;
     };
     var exports = {}, Op = Object.prototype, hasOwn5 = Op.hasOwnProperty, defineProperty3 = Object.defineProperty || function(obj, key, desc) {
@@ -21002,7 +21332,7 @@
       return this.delegate = { iterator: values2(iterable), resultName: resultName, nextLoc: nextLoc }, "next" === this.method && (this.arg = void 0), ContinueSentinel;
     } }, exports;
   }
-  function asyncGeneratorStep10(gen, resolve, reject, _next, _throw, key, arg) {
+  function asyncGeneratorStep11(gen, resolve, reject, _next, _throw, key, arg) {
     try {
       var info = gen[key](arg);
       var value = info.value;
@@ -21016,16 +21346,16 @@
       Promise.resolve(value).then(_next, _throw);
     }
   }
-  function _asyncToGenerator10(fn) {
+  function _asyncToGenerator11(fn) {
     return function() {
       var self2 = this, args = arguments;
       return new Promise(function(resolve, reject) {
         var gen = fn.apply(self2, args);
         function _next(value) {
-          asyncGeneratorStep10(gen, resolve, reject, _next, _throw, "next", value);
+          asyncGeneratorStep11(gen, resolve, reject, _next, _throw, "next", value);
         }
         function _throw(err) {
-          asyncGeneratorStep10(gen, resolve, reject, _next, _throw, "throw", err);
+          asyncGeneratorStep11(gen, resolve, reject, _next, _throw, "throw", err);
         }
         _next(void 0);
       });
@@ -21129,9 +21459,9 @@
     return _bindOutputs.apply(this, arguments);
   }
   function _bindOutputs() {
-    _bindOutputs = _asyncToGenerator10(/* @__PURE__ */ _regeneratorRuntime10().mark(function _callee(_ref) {
+    _bindOutputs = _asyncToGenerator11(/* @__PURE__ */ _regeneratorRuntime11().mark(function _callee(_ref) {
       var sendOutputHiddenState, maybeAddThemeObserver, outputBindings, scope, outputDuplicateIds, $scope, bindings, i5, binding, matches, j3, _el2, id, $el, bindingAdapter, _args = arguments;
-      return _regeneratorRuntime10().wrap(function _callee$(_context) {
+      return _regeneratorRuntime11().wrap(function _callee$(_context) {
         while (1)
           switch (_context.prev = _context.next) {
             case 0:
@@ -21278,8 +21608,8 @@
     return _bindAll2.apply(this, arguments);
   }
   function _bindAll2() {
-    _bindAll2 = _asyncToGenerator10(/* @__PURE__ */ _regeneratorRuntime10().mark(function _callee2(shinyCtx, scope) {
-      return _regeneratorRuntime10().wrap(function _callee2$(_context2) {
+    _bindAll2 = _asyncToGenerator11(/* @__PURE__ */ _regeneratorRuntime11().mark(function _callee2(shinyCtx, scope) {
+      return _regeneratorRuntime11().wrap(function _callee2$(_context2) {
         while (1)
           switch (_context2.prev = _context2.next) {
             case 0:
@@ -21304,9 +21634,9 @@
     return _bindAll3.apply(this, arguments);
   }
   function _bindAll3() {
-    _bindAll3 = _asyncToGenerator10(/* @__PURE__ */ _regeneratorRuntime10().mark(function _callee3(shinyCtx, scope) {
+    _bindAll3 = _asyncToGenerator11(/* @__PURE__ */ _regeneratorRuntime11().mark(function _callee3(shinyCtx, scope) {
       var currentInputItems, inputs;
-      return _regeneratorRuntime10().wrap(function _callee3$(_context3) {
+      return _regeneratorRuntime11().wrap(function _callee3$(_context3) {
         while (1)
           switch (_context3.prev = _context3.next) {
             case 0:
@@ -21399,9 +21729,9 @@
       return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
     }, _typeof47(obj);
   }
-  function _regeneratorRuntime11() {
+  function _regeneratorRuntime12() {
     "use strict";
-    _regeneratorRuntime11 = function _regeneratorRuntime15() {
+    _regeneratorRuntime12 = function _regeneratorRuntime16() {
       return exports;
     };
     var exports = {}, Op = Object.prototype, hasOwn5 = Op.hasOwnProperty, defineProperty3 = Object.defineProperty || function(obj, key, desc) {
@@ -21667,7 +21997,7 @@
       return this.delegate = { iterator: values2(iterable), resultName: resultName, nextLoc: nextLoc }, "next" === this.method && (this.arg = void 0), ContinueSentinel;
     } }, exports;
   }
-  function asyncGeneratorStep11(gen, resolve, reject, _next, _throw, key, arg) {
+  function asyncGeneratorStep12(gen, resolve, reject, _next, _throw, key, arg) {
     try {
       var info = gen[key](arg);
       var value = info.value;
@@ -21681,16 +22011,16 @@
       Promise.resolve(value).then(_next, _throw);
     }
   }
-  function _asyncToGenerator11(fn) {
+  function _asyncToGenerator12(fn) {
     return function() {
       var self2 = this, args = arguments;
       return new Promise(function(resolve, reject) {
         var gen = fn.apply(self2, args);
         function _next(value) {
-          asyncGeneratorStep11(gen, resolve, reject, _next, _throw, "next", value);
+          asyncGeneratorStep12(gen, resolve, reject, _next, _throw, "next", value);
         }
         function _throw(err) {
-          asyncGeneratorStep11(gen, resolve, reject, _next, _throw, "throw", err);
+          asyncGeneratorStep12(gen, resolve, reject, _next, _throw, "throw", err);
         }
         _next(void 0);
       });
@@ -21770,9 +22100,9 @@
     }, {
       key: "dequeue",
       value: function() {
-        var _dequeue = _asyncToGenerator11(/* @__PURE__ */ _regeneratorRuntime11().mark(function _callee() {
+        var _dequeue = _asyncToGenerator12(/* @__PURE__ */ _regeneratorRuntime12().mark(function _callee() {
           var promise;
-          return _regeneratorRuntime11().wrap(function _callee$(_context) {
+          return _regeneratorRuntime12().wrap(function _callee$(_context) {
             while (1)
               switch (_context.prev = _context.next) {
                 case 0:
@@ -21878,9 +22208,9 @@
       arr2[i5] = arr[i5];
     return arr2;
   }
-  function _regeneratorRuntime12() {
+  function _regeneratorRuntime13() {
     "use strict";
-    _regeneratorRuntime12 = function _regeneratorRuntime15() {
+    _regeneratorRuntime13 = function _regeneratorRuntime16() {
       return exports;
     };
     var exports = {}, Op = Object.prototype, hasOwn5 = Op.hasOwnProperty, defineProperty3 = Object.defineProperty || function(obj, key, desc) {
@@ -22146,7 +22476,7 @@
       return this.delegate = { iterator: values2(iterable), resultName: resultName, nextLoc: nextLoc }, "next" === this.method && (this.arg = void 0), ContinueSentinel;
     } }, exports;
   }
-  function asyncGeneratorStep12(gen, resolve, reject, _next, _throw, key, arg) {
+  function asyncGeneratorStep13(gen, resolve, reject, _next, _throw, key, arg) {
     try {
       var info = gen[key](arg);
       var value = info.value;
@@ -22160,16 +22490,16 @@
       Promise.resolve(value).then(_next, _throw);
     }
   }
-  function _asyncToGenerator12(fn) {
+  function _asyncToGenerator13(fn) {
     return function() {
       var self2 = this, args = arguments;
       return new Promise(function(resolve, reject) {
         var gen = fn.apply(self2, args);
         function _next(value) {
-          asyncGeneratorStep12(gen, resolve, reject, _next, _throw, "next", value);
+          asyncGeneratorStep13(gen, resolve, reject, _next, _throw, "next", value);
         }
         function _throw(err) {
-          asyncGeneratorStep12(gen, resolve, reject, _next, _throw, "throw", err);
+          asyncGeneratorStep13(gen, resolve, reject, _next, _throw, "throw", err);
         }
         _next(void 0);
       });
@@ -22306,9 +22636,9 @@
           }
         },
         open: function() {
-          var _open = _asyncToGenerator12(/* @__PURE__ */ _regeneratorRuntime12().mark(function _callee(message) {
+          var _open = _asyncToGenerator13(/* @__PURE__ */ _regeneratorRuntime13().mark(function _callee(message) {
             var $container, depth, $progress, $progressBar, $progressText;
-            return _regeneratorRuntime12().wrap(function _callee$(_context) {
+            return _regeneratorRuntime13().wrap(function _callee$(_context) {
               while (1)
                 switch (_context.prev = _context.next) {
                   case 0:
@@ -22470,8 +22800,8 @@
           _this.startActionQueueLoop();
         };
         socket.onmessage = function(e4) {
-          _this.taskQueue.enqueue(/* @__PURE__ */ _asyncToGenerator12(/* @__PURE__ */ _regeneratorRuntime12().mark(function _callee2() {
-            return _regeneratorRuntime12().wrap(function _callee2$(_context2) {
+          _this.taskQueue.enqueue(/* @__PURE__ */ _asyncToGenerator13(/* @__PURE__ */ _regeneratorRuntime13().mark(function _callee2() {
+            return _regeneratorRuntime13().wrap(function _callee2$(_context2) {
               while (1)
                 switch (_context2.prev = _context2.next) {
                   case 0:
@@ -22503,9 +22833,9 @@
     }, {
       key: "startActionQueueLoop",
       value: function() {
-        var _startActionQueueLoop = _asyncToGenerator12(/* @__PURE__ */ _regeneratorRuntime12().mark(function _callee3() {
+        var _startActionQueueLoop = _asyncToGenerator13(/* @__PURE__ */ _regeneratorRuntime13().mark(function _callee3() {
           var action;
-          return _regeneratorRuntime12().wrap(function _callee3$(_context3) {
+          return _regeneratorRuntime13().wrap(function _callee3$(_context3) {
             while (1)
               switch (_context3.prev = _context3.next) {
                 case 0:
@@ -22662,9 +22992,9 @@
     }, {
       key: "receiveOutput",
       value: function() {
-        var _receiveOutput = _asyncToGenerator12(/* @__PURE__ */ _regeneratorRuntime12().mark(function _callee4(name, value) {
+        var _receiveOutput = _asyncToGenerator13(/* @__PURE__ */ _regeneratorRuntime13().mark(function _callee4(name, value) {
           var binding, evt;
-          return _regeneratorRuntime12().wrap(function _callee4$(_context4) {
+          return _regeneratorRuntime13().wrap(function _callee4$(_context4) {
             while (1)
               switch (_context4.prev = _context4.next) {
                 case 0:
@@ -22705,8 +23035,8 @@
     }, {
       key: "bindOutput",
       value: function() {
-        var _bindOutput = _asyncToGenerator12(/* @__PURE__ */ _regeneratorRuntime12().mark(function _callee5(id, binding) {
-          return _regeneratorRuntime12().wrap(function _callee5$(_context5) {
+        var _bindOutput = _asyncToGenerator13(/* @__PURE__ */ _regeneratorRuntime13().mark(function _callee5(id, binding) {
+          return _regeneratorRuntime13().wrap(function _callee5$(_context5) {
             while (1)
               switch (_context5.prev = _context5.next) {
                 case 0:
@@ -22820,9 +23150,9 @@
     }, {
       key: "dispatchMessage",
       value: function() {
-        var _dispatchMessage = _asyncToGenerator12(/* @__PURE__ */ _regeneratorRuntime12().mark(function _callee6(data) {
+        var _dispatchMessage = _asyncToGenerator13(/* @__PURE__ */ _regeneratorRuntime13().mark(function _callee6(data) {
           var msgObj, len, typedv, typebuf, i5, type, evt;
-          return _regeneratorRuntime12().wrap(function _callee6$(_context6) {
+          return _regeneratorRuntime13().wrap(function _callee6$(_context6) {
             while (1)
               switch (_context6.prev = _context6.next) {
                 case 0:
@@ -22868,9 +23198,9 @@
     }, {
       key: "_sendMessagesToHandlers",
       value: function() {
-        var _sendMessagesToHandlers2 = _asyncToGenerator12(/* @__PURE__ */ _regeneratorRuntime12().mark(function _callee7(msgObj, handlers, handlerOrder) {
+        var _sendMessagesToHandlers2 = _asyncToGenerator13(/* @__PURE__ */ _regeneratorRuntime13().mark(function _callee7(msgObj, handlers, handlerOrder) {
           var i5, msgType;
-          return _regeneratorRuntime12().wrap(function _callee7$(_context7) {
+          return _regeneratorRuntime13().wrap(function _callee7$(_context7) {
             while (1)
               switch (_context7.prev = _context7.next) {
                 case 0:
@@ -22907,9 +23237,9 @@
       value: function _init() {
         var _this3 = this;
         addMessageHandler("values", /* @__PURE__ */ function() {
-          var _ref3 = _asyncToGenerator12(/* @__PURE__ */ _regeneratorRuntime12().mark(function _callee8(message) {
+          var _ref3 = _asyncToGenerator13(/* @__PURE__ */ _regeneratorRuntime13().mark(function _callee8(message) {
             var name, _key;
-            return _regeneratorRuntime12().wrap(function _callee8$(_context8) {
+            return _regeneratorRuntime13().wrap(function _callee8$(_context8) {
               while (1)
                 switch (_context8.prev = _context8.next) {
                   case 0:
@@ -22917,7 +23247,7 @@
                       if (hasOwnProperty(_this3.$bindings, name))
                         _this3.$bindings[name].showProgress(false);
                     }
-                    _context8.t0 = _regeneratorRuntime12().keys(message);
+                    _context8.t0 = _regeneratorRuntime13().keys(message);
                   case 2:
                     if ((_context8.t1 = _context8.t0()).done) {
                       _context8.next = 9;
@@ -22985,9 +23315,9 @@
           }
         });
         addMessageHandler("progress", /* @__PURE__ */ function() {
-          var _ref4 = _asyncToGenerator12(/* @__PURE__ */ _regeneratorRuntime12().mark(function _callee9(message) {
+          var _ref4 = _asyncToGenerator13(/* @__PURE__ */ _regeneratorRuntime13().mark(function _callee9(message) {
             var handler;
-            return _regeneratorRuntime12().wrap(function _callee9$(_context9) {
+            return _regeneratorRuntime13().wrap(function _callee9$(_context9) {
               while (1)
                 switch (_context9.prev = _context9.next) {
                   case 0:
@@ -23012,8 +23342,8 @@
           };
         }());
         addMessageHandler("notification", /* @__PURE__ */ function() {
-          var _ref5 = _asyncToGenerator12(/* @__PURE__ */ _regeneratorRuntime12().mark(function _callee10(message) {
-            return _regeneratorRuntime12().wrap(function _callee10$(_context10) {
+          var _ref5 = _asyncToGenerator13(/* @__PURE__ */ _regeneratorRuntime13().mark(function _callee10(message) {
+            return _regeneratorRuntime13().wrap(function _callee10$(_context10) {
               while (1)
                 switch (_context10.prev = _context10.next) {
                   case 0:
@@ -23047,8 +23377,8 @@
           };
         }());
         addMessageHandler("modal", /* @__PURE__ */ function() {
-          var _ref6 = _asyncToGenerator12(/* @__PURE__ */ _regeneratorRuntime12().mark(function _callee11(message) {
-            return _regeneratorRuntime12().wrap(function _callee11$(_context11) {
+          var _ref6 = _asyncToGenerator13(/* @__PURE__ */ _regeneratorRuntime13().mark(function _callee11(message) {
+            return _regeneratorRuntime13().wrap(function _callee11$(_context11) {
               while (1)
                 switch (_context11.prev = _context11.next) {
                   case 0:
@@ -23104,9 +23434,9 @@
           }
         });
         addMessageHandler("custom", /* @__PURE__ */ function() {
-          var _ref7 = _asyncToGenerator12(/* @__PURE__ */ _regeneratorRuntime12().mark(function _callee12(message) {
+          var _ref7 = _asyncToGenerator13(/* @__PURE__ */ _regeneratorRuntime13().mark(function _callee12(message) {
             var shinyOnCustomMessage;
-            return _regeneratorRuntime12().wrap(function _callee12$(_context12) {
+            return _regeneratorRuntime13().wrap(function _callee12$(_context12) {
               while (1)
                 switch (_context12.prev = _context12.next) {
                   case 0:
@@ -23164,9 +23494,9 @@
           message;
         });
         addMessageHandler("shiny-insert-ui", /* @__PURE__ */ function() {
-          var _ref8 = _asyncToGenerator12(/* @__PURE__ */ _regeneratorRuntime12().mark(function _callee13(message) {
+          var _ref8 = _asyncToGenerator13(/* @__PURE__ */ _regeneratorRuntime13().mark(function _callee13(message) {
             var targets, _iterator, _step, target;
-            return _regeneratorRuntime12().wrap(function _callee13$(_context13) {
+            return _regeneratorRuntime13().wrap(function _callee13$(_context13) {
               while (1)
                 switch (_context13.prev = _context13.next) {
                   case 0:
@@ -23278,9 +23608,9 @@
           };
         }
         addMessageHandler("shiny-insert-tab", /* @__PURE__ */ function() {
-          var _ref9 = _asyncToGenerator12(/* @__PURE__ */ _regeneratorRuntime12().mark(function _callee14(message) {
+          var _ref9 = _asyncToGenerator13(/* @__PURE__ */ _regeneratorRuntime13().mark(function _callee14(message) {
             var $parentTabset, $tabset, $tabContent, tabsetId, $divTag, $liTag, $aTag, $targetLiTag, targetInfo, dropdown, index, tabId, _iterator2, _step2, el, getTabIndex, getDropdown;
-            return _regeneratorRuntime12().wrap(function _callee14$(_context14) {
+            return _regeneratorRuntime13().wrap(function _callee14$(_context14) {
               while (1)
                 switch (_context14.prev = _context14.next) {
                   case 0:
@@ -23534,9 +23864,9 @@
       return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
     }, _typeof49(obj);
   }
-  function _regeneratorRuntime13() {
+  function _regeneratorRuntime14() {
     "use strict";
-    _regeneratorRuntime13 = function _regeneratorRuntime15() {
+    _regeneratorRuntime14 = function _regeneratorRuntime16() {
       return exports;
     };
     var exports = {}, Op = Object.prototype, hasOwn5 = Op.hasOwnProperty, defineProperty3 = Object.defineProperty || function(obj, key, desc) {
@@ -23802,7 +24132,7 @@
       return this.delegate = { iterator: values2(iterable), resultName: resultName, nextLoc: nextLoc }, "next" === this.method && (this.arg = void 0), ContinueSentinel;
     } }, exports;
   }
-  function asyncGeneratorStep13(gen, resolve, reject, _next, _throw, key, arg) {
+  function asyncGeneratorStep14(gen, resolve, reject, _next, _throw, key, arg) {
     try {
       var info = gen[key](arg);
       var value = info.value;
@@ -23816,16 +24146,16 @@
       Promise.resolve(value).then(_next, _throw);
     }
   }
-  function _asyncToGenerator13(fn) {
+  function _asyncToGenerator14(fn) {
     return function() {
       var self2 = this, args = arguments;
       return new Promise(function(resolve, reject) {
         var gen = fn.apply(self2, args);
         function _next(value) {
-          asyncGeneratorStep13(gen, resolve, reject, _next, _throw, "next", value);
+          asyncGeneratorStep14(gen, resolve, reject, _next, _throw, "next", value);
         }
         function _throw(err) {
-          asyncGeneratorStep13(gen, resolve, reject, _next, _throw, "throw", err);
+          asyncGeneratorStep14(gen, resolve, reject, _next, _throw, "throw", err);
         }
         _next(void 0);
       });
@@ -23835,9 +24165,9 @@
     return _initShiny.apply(this, arguments);
   }
   function _initShiny() {
-    _initShiny = _asyncToGenerator13(/* @__PURE__ */ _regeneratorRuntime13().mark(function _callee2(windowShiny3) {
+    _initShiny = _asyncToGenerator14(/* @__PURE__ */ _regeneratorRuntime14().mark(function _callee2(windowShiny3) {
       var shinyapp, inputBatchSender, inputsNoResend, inputsEvent, inputsRate, inputsDefer, target, inputs, inputBindings, outputBindings, shinyBindCtx, initializeInputs, getIdFromEl, initialValues, getComputedBgColor, getComputedFont, maybeAddThemeObserver, doSendTheme, doSendImageSize, isHidden, lastKnownVisibleOutputs, doSendOutputHiddenState, sendOutputHiddenStateDebouncer, sendOutputHiddenState, filterEventsByNamespace, bs3classes, singletonText, dependencyText;
-      return _regeneratorRuntime13().wrap(function _callee2$(_context2) {
+      return _regeneratorRuntime14().wrap(function _callee2$(_context2) {
         while (1)
           switch (_context2.prev = _context2.next) {
             case 0:
@@ -24043,8 +24373,8 @@
               inputBindings = windowShiny3.inputBindings;
               outputBindings = windowShiny3.outputBindings;
               windowShiny3.bindAll = /* @__PURE__ */ function() {
-                var _ref = _asyncToGenerator13(/* @__PURE__ */ _regeneratorRuntime13().mark(function _callee(scope) {
-                  return _regeneratorRuntime13().wrap(function _callee$(_context) {
+                var _ref = _asyncToGenerator14(/* @__PURE__ */ _regeneratorRuntime14().mark(function _callee(scope) {
+                  return _regeneratorRuntime14().wrap(function _callee$(_context) {
                     while (1)
                       switch (_context.prev = _context.next) {
                         case 0:
@@ -24184,9 +24514,9 @@
       return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
     }, _typeof50(obj);
   }
-  function _regeneratorRuntime14() {
+  function _regeneratorRuntime15() {
     "use strict";
-    _regeneratorRuntime14 = function _regeneratorRuntime15() {
+    _regeneratorRuntime15 = function _regeneratorRuntime16() {
       return exports;
     };
     var exports = {}, Op = Object.prototype, hasOwn5 = Op.hasOwnProperty, defineProperty3 = Object.defineProperty || function(obj, key, desc) {
@@ -24452,7 +24782,7 @@
       return this.delegate = { iterator: values2(iterable), resultName: resultName, nextLoc: nextLoc }, "next" === this.method && (this.arg = void 0), ContinueSentinel;
     } }, exports;
   }
-  function asyncGeneratorStep14(gen, resolve, reject, _next, _throw, key, arg) {
+  function asyncGeneratorStep15(gen, resolve, reject, _next, _throw, key, arg) {
     try {
       var info = gen[key](arg);
       var value = info.value;
@@ -24466,16 +24796,16 @@
       Promise.resolve(value).then(_next, _throw);
     }
   }
-  function _asyncToGenerator14(fn) {
+  function _asyncToGenerator15(fn) {
     return function() {
       var self2 = this, args = arguments;
       return new Promise(function(resolve, reject) {
         var gen = fn.apply(self2, args);
         function _next(value) {
-          asyncGeneratorStep14(gen, resolve, reject, _next, _throw, "next", value);
+          asyncGeneratorStep15(gen, resolve, reject, _next, _throw, "next", value);
         }
         function _throw(err) {
-          asyncGeneratorStep14(gen, resolve, reject, _next, _throw, "throw", err);
+          asyncGeneratorStep15(gen, resolve, reject, _next, _throw, "throw", err);
         }
         _next(void 0);
       });
@@ -24513,8 +24843,8 @@
     windowShiny2.renderHtmlAsync = renderHtmlAsync;
     windowShiny2.renderHtml = renderHtml2;
     (0, import_jquery40.default)(function() {
-      setTimeout(/* @__PURE__ */ _asyncToGenerator14(/* @__PURE__ */ _regeneratorRuntime14().mark(function _callee() {
-        return _regeneratorRuntime14().wrap(function _callee$(_context) {
+      setTimeout(/* @__PURE__ */ _asyncToGenerator15(/* @__PURE__ */ _regeneratorRuntime15().mark(function _callee() {
+        return _regeneratorRuntime15().wrap(function _callee$(_context) {
           while (1)
             switch (_context.prev = _context.next) {
               case 0:

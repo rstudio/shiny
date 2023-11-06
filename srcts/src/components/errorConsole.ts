@@ -243,6 +243,9 @@ export class ErrorConsole extends LitElement {
         position: relative;
         --anim-speed: 0.2s;
         --icon-size: 1.5rem;
+
+        --padding-top: var(--space-1);
+        --padding-bottom: var(--space-3);
       }
 
       .container {
@@ -255,8 +258,12 @@ export class ErrorConsole extends LitElement {
         display: flex;
         flex-direction: column;
         gap: var(--space-1);
-        padding-bottom: 1.5rem;
-        padding-top: 0.5rem;
+        padding-bottom: var(--padding-bottom);
+        padding-top: var(--padding-top);
+      }
+
+      :host(:last-of-type) .contents {
+        --padding-bottom: var(--space-1);
       }
 
       .contents > h3 {
@@ -293,17 +300,18 @@ export class ErrorConsole extends LitElement {
         height: 100%;
 
         background-color: var(--red-10);
+      }
 
-        transform: scaleX(var(--scale, 1));
-
-        transition: transform var(--anim-speed) ease-in-out;
+      :host(:first-of-type) .vertical-line {
+        height: calc(100% - var(--dot-size));
+        margin-top: var(--dot-size);
       }
 
       .dot {
         position: absolute;
         width: var(--dot-size);
         height: var(--dot-size);
-        top: calc(50% - var(--dot-size) / 2);
+        top: var(--dot-size);
         left: calc(50% - var(--dot-size) / 2);
         border-radius: 100%;
         transform: scale(var(--scale, 1));
@@ -320,7 +328,7 @@ export class ErrorConsole extends LitElement {
       /* Delay transition on mouseout so the buttons don't jump away if the user
       overshoots them with their mouse */
       :host(:not(:hover)) .actions {
-        transition-delay: 0.5s;
+        transition-delay: 0.15s;
       }
 
       :host(:hover) .actions {
@@ -374,16 +382,6 @@ export class ErrorConsole extends LitElement {
           opacity: 0;
           filter: brightness(1) blur(20px);
         }
-
-        /* 0% {
-          transform: translateX(100%);
-        }
-        50% {
-          transform: translateX(0);
-        }
-        100% {
-          transform: translateX(100%);
-        } */
       }
     `,
   ];

@@ -7,7 +7,7 @@ const buttonStyles = css`
     background-color: transparent;
     outline: none;
     border-style: none;
-    padding: var(--space-2);
+    padding: var(--space-3);
     border-radius: var(--space-1);
     font-size: 1.5rem;
     background-color: inherit;
@@ -22,7 +22,7 @@ const buttonStyles = css`
     display: block;
   }
 `;
-class ErrorConsoleContainer extends LitElement {
+class ShinyErrorConsole extends LitElement {
   static styles = [
     css`
       :host {
@@ -111,6 +111,15 @@ class ErrorConsoleContainer extends LitElement {
         gap: var(--space-2);
       }
 
+      .title {
+        font-size: 1.6rem;
+        margin-right: auto;
+        padding: var(--space-3);
+        line-height: 1;
+        font-weight: 600;
+        color: var(--red-12);
+      }
+
       ${buttonStyles}
 
       .toggle-button {
@@ -175,6 +184,7 @@ class ErrorConsoleContainer extends LitElement {
 
   render() {
     return html` <div class="header">
+        <span class="title"> Shiny Client Errors </span>
         <button
           class="close-button"
           @click=${this.handleDismissAll}
@@ -222,9 +232,9 @@ class ErrorConsoleContainer extends LitElement {
   }
 }
 
-customElements.define("shiny-error-console-container", ErrorConsoleContainer);
+customElements.define("shiny-error-console", ShinyErrorConsole);
 
-export class ErrorConsole extends LitElement {
+export class ShinyErrorMessage extends LitElement {
   static properties = {
     headline: {},
     message: {},
@@ -277,7 +287,6 @@ export class ErrorConsole extends LitElement {
       }
 
       .error-message {
-        color: var(--red-11);
         font-family: "Courier New", Courier, monospace;
       }
 
@@ -440,10 +449,10 @@ export class ErrorConsole extends LitElement {
   }
 }
 
-customElements.define("shiny-error-console", ErrorConsole);
+customElements.define("shiny-error-message", ShinyErrorMessage);
 
 /**
- * Function to show an error message to user in shiny-error-console web
+ * Function to show an error message to user in shiny-error-message web
  * component
  * @param e - Error object to show to user. This is whatever is caught in
  * a try-catch statement so it may be a string or it may be a proper Error
@@ -466,17 +475,13 @@ export function showErrorInClientConsole(e: unknown): void {
 
   // Check to see if an Error Console Container element already exists. If it
   // doesn't we need to add it before putting an error on the screen
-  let errorConsoleContainer = document.querySelector(
-    "shiny-error-console-container"
-  );
+  let errorConsoleContainer = document.querySelector("shiny-error-console");
   if (!errorConsoleContainer) {
-    errorConsoleContainer = document.createElement(
-      "shiny-error-console-container"
-    );
+    errorConsoleContainer = document.createElement("shiny-error-console");
     document.body.appendChild(errorConsoleContainer);
   }
 
-  const errorConsole = document.createElement("shiny-error-console");
+  const errorConsole = document.createElement("shiny-error-message");
   errorConsole.setAttribute("headline", headline || "");
   errorConsole.setAttribute("message", errorMsg);
 

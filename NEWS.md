@@ -13,7 +13,7 @@
 
 * Default styles for `showNotification()` were tweaked slightly to improve accessibility, sizing, and padding. (#3913)
 
-* Shiny inputs and `{htmlwidgets}` are no longer treated as draggable inside of `absolutePanel()`/`fixedPanel()` with `draggable = TRUE`. As a result, interactions like zooming and panning now work as expected with widgets like `{plotly}` and `{leaflet}` when they appear in a draggable panel. (#3752, #3933) 
+* Shiny inputs and `{htmlwidgets}` are no longer treated as draggable inside of `absolutePanel()`/`fixedPanel()` with `draggable = TRUE`. As a result, interactions like zooming and panning now work as expected with widgets like `{plotly}` and `{leaflet}` when they appear in a draggable panel. (#3752, #3933)
 
 * For `InputBinding`s, the `.receiveMessage()` method can now be asynchronous or synchronous (previously it could only be synchronous). (#3930)
 
@@ -22,6 +22,8 @@
 * `fileInput()` no longer has unwanted round corners applied to the `buttonLabel`. (#3879)
 
 * Fixed #3898: `wrapFunctionLabel()` no longer throws an error if the `name` is longer than 10000 bytes. (#3903)
+
+* Fixed #2392: `downloadButton()` now visibly returns its HTML tag so that it renders correctly in R Markdown and Quarto output. (Thanks to @fennovj, #2672)
 
 # shiny 1.7.5.1
 
@@ -360,8 +362,6 @@ This release focuses on improvements in three main areas:
 * Fixed #2606: `debounce()` would not work properly if the code in the reactive expression threw an error on the first run. (#2652)
 
 * Fixed #2653: The `dataTableOutput()` could have incorrect output if certain characters were in the column names. (#2658)
-
-* Fixed [#2392](https://github.com/rstudio/shiny/issues/2392): The `downloadButton()` now renders correctly in R Markdown output. ([#2672](https://github.com/rstudio/shiny/pull/2672))
 
 ### Documentation Updates
 

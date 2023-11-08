@@ -21384,6 +21384,14 @@
   function bindingIdExists(id) {
     return bindingIds.outputs.has(id) || bindingIds.inputs.has(id);
   }
+  function throwDuplicateIdError(duplicatedIds) {
+    throw new ShinyClientError({
+      headline: "Duplicate input/output IDs found",
+      message: "The following ".concat(duplicatedIds.size === 1 ? "ID was" : "IDs were", " repeated: ").concat(Array.from(duplicatedIds).map(function(id) {
+        return '"'.concat(id, '"');
+      }).join(", "), ".")
+    });
+  }
   function bindInputs(shinyCtx) {
     var scope = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : document.documentElement;
     var inputs = shinyCtx.inputs, inputsRate = shinyCtx.inputsRate, inputBindings = shinyCtx.inputBindings;
@@ -21449,12 +21457,7 @@
       _loop();
     }
     if (inputDuplicateIds.size > 0) {
-      throw new ShinyClientError({
-        headline: "Duplicate input IDs found",
-        message: "The following ".concat(inputDuplicateIds.size === 1 ? "ID was" : "IDs were", " repeated: ").concat(Array.from(inputDuplicateIds).map(function(id) {
-          return '"'.concat(id, '"');
-        }).join(", "), ".")
-      });
+      throwDuplicateIdError(inputDuplicateIds);
     }
     return inputItems;
   }
@@ -21535,20 +21538,12 @@
               _context.next = 6;
               break;
             case 36:
-              if (!(outputDuplicateIds.size > 0)) {
-                _context.next = 38;
-                break;
+              if (outputDuplicateIds.size > 0) {
+                throwDuplicateIdError(outputDuplicateIds);
               }
-              throw new ShinyClientError({
-                headline: "Duplicate output IDs found",
-                message: "The following ".concat(outputDuplicateIds.size === 1 ? "ID was" : "IDs were", " repeated: ").concat(Array.from(outputDuplicateIds).map(function(id2) {
-                  return '"'.concat(id2, '"');
-                }).join(", "), ".")
-              });
-            case 38:
               setTimeout(sendImageSizeFns.regular, 0);
               setTimeout(sendOutputHiddenState, 0);
-            case 40:
+            case 39:
             case "end":
               return _context.stop();
           }

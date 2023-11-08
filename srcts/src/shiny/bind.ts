@@ -71,6 +71,22 @@ function bindingIdExists(id: string): boolean {
   return bindingIds.outputs.has(id) || bindingIds.inputs.has(id);
 }
 
+/**
+ * Throws a ShinyClientError with a message indicating which IDs are duplicated
+ * @param duplicatedIds Set of duplicated IDs to throw error for
+ * @throws ShinyClientError
+ */
+function throwDuplicateIdError(duplicatedIds: Set<string>) {
+  throw new ShinyClientError({
+    headline: "Duplicate input/output IDs found",
+    message: `The following ${
+      duplicatedIds.size === 1 ? "ID was" : "IDs were"
+    } repeated: ${Array.from(duplicatedIds)
+      .map((id) => `"${id}"`)
+      .join(", ")}.`,
+  });
+}
+
 type BindInputsCtx = {
   inputs: InputValidateDecorator;
   inputsRate: InputRateDecorator;
@@ -176,14 +192,7 @@ function bindInputs(
 
   // Send error message to the user if duplicate IDs are found
   if (inputDuplicateIds.size > 0) {
-    throw new ShinyClientError({
-      headline: "Duplicate input IDs found",
-      message: `The following ${
-        inputDuplicateIds.size === 1 ? "ID was" : "IDs were"
-      } repeated: ${Array.from(inputDuplicateIds)
-        .map((id) => `"${id}"`)
-        .join(", ")}.`,
-    });
+    throwDuplicateIdError(inputDuplicateIds);
   }
 
   return inputItems;
@@ -260,14 +269,7 @@ async function bindOutputs(
 
   // Send error message to the user if duplicate IDs are found
   if (outputDuplicateIds.size > 0) {
-    throw new ShinyClientError({
-      headline: "Duplicate output IDs found",
-      message: `The following ${
-        outputDuplicateIds.size === 1 ? "ID was" : "IDs were"
-      } repeated: ${Array.from(outputDuplicateIds)
-        .map((id) => `"${id}"`)
-        .join(", ")}.`,
-    });
+    throwDuplicateIdError(outputDuplicateIds);
   }
 
   // Send later in case DOM layout isn't final yet.

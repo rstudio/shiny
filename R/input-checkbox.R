@@ -31,12 +31,12 @@ checkboxInput <- function(inputId, label, value = FALSE, width = NULL) {
 
   value <- restoreInput(id = inputId, default = value)
 
-  inputTag <- tags$input(id = inputId, type="checkbox")
+  inputTag <- tags$input(id = inputId, type="checkbox", class = "shiny-input-checkbox")
   if (!is.null(value) && value)
     inputTag$attribs$checked <- "checked"
 
   div(class = "form-group shiny-input-container",
-    style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
+    style = css(width = validateCssUnit(width)),
     div(class = "checkbox",
       tags$label(inputTag, tags$span(label))
     )

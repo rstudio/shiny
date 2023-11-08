@@ -1,5 +1,3 @@
-context("get-extension")
-
 test_that("Valid extensions are preserved", {
   expect_equal(maybeGetExtension("report.csv"), ".csv")
   expect_equal(maybeGetExtension("data.tar.bz2"), ".bz2")

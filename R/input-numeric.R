@@ -35,7 +35,7 @@ numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA,
   value <- restoreInput(id = inputId, default = value)
 
   # build input tag
-  inputTag <- tags$input(id = inputId, type = "number", class="form-control",
+  inputTag <- tags$input(id = inputId, type = "number", class="shiny-input-number form-control",
                          value = formatNoSci(value))
   if (!is.na(min))
     inputTag$attribs$min = min
@@ -45,7 +45,7 @@ numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA,
     inputTag$attribs$step = step
 
   div(class = "form-group shiny-input-container",
-    style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
+    style = css(width = validateCssUnit(width)),
     shinyInputLabel(inputId, label),
     inputTag
   )

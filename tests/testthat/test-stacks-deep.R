@@ -1,5 +1,3 @@
-context("deepstacks")
-
 describe("deep stack trace filtering", {
   it("passes smoke test", {
     st <- list(
@@ -11,20 +9,20 @@ describe("deep stack trace filtering", {
       c(common, "8", "..stacktraceon.."),
       c(common, "9")
     )
-    
+
     expect_equal(
       stripStackTraces(values = TRUE, st),
       jsonlite::fromJSON('[["1", "2", "5"],["6"],[],["9"]]')
     )
   })
-  
+
   it("handles null cases", {
     expect_equal(
       stripStackTraces(values = TRUE, list(c())),
       list(character(0))
     )
   })
-  
+
   it("handles various edge cases", {
     expect_equal(
       stripStackTraces(values = TRUE, list(

@@ -5,7 +5,13 @@
 \alias{downloadLink}
 \title{Create a download button or link}
 \usage{
-downloadButton(outputId, label = "Download", class = NULL, ...)
+downloadButton(
+  outputId,
+  label = "Download",
+  class = NULL,
+  ...,
+  icon = shiny::icon("download")
+)
 
 downloadLink(outputId, label = "Download", class = NULL, ...)
 }
@@ -18,6 +24,8 @@ is assigned to.}
 \item{class}{Additional CSS classes to apply to the tag, if any.}
 
 \item{...}{Other arguments to pass to the container tag function.}
+
+\item{icon}{An \code{\link[=icon]{icon()}} to appear on the button. Default is \code{icon("download")}.}
 }
 \description{
 Use these functions to create a download button or link; when clicked, it
@@ -27,18 +35,31 @@ function.
 }
 \examples{
 \dontrun{
-# In server.R:
-output$downloadData <- downloadHandler(
-  filename = function() {
-    paste('data-', Sys.Date(), '.csv', sep='')
-  },
-  content = function(con) {
-    write.csv(data, con)
-  }
+ui <- fluidPage(
+  p("Choose a dataset to download."),
+  selectInput("dataset", "Dataset", choices = c("mtcars", "airquality")),
+  downloadButton("downloadData", "Download")
 )
 
-# In ui.R:
-downloadLink('downloadData', 'Download')
+server <- function(input, output) {
+  # The requested dataset
+  data <- reactive({
+    get(input$dataset)
+  })
+
+  output$downloadData <- downloadHandler(
+    filename = function() {
+      # Use the selected dataset as the suggested file name
+      paste0(input$dataset, ".csv")
+    },
+    content = function(file) {
+      # Write the dataset to the `file` that will be downloaded
+      write.csv(data(), file)
+    }
+  )
+}
+
+shinyApp(ui, server)
 }
 
 }

@@ -10,8 +10,14 @@ runUrl(url, filetype = NULL, subdir = NULL, destdir = NULL, ...)
 
 runGist(gist, destdir = NULL, ...)
 
-runGitHub(repo, username = getOption("github.user"), ref = "master",
-  subdir = NULL, destdir = NULL, ...)
+runGitHub(
+  repo,
+  username = getOption("github.user"),
+  ref = "HEAD",
+  subdir = NULL,
+  destdir = NULL,
+  ...
+)
 }
 \arguments{
 \item{url}{URL of the application.}
@@ -41,7 +47,8 @@ all valid values.}
 \code{"username/repo"}, \code{username} will be taken from \code{repo}.}
 
 \item{ref}{Desired git reference. Could be a commit, tag, or branch name.
-Defaults to \code{"master"}.}
+Defaults to \code{"HEAD"}, which means the default branch on GitHub, typically
+\code{"main"} or \code{"master"}.}
 }
 \description{
 \code{runUrl()} downloads and launches a Shiny application that is hosted at
@@ -56,10 +63,10 @@ respectively.
 \examples{
 ## Only run this example in interactive R sessions
 if (interactive()) {
-  runUrl('https://github.com/rstudio/shiny_example/archive/master.tar.gz')
+  runUrl('https://github.com/rstudio/shiny_example/archive/main.tar.gz')
 
   # Can run an app from a subdirectory in the archive
-  runUrl("https://github.com/rstudio/shiny_example/archive/master.zip",
+  runUrl("https://github.com/rstudio/shiny_example/archive/main.zip",
     subdir = "inst/shinyapp/")
 }
 ## Only run this example in interactive R sessions

@@ -50,21 +50,19 @@ textAreaInput <- function(inputId, label, value = "", width = NULL, height = NUL
     resize <- match.arg(resize, c("both", "none", "vertical", "horizontal"))
   }
 
-  style <- paste(
-    if (!is.null(width))  paste0("width: ",  validateCssUnit(width),  ";"),
-    if (!is.null(height)) paste0("height: ", validateCssUnit(height), ";"),
-    if (!is.null(resize)) paste0("resize: ", resize, ";")
+  style <- css(
+    # The width is specified on the parent div.
+    width = if (!is.null(width)) "100%",
+    height = validateCssUnit(height),
+    resize = resize
   )
-
-  # Workaround for tag attribute=character(0) bug:
-  #   https://github.com/rstudio/htmltools/issues/65
-  if (length(style) == 0) style <- NULL
 
   div(class = "form-group shiny-input-container",
     shinyInputLabel(inputId, label),
+    style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
     tags$textarea(
       id = inputId,
-      class = "form-control",
+      class = "shiny-input-textarea form-control",
       placeholder = placeholder,
       style = style,
       rows = rows,

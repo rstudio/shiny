@@ -23,10 +23,10 @@
 #' @examples
 #' ## Only run this example in interactive R sessions
 #' if (interactive()) {
-#'   runUrl('https://github.com/rstudio/shiny_example/archive/master.tar.gz')
+#'   runUrl('https://github.com/rstudio/shiny_example/archive/main.tar.gz')
 #'
 #'   # Can run an app from a subdirectory in the archive
-#'   runUrl("https://github.com/rstudio/shiny_example/archive/master.zip",
+#'   runUrl("https://github.com/rstudio/shiny_example/archive/main.zip",
 #'     subdir = "inst/shinyapp/")
 #' }
 runUrl <- function(url, filetype = NULL, subdir = NULL, destdir = NULL, ...) {
@@ -121,7 +121,8 @@ runGist <- function(gist, destdir = NULL, ...) {
 #' @param username GitHub username. If `repo` is of the form
 #'   `"username/repo"`, `username` will be taken from `repo`.
 #' @param ref Desired git reference. Could be a commit, tag, or branch name.
-#'   Defaults to `"master"`.
+#'   Defaults to `"HEAD"`, which means the default branch on GitHub, typically
+#'   `"main"` or `"master"`.
 #' @export
 #' @examples
 #' ## Only run this example in interactive R sessions
@@ -133,7 +134,7 @@ runGist <- function(gist, destdir = NULL, ...) {
 #'   runGitHub("shiny_example", "rstudio", subdir = "inst/shinyapp/")
 #' }
 runGitHub <- function(repo, username = getOption("github.user"),
-                      ref = "master", subdir = NULL, destdir = NULL, ...) {
+                      ref = "HEAD", subdir = NULL, destdir = NULL, ...) {
 
   if (grepl('/', repo)) {
     res <- strsplit(repo, '/')[[1]]

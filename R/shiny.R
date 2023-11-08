@@ -1,4 +1,4 @@
-#' @include utils.R stack.R
+#' @include utils.R
 NULL
 
 #' Web Application Framework for R
@@ -8,7 +8,7 @@ NULL
 #' prebuilt widgets make it possible to build beautiful, responsive, and
 #' powerful applications with minimal effort.
 #'
-#' The Shiny tutorial at <http://shiny.rstudio.com/tutorial/> explains
+#' The Shiny tutorial at <https://shiny.rstudio.com/tutorial/> explains
 #' the framework in depth, walks you through building a simple application, and
 #' includes extensive annotated examples.
 #'
@@ -17,15 +17,6 @@ NULL
 #' @name shiny-package
 #' @aliases shiny
 #' @docType package
-#' @import htmltools httpuv xtable digest R6 mime
-NULL
-
-# It's necessary to Depend on methods so Rscript doesn't fail. It's necessary
-# to import(methods) in NAMESPACE so R CMD check doesn't complain. This
-# approach isn't foolproof because Rscript -e pkgname::func() doesn't actually
-# cause methods to be attached, but it's not a problem for shiny::runApp()
-# since we call require(shiny) as part of loading the app.
-#' @import methods
 NULL
 
 createUniqueId <- function(bytes, prefix = "", suffix = "") {
@@ -42,8 +33,12 @@ createUniqueId <- function(bytes, prefix = "", suffix = "") {
 }
 
 toJSON <- function(x, ...,  dataframe = "columns", null = "null", na = "null",
-  auto_unbox = TRUE, digits = getOption("shiny.json.digits", 16),
-  use_signif = TRUE, force = TRUE, POSIXt = "ISO8601", UTC = TRUE,
+  auto_unbox = TRUE,
+  # Shiny has had a legacy value of 16 significant digits
+  # We can use `I(16)` mixed with the default behavior in jsonlite's `use_signif=`
+  # https://github.com/jeroen/jsonlite/commit/728efa9
+  digits = getOption("shiny.json.digits", I(16)), use_signif = is(digits, "AsIs"),
+  force = TRUE, POSIXt = "ISO8601", UTC = TRUE,
   rownames = FALSE, keep_vec_names = TRUE, strict_atomic = TRUE) {
 
   if (strict_atomic) {
@@ -117,9 +112,6 @@ workerId <- local({
 #' \item{clientData}{
 #'   A [reactiveValues()] object that contains information about the client.
 #'   \itemize{
-#'     \item{`allowDataUriScheme` is a logical value that indicates whether
-#'       the browser is able to handle URIs that use the `data:` scheme.
-#'     }
 #'     \item{`pixelratio` reports the "device pixel ratio" from the web browser,
 #'       or 1 if none is reported. The value is 2 for Apple Retina displays.
 #'     }
@@ -197,13 +189,23 @@ workerId <- local({
 #'   session is actually connected.
 #' }
 #' \item{request}{
-#'   An environment that implements the Rook specification for HTTP requests.
-#'   This is the request that was used to initiate the websocket connection
-#'   (as opposed to the request that downloaded the web page for the app).
+#'   An environment that implements the [Rook
+#'   specification](https://github.com/jeffreyhorner/Rook#the-environment) for
+#'   HTTP requests. This is the request that was used to initiate the websocket
+#'   connection (as opposed to the request that downloaded the web page for the
+#'   app).
 #' }
 #' \item{userData}{
 #'   An environment for app authors and module/package authors to store whatever
 #'   session-specific data they want.
+#' }
+#' \item{user}{
+#'   User's log-in information. Useful for identifying users on hosted platforms
+#'   such as RStudio Connect and Shiny Server.
+#' }
+#' \item{groups}{
+#'   The `user`'s relevant group information. Useful for determining what
+#'   privileges the user should or shouldn't have.
 #' }
 #' \item{resetBrush(brushId)}{
 #'   Resets/clears the brush with the given `brushId`, if it exists on
@@ -272,6 +274,18 @@ workerId <- local({
 #'   character vector, as in `input=c("x", "y")`. The format can be
 #'   "rds" or "json".
 #' }
+#' \item{setCurrentTheme(theme)}{
+#'   Sets the current [bootstrapLib()] theme, which updates the value of
+#'   [getCurrentTheme()], invalidates `session$getCurrentTheme()`, and calls
+#'   function(s) registered with [registerThemeDependency()] with provided
+#'   `theme`. If those function calls return [htmltools::htmlDependency()]s with
+#'   `stylesheet`s, then those stylesheets are "refreshed" (i.e., the new
+#'   stylesheets are inserted on the page and the old ones are disabled and
+#'   removed).
+#' }
+#' \item{getCurrentTheme()}{
+#'   A reactive read of the current [bootstrapLib()] theme.
+#' }
 #'
 #' @name session
 NULL
@@ -280,7 +294,7 @@ NULL
 #'
 #' The `NS` function creates namespaced IDs out of bare IDs, by joining
 #' them using `ns.sep` as the delimiter. It is intended for use in Shiny
-#' modules. See <http://shiny.rstudio.com/articles/modules.html>.
+#' modules. See <https://shiny.rstudio.com/articles/modules.html>.
 #'
 #' Shiny applications use IDs to identify inputs and outputs. These IDs must be
 #' unique within an application, as accidentally using the same input/output ID
@@ -297,7 +311,7 @@ NULL
 #' @param id The id string to be namespaced (optional).
 #' @return If `id` is missing, returns a function that expects an id string
 #'   as its only argument and returns that id with the namespace prepended.
-#' @seealso <http://shiny.rstudio.com/articles/modules.html>
+#' @seealso <https://shiny.rstudio.com/articles/modules.html>
 #' @export
 NS <- function(namespace, id = NULL) {
   if (length(namespace) == 0)
@@ -335,8 +349,8 @@ ShinySession <- R6Class(
     websocket = 'ANY',
     invalidatedOutputValues = 'Map',
     invalidatedOutputErrors = 'Map',
-    inputMessageQueue = list(), # A list of inputMessages to send when flushed
-    cycleStartActionQueue = list(), # A list of actions to perform to start a cycle
+    inputMessageQueue = 'fastqueue',     # A list of inputMessages to send when flushed
+    cycleStartActionQueue = 'fastqueue', # A list of actions to perform to start a cycle
     .outputs = list(),          # Keeps track of all the output observer objects
     .outputOptions = list(),     # Options for each of the output observer objects
     progressKeys = 'character',
@@ -363,6 +377,7 @@ ShinySession <- R6Class(
     currentOutputName = NULL,        # Name of the currently-running output
     outputInfo = list(),             # List of information for each output
     testSnapshotUrl = character(0),
+    currentThemeDependency = NULL,   # ReactiveVal for taking dependency on theme
 
     sendResponse = function(requestMsg, value) {
       if (is.null(requestMsg$tag)) {
@@ -394,7 +409,7 @@ ShinySession <- R6Class(
     sendMessage = function(...) {
       # This function is a wrapper for $write
       msg <- list(...)
-      if (anyUnnamed(msg)) {
+      if (any_unnamed(msg)) {
         stop("All arguments to sendMessage must be named.")
       }
       private$write(toJSON(msg))
@@ -468,14 +483,57 @@ ShinySession <- R6Class(
           # The format of the response that will be sent back. Defaults to
           # "json" unless requested otherwise. The only other valid value is
           # "rds".
-          format <- params$format %OR% "json"
+          format <- params$format %||% "json"
+          # Machines can test their snapshot under different locales.
+          # R CMD check runs under the `C` locale.
+          # However, before this parameter, existing snapshots were most likely not
+          #   under the `C` locale is would cause failures. This parameter allows
+          #   users to opt-in to the `C` locale.
+          # From ?sort:
+          #   However, there are some caveats with the radix sort:
+          #     If ‘x’ is a ‘character’ vector, all elements must share the
+          #   same encoding. Only UTF-8 (including ASCII) and Latin-1
+          #   encodings are supported. Collation always follows the "C"
+          #   locale.
+          # {shinytest2} will always set `sortC=1`
+          # {shinytest} does not have `sortC` functionality.
+          #    Users should set `options(shiny.snapshotsortc = TRUE)` within their app.
+          # The sortingMethod should always be `radix` going forward.
+          sortMethod <-
+            if (!is.null(params$sortC)) {
+              if (params$sortC != "1") {
+                stop("The `sortC` parameter can only be `1` or not supplied")
+              }
+              "radix"
+            } else {
+              # Allow users to set an option for {shinytest2}.
+              if (isTRUE(getShinyOption("snapshotsortc", default = FALSE))) {
+                "radix"
+              } else {
+                "auto"
+              }
+            }
 
           values <- list()
 
           if (!is.null(params$input)) {
 
-            allInputs <- isolate(
-              reactiveValuesToList(self$input, all.names = TRUE)
+            # The isolate and reactiveValuesToList calls are being executed
+            # in a non-reactive context, but will produce output in the reactlog
+            # Seeing new, unlabelled reactives ONLY when calling shinytest is
+            # jarring / frustrating to debug.
+            # Since labeling these values is not currently supported in reactlog,
+            # it is better to hide them.
+            # Hopefully we can replace this with something like
+            # `with_reactlog_group("shinytest", {})`, which would visibily explain
+            # why the new reactives are added when calling shinytest
+            withr::with_options(
+              list(shiny.reactlog = FALSE),
+              {
+                allInputs <- isolate(
+                  reactiveValuesToList(self$input, all.names = TRUE)
+                )
+              }
             )
 
             # If params$input is "1", return all; otherwise return just the
@@ -497,7 +555,7 @@ ShinySession <- R6Class(
               }
             )
 
-            values$input <- sortByName(values$input)
+            values$input <- sortByName(values$input, method = sortMethod)
           }
 
           if (!is.null(params$output)) {
@@ -525,7 +583,7 @@ ShinySession <- R6Class(
               }
             )
 
-            values$output <- sortByName(values$output)
+            values$output <- sortByName(values$output, method = sortMethod)
           }
 
           if (!is.null(params$export)) {
@@ -546,7 +604,7 @@ ShinySession <- R6Class(
               )
             }
 
-            values$export <- sortByName(values$export)
+            values$export <- sortByName(values$export, method = sortMethod)
           }
 
           # Make sure input, output, and export are all named lists (at this
@@ -585,23 +643,22 @@ ShinySession <- R6Class(
     # function has been set, return the identity function.
     getSnapshotPreprocessOutput = function(name) {
       fun <- attr(private$.outputs[[name]], "snapshotPreprocess", exact = TRUE)
-      fun %OR% identity
+      fun %||% identity
     },
 
     # Get the snapshotPreprocessInput function for an input name. If no preprocess
     # function has been set, return the identity function.
     getSnapshotPreprocessInput = function(name) {
       fun <- private$.input$getMeta(name, "shiny.snapshot.preprocess")
-      fun %OR% identity
+      fun %||% identity
     },
 
     # See cycleStartAction
     startCycle = function() {
       # TODO: This should check for busyCount == 0L, and remove the checks from
       # the call sites
-      if (length(private$cycleStartActionQueue) > 0) {
-        head <- private$cycleStartActionQueue[[1L]]
-        private$cycleStartActionQueue <- private$cycleStartActionQueue[-1L]
+      if (private$cycleStartActionQueue$size() > 0) {
+        head <- private$cycleStartActionQueue$remove()
 
         # After we execute the current cycleStartAction (head), there may be
         # more items left on the queue. If the current busyCount > 0, then that
@@ -620,7 +677,7 @@ ShinySession <- R6Class(
         # busyCount, it's possible we're calling startCycle spuriously; that's
         # OK, it's essentially a no-op in that case.
         on.exit({
-          if (private$busyCount == 0L && length(private$cycleStartActionQueue) > 0L) {
+          if (private$busyCount == 0L && private$cycleStartActionQueue$size() > 0L) {
             later::later(function() {
               if (private$busyCount == 0L) {
                 private$startCycle()
@@ -651,12 +708,15 @@ ShinySession <- R6Class(
     cache = NULL,         # A cache object used in the session
     user = NULL,
     groups = NULL,
+    options = NULL,       # For session-specific shinyOptions()
 
     initialize = function(websocket) {
       private$websocket <- websocket
       self$closed <- FALSE
       # TODO: Put file upload context in user/app-specific dir if possible
 
+      private$inputMessageQueue     <- fastmap::fastqueue()
+      private$cycleStartActionQueue <- fastmap::fastqueue()
       private$invalidatedOutputValues <- Map$new()
       private$invalidatedOutputErrors <- Map$new()
       private$fileUploadContext <- FileUploadContext$new()
@@ -667,7 +727,7 @@ ShinySession <- R6Class(
       private$.input      <- ReactiveValues$new(dedupe = FALSE, label = "input")
       private$.clientData <- ReactiveValues$new(dedupe = TRUE, label = "clientData")
       private$timingRecorder <- ShinyServerTimingRecorder$new()
-      self$progressStack <- Stack$new()
+      self$progressStack <- fastmap::faststack()
       self$files <- Map$new()
       self$downloads <- Map$new()
       self$userData <- new.env(parent = emptyenv())
@@ -681,15 +741,25 @@ ShinySession <- R6Class(
       private$.outputs <- list()
       private$.outputOptions <- list()
 
-      self$cache <- MemoryCache$new()
+      # Copy app-level options
+      self$options <- getCurrentAppState()$options
+
+      self$cache <- cachem::cache_mem(max_size = 200 * 1024^2)
 
       private$bookmarkCallbacks <- Callbacks$new()
       private$bookmarkedCallbacks <- Callbacks$new()
       private$restoreCallbacks <- Callbacks$new()
       private$restoredCallbacks <- Callbacks$new()
 
-      private$testMode <- .globals$testMode
+      private$testMode <- getShinyOption("testmode", default = FALSE)
       private$enableTestSnapshot()
+
+      # This `withReactiveDomain` is used only to satisfy the reactlog, so that
+      # it knows to scope this reactiveVal to this session.
+      # https://github.com/rstudio/shiny/pull/3182
+      withReactiveDomain(self,
+        private$currentThemeDependency <- reactiveVal(0, label = "Theme Counter")
+      )
 
       private$registerSessionEndCallbacks()
 
@@ -722,6 +792,12 @@ ShinySession <- R6Class(
     },
     requestFlush = function() {
       appsNeedingFlush$set(self$token, self)
+    },
+    .scheduleTask = function(millis, callback) {
+      scheduleTask(millis, callback)
+    },
+    .now = function(){
+      getTimeMs()
     },
     rootScope = function() {
       self
@@ -784,7 +860,7 @@ ShinySession <- R6Class(
             dots <- eval(substitute(alist(...)))
           }
 
-          if (anyUnnamed(dots))
+          if (any_unnamed(dots))
             stop("exportTestValues: all arguments must be named.")
 
           names(dots) <- ns(names(dots))
@@ -872,7 +948,7 @@ ShinySession <- R6Class(
 
         # Copy `values` from scopeState to state, adding namespace
         if (length(scopeState$values) != 0) {
-          if (anyUnnamed(scopeState$values)) {
+          if (any_unnamed(scopeState$values)) {
             stop("All scope values in must be named.")
           }
 
@@ -922,7 +998,33 @@ ShinySession <- R6Class(
 
       impl <- .subset2(x, 'impl')
       key <- .subset2(x, 'ns')(name)
-      impl$freeze(key)
+
+      is_input <- identical(impl, private$.input)
+
+      # There's no good reason for us not to just do force=TRUE, except that we
+      # know this fixes problems for freezeReactiveValue(input) but we don't
+      # currently even know what you would use freezeReactiveValue(rv) for. In
+      # the spirit of not breaking things we don't understand, we're making as
+      # targeted a fix as possible, while emitting a deprecation warning (below)
+      # that should help us gather more data about the other case.
+      impl$freeze(key, invalidate = is_input)
+
+      if (is_input) {
+        # Notify the client that this input was frozen. The client will ensure
+        # that the next time it sees a value for that input, even if the value
+        # has not changed from the last known value of that input, it will be
+        # sent to the server anyway.
+        private$sendMessage(frozen = list(
+          ids = list(key)
+        ))
+      } else {
+        if (getOption("shiny.deprecation.messages", TRUE) && getOption("shiny.deprecation.messages.freeze", TRUE)) {
+          rlang::warn(
+            "Support for calling freezeReactiveValue() with non-`input` reactiveValues objects is soft-deprecated, and may be removed in a future version of Shiny. (See https://github.com/rstudio/shiny/issues/3063)",
+            .frequency = "once", .frequency_id = "freezeReactiveValue")
+        }
+      }
+
       self$onFlushed(function() impl$thaw(key))
     },
 
@@ -956,7 +1058,9 @@ ShinySession <- R6Class(
         output$suspend()
       }
       # ..stacktraceon matches with the top-level ..stacktraceoff..
-      private$closedCallbacks$invoke(onError = printError, ..stacktraceon = TRUE)
+      withReactiveDomain(self, {
+        private$closedCallbacks$invoke(onError = printError, ..stacktraceon = TRUE)
+      })
     },
     isClosed = function() {
       return(self$closed)
@@ -1045,7 +1149,12 @@ ShinySession <- R6Class(
                   structure(list(), class = "try-error", condition = cond)
                 } else if (inherits(cond, "shiny.output.cancel")) {
                   structure(list(), class = "cancel-output")
-                } else if (inherits(cond, "shiny.silent.error")) {
+                } else if (cnd_inherits(cond, "shiny.silent.error")) {
+                  # The error condition might have been chained by
+                  # foreign code, e.g. dplyr. Find the original error.
+                  while (!inherits(cond, "shiny.silent.error")) {
+                    cond <- cond$parent
+                  }
                   # Don't let shiny.silent.error go through the normal stop
                   # path of try, because we don't want it to print. But we
                   # do want to try to return the same looking result so that
@@ -1109,7 +1218,10 @@ ShinySession <- R6Class(
           private$.outputOptions[[name]] <- list()
       }
       else {
-        stop(paste("Unexpected", class(func), "output for", name))
+        rlang::abort(c(
+          paste0("Unexpected ", class(func)[[1]], " object for output$", name),
+          i = "Did you forget to use a render function?"
+        ))
       }
     },
     getOutput = function(name) {
@@ -1139,7 +1251,7 @@ ShinySession <- R6Class(
           length(private$progressKeys) != 0 ||
           length(private$invalidatedOutputValues) != 0 ||
           length(private$invalidatedOutputErrors) != 0 ||
-          length(private$inputMessageQueue) != 0
+          private$inputMessageQueue$size() != 0
         )
       }
 
@@ -1171,8 +1283,8 @@ ShinySession <- R6Class(
         private$invalidatedOutputValues <- Map$new()
         errors <- as.list(private$invalidatedOutputErrors)
         private$invalidatedOutputErrors <- Map$new()
-        inputMessages <- private$inputMessageQueue
-        private$inputMessageQueue <- list()
+        inputMessages <- private$inputMessageQueue$as_list()
+        private$inputMessageQueue$reset()
 
         if (isTRUE(private$testMode)) {
           private$storeOutputValues(mergeVectors(values, errors))
@@ -1190,7 +1302,7 @@ ShinySession <- R6Class(
     # does not guarantee) inputs and reactive values from changing underneath
     # async observers as they run.
     cycleStartAction = function(callback) {
-      private$cycleStartActionQueue <- c(private$cycleStartActionQueue, list(callback))
+      private$cycleStartActionQueue$add(callback)
       # If no observers are running in this session, we're safe to proceed.
       # Otherwise, startCycle() will be called later, via decrementBusyCount().
       if (private$busyCount == 0L) {
@@ -1230,6 +1342,66 @@ ShinySession <- R6Class(
         modal = list(type = type, message = message)
       )
     },
+
+    getCurrentTheme = function() {
+      private$currentThemeDependency()
+      getCurrentTheme()
+    },
+
+    setCurrentTheme = function(theme) {
+      # This function does three things: (1) sets theme as the current
+      # bootstrapTheme, (2) re-executes any registered theme dependencies, and
+      # (3) sends the resulting dependencies to the client.
+
+      if (!is_bs_theme(theme)) {
+        stop("`session$setCurrentTheme()` expects a `bslib::bs_theme()` object.", call. = FALSE)
+      }
+
+      # Switching Bootstrap versions has weird & complex consequences
+      # for the JS logic, so we forbid it
+      current_version <- bslib::theme_version(getCurrentTheme())
+      next_version <- bslib::theme_version(theme)
+      if (!identical(current_version, next_version)) {
+        stop(
+          "session$setCurrentTheme() cannot be used to change the Bootstrap version ",
+          "from ", current_version, " to ", next_version, ". ",
+          "Try using `bs_theme(version = ", next_version, ")` for initial theme.",
+          call. = FALSE
+        )
+      }
+
+      # Note that this will automatically scope to the session.
+      setCurrentTheme(theme)
+
+      # Invalidate
+      private$currentThemeDependency(isolate(private$currentThemeDependency()) + 1)
+
+      # Call any theme dependency functions and make sure we get a list of deps back
+      funcs <- getShinyOption("themeDependencyFuncs", default = list())
+      deps <- lapply(funcs, function(func) {
+        deps <- func(theme)
+        if (length(deps) == 0) return(NULL)
+        if (inherits(deps, "html_dependency")) return(list(deps))
+        is_dep <- vapply(deps, inherits, logical(1), "html_dependency")
+        if (all(is_dep)) return(deps)
+        stop("All registerThemeDependency() functions must yield htmlDependency() object(s)", call. = FALSE)
+      })
+      # Work with a flat list of dependencies
+      deps <- unlist(dropNulls(deps), recursive = FALSE)
+      # Add a special flag to let Shiny.renderDependencies() know that, even
+      # though we've already rendered the dependency, that we need to re-render
+      # the stylesheets
+      deps <- lapply(deps, function(dep) {
+        dep$restyle <- TRUE
+        dep
+      })
+
+      # Send any dependencies to be re-rendered
+      if (length(deps)) {
+        insertUI(selector = "body", where = "afterEnd", ui = tagList(deps))
+      }
+    },
+
     dispatch = function(msg) {
       method <- paste('@', msg$method, sep='')
       func <- try(self[[method]], silent = TRUE)
@@ -1261,8 +1433,7 @@ ShinySession <- R6Class(
     sendInputMessage = function(inputId, message) {
       data <- list(id = inputId, message = message)
 
-      # Add to input message queue
-      private$inputMessageQueue[[length(private$inputMessageQueue) + 1]] <- data
+      private$inputMessageQueue$add(data)
       # Needed so that Shiny knows to actually flush the input message queue
       self$requestFlush()
     },
@@ -1291,40 +1462,101 @@ ShinySession <- R6Class(
 
     getCurrentOutputInfo = function() {
       name <- private$currentOutputName
+      if (is.null(name)) {
+        return(NULL)
+      }
 
-      tmp_info <- private$outputInfo[[name]] %OR% list(name = name)
+      if (!is.null(private$outputInfo[[name]])) {
+        return(private$outputInfo[[name]])
+      }
+
+      # The following code will only run the first time this function has been
+      # called for this output.
+
+      tmp_info <- list(name = name)
 
       # cd_names() returns names of all items in clientData, without taking a
       # reactive dependency. It is a function and it's memoized, so that we do
       # the (relatively) expensive isolate(names(...)) call only when needed,
       # and at most one time in this function.
-      .cd_names <- NULL
-      cd_names <- function() {
-        if (is.null(.cd_names)) {
-          .cd_names <<- isolate(names(self$clientData))
-        }
-        .cd_names
+      cd_names <- isolate(names(self$clientData))
+
+      # parseCssColors() currently errors out if you hand it any NAs
+      # This'll make sure we're always working with a string (and if
+      # that string isn't a valid CSS color, will return NA)
+      # https://github.com/rstudio/htmltools/issues/161
+      parse_css_colors <- function(x) {
+        htmltools::parseCssColors(x %||% "", mustWork = FALSE)
       }
 
-      # If we don't already have width for this output info, see if it's
-      # present, and if so, add it.
-      if (! ("width" %in% names(tmp_info)) ) {
-        width_name  <- paste0("output_", name, "_width")
-        if (width_name %in% cd_names()) {
-          tmp_info$width <- reactive({
-            self$clientData[[width_name]]
-          })
+
+      # This function conditionally adds an item to tmp_info (for "width", it
+      # would create tmp_info$width). It is added _if_ there is an entry in
+      # clientData like "output_foo_width", where "foo" is the name of the
+      # output. The first time `tmp_info$width()` is called, it creates a
+      # reactive expression that reads `clientData$output_foo_width`, saves it,
+      # then invokes that reactive. On subsequent calls, the reactive already
+      # exists, so it simply invokes it.
+      #
+      # The reason it creates the reactive only on first use is so that it
+      # doesn't spuriously create reactives.
+      #
+      # This function essentially generalizes the code below for names other
+      # than just "width".
+      #
+      # width_name <- paste0("output_", name, "_width")
+      # if (width_name %in% cd_names()) {
+      #   width_r <- NULL
+      #   tmp_info$width <- function() {
+      #     if (is.null(width_r)) {
+      #       width_r <<- reactive({
+      #         parse_css_colors(self$clientData[[width_name]])
+      #       })
+      #     }
+      #
+      #     width_r()
+      #   }
+      # }
+      add_conditional_reactive <- function(prop, wrapfun = identity) {
+        force(prop)
+        force(wrapfun)
+
+        prop_name <- paste0("output_", name, "_", prop)
+
+        # Only add tmp_info$width if clientData has "output_foo_width"
+        if (prop_name %in% cd_names) {
+          r <- NULL
+
+          # Turn it into a function that creates a reactive on the first
+          # invocation of getCurrentOutputInfo()$width() and saves it; future
+          # invocations of getCurrentOutputInfo()$width() use the existing
+          # reactive and save it.
+          tmp_info[[prop]] <<- function() {
+            if (is.null(r)) {
+              r <<- reactive(label = prop_name, {
+                wrapfun(self$clientData[[prop_name]])
+              })
+            }
+
+            r()
+          }
         }
       }
 
-      if (! ("height" %in% names(tmp_info)) ) {
-        height_name  <- paste0("output_", name, "_height")
-        if (height_name %in% cd_names()) {
-          tmp_info$height <- reactive({
-            self$clientData[[height_name]]
-          })
-        }
-      }
+
+      # Note that all the following clientData values (which are reactiveValues)
+      # are wrapped in reactive() so that users can take a dependency on
+      # particular output info (i.e., just depend on width/height, or just
+      # depend on bg, fg, etc). To put it another way, if getCurrentOutputInfo()
+      # simply returned a list of values from self$clientData, than anything
+      # that calls getCurrentOutputInfo() would take a reactive dependency on
+      # all of these values.
+      add_conditional_reactive("width")
+      add_conditional_reactive("height")
+      add_conditional_reactive("bg",     parse_css_colors)
+      add_conditional_reactive("fg",     parse_css_colors)
+      add_conditional_reactive("accent", parse_css_colors)
+      add_conditional_reactive("font")
 
       private$outputInfo[[name]] <- tmp_info
       private$outputInfo[[name]]
@@ -1341,7 +1573,7 @@ ShinySession <- R6Class(
       # Warn if trying to enable save-to-server bookmarking on a version of SS,
       # SSP, or Connect that doesn't support it.
       if (store == "server" && inShinyServer() &&
-          is.null(getShinyOption("save.interface")))
+          is.null(getShinyOption("save.interface", default = NULL)))
       {
         showNotification(
           "This app tried to enable saved-to-server bookmarking, but it is not supported by the hosting environment.",
@@ -1509,7 +1741,7 @@ ShinySession <- R6Class(
         dots <- eval(substitute(alist(...)))
       }
 
-      if (anyUnnamed(dots))
+      if (any_unnamed(dots))
         stop("exportTestValues: all arguments must be named.")
 
       # Create a named list where each item is a list with an expression and
@@ -1522,7 +1754,7 @@ ShinySession <- R6Class(
     },
 
     getTestSnapshotUrl = function(input = TRUE, output = TRUE, export = TRUE,
-                                  format = "json") {
+                                  format = "json", sortC = FALSE) {
       reqString <- function(group, value) {
         if (isTRUE(value))
           paste0(group, "=1")
@@ -1536,6 +1768,7 @@ ShinySession <- R6Class(
         reqString("input", input),
         reqString("output", output),
         reqString("export", export),
+        reqString("sortC", sortC),
         paste0("format=", format),
         sep = "&"
       )
@@ -1617,10 +1850,6 @@ ShinySession <- R6Class(
       )
     },
 
-    # Public RPC methods
-    `@uploadieFinish` = function() {
-      # Do nothing; just want the side effect of flushReact, output flush, etc.
-    },
     `@uploadInit` = function(fileInfos) {
       maxSize <- getOption('shiny.maxRequestSize', 5 * 1024 * 1024)
       fileInfos <- lapply(fileInfos, function(fi) {
@@ -1687,33 +1916,6 @@ ShinySession <- R6Class(
         }
       }
 
-      # @description Only applicable to files uploaded via IE. When possible,
-      #   adds the appropriate extension to temporary files created by
-      #   \code{mime::parse_multipart}.
-      # @param multipart A named list as returned by
-      #   \code{mime::parse_multipart}
-      # @return A named list with datapath updated to point to the new location
-      #   of the file, if an extension was added.
-      maybeMoveIEUpload <- function(multipart) {
-        if (is.null(multipart)) return(NULL)
-
-        lapply(multipart, function(input) {
-          oldPath <- input$datapath
-          newPath <- paste0(oldPath, maybeGetExtension(input$name))
-          if (oldPath != newPath) {
-            file.rename(oldPath, newPath)
-            input$datapath <- newPath
-          }
-          input
-        })
-      }
-
-      if (matches[2] == 'uploadie' && identical(req$REQUEST_METHOD, "POST")) {
-        id <- URLdecode(matches[3])
-        res <- maybeMoveIEUpload(mime::parse_multipart(req))
-        private$.input$set(id, res[[id]])
-        return(httpResponse(200, 'text/plain', 'OK'))
-      }
 
       if (matches[2] == 'download') {
 
@@ -1788,15 +1990,17 @@ ShinySession <- R6Class(
                   }
                   return(httpResponse(
                     200,
-                    download$contentType %OR% getContentType(filename),
+                    download$contentType %||% getContentType(filename),
                     # owned=TRUE means tmpdata will be deleted after response completes
                     list(file=tmpdata, owned=TRUE),
                     c(
                       'Content-Disposition' = ifelse(
                         dlmatches[3] == '',
-                        'attachment; filename="' %.%
-                          gsub('(["\\\\])', '\\\\\\1', filename) %.%  # yes, that many \'s
-                          '"',
+                        paste0(
+                          'attachment; filename="',
+                          gsub('(["\\\\])', '\\\\\\1', filename),
+                          '"'
+                        ),
                         'attachment'
                       ),
                       'Cache-Control'='no-cache')))
@@ -1822,33 +2026,18 @@ ShinySession <- R6Class(
 
       return(httpResponse(404, 'text/html', '<h1>Not Found</h1>'))
     },
-    saveFileUrl = function(name, data, contentType, extra=list()) {
-      "Creates an entry in the file map for the data, and returns a URL pointing
-      to the file."
-      self$files$set(name, list(data=data, contentType=contentType))
-      return(sprintf('session/%s/file/%s?w=%s&r=%s',
-                     URLencode(self$token, TRUE),
-                     URLencode(name, TRUE),
-                     workerId(),
-                     createUniqueId(8)))
-    },
     # Send a file to the client
     fileUrl = function(name, file, contentType='application/octet-stream') {
-      "Return a URL for a file to be sent to the client. If allowDataUriScheme
-      is TRUE, then the file will be base64 encoded and embedded in the URL.
-      Otherwise, a URL pointing to the file will be returned."
+      "Return a URL for a file to be sent to the client. The file will be base64
+      encoded and embedded in the URL."
       bytes <- file.info(file)$size
       if (is.na(bytes))
         return(NULL)
 
       fileData <- readBin(file, 'raw', n=bytes)
 
-      if (isTRUE(private$.clientData$.values$get("allowDataUriScheme"))) {
-        b64 <- rawToBase64(fileData)
-        return(paste('data:', contentType, ';base64,', b64, sep=''))
-      } else {
-        return(self$saveFileUrl(name, fileData, contentType))
-      }
+      b64 <- rawToBase64(fileData)
+      return(paste('data:', contentType, ';base64,', b64, sep=''))
     },
     registerDownload = function(name, filename, contentType, func) {
 
@@ -1979,16 +2168,6 @@ ShinySession <- R6Class(
         })
       }
     }
-  ),
-  active = list(
-    session = function() {
-      shinyDeprecated(
-        msg = paste("Attempted to access deprecated shinysession$session object.",
-                    "Please just access the shinysession object directly."),
-        version = "0.11.1"
-      )
-      self
-    }
   )
 )
 
@@ -2025,7 +2204,7 @@ ShinySession <- R6Class(
   if (getOption("shiny.allowoutputreads", FALSE)) {
     .subset2(x, 'impl')$getOutput(name)
   } else {
-    stop("Reading from shinyoutput object is not allowed.")
+    rlang::abort(paste0("Can't read output '", name, "'"))
   }
 }
 
@@ -2034,12 +2213,12 @@ ShinySession <- R6Class(
 
 #' @export
 `[.shinyoutput` <- function(values, name) {
-  stop("Single-bracket indexing of shinyoutput object is not allowed.")
+  rlang::abort("Can't index shinyoutput with `[`.")
 }
 
 #' @export
 `[<-.shinyoutput` <- function(values, name, value) {
-  stop("Single-bracket indexing of shinyoutput object is not allowed.")
+  rlang::abort("Can't index shinyoutput with `[[`.")
 }
 
 #' Set options for an output object.
@@ -2088,12 +2267,69 @@ outputOptions <- function(x, name, ...) {
 }
 
 
-#' Get information about the output that is currently being executed.
+#' Get output information
+#'
+#' Returns information about the currently executing output, including its `name` (i.e., `outputId`);
+#' and in some cases, relevant sizing and styling information.
 #'
 #' @param session The current Shiny session.
 #'
+#' @return `NULL` if called outside of an output context; otherwise,
+#'   a list which includes:
+#'   * The `name` of the output (reported for any output).
+#'   * If the output is a `plotOutput()` or `imageOutput()`, then:
+#'     * `height`: a reactive expression which returns the height in pixels.
+#'     * `width`: a reactive expression which returns the width in pixels.
+#'  * If the output is a `plotOutput()`, `imageOutput()`, or contains a `shiny-report-theme` class, then:
+#'     * `bg`: a reactive expression which returns the background color.
+#'     * `fg`: a reactive expression which returns the foreground color.
+#'     * `accent`: a reactive expression which returns the hyperlink color.
+#'     * `font`: a reactive expression which returns a list of font information, including:
+#'       * `families`: a character vector containing the CSS `font-family` property.
+#'       * `size`: a character string containing the CSS `font-size` property
+#'
 #' @export
+#' @examples
+#'
+#' if (interactive()) {
+#'   shinyApp(
+#'     fluidPage(
+#'       tags$style(HTML("body {background-color: black; color: white; }")),
+#'       tags$style(HTML("body a {color: purple}")),
+#'       tags$style(HTML("#info {background-color: teal; color: orange; }")),
+#'       plotOutput("p"),
+#'       "Computed CSS styles for the output named info:",
+#'       tagAppendAttributes(
+#'         textOutput("info"),
+#'         class = "shiny-report-theme"
+#'       )
+#'     ),
+#'     function(input, output) {
+#'       output$p <- renderPlot({
+#'         info <- getCurrentOutputInfo()
+#'         par(bg = info$bg(), fg = info$fg(), col.axis = info$fg(), col.main = info$fg())
+#'         plot(1:10, col = info$accent(), pch = 19)
+#'         title("A simple R plot that uses its CSS styling")
+#'       })
+#'       output$info <- renderText({
+#'         info <- getCurrentOutputInfo()
+#'         jsonlite::toJSON(
+#'           list(
+#'             bg = info$bg(),
+#'             fg = info$fg(),
+#'             accent = info$accent(),
+#'             font = info$font()
+#'           ),
+#'           auto_unbox = TRUE
+#'         )
+#'       })
+#'     }
+#'   )
+#' }
+#'
+#'
 getCurrentOutputInfo <- function(session = getDefaultReactiveDomain()) {
+  if (is.null(session)) return(NULL)
   session$getCurrentOutputInfo()
 }
 
@@ -2281,3 +2517,72 @@ ShinyServerTimingRecorder <- R6Class("ShinyServerTimingRecorder",
 )
 
 missingOutput <- function(...) req(FALSE)
+
+#' Insert inline Markdown
+#'
+#' This function accepts
+#' [Markdown](https://en.wikipedia.org/wiki/Markdown)-syntax text and returns
+#' HTML that may be included in Shiny UIs.
+#'
+#' Leading whitespace is trimmed from Markdown text with [glue::trim()].
+#' Whitespace trimming ensures Markdown is processed correctly even when the
+#' call to `markdown()` is indented within surrounding R code.
+#'
+#' By default, [Github extensions][commonmark::extensions] are enabled, but this
+#' can be disabled by passing `extensions = FALSE`.
+#'
+#' Markdown rendering is performed by [commonmark::markdown_html()]. Additional
+#' arguments to `markdown()` are passed as arguments to `markdown_html()`
+#'
+#' @param mds A character vector of Markdown source to convert to HTML. If the
+#'   vector has more than one element, a single-element character vector of
+#'   concatenated HTML is returned.
+#' @param extensions Enable Github syntax extensions; defaults to `TRUE`.
+#' @param .noWS Character vector used to omit some of the whitespace that would
+#'   normally be written around generated HTML. Valid options include `before`,
+#'   `after`, and `outside` (equivalent to `before` and `end`).
+#' @param ... Additional arguments to pass to [commonmark::markdown_html()].
+#'   These arguments are _[dynamic][rlang::dyn-dots]_.
+#'
+#' @return a character vector marked as HTML.
+#' @export
+#' @examples
+#' ui <- fluidPage(
+#'   markdown("
+#'     # Markdown Example
+#'
+#'     This is a markdown paragraph, and will be contained within a `<p>` tag
+#'     in the UI.
+#'
+#'     The following is an unordered list, which will be represented in the UI as
+#'     a `<ul>` with `<li>` children:
+#'
+#'     * a bullet
+#'     * another
+#'
+#'     [Links](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a) work;
+#'     so does *emphasis*.
+#'
+#'     To see more of what's possible, check out [commonmark.org/help](https://commonmark.org/help).
+#'     ")
+#' )
+markdown <- function(mds, extensions = TRUE, .noWS = NULL, ...) {
+  html <- rlang::exec(commonmark::markdown_html, glue::trim(mds), extensions = extensions, ...)
+  htmltools::HTML(html, .noWS = .noWS)
+}
+
+
+# Check that an object is a ShinySession object, and give an informative error.
+# The default label is the caller function's name.
+validate_session_object <- function(session, label = as.character(sys.call(sys.parent())[[1]])) {
+  if (missing(session) ||
+      !inherits(session, c("ShinySession", "MockShinySession", "session_proxy")))
+  {
+    stop(call. = FALSE,
+      sprintf(
+        "`session` must be a 'ShinySession' object. Did you forget to pass `session` to `%s()`?",
+        label
+      )
+    )
+  }
+}

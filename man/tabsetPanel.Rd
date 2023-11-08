@@ -4,13 +4,19 @@
 \alias{tabsetPanel}
 \title{Create a tabset panel}
 \usage{
-tabsetPanel(..., id = NULL, selected = NULL, type = c("tabs",
-  "pills"), position = NULL)
+tabsetPanel(
+  ...,
+  id = NULL,
+  selected = NULL,
+  type = c("tabs", "pills", "hidden"),
+  header = NULL,
+  footer = NULL
+)
 }
 \arguments{
 \item{...}{\code{\link[=tabPanel]{tabPanel()}} elements to include in the tabset}
 
-\item{id}{If provided, you can use \code{input$}\emph{\code{id}} in your
+\item{id}{If provided, you can use \verb{input$}\emph{\code{id}} in your
 server logic to determine which of the current tabs is active. The value
 will correspond to the \code{value} argument that is passed to
 \code{\link[=tabPanel]{tabPanel()}}.}
@@ -19,11 +25,19 @@ will correspond to the \code{value} argument that is passed to
 of the tab that should be selected by default. If \code{NULL}, the first
 tab will be selected.}
 
-\item{type}{Use "tabs" for the standard look; Use "pills" for a more plain
-look where tabs are selected using a background fill color.}
+\item{type}{\describe{
+\item{\code{"tabs"}}{Standard tab look}
+\item{\code{"pills"}}{Selected tabs use the background fill color}
+\item{\code{"hidden"}}{Hides the selectable tabs. Use \code{type = "hidden"} in
+conjunction with \code{\link[=tabPanelBody]{tabPanelBody()}} and \code{\link[=updateTabsetPanel]{updateTabsetPanel()}} to control the
+active tab via other input controls. (See example below)}
+}}
 
-\item{position}{This argument is deprecated; it has been discontinued in
-Bootstrap 3.}
+\item{header}{Tag or list of tags to display as a common header above all
+tabPanels.}
+
+\item{footer}{Tag or list of tags to display as a common footer below all
+tabPanels}
 }
 \value{
 A tabset that can be passed to \code{\link[=mainPanel]{mainPanel()}}
@@ -42,6 +56,35 @@ mainPanel(
     tabPanel("Table", tableOutput("table"))
   )
 )
+
+ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel(
+      radioButtons("controller", "Controller", 1:3, 1)
+    ),
+    mainPanel(
+      tabsetPanel(
+        id = "hidden_tabs",
+        # Hide the tab values.
+        # Can only switch tabs by using `updateTabsetPanel()`
+        type = "hidden",
+        tabPanelBody("panel1", "Panel 1 content"),
+        tabPanelBody("panel2", "Panel 2 content"),
+        tabPanelBody("panel3", "Panel 3 content")
+      )
+    )
+  )
+)
+
+server <- function(input, output, session) {
+  observeEvent(input$controller, {
+    updateTabsetPanel(session, "hidden_tabs", selected = paste0("panel", input$controller))
+  })
+}
+
+if (interactive()) {
+  shinyApp(ui, server)
+}
 }
 \seealso{
 \code{\link[=tabPanel]{tabPanel()}}, \code{\link[=updateTabsetPanel]{updateTabsetPanel()}},

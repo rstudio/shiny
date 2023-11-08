@@ -1,5 +1,3 @@
-context("bootstrap")
-
 test_that("CSS unit validation", {
   # On error, return NA; on success, return result
   validateCssUnit_wrap <- function(x) {
@@ -24,7 +22,7 @@ test_that("Repeated names for selectInput and radioButtons choices", {
   # Select input
   x <- selectInput('id','label', choices = c(a='x1', a='x2', b='x3'), selectize = FALSE)
   expect_true(grepl(fixed = TRUE,
-    '<select id="id" class="form-control"><option value="x1" selected>a</option>\n<option value="x2">a</option>\n<option value="x3">b</option></select>',
+    '<select class="shiny-input-select form-control" id="id"><option value="x1" selected>a</option>\n<option value="x2">a</option>\n<option value="x3">b</option></select>',
      format(x)
   ))
 
@@ -52,7 +50,7 @@ test_that("Repeated names for selectInput and radioButtons choices", {
   choices <- x$children
 
   expect_equal(choices[[2]]$children[[1]][[1]]$children[[1]]$children[[2]]$children[[1]],
-    HTML('<i class="fa fa-calendar"></i>'))
+    HTML('<i class="far fa-calendar" role="presentation" aria-label="calendar icon"></i>'))
   expect_equal(choices[[2]]$children[[1]][[1]]$children[[1]]$children[[1]]$attribs$value, 'icon')
   expect_equal(choices[[2]]$children[[1]][[1]]$children[[1]]$children[[1]]$attribs$checked, 'checked')
 
@@ -251,7 +249,7 @@ test_that("selectInput selects items by default", {
 
   # Nothing selected when choices=NULL
   expect_true(grepl(fixed = TRUE,
-    '<select id="x" class="form-control"></select>',
+    '<select class="shiny-input-select form-control" id="x"></select>',
     format(selectInput('x', NULL, NULL, selectize = FALSE))
   ))
 
@@ -323,7 +321,7 @@ test_that("normalizeChoicesArgs does its job", {
 
 test_that("Choices need not be provided, can be NULL or c()", {
 
-  expected <- "<div id=\"cb\" class=\"form-group shiny-input-checkboxgroup shiny-input-container\">\n  <label class=\"control-label\" for=\"cb\">Choose:</label>\n  <div class=\"shiny-options-group\"></div>\n</div>"
+  expected <- '<div id="cb" class="form-group shiny-input-checkboxgroup shiny-input-container" role="group" aria-labelledby="cb-label">\n  <label class="control-label" id="cb-label" for="cb">Choose:</label>\n  <div class="shiny-options-group"></div>\n</div>'
   noChoices <- checkboxGroupInput("cb", "Choose:")
   choicesNull <- checkboxGroupInput("cb", "Choose:", choices = NULL)
   choicesCharacter <- checkboxGroupInput("cb", "Choose:", choices = c())
@@ -336,5 +334,26 @@ test_that("Choices need not be provided, can be NULL or c()", {
   expect_identical(noChoices, choicesCharacter0)
   expect_identical(noChoices, allChoicesNull)
 
-  expect_true(grepl(fixed = TRUE, expected, format(noChoices)))
+  expect_equal(expected, format(noChoices))
+})
+
+# https://github.com/rstudio/shiny/pull/3187
+test_that("radioButtons() and checkboxGroupInput() accessibility", {
+  rb <- radioButtons("foo", "bar", c("a", "b"))
+  rb_lbl <- rb$children[[1]]
+  expect_equal(rb$attribs$role, "radiogroup")
+  expect_equal(rb_lbl$name, "label")
+  expect_true(!is.null(rb_lbl$attribs$id))
+  expect_equal(
+    rb$attribs$`aria-labelledby`, rb_lbl$attribs$id
+  )
+
+  cbg <- checkboxGroupInput("foo", "bar", c("a", "b"))
+  cbg_lbl <- cbg$children[[1]]
+  expect_equal(cbg$attribs$role, "group")
+  expect_equal(cbg_lbl$name, "label")
+  expect_true(!is.null(cbg_lbl$attribs$id))
+  expect_equal(
+    cbg$attribs$`aria-labelledby`, cbg_lbl$attribs$id
+  )
 })

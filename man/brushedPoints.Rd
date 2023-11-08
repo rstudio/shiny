@@ -2,67 +2,114 @@
 % Please edit documentation in R/image-interact.R
 \name{brushedPoints}
 \alias{brushedPoints}
-\title{Find rows of data that are selected by a brush}
+\alias{nearPoints}
+\title{Find rows of data selected on an interactive plot.}
 \usage{
-brushedPoints(df, brush, xvar = NULL, yvar = NULL, panelvar1 = NULL,
-  panelvar2 = NULL, allRows = FALSE)
+brushedPoints(
+  df,
+  brush,
+  xvar = NULL,
+  yvar = NULL,
+  panelvar1 = NULL,
+  panelvar2 = NULL,
+  allRows = FALSE
+)
+
+nearPoints(
+  df,
+  coordinfo,
+  xvar = NULL,
+  yvar = NULL,
+  panelvar1 = NULL,
+  panelvar2 = NULL,
+  threshold = 5,
+  maxpoints = NULL,
+  addDist = FALSE,
+  allRows = FALSE
+)
 }
 \arguments{
 \item{df}{A data frame from which to select rows.}
 
-\item{brush}{The data from a brush, such as \code{input$plot_brush}.}
+\item{brush, coordinfo}{The data from a brush or click/dblclick/hover event
+e.g. \code{input$plot_brush}, \code{input$plot_click}.}
 
-\item{xvar, yvar}{A string with the name of the variable on the x or y axis.
-This must also be the name of a column in \code{df}. If absent, then this
-function will try to infer the variable from the brush (only works for
-ggplot2).}
+\item{xvar, yvar}{A string giving the name of the variable on the x or y axis.
+These are only required for base graphics, and must be the name of
+a column in \code{df}.}
 
-\item{panelvar1, panelvar2}{Each of these is a string with the name of a panel
-variable. For example, if with ggplot2, you facet on a variable called
-\code{cyl}, then you can use \code{"cyl"} here. However, specifying the
-panel variable should not be necessary with ggplot2; Shiny should be able
-to auto-detect the panel variable.}
+\item{panelvar1, panelvar2}{A string giving the name of a panel variable.
+For expert use only; in most cases these will be automatically
+derived from the ggplot2 spec.}
 
 \item{allRows}{If \code{FALSE} (the default) return a data frame containing
 the selected rows. If \code{TRUE}, the input data frame will have a new
-column, \code{selected_}, which indicates whether the row was inside the
-brush (\code{TRUE}) or outside the brush (\code{FALSE}).}
+column, \code{selected_}, which indicates whether the row was selected or not.}
+
+\item{threshold}{A maximum distance (in pixels) to the pointer location.
+Rows in the data frame will be selected if the distance to the pointer is
+less than \code{threshold}.}
+
+\item{maxpoints}{Maximum number of rows to return. If \code{NULL} (the default),
+will return all rows within the threshold distance.}
+
+\item{addDist}{If TRUE, add a column named \code{dist_} that contains the
+distance from the coordinate to the point, in pixels. When no pointer
+event has yet occurred, the value of \code{dist_} will be \code{NA}.}
+}
+\value{
+A data frame based on \code{df}, containing the observations selected by the
+brush or near the click event. For \code{nearPoints()}, the rows will be sorted
+by distance to the event.
+
+If \code{allRows = TRUE}, then all rows will returned, along with a new
+\code{selected_} column that indicates whether or not the point was selected.
+The output from \code{nearPoints()} will no longer be sorted, but you can
+set \code{addDist = TRUE} to get an additional column that gives the pixel
+distance to the pointer.
 }
 \description{
-This function returns rows from a data frame which are under a brush used
-with \code{\link[=plotOutput]{plotOutput()}}.
+\code{brushedPoints()} returns rows from a data frame which are under a brush.
+\code{nearPoints()} returns rows from a data frame which are near a click, hover,
+or double-click. Alternatively, set \code{allRows = TRUE} to return all rows from
+the input data with an additional column \code{selected_} that indicates which
+rows of the would be selected.
 }
-\details{
-It is also possible for this function to return all rows from the input data
-frame, but with an additional column \code{selected_}, which indicates which
-rows of the input data frame are selected by the brush (\code{TRUE} for
-selected, \code{FALSE} for not-selected). This is enabled by setting
-\code{allRows=TRUE} option.
+\section{ggplot2}{
 
-The \code{xvar}, \code{yvar}, \code{panelvar1}, and \code{panelvar2}
-arguments specify which columns in the data correspond to the x variable, y
-variable, and panel variables of the plot. For example, if your plot is
-\code{plot(x=cars$speed, y=cars$dist)}, and your brush is named
-\code{"cars_brush"}, then you would use \code{brushedPoints(cars, input$cars_brush, "speed", "dist")}.
+For plots created with ggplot2, it is not necessary to specify the
+column names to \code{xvar}, \code{yvar}, \code{panelvar1}, and \code{panelvar2} as that
+information can be automatically derived from the plot specification.
 
-For plots created with ggplot2, it should not be necessary to specify the
-column names; that information will already be contained in the brush,
-provided that variables are in the original data, and not computed. For
-example, with \code{ggplot(cars, aes(x=speed, y=dist)) + geom_point()}, you
-could use \code{brushedPoints(cars, input$cars_brush)}. If, however, you use
-a computed column, like \code{ggplot(cars, aes(x=speed/2, y=dist)) + geom_point()}, then it will not be able to automatically extract column names
-and filter on them. If you want to use this function to filter data, it is
-recommended that you not use computed columns; instead, modify the data
+Note, however, that this will not work if you use a computed column, like
+\verb{aes(speed/2, dist))}. Instead, we recommend that you modify the data
 first, and then make the plot with "raw" columns in the modified data.
+}
 
-If a specified x or y column is a factor, then it will be coerced to an
-integer vector. If it is a character vector, then it will be coerced to a
-factor and then integer vector. This means that the brush will be considered
-to cover a given character/factor value when it covers the center value.
+\section{Brushing}{
+
+If x or y column is a factor, then it will be coerced to an integer vector.
+If it is a character vector, then it will be coerced to a factor and then
+integer vector. This means that the brush will be considered to cover a
+given character/factor value when it covers the center value.
 
 If the brush is operating in just the x or y directions (e.g., with
 \code{brushOpts(direction = "x")}, then this function will filter out points
 using just the x or y variable, whichever is appropriate.
+}
+
+\examples{
+\dontrun{
+# Note that in practice, these examples would need to go in reactives
+# or observers.
+
+# This would select all points within 5 pixels of the click
+nearPoints(mtcars, input$plot_click)
+
+# Select just the nearest point within 10 pixels of the click
+nearPoints(mtcars, input$plot_click, threshold = 10, maxpoints = 1)
+
+}
 }
 \seealso{
 \code{\link[=plotOutput]{plotOutput()}} for example usage.

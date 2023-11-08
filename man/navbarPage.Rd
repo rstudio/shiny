@@ -5,11 +5,21 @@
 \alias{navbarMenu}
 \title{Create a page with a top level navigation bar}
 \usage{
-navbarPage(title, ..., id = NULL, selected = NULL,
+navbarPage(
+  title,
+  ...,
+  id = NULL,
+  selected = NULL,
   position = c("static-top", "fixed-top", "fixed-bottom"),
-  header = NULL, footer = NULL, inverse = FALSE,
-  collapsible = FALSE, collapsable, fluid = TRUE, responsive = NULL,
-  theme = NULL, windowTitle = title)
+  header = NULL,
+  footer = NULL,
+  inverse = FALSE,
+  collapsible = FALSE,
+  fluid = TRUE,
+  theme = NULL,
+  windowTitle = NA,
+  lang = NULL
+)
 
 navbarMenu(title, ..., menuName = title, icon = NULL)
 }
@@ -21,7 +31,7 @@ navbarMenu(title, ..., menuName = title, icon = NULL)
 section headers. If the string is a set of dashes like \code{"----"} a
 horizontal separator will be displayed in the menu.}
 
-\item{id}{If provided, you can use \code{input$}\emph{\code{id}} in your
+\item{id}{If provided, you can use \verb{input$}\emph{\code{id}} in your
 server logic to determine which of the current tabs is active. The value
 will correspond to the \code{value} argument that is passed to
 \code{\link[=tabPanel]{tabPanel()}}.}
@@ -48,23 +58,28 @@ tabPanels}
 navigation bar}
 
 \item{collapsible}{\code{TRUE} to automatically collapse the navigation
-elements into a menu when the width of the browser is less than 940 pixels
-(useful for viewing on smaller touchscreen device)}
-
-\item{collapsable}{Deprecated; use \code{collapsible} instead.}
+elements into an expandable menu on mobile devices or narrow window widths.}
 
 \item{fluid}{\code{TRUE} to use a fluid layout. \code{FALSE} to use a fixed
 layout.}
 
-\item{responsive}{This option is deprecated; it is no longer optional with
-Bootstrap 3.}
+\item{theme}{One of the following:
+\itemize{
+\item \code{NULL} (the default), which implies a "stock" build of Bootstrap 3.
+\item A \code{\link[bslib:bs_theme]{bslib::bs_theme()}} object. This can be used to replace a stock
+build of Bootstrap 3 with a customized version of Bootstrap 3 or higher.
+\item A character string pointing to an alternative Bootstrap stylesheet
+(normally a css file within the www directory, e.g. \code{www/bootstrap.css}).
+}}
 
-\item{theme}{Alternative Bootstrap stylesheet (normally a css file within the
-www directory). For example, to use the theme located at
-\code{www/bootstrap.css} you would use \code{theme = "bootstrap.css"}.}
+\item{windowTitle}{the browser window title (as a character string). The
+default value, \code{NA}, means to use any character strings that appear in
+\code{title} (if none are found, the host URL of the page is displayed by
+default).}
 
-\item{windowTitle}{The title that should be displayed by the browser window.
-Useful if \code{title} is not a string.}
+\item{lang}{ISO 639-1 language code for the HTML page, such as "en" or "ko".
+This will be used as the lang in the \code{<html>} tag, as in \code{<html lang="en">}.
+The default (NULL) results in an empty string.}
 
 \item{menuName}{A name that identifies this \code{navbarMenu}. This
 is needed if you want to insert/remove or show/hide an entire
@@ -73,7 +88,7 @@ is needed if you want to insert/remove or show/hide an entire
 \item{icon}{Optional icon to appear on a \code{navbarMenu} tab.}
 }
 \value{
-A UI defintion that can be passed to the \link{shinyUI} function.
+A UI definition that can be passed to the \link{shinyUI} function.
 }
 \description{
 Create a page that contains a top level navigation bar that can be used to
@@ -106,9 +121,13 @@ navbarPage("App Title",
 \code{\link[=updateNavbarPage]{updateNavbarPage()}}, \code{\link[=insertTab]{insertTab()}},
 \code{\link[=showTab]{showTab()}}
 
-Other layout functions: \code{\link{fillPage}},
-  \code{\link{fixedPage}}, \code{\link{flowLayout}},
-  \code{\link{fluidPage}}, \code{\link{sidebarLayout}},
-  \code{\link{splitLayout}}, \code{\link{verticalLayout}}
+Other layout functions: 
+\code{\link{fillPage}()},
+\code{\link{fixedPage}()},
+\code{\link{flowLayout}()},
+\code{\link{fluidPage}()},
+\code{\link{sidebarLayout}()},
+\code{\link{splitLayout}()},
+\code{\link{verticalLayout}()}
 }
 \concept{layout functions}

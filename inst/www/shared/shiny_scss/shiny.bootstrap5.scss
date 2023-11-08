@@ -1,0 +1,39 @@
+$body-emphasis-color: $body-color !default; // introduced in BS 5.3
+
+$shiny-emphasis-color-rgb:          var(--#{$prefix}emphasis-color-rgb, 0,0,0) !default;
+
+$shiny-disconnected-bg:             RGBA($shiny-emphasis-color-rgb, 0.42) !default;
+$shiny-table-na:                    RGBA($shiny-emphasis-color-rgb, 0.46) !default;
+$shiny-error-color:                 var(--#{$prefix}danger-text-emphasis) !default;
+$shiny-error-validated-color:       RGBA($shiny-emphasis-color-rgb, 0.5) !default;
+$shiny-progress-text-bg-color:      RGBA(var(--#{$prefix}primary-rgb, #{to-rgb($primary)}), 0.05) !default;
+
+$shiny-input-panel-bg:              RGBA($shiny-emphasis-color-rgb, 0.04) !default;
+$shiny-input-panel-border:          $border-width solid var(--#{$prefix}border-color, #{$border-color}) !default;
+$shiny-input-panel-border-radius:   $border-radius !default;
+$shiny-text-output-border-radius:   $border-radius !default;
+
+$notification-color:                var(--#{$prefix}emphasis-color, #{$body-emphasis-color}) !default;
+$notification-bg-color:             var(--#{$prefix}body-bg, #{$body-bg}) !default;
+$notification-border:               $border-width solid var(--#{$prefix}border-color, #{$border-color}) !default;
+$notification-border-radius:        $border-radius !default;
+
+$notification-message-color:        var(--#{$prefix}info-text-emphasis) !default;
+$notification-message-bg:           var(--#{$prefix}info-bg-subtle) !default;
+$notification-message-border:       $border-width solid var(--#{$prefix}info-border-subtle) !default;
+
+$notification-warning-color:        var(--#{$prefix}warning-text-emphasis) !default;
+$notification-warning-bg:           var(--#{$prefix}warning-bg-subtle) !default;
+$notification-warning-border:       $border-width solid var(--#{$prefix}warning-border-subtle) !default;
+
+$notification-error-color:          var(--#{$prefix}danger-text-emphasis) !default;
+$notification-error-bg:             var(--#{$prefix}danger-bg-subtle) !default;
+$notification-error-border:         $border-width solid var(--#{$prefix}danger-border-subtle) !default;
+
+$notification-close-color:          RGBA($shiny-emphasis-color-rgb, 0.8) !default;
+$notification-close-hover-color:    RGB($shiny-emphasis-color-rgb) !default;
+$notification-content-action-color: RGB(var(--#{$prefix}primary-rgb, #{to-rgb($primary)})) !default;
+
+$datepicker-disabled-color:         $dropdown-link-disabled-color !default;
+
+$shiny-file-active-shadow:          $input-focus-box-shadow !default;

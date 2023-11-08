@@ -4,17 +4,22 @@
 \alias{updateCheckboxInput}
 \title{Change the value of a checkbox input on the client}
 \usage{
-updateCheckboxInput(session, inputId, label = NULL, value = NULL)
+updateCheckboxInput(
+  session = getDefaultReactiveDomain(),
+  inputId,
+  label = NULL,
+  value = NULL
+)
 }
 \arguments{
 \item{session}{The \code{session} object passed to function given to
-\code{shinyServer}.}
+\code{shinyServer}. Default is \code{getDefaultReactiveDomain()}.}
 
 \item{inputId}{The id of the input object.}
 
 \item{label}{The label to set for the input object.}
 
-\item{value}{The value to set for the input object.}
+\item{value}{Initial value (\code{TRUE} or \code{FALSE}).}
 }
 \description{
 Change the value of a checkbox input on the client

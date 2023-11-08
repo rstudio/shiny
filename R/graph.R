@@ -1,31 +1,20 @@
-is_installed <- function(package, version) {
-  installedVersion <- tryCatch(utils::packageVersion(package), error = function(e) NA)
-  !is.na(installedVersion) && installedVersion >= version
-}
-
 # Check that the version of an suggested package satisfies the requirements
 #
 # @param package The name of the suggested package
 # @param version The version of the package
-check_suggested <- function(package, version, location) {
+check_suggested <- function(package, version = NULL) {
 
   if (is_installed(package, version)) {
     return()
   }
 
-  missing_location <- missing(location)
   msg <- paste0(
     sQuote(package),
-    if (is.na(version)) "" else paste0("(>= ", version, ")"),
-    " must be installed for this functionality.",
-    if (!missing_location)
-      paste0(
-        "\nPlease install the missing package: \n",
-        "  source(\"https://install-github.me/", location, "\")"
-      )
+    if (is.na(version %||% NA)) "" else paste0("(>= ", version, ")"),
+    " must be installed for this functionality."
   )
 
-  if (interactive() && missing_location) {
+  if (interactive()) {
     message(msg, "\nWould you like to install it?")
     if (utils::menu(c("Yes", "No")) == 1) {
       return(utils::install.packages(package))
@@ -98,19 +87,14 @@ reactlog <- function() {
 }
 
 #' @describeIn reactlog Display a full reactlog graph for all sessions.
-#' @inheritParams reactlog::reactlog_show
+#' @param time A boolean that specifies whether or not to display the
+#' time that each reactive takes to calculate a result.
 #' @export
 reactlogShow <- function(time = TRUE) {
   check_reactlog()
   reactlog::reactlog_show(reactlog(), time = time)
 }
-#' @describeIn reactlog This function is deprecated. You should use [reactlogShow()]
-#' @export
-# legacy purposes
-showReactLog <- function(time = TRUE) {
-  shinyDeprecated(new = "`reactlogShow`", version = "1.2.0")
-  reactlogShow(time = time)
-}
+
 #' @describeIn reactlog Resets the entire reactlog stack.  Useful for debugging and removing all prior reactive history.
 #' @export
 reactlogReset <- function() {
@@ -131,22 +115,28 @@ check_reactlog <- function() {
 }
 # read reactlog version from description file
 # prevents version mismatch in code and description file
-reactlog_version <- function() {
-  desc <- read.dcf(system.file("DESCRIPTION", package = "shiny", mustWork = TRUE))
-  suggests <- desc[1,"Suggests"][[1]]
-  suggests_pkgs <- strsplit(suggests, "\n")[[1]]
+reactlog_version <- local({
+  version <- NULL
+  function() {
+    if (!is.null(version)) return(version)
 
-  reactlog_info <- suggests_pkgs[grepl("reactlog", suggests_pkgs)]
-  if (length(reactlog_info) == 0) {
-    stop("reactlog can not be found in shiny DESCRIPTION file")
+    desc <- read.dcf(system_file("DESCRIPTION", package = "shiny"))
+    suggests <- desc[1,"Suggests"][[1]]
+    suggests_pkgs <- strsplit(suggests, "\n")[[1]]
+
+    reactlog_info <- suggests_pkgs[grepl("reactlog", suggests_pkgs)]
+    if (length(reactlog_info) == 0) {
+      stop("reactlog can not be found in shiny DESCRIPTION file")
+    }
+
+    reactlog_info <- sub("^[^\\(]*\\(", "", reactlog_info)
+    reactlog_info <- sub("\\)[^\\)]*$", "", reactlog_info)
+    reactlog_info <- sub("^[>= ]*", "", reactlog_info)
+
+    version <<- package_version(reactlog_info)
+    version
   }
-
-  reactlog_info <- sub("^[^\\(]*\\(", "", reactlog_info)
-  reactlog_info <- sub("\\)[^\\)]*$", "", reactlog_info)
-  reactlog_info <- sub("^[>= ]*", "", reactlog_info)
-
-  package_version(reactlog_info)
-}
+})
 
 
 RLog <- R6Class(
@@ -190,10 +180,10 @@ RLog <- R6Class(
       paste0("names(", reactId, ")")
     },
     asListIdStr = function(reactId) {
-      paste0("as.list(", reactId, ")")
+      paste0("reactiveValuesToList(", reactId, ")")
     },
     asListAllIdStr = function(reactId) {
-      paste0("as.list(", reactId, ", all.names = TRUE)")
+      paste0("reactiveValuesToList(", reactId, ", all.names = TRUE)")
     },
     keyIdStr = function(reactId, key) {
       paste0(reactId, "$", key)
@@ -221,7 +211,7 @@ RLog <- R6Class(
     reset = function() {
       .globals$reactIdCounter <- 0L
 
-      self$logStack <- Stack$new()
+      self$logStack <- fastmap::faststack()
       self$msg <- MessageLogger$new(option = private$msgOption)
 
       # setup dummy and missing react information
@@ -528,7 +518,7 @@ MessageLogger = R6Class(
       return(txt)
     },
     singleLine = function(txt) {
-      gsub("[^\\]\\n", "\\\\n", txt)
+      gsub("([^\\])\\n", "\\1\\\\n", txt)
     },
     valueStr = function(valueStr) {
       paste0(
@@ -569,5 +559,6 @@ MessageLogger = R6Class(
   )
 )
 
-#' @include stack.R
-rLog <- RLog$new("shiny.reactlog", "shiny.reactlog.console")
+on_load({
+  rLog <- RLog$new("shiny.reactlog", "shiny.reactlog.console")
+})

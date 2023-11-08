@@ -1,0 +1,3 @@
+*.noindex*
+data.sqlite
+failures.md

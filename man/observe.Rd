@@ -4,10 +4,18 @@
 \alias{observe}
 \title{Create a reactive observer}
 \usage{
-observe(x, env = parent.frame(), quoted = FALSE, label = NULL,
-  suspended = FALSE, priority = 0,
-  domain = getDefaultReactiveDomain(), autoDestroy = TRUE,
-  ..stacktraceon = TRUE)
+observe(
+  x,
+  env = parent.frame(),
+  quoted = FALSE,
+  ...,
+  label = NULL,
+  suspended = FALSE,
+  priority = 0,
+  domain = getDefaultReactiveDomain(),
+  autoDestroy = TRUE,
+  ..stacktraceon = TRUE
+)
 }
 \arguments{
 \item{x}{An expression (quoted or unquoted). Any return value will be
@@ -15,11 +23,15 @@ ignored.}
 
 \item{env}{The parent environment for the reactive expression. By default,
 this is the calling environment, the same as when defining an ordinary
-non-reactive expression.}
+non-reactive expression. If \code{x} is a quosure and \code{quoted} is \code{TRUE},
+then \code{env} is ignored.}
 
-\item{quoted}{Is the expression quoted? By default, this is \code{FALSE}.
-This is useful when you want to use an expression that is stored in a
-variable; to do so, it must be quoted with \code{quote()}.}
+\item{quoted}{If it is \code{TRUE}, then the \code{\link[=quote]{quote()}}ed value of \code{x}
+will be used when \code{x} is evaluated. If \code{x} is a quosure and you
+would like to use its expression as a value for \code{x}, then you must set
+\code{quoted} to \code{TRUE}.}
+
+\item{...}{Not used.}
 
 \item{label}{A label for the observer, useful for debugging.}
 
@@ -106,12 +118,12 @@ obsB <- observe({
   print(values$A + 1)
 })
 
-# Can use quoted expressions
-obsC <- observe(quote({ print(values$A + 2) }), quoted = TRUE)
+# To store expressions for later conversion to observe, use rlang::quo()
+myquo <- rlang::quo({ print(values$A + 3) })
+obsC <- rlang::inject(observe(!!myquo))
 
-# To store expressions for later conversion to observe, use quote()
-expr_q <- quote({ print(values$A + 3) })
-obsD <- observe(expr_q, quoted = TRUE)
+# (Legacy) Can use quoted expressions
+obsD <- observe(quote({ print(values$A + 2) }), quoted = TRUE)
 
 # In a normal Shiny app, the web client will trigger flush events. If you
 # are at the console, you can force a flush with flushReact()

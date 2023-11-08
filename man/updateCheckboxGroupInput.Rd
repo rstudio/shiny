@@ -4,13 +4,20 @@
 \alias{updateCheckboxGroupInput}
 \title{Change the value of a checkbox group input on the client}
 \usage{
-updateCheckboxGroupInput(session, inputId, label = NULL,
-  choices = NULL, selected = NULL, inline = FALSE,
-  choiceNames = NULL, choiceValues = NULL)
+updateCheckboxGroupInput(
+  session = getDefaultReactiveDomain(),
+  inputId,
+  label = NULL,
+  choices = NULL,
+  selected = NULL,
+  inline = FALSE,
+  choiceNames = NULL,
+  choiceValues = NULL
+)
 }
 \arguments{
 \item{session}{The \code{session} object passed to function given to
-\code{shinyServer}.}
+\code{shinyServer}. Default is \code{getDefaultReactiveDomain()}.}
 
 \item{inputId}{The id of the input object.}
 
@@ -26,17 +33,7 @@ types (such as logicals and numbers) will be coerced to strings.}
 
 \item{inline}{If \code{TRUE}, render the choices inline (i.e. horizontally)}
 
-\item{choiceNames}{List of names and values, respectively,
-that are displayed to the user in the app and correspond to the each
-choice (for this reason, \code{choiceNames} and \code{choiceValues}
-must have the same length). If either of these arguments is
-provided, then the other \emph{must} be provided and \code{choices}
-\emph{must not} be provided. The advantage of using both of these over
-a named list for \code{choices} is that \code{choiceNames} allows any
-type of UI object to be passed through (tag objects, icons, HTML code,
-...), instead of just simple text. See Examples.}
-
-\item{choiceValues}{List of names and values, respectively,
+\item{choiceNames, choiceValues}{List of names and values, respectively,
 that are displayed to the user in the app and correspond to the each
 choice (for this reason, \code{choiceNames} and \code{choiceValues}
 must have the same length). If either of these arguments is

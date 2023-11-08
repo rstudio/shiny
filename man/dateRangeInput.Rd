@@ -4,10 +4,21 @@
 \alias{dateRangeInput}
 \title{Create date range input}
 \usage{
-dateRangeInput(inputId, label, start = NULL, end = NULL, min = NULL,
-  max = NULL, format = "yyyy-mm-dd", startview = "month",
-  weekstart = 0, language = "en", separator = " to ", width = NULL,
-  autoclose = TRUE)
+dateRangeInput(
+  inputId,
+  label,
+  start = NULL,
+  end = NULL,
+  min = NULL,
+  max = NULL,
+  format = "yyyy-mm-dd",
+  startview = "month",
+  weekstart = 0,
+  language = "en",
+  separator = " to ",
+  width = NULL,
+  autoclose = TRUE
+)
 }
 \arguments{
 \item{inputId}{The \code{input} slot that will be used to access the value.}
@@ -124,13 +135,20 @@ shinyApp(ui, server = function(input, output) { })
 \seealso{
 \code{\link[=dateInput]{dateInput()}}, \code{\link[=updateDateRangeInput]{updateDateRangeInput()}}
 
-Other input elements: \code{\link{actionButton}},
-  \code{\link{checkboxGroupInput}},
-  \code{\link{checkboxInput}}, \code{\link{dateInput}},
-  \code{\link{fileInput}}, \code{\link{numericInput}},
-  \code{\link{passwordInput}}, \code{\link{radioButtons}},
-  \code{\link{selectInput}}, \code{\link{sliderInput}},
-  \code{\link{submitButton}}, \code{\link{textAreaInput}},
-  \code{\link{textInput}}, \code{\link{varSelectInput}}
+Other input elements: 
+\code{\link{actionButton}()},
+\code{\link{checkboxGroupInput}()},
+\code{\link{checkboxInput}()},
+\code{\link{dateInput}()},
+\code{\link{fileInput}()},
+\code{\link{numericInput}()},
+\code{\link{passwordInput}()},
+\code{\link{radioButtons}()},
+\code{\link{selectInput}()},
+\code{\link{sliderInput}()},
+\code{\link{submitButton}()},
+\code{\link{textAreaInput}()},
+\code{\link{textInput}()},
+\code{\link{varSelectInput}()}
 }
 \concept{input elements}

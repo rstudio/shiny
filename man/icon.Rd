@@ -4,34 +4,35 @@
 \alias{icon}
 \title{Create an icon}
 \usage{
-icon(name, class = NULL, lib = "font-awesome")
+icon(name, class = NULL, lib = "font-awesome", ...)
 }
 \arguments{
-\item{name}{Name of icon. Icons are drawn from the
-\href{https://fontawesome.com/}{Font Awesome Free} (currently icons from
-the v5.3.1 set are supported with the v4 naming convention) and
-\href{http://getbootstrap.com/components/#glyphicons}{Glyphicons}
-libraries. Note that the "fa-" and "glyphicon-" prefixes should not be used
-in icon names (i.e. the "fa-calendar" icon should be referred to as
-"calendar")}
+\item{name}{The name of the icon. A name from either \href{https://fontawesome.com/}{Font Awesome} (when \code{lib="font-awesome"}) or
+\href{https://getbootstrap.com/docs/3.3/components/#glyphicons}{Bootstrap Glyphicons} (when
+\code{lib="glyphicon"}) may be provided. Note that the \code{"fa-"} and
+\code{"glyphicon-"} prefixes should not appear in name (i.e., the
+\code{"fa-calendar"} icon should be referred to as \code{"calendar"}). A \code{name} of
+\code{NULL} may also be provided to get a raw \verb{<i>} tag with no library attached
+to it.}
 
-\item{class}{Additional classes to customize the style of the icon (see the
-\href{http://fontawesome.io/examples/}{usage examples} for details on
+\item{class}{Additional classes to customize the style of an icon (see the
+\href{https://fontawesome.com/how-to-use}{usage examples} for details on
 supported styles).}
 
-\item{lib}{Icon library to use ("font-awesome" or "glyphicon")}
+\item{lib}{The icon library to use. Either \code{"font-awesome"} or \code{"glyphicon"}.}
+
+\item{...}{Arguments passed to the \verb{<i>} tag of \link[htmltools:builder]{htmltools::tags}.}
 }
 \value{
-An icon element
+An \verb{<i>} (icon) HTML tag.
 }
 \description{
 Create an icon for use within a page. Icons can appear on their own, inside
-of a button, or as an icon for a \code{\link[=tabPanel]{tabPanel()}} within a
-\code{\link[=navbarPage]{navbarPage()}}.
+of a button, and/or used with \code{\link[=tabPanel]{tabPanel()}} and \code{\link[=navbarMenu]{navbarMenu()}}.
 }
 \examples{
 # add an icon to a submit button
-submitButton("Update View", icon = icon("refresh"))
+submitButton("Update View", icon = icon("redo"))
 
 navbarPage("App Title",
   tabPanel("Plot", icon = icon("bar-chart-o")),
@@ -40,7 +41,6 @@ navbarPage("App Title",
 )
 }
 \seealso{
-For lists of available icons, see
-\url{http://fontawesome.io/icons/} and
-\url{http://getbootstrap.com/components/#glyphicons}.
+For lists of available icons, see \url{https://fontawesome.com/icons}
+and \url{https://getbootstrap.com/docs/3.3/components/#glyphicons}
 }

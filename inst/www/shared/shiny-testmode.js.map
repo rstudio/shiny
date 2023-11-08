@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../srcts/src/utils/eval.ts", "../../../srcts/extras/shiny-testmode.ts"],
+  "sourcesContent": ["//esbuild.github.io/content-types/#direct-eval\n//tl/dr;\n// * Direct usage of `eval(\"x\")` is bad with bundled code.\n// * Instead, use indirect calls to `eval` such as `indirectEval(\"x\")`\n//   * Even just renaming the function works well enough.\n// > This is known as \"indirect eval\" because eval is not being called directly, and so does not trigger the grammatical special case for direct eval in the JavaScript VM. You can call indirect eval using any syntax at all except for an expression of the exact form eval('x'). For example, var eval2 = eval; eval2('x') and [eval][0]('x') and window.eval('x') are all indirect eval calls.\n// > When you use indirect eval, the code is evaluated in the global scope instead of in the inline scope of the caller.\n\nvar indirectEval = eval;\nexport { indirectEval };", "/* eslint-disable unicorn/filename-case */\nimport { indirectEval } from \"../src/utils/eval\";\n\n// Listen for messages from parent frame. This file is only added when the\n// shiny.testmode option is TRUE.\nwindow.addEventListener(\"message\", function (e) {\n  var message = e.data;\n  if (message.code) indirectEval(message.code);\n});"],
+  "mappings": ";yBAQA,IAAIA,EAAe,KCHnB,OAAO,iBAAiB,UAAW,SAAUC,EAAG,CAC9C,IAAIC,EAAUD,EAAE,KACZC,EAAQ,MAAMC,EAAaD,EAAQ,IAAI,CAC7C,CAAC",
+  "names": ["indirectEval", "e", "message", "indirectEval"]
+}

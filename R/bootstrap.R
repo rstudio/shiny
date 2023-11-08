@@ -4,7 +4,7 @@ NULL
 #' Create a Bootstrap page
 #'
 #' Create a Shiny UI page that loads the CSS and JavaScript for
-#' [Bootstrap](http://getbootstrap.com/), and has no content in the page
+#' [Bootstrap](https://getbootstrap.com/), and has no content in the page
 #' body (other than what you provide).
 #'
 #' This function is primarily intended for users who are proficient in HTML/CSS,
@@ -14,67 +14,226 @@ NULL
 #'
 #' @param ... The contents of the document body.
 #' @param title The browser window title (defaults to the host URL of the page)
-#' @param responsive This option is deprecated; it is no longer optional with
-#'   Bootstrap 3.
-#' @param theme Alternative Bootstrap stylesheet (normally a css file within the
-#'   www directory, e.g. `www/bootstrap.css`)
+#' @param theme One of the following:
+#'   * `NULL` (the default), which implies a "stock" build of Bootstrap 3.
+#'   * A [bslib::bs_theme()] object. This can be used to replace a stock
+#'   build of Bootstrap 3 with a customized version of Bootstrap 3 or higher.
+#'   * A character string pointing to an alternative Bootstrap stylesheet
+#'   (normally a css file within the www directory, e.g. `www/bootstrap.css`).
+#' @param lang ISO 639-1 language code for the HTML page, such as "en" or "ko".
+#'   This will be used as the lang in the \code{<html>} tag, as in \code{<html lang="en">}.
+#'   The default (NULL) results in an empty string.
 #'
-#' @return A UI defintion that can be passed to the [shinyUI] function.
+#' @return A UI definition that can be passed to the [shinyUI] function.
 #'
 #' @note The `basicPage` function is deprecated, you should use the
 #'   [fluidPage()] function instead.
 #'
 #' @seealso [fluidPage()], [fixedPage()]
 #' @export
-bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
+bootstrapPage <- function(..., title = NULL, theme = NULL, lang = NULL) {
 
-  if (!is.null(responsive)) {
-    shinyDeprecated("The 'responsive' argument is no longer used with Bootstrap 3.")
+  args <- list(
+    jqueryDependency(),
+    if (!is.null(title)) tags$head(tags$title(title)),
+    if (is.character(theme)) {
+      if (length(theme) > 1) stop("`theme` must point to a single CSS file, not multiple files.")
+      tags$head(tags$link(rel="stylesheet", type="text/css", href=theme))
+    },
+    # remainder of tags passed to the function
+    list2(...)
+  )
+
+  # If theme is a bslib::bs_theme() object, bootstrapLib() needs to come first
+  # (so other tags, when rendered via tagFunction(), know about the relevant
+  # theme). However, if theme is anything else, we intentionally avoid changing
+  # the tagList() contents to avoid breaking user code that makes assumptions
+  # about the return value https://github.com/rstudio/shiny/issues/3235
+  if (is_bs_theme(theme)) {
+    args <- c(bootstrapLib(theme), args)
+    ui <- do.call(tagList, args)
+  } else {
+    ui <- do.call(tagList, args)
+    ui <- attachDependencies(ui, bootstrapLib())
   }
 
-  attachDependencies(
-    tagList(
-      if (!is.null(title)) tags$head(tags$title(title)),
-      if (!is.null(theme)) {
-        tags$head(tags$link(rel="stylesheet", type="text/css", href = theme))
-      },
+  setLang(ui, lang)
+}
 
-      # remainder of tags passed to the function
-      list(...)
-    ),
-    bootstrapLib()
-  )
+setLang <- function(ui, lang) {
+  # Add lang attribute to be passed to renderPage function
+  attr(ui, "lang") <- lang
+  ui
+}
+getLang <- function(ui) {
+  # Check if ui has lang attribute; otherwise, NULL
+  attr(ui, "lang", exact = TRUE)
 }
 
 #' Bootstrap libraries
 #'
-#' This function returns a set of web dependencies necessary for using Bootstrap
+#' This function defines a set of web dependencies necessary for using Bootstrap
 #' components in a web page.
 #'
-#' It isn't necessary to call this function if you use
-#' [bootstrapPage()] or others which use `bootstrapPage`, such
-#' [basicPage()], [fluidPage()], [fillPage()],
-#' [pageWithSidebar()], and [navbarPage()], because they
-#' already include the Bootstrap web dependencies.
+#' It isn't necessary to call this function if you use [bootstrapPage()] or
+#' others which use `bootstrapPage`, such [fluidPage()], [navbarPage()],
+#' [fillPage()], etc, because they already include the Bootstrap web dependencies.
 #'
 #' @inheritParams bootstrapPage
 #' @export
 bootstrapLib <- function(theme = NULL) {
-  htmlDependency("bootstrap", "3.4.1",
-    c(
-      href = "shared/bootstrap",
-      file = system.file("www/shared/bootstrap", package = "shiny")
-    ),
+  tagFunction(function() {
+    if (isRunning()) {
+      setCurrentTheme(theme)
+    }
+
+    # If we're not compiling Bootstrap Sass (from bslib), return the
+    # static Bootstrap build.
+    if (!is_bs_theme(theme)) {
+      # We'll enter here if `theme` is the path to a .css file, like that
+      # provided by `shinythemes::shinytheme("darkly")`.
+      return(bootstrapDependency(theme))
+    }
+
+    # Make bootstrap Sass available so other tagFunction()s (e.g.,
+    # sliderInput() et al) can resolve their HTML dependencies at render time
+    # using getCurrentTheme(). Note that we're making an implicit assumption
+    # that this tagFunction() executes *before* all other tagFunction()s; but
+    # that should be fine considering that, DOM tree order is preorder,
+    # depth-first traversal, and at least in the bootstrapPage(theme) case, we
+    # have control over the relative ordering.
+    # https://dom.spec.whatwg.org/#concept-tree
+    # https://stackoverflow.com/a/16113998/1583084
+    #
+    # Note also that since this is shinyOptions() (and not options()), the
+    # option is automatically reset when the app (or session) exits
+    if (isRunning()) {
+      registerThemeDependency(bs_theme_deps)
+
+    } else {
+      # Technically, this a potential issue (someone trying to execute/render
+      # bootstrapLib outside of a Shiny app), but it seems that, in that case,
+      # you likely have other problems, since sliderInput() et al. already assume
+      # that Shiny is the one doing the rendering
+      #warning(
+      #  "It appears `shiny::bootstrapLib()` was rendered outside of an Shiny ",
+      #  "application context, likely by calling `as.tags()`, `as.character()`, ",
+      #  "or `print()` directly on `bootstrapLib()` or UI components that may ",
+      #  "depend on it (e.g., `fluidPage()`, etc). For 'themable' UI components ",
+      #  "(e.g., `sliderInput()`, `selectInput()`, `dateInput()`, etc) to style ",
+      #  "themselves based on the Bootstrap theme, make sure `bootstrapLib()` is ",
+      #  "provided directly to the UI and that the UI is provided direction to ",
+      #  "`shinyApp()` (or `runApp()`)", call. = FALSE
+      #)
+    }
+
+    bslib::bs_theme_dependencies(theme)
+  })
+}
+
+# This is defined outside of bootstrapLib() because registerThemeDependency()
+# wants a non-anonymous function with a single argument
+bs_theme_deps <- function(theme) {
+  bslib::bs_theme_dependencies(theme)
+}
+
+is_bs_theme <- function(x) {
+  bslib::is_bs_theme(x)
+}
+
+#' Obtain Shiny's Bootstrap Sass theme
+#'
+#' Intended for use by Shiny developers to create Shiny bindings with intelligent
+#' styling based on the [bootstrapLib()]'s `theme` value.
+#'
+#' @return If called at render-time (i.e., inside a [htmltools::tagFunction()]),
+#' and [bootstrapLib()]'s `theme` has been set to a [bslib::bs_theme()]
+#' object, then this returns the `theme`. Otherwise, this returns `NULL`.
+#' @seealso [getCurrentOutputInfo()], [bootstrapLib()], [htmltools::tagFunction()]
+#'
+#' @keywords internal
+#' @export
+getCurrentTheme <- function() {
+  getShinyOption("bootstrapTheme", default = NULL)
+}
+
+getCurrentThemeVersion <- function() {
+  theme <- getCurrentTheme()
+  if (bslib::is_bs_theme(theme)) {
+    bslib::theme_version(theme)
+  } else {
+    strsplit(bootstrapVersion, ".", fixed = TRUE)[[1]][[1]]
+  }
+}
+
+setCurrentTheme <- function(theme) {
+  shinyOptions(bootstrapTheme = theme)
+}
+
+#' Register a theme dependency
+#'
+#' This function registers a function that returns an [htmlDependency()] or list
+#' of such objects. If `session$setCurrentTheme()` is called, the function will
+#' be re-executed, and the resulting html dependency will be sent to the client.
+#'
+#' Note that `func` should **not** be an anonymous function, or a function which
+#' is defined within the calling function. This is so that,
+#' `registerThemeDependency()` is called multiple times with the function, it
+#' tries to deduplicate them
+#'
+#' @param func A function that takes one argument, `theme` (which is a
+#'   [sass::sass_layer()] object), and returns an htmlDependency object, or list
+#'   of them.
+#'
+#' @export
+#' @keywords internal
+registerThemeDependency <- function(func) {
+  func_expr <- substitute(func)
+  if (is.call(func_expr) && identical(func_expr[[1]], as.symbol("function"))) {
+    warning("`func` should not be an anonymous function. ",
+      "It should be declared outside of the function that calls registerThemeDependency(); ",
+      "otherwise it will not be deduplicated by Shiny and multiple copies of the ",
+      "resulting htmlDependency may be computed and sent to the client.")
+  }
+  if (!is.function(func) || length(formals(func)) != 1) {
+    stop("`func` must be a function with one argument (the current theme)")
+  }
+
+  # Note that this will automatically scope to the app or session level,
+  # depending on if this is called from within a session or not.
+  funcs <- getShinyOption("themeDependencyFuncs", default = list())
+
+  # Don't add func if it's already present.
+  have_func <- any(vapply(funcs, identical, logical(1), func))
+  if (!have_func) {
+    funcs[[length(funcs) + 1]] <- func
+  }
+
+  shinyOptions("themeDependencyFuncs" = funcs)
+}
+
+bootstrapDependency <- function(theme) {
+  htmlDependency(
+    "bootstrap",
+    bootstrapVersion,
+    src = "www/shared/bootstrap",
+    package = "shiny",
     script = c(
       "js/bootstrap.min.js",
-      # These shims are necessary for IE 8 compatibility
-      "shim/html5shiv.min.js",
-      "shim/respond.min.js"
+      # Safely adding accessibility plugin for screen readers and keyboard users; no break for sighted aspects (see https://github.com/paypal/bootstrap-accessibility-plugin)
+      "accessibility/js/bootstrap-accessibility.min.js"
     ),
-    stylesheet = if (is.null(theme)) "css/bootstrap.min.css",
+    stylesheet = c(
+      theme %||% "css/bootstrap.min.css",
+      # Safely adding accessibility plugin for screen readers and keyboard users; no break for sighted aspects (see https://github.com/paypal/bootstrap-accessibility-plugin)
+      "accessibility/css/bootstrap-accessibility.min.css"
+    ),
     meta = list(viewport = "width=device-width, initial-scale=1")
   )
 }
+
+bootstrapVersion <- "3.4.1"
+
 
 #' @rdname bootstrapPage
 #' @export
@@ -103,7 +262,7 @@ basicPage <- function(...) {
 #' *automatic* height; that is, they determine their own height based on
 #' the height of their contained elements. However,
 #' `fillPage(plotOutput("plot", height = "100%"))` will work because
-#' `fillPage` fixes the `<body>` height at 100\% of the window height.
+#' `fillPage` fixes the `<body>` height at 100% of the window height.
 #'
 #' Note that `fillPage(plotOutput("plot"))` will not cause the plot to fill
 #' the page. Like most Shiny output widgets, `plotOutput`'s default height
@@ -128,7 +287,7 @@ basicPage <- function(...) {
 #' @param title The title to use for the browser window/tab (it will not be
 #'   shown in the document).
 #' @param bootstrap If `TRUE`, load the Bootstrap CSS library.
-#' @param theme URL to alternative Bootstrap stylesheet.
+#' @inheritParams bootstrapPage
 #'
 #' @family layout functions
 #'
@@ -156,7 +315,7 @@ basicPage <- function(...) {
 #' )
 #' @export
 fillPage <- function(..., padding = 0, title = NULL, bootstrap = TRUE,
-  theme = NULL) {
+  theme = NULL, lang = NULL) {
 
   fillCSS <- tags$head(tags$style(type = "text/css",
     "html, body { width: 100%; height: 100%; overflow: hidden; }",
@@ -164,14 +323,18 @@ fillPage <- function(..., padding = 0, title = NULL, bootstrap = TRUE,
   ))
 
   if (isTRUE(bootstrap)) {
-    bootstrapPage(title = title, theme = theme, fillCSS, ...)
+    ui <- bootstrapPage(title = title, theme = theme, fillCSS, lang = lang, ...)
   } else {
-    tagList(
+    ui <- tagList(
       fillCSS,
       if (!is.null(title)) tags$head(tags$title(title)),
       ...
     )
+
+    ui <- setLang(ui, lang)
   }
+
+  return(ui)
 }
 
 collapseSizes <- function(padding) {
@@ -211,21 +374,17 @@ collapseSizes <- function(padding) {
 #' @param inverse `TRUE` to use a dark background and light text for the
 #'   navigation bar
 #' @param collapsible `TRUE` to automatically collapse the navigation
-#'   elements into a menu when the width of the browser is less than 940 pixels
-#'   (useful for viewing on smaller touchscreen device)
-#' @param collapsable Deprecated; use `collapsible` instead.
+#'   elements into an expandable menu on mobile devices or narrow window widths.
 #' @param fluid `TRUE` to use a fluid layout. `FALSE` to use a fixed
 #'   layout.
-#' @param responsive This option is deprecated; it is no longer optional with
-#'   Bootstrap 3.
-#' @param theme Alternative Bootstrap stylesheet (normally a css file within the
-#'   www directory). For example, to use the theme located at
-#'   `www/bootstrap.css` you would use `theme = "bootstrap.css"`.
-#' @param windowTitle The title that should be displayed by the browser window.
-#'   Useful if `title` is not a string.
+#' @param windowTitle the browser window title (as a character string). The
+#'   default value, `NA`, means to use any character strings that appear in
+#'   `title` (if none are found, the host URL of the page is displayed by
+#'   default).
+#' @inheritParams bootstrapPage
 #' @param icon Optional icon to appear on a `navbarMenu` tab.
 #'
-#' @return A UI defintion that can be passed to the [shinyUI] function.
+#' @return A UI definition that can be passed to the [shinyUI] function.
 #'
 #' @details The `navbarMenu` function can be used to create an embedded
 #'   menu within the navbar that in turns includes additional tabPanels (see
@@ -263,84 +422,20 @@ navbarPage <- function(title,
                        footer = NULL,
                        inverse = FALSE,
                        collapsible = FALSE,
-                       collapsable,
                        fluid = TRUE,
-                       responsive = NULL,
                        theme = NULL,
-                       windowTitle = title) {
-
-  if (!missing(collapsable)) {
-    shinyDeprecated("`collapsable` is deprecated; use `collapsible` instead.")
-    collapsible <- collapsable
-  }
-
-  # alias title so we can avoid conflicts w/ title in withTags
-  pageTitle <- title
-
-  # navbar class based on options
-  navbarClass <- "navbar navbar-default"
-  position <- match.arg(position)
-  if (!is.null(position))
-    navbarClass <- paste(navbarClass, " navbar-", position, sep = "")
-  if (inverse)
-    navbarClass <- paste(navbarClass, "navbar-inverse")
-
-  if (!is.null(id))
-    selected <- restoreInput(id = id, default = selected)
-
-  # build the tabset
-  tabs <- list(...)
-  tabset <- buildTabset(tabs, "nav navbar-nav", NULL, id, selected)
-
-  # function to return plain or fluid class name
-  className <- function(name) {
-    if (fluid)
-      paste(name, "-fluid", sep="")
-    else
-      name
-  }
-
-  # built the container div dynamically to support optional collapsibility
-  if (collapsible) {
-    navId <- paste("navbar-collapse-", p_randomInt(1000, 10000), sep="")
-    containerDiv <- div(class=className("container"),
-      div(class="navbar-header",
-        tags$button(type="button", class="navbar-toggle collapsed",
-          `data-toggle`="collapse", `data-target`=paste0("#", navId),
-          span(class="sr-only", "Toggle navigation"),
-          span(class="icon-bar"),
-          span(class="icon-bar"),
-          span(class="icon-bar")
-        ),
-        span(class="navbar-brand", pageTitle)
-      ),
-      div(class="navbar-collapse collapse", id=navId, tabset$navList)
-    )
-  } else {
-    containerDiv <- div(class=className("container"),
-      div(class="navbar-header",
-        span(class="navbar-brand", pageTitle)
-      ),
-      tabset$navList
-    )
-  }
-
-  # build the main tab content div
-  contentDiv <- div(class=className("container"))
-  if (!is.null(header))
-    contentDiv <- tagAppendChild(contentDiv, div(class="row", header))
-  contentDiv <- tagAppendChild(contentDiv, tabset$content)
-  if (!is.null(footer))
-    contentDiv <- tagAppendChild(contentDiv, div(class="row", footer))
-
-  # build the page
-  bootstrapPage(
-    title = windowTitle,
-    responsive = responsive,
+                       windowTitle = NA,
+                       lang = NULL) {
+  remove_first_class(bslib::page_navbar(
+    ..., title = title, id = id, selected = selected,
+    position = match.arg(position),
+    header = header, footer = footer,
+    inverse = inverse, collapsible = collapsible,
+    fluid = fluid,
     theme = theme,
-    tags$nav(class=navbarClass, role="navigation", containerDiv),
-    contentDiv
-  )
+    window_title = windowTitle,
+    lang = lang
+  ))
 }
 
 #' @param menuName A name that identifies this `navbarMenu`. This
@@ -350,11 +445,7 @@ navbarPage <- function(title,
 #' @rdname navbarPage
 #' @export
 navbarMenu <- function(title, ..., menuName = title, icon = NULL) {
-  structure(list(title = title,
-                 menuName = menuName,
-                 tabs = list(...),
-                 iconClass = iconClass(icon)),
-            class = "shiny.navbarmenu")
+  bslib::nav_menu(title, ..., value = menuName, icon = icon)
 }
 
 #' Create a well panel
@@ -464,14 +555,12 @@ helpText <- function(...) {
 
 #' Create a tab panel
 #'
-#' Create a tab panel that can be included within a [tabsetPanel()] or
-#' a [navbarPage()].
 #'
 #' @param title Display title for tab
 #' @param ... UI elements to include within the tab
 #' @param value The value that should be sent when `tabsetPanel` reports
 #'   that this tab is selected. If omitted and `tabsetPanel` has an
-#'   `id`, then the title will be used..
+#'   `id`, then the title will be used.
 #' @param icon Optional icon to appear on the tab. This attribute is only
 #' valid when using a `tabPanel` within a [navbarPage()].
 #' @return A tab that can be passed to [tabsetPanel()]
@@ -489,12 +578,16 @@ helpText <- function(...) {
 #'   )
 #' )
 #' @export
+#' @describeIn tabPanel Create a tab panel that can be included within a [tabsetPanel()] or a [navbarPage()].
 tabPanel <- function(title, ..., value = title, icon = NULL) {
-  divTag <- div(class="tab-pane",
-                title=title,
-                `data-value`=value,
-                `data-icon-class` = iconClass(icon),
-                ...)
+  bslib::nav(title, ..., value = value, icon = icon)
+}
+
+#' @export
+#' @describeIn tabPanel Create a tab panel that drops the title argument.
+#'   This function should be used within `tabsetPanel(type = "hidden")`. See [tabsetPanel()] for example usage.
+tabPanelBody <- function(value, ..., icon = NULL) {
+  bslib::nav_content(value, ..., icon = icon)
 }
 
 #' Create a tabset panel
@@ -510,10 +603,14 @@ tabPanel <- function(title, ..., value = title, icon = NULL) {
 #' @param selected The `value` (or, if none was supplied, the `title`)
 #'   of the tab that should be selected by default. If `NULL`, the first
 #'   tab will be selected.
-#' @param type Use "tabs" for the standard look; Use "pills" for a more plain
-#'   look where tabs are selected using a background fill color.
-#' @param position This argument is deprecated; it has been discontinued in
-#'   Bootstrap 3.
+#' @param type  \describe{
+#'   \item{`"tabs"`}{Standard tab look}
+#'   \item{`"pills"`}{Selected tabs use the background fill color}
+#'   \item{`"hidden"`}{Hides the selectable tabs. Use `type = "hidden"` in
+#'   conjunction with [tabPanelBody()] and [updateTabsetPanel()] to control the
+#'   active tab via other input controls. (See example below)}
+#' }
+#' @inheritParams navbarPage
 #' @return A tabset that can be passed to [mainPanel()]
 #'
 #' @seealso [tabPanel()], [updateTabsetPanel()],
@@ -529,33 +626,55 @@ tabPanel <- function(title, ..., value = title, icon = NULL) {
 #'     tabPanel("Table", tableOutput("table"))
 #'   )
 #' )
+#'
+#' ui <- fluidPage(
+#'   sidebarLayout(
+#'     sidebarPanel(
+#'       radioButtons("controller", "Controller", 1:3, 1)
+#'     ),
+#'     mainPanel(
+#'       tabsetPanel(
+#'         id = "hidden_tabs",
+#'         # Hide the tab values.
+#'         # Can only switch tabs by using `updateTabsetPanel()`
+#'         type = "hidden",
+#'         tabPanelBody("panel1", "Panel 1 content"),
+#'         tabPanelBody("panel2", "Panel 2 content"),
+#'         tabPanelBody("panel3", "Panel 3 content")
+#'       )
+#'     )
+#'   )
+#' )
+#'
+#' server <- function(input, output, session) {
+#'   observeEvent(input$controller, {
+#'     updateTabsetPanel(session, "hidden_tabs", selected = paste0("panel", input$controller))
+#'   })
+#' }
+#'
+#' if (interactive()) {
+#'   shinyApp(ui, server)
+#' }
 #' @export
 tabsetPanel <- function(...,
                         id = NULL,
                         selected = NULL,
-                        type = c("tabs", "pills"),
-                        position = NULL) {
-  if (!is.null(position)) {
-    shinyDeprecated(msg = paste("tabsetPanel: argument 'position' is deprecated;",
-                                "it has been discontinued in Bootstrap 3."),
-                    version = "0.10.2.2")
-  }
+                        type = c("tabs", "pills", "hidden"),
+                        header = NULL,
+                        footer = NULL) {
 
-  if (!is.null(id))
-    selected <- restoreInput(id = id, default = selected)
+  func <- switch(
+    match.arg(type),
+    tabs = bslib::navs_tab,
+    pills = bslib::navs_pill,
+    hidden = bslib::navs_hidden
+  )
 
-  # build the tabset
-  tabs <- list(...)
-  type <- match.arg(type)
-
-  tabset <- buildTabset(tabs, paste0("nav nav-", type), NULL, id, selected)
-
-  # create the content
-  first <- tabset$navList
-  second <- tabset$content
-
-  # create the tab div
-  tags$div(class = "tabbable", first, second)
+  # bslib adds a class to make the content browsable() by default,
+  # but that's probably too big of a change for shiny
+  remove_first_class(
+    func(..., id = id, selected = selected, header = header, footer = footer)
+  )
 }
 
 #' Create a navigation list panel
@@ -575,8 +694,10 @@ tabsetPanel <- function(...,
 #'   navigation list.
 #' @param fluid `TRUE` to use fluid layout; `FALSE` to use fixed
 #'   layout.
-#' @param widths Column withs of the navigation list and tabset content areas
+#' @param widths Column widths of the navigation list and tabset content areas
 #'   respectively.
+#' @inheritParams tabsetPanel
+#' @inheritParams navbarPage
 #'
 #' @details You can include headers within the `navlistPanel` by including
 #'   plain text elements in the list. Versions of Shiny before 0.11 supported
@@ -603,245 +724,67 @@ tabsetPanel <- function(...,
 navlistPanel <- function(...,
                          id = NULL,
                          selected = NULL,
+                         header = NULL,
+                         footer = NULL,
                          well = TRUE,
                          fluid = TRUE,
                          widths = c(4, 8)) {
-
-  # text filter for headers
-  textFilter <- function(text) {
-      tags$li(class="navbar-brand", text)
-  }
-
-  if (!is.null(id))
-    selected <- restoreInput(id = id, default = selected)
-
-  # build the tabset
-  tabs <- list(...)
-  tabset <- buildTabset(tabs,
-                        "nav nav-pills nav-stacked",
-                        textFilter,
-                        id,
-                        selected)
-
-  # create the columns
-  columns <- list(
-    column(widths[[1]], class=ifelse(well, "well", ""), tabset$navList),
-    column(widths[[2]], tabset$content)
-  )
-
-  # return the row
-  if (fluid)
-    fluidRow(columns)
-  else
-    fixedRow(columns)
+  remove_first_class(bslib::navs_pill_list(
+    ..., id = id, selected = selected,
+    header = header, footer = footer,
+    well = well, fluid = fluid, widths = widths
+  ))
 }
 
-# Helpers to build tabsetPanels (& Co.) and their elements
-markTabAsSelected <- function(x) {
-  attr(x, "selected") <- TRUE
+remove_first_class <- function(x) {
+  class(x) <- class(x)[-1]
   x
 }
 
-isTabSelected <- function(x) {
-  isTRUE(attr(x, "selected", exact = TRUE))
-}
-
-containsSelectedTab <- function(tabs) {
-  any(vapply(tabs, isTabSelected, logical(1)))
-}
-
-findAndMarkSelectedTab <- function(tabs, selected, foundSelected) {
-  tabs <- lapply(tabs, function(div) {
-    if (foundSelected || is.character(div)) {
-      # Strings are not selectable items
-
-    } else if (inherits(div, "shiny.navbarmenu")) {
-      # Recur for navbarMenus
-      res <- findAndMarkSelectedTab(div$tabs, selected, foundSelected)
-      div$tabs <- res$tabs
-      foundSelected <<- res$foundSelected
-
-    } else {
-      # Base case: regular tab item. If the `selected` argument is
-      # provided, check for a match in the existing tabs; else,
-      # mark first available item as selected
-      if (is.null(selected)) {
-        foundSelected <<- TRUE
-        div <- markTabAsSelected(div)
-      } else {
-        tabValue <- div$attribs$`data-value` %OR% div$attribs$title
-        if (identical(selected, tabValue)) {
-          foundSelected <<- TRUE
-          div <- markTabAsSelected(div)
-        }
-      }
-    }
-    return(div)
-  })
-  return(list(tabs = tabs, foundSelected = foundSelected))
-}
-
-# Returns the icon object (or NULL if none), provided either a
-# tabPanel, OR the icon class
-getIcon <- function(tab = NULL, iconClass = NULL) {
-  if (!is.null(tab)) iconClass <- tab$attribs$`data-icon-class`
-  if (!is.null(iconClass)) {
-    if (grepl("fa-", iconClass, fixed = TRUE)) {
-      # for font-awesome we specify fixed-width
-      iconClass <- paste(iconClass, "fa-fw")
-    }
-    icon(name = NULL, class = iconClass)
-  } else NULL
-}
-
-# Text filter for navbarMenu's (plain text) separators
-navbarMenuTextFilter <- function(text) {
-  if (grepl("^\\-+$", text)) tags$li(class = "divider")
-  else tags$li(class = "dropdown-header", text)
-}
-
-# This function is called internally by navbarPage, tabsetPanel
-# and navlistPanel
-buildTabset <- function(tabs, ulClass, textFilter = NULL, id = NULL,
-                        selected = NULL, foundSelected = FALSE) {
-
-  res <- findAndMarkSelectedTab(tabs, selected, foundSelected)
-  tabs <- res$tabs
-  foundSelected <- res$foundSelected
-
-  # add input class if we have an id
-  if (!is.null(id)) ulClass <- paste(ulClass, "shiny-tab-input")
-
-  if (anyNamed(tabs)) {
-    nms <- names(tabs)
-    nms <- nms[nzchar(nms)]
-    stop("Tabs should all be unnamed arguments, but some are named: ",
-      paste(nms, collapse = ", "))
-  }
-
-  tabsetId <- p_randomInt(1000, 10000)
-  tabs <- lapply(seq_len(length(tabs)), buildTabItem,
-            tabsetId = tabsetId, foundSelected = foundSelected,
-            tabs = tabs, textFilter = textFilter)
-
-  tabNavList <- tags$ul(class = ulClass, id = id,
-                  `data-tabsetid` = tabsetId, lapply(tabs, "[[", 1))
-
-  tabContent <- tags$div(class = "tab-content",
-                  `data-tabsetid` = tabsetId, lapply(tabs, "[[", 2))
-
-  list(navList = tabNavList, content = tabContent)
-}
-
-# Builds tabPanel/navbarMenu items (this function used to be
-# declared inside the buildTabset() function and it's been
-# refactored for clarity and reusability). Called internally
-# by buildTabset.
-buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
-                         divTag = NULL, textFilter = NULL) {
-
-  divTag <- if (!is.null(divTag)) divTag else tabs[[index]]
-
-  if (is.character(divTag) && !is.null(textFilter)) {
-    # text item: pass it to the textFilter if it exists
-    liTag <- textFilter(divTag)
-    divTag <- NULL
-
-  } else if (inherits(divTag, "shiny.navbarmenu")) {
-    # navbarMenu item: build the child tabset
-    tabset <- buildTabset(divTag$tabs, "dropdown-menu",
-      navbarMenuTextFilter, foundSelected = foundSelected)
-
-    # if this navbarMenu contains a selected item, mark it active
-    containsSelected <- containsSelectedTab(divTag$tabs)
-    liTag <- tags$li(
-      class = paste0("dropdown", if (containsSelected) " active"),
-      tags$a(href = "#",
-        class = "dropdown-toggle", `data-toggle` = "dropdown",
-        `data-value` = divTag$menuName,
-        getIcon(iconClass = divTag$iconClass),
-        divTag$title, tags$b(class = "caret")
-      ),
-      tabset$navList   # inner tabPanels items
-    )
-    # list of tab content divs from the child tabset
-    divTag <- tabset$content$children
-
-  } else {
-    # tabPanel item: create the tab's liTag and divTag
-    tabId <- paste("tab", tabsetId, index, sep = "-")
-    liTag <- tags$li(
-               tags$a(
-                 href = paste("#", tabId, sep = ""),
-                 `data-toggle` = "tab",
-                 `data-value` = divTag$attribs$`data-value`,
-                 getIcon(iconClass = divTag$attribs$`data-icon-class`),
-                 divTag$attribs$title
-               )
-    )
-    # if this tabPanel is selected item, mark it active
-    if (isTabSelected(divTag)) {
-      liTag$attribs$class <- "active"
-      divTag$attribs$class <- "tab-pane active"
-    }
-    divTag$attribs$id <- tabId
-    divTag$attribs$title <- NULL
-  }
-  return(list(liTag = liTag, divTag = divTag))
-}
-
-
 #' Create a text output element
 #'
-#' Render a reactive output variable as text within an application page. The
-#' text will be included within an HTML `div` tag by default.
+#' Render a reactive output variable as text within an application page.
+#' `textOutput()` is usually paired with [renderText()] and puts regular text
+#' in `<div>` or `<span>`; `verbatimTextOutput()` is usually paired with
+#' [renderPrint()] and provides fixed-width text in a `<pre>`.
+#'
+#' In both functions, text is HTML-escaped prior to rendering.
+#'
 #' @param outputId output variable to read the value from
 #' @param container a function to generate an HTML element to contain the text
 #' @param inline use an inline (`span()`) or block container (`div()`)
 #'   for the output
-#' @return A text output element that can be included in a panel
-#' @details Text is HTML-escaped prior to rendering. This element is often used
-#'   to display [renderText] output variables.
-#' @examples
-#' h3(textOutput("caption"))
-#' @export
-textOutput <- function(outputId, container = if (inline) span else div, inline = FALSE) {
-  container(id = outputId, class = "shiny-text-output")
-}
-
-#' Create a verbatim text output element
-#'
-#' Render a reactive output variable as verbatim text within an
-#' application page. The text will be included within an HTML `pre` tag.
-#' @param outputId output variable to read the value from
-#' @param placeholder if the output is empty or `NULL`, should an empty
-#'   rectangle be displayed to serve as a placeholder? (does not affect
-#'   behavior when the the output in nonempty)
-#' @return A verbatim text output element that can be included in a panel
-#' @details Text is HTML-escaped prior to rendering. This element is often used
-#'   with the [renderPrint] function to preserve fixed-width formatting
-#'   of printed objects.
+#' @return An output element for use in UI.
 #' @examples
 #' ## Only run this example in interactive R sessions
 #' if (interactive()) {
 #'   shinyApp(
 #'     ui = basicPage(
 #'       textInput("txt", "Enter the text to display below:"),
-#'       verbatimTextOutput("default"),
-#'       verbatimTextOutput("placeholder", placeholder = TRUE)
+#'       textOutput("text"),
+#'       verbatimTextOutput("verb")
 #'     ),
 #'     server = function(input, output) {
-#'       output$default <- renderText({ input$txt })
-#'       output$placeholder <- renderText({ input$txt })
+#'       output$text <- renderText({ input$txt })
+#'       output$verb <- renderText({ input$txt })
 #'     }
 #'   )
 #' }
 #' @export
+textOutput <- function(outputId, container = if (inline) span else div, inline = FALSE) {
+  container(id = outputId, class = "shiny-text-output")
+}
+
+#' @param placeholder if the output is empty or `NULL`, should an empty
+#'   rectangle be displayed to serve as a placeholder? (does not affect
+#'   behavior when the output is nonempty)
+#' @export
+#' @rdname textOutput
 verbatimTextOutput <- function(outputId, placeholder = FALSE) {
   pre(id = outputId,
-      class = paste(c("shiny-text-output", if (!placeholder) "noplaceholder"),
-                    collapse = " ")
-      )
+    class = "shiny-text-output",
+    class = if (!placeholder) "noplaceholder"
+  )
 }
 
 
@@ -849,44 +792,13 @@ verbatimTextOutput <- function(outputId, placeholder = FALSE) {
 #' @rdname plotOutput
 #' @export
 imageOutput <- function(outputId, width = "100%", height="400px",
-                        click = NULL, dblclick = NULL,
-                        hover = NULL, hoverDelay = NULL, hoverDelayType = NULL,
-                        brush = NULL,
-                        clickId = NULL, hoverId = NULL,
-                        inline = FALSE) {
-
-  if (!is.null(clickId)) {
-    shinyDeprecated(
-      msg = paste("The 'clickId' argument is deprecated. ",
-                  "Please use 'click' instead. ",
-                  "See ?imageOutput or ?plotOutput for more information."),
-      version = "0.11.1"
-    )
-    click <- clickId
-  }
-
-  if (!is.null(hoverId)) {
-    shinyDeprecated(
-      msg = paste("The 'hoverId' argument is deprecated. ",
-                  "Please use 'hover' instead. ",
-                  "See ?imageOutput or ?plotOutput for more information."),
-      version = "0.11.1"
-    )
-    hover <- hoverId
-  }
-
-  if (!is.null(hoverDelay) || !is.null(hoverDelayType)) {
-    shinyDeprecated(
-      msg = paste("The 'hoverDelay'and 'hoverDelayType' arguments are deprecated. ",
-                  "Please use 'hoverOpts' instead. ",
-                  "See ?imageOutput or ?plotOutput for more information."),
-      version = "0.11.1"
-    )
-    hover <- hoverOpts(id = hover, delay = hoverDelay, delayType = hoverDelayType)
-  }
+                        click = NULL, dblclick = NULL, hover = NULL, brush = NULL,
+                        inline = FALSE, fill = FALSE) {
 
   style <- if (!inline) {
-    paste("width:", validateCssUnit(width), ";", "height:", validateCssUnit(height))
+    # Using `css()` here instead of paste/sprintf so that NULL values will
+    # result in the property being dropped altogether
+    css(width = validateCssUnit(width), height = validateCssUnit(height))
   }
 
 
@@ -937,7 +849,8 @@ imageOutput <- function(outputId, width = "100%", height="400px",
   }
 
   container <- if (inline) span else div
-  do.call(container, args)
+  res <- do.call(container, args)
+  bindFillRole(res, item = fill)
 }
 
 #' Create an plot or image output element
@@ -991,14 +904,6 @@ imageOutput <- function(outputId, width = "100%", height="400px",
 #'   named list with `x` and `y` elements indicating the mouse
 #'   position. To control the hover time or hover delay type, you must use
 #'   [hoverOpts()].
-#' @param clickId Deprecated; use `click` instead. Also see the
-#'   [clickOpts()] function.
-#' @param hoverId Deprecated; use `hover` instead. Also see the
-#'   [hoverOpts()] function.
-#' @param hoverDelay Deprecated; use `hover` instead. Also see the
-#'   [hoverOpts()] function.
-#' @param hoverDelayType Deprecated; use `hover` instead. Also see the
-#'   [hoverOpts()] function.
 #' @param brush Similar to the `click` argument, this can be `NULL`
 #'   (the default), a string, or an object created by the
 #'   [brushOpts()] function. If you use a value like
@@ -1013,6 +918,11 @@ imageOutput <- function(outputId, width = "100%", height="400px",
 #'   `imageOutput`/`plotOutput` calls may share the same `id`
 #'   value; brushing one image or plot will cause any other brushes with the
 #'   same `id` to disappear.
+#' @param fill Whether or not the returned tag should be treated as a fill item,
+#'   meaning that its `height` is allowed to grow/shrink to fit a fill container
+#'   with an opinionated height (see [htmltools::bindFillRole()]) with an
+#'   opinionated height. Examples of fill containers include `bslib::card()` and
+#'   `bslib::card_body_fill()`.
 #' @inheritParams textOutput
 #' @note The arguments `clickId` and `hoverId` only work for R base graphics
 #'   (see the \pkg{\link[graphics:graphics-package]{graphics}} package). They do
@@ -1182,64 +1092,19 @@ imageOutput <- function(outputId, width = "100%", height="400px",
 #' }
 #' @export
 plotOutput <- function(outputId, width = "100%", height="400px",
-                       click = NULL, dblclick = NULL,
-                       hover = NULL, hoverDelay = NULL, hoverDelayType = NULL,
-                       brush = NULL,
-                       clickId = NULL, hoverId = NULL,
-                       inline = FALSE) {
+                       click = NULL, dblclick = NULL, hover = NULL, brush = NULL,
+                       inline = FALSE, fill = !inline) {
 
   # Result is the same as imageOutput, except for HTML class
   res <- imageOutput(outputId, width, height, click, dblclick,
-                     hover, hoverDelay, hoverDelayType, brush,
-                     clickId, hoverId, inline)
+                     hover, brush, inline, fill)
 
   res$attribs$class <- "shiny-plot-output"
   res
 }
 
-#' Create a table output element
-#'
-#' Render a [renderTable()] or [renderDataTable()] within an
-#' application page. `renderTable` uses a standard HTML table, while
-#' `renderDataTable` uses the DataTables Javascript library to create an
-#' interactive table with more features.
-#'
 #' @param outputId output variable to read the table from
-#' @return A table output element that can be included in a panel
-#'
-#' @seealso [renderTable()], [renderDataTable()].
-#' @examples
-#' ## Only run this example in interactive R sessions
-#' if (interactive()) {
-#'   # table example
-#'   shinyApp(
-#'     ui = fluidPage(
-#'       fluidRow(
-#'         column(12,
-#'           tableOutput('table')
-#'         )
-#'       )
-#'     ),
-#'     server = function(input, output) {
-#'       output$table <- renderTable(iris)
-#'     }
-#'   )
-#'
-#'
-#'   # DataTables example
-#'   shinyApp(
-#'     ui = fluidPage(
-#'       fluidRow(
-#'         column(12,
-#'           dataTableOutput('table')
-#'         )
-#'       )
-#'     ),
-#'     server = function(input, output) {
-#'       output$table <- renderDataTable(iris)
-#'     }
-#'   )
-#' }
+#' @rdname renderTable
 #' @export
 tableOutput <- function(outputId) {
   div(id = outputId, class="shiny-html-output")
@@ -1247,17 +1112,23 @@ tableOutput <- function(outputId) {
 
 dataTableDependency <- list(
   htmlDependency(
-    "datatables", "1.10.5", c(href = "shared/datatables"),
+    "datatables",
+    "1.10.5",
+    src = "www/shared/datatables",
+    package = "shiny",
     script = "js/jquery.dataTables.min.js"
   ),
   htmlDependency(
-    "datatables-bootstrap", "1.10.5", c(href = "shared/datatables"),
+    "datatables-bootstrap",
+    "1.10.5",
+    src = "www/shared/datatables",
+    package = "shiny",
     stylesheet = c("css/dataTables.bootstrap.css", "css/dataTables.extra.css"),
     script = "js/dataTables.bootstrap.js"
   )
 )
 
-#' @rdname tableOutput
+#' @rdname renderDataTable
 #' @export
 dataTableOutput <- function(outputId) {
   attachDependencies(
@@ -1269,15 +1140,21 @@ dataTableOutput <- function(outputId) {
 #' Create an HTML output element
 #'
 #' Render a reactive output variable as HTML within an application page. The
-#' text will be included within an HTML `div` tag, and is presumed to
-#' contain HTML content which should not be escaped.
+#' text will be included within an HTML `div` tag, and is presumed to contain
+#' HTML content which should not be escaped.
 #'
-#' `uiOutput` is intended to be used with `renderUI` on the server
-#' side. It is currently just an alias for `htmlOutput`.
+#' `uiOutput` is intended to be used with `renderUI` on the server side. It is
+#' currently just an alias for `htmlOutput`.
 #'
 #' @param outputId output variable to read the value from
 #' @param ... Other arguments to pass to the container tag function. This is
 #'   useful for providing additional classes for the tag.
+#' @param fill If `TRUE`, the result of `container` is treated as _both_ a fill
+#'   item and container (see [htmltools::bindFillRole()]), which means both the
+#'   `container` as well as its immediate children (i.e., the result of
+#'   `renderUI()`) are allowed to grow/shrink to fit a fill container with an
+#'   opinionated height. Set `fill = "item"` or `fill = "container"` to treat
+#'   `container` as just a fill item or a fill container.
 #' @inheritParams textOutput
 #' @return An HTML output element that can be included in a panel
 #' @examples
@@ -1289,12 +1166,16 @@ dataTableOutput <- function(outputId) {
 #' )
 #' @export
 htmlOutput <- function(outputId, inline = FALSE,
-  container = if (inline) span else div, ...)
+  container = if (inline) span else div, fill = FALSE, ...)
 {
-  if (anyUnnamed(list(...))) {
+  if (any_unnamed(list(...))) {
     warning("Unnamed elements in ... will be replaced with dynamic UI.")
   }
-  container(id = outputId, class="shiny-html-output", ...)
+  res <- container(id = outputId, class = "shiny-html-output", ...)
+  bindFillRole(
+    res, item = isTRUE(fill) || isTRUE("item" == fill),
+    container = isTRUE(fill) || isTRUE("container" == fill)
+  )
 }
 
 #' @rdname htmlOutput
@@ -1312,22 +1193,36 @@ uiOutput <- htmlOutput
 #'   is assigned to.
 #' @param label The label that should appear on the button.
 #' @param class Additional CSS classes to apply to the tag, if any.
+#' @param icon An [icon()] to appear on the button. Default is `icon("download")`.
 #' @param ... Other arguments to pass to the container tag function.
 #'
 #' @examples
 #' \dontrun{
-#' # In server.R:
-#' output$downloadData <- downloadHandler(
-#'   filename = function() {
-#'     paste('data-', Sys.Date(), '.csv', sep='')
-#'   },
-#'   content = function(con) {
-#'     write.csv(data, con)
-#'   }
+#' ui <- fluidPage(
+#'   p("Choose a dataset to download."),
+#'   selectInput("dataset", "Dataset", choices = c("mtcars", "airquality")),
+#'   downloadButton("downloadData", "Download")
 #' )
 #'
-#' # In ui.R:
-#' downloadLink('downloadData', 'Download')
+#' server <- function(input, output) {
+#'   # The requested dataset
+#'   data <- reactive({
+#'     get(input$dataset)
+#'   })
+#'
+#'   output$downloadData <- downloadHandler(
+#'     filename = function() {
+#'       # Use the selected dataset as the suggested file name
+#'       paste0(input$dataset, ".csv")
+#'     },
+#'     content = function(file) {
+#'       # Write the dataset to the `file` that will be downloaded
+#'       write.csv(data(), file)
+#'     }
+#'   )
+#' }
+#'
+#' shinyApp(ui, server)
 #' }
 #'
 #' @aliases downloadLink
@@ -1335,13 +1230,15 @@ uiOutput <- htmlOutput
 #' @export
 downloadButton <- function(outputId,
                            label="Download",
-                           class=NULL, ...) {
+                           class=NULL,
+                           ...,
+                           icon = shiny::icon("download")) {
   tags$a(id=outputId,
          class=paste('btn btn-default shiny-download-link', class),
          href='',
          target='_blank',
          download=NA,
-         icon("download"),
+         validateIcon(icon),
          label, ...)
 }
 
@@ -1360,31 +1257,31 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #' Create an icon
 #'
 #' Create an icon for use within a page. Icons can appear on their own, inside
-#' of a button, or as an icon for a [tabPanel()] within a
-#' [navbarPage()].
+#' of a button, and/or used with [tabPanel()] and [navbarMenu()].
 #'
-#' @param name Name of icon. Icons are drawn from the
-#'   [Font Awesome Free](https://fontawesome.com/) (currently icons from
-#'   the v5.3.1 set are supported with the v4 naming convention) and
-#'   [Glyphicons](http://getbootstrap.com/components/#glyphicons)
-#'   libraries. Note that the "fa-" and "glyphicon-" prefixes should not be used
-#'   in icon names (i.e. the "fa-calendar" icon should be referred to as
-#'   "calendar")
-#' @param class Additional classes to customize the style of the icon (see the
-#'   [usage examples](http://fontawesome.io/examples/) for details on
+#' @param name The name of the icon. A name from either [Font
+#'   Awesome](https://fontawesome.com/) (when `lib="font-awesome"`) or
+#'   [Bootstrap
+#'   Glyphicons](https://getbootstrap.com/docs/3.3/components/#glyphicons) (when
+#'   `lib="glyphicon"`) may be provided. Note that the `"fa-"` and
+#'   `"glyphicon-"` prefixes should not appear in name (i.e., the
+#'   `"fa-calendar"` icon should be referred to as `"calendar"`). A `name` of
+#'   `NULL` may also be provided to get a raw `<i>` tag with no library attached
+#'   to it.
+#' @param class Additional classes to customize the style of an icon (see the
+#'   [usage examples](https://fontawesome.com/how-to-use) for details on
 #'   supported styles).
-#' @param lib Icon library to use ("font-awesome" or "glyphicon")
+#' @param lib The icon library to use. Either `"font-awesome"` or `"glyphicon"`.
+#' @param ... Arguments passed to the `<i>` tag of [htmltools::tags].
 #'
-#' @return An icon element
+#' @return An `<i>` (icon) HTML tag.
 #'
-#' @seealso For lists of available icons, see
-#'   [http://fontawesome.io/icons/](http://fontawesome.io/icons/) and
-#'   [http://getbootstrap.com/components/#glyphicons](http://getbootstrap.com/components/#glyphicons).
-#'
+#' @seealso For lists of available icons, see <https://fontawesome.com/icons>
+#'   and <https://getbootstrap.com/docs/3.3/components/#glyphicons>
 #'
 #' @examples
 #' # add an icon to a submit button
-#' submitButton("Update View", icon = icon("refresh"))
+#' submitButton("Update View", icon = icon("redo"))
 #'
 #' navbarPage("App Title",
 #'   tabPanel("Plot", icon = icon("bar-chart-o")),
@@ -1392,49 +1289,27 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #'   tabPanel("Table", icon = icon("table"))
 #' )
 #' @export
-icon <- function(name, class = NULL, lib = "font-awesome") {
-  prefixes <- list(
-    "font-awesome" = "fa",
-    "glyphicon" = "glyphicon"
+icon <- function(name, class = NULL, lib = "font-awesome", ...) {
+
+  # A NULL name allows for a generic <i> not tied to any library
+  if (is.null(name)) {
+    lib <- "none"
+  }
+
+  switch(
+    lib %||% "",
+    "none" = iconTag(name, class = class, ...),
+    "font-awesome" = fontawesome::fa_i(name = name, class = class, ...),
+    "glyphicon" = iconTag(
+      name, class = "glyphicon", class = paste0("glyphicon-", name),
+      class = class, ...
+    ),
+    stop("Unknown icon library: ", lib, ". See `?icon` for supported libraries.")
   )
-  prefix <- prefixes[[lib]]
-
-  # determine stylesheet
-  if (is.null(prefix)) {
-    stop("Unknown font library '", lib, "' specified. Must be one of ",
-         paste0('"', names(prefixes), '"', collapse = ", "))
-  }
-
-  # build the icon class (allow name to be null so that other functions
-  # e.g. buildTabset can pass an explicit class value)
-  iconClass <- ""
-  if (!is.null(name)) {
-    prefix_class <- prefix
-    if (prefix_class == "fa" && name %in% font_awesome_brands) {
-      prefix_class <- "fab"
-    }
-    iconClass <- paste0(prefix_class, " ", prefix, "-", name)
-  }
-  if (!is.null(class))
-    iconClass <- paste(iconClass, class)
-
-  iconTag <- tags$i(class = iconClass)
-
-  # font-awesome needs an additional dependency (glyphicon is in bootstrap)
-  if (lib == "font-awesome") {
-    htmlDependencies(iconTag) <- htmlDependency(
-      "font-awesome", "5.3.1", "www/shared/fontawesome", package = "shiny",
-      stylesheet = c(
-        "css/all.min.css",
-        "css/v4-shims.min.css"
-      )
-    )
-  }
-
-  htmltools::browsable(iconTag)
 }
 
-# Helper funtion to extract the class from an icon
-iconClass <- function(icon) {
-  if (!is.null(icon)) icon$attribs$class
+iconTag <- function(name, ...) {
+  htmltools::browsable(
+    tags$i(..., role = "presentation", `aria-label` = paste(name, "icon"))
+  )
 }

@@ -1,8 +1,3 @@
-// Listen for messages from parent frame. This file is only added when the
-// shiny.testmode option is TRUE.
-window.addEventListener("message", function(e) {
-  var message = e.data;
-
-  if (message.code)
-    eval(message.code);
-});
+/*! shiny 1.7.5.9001 | (c) 2012-2023 RStudio, PBC. | License: GPL-3 | file LICENSE */
+"use strict";(function(){var a=eval;window.addEventListener("message",function(i){var e=i.data;e.code&&a(e.code)});})();
+//# sourceMappingURL=shiny-testmode.js.map

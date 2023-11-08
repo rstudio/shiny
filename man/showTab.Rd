@@ -5,8 +5,7 @@
 \alias{hideTab}
 \title{Dynamically hide/show a tabPanel}
 \usage{
-showTab(inputId, target, select = FALSE,
-  session = getDefaultReactiveDomain())
+showTab(inputId, target, select = FALSE, session = getDefaultReactiveDomain())
 
 hideTab(inputId, target, session = getDefaultReactiveDomain())
 }

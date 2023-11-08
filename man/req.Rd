@@ -2,12 +2,9 @@
 % Please edit documentation in R/utils.R
 \name{req}
 \alias{req}
-\alias{isTruthy}
 \title{Check for required values}
 \usage{
 req(..., cancelOutput = FALSE)
-
-isTruthy(x)
 }
 \arguments{
 \item{...}{Values to check for truthiness.}
@@ -15,14 +12,12 @@ isTruthy(x)
 \item{cancelOutput}{If \code{TRUE} and an output is being evaluated, stop
 processing as usual but instead of clearing the output, leave it in
 whatever state it happens to be in.}
-
-\item{x}{An expression whose truthiness value we want to determine}
 }
 \value{
 The first value that was passed in.
 }
 \description{
-Ensure that values are available ("truthy"--see Details) before proceeding
+Ensure that values are available (\link[=isTruthy]{"truthy"}) before proceeding
 with a calculation or action. If any of the given values is not truthy, the
 operation is stopped by raising a "silent" exception (not logged by Shiny,
 nor displayed in the Shiny app's UI).
@@ -32,11 +27,12 @@ The \code{req} function was designed to be used in one of two ways. The first
 is to call it like a statement (ignoring its return value) before attempting
 operations using the required values:
 
-\preformatted{rv <- reactiveValues(state = FALSE)
-r <- reactive({
+\if{html}{\out{<div class="sourceCode">}}\preformatted{rv <- reactiveValues(state = FALSE)
+r <- reactive(\{
   req(input$a, input$b, rv$state)
   # Code that uses input$a, input$b, and/or rv$state...
-})}
+\})
+}\if{html}{\out{</div>}}
 
 In this example, if \code{r()} is called and any of \code{input$a},
 \code{input$b}, and \code{rv$state} are \code{NULL}, \code{FALSE}, \code{""},
@@ -45,62 +41,31 @@ way up to whatever render block or observer is executing.
 
 The second is to use it to wrap an expression that must be truthy:
 
-\preformatted{output$plot <- renderPlot({
-  if (req(input$plotType) == "histogram") {
+\if{html}{\out{<div class="sourceCode">}}\preformatted{output$plot <- renderPlot(\{
+  if (req(input$plotType) == "histogram") \{
     hist(dataset())
-  } else if (input$plotType == "scatter") {
+  \} else if (input$plotType == "scatter") \{
     qplot(dataset(), aes(x = x, y = y))
-  }
-})}
+  \}
+\})
+}\if{html}{\out{</div>}}
 
 In this example, \code{req(input$plotType)} first checks that
 \code{input$plotType} is truthy, and if so, returns it. This is a convenient
 way to check for a value "inline" with its first use.
-
-\strong{Truthy and falsy values}
-
-The terms "truthy" and "falsy" generally indicate whether a value, when
-coerced to a \code{\link[base:logical]{base::logical()}}, is \code{TRUE} or \code{FALSE}. We use
-the term a little loosely here; our usage tries to match the intuitive
-notions of "Is this value missing or available?", or "Has the user provided
-an answer?", or in the case of action buttons, "Has the button been
-clicked?".
-
-For example, a \code{textInput} that has not been filled out by the user has
-a value of \code{""}, so that is considered a falsy value.
-
-To be precise, \code{req} considers a value truthy \emph{unless} it is one
-of:
-
-\itemize{
-\item{\code{FALSE}}
-\item{\code{NULL}}
-\item{\code{""}}
-\item{An empty atomic vector}
-\item{An atomic vector that contains only missing values}
-\item{A logical vector that contains all \code{FALSE} or missing values}
-\item{An object of class \code{"try-error"}}
-\item{A value that represents an unclicked \code{\link[=actionButton]{actionButton()}}}
 }
+\section{Using \code{req(FALSE)}}{
 
-Note in particular that the value \code{0} is considered truthy, even though
-\code{as.logical(0)} is \code{FALSE}.
-
-If the built-in rules for truthiness do not match your requirements, you can
-always work around them. Since \code{FALSE} is falsy, you can simply provide
-the results of your own checks to \code{req}:
-
-\code{req(input$a != 0)}
-
-\strong{Using \code{req(FALSE)}}
 
 You can use \code{req(FALSE)} (i.e. no condition) if you've already performed
 all the checks you needed to by that point and just want to stop the reactive
 chain now. There is no advantange to this, except perhaps ease of readibility
 if you have a complicated condition to check for (or perhaps if you'd like to
 divide your condition into nested \code{if} statements).
+}
 
-\strong{Using \code{cancelOutput = TRUE}}
+\section{Using \code{cancelOutput = TRUE}}{
+
 
 When \code{req(..., cancelOutput = TRUE)} is used, the "silent" exception is
 also raised, but it is treated slightly differently if one or more outputs are
@@ -115,6 +80,7 @@ or may not be the case if it is used inside a non-output context (e.g.
 --- depending on whether or not there is an \code{output$...} that is triggered
 as a result of those calls. See the examples below for concrete scenarios.
 }
+
 \examples{
 ## Only run examples in interactive R sessions
 if (interactive()) {

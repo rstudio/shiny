@@ -5,43 +5,55 @@
 \alias{animationOptions}
 \title{Slider Input Widget}
 \usage{
-sliderInput(inputId, label, min, max, value, step = NULL,
-  round = FALSE, format = NULL, locale = NULL, ticks = TRUE,
-  animate = FALSE, width = NULL, sep = ",", pre = NULL,
-  post = NULL, timeFormat = NULL, timezone = NULL,
-  dragRange = TRUE)
+sliderInput(
+  inputId,
+  label,
+  min,
+  max,
+  value,
+  step = NULL,
+  round = FALSE,
+  ticks = TRUE,
+  animate = FALSE,
+  width = NULL,
+  sep = ",",
+  pre = NULL,
+  post = NULL,
+  timeFormat = NULL,
+  timezone = NULL,
+  dragRange = TRUE
+)
 
-animationOptions(interval = 1000, loop = FALSE, playButton = NULL,
-  pauseButton = NULL)
+animationOptions(
+  interval = 1000,
+  loop = FALSE,
+  playButton = NULL,
+  pauseButton = NULL
+)
 }
 \arguments{
 \item{inputId}{The \code{input} slot that will be used to access the value.}
 
 \item{label}{Display label for the control, or \code{NULL} for no label.}
 
-\item{min}{The minimum value (inclusive) that can be selected.}
+\item{min, max}{The minimum and maximum values (inclusive) that can be
+selected.}
 
-\item{max}{The maximum value (inclusive) that can be selected.}
-
-\item{value}{The initial value of the slider. A numeric vector of length one
-will create a regular slider; a numeric vector of length two will create a
-double-ended range slider. A warning will be issued if the value doesn't
-fit between \code{min} and \code{max}.}
+\item{value}{The initial value of the slider, either a number, a date
+(class Date), or a date-time (class POSIXt). A length one vector will
+create a regular slider; a length two vector will create a double-ended
+range slider. Must lie between \code{min} and \code{max}.}
 
 \item{step}{Specifies the interval between each selectable value on the
-slider (if \code{NULL}, a heuristic is used to determine the step size). If
-the values are dates, \code{step} is in days; if the values are times
-(POSIXt), \code{step} is in seconds.}
+slider. Either \code{NULL}, the default, which uses a heuristic to determine the
+step size or a single number. If the values are dates, \code{step} is in days;
+if the values are date-times, \code{step} is in seconds.}
 
 \item{round}{\code{TRUE} to round all values to the nearest integer;
 \code{FALSE} if no rounding is desired; or an integer to round to that
 number of digits (for example, 1 will round to the nearest 10, and -2 will
 round to the nearest .01). Any rounding will be applied after snapping to
 the nearest step.}
-
-\item{format}{Deprecated.}
-
-\item{locale}{Deprecated.}
 
 \item{ticks}{\code{FALSE} to hide tick marks, \code{TRUE} to show them
 according to some simple heuristics.}
@@ -63,7 +75,7 @@ see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
 format string, to be passed to the Javascript strftime library. See
 \url{https://github.com/samsonjs/strftime} for more details. The allowed
 format specifications are very similar, but not identical, to those for R's
-\code{\link[base:strftime]{base::strftime()}} function. For Dates, the default is \code{"\%F"}
+\code{\link[base:strptime]{base::strftime()}} function. For Dates, the default is \code{"\%F"}
 (like \code{"2015-07-01"}), and for POSIXt, the default is \code{"\%F \%T"}
 (like \code{"2015-07-01 15:32:10"}).}
 
@@ -91,11 +103,13 @@ or list of tags (using \code{\link[=tag]{tag()}} and friends), or raw HTML (usin
 \item{pauseButton}{Similar to \code{playButton}, but for the pause button.}
 }
 \description{
-Constructs a slider widget to select a numeric value from a range.
+Constructs a slider widget to select a number, date, or date-time from a
+range.
 }
 \section{Server value}{
 
-A number, or in the case of slider range, a vector of two numbers.
+A number, date, or date-time (depending on the class of \code{value}), or
+in the case of slider range, a vector of two numbers/dates/date-times.
 }
 
 \examples{
@@ -125,13 +139,20 @@ shinyApp(ui, server)
 \seealso{
 \code{\link[=updateSliderInput]{updateSliderInput()}}
 
-Other input elements: \code{\link{actionButton}},
-  \code{\link{checkboxGroupInput}},
-  \code{\link{checkboxInput}}, \code{\link{dateInput}},
-  \code{\link{dateRangeInput}}, \code{\link{fileInput}},
-  \code{\link{numericInput}}, \code{\link{passwordInput}},
-  \code{\link{radioButtons}}, \code{\link{selectInput}},
-  \code{\link{submitButton}}, \code{\link{textAreaInput}},
-  \code{\link{textInput}}, \code{\link{varSelectInput}}
+Other input elements: 
+\code{\link{actionButton}()},
+\code{\link{checkboxGroupInput}()},
+\code{\link{checkboxInput}()},
+\code{\link{dateInput}()},
+\code{\link{dateRangeInput}()},
+\code{\link{fileInput}()},
+\code{\link{numericInput}()},
+\code{\link{passwordInput}()},
+\code{\link{radioButtons}()},
+\code{\link{selectInput}()},
+\code{\link{submitButton}()},
+\code{\link{textAreaInput}()},
+\code{\link{textInput}()},
+\code{\link{varSelectInput}()}
 }
 \concept{input elements}

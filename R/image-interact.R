@@ -1,59 +1,76 @@
-#' Find rows of data that are selected by a brush
+#' Find rows of data selected on an interactive plot.
 #'
-#' This function returns rows from a data frame which are under a brush used
-#' with [plotOutput()].
+#' @description
+#' `brushedPoints()` returns rows from a data frame which are under a brush.
+#' `nearPoints()` returns rows from a data frame which are near a click, hover,
+#' or double-click. Alternatively, set `allRows = TRUE` to return all rows from
+#' the input data with an additional column `selected_` that indicates which
+#' rows of the would be selected.
 #'
-#' It is also possible for this function to return all rows from the input data
-#' frame, but with an additional column `selected_`, which indicates which
-#' rows of the input data frame are selected by the brush (`TRUE` for
-#' selected, `FALSE` for not-selected). This is enabled by setting
-#' `allRows=TRUE` option.
+#' @section ggplot2:
+#' For plots created with ggplot2, it is not necessary to specify the
+#' column names to `xvar`, `yvar`, `panelvar1`, and `panelvar2` as that
+#' information can be automatically derived from the plot specification.
 #'
-#' The `xvar`, `yvar`, `panelvar1`, and `panelvar2`
-#' arguments specify which columns in the data correspond to the x variable, y
-#' variable, and panel variables of the plot. For example, if your plot is
-#' `plot(x=cars$speed, y=cars$dist)`, and your brush is named
-#' `"cars_brush"`, then you would use `brushedPoints(cars,
-#' input$cars_brush, "speed", "dist")`.
-#'
-#' For plots created with ggplot2, it should not be necessary to specify the
-#' column names; that information will already be contained in the brush,
-#' provided that variables are in the original data, and not computed. For
-#' example, with `ggplot(cars, aes(x=speed, y=dist)) + geom_point()`, you
-#' could use `brushedPoints(cars, input$cars_brush)`. If, however, you use
-#' a computed column, like `ggplot(cars, aes(x=speed/2, y=dist)) +
-#' geom_point()`, then it will not be able to automatically extract column names
-#' and filter on them. If you want to use this function to filter data, it is
-#' recommended that you not use computed columns; instead, modify the data
+#' Note, however, that this will not work if you use a computed column, like
+#' `aes(speed/2, dist))`. Instead, we recommend that you modify the data
 #' first, and then make the plot with "raw" columns in the modified data.
 #'
-#' If a specified x or y column is a factor, then it will be coerced to an
-#' integer vector. If it is a character vector, then it will be coerced to a
-#' factor and then integer vector. This means that the brush will be considered
-#' to cover a given character/factor value when it covers the center value.
+#' @section Brushing:
+#' If x or y column is a factor, then it will be coerced to an integer vector.
+#' If it is a character vector, then it will be coerced to a factor and then
+#' integer vector. This means that the brush will be considered to cover a
+#' given character/factor value when it covers the center value.
 #'
 #' If the brush is operating in just the x or y directions (e.g., with
 #' `brushOpts(direction = "x")`, then this function will filter out points
 #' using just the x or y variable, whichever is appropriate.
 #'
-#' @param brush The data from a brush, such as `input$plot_brush`.
+#' @returns
+#' A data frame based on `df`, containing the observations selected by the
+#' brush or near the click event. For `nearPoints()`, the rows will be sorted
+#' by distance to the event.
+#'
+#' If `allRows = TRUE`, then all rows will returned, along with a new
+#' `selected_` column that indicates whether or not the point was selected.
+#' The output from `nearPoints()` will no longer be sorted, but you can
+#' set `addDist = TRUE` to get an additional column that gives the pixel
+#' distance to the pointer.
+#'
 #' @param df A data frame from which to select rows.
-#' @param xvar,yvar A string with the name of the variable on the x or y axis.
-#'   This must also be the name of a column in `df`. If absent, then this
-#'   function will try to infer the variable from the brush (only works for
-#'   ggplot2).
-#' @param panelvar1,panelvar2 Each of these is a string with the name of a panel
-#'   variable. For example, if with ggplot2, you facet on a variable called
-#'   `cyl`, then you can use `"cyl"` here. However, specifying the
-#'   panel variable should not be necessary with ggplot2; Shiny should be able
-#'   to auto-detect the panel variable.
+#' @param brush,coordinfo The data from a brush or click/dblclick/hover event
+#'   e.g. `input$plot_brush`, `input$plot_click`.
+#' @param xvar,yvar A string giving the name of the variable on the x or y axis.
+#'   These are only required for base graphics, and must be the name of
+#'   a column in `df`.
+#' @param panelvar1,panelvar2 A string giving the name of a panel variable.
+#'   For expert use only; in most cases these will be automatically
+#'   derived from the ggplot2 spec.
 #' @param allRows If `FALSE` (the default) return a data frame containing
 #'   the selected rows. If `TRUE`, the input data frame will have a new
-#'   column, `selected_`, which indicates whether the row was inside the
-#'   brush (`TRUE`) or outside the brush (`FALSE`).
-#'
+#'   column, `selected_`, which indicates whether the row was selected or not.
+#' @param threshold A maximum distance (in pixels) to the pointer location.
+#'   Rows in the data frame will be selected if the distance to the pointer is
+#'   less than `threshold`.
+#' @param maxpoints Maximum number of rows to return. If `NULL` (the default),
+#'   will return all rows within the threshold distance.
+#' @param addDist If TRUE, add a column named `dist_` that contains the
+#'   distance from the coordinate to the point, in pixels. When no pointer
+#'   event has yet occurred, the value of `dist_` will be `NA`.
 #' @seealso [plotOutput()] for example usage.
 #' @export
+#' @examples
+#' \dontrun{
+#' # Note that in practice, these examples would need to go in reactives
+#' # or observers.
+#'
+#' # This would select all points within 5 pixels of the click
+#' nearPoints(mtcars, input$plot_click)
+#'
+#' # Select just the nearest point within 10 pixels of the click
+#' nearPoints(mtcars, input$plot_click, threshold = 10, maxpoints = 1)
+#'
+#' }
 brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
                           panelvar1 = NULL, panelvar2 = NULL,
                           allRows = FALSE) {
@@ -75,11 +92,21 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
   use_x <- grepl("x", brush$direction)
   use_y <- grepl("y", brush$direction)
 
+  # We transitioned to using %||% in Shiny 1.6.0. Previously, these vars could
+  # be NA, because the old %OR% operator recognized NA. These warnings and
+  # the NULL replacement are here just to ease the transition in case anyone is
+  # using NA. We can remove these checks in a future version of Shiny.
+  # https://github.com/rstudio/shiny/pull/3172
+  if (is_na(xvar))      { xvar      <- NULL; warning("xvar should be NULL, not NA.") }
+  if (is_na(yvar))      { yvar      <- NULL; warning("yvar should be NULL, not NA.") }
+  if (is_na(panelvar1)) { panelvar1 <- NULL; warning("panelvar1 should be NULL, not NA.") }
+  if (is_na(panelvar2)) { panelvar2 <- NULL; warning("panelvar2 should be NULL, not NA.") }
+
   # Try to extract vars from brush object
-  xvar      <- xvar      %OR% brush$mapping$x
-  yvar      <- yvar      %OR% brush$mapping$y
-  panelvar1 <- panelvar1 %OR% brush$mapping$panelvar1
-  panelvar2 <- panelvar2 %OR% brush$mapping$panelvar2
+  xvar      <- xvar      %||% brush$mapping$x
+  yvar      <- yvar      %||% brush$mapping$y
+  panelvar1 <- panelvar1 %||% brush$mapping$panelvar1
+  panelvar2 <- panelvar2 %||% brush$mapping$panelvar2
 
   # Filter out x and y values
   keep_rows <- rep(TRUE, nrow(df))
@@ -155,8 +182,8 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
 #  $ xmax     : num 3.78
 #  $ ymin     : num 17.1
 #  $ ymax     : num 20.4
-#  $ panelvar1: int 6
-#  $ panelvar2: int 0
+#  $ panelvar1: chr "6"
+#  $ panelvar2: chr "0
 #  $ coords_css:List of 4
 #   ..$ xmin: int 260
 #   ..$ xmax: int 298
@@ -191,56 +218,8 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
 #  $ direction: chr "y"
 
 
-#'Find rows of data that are near a click/hover/double-click
-#'
-#'This function returns rows from a data frame which are near a click, hover, or
-#'double-click, when used with [plotOutput()]. The rows will be sorted
-#'by their distance to the mouse event.
-#'
-#'It is also possible for this function to return all rows from the input data
-#'frame, but with an additional column `selected_`, which indicates which
-#'rows of the input data frame are selected by the brush (`TRUE` for
-#'selected, `FALSE` for not-selected). This is enabled by setting
-#'`allRows=TRUE` option. If this is used, the resulting data frame will not
-#'be sorted by distance to the mouse event.
-#'
-#'The `xvar`, `yvar`, `panelvar1`, and `panelvar2` arguments
-#'specify which columns in the data correspond to the x variable, y variable,
-#'and panel variables of the plot. For example, if your plot is
-#'`plot(x=cars$speed, y=cars$dist)`, and your click variable is named
-#'`"cars_click"`, then you would use `nearPoints(cars,
-#'input$cars_brush, "speed", "dist")`.
-#'
-#'@inheritParams brushedPoints
-#'@param coordinfo The data from a mouse event, such as `input$plot_click`.
-#'@param threshold A maxmimum distance to the click point; rows in the data
-#'  frame where the distance to the click is less than `threshold` will be
-#'  returned.
-#'@param maxpoints Maximum number of rows to return. If NULL (the default),
-#'  return all rows that are within the threshold distance.
-#'@param addDist If TRUE, add a column named `dist_` that contains the
-#'  distance from the coordinate to the point, in pixels. When no mouse event
-#'  has yet occured, the value of `dist_` will be `NA`.
-#'@param allRows If `FALSE` (the default) return a data frame containing
-#'  the selected rows. If `TRUE`, the input data frame will have a new
-#'  column, `selected_`, which indicates whether the row was inside the
-#'  selected by the mouse event (`TRUE`) or not (`FALSE`).
-#'
-#'@seealso [plotOutput()] for more examples.
-#'
-#' @examples
-#' \dontrun{
-#' # Note that in practice, these examples would need to go in reactives
-#' # or observers.
-#'
-#' # This would select all points within 5 pixels of the click
-#' nearPoints(mtcars, input$plot_click)
-#'
-#' # Select just the nearest point within 10 pixels of the click
-#' nearPoints(mtcars, input$plot_click, threshold = 10, maxpoints = 1)
-#'
-#' }
-#'@export
+#' @export
+#' @rdname brushedPoints
 nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
                        panelvar1 = NULL, panelvar2 = NULL,
                        threshold = 5, maxpoints = NULL, addDist = FALSE,
@@ -261,11 +240,21 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
     stop("nearPoints requires a click/hover/double-click object with x and y values.")
   }
 
+  # We transitioned to using %||% in Shiny 1.6.0. Previously, these vars could
+  # be NA, because the old %OR% operator recognized NA. These warnings and
+  # the NULL replacement are here just to ease the transition in case anyone is
+  # using NA. We can remove these checks in a future version of Shiny.
+  # https://github.com/rstudio/shiny/pull/3172
+  if (is_na(xvar))      { xvar      <- NULL; warning("xvar should be NULL, not NA.") }
+  if (is_na(yvar))      { yvar      <- NULL; warning("yvar should be NULL, not NA.") }
+  if (is_na(panelvar1)) { panelvar1 <- NULL; warning("panelvar1 should be NULL, not NA.") }
+  if (is_na(panelvar2)) { panelvar2 <- NULL; warning("panelvar2 should be NULL, not NA.") }
+
   # Try to extract vars from coordinfo object
-  xvar      <- xvar      %OR% coordinfo$mapping$x
-  yvar      <- yvar      %OR% coordinfo$mapping$y
-  panelvar1 <- panelvar1 %OR% coordinfo$mapping$panelvar1
-  panelvar2 <- panelvar2 %OR% coordinfo$mapping$panelvar2
+  xvar      <- xvar      %||% coordinfo$mapping$x
+  yvar      <- yvar      %||% coordinfo$mapping$y
+  panelvar1 <- panelvar1 %||% coordinfo$mapping$panelvar1
+  panelvar2 <- panelvar2 %||% coordinfo$mapping$panelvar2
 
   if (is.null(xvar))
     stop("nearPoints: not able to automatically infer `xvar` from coordinfo")
@@ -278,6 +267,7 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
     stop("nearPoints: `yvar` ('", yvar ,"')  not in names of input")
 
   # Extract data values from the data frame
+  coordinfo <- fortifyDiscreteLimits(coordinfo)
   x <- asNumber(df[[xvar]], coordinfo$domain$discrete_limits$x)
   y <- asNumber(df[[yvar]], coordinfo$domain$discrete_limits$y)
 
@@ -377,8 +367,8 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
 #  $ img_css_ratio:List of 2
 #   ..$ x: num 1.25
 #   ..$ y: num 1.25
-#  $ panelvar1 : int 6
-#  $ panelvar2 : int 0
+#  $ panelvar1 : chr "6"
+#  $ panelvar2 : chr "0"
 #  $ mapping   :List of 4
 #   ..$ x        : chr "wt"
 #   ..$ y        : chr "mpg"
@@ -403,6 +393,7 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
 # an input brush
 within_brush <- function(vals, brush, var = "x") {
   var <- match.arg(var, c("x", "y"))
+  brush <- fortifyDiscreteLimits(brush)
   vals <- asNumber(vals, brush$domain$discrete_limits[[var]])
   # It's possible for a non-missing data values to not
   # map to the axis limits, for example:
@@ -425,11 +416,43 @@ asNumber <- function(x, levels = NULL) {
   as.numeric(x)
 }
 
+# Ensure the discrete limits/levels of a coordmap received
+# from the client matches the data structure sent the client.
+#
+# When we construct the coordmap (in getGgplotCoordmap()),
+# we save a character vector which may contain missing values
+# (e.g., c("a", "b", NA)). When that same character is received
+# from the client, it runs through decodeMessage() which sets
+# simplifyVector=FALSE, which means NA are replaced by NULL
+# (because jsonlite::fromJSON('["a", "b", null]') -> list("a", "b", NULL))
+#
+# Thankfully, it doesn't seem like it's meaningful for limits to
+# contains a NULL in the 1st place, so we simply treat NULL like NA.
+# For more context, https://github.com/rstudio/shiny/issues/2666
+fortifyDiscreteLimits <- function(coord) {
+  # Note that discrete_limits$x/y are populated iff
+  # x/y are discrete mappings
+  coord$domain$discrete_limits <- lapply(
+    coord$domain$discrete_limits,
+    function(var) {
+      # if there is an 'explicit' NULL, then the limits are NA
+      if (is.null(var)) return(NA)
+      vapply(var, function(x) {
+        if (is.null(x) || isTRUE(is.na(x))) NA_character_ else x
+      }, character(1))
+    }
+  )
+  coord
+}
+
+
+
 # Given a panelvar value and a vector x, return logical vector indicating which
 # items match the panelvar value. Because the panelvar value is always a
 # string but the vector could be numeric, it might be necessary to coerce the
 # panelvar to a number before comparing to the vector.
 panelMatch <- function(search_value, x) {
+  if (is.null(search_value)) return(is.na(x))
   if (is.numeric(x)) search_value <- as.numeric(search_value)
   x == search_value
 }

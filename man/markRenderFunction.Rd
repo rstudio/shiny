@@ -4,7 +4,14 @@
 \alias{markRenderFunction}
 \title{Mark a function as a render function}
 \usage{
-markRenderFunction(uiFunc, renderFunc, outputArgs = list())
+markRenderFunction(
+  uiFunc,
+  renderFunc,
+  outputArgs = list(),
+  cacheHint = "auto",
+  cacheWriteHook = NULL,
+  cacheReadHook = NULL
+)
 }
 \arguments{
 \item{uiFunc}{A function that renders Shiny UI. Must take a single argument:
@@ -14,19 +21,54 @@ an output ID.}
 slot.}
 
 \item{outputArgs}{A list of arguments to pass to the \code{uiFunc}. Render
-functions should include \code{outputArgs = list()} in their own parameter
-list, and pass through the value to \code{markRenderFunction}, to allow
-app authors to customize outputs. (Currently, this is only supported for
-dynamically generated UIs, such as those created by Shiny code snippets
-embedded in R Markdown documents).}
+functions should include \code{outputArgs = list()} in their own parameter list,
+and pass through the value to \code{markRenderFunction}, to allow app authors to
+customize outputs. (Currently, this is only supported for dynamically
+generated UIs, such as those created by Shiny code snippets embedded in R
+Markdown documents).}
+
+\item{cacheHint}{One of \code{"auto"}, \code{FALSE}, or some other information to
+identify this instance for caching using \code{\link[=bindCache]{bindCache()}}. If \code{"auto"}, it
+will try to automatically infer caching information. If \code{FALSE}, do not
+allow caching for the object. Some render functions (such as \link{renderPlot})
+contain internal state that makes them unsuitable for caching.}
+
+\item{cacheWriteHook}{Used if the render function is passed to \code{bindCache()}.
+This is an optional callback function to invoke before saving the value
+from the render function to the cache. This function must accept one
+argument, the value returned from \code{renderFunc}, and should return the value
+to store in the cache.}
+
+\item{cacheReadHook}{Used if the render function is passed to \code{bindCache()}.
+This is an optional callback function to invoke after reading a value from
+the cache (if there is a cache hit). The function will be passed one
+argument, the value retrieved from the cache. This can be useful when some
+side effect needs to occur for a render function to behave correctly. For
+example, some render functions call \code{\link[=createWebDependency]{createWebDependency()}} so that Shiny
+is able to serve JS and CSS resources.}
 }
 \value{
 The \code{renderFunc} function, with annotations.
 }
 \description{
-Should be called by implementers of \code{renderXXX} functions in order to
-mark their return values as Shiny render functions, and to provide a hint to
-Shiny regarding what UI function is most commonly used with this type of
-render function. This can be used in R Markdown documents to create complete
-output widgets out of just the render function.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}} Please use \code{\link[=createRenderFunction]{createRenderFunction()}} to
+support async execution. (Shiny 1.1.0)
+}
+\details{
+Should be called by implementers of \code{renderXXX} functions in order to mark
+their return values as Shiny render functions, and to provide a hint to Shiny
+regarding what UI function is most commonly used with this type of render
+function. This can be used in R Markdown documents to create complete output
+widgets out of just the render function.
+
+Note that it is generally preferable to use \code{\link[=createRenderFunction]{createRenderFunction()}} instead
+of \code{markRenderFunction()}. It essentially wraps up the user-provided
+expression in the \code{transform} function passed to it, then passes the resulting
+function to \code{markRenderFunction()}. It also provides a simpler calling
+interface. There may be cases where \code{markRenderFunction()} must be used instead of
+\code{\link[=createRenderFunction]{createRenderFunction()}} -- for example, when the \code{transform} parameter of
+\code{\link[=createRenderFunction]{createRenderFunction()}} is not flexible enough for your needs.
+}
+\seealso{
+\code{\link[=createRenderFunction]{createRenderFunction()}}
 }

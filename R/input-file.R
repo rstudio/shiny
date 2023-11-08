@@ -2,8 +2,13 @@
 #'
 #' Create a file upload control that can be used to upload one or more files.
 #'
-#' Whenever a file upload completes, the corresponding input variable is set
-#' to a dataframe. See the `Server value` section.
+#' Whenever a file upload completes, the corresponding input variable is set to
+#' a dataframe. See the `Server value` section.
+#'
+#' Each time files are uploaded, they are written to a new random subdirectory
+#' inside of R's process-level temporary directory. The Shiny user session keeps
+#' track of all uploads in the session, and when the session ends, Shiny deletes
+#' all of the subdirectories where files where uploaded to.
 #'
 #' @family input elements
 #'
@@ -11,12 +16,30 @@
 #' @param multiple Whether the user should be allowed to select and upload
 #'   multiple files at once. **Does not work on older browsers, including
 #'   Internet Explorer 9 and earlier.**
-#' @param accept A character vector of MIME types; gives the browser a hint of
-#'   what kind of files the server is expecting.
+#' @param accept A character vector of "unique file type specifiers" which gives
+#'   the browser a hint as to the type of file the server expects. Many browsers
+#'   use this prevent the user from selecting an invalid file.
+#'
+#'   A unique file type specifier can be:
+#'   * A case insensitive extension like `.csv` or `.rds`.
+#'   * A valid MIME type, like `text/plain` or `application/pdf`
+#'   * One of `audio/*`, `video/*`, or `image/*` meaning any audio, video,
+#'   or image type, respectively.
 #' @param buttonLabel The label used on the button. Can be text or an HTML tag
 #'   object.
 #' @param placeholder The text to show before a file has been uploaded.
+#' @param capture What source to use for capturing image, audio or video data.
+#'   This attribute facilitates user access to a device's media capture
+#'   mechanism, such as a camera, or microphone, from within a file upload
+#'   control.
 #'
+#'   A value of `user` indicates that the user-facing camera and/or microphone
+#'   should be used. A value of `environment` specifies that the outward-facing
+#'   camera and/or microphone should be used.
+#'
+#'   By default on most phones, this will accept still photos or video. For
+#'   still photos only, also use `accept="image/*"`. For video only, use
+#'   `accept="video/*"`.
 #' @examples
 #' ## Only run examples in interactive R sessions
 #' if (interactive()) {
@@ -24,13 +47,7 @@
 #' ui <- fluidPage(
 #'   sidebarLayout(
 #'     sidebarPanel(
-#'       fileInput("file1", "Choose CSV File",
-#'         accept = c(
-#'           "text/csv",
-#'           "text/comma-separated-values,text/plain",
-#'           ".csv")
-#'         ),
-#'       tags$hr(),
+#'       fileInput("file1", "Choose CSV File", accept = ".csv"),
 #'       checkboxInput("header", "Header", TRUE)
 #'     ),
 #'     mainPanel(
@@ -41,17 +58,13 @@
 #'
 #' server <- function(input, output) {
 #'   output$contents <- renderTable({
-#'     # input$file1 will be NULL initially. After the user selects
-#'     # and uploads a file, it will be a data frame with 'name',
-#'     # 'size', 'type', and 'datapath' columns. The 'datapath'
-#'     # column will contain the local filenames where the data can
-#'     # be found.
-#'     inFile <- input$file1
+#'     file <- input$file1
+#'     ext <- tools::file_ext(file$datapath)
 #'
-#'     if (is.null(inFile))
-#'       return(NULL)
+#'     req(file)
+#'     validate(need(ext == "csv", "Please upload a csv file"))
 #'
-#'     read.csv(inFile$datapath, header = input$header)
+#'     read.csv(file$datapath, header = input$header)
 #'   })
 #' }
 #'
@@ -59,7 +72,9 @@
 #' }
 #'
 #' @section Server value:
-#' A `data.frame` that contains one row for each selected file, and following columns:
+#'
+#'   A `data.frame` that contains one row for each selected file, and following
+#'   columns:
 #' \describe{
 #'   \item{`name`}{The filename provided by the web browser. This is
 #'   **not** the path to read to get at the actual data that was uploaded
@@ -76,7 +91,8 @@
 #'
 #' @export
 fileInput <- function(inputId, label, multiple = FALSE, accept = NULL,
-  width = NULL, buttonLabel = "Browse...", placeholder = "No file selected") {
+  width = NULL, buttonLabel = "Browse...", placeholder = "No file selected",
+  capture = NULL) {
 
   restoredValue <- restoreInput(id = inputId, default = NULL)
 
@@ -92,9 +108,11 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL,
 
   inputTag <- tags$input(
     id = inputId,
+    class = "shiny-input-file",
     name = inputId,
     type = "file",
-    style = "display: none;",
+    # Don't use "display: none;" style, which causes keyboard accessibility issue; instead use the following workaround: https://css-tricks.com/places-its-tempting-to-use-display-none-but-dont/
+    style = "position: absolute !important; top: -99999px !important; left: -99999px !important;",
     `data-restore` = restoredValue
   )
 
@@ -103,13 +121,17 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL,
   if (length(accept) > 0)
     inputTag$attribs$accept <- paste(accept, collapse=',')
 
+  if (!is.null(capture)) {
+    inputTag$attribs$capture <- capture
+  }
 
   div(class = "form-group shiny-input-container",
-    style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
+    style = css(width = validateCssUnit(width)),
     shinyInputLabel(inputId, label),
 
     div(class = "input-group",
-      tags$label(class = "input-group-btn",
+      # input-group-prepend is for bootstrap 4 compat
+      tags$label(class = "input-group-btn input-group-prepend",
         span(class = "btn btn-default btn-file",
           buttonLabel,
           inputTag
@@ -122,7 +144,7 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL,
 
     tags$div(
       id=paste(inputId, "_progress", sep=""),
-      class="progress progress-striped active shiny-file-input-progress",
+      class="progress active shiny-file-input-progress",
       tags$div(class="progress-bar")
     )
   )

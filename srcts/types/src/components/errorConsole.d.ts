@@ -1,5 +1,5 @@
 import { LitElement } from "lit";
-export declare class ErrorConsole extends LitElement {
+export declare class ShinyErrorMessage extends LitElement {
     static properties: {
         headline: {};
         message: {};
@@ -11,7 +11,7 @@ export declare class ErrorConsole extends LitElement {
     render(): import("lit-html").TemplateResult<1>;
 }
 /**
- * Function to show an error message to user in shiny-error-console web
+ * Function to show an error message to user in shiny-error-message web
  * component
  * @param e - Error object to show to user. This is whatever is caught in
  * a try-catch statement so it may be a string or it may be a proper Error

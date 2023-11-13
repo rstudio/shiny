@@ -63,7 +63,7 @@ class ShinyErrorConsole extends LitElement {
         --ring-shadow: 0 0 0 1px var(--gray-2);
 
         /* How fast should the message pop in and out of the screen? */
-        --animation-speed: 1s;
+        --animation-speed: 500ms;
 
         /* Taken from open-props */
         --ease-3: cubic-bezier(0.25, 0, 0.3, 1);
@@ -87,6 +87,9 @@ class ShinyErrorConsole extends LitElement {
 
         animation: var(--animation-slide-in-left);
         box-shadow: var(--shadow-3), var(--ring-shadow);
+
+        /* Dont let the error console burst out of the viewport */
+        max-height: calc(100vh - 2 * var(--space-1));
       }
 
       @keyframes slide-in-left {
@@ -159,6 +162,8 @@ class ShinyErrorConsole extends LitElement {
         display: block;
         padding: var(--space-4);
         padding-top: var(--space-2);
+        max-height: 100%;
+        overflow: auto;
       }
 
       :host(.collapsed) .content {

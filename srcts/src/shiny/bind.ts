@@ -48,23 +48,57 @@ function valueChangeCallback(
  * scope.
  */
 const bindingsRegistery = (() => {
-  /**
-   * Set of IDs for output bindings. not exposed to user
-   */
-  const outputs = new Set<string>();
+  type InputOrOutput = "input" | "output";
+  type DuplicateBindings = Map<string, InputOrOutput[]>;
+
+  const bindings = new Map<string, InputOrOutput[]>();
 
   /**
-   * Set of IDs for input bindings
+   * Checks if the bindings registery is valid. Currently this just checks for
+   * duplicate IDs but in the future could be expanded to check more conditions
+   * @returns ShinyClientError if duplicate IDs are found, otherwise null
    */
-  const inputs = new Set<string>();
+  function getValidity():
+    | { status: "error"; error: ShinyClientError }
+    | { status: "ok" } {
+    const duplicateIds: DuplicateBindings = new Map();
 
-  /**
-   * Check if a binding id already exists in the bindingIds set across both inputs and outputs
-   * @param id Id to check
-   * @returns boolean indicating if that binding Id has already been added to app
-   */
-  function bindingExists(id: string): boolean {
-    return outputs.has(id) || inputs.has(id);
+    bindings.forEach((inputOrOutput, id) => {
+      if (inputOrOutput.length > 1) {
+        duplicateIds.set(id, inputOrOutput);
+      }
+    });
+
+    if (duplicateIds.size === 0) return { status: "ok" };
+
+    const duplicateIdMsg = [...duplicateIds.entries()]
+      .map(([id, idTypes]) => {
+        const counts = { input: 0, output: 0 };
+
+        idTypes.forEach((idType) => {
+          counts[idType]++;
+        });
+
+        const messages = [
+          pluralize(counts.input, "input"),
+          pluralize(counts.output, "output"),
+        ]
+          .filter((msg) => msg !== "")
+          .join(" and ");
+
+        return `"${id}": (${messages})`;
+      })
+      .join(",\n");
+
+    return {
+      status: "error",
+      error: new ShinyClientError({
+        headline: "Duplicate input/output IDs found",
+        message: `The following ${
+          duplicateIds.size === 1 ? "ID was" : "IDs were"
+        } repeated: ${duplicateIdMsg}`,
+      }),
+    };
   }
 
   /**
@@ -79,10 +113,13 @@ const bindingsRegistery = (() => {
         message: "Binding IDs must not be empty.",
       });
     }
-    if (inputOrOutput === "input") {
-      inputs.add(id);
+
+    const existingBinding = bindings.get(id);
+
+    if (existingBinding) {
+      existingBinding.push(inputOrOutput);
     } else {
-      outputs.add(id);
+      bindings.set(id, [inputOrOutput]);
     }
   }
 
@@ -91,35 +128,32 @@ const bindingsRegistery = (() => {
    * @param id Id to remove
    * @param inputOrOutput Whether the id is for an input or output binding
    */
-  function removeBinding(id: string, inputOrOutput: "input" | "output"): void {
-    if (inputOrOutput === "input") {
-      inputs.delete(id);
-    } else {
-      outputs.delete(id);
+  function removeBinding(id: string, inputOrOutput: InputOrOutput): void {
+    const existingBinding = bindings.get(id);
+
+    if (existingBinding) {
+      const index = existingBinding.indexOf(inputOrOutput);
+      if (index > -1) {
+        existingBinding.splice(index, 1);
+      }
+    }
+
+    if (existingBinding?.length === 0) {
+      bindings.delete(id);
     }
   }
 
   return {
-    bindingExists,
     addBinding,
     removeBinding,
+    getValidity,
   };
 })();
 
-/**
- * Create a new ShinyClientError with a message indicating which IDs are duplicated
- * @param duplicatedIds Set of duplicated IDs to throw error for
- * @returns ShinyClientError with message indicating which IDs are duplicated
- */
-function createDuplicateIdError(duplicatedIds: Set<string>) {
-  return new ShinyClientError({
-    headline: "Duplicate input/output IDs found",
-    message: `The following ${
-      duplicatedIds.size === 1 ? "ID was" : "IDs were"
-    } repeated: ${Array.from(duplicatedIds)
-      .map((id) => `"${id}"`)
-      .join(", ")}.`,
-  });
+function pluralize(num: number, word: string): string {
+  if (num === 0) return "";
+  if (num === 1) return `${num} ${word}`;
+  return `${num} ${word}s`;
 }
 
 type BindInputsCtx = {
@@ -142,9 +176,6 @@ function bindInputs(
 } {
   const { inputs, inputsRate, inputBindings } = shinyCtx;
   const bindings = inputBindings.getBindings();
-
-  // Keep track of duplicate IDs for input bindings so we can warn users
-  const inputDuplicateIds = new Set<string>();
 
   const inputItems: {
     [key: string]: {
@@ -169,11 +200,6 @@ function bindInputs(
       // Check if ID is falsy, or if already bound, or has the same ID as
       // another input binding and if it is, skip
       if (!id) continue;
-
-      // Check for duplicates in bindingIds array and keep track of them
-      if (bindingsRegistery.bindingExists(id)) {
-        inputDuplicateIds.add(id);
-      }
 
       bindingsRegistery.addBinding(id, "input");
       const type = binding.getType(el);
@@ -220,11 +246,6 @@ function bindInputs(
     }
   }
 
-  // Send error message to the user if duplicate IDs are found
-  if (inputDuplicateIds.size > 0) {
-    throw createDuplicateIdError(inputDuplicateIds);
-  }
-
   return inputItems;
 }
 
@@ -236,9 +257,6 @@ async function bindOutputs(
   }: BindInputsCtx,
   scope: BindScope = document.documentElement
 ): Promise<void> {
-  // Keep track of duplicate IDs for output bindings so we can warn users
-  const outputDuplicateIds = new Set<string>();
-
   const $scope = $(scope);
 
   const bindings = outputBindings.getBindings();
@@ -255,11 +273,6 @@ async function bindOutputs(
 
       // Check if ID is falsy
       if (!id) continue;
-
-      // Check for duplicates in bindingIds array and keep track of them
-      if (bindingsRegistery.bindingExists(id)) {
-        outputDuplicateIds.add(id);
-      }
 
       bindingsRegistery.addBinding(id, "output");
 
@@ -295,11 +308,6 @@ async function bindOutputs(
         bindingType: "output",
       });
     }
-  }
-
-  // Send error message to the user if duplicate IDs are found
-  if (outputDuplicateIds.size > 0) {
-    throw createDuplicateIdError(outputDuplicateIds);
   }
 
   // Send later in case DOM layout isn't final yet.
@@ -383,7 +391,15 @@ async function _bindAll(
   scope: BindScope
 ): Promise<ReturnType<typeof bindInputs>> {
   await bindOutputs(shinyCtx, scope);
-  return bindInputs(shinyCtx, scope);
+  const currentInputs = bindInputs(shinyCtx, scope);
+
+  // Check to make sure the bindings setup is valid
+  const bindingValidity = bindingsRegistery.getValidity();
+  if (bindingValidity.status === "error") {
+    throw bindingValidity.error;
+  }
+
+  return currentInputs;
 }
 function unbindAll(
   shinyCtx: BindInputsCtx,

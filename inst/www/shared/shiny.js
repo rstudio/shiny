@@ -18503,6 +18503,12 @@
       return outputs.has(id) || inputs.has(id);
     }
     function addBinding(id, inputOrOutput) {
+      if (id === "") {
+        throw new ShinyClientError({
+          headline: "Empty ".concat(inputOrOutput, " ID found"),
+          message: "Binding IDs must not be empty."
+        });
+      }
       if (inputOrOutput === "input") {
         inputs.add(id);
       } else {

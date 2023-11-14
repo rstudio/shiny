@@ -9,6 +9,7 @@ import type {
 import { shinyAppBindOutput, shinyAppUnbindOutput } from "./initedMethods";
 import { sendImageSizeFns } from "./sendImageSize";
 import { ShinyClientError } from "./error";
+import { head } from "lodash";
 
 const boundInputs: {
   [key: string]: { binding: InputBinding; node: HTMLElement };
@@ -77,6 +78,12 @@ const bindingsRegistery = (() => {
    * @param inputOrOutput Whether the id is for an input or output binding
    */
   function addBinding(id: string, inputOrOutput: "input" | "output"): void {
+    if (id === "") {
+      throw new ShinyClientError({
+        headline: `Empty ${inputOrOutput} ID found`,
+        message: "Binding IDs must not be empty.",
+      });
+    }
     if (inputOrOutput === "input") {
       inputs.add(id);
     } else {

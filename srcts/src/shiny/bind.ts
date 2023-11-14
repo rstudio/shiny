@@ -8,7 +8,7 @@ import type {
 } from "../inputPolicies";
 import { shinyAppBindOutput, shinyAppUnbindOutput } from "./initedMethods";
 import { sendImageSizeFns } from "./sendImageSize";
-import { ShinyClientError } from "../components/errorConsole";
+import { ShinyClientError } from "./error";
 
 const boundInputs: {
   [key: string]: { binding: InputBinding; node: HTMLElement };

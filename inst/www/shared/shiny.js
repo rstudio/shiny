@@ -4883,6 +4883,459 @@
     }
   });
 
+  // node_modules/core-js/internals/array-buffer-basic-detection.js
+  var require_array_buffer_basic_detection = __commonJS({
+    "node_modules/core-js/internals/array-buffer-basic-detection.js": function(exports, module) {
+      module.exports = typeof ArrayBuffer != "undefined" && typeof DataView != "undefined";
+    }
+  });
+
+  // node_modules/core-js/internals/to-index.js
+  var require_to_index = __commonJS({
+    "node_modules/core-js/internals/to-index.js": function(exports, module) {
+      var toIntegerOrInfinity4 = require_to_integer_or_infinity();
+      var toLength7 = require_to_length();
+      var $RangeError = RangeError;
+      module.exports = function(it) {
+        if (it === void 0)
+          return 0;
+        var number = toIntegerOrInfinity4(it);
+        var length = toLength7(number);
+        if (number !== length)
+          throw $RangeError("Wrong length or index");
+        return length;
+      };
+    }
+  });
+
+  // node_modules/core-js/internals/ieee754.js
+  var require_ieee754 = __commonJS({
+    "node_modules/core-js/internals/ieee754.js": function(exports, module) {
+      var $Array2 = Array;
+      var abs = Math.abs;
+      var pow = Math.pow;
+      var floor = Math.floor;
+      var log = Math.log;
+      var LN2 = Math.LN2;
+      var pack = function(number, mantissaLength, bytes) {
+        var buffer = $Array2(bytes);
+        var exponentLength = bytes * 8 - mantissaLength - 1;
+        var eMax = (1 << exponentLength) - 1;
+        var eBias = eMax >> 1;
+        var rt = mantissaLength === 23 ? pow(2, -24) - pow(2, -77) : 0;
+        var sign = number < 0 || number === 0 && 1 / number < 0 ? 1 : 0;
+        var index = 0;
+        var exponent, mantissa, c5;
+        number = abs(number);
+        if (number != number || number === Infinity) {
+          mantissa = number != number ? 1 : 0;
+          exponent = eMax;
+        } else {
+          exponent = floor(log(number) / LN2);
+          c5 = pow(2, -exponent);
+          if (number * c5 < 1) {
+            exponent--;
+            c5 *= 2;
+          }
+          if (exponent + eBias >= 1) {
+            number += rt / c5;
+          } else {
+            number += rt * pow(2, 1 - eBias);
+          }
+          if (number * c5 >= 2) {
+            exponent++;
+            c5 /= 2;
+          }
+          if (exponent + eBias >= eMax) {
+            mantissa = 0;
+            exponent = eMax;
+          } else if (exponent + eBias >= 1) {
+            mantissa = (number * c5 - 1) * pow(2, mantissaLength);
+            exponent = exponent + eBias;
+          } else {
+            mantissa = number * pow(2, eBias - 1) * pow(2, mantissaLength);
+            exponent = 0;
+          }
+        }
+        while (mantissaLength >= 8) {
+          buffer[index++] = mantissa & 255;
+          mantissa /= 256;
+          mantissaLength -= 8;
+        }
+        exponent = exponent << mantissaLength | mantissa;
+        exponentLength += mantissaLength;
+        while (exponentLength > 0) {
+          buffer[index++] = exponent & 255;
+          exponent /= 256;
+          exponentLength -= 8;
+        }
+        buffer[--index] |= sign * 128;
+        return buffer;
+      };
+      var unpack = function(buffer, mantissaLength) {
+        var bytes = buffer.length;
+        var exponentLength = bytes * 8 - mantissaLength - 1;
+        var eMax = (1 << exponentLength) - 1;
+        var eBias = eMax >> 1;
+        var nBits = exponentLength - 7;
+        var index = bytes - 1;
+        var sign = buffer[index--];
+        var exponent = sign & 127;
+        var mantissa;
+        sign >>= 7;
+        while (nBits > 0) {
+          exponent = exponent * 256 + buffer[index--];
+          nBits -= 8;
+        }
+        mantissa = exponent & (1 << -nBits) - 1;
+        exponent >>= -nBits;
+        nBits += mantissaLength;
+        while (nBits > 0) {
+          mantissa = mantissa * 256 + buffer[index--];
+          nBits -= 8;
+        }
+        if (exponent === 0) {
+          exponent = 1 - eBias;
+        } else if (exponent === eMax) {
+          return mantissa ? NaN : sign ? -Infinity : Infinity;
+        } else {
+          mantissa = mantissa + pow(2, mantissaLength);
+          exponent = exponent - eBias;
+        }
+        return (sign ? -1 : 1) * mantissa * pow(2, exponent - mantissaLength);
+      };
+      module.exports = {
+        pack: pack,
+        unpack: unpack
+      };
+    }
+  });
+
+  // node_modules/core-js/internals/array-fill.js
+  var require_array_fill = __commonJS({
+    "node_modules/core-js/internals/array-fill.js": function(exports, module) {
+      "use strict";
+      var toObject6 = require_to_object();
+      var toAbsoluteIndex4 = require_to_absolute_index();
+      var lengthOfArrayLike5 = require_length_of_array_like();
+      module.exports = function fill2(value) {
+        var O = toObject6(this);
+        var length = lengthOfArrayLike5(O);
+        var argumentsLength = arguments.length;
+        var index = toAbsoluteIndex4(argumentsLength > 1 ? arguments[1] : void 0, length);
+        var end = argumentsLength > 2 ? arguments[2] : void 0;
+        var endPos = end === void 0 ? length : toAbsoluteIndex4(end, length);
+        while (endPos > index)
+          O[index++] = value;
+        return O;
+      };
+    }
+  });
+
+  // node_modules/core-js/internals/array-buffer.js
+  var require_array_buffer = __commonJS({
+    "node_modules/core-js/internals/array-buffer.js": function(exports, module) {
+      "use strict";
+      var global11 = require_global();
+      var uncurryThis14 = require_function_uncurry_this();
+      var DESCRIPTORS10 = require_descriptors();
+      var NATIVE_ARRAY_BUFFER = require_array_buffer_basic_detection();
+      var FunctionName = require_function_name();
+      var createNonEnumerableProperty4 = require_create_non_enumerable_property();
+      var defineBuiltInAccessor4 = require_define_built_in_accessor();
+      var defineBuiltIns = require_define_built_ins();
+      var fails15 = require_fails();
+      var anInstance = require_an_instance();
+      var toIntegerOrInfinity4 = require_to_integer_or_infinity();
+      var toLength7 = require_to_length();
+      var toIndex = require_to_index();
+      var IEEE754 = require_ieee754();
+      var getPrototypeOf3 = require_object_get_prototype_of();
+      var setPrototypeOf2 = require_object_set_prototype_of();
+      var getOwnPropertyNames4 = require_object_get_own_property_names().f;
+      var arrayFill = require_array_fill();
+      var arraySlice2 = require_array_slice_simple();
+      var setToStringTag5 = require_set_to_string_tag();
+      var InternalStateModule2 = require_internal_state();
+      var PROPER_FUNCTION_NAME2 = FunctionName.PROPER;
+      var CONFIGURABLE_FUNCTION_NAME = FunctionName.CONFIGURABLE;
+      var ARRAY_BUFFER2 = "ArrayBuffer";
+      var DATA_VIEW = "DataView";
+      var PROTOTYPE = "prototype";
+      var WRONG_LENGTH = "Wrong length";
+      var WRONG_INDEX = "Wrong index";
+      var getInternalArrayBufferState = InternalStateModule2.getterFor(ARRAY_BUFFER2);
+      var getInternalDataViewState = InternalStateModule2.getterFor(DATA_VIEW);
+      var setInternalState2 = InternalStateModule2.set;
+      var NativeArrayBuffer2 = global11[ARRAY_BUFFER2];
+      var $ArrayBuffer = NativeArrayBuffer2;
+      var ArrayBufferPrototype = $ArrayBuffer && $ArrayBuffer[PROTOTYPE];
+      var $DataView = global11[DATA_VIEW];
+      var DataViewPrototype2 = $DataView && $DataView[PROTOTYPE];
+      var ObjectPrototype2 = Object.prototype;
+      var Array2 = global11.Array;
+      var RangeError2 = global11.RangeError;
+      var fill2 = uncurryThis14(arrayFill);
+      var reverse2 = uncurryThis14([].reverse);
+      var packIEEE754 = IEEE754.pack;
+      var unpackIEEE754 = IEEE754.unpack;
+      var packInt8 = function(number) {
+        return [number & 255];
+      };
+      var packInt16 = function(number) {
+        return [number & 255, number >> 8 & 255];
+      };
+      var packInt32 = function(number) {
+        return [number & 255, number >> 8 & 255, number >> 16 & 255, number >> 24 & 255];
+      };
+      var unpackInt32 = function(buffer) {
+        return buffer[3] << 24 | buffer[2] << 16 | buffer[1] << 8 | buffer[0];
+      };
+      var packFloat32 = function(number) {
+        return packIEEE754(number, 23, 4);
+      };
+      var packFloat64 = function(number) {
+        return packIEEE754(number, 52, 8);
+      };
+      var addGetter = function(Constructor, key2, getInternalState3) {
+        defineBuiltInAccessor4(Constructor[PROTOTYPE], key2, {
+          configurable: true,
+          get: function() {
+            return getInternalState3(this)[key2];
+          }
+        });
+      };
+      var get3 = function(view, count, index, isLittleEndian) {
+        var intIndex = toIndex(index);
+        var store = getInternalDataViewState(view);
+        if (intIndex + count > store.byteLength)
+          throw RangeError2(WRONG_INDEX);
+        var bytes = store.bytes;
+        var start = intIndex + store.byteOffset;
+        var pack = arraySlice2(bytes, start, start + count);
+        return isLittleEndian ? pack : reverse2(pack);
+      };
+      var set = function(view, count, index, conversion, value, isLittleEndian) {
+        var intIndex = toIndex(index);
+        var store = getInternalDataViewState(view);
+        if (intIndex + count > store.byteLength)
+          throw RangeError2(WRONG_INDEX);
+        var bytes = store.bytes;
+        var start = intIndex + store.byteOffset;
+        var pack = conversion(+value);
+        for (var i5 = 0; i5 < count; i5++)
+          bytes[start + i5] = pack[isLittleEndian ? i5 : count - i5 - 1];
+      };
+      if (!NATIVE_ARRAY_BUFFER) {
+        $ArrayBuffer = function ArrayBuffer4(length) {
+          anInstance(this, ArrayBufferPrototype);
+          var byteLength = toIndex(length);
+          setInternalState2(this, {
+            type: ARRAY_BUFFER2,
+            bytes: fill2(Array2(byteLength), 0),
+            byteLength: byteLength
+          });
+          if (!DESCRIPTORS10) {
+            this.byteLength = byteLength;
+            this.detached = false;
+          }
+        };
+        ArrayBufferPrototype = $ArrayBuffer[PROTOTYPE];
+        $DataView = function DataView3(buffer, byteOffset, byteLength) {
+          anInstance(this, DataViewPrototype2);
+          anInstance(buffer, ArrayBufferPrototype);
+          var bufferState = getInternalArrayBufferState(buffer);
+          var bufferLength = bufferState.byteLength;
+          var offset = toIntegerOrInfinity4(byteOffset);
+          if (offset < 0 || offset > bufferLength)
+            throw RangeError2("Wrong offset");
+          byteLength = byteLength === void 0 ? bufferLength - offset : toLength7(byteLength);
+          if (offset + byteLength > bufferLength)
+            throw RangeError2(WRONG_LENGTH);
+          setInternalState2(this, {
+            type: DATA_VIEW,
+            buffer: buffer,
+            byteLength: byteLength,
+            byteOffset: offset,
+            bytes: bufferState.bytes
+          });
+          if (!DESCRIPTORS10) {
+            this.buffer = buffer;
+            this.byteLength = byteLength;
+            this.byteOffset = offset;
+          }
+        };
+        DataViewPrototype2 = $DataView[PROTOTYPE];
+        if (DESCRIPTORS10) {
+          addGetter($ArrayBuffer, "byteLength", getInternalArrayBufferState);
+          addGetter($DataView, "buffer", getInternalDataViewState);
+          addGetter($DataView, "byteLength", getInternalDataViewState);
+          addGetter($DataView, "byteOffset", getInternalDataViewState);
+        }
+        defineBuiltIns(DataViewPrototype2, {
+          getInt8: function getInt8(byteOffset) {
+            return get3(this, 1, byteOffset)[0] << 24 >> 24;
+          },
+          getUint8: function getUint82(byteOffset) {
+            return get3(this, 1, byteOffset)[0];
+          },
+          getInt16: function getInt16(byteOffset) {
+            var bytes = get3(this, 2, byteOffset, arguments.length > 1 ? arguments[1] : void 0);
+            return (bytes[1] << 8 | bytes[0]) << 16 >> 16;
+          },
+          getUint16: function getUint16(byteOffset) {
+            var bytes = get3(this, 2, byteOffset, arguments.length > 1 ? arguments[1] : void 0);
+            return bytes[1] << 8 | bytes[0];
+          },
+          getInt32: function getInt32(byteOffset) {
+            return unpackInt32(get3(this, 4, byteOffset, arguments.length > 1 ? arguments[1] : void 0));
+          },
+          getUint32: function getUint32(byteOffset) {
+            return unpackInt32(get3(this, 4, byteOffset, arguments.length > 1 ? arguments[1] : void 0)) >>> 0;
+          },
+          getFloat32: function getFloat32(byteOffset) {
+            return unpackIEEE754(get3(this, 4, byteOffset, arguments.length > 1 ? arguments[1] : void 0), 23);
+          },
+          getFloat64: function getFloat64(byteOffset) {
+            return unpackIEEE754(get3(this, 8, byteOffset, arguments.length > 1 ? arguments[1] : void 0), 52);
+          },
+          setInt8: function setInt8(byteOffset, value) {
+            set(this, 1, byteOffset, packInt8, value);
+          },
+          setUint8: function setUint82(byteOffset, value) {
+            set(this, 1, byteOffset, packInt8, value);
+          },
+          setInt16: function setInt16(byteOffset, value) {
+            set(this, 2, byteOffset, packInt16, value, arguments.length > 2 ? arguments[2] : void 0);
+          },
+          setUint16: function setUint16(byteOffset, value) {
+            set(this, 2, byteOffset, packInt16, value, arguments.length > 2 ? arguments[2] : void 0);
+          },
+          setInt32: function setInt32(byteOffset, value) {
+            set(this, 4, byteOffset, packInt32, value, arguments.length > 2 ? arguments[2] : void 0);
+          },
+          setUint32: function setUint32(byteOffset, value) {
+            set(this, 4, byteOffset, packInt32, value, arguments.length > 2 ? arguments[2] : void 0);
+          },
+          setFloat32: function setFloat32(byteOffset, value) {
+            set(this, 4, byteOffset, packFloat32, value, arguments.length > 2 ? arguments[2] : void 0);
+          },
+          setFloat64: function setFloat64(byteOffset, value) {
+            set(this, 8, byteOffset, packFloat64, value, arguments.length > 2 ? arguments[2] : void 0);
+          }
+        });
+      } else {
+        INCORRECT_ARRAY_BUFFER_NAME = PROPER_FUNCTION_NAME2 && NativeArrayBuffer2.name !== ARRAY_BUFFER2;
+        if (!fails15(function() {
+          NativeArrayBuffer2(1);
+        }) || !fails15(function() {
+          new NativeArrayBuffer2(-1);
+        }) || fails15(function() {
+          new NativeArrayBuffer2();
+          new NativeArrayBuffer2(1.5);
+          new NativeArrayBuffer2(NaN);
+          return NativeArrayBuffer2.length != 1 || INCORRECT_ARRAY_BUFFER_NAME && !CONFIGURABLE_FUNCTION_NAME;
+        })) {
+          $ArrayBuffer = function ArrayBuffer4(length) {
+            anInstance(this, ArrayBufferPrototype);
+            return new NativeArrayBuffer2(toIndex(length));
+          };
+          $ArrayBuffer[PROTOTYPE] = ArrayBufferPrototype;
+          for (keys2 = getOwnPropertyNames4(NativeArrayBuffer2), j3 = 0; keys2.length > j3; ) {
+            if (!((key = keys2[j3++]) in $ArrayBuffer)) {
+              createNonEnumerableProperty4($ArrayBuffer, key, NativeArrayBuffer2[key]);
+            }
+          }
+          ArrayBufferPrototype.constructor = $ArrayBuffer;
+        } else if (INCORRECT_ARRAY_BUFFER_NAME && CONFIGURABLE_FUNCTION_NAME) {
+          createNonEnumerableProperty4(NativeArrayBuffer2, "name", ARRAY_BUFFER2);
+        }
+        if (setPrototypeOf2 && getPrototypeOf3(DataViewPrototype2) !== ObjectPrototype2) {
+          setPrototypeOf2(DataViewPrototype2, ObjectPrototype2);
+        }
+        testView = new $DataView(new $ArrayBuffer(2));
+        $setInt8 = uncurryThis14(DataViewPrototype2.setInt8);
+        testView.setInt8(0, 2147483648);
+        testView.setInt8(1, 2147483649);
+        if (testView.getInt8(0) || !testView.getInt8(1))
+          defineBuiltIns(DataViewPrototype2, {
+            setInt8: function setInt8(byteOffset, value) {
+              $setInt8(this, byteOffset, value << 24 >> 24);
+            },
+            setUint8: function setUint82(byteOffset, value) {
+              $setInt8(this, byteOffset, value << 24 >> 24);
+            }
+          }, { unsafe: true });
+      }
+      var INCORRECT_ARRAY_BUFFER_NAME;
+      var keys2;
+      var j3;
+      var key;
+      var testView;
+      var $setInt8;
+      setToStringTag5($ArrayBuffer, ARRAY_BUFFER2);
+      setToStringTag5($DataView, DATA_VIEW);
+      module.exports = {
+        ArrayBuffer: $ArrayBuffer,
+        DataView: $DataView
+      };
+    }
+  });
+
+  // node_modules/core-js/modules/es.data-view.constructor.js
+  var require_es_data_view_constructor = __commonJS({
+    "node_modules/core-js/modules/es.data-view.constructor.js": function() {
+      var $86 = require_export();
+      var ArrayBufferModule2 = require_array_buffer();
+      var NATIVE_ARRAY_BUFFER = require_array_buffer_basic_detection();
+      $86({ global: true, constructor: true, forced: !NATIVE_ARRAY_BUFFER }, {
+        DataView: ArrayBufferModule2.DataView
+      });
+    }
+  });
+
+  // node_modules/core-js/internals/array-reduce.js
+  var require_array_reduce = __commonJS({
+    "node_modules/core-js/internals/array-reduce.js": function(exports, module) {
+      var aCallable2 = require_a_callable();
+      var toObject6 = require_to_object();
+      var IndexedObject2 = require_indexed_object();
+      var lengthOfArrayLike5 = require_length_of_array_like();
+      var $TypeError2 = TypeError;
+      var createMethod = function(IS_RIGHT) {
+        return function(that, callbackfn, argumentsLength, memo) {
+          aCallable2(callbackfn);
+          var O = toObject6(that);
+          var self2 = IndexedObject2(O);
+          var length = lengthOfArrayLike5(O);
+          var index = IS_RIGHT ? length - 1 : 0;
+          var i5 = IS_RIGHT ? -1 : 1;
+          if (argumentsLength < 2)
+            while (true) {
+              if (index in self2) {
+                memo = self2[index];
+                index += i5;
+                break;
+              }
+              index += i5;
+              if (IS_RIGHT ? index < 0 : length <= index) {
+                throw $TypeError2("Reduce of empty array with no initial value");
+              }
+            }
+          for (; IS_RIGHT ? index >= 0 : length > index; index += i5)
+            if (index in self2) {
+              memo = callbackfn(memo, self2[index], index, O);
+            }
+          return memo;
+        };
+      };
+      module.exports = {
+        left: createMethod(false),
+        right: createMethod(true)
+      };
+    }
+  });
+
   // node_modules/core-js/internals/collection-weak.js
   var require_collection_weak = __commonJS({
     "node_modules/core-js/internals/collection-weak.js": function(exports, module) {
@@ -5153,48 +5606,6 @@
     }
   });
 
-  // node_modules/core-js/internals/array-reduce.js
-  var require_array_reduce = __commonJS({
-    "node_modules/core-js/internals/array-reduce.js": function(exports, module) {
-      var aCallable2 = require_a_callable();
-      var toObject6 = require_to_object();
-      var IndexedObject2 = require_indexed_object();
-      var lengthOfArrayLike5 = require_length_of_array_like();
-      var $TypeError2 = TypeError;
-      var createMethod = function(IS_RIGHT) {
-        return function(that, callbackfn, argumentsLength, memo) {
-          aCallable2(callbackfn);
-          var O = toObject6(that);
-          var self2 = IndexedObject2(O);
-          var length = lengthOfArrayLike5(O);
-          var index = IS_RIGHT ? length - 1 : 0;
-          var i5 = IS_RIGHT ? -1 : 1;
-          if (argumentsLength < 2)
-            while (true) {
-              if (index in self2) {
-                memo = self2[index];
-                index += i5;
-                break;
-              }
-              index += i5;
-              if (IS_RIGHT ? index < 0 : length <= index) {
-                throw $TypeError2("Reduce of empty array with no initial value");
-              }
-            }
-          for (; IS_RIGHT ? index >= 0 : length > index; index += i5)
-            if (index in self2) {
-              memo = callbackfn(memo, self2[index], index, O);
-            }
-          return memo;
-        };
-      };
-      module.exports = {
-        left: createMethod(false),
-        right: createMethod(true)
-      };
-    }
-  });
-
   // node_modules/core-js/internals/proxy-accessor.js
   var require_proxy_accessor = __commonJS({
     "node_modules/core-js/internals/proxy-accessor.js": function(exports, module) {
@@ -5245,417 +5656,6 @@
         }
         return false;
       };
-    }
-  });
-
-  // node_modules/core-js/internals/array-fill.js
-  var require_array_fill = __commonJS({
-    "node_modules/core-js/internals/array-fill.js": function(exports, module) {
-      "use strict";
-      var toObject6 = require_to_object();
-      var toAbsoluteIndex4 = require_to_absolute_index();
-      var lengthOfArrayLike5 = require_length_of_array_like();
-      module.exports = function fill2(value) {
-        var O = toObject6(this);
-        var length = lengthOfArrayLike5(O);
-        var argumentsLength = arguments.length;
-        var index = toAbsoluteIndex4(argumentsLength > 1 ? arguments[1] : void 0, length);
-        var end = argumentsLength > 2 ? arguments[2] : void 0;
-        var endPos = end === void 0 ? length : toAbsoluteIndex4(end, length);
-        while (endPos > index)
-          O[index++] = value;
-        return O;
-      };
-    }
-  });
-
-  // node_modules/core-js/internals/array-buffer-basic-detection.js
-  var require_array_buffer_basic_detection = __commonJS({
-    "node_modules/core-js/internals/array-buffer-basic-detection.js": function(exports, module) {
-      module.exports = typeof ArrayBuffer != "undefined" && typeof DataView != "undefined";
-    }
-  });
-
-  // node_modules/core-js/internals/to-index.js
-  var require_to_index = __commonJS({
-    "node_modules/core-js/internals/to-index.js": function(exports, module) {
-      var toIntegerOrInfinity4 = require_to_integer_or_infinity();
-      var toLength7 = require_to_length();
-      var $RangeError = RangeError;
-      module.exports = function(it) {
-        if (it === void 0)
-          return 0;
-        var number = toIntegerOrInfinity4(it);
-        var length = toLength7(number);
-        if (number !== length)
-          throw $RangeError("Wrong length or index");
-        return length;
-      };
-    }
-  });
-
-  // node_modules/core-js/internals/ieee754.js
-  var require_ieee754 = __commonJS({
-    "node_modules/core-js/internals/ieee754.js": function(exports, module) {
-      var $Array2 = Array;
-      var abs = Math.abs;
-      var pow = Math.pow;
-      var floor = Math.floor;
-      var log = Math.log;
-      var LN2 = Math.LN2;
-      var pack = function(number, mantissaLength, bytes) {
-        var buffer = $Array2(bytes);
-        var exponentLength = bytes * 8 - mantissaLength - 1;
-        var eMax = (1 << exponentLength) - 1;
-        var eBias = eMax >> 1;
-        var rt = mantissaLength === 23 ? pow(2, -24) - pow(2, -77) : 0;
-        var sign = number < 0 || number === 0 && 1 / number < 0 ? 1 : 0;
-        var index = 0;
-        var exponent, mantissa, c5;
-        number = abs(number);
-        if (number != number || number === Infinity) {
-          mantissa = number != number ? 1 : 0;
-          exponent = eMax;
-        } else {
-          exponent = floor(log(number) / LN2);
-          c5 = pow(2, -exponent);
-          if (number * c5 < 1) {
-            exponent--;
-            c5 *= 2;
-          }
-          if (exponent + eBias >= 1) {
-            number += rt / c5;
-          } else {
-            number += rt * pow(2, 1 - eBias);
-          }
-          if (number * c5 >= 2) {
-            exponent++;
-            c5 /= 2;
-          }
-          if (exponent + eBias >= eMax) {
-            mantissa = 0;
-            exponent = eMax;
-          } else if (exponent + eBias >= 1) {
-            mantissa = (number * c5 - 1) * pow(2, mantissaLength);
-            exponent = exponent + eBias;
-          } else {
-            mantissa = number * pow(2, eBias - 1) * pow(2, mantissaLength);
-            exponent = 0;
-          }
-        }
-        while (mantissaLength >= 8) {
-          buffer[index++] = mantissa & 255;
-          mantissa /= 256;
-          mantissaLength -= 8;
-        }
-        exponent = exponent << mantissaLength | mantissa;
-        exponentLength += mantissaLength;
-        while (exponentLength > 0) {
-          buffer[index++] = exponent & 255;
-          exponent /= 256;
-          exponentLength -= 8;
-        }
-        buffer[--index] |= sign * 128;
-        return buffer;
-      };
-      var unpack = function(buffer, mantissaLength) {
-        var bytes = buffer.length;
-        var exponentLength = bytes * 8 - mantissaLength - 1;
-        var eMax = (1 << exponentLength) - 1;
-        var eBias = eMax >> 1;
-        var nBits = exponentLength - 7;
-        var index = bytes - 1;
-        var sign = buffer[index--];
-        var exponent = sign & 127;
-        var mantissa;
-        sign >>= 7;
-        while (nBits > 0) {
-          exponent = exponent * 256 + buffer[index--];
-          nBits -= 8;
-        }
-        mantissa = exponent & (1 << -nBits) - 1;
-        exponent >>= -nBits;
-        nBits += mantissaLength;
-        while (nBits > 0) {
-          mantissa = mantissa * 256 + buffer[index--];
-          nBits -= 8;
-        }
-        if (exponent === 0) {
-          exponent = 1 - eBias;
-        } else if (exponent === eMax) {
-          return mantissa ? NaN : sign ? -Infinity : Infinity;
-        } else {
-          mantissa = mantissa + pow(2, mantissaLength);
-          exponent = exponent - eBias;
-        }
-        return (sign ? -1 : 1) * mantissa * pow(2, exponent - mantissaLength);
-      };
-      module.exports = {
-        pack: pack,
-        unpack: unpack
-      };
-    }
-  });
-
-  // node_modules/core-js/internals/array-buffer.js
-  var require_array_buffer = __commonJS({
-    "node_modules/core-js/internals/array-buffer.js": function(exports, module) {
-      "use strict";
-      var global11 = require_global();
-      var uncurryThis14 = require_function_uncurry_this();
-      var DESCRIPTORS10 = require_descriptors();
-      var NATIVE_ARRAY_BUFFER = require_array_buffer_basic_detection();
-      var FunctionName = require_function_name();
-      var createNonEnumerableProperty4 = require_create_non_enumerable_property();
-      var defineBuiltInAccessor4 = require_define_built_in_accessor();
-      var defineBuiltIns = require_define_built_ins();
-      var fails15 = require_fails();
-      var anInstance = require_an_instance();
-      var toIntegerOrInfinity4 = require_to_integer_or_infinity();
-      var toLength7 = require_to_length();
-      var toIndex = require_to_index();
-      var IEEE754 = require_ieee754();
-      var getPrototypeOf3 = require_object_get_prototype_of();
-      var setPrototypeOf2 = require_object_set_prototype_of();
-      var getOwnPropertyNames4 = require_object_get_own_property_names().f;
-      var arrayFill = require_array_fill();
-      var arraySlice2 = require_array_slice_simple();
-      var setToStringTag5 = require_set_to_string_tag();
-      var InternalStateModule2 = require_internal_state();
-      var PROPER_FUNCTION_NAME2 = FunctionName.PROPER;
-      var CONFIGURABLE_FUNCTION_NAME = FunctionName.CONFIGURABLE;
-      var ARRAY_BUFFER2 = "ArrayBuffer";
-      var DATA_VIEW = "DataView";
-      var PROTOTYPE = "prototype";
-      var WRONG_LENGTH = "Wrong length";
-      var WRONG_INDEX = "Wrong index";
-      var getInternalArrayBufferState = InternalStateModule2.getterFor(ARRAY_BUFFER2);
-      var getInternalDataViewState = InternalStateModule2.getterFor(DATA_VIEW);
-      var setInternalState2 = InternalStateModule2.set;
-      var NativeArrayBuffer2 = global11[ARRAY_BUFFER2];
-      var $ArrayBuffer = NativeArrayBuffer2;
-      var ArrayBufferPrototype = $ArrayBuffer && $ArrayBuffer[PROTOTYPE];
-      var $DataView = global11[DATA_VIEW];
-      var DataViewPrototype2 = $DataView && $DataView[PROTOTYPE];
-      var ObjectPrototype2 = Object.prototype;
-      var Array2 = global11.Array;
-      var RangeError2 = global11.RangeError;
-      var fill2 = uncurryThis14(arrayFill);
-      var reverse2 = uncurryThis14([].reverse);
-      var packIEEE754 = IEEE754.pack;
-      var unpackIEEE754 = IEEE754.unpack;
-      var packInt8 = function(number) {
-        return [number & 255];
-      };
-      var packInt16 = function(number) {
-        return [number & 255, number >> 8 & 255];
-      };
-      var packInt32 = function(number) {
-        return [number & 255, number >> 8 & 255, number >> 16 & 255, number >> 24 & 255];
-      };
-      var unpackInt32 = function(buffer) {
-        return buffer[3] << 24 | buffer[2] << 16 | buffer[1] << 8 | buffer[0];
-      };
-      var packFloat32 = function(number) {
-        return packIEEE754(number, 23, 4);
-      };
-      var packFloat64 = function(number) {
-        return packIEEE754(number, 52, 8);
-      };
-      var addGetter = function(Constructor, key2, getInternalState3) {
-        defineBuiltInAccessor4(Constructor[PROTOTYPE], key2, {
-          configurable: true,
-          get: function() {
-            return getInternalState3(this)[key2];
-          }
-        });
-      };
-      var get3 = function(view, count, index, isLittleEndian) {
-        var intIndex = toIndex(index);
-        var store = getInternalDataViewState(view);
-        if (intIndex + count > store.byteLength)
-          throw RangeError2(WRONG_INDEX);
-        var bytes = store.bytes;
-        var start = intIndex + store.byteOffset;
-        var pack = arraySlice2(bytes, start, start + count);
-        return isLittleEndian ? pack : reverse2(pack);
-      };
-      var set = function(view, count, index, conversion, value, isLittleEndian) {
-        var intIndex = toIndex(index);
-        var store = getInternalDataViewState(view);
-        if (intIndex + count > store.byteLength)
-          throw RangeError2(WRONG_INDEX);
-        var bytes = store.bytes;
-        var start = intIndex + store.byteOffset;
-        var pack = conversion(+value);
-        for (var i5 = 0; i5 < count; i5++)
-          bytes[start + i5] = pack[isLittleEndian ? i5 : count - i5 - 1];
-      };
-      if (!NATIVE_ARRAY_BUFFER) {
-        $ArrayBuffer = function ArrayBuffer4(length) {
-          anInstance(this, ArrayBufferPrototype);
-          var byteLength = toIndex(length);
-          setInternalState2(this, {
-            type: ARRAY_BUFFER2,
-            bytes: fill2(Array2(byteLength), 0),
-            byteLength: byteLength
-          });
-          if (!DESCRIPTORS10) {
-            this.byteLength = byteLength;
-            this.detached = false;
-          }
-        };
-        ArrayBufferPrototype = $ArrayBuffer[PROTOTYPE];
-        $DataView = function DataView3(buffer, byteOffset, byteLength) {
-          anInstance(this, DataViewPrototype2);
-          anInstance(buffer, ArrayBufferPrototype);
-          var bufferState = getInternalArrayBufferState(buffer);
-          var bufferLength = bufferState.byteLength;
-          var offset = toIntegerOrInfinity4(byteOffset);
-          if (offset < 0 || offset > bufferLength)
-            throw RangeError2("Wrong offset");
-          byteLength = byteLength === void 0 ? bufferLength - offset : toLength7(byteLength);
-          if (offset + byteLength > bufferLength)
-            throw RangeError2(WRONG_LENGTH);
-          setInternalState2(this, {
-            type: DATA_VIEW,
-            buffer: buffer,
-            byteLength: byteLength,
-            byteOffset: offset,
-            bytes: bufferState.bytes
-          });
-          if (!DESCRIPTORS10) {
-            this.buffer = buffer;
-            this.byteLength = byteLength;
-            this.byteOffset = offset;
-          }
-        };
-        DataViewPrototype2 = $DataView[PROTOTYPE];
-        if (DESCRIPTORS10) {
-          addGetter($ArrayBuffer, "byteLength", getInternalArrayBufferState);
-          addGetter($DataView, "buffer", getInternalDataViewState);
-          addGetter($DataView, "byteLength", getInternalDataViewState);
-          addGetter($DataView, "byteOffset", getInternalDataViewState);
-        }
-        defineBuiltIns(DataViewPrototype2, {
-          getInt8: function getInt8(byteOffset) {
-            return get3(this, 1, byteOffset)[0] << 24 >> 24;
-          },
-          getUint8: function getUint82(byteOffset) {
-            return get3(this, 1, byteOffset)[0];
-          },
-          getInt16: function getInt16(byteOffset) {
-            var bytes = get3(this, 2, byteOffset, arguments.length > 1 ? arguments[1] : void 0);
-            return (bytes[1] << 8 | bytes[0]) << 16 >> 16;
-          },
-          getUint16: function getUint16(byteOffset) {
-            var bytes = get3(this, 2, byteOffset, arguments.length > 1 ? arguments[1] : void 0);
-            return bytes[1] << 8 | bytes[0];
-          },
-          getInt32: function getInt32(byteOffset) {
-            return unpackInt32(get3(this, 4, byteOffset, arguments.length > 1 ? arguments[1] : void 0));
-          },
-          getUint32: function getUint32(byteOffset) {
-            return unpackInt32(get3(this, 4, byteOffset, arguments.length > 1 ? arguments[1] : void 0)) >>> 0;
-          },
-          getFloat32: function getFloat32(byteOffset) {
-            return unpackIEEE754(get3(this, 4, byteOffset, arguments.length > 1 ? arguments[1] : void 0), 23);
-          },
-          getFloat64: function getFloat64(byteOffset) {
-            return unpackIEEE754(get3(this, 8, byteOffset, arguments.length > 1 ? arguments[1] : void 0), 52);
-          },
-          setInt8: function setInt8(byteOffset, value) {
-            set(this, 1, byteOffset, packInt8, value);
-          },
-          setUint8: function setUint82(byteOffset, value) {
-            set(this, 1, byteOffset, packInt8, value);
-          },
-          setInt16: function setInt16(byteOffset, value) {
-            set(this, 2, byteOffset, packInt16, value, arguments.length > 2 ? arguments[2] : void 0);
-          },
-          setUint16: function setUint16(byteOffset, value) {
-            set(this, 2, byteOffset, packInt16, value, arguments.length > 2 ? arguments[2] : void 0);
-          },
-          setInt32: function setInt32(byteOffset, value) {
-            set(this, 4, byteOffset, packInt32, value, arguments.length > 2 ? arguments[2] : void 0);
-          },
-          setUint32: function setUint32(byteOffset, value) {
-            set(this, 4, byteOffset, packInt32, value, arguments.length > 2 ? arguments[2] : void 0);
-          },
-          setFloat32: function setFloat32(byteOffset, value) {
-            set(this, 4, byteOffset, packFloat32, value, arguments.length > 2 ? arguments[2] : void 0);
-          },
-          setFloat64: function setFloat64(byteOffset, value) {
-            set(this, 8, byteOffset, packFloat64, value, arguments.length > 2 ? arguments[2] : void 0);
-          }
-        });
-      } else {
-        INCORRECT_ARRAY_BUFFER_NAME = PROPER_FUNCTION_NAME2 && NativeArrayBuffer2.name !== ARRAY_BUFFER2;
-        if (!fails15(function() {
-          NativeArrayBuffer2(1);
-        }) || !fails15(function() {
-          new NativeArrayBuffer2(-1);
-        }) || fails15(function() {
-          new NativeArrayBuffer2();
-          new NativeArrayBuffer2(1.5);
-          new NativeArrayBuffer2(NaN);
-          return NativeArrayBuffer2.length != 1 || INCORRECT_ARRAY_BUFFER_NAME && !CONFIGURABLE_FUNCTION_NAME;
-        })) {
-          $ArrayBuffer = function ArrayBuffer4(length) {
-            anInstance(this, ArrayBufferPrototype);
-            return new NativeArrayBuffer2(toIndex(length));
-          };
-          $ArrayBuffer[PROTOTYPE] = ArrayBufferPrototype;
-          for (keys2 = getOwnPropertyNames4(NativeArrayBuffer2), j3 = 0; keys2.length > j3; ) {
-            if (!((key = keys2[j3++]) in $ArrayBuffer)) {
-              createNonEnumerableProperty4($ArrayBuffer, key, NativeArrayBuffer2[key]);
-            }
-          }
-          ArrayBufferPrototype.constructor = $ArrayBuffer;
-        } else if (INCORRECT_ARRAY_BUFFER_NAME && CONFIGURABLE_FUNCTION_NAME) {
-          createNonEnumerableProperty4(NativeArrayBuffer2, "name", ARRAY_BUFFER2);
-        }
-        if (setPrototypeOf2 && getPrototypeOf3(DataViewPrototype2) !== ObjectPrototype2) {
-          setPrototypeOf2(DataViewPrototype2, ObjectPrototype2);
-        }
-        testView = new $DataView(new $ArrayBuffer(2));
-        $setInt8 = uncurryThis14(DataViewPrototype2.setInt8);
-        testView.setInt8(0, 2147483648);
-        testView.setInt8(1, 2147483649);
-        if (testView.getInt8(0) || !testView.getInt8(1))
-          defineBuiltIns(DataViewPrototype2, {
-            setInt8: function setInt8(byteOffset, value) {
-              $setInt8(this, byteOffset, value << 24 >> 24);
-            },
-            setUint8: function setUint82(byteOffset, value) {
-              $setInt8(this, byteOffset, value << 24 >> 24);
-            }
-          }, { unsafe: true });
-      }
-      var INCORRECT_ARRAY_BUFFER_NAME;
-      var keys2;
-      var j3;
-      var key;
-      var testView;
-      var $setInt8;
-      setToStringTag5($ArrayBuffer, ARRAY_BUFFER2);
-      setToStringTag5($DataView, DATA_VIEW);
-      module.exports = {
-        ArrayBuffer: $ArrayBuffer,
-        DataView: $DataView
-      };
-    }
-  });
-
-  // node_modules/core-js/modules/es.data-view.constructor.js
-  var require_es_data_view_constructor = __commonJS({
-    "node_modules/core-js/modules/es.data-view.constructor.js": function() {
-      var $86 = require_export();
-      var ArrayBufferModule2 = require_array_buffer();
-      var NATIVE_ARRAY_BUFFER = require_array_buffer_basic_detection();
-      $86({ global: true, constructor: true, forced: !NATIVE_ARRAY_BUFFER }, {
-        DataView: ArrayBufferModule2.DataView
-      });
     }
   });
 
@@ -5899,7 +5899,7 @@
   defineWellKnownSymbol("iterator");
 
   // srcts/src/shiny/index.ts
-  var import_es_array_iterator50 = __toESM(require_es_array_iterator());
+  var import_es_array_iterator51 = __toESM(require_es_array_iterator());
 
   // node_modules/core-js/modules/es.string.iterator.js
   var charAt = require_string_multibyte().charAt;
@@ -7179,7 +7179,7 @@
       _setPrototypeOf(subClass, superClass);
   }
   function _setPrototypeOf(o4, p3) {
-    _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf25(o5, p4) {
+    _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf26(o5, p4) {
       o5.__proto__ = p4;
       return o5;
     };
@@ -7228,7 +7228,7 @@
     }
   }
   function _getPrototypeOf(o4) {
-    _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf25(o5) {
+    _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf26(o5) {
       return o5.__proto__ || Object.getPrototypeOf(o5);
     };
     return _getPrototypeOf(o4);
@@ -7360,7 +7360,7 @@
       _setPrototypeOf2(subClass, superClass);
   }
   function _setPrototypeOf2(o4, p3) {
-    _setPrototypeOf2 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf25(o5, p4) {
+    _setPrototypeOf2 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf26(o5, p4) {
       o5.__proto__ = p4;
       return o5;
     };
@@ -7409,7 +7409,7 @@
     }
   }
   function _getPrototypeOf2(o4) {
-    _getPrototypeOf2 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf25(o5) {
+    _getPrototypeOf2 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf26(o5) {
       return o5.__proto__ || Object.getPrototypeOf(o5);
     };
     return _getPrototypeOf2(o4);
@@ -7636,7 +7636,7 @@
       _setPrototypeOf3(subClass, superClass);
   }
   function _setPrototypeOf3(o4, p3) {
-    _setPrototypeOf3 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf25(o5, p4) {
+    _setPrototypeOf3 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf26(o5, p4) {
       o5.__proto__ = p4;
       return o5;
     };
@@ -7685,7 +7685,7 @@
     }
   }
   function _getPrototypeOf3(o4) {
-    _getPrototypeOf3 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf25(o5) {
+    _getPrototypeOf3 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf26(o5) {
       return o5.__proto__ || Object.getPrototypeOf(o5);
     };
     return _getPrototypeOf3(o4);
@@ -7868,7 +7868,7 @@
       _setPrototypeOf4(subClass, superClass);
   }
   function _setPrototypeOf4(o4, p3) {
-    _setPrototypeOf4 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf25(o5, p4) {
+    _setPrototypeOf4 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf26(o5, p4) {
       o5.__proto__ = p4;
       return o5;
     };
@@ -7917,7 +7917,7 @@
     }
   }
   function _getPrototypeOf4(o4) {
-    _getPrototypeOf4 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf25(o5) {
+    _getPrototypeOf4 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf26(o5) {
       return o5.__proto__ || Object.getPrototypeOf(o5);
     };
     return _getPrototypeOf4(o4);
@@ -8052,7 +8052,7 @@
       _setPrototypeOf5(subClass, superClass);
   }
   function _setPrototypeOf5(o4, p3) {
-    _setPrototypeOf5 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf25(o5, p4) {
+    _setPrototypeOf5 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf26(o5, p4) {
       o5.__proto__ = p4;
       return o5;
     };
@@ -8101,7 +8101,7 @@
     }
   }
   function _getPrototypeOf5(o4) {
-    _getPrototypeOf5 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf25(o5) {
+    _getPrototypeOf5 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf26(o5) {
       return o5.__proto__ || Object.getPrototypeOf(o5);
     };
     return _getPrototypeOf5(o4);
@@ -8188,7 +8188,7 @@
       _setPrototypeOf6(subClass, superClass);
   }
   function _setPrototypeOf6(o4, p3) {
-    _setPrototypeOf6 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf25(o5, p4) {
+    _setPrototypeOf6 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf26(o5, p4) {
       o5.__proto__ = p4;
       return o5;
     };
@@ -8237,7 +8237,7 @@
     }
   }
   function _getPrototypeOf6(o4) {
-    _getPrototypeOf6 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf25(o5) {
+    _getPrototypeOf6 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf26(o5) {
       return o5.__proto__ || Object.getPrototypeOf(o5);
     };
     return _getPrototypeOf6(o4);
@@ -8318,7 +8318,7 @@
       _setPrototypeOf7(subClass, superClass);
   }
   function _setPrototypeOf7(o4, p3) {
-    _setPrototypeOf7 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf25(o5, p4) {
+    _setPrototypeOf7 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf26(o5, p4) {
       o5.__proto__ = p4;
       return o5;
     };
@@ -8367,7 +8367,7 @@
     }
   }
   function _getPrototypeOf7(o4) {
-    _getPrototypeOf7 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf25(o5) {
+    _getPrototypeOf7 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf26(o5) {
       return o5.__proto__ || Object.getPrototypeOf(o5);
     };
     return _getPrototypeOf7(o4);
@@ -8520,7 +8520,7 @@
       _setPrototypeOf8(subClass, superClass);
   }
   function _setPrototypeOf8(o4, p3) {
-    _setPrototypeOf8 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf25(o5, p4) {
+    _setPrototypeOf8 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf26(o5, p4) {
       o5.__proto__ = p4;
       return o5;
     };
@@ -8569,7 +8569,7 @@
     }
   }
   function _getPrototypeOf8(o4) {
-    _getPrototypeOf8 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf25(o5) {
+    _getPrototypeOf8 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf26(o5) {
       return o5.__proto__ || Object.getPrototypeOf(o5);
     };
     return _getPrototypeOf8(o4);
@@ -8868,7 +8868,7 @@
       _setPrototypeOf9(subClass, superClass);
   }
   function _setPrototypeOf9(o4, p3) {
-    _setPrototypeOf9 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf25(o5, p4) {
+    _setPrototypeOf9 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf26(o5, p4) {
       o5.__proto__ = p4;
       return o5;
     };
@@ -8917,7 +8917,7 @@
     }
   }
   function _getPrototypeOf9(o4) {
-    _getPrototypeOf9 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf25(o5) {
+    _getPrototypeOf9 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf26(o5) {
       return o5.__proto__ || Object.getPrototypeOf(o5);
     };
     return _getPrototypeOf9(o4);
@@ -9272,7 +9272,7 @@
       _setPrototypeOf10(subClass, superClass);
   }
   function _setPrototypeOf10(o4, p3) {
-    _setPrototypeOf10 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf25(o5, p4) {
+    _setPrototypeOf10 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf26(o5, p4) {
       o5.__proto__ = p4;
       return o5;
     };
@@ -9321,7 +9321,7 @@
     }
   }
   function _getPrototypeOf10(o4) {
-    _getPrototypeOf10 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf25(o5) {
+    _getPrototypeOf10 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf26(o5) {
       return o5.__proto__ || Object.getPrototypeOf(o5);
     };
     return _getPrototypeOf10(o4);
@@ -9928,7 +9928,7 @@
       _setPrototypeOf11(subClass, superClass);
   }
   function _setPrototypeOf11(o4, p3) {
-    _setPrototypeOf11 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf25(o5, p4) {
+    _setPrototypeOf11 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf26(o5, p4) {
       o5.__proto__ = p4;
       return o5;
     };
@@ -9977,7 +9977,7 @@
     }
   }
   function _getPrototypeOf11(o4) {
-    _getPrototypeOf11 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf25(o5) {
+    _getPrototypeOf11 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf26(o5) {
       return o5.__proto__ || Object.getPrototypeOf(o5);
     };
     return _getPrototypeOf11(o4);
@@ -10261,7 +10261,7 @@
       _setPrototypeOf12(subClass, superClass);
   }
   function _setPrototypeOf12(o4, p3) {
-    _setPrototypeOf12 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf25(o5, p4) {
+    _setPrototypeOf12 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf26(o5, p4) {
       o5.__proto__ = p4;
       return o5;
     };
@@ -10310,7 +10310,7 @@
     }
   }
   function _getPrototypeOf12(o4) {
-    _getPrototypeOf12 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf25(o5) {
+    _getPrototypeOf12 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf26(o5) {
       return o5.__proto__ || Object.getPrototypeOf(o5);
     };
     return _getPrototypeOf12(o4);
@@ -10456,7 +10456,7 @@
       _setPrototypeOf13(subClass, superClass);
   }
   function _setPrototypeOf13(o4, p3) {
-    _setPrototypeOf13 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf25(o5, p4) {
+    _setPrototypeOf13 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf26(o5, p4) {
       o5.__proto__ = p4;
       return o5;
     };
@@ -10505,7 +10505,7 @@
     }
   }
   function _getPrototypeOf13(o4) {
-    _getPrototypeOf13 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf25(o5) {
+    _getPrototypeOf13 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf26(o5) {
       return o5.__proto__ || Object.getPrototypeOf(o5);
     };
     return _getPrototypeOf13(o4);
@@ -10647,7 +10647,7 @@
       _setPrototypeOf14(subClass, superClass);
   }
   function _setPrototypeOf14(o4, p3) {
-    _setPrototypeOf14 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf25(o5, p4) {
+    _setPrototypeOf14 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf26(o5, p4) {
       o5.__proto__ = p4;
       return o5;
     };
@@ -10696,7 +10696,7 @@
     }
   }
   function _getPrototypeOf14(o4) {
-    _getPrototypeOf14 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf25(o5) {
+    _getPrototypeOf14 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf26(o5) {
       return o5.__proto__ || Object.getPrototypeOf(o5);
     };
     return _getPrototypeOf14(o4);
@@ -11043,7 +11043,7 @@
       _setPrototypeOf15(subClass, superClass);
   }
   function _setPrototypeOf15(o4, p3) {
-    _setPrototypeOf15 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf25(o5, p4) {
+    _setPrototypeOf15 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf26(o5, p4) {
       o5.__proto__ = p4;
       return o5;
     };
@@ -11092,7 +11092,7 @@
     }
   }
   function _getPrototypeOf15(o4) {
-    _getPrototypeOf15 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf25(o5) {
+    _getPrototypeOf15 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf26(o5) {
       return o5.__proto__ || Object.getPrototypeOf(o5);
     };
     return _getPrototypeOf15(o4);
@@ -11845,7 +11845,7 @@
       _setPrototypeOf16(subClass, superClass);
   }
   function _setPrototypeOf16(o4, p3) {
-    _setPrototypeOf16 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf25(o5, p4) {
+    _setPrototypeOf16 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf26(o5, p4) {
       o5.__proto__ = p4;
       return o5;
     };
@@ -11894,7 +11894,7 @@
     }
   }
   function _getPrototypeOf16(o4) {
-    _getPrototypeOf16 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf25(o5) {
+    _getPrototypeOf16 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf26(o5) {
       return o5.__proto__ || Object.getPrototypeOf(o5);
     };
     return _getPrototypeOf16(o4);
@@ -11980,7 +11980,7 @@
       _setPrototypeOf17(subClass, superClass);
   }
   function _setPrototypeOf17(o4, p3) {
-    _setPrototypeOf17 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf25(o5, p4) {
+    _setPrototypeOf17 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf26(o5, p4) {
       o5.__proto__ = p4;
       return o5;
     };
@@ -12029,7 +12029,7 @@
     }
   }
   function _getPrototypeOf17(o4) {
-    _getPrototypeOf17 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf25(o5) {
+    _getPrototypeOf17 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf26(o5) {
       return o5.__proto__ || Object.getPrototypeOf(o5);
     };
     return _getPrototypeOf17(o4);
@@ -12518,7 +12518,7 @@
       _setPrototypeOf18(subClass, superClass);
   }
   function _setPrototypeOf18(o4, p3) {
-    _setPrototypeOf18 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf25(o5, p4) {
+    _setPrototypeOf18 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf26(o5, p4) {
       o5.__proto__ = p4;
       return o5;
     };
@@ -12567,7 +12567,7 @@
     }
   }
   function _getPrototypeOf18(o4) {
-    _getPrototypeOf18 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf25(o5) {
+    _getPrototypeOf18 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf26(o5) {
       return o5.__proto__ || Object.getPrototypeOf(o5);
     };
     return _getPrototypeOf18(o4);
@@ -14141,7 +14141,7 @@
       _setPrototypeOf19(subClass, superClass);
   }
   function _setPrototypeOf19(o4, p3) {
-    _setPrototypeOf19 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf25(o5, p4) {
+    _setPrototypeOf19 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf26(o5, p4) {
       o5.__proto__ = p4;
       return o5;
     };
@@ -14190,7 +14190,7 @@
     }
   }
   function _getPrototypeOf19(o4) {
-    _getPrototypeOf19 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf25(o5) {
+    _getPrototypeOf19 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf26(o5) {
       return o5.__proto__ || Object.getPrototypeOf(o5);
     };
     return _getPrototypeOf19(o4);
@@ -15383,7 +15383,7 @@
       _setPrototypeOf20(subClass, superClass);
   }
   function _setPrototypeOf20(o4, p3) {
-    _setPrototypeOf20 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf25(o5, p4) {
+    _setPrototypeOf20 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf26(o5, p4) {
       o5.__proto__ = p4;
       return o5;
     };
@@ -15432,7 +15432,7 @@
     }
   }
   function _getPrototypeOf20(o4) {
-    _getPrototypeOf20 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf25(o5) {
+    _getPrototypeOf20 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf26(o5) {
       return o5.__proto__ || Object.getPrototypeOf(o5);
     };
     return _getPrototypeOf20(o4);
@@ -16947,7 +16947,7 @@
 
   // srcts/src/shiny/init.ts
   var import_es_regexp_exec15 = __toESM(require_es_regexp_exec());
-  var import_es_array_iterator49 = __toESM(require_es_array_iterator());
+  var import_es_array_iterator50 = __toESM(require_es_array_iterator());
   var import_jquery39 = __toESM(require_jquery());
 
   // srcts/src/inputPolicies/inputBatchSender.ts
@@ -17571,7 +17571,7 @@
   }();
 
   // srcts/src/shiny/bind.ts
-  var import_es_array_iterator46 = __toESM(require_es_array_iterator());
+  var import_es_array_iterator42 = __toESM(require_es_array_iterator());
 
   // node_modules/core-js/modules/es.set.js
   require_es_set_constructor();
@@ -17991,105 +17991,13 @@
     return OutputBindingAdapter2;
   }();
 
-  // node_modules/core-js/modules/es.object.freeze.js
-  var $69 = require_export();
-  var FREEZING = require_freezing();
-  var fails11 = require_fails();
-  var isObject5 = require_is_object();
-  var onFreeze = require_internal_metadata().onFreeze;
-  var $freeze = Object.freeze;
-  var FAILS_ON_PRIMITIVES3 = fails11(function() {
-    $freeze(1);
-  });
-  $69({ target: "Object", stat: true, forced: FAILS_ON_PRIMITIVES3, sham: !FREEZING }, {
-    freeze: function freeze(it) {
-      return $freeze && isObject5(it) ? $freeze(onFreeze(it)) : it;
-    }
-  });
-
-  // srcts/src/components/errorConsole.ts
-  var import_es_array_iterator45 = __toESM(require_es_array_iterator());
+  // srcts/src/shiny/error.ts
+  var import_es_array_iterator41 = __toESM(require_es_array_iterator());
 
   // node_modules/core-js/modules/es.map.js
   require_es_map_constructor();
 
-  // node_modules/@lit/reactive-element/reactive-element.js
-  var import_es_regexp_exec12 = __toESM(require_es_regexp_exec(), 1);
-
-  // node_modules/core-js/modules/es.object.is.js
-  var $70 = require_export();
-  var is = require_same_value();
-  $70({ target: "Object", stat: true }, {
-    is: is
-  });
-
-  // node_modules/core-js/modules/es.object.get-own-property-names.js
-  var $71 = require_export();
-  var fails12 = require_fails();
-  var getOwnPropertyNames2 = require_object_get_own_property_names_external().f;
-  var FAILS_ON_PRIMITIVES4 = fails12(function() {
-    return !Object.getOwnPropertyNames(1);
-  });
-  $71({ target: "Object", stat: true, forced: FAILS_ON_PRIMITIVES4 }, {
-    getOwnPropertyNames: getOwnPropertyNames2
-  });
-
-  // node_modules/core-js/modules/es.global-this.js
-  var $72 = require_export();
-  var global8 = require_global();
-  $72({ global: true, forced: global8.globalThis !== global8 }, {
-    globalThis: global8
-  });
-
-  // node_modules/@lit/reactive-element/reactive-element.js
-  var import_es_json_stringify3 = __toESM(require_es_json_stringify(), 1);
-  var import_es_array_iterator42 = __toESM(require_es_array_iterator(), 1);
-
-  // node_modules/core-js/modules/es.weak-map.js
-  require_es_weak_map_constructor();
-
-  // node_modules/core-js/modules/es.array.flat.js
-  var $73 = require_export();
-  var flattenIntoArray = require_flatten_into_array();
-  var toObject5 = require_to_object();
-  var lengthOfArrayLike4 = require_length_of_array_like();
-  var toIntegerOrInfinity3 = require_to_integer_or_infinity();
-  var arraySpeciesCreate3 = require_array_species_create();
-  $73({ target: "Array", proto: true }, {
-    flat: function flat() {
-      var depthArg = arguments.length ? arguments[0] : void 0;
-      var O = toObject5(this);
-      var sourceLen = lengthOfArrayLike4(O);
-      var A2 = arraySpeciesCreate3(O, 0);
-      A2.length = flattenIntoArray(A2, O, O, sourceLen, 0, depthArg === void 0 ? 1 : toIntegerOrInfinity3(depthArg));
-      return A2;
-    }
-  });
-
-  // node_modules/core-js/modules/es.array.unscopables.flat.js
-  var addToUnscopables2 = require_add_to_unscopables();
-  addToUnscopables2("flat");
-
-  // node_modules/@lit/reactive-element/css-tag.js
-  var import_es_regexp_exec11 = __toESM(require_es_regexp_exec(), 1);
-  var import_es_array_iterator41 = __toESM(require_es_array_iterator(), 1);
-
-  // node_modules/core-js/modules/es.array.reduce.js
-  var $74 = require_export();
-  var $reduce = require_array_reduce().left;
-  var arrayMethodIsStrict4 = require_array_method_is_strict();
-  var CHROME_VERSION = require_engine_v8_version();
-  var IS_NODE = require_engine_is_node();
-  var CHROME_BUG = !IS_NODE && CHROME_VERSION > 79 && CHROME_VERSION < 83;
-  var FORCED8 = CHROME_BUG || !arrayMethodIsStrict4("reduce");
-  $74({ target: "Array", proto: true, forced: FORCED8 }, {
-    reduce: function reduce(callbackfn) {
-      var length = arguments.length;
-      return $reduce(this, callbackfn, length, length > 1 ? arguments[1] : void 0);
-    }
-  });
-
-  // node_modules/@lit/reactive-element/css-tag.js
+  // srcts/src/shiny/error.ts
   function _typeof41(obj) {
     "@babel/helpers - typeof";
     return _typeof41 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
@@ -18097,70 +18005,6 @@
     } : function(obj2) {
       return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
     }, _typeof41(obj);
-  }
-  function _createForOfIteratorHelper2(o4, allowArrayLike) {
-    var it = typeof Symbol !== "undefined" && o4[Symbol.iterator] || o4["@@iterator"];
-    if (!it) {
-      if (Array.isArray(o4) || (it = _unsupportedIterableToArray2(o4)) || allowArrayLike && o4 && typeof o4.length === "number") {
-        if (it)
-          o4 = it;
-        var i5 = 0;
-        var F = function F2() {
-        };
-        return { s: F, n: function n4() {
-          if (i5 >= o4.length)
-            return { done: true };
-          return { done: false, value: o4[i5++] };
-        }, e: function e4(_e3) {
-          throw _e3;
-        }, f: F };
-      }
-      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-    }
-    var normalCompletion = true, didErr = false, err;
-    return { s: function s4() {
-      it = it.call(o4);
-    }, n: function n4() {
-      var step = it.next();
-      normalCompletion = step.done;
-      return step;
-    }, e: function e4(_e4) {
-      didErr = true;
-      err = _e4;
-    }, f: function f4() {
-      try {
-        if (!normalCompletion && it.return != null)
-          it.return();
-      } finally {
-        if (didErr)
-          throw err;
-      }
-    } };
-  }
-  function _unsupportedIterableToArray2(o4, minLen) {
-    if (!o4)
-      return;
-    if (typeof o4 === "string")
-      return _arrayLikeToArray2(o4, minLen);
-    var n4 = Object.prototype.toString.call(o4).slice(8, -1);
-    if (n4 === "Object" && o4.constructor)
-      n4 = o4.constructor.name;
-    if (n4 === "Map" || n4 === "Set")
-      return Array.from(o4);
-    if (n4 === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n4))
-      return _arrayLikeToArray2(o4, minLen);
-  }
-  function _arrayLikeToArray2(arr, len) {
-    if (len == null || len > arr.length)
-      len = arr.length;
-    for (var i5 = 0, arr2 = new Array(len); i5 < len; i5++)
-      arr2[i5] = arr[i5];
-    return arr2;
-  }
-  function _classCallCheck35(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
   }
   function _defineProperties35(target, props) {
     for (var i5 = 0; i5 < props.length; i5++) {
@@ -18180,6 +18024,124 @@
     Object.defineProperty(Constructor, "prototype", { writable: false });
     return Constructor;
   }
+  function _classCallCheck35(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _inherits21(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } });
+    Object.defineProperty(subClass, "prototype", { writable: false });
+    if (superClass)
+      _setPrototypeOf21(subClass, superClass);
+  }
+  function _createSuper21(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct21();
+    return function _createSuperInternal() {
+      var Super = _getPrototypeOf21(Derived), result;
+      if (hasNativeReflectConstruct) {
+        var NewTarget = _getPrototypeOf21(this).constructor;
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+      return _possibleConstructorReturn21(this, result);
+    };
+  }
+  function _possibleConstructorReturn21(self2, call8) {
+    if (call8 && (_typeof41(call8) === "object" || typeof call8 === "function")) {
+      return call8;
+    } else if (call8 !== void 0) {
+      throw new TypeError("Derived constructors may only return object or undefined");
+    }
+    return _assertThisInitialized21(self2);
+  }
+  function _assertThisInitialized21(self2) {
+    if (self2 === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+    return self2;
+  }
+  function _wrapNativeSuper(Class) {
+    var _cache = typeof Map === "function" ? /* @__PURE__ */ new Map() : void 0;
+    _wrapNativeSuper = function _wrapNativeSuper3(Class2) {
+      if (Class2 === null || !_isNativeFunction(Class2))
+        return Class2;
+      if (typeof Class2 !== "function") {
+        throw new TypeError("Super expression must either be null or a function");
+      }
+      if (typeof _cache !== "undefined") {
+        if (_cache.has(Class2))
+          return _cache.get(Class2);
+        _cache.set(Class2, Wrapper);
+      }
+      function Wrapper() {
+        return _construct(Class2, arguments, _getPrototypeOf21(this).constructor);
+      }
+      Wrapper.prototype = Object.create(Class2.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } });
+      return _setPrototypeOf21(Wrapper, Class2);
+    };
+    return _wrapNativeSuper(Class);
+  }
+  function _construct(Parent, args, Class) {
+    if (_isNativeReflectConstruct21()) {
+      _construct = Reflect.construct.bind();
+    } else {
+      _construct = function _construct3(Parent2, args2, Class2) {
+        var a3 = [null];
+        a3.push.apply(a3, args2);
+        var Constructor = Function.bind.apply(Parent2, a3);
+        var instance = new Constructor();
+        if (Class2)
+          _setPrototypeOf21(instance, Class2.prototype);
+        return instance;
+      };
+    }
+    return _construct.apply(null, arguments);
+  }
+  function _isNativeReflectConstruct21() {
+    if (typeof Reflect === "undefined" || !Reflect.construct)
+      return false;
+    if (Reflect.construct.sham)
+      return false;
+    if (typeof Proxy === "function")
+      return true;
+    try {
+      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
+      }));
+      return true;
+    } catch (e4) {
+      return false;
+    }
+  }
+  function _isNativeFunction(fn) {
+    return Function.toString.call(fn).indexOf("[native code]") !== -1;
+  }
+  function _setPrototypeOf21(o4, p3) {
+    _setPrototypeOf21 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf26(o5, p4) {
+      o5.__proto__ = p4;
+      return o5;
+    };
+    return _setPrototypeOf21(o4, p3);
+  }
+  function _getPrototypeOf21(o4) {
+    _getPrototypeOf21 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf26(o5) {
+      return o5.__proto__ || Object.getPrototypeOf(o5);
+    };
+    return _getPrototypeOf21(o4);
+  }
+  function _defineProperty17(obj, key, value) {
+    key = _toPropertyKey36(key);
+    if (key in obj) {
+      Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
+    } else {
+      obj[key] = value;
+    }
+    return obj;
+  }
   function _toPropertyKey36(arg) {
     var key = _toPrimitive36(arg, "string");
     return _typeof41(key) === "symbol" ? key : String(key);
@@ -18196,95 +18158,23 @@
     }
     return (hint === "string" ? String : Number)(input);
   }
-  var t = globalThis;
-  var e = t.ShadowRoot && (void 0 === t.ShadyCSS || t.ShadyCSS.nativeShadow) && "adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype;
-  var s = Symbol();
-  var o = /* @__PURE__ */ new WeakMap();
-  var n = /* @__PURE__ */ function() {
-    function n4(t3, e4, o4) {
-      _classCallCheck35(this, n4);
-      if (this._$cssResult$ = true, o4 !== s)
-        throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");
-      this.cssText = t3, this.t = e4;
+  var ShinyClientError = /* @__PURE__ */ function(_Error) {
+    _inherits21(ShinyClientError2, _Error);
+    var _super = _createSuper21(ShinyClientError2);
+    function ShinyClientError2(_ref) {
+      var _this;
+      var headline = _ref.headline, message = _ref.message;
+      _classCallCheck35(this, ShinyClientError2);
+      _this = _super.call(this, message);
+      _defineProperty17(_assertThisInitialized21(_this), "headline", void 0);
+      _this.name = "ShinyClientError";
+      _this.headline = headline;
+      return _this;
     }
-    _createClass35(n4, [{
-      key: "styleSheet",
-      get: function get3() {
-        var t3 = this.o;
-        var s4 = this.t;
-        if (e && void 0 === t3) {
-          var _e = void 0 !== s4 && 1 === s4.length;
-          _e && (t3 = o.get(s4)), void 0 === t3 && ((this.o = t3 = new CSSStyleSheet()).replaceSync(this.cssText), _e && o.set(s4, t3));
-        }
-        return t3;
-      }
-    }, {
-      key: "toString",
-      value: function toString12() {
-        return this.cssText;
-      }
-    }]);
-    return n4;
-  }();
-  var r = function r2(t3) {
-    return new n("string" == typeof t3 ? t3 : t3 + "", void 0, s);
-  };
-  var i = function i2(t3) {
-    for (var _len = arguments.length, e4 = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-      e4[_key - 1] = arguments[_key];
-    }
-    var o4 = 1 === t3.length ? t3[0] : e4.reduce(function(e5, s4, o5) {
-      return e5 + function(t4) {
-        if (true === t4._$cssResult$)
-          return t4.cssText;
-        if ("number" == typeof t4)
-          return t4;
-        throw Error("Value passed to 'css' function must be a 'css' function result: " + t4 + ". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.");
-      }(s4) + t3[o5 + 1];
-    }, t3[0]);
-    return new n(o4, t3, s);
-  };
-  var S = function S2(s4, o4) {
-    if (e)
-      s4.adoptedStyleSheets = o4.map(function(t3) {
-        return t3 instanceof CSSStyleSheet ? t3 : t3.styleSheet;
-      });
-    else {
-      var _iterator = _createForOfIteratorHelper2(o4), _step;
-      try {
-        for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-          var _e2 = _step.value;
-          var _o = document.createElement("style"), _n = t.litNonce;
-          void 0 !== _n && _o.setAttribute("nonce", _n), _o.textContent = _e2.cssText, s4.appendChild(_o);
-        }
-      } catch (err) {
-        _iterator.e(err);
-      } finally {
-        _iterator.f();
-      }
-    }
-  };
-  var c = e ? function(t3) {
-    return t3;
-  } : function(t3) {
-    return t3 instanceof CSSStyleSheet ? function(t4) {
-      var e4 = "";
-      var _iterator2 = _createForOfIteratorHelper2(t4.cssRules), _step2;
-      try {
-        for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-          var _s = _step2.value;
-          e4 += _s.cssText;
-        }
-      } catch (err) {
-        _iterator2.e(err);
-      } finally {
-        _iterator2.f();
-      }
-      return r(e4);
-    }(t3) : t3;
-  };
+    return _createClass35(ShinyClientError2);
+  }(/* @__PURE__ */ _wrapNativeSuper(Error));
 
-  // node_modules/@lit/reactive-element/reactive-element.js
+  // srcts/src/shiny/bind.ts
   function _typeof42(obj) {
     "@babel/helpers - typeof";
     return _typeof42 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
@@ -18292,59 +18182,6 @@
     } : function(obj2) {
       return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
     }, _typeof42(obj);
-  }
-  var _Symbol$metadata;
-  var _a$litPropertyMetadat;
-  var _a$reactiveElementVer;
-  function _toConsumableArray(arr) {
-    return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray3(arr) || _nonIterableSpread();
-  }
-  function _nonIterableSpread() {
-    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _iterableToArray(iter) {
-    if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null)
-      return Array.from(iter);
-  }
-  function _arrayWithoutHoles(arr) {
-    if (Array.isArray(arr))
-      return _arrayLikeToArray3(arr);
-  }
-  function _slicedToArray2(arr, i5) {
-    return _arrayWithHoles2(arr) || _iterableToArrayLimit2(arr, i5) || _unsupportedIterableToArray3(arr, i5) || _nonIterableRest2();
-  }
-  function _nonIterableRest2() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _iterableToArrayLimit2(arr, i5) {
-    var _i = null == arr ? null : "undefined" != typeof Symbol && arr[Symbol.iterator] || arr["@@iterator"];
-    if (null != _i) {
-      var _s, _e, _x, _r, _arr = [], _n = true, _d = false;
-      try {
-        if (_x = (_i = _i.call(arr)).next, 0 === i5) {
-          if (Object(_i) !== _i)
-            return;
-          _n = false;
-        } else
-          for (; !(_n = (_s = _x.call(_i)).done) && (_arr.push(_s.value), _arr.length !== i5); _n = true)
-            ;
-      } catch (err) {
-        _d = true, _e = err;
-      } finally {
-        try {
-          if (!_n && null != _i.return && (_r = _i.return(), Object(_r) !== _r))
-            return;
-        } finally {
-          if (_d)
-            throw _e;
-        }
-      }
-      return _arr;
-    }
-  }
-  function _arrayWithHoles2(arr) {
-    if (Array.isArray(arr))
-      return arr;
   }
   function _regeneratorRuntime9() {
     "use strict";
@@ -18643,6 +18480,1430 @@
       });
     };
   }
+  var boundInputs = {};
+  function valueChangeCallback(inputs, binding, el, allowDeferred) {
+    var id = binding.getId(el);
+    if (id) {
+      var value = binding.getValue(el);
+      var type = binding.getType(el);
+      if (type)
+        id = id + ":" + type;
+      var opts = {
+        priority: allowDeferred ? "deferred" : "immediate",
+        binding: binding,
+        el: el
+      };
+      inputs.setInput(id, value, opts);
+    }
+  }
+  var bindingIds = {
+    outputs: /* @__PURE__ */ new Set(),
+    inputs: /* @__PURE__ */ new Set()
+  };
+  function bindingIdExists(id) {
+    return bindingIds.outputs.has(id) || bindingIds.inputs.has(id);
+  }
+  function throwDuplicateIdError(duplicatedIds) {
+    throw new ShinyClientError({
+      headline: "Duplicate input/output IDs found",
+      message: "The following ".concat(duplicatedIds.size === 1 ? "ID was" : "IDs were", " repeated: ").concat(Array.from(duplicatedIds).map(function(id) {
+        return '"'.concat(id, '"');
+      }).join(", "), ".")
+    });
+  }
+  function bindInputs(shinyCtx) {
+    var scope = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : document.documentElement;
+    var inputs = shinyCtx.inputs, inputsRate = shinyCtx.inputsRate, inputBindings = shinyCtx.inputBindings;
+    var bindings = inputBindings.getBindings();
+    var inputDuplicateIds = /* @__PURE__ */ new Set();
+    var inputItems = {};
+    var _loop = function _loop2() {
+      var binding = bindings[i5].binding;
+      var matches = binding.find(scope) || [];
+      var _loop22 = function _loop23() {
+        var el = matches[j3];
+        if (el.hasAttribute("data-shiny-no-bind-input"))
+          return "continue";
+        var id = binding.getId(el);
+        var duplicateId = bindingIdExists(id);
+        if (duplicateId) {
+          inputDuplicateIds.add(id);
+        }
+        if (!id || boundInputs[id] || duplicateId)
+          return "continue";
+        bindingIds.inputs.add(id);
+        var type = binding.getType(el);
+        var effectiveId = type ? id + ":" + type : id;
+        inputItems[effectiveId] = {
+          value: binding.getValue(el),
+          opts: {
+            immediate: true,
+            binding: binding,
+            el: el
+          }
+        };
+        var thisCallback = function() {
+          var thisBinding = binding;
+          var thisEl = el;
+          return function(allowDeferred) {
+            valueChangeCallback(inputs, thisBinding, thisEl, allowDeferred);
+          };
+        }();
+        binding.subscribe(el, thisCallback);
+        (0, import_jquery37.default)(el).data("shiny-input-binding", binding);
+        (0, import_jquery37.default)(el).addClass("shiny-bound-input");
+        var ratePolicy = binding.getRatePolicy(el);
+        if (ratePolicy !== null) {
+          inputsRate.setRatePolicy(effectiveId, ratePolicy.policy, ratePolicy.delay);
+        }
+        boundInputs[id] = {
+          binding: binding,
+          node: el
+        };
+        (0, import_jquery37.default)(el).trigger({
+          type: "shiny:bound",
+          binding: binding,
+          bindingType: "input"
+        });
+      };
+      for (var j3 = 0; j3 < matches.length; j3++) {
+        var _ret = _loop22();
+        if (_ret === "continue")
+          continue;
+      }
+    };
+    for (var i5 = 0; i5 < bindings.length; i5++) {
+      _loop();
+    }
+    if (inputDuplicateIds.size > 0) {
+      throwDuplicateIdError(inputDuplicateIds);
+    }
+    return inputItems;
+  }
+  function bindOutputs(_x) {
+    return _bindOutputs.apply(this, arguments);
+  }
+  function _bindOutputs() {
+    _bindOutputs = _asyncToGenerator9(/* @__PURE__ */ _regeneratorRuntime9().mark(function _callee(_ref) {
+      var sendOutputHiddenState, maybeAddThemeObserver, outputBindings, scope, outputDuplicateIds, $scope, bindings, i5, binding, matches, j3, _el2, id, $el, bindingAdapter, _args = arguments;
+      return _regeneratorRuntime9().wrap(function _callee$(_context) {
+        while (1)
+          switch (_context.prev = _context.next) {
+            case 0:
+              sendOutputHiddenState = _ref.sendOutputHiddenState, maybeAddThemeObserver = _ref.maybeAddThemeObserver, outputBindings = _ref.outputBindings;
+              scope = _args.length > 1 && _args[1] !== void 0 ? _args[1] : document.documentElement;
+              outputDuplicateIds = /* @__PURE__ */ new Set();
+              $scope = (0, import_jquery37.default)(scope);
+              bindings = outputBindings.getBindings();
+              i5 = 0;
+            case 6:
+              if (!(i5 < bindings.length)) {
+                _context.next = 36;
+                break;
+              }
+              binding = bindings[i5].binding;
+              matches = binding.find($scope) || [];
+              j3 = 0;
+            case 10:
+              if (!(j3 < matches.length)) {
+                _context.next = 33;
+                break;
+              }
+              _el2 = matches[j3];
+              id = binding.getId(_el2);
+              if (id) {
+                _context.next = 15;
+                break;
+              }
+              return _context.abrupt("continue", 30);
+            case 15:
+              if (bindingIdExists(id)) {
+                outputDuplicateIds.add(id);
+              }
+              bindingIds.outputs.add(id);
+              if (import_jquery37.default.contains(document.documentElement, _el2)) {
+                _context.next = 19;
+                break;
+              }
+              return _context.abrupt("continue", 30);
+            case 19:
+              $el = (0, import_jquery37.default)(_el2);
+              if (!$el.hasClass("shiny-bound-output")) {
+                _context.next = 22;
+                break;
+              }
+              return _context.abrupt("continue", 30);
+            case 22:
+              maybeAddThemeObserver(_el2);
+              bindingAdapter = new OutputBindingAdapter(_el2, binding);
+              _context.next = 26;
+              return shinyAppBindOutput(id, bindingAdapter);
+            case 26:
+              $el.data("shiny-output-binding", bindingAdapter);
+              $el.addClass("shiny-bound-output");
+              if (!$el.attr("aria-live"))
+                $el.attr("aria-live", "polite");
+              $el.trigger({
+                type: "shiny:bound",
+                binding: binding,
+                bindingType: "output"
+              });
+            case 30:
+              j3++;
+              _context.next = 10;
+              break;
+            case 33:
+              i5++;
+              _context.next = 6;
+              break;
+            case 36:
+              if (outputDuplicateIds.size > 0) {
+                throwDuplicateIdError(outputDuplicateIds);
+              }
+              setTimeout(sendImageSizeFns.regular, 0);
+              setTimeout(sendOutputHiddenState, 0);
+            case 39:
+            case "end":
+              return _context.stop();
+          }
+      }, _callee);
+    }));
+    return _bindOutputs.apply(this, arguments);
+  }
+  function unbindInputs() {
+    var scope = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : document.documentElement;
+    var includeSelf = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
+    var inputs = (0, import_jquery37.default)(scope).find(".shiny-bound-input").toArray();
+    if (includeSelf && (0, import_jquery37.default)(scope).hasClass("shiny-bound-input")) {
+      inputs.push(scope);
+    }
+    for (var i5 = 0; i5 < inputs.length; i5++) {
+      var _el = inputs[i5];
+      var binding = (0, import_jquery37.default)(_el).data("shiny-input-binding");
+      if (!binding)
+        continue;
+      var id = binding.getId(_el);
+      (0, import_jquery37.default)(_el).removeClass("shiny-bound-input");
+      delete boundInputs[id];
+      bindingIds.inputs.delete(id);
+      binding.unsubscribe(_el);
+      (0, import_jquery37.default)(_el).trigger({
+        type: "shiny:unbound",
+        binding: binding,
+        bindingType: "input"
+      });
+    }
+  }
+  function unbindOutputs(_ref2) {
+    var sendOutputHiddenState = _ref2.sendOutputHiddenState;
+    var scope = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : document.documentElement;
+    var includeSelf = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false;
+    var outputs = (0, import_jquery37.default)(scope).find(".shiny-bound-output").toArray();
+    if (includeSelf && (0, import_jquery37.default)(scope).hasClass("shiny-bound-output")) {
+      outputs.push(scope);
+    }
+    for (var i5 = 0; i5 < outputs.length; i5++) {
+      var $el = (0, import_jquery37.default)(outputs[i5]);
+      var bindingAdapter = $el.data("shiny-output-binding");
+      if (!bindingAdapter)
+        continue;
+      var id = bindingAdapter.binding.getId(outputs[i5]);
+      shinyAppUnbindOutput(id, bindingAdapter);
+      bindingIds.outputs.delete(id);
+      $el.removeClass("shiny-bound-output");
+      $el.removeData("shiny-output-binding");
+      $el.trigger({
+        type: "shiny:unbound",
+        binding: bindingAdapter.binding,
+        bindingType: "output"
+      });
+    }
+    setTimeout(sendImageSizeFns.regular, 0);
+    setTimeout(sendOutputHiddenState, 0);
+  }
+  function _bindAll(_x2, _x3) {
+    return _bindAll2.apply(this, arguments);
+  }
+  function _bindAll2() {
+    _bindAll2 = _asyncToGenerator9(/* @__PURE__ */ _regeneratorRuntime9().mark(function _callee2(shinyCtx, scope) {
+      return _regeneratorRuntime9().wrap(function _callee2$(_context2) {
+        while (1)
+          switch (_context2.prev = _context2.next) {
+            case 0:
+              _context2.next = 2;
+              return bindOutputs(shinyCtx, scope);
+            case 2:
+              return _context2.abrupt("return", bindInputs(shinyCtx, scope));
+            case 3:
+            case "end":
+              return _context2.stop();
+          }
+      }, _callee2);
+    }));
+    return _bindAll2.apply(this, arguments);
+  }
+  function unbindAll(shinyCtx, scope) {
+    var includeSelf = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false;
+    unbindInputs(scope, includeSelf);
+    unbindOutputs(shinyCtx, scope, includeSelf);
+  }
+  function bindAll(_x4, _x5) {
+    return _bindAll3.apply(this, arguments);
+  }
+  function _bindAll3() {
+    _bindAll3 = _asyncToGenerator9(/* @__PURE__ */ _regeneratorRuntime9().mark(function _callee3(shinyCtx, scope) {
+      var currentInputItems, inputs;
+      return _regeneratorRuntime9().wrap(function _callee3$(_context3) {
+        while (1)
+          switch (_context3.prev = _context3.next) {
+            case 0:
+              _context3.next = 2;
+              return _bindAll(shinyCtx, scope);
+            case 2:
+              currentInputItems = _context3.sent;
+              inputs = shinyCtx.inputs;
+              import_jquery37.default.each(currentInputItems, function(name, item) {
+                inputs.setInput(name, item.value, item.opts);
+              });
+              shinyCtx.initDeferredIframes();
+            case 6:
+            case "end":
+              return _context3.stop();
+          }
+      }, _callee3);
+    }));
+    return _bindAll3.apply(this, arguments);
+  }
+
+  // srcts/src/shiny/shinyapp.ts
+  var import_es_regexp_exec14 = __toESM(require_es_regexp_exec());
+  var import_es_json_stringify4 = __toESM(require_es_json_stringify());
+
+  // node_modules/core-js/modules/es.array-buffer.constructor.js
+  var $70 = require_export();
+  var global8 = require_global();
+  var arrayBufferModule = require_array_buffer();
+  var setSpecies = require_set_species();
+  var ARRAY_BUFFER = "ArrayBuffer";
+  var ArrayBuffer2 = arrayBufferModule[ARRAY_BUFFER];
+  var NativeArrayBuffer = global8[ARRAY_BUFFER];
+  $70({ global: true, constructor: true, forced: NativeArrayBuffer !== ArrayBuffer2 }, {
+    ArrayBuffer: ArrayBuffer2
+  });
+  setSpecies(ARRAY_BUFFER);
+
+  // node_modules/core-js/modules/es.array-buffer.slice.js
+  var $71 = require_export();
+  var uncurryThis10 = require_function_uncurry_this_clause();
+  var fails11 = require_fails();
+  var ArrayBufferModule = require_array_buffer();
+  var anObject9 = require_an_object();
+  var toAbsoluteIndex3 = require_to_absolute_index();
+  var toLength4 = require_to_length();
+  var speciesConstructor2 = require_species_constructor();
+  var ArrayBuffer3 = ArrayBufferModule.ArrayBuffer;
+  var DataView2 = ArrayBufferModule.DataView;
+  var DataViewPrototype = DataView2.prototype;
+  var nativeArrayBufferSlice = uncurryThis10(ArrayBuffer3.prototype.slice);
+  var getUint8 = uncurryThis10(DataViewPrototype.getUint8);
+  var setUint8 = uncurryThis10(DataViewPrototype.setUint8);
+  var INCORRECT_SLICE = fails11(function() {
+    return !new ArrayBuffer3(2).slice(1, void 0).byteLength;
+  });
+  $71({ target: "ArrayBuffer", proto: true, unsafe: true, forced: INCORRECT_SLICE }, {
+    slice: function slice2(start, end) {
+      if (nativeArrayBufferSlice && end === void 0) {
+        return nativeArrayBufferSlice(anObject9(this), start);
+      }
+      var length = anObject9(this).byteLength;
+      var first = toAbsoluteIndex3(start, length);
+      var fin = toAbsoluteIndex3(end === void 0 ? length : end, length);
+      var result = new (speciesConstructor2(this, ArrayBuffer3))(toLength4(fin - first));
+      var viewSource = new DataView2(this);
+      var viewTarget = new DataView2(result);
+      var index = 0;
+      while (first < fin) {
+        setUint8(viewTarget, index++, getUint8(viewSource, first++));
+      }
+      return result;
+    }
+  });
+
+  // node_modules/core-js/modules/es.data-view.js
+  require_es_data_view_constructor();
+
+  // node_modules/core-js/modules/es.array.reduce.js
+  var $72 = require_export();
+  var $reduce = require_array_reduce().left;
+  var arrayMethodIsStrict4 = require_array_method_is_strict();
+  var CHROME_VERSION = require_engine_v8_version();
+  var IS_NODE = require_engine_is_node();
+  var CHROME_BUG = !IS_NODE && CHROME_VERSION > 79 && CHROME_VERSION < 83;
+  var FORCED8 = CHROME_BUG || !arrayMethodIsStrict4("reduce");
+  $72({ target: "Array", proto: true, forced: FORCED8 }, {
+    reduce: function reduce(callbackfn) {
+      var length = arguments.length;
+      return $reduce(this, callbackfn, length, length > 1 ? arguments[1] : void 0);
+    }
+  });
+
+  // srcts/src/shiny/shinyapp.ts
+  var import_es_array_iterator49 = __toESM(require_es_array_iterator());
+  var import_jquery38 = __toESM(require_jquery());
+
+  // srcts/src/utils/asyncQueue.ts
+  var import_es_array_iterator43 = __toESM(require_es_array_iterator());
+  function _typeof43(obj) {
+    "@babel/helpers - typeof";
+    return _typeof43 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
+      return typeof obj2;
+    } : function(obj2) {
+      return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+    }, _typeof43(obj);
+  }
+  function _regeneratorRuntime10() {
+    "use strict";
+    _regeneratorRuntime10 = function _regeneratorRuntime16() {
+      return exports;
+    };
+    var exports = {}, Op = Object.prototype, hasOwn5 = Op.hasOwnProperty, defineProperty3 = Object.defineProperty || function(obj, key, desc) {
+      obj[key] = desc.value;
+    }, $Symbol = "function" == typeof Symbol ? Symbol : {}, iteratorSymbol = $Symbol.iterator || "@@iterator", asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator", toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
+    function define(obj, key, value) {
+      return Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }), obj[key];
+    }
+    try {
+      define({}, "");
+    } catch (err) {
+      define = function define2(obj, key, value) {
+        return obj[key] = value;
+      };
+    }
+    function wrap(innerFn, outerFn, self2, tryLocsList) {
+      var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator, generator = Object.create(protoGenerator.prototype), context = new Context(tryLocsList || []);
+      return defineProperty3(generator, "_invoke", { value: makeInvokeMethod(innerFn, self2, context) }), generator;
+    }
+    function tryCatch(fn, obj, arg) {
+      try {
+        return { type: "normal", arg: fn.call(obj, arg) };
+      } catch (err) {
+        return { type: "throw", arg: err };
+      }
+    }
+    exports.wrap = wrap;
+    var ContinueSentinel = {};
+    function Generator() {
+    }
+    function GeneratorFunction() {
+    }
+    function GeneratorFunctionPrototype() {
+    }
+    var IteratorPrototype = {};
+    define(IteratorPrototype, iteratorSymbol, function() {
+      return this;
+    });
+    var getProto = Object.getPrototypeOf, NativeIteratorPrototype = getProto && getProto(getProto(values2([])));
+    NativeIteratorPrototype && NativeIteratorPrototype !== Op && hasOwn5.call(NativeIteratorPrototype, iteratorSymbol) && (IteratorPrototype = NativeIteratorPrototype);
+    var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(IteratorPrototype);
+    function defineIteratorMethods(prototype) {
+      ["next", "throw", "return"].forEach(function(method) {
+        define(prototype, method, function(arg) {
+          return this._invoke(method, arg);
+        });
+      });
+    }
+    function AsyncIterator(generator, PromiseImpl) {
+      function invoke(method, arg, resolve, reject) {
+        var record = tryCatch(generator[method], generator, arg);
+        if ("throw" !== record.type) {
+          var result = record.arg, value = result.value;
+          return value && "object" == _typeof43(value) && hasOwn5.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function(value2) {
+            invoke("next", value2, resolve, reject);
+          }, function(err) {
+            invoke("throw", err, resolve, reject);
+          }) : PromiseImpl.resolve(value).then(function(unwrapped) {
+            result.value = unwrapped, resolve(result);
+          }, function(error) {
+            return invoke("throw", error, resolve, reject);
+          });
+        }
+        reject(record.arg);
+      }
+      var previousPromise;
+      defineProperty3(this, "_invoke", { value: function value(method, arg) {
+        function callInvokeWithMethodAndArg() {
+          return new PromiseImpl(function(resolve, reject) {
+            invoke(method, arg, resolve, reject);
+          });
+        }
+        return previousPromise = previousPromise ? previousPromise.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg();
+      } });
+    }
+    function makeInvokeMethod(innerFn, self2, context) {
+      var state = "suspendedStart";
+      return function(method, arg) {
+        if ("executing" === state)
+          throw new Error("Generator is already running");
+        if ("completed" === state) {
+          if ("throw" === method)
+            throw arg;
+          return doneResult();
+        }
+        for (context.method = method, context.arg = arg; ; ) {
+          var delegate = context.delegate;
+          if (delegate) {
+            var delegateResult = maybeInvokeDelegate(delegate, context);
+            if (delegateResult) {
+              if (delegateResult === ContinueSentinel)
+                continue;
+              return delegateResult;
+            }
+          }
+          if ("next" === context.method)
+            context.sent = context._sent = context.arg;
+          else if ("throw" === context.method) {
+            if ("suspendedStart" === state)
+              throw state = "completed", context.arg;
+            context.dispatchException(context.arg);
+          } else
+            "return" === context.method && context.abrupt("return", context.arg);
+          state = "executing";
+          var record = tryCatch(innerFn, self2, context);
+          if ("normal" === record.type) {
+            if (state = context.done ? "completed" : "suspendedYield", record.arg === ContinueSentinel)
+              continue;
+            return { value: record.arg, done: context.done };
+          }
+          "throw" === record.type && (state = "completed", context.method = "throw", context.arg = record.arg);
+        }
+      };
+    }
+    function maybeInvokeDelegate(delegate, context) {
+      var methodName = context.method, method = delegate.iterator[methodName];
+      if (void 0 === method)
+        return context.delegate = null, "throw" === methodName && delegate.iterator.return && (context.method = "return", context.arg = void 0, maybeInvokeDelegate(delegate, context), "throw" === context.method) || "return" !== methodName && (context.method = "throw", context.arg = new TypeError("The iterator does not provide a '" + methodName + "' method")), ContinueSentinel;
+      var record = tryCatch(method, delegate.iterator, context.arg);
+      if ("throw" === record.type)
+        return context.method = "throw", context.arg = record.arg, context.delegate = null, ContinueSentinel;
+      var info = record.arg;
+      return info ? info.done ? (context[delegate.resultName] = info.value, context.next = delegate.nextLoc, "return" !== context.method && (context.method = "next", context.arg = void 0), context.delegate = null, ContinueSentinel) : info : (context.method = "throw", context.arg = new TypeError("iterator result is not an object"), context.delegate = null, ContinueSentinel);
+    }
+    function pushTryEntry(locs) {
+      var entry = { tryLoc: locs[0] };
+      1 in locs && (entry.catchLoc = locs[1]), 2 in locs && (entry.finallyLoc = locs[2], entry.afterLoc = locs[3]), this.tryEntries.push(entry);
+    }
+    function resetTryEntry(entry) {
+      var record = entry.completion || {};
+      record.type = "normal", delete record.arg, entry.completion = record;
+    }
+    function Context(tryLocsList) {
+      this.tryEntries = [{ tryLoc: "root" }], tryLocsList.forEach(pushTryEntry, this), this.reset(true);
+    }
+    function values2(iterable) {
+      if (iterable) {
+        var iteratorMethod = iterable[iteratorSymbol];
+        if (iteratorMethod)
+          return iteratorMethod.call(iterable);
+        if ("function" == typeof iterable.next)
+          return iterable;
+        if (!isNaN(iterable.length)) {
+          var i5 = -1, next2 = function next3() {
+            for (; ++i5 < iterable.length; )
+              if (hasOwn5.call(iterable, i5))
+                return next3.value = iterable[i5], next3.done = false, next3;
+            return next3.value = void 0, next3.done = true, next3;
+          };
+          return next2.next = next2;
+        }
+      }
+      return { next: doneResult };
+    }
+    function doneResult() {
+      return { value: void 0, done: true };
+    }
+    return GeneratorFunction.prototype = GeneratorFunctionPrototype, defineProperty3(Gp, "constructor", { value: GeneratorFunctionPrototype, configurable: true }), defineProperty3(GeneratorFunctionPrototype, "constructor", { value: GeneratorFunction, configurable: true }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, toStringTagSymbol, "GeneratorFunction"), exports.isGeneratorFunction = function(genFun) {
+      var ctor = "function" == typeof genFun && genFun.constructor;
+      return !!ctor && (ctor === GeneratorFunction || "GeneratorFunction" === (ctor.displayName || ctor.name));
+    }, exports.mark = function(genFun) {
+      return Object.setPrototypeOf ? Object.setPrototypeOf(genFun, GeneratorFunctionPrototype) : (genFun.__proto__ = GeneratorFunctionPrototype, define(genFun, toStringTagSymbol, "GeneratorFunction")), genFun.prototype = Object.create(Gp), genFun;
+    }, exports.awrap = function(arg) {
+      return { __await: arg };
+    }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, asyncIteratorSymbol, function() {
+      return this;
+    }), exports.AsyncIterator = AsyncIterator, exports.async = function(innerFn, outerFn, self2, tryLocsList, PromiseImpl) {
+      void 0 === PromiseImpl && (PromiseImpl = Promise);
+      var iter = new AsyncIterator(wrap(innerFn, outerFn, self2, tryLocsList), PromiseImpl);
+      return exports.isGeneratorFunction(outerFn) ? iter : iter.next().then(function(result) {
+        return result.done ? result.value : iter.next();
+      });
+    }, defineIteratorMethods(Gp), define(Gp, toStringTagSymbol, "Generator"), define(Gp, iteratorSymbol, function() {
+      return this;
+    }), define(Gp, "toString", function() {
+      return "[object Generator]";
+    }), exports.keys = function(val) {
+      var object = Object(val), keys2 = [];
+      for (var key in object)
+        keys2.push(key);
+      return keys2.reverse(), function next2() {
+        for (; keys2.length; ) {
+          var key2 = keys2.pop();
+          if (key2 in object)
+            return next2.value = key2, next2.done = false, next2;
+        }
+        return next2.done = true, next2;
+      };
+    }, exports.values = values2, Context.prototype = { constructor: Context, reset: function reset(skipTempReset) {
+      if (this.prev = 0, this.next = 0, this.sent = this._sent = void 0, this.done = false, this.delegate = null, this.method = "next", this.arg = void 0, this.tryEntries.forEach(resetTryEntry), !skipTempReset)
+        for (var name in this)
+          "t" === name.charAt(0) && hasOwn5.call(this, name) && !isNaN(+name.slice(1)) && (this[name] = void 0);
+    }, stop: function stop() {
+      this.done = true;
+      var rootRecord = this.tryEntries[0].completion;
+      if ("throw" === rootRecord.type)
+        throw rootRecord.arg;
+      return this.rval;
+    }, dispatchException: function dispatchException(exception) {
+      if (this.done)
+        throw exception;
+      var context = this;
+      function handle(loc, caught) {
+        return record.type = "throw", record.arg = exception, context.next = loc, caught && (context.method = "next", context.arg = void 0), !!caught;
+      }
+      for (var i5 = this.tryEntries.length - 1; i5 >= 0; --i5) {
+        var entry = this.tryEntries[i5], record = entry.completion;
+        if ("root" === entry.tryLoc)
+          return handle("end");
+        if (entry.tryLoc <= this.prev) {
+          var hasCatch = hasOwn5.call(entry, "catchLoc"), hasFinally = hasOwn5.call(entry, "finallyLoc");
+          if (hasCatch && hasFinally) {
+            if (this.prev < entry.catchLoc)
+              return handle(entry.catchLoc, true);
+            if (this.prev < entry.finallyLoc)
+              return handle(entry.finallyLoc);
+          } else if (hasCatch) {
+            if (this.prev < entry.catchLoc)
+              return handle(entry.catchLoc, true);
+          } else {
+            if (!hasFinally)
+              throw new Error("try statement without catch or finally");
+            if (this.prev < entry.finallyLoc)
+              return handle(entry.finallyLoc);
+          }
+        }
+      }
+    }, abrupt: function abrupt(type, arg) {
+      for (var i5 = this.tryEntries.length - 1; i5 >= 0; --i5) {
+        var entry = this.tryEntries[i5];
+        if (entry.tryLoc <= this.prev && hasOwn5.call(entry, "finallyLoc") && this.prev < entry.finallyLoc) {
+          var finallyEntry = entry;
+          break;
+        }
+      }
+      finallyEntry && ("break" === type || "continue" === type) && finallyEntry.tryLoc <= arg && arg <= finallyEntry.finallyLoc && (finallyEntry = null);
+      var record = finallyEntry ? finallyEntry.completion : {};
+      return record.type = type, record.arg = arg, finallyEntry ? (this.method = "next", this.next = finallyEntry.finallyLoc, ContinueSentinel) : this.complete(record);
+    }, complete: function complete(record, afterLoc) {
+      if ("throw" === record.type)
+        throw record.arg;
+      return "break" === record.type || "continue" === record.type ? this.next = record.arg : "return" === record.type ? (this.rval = this.arg = record.arg, this.method = "return", this.next = "end") : "normal" === record.type && afterLoc && (this.next = afterLoc), ContinueSentinel;
+    }, finish: function finish(finallyLoc) {
+      for (var i5 = this.tryEntries.length - 1; i5 >= 0; --i5) {
+        var entry = this.tryEntries[i5];
+        if (entry.finallyLoc === finallyLoc)
+          return this.complete(entry.completion, entry.afterLoc), resetTryEntry(entry), ContinueSentinel;
+      }
+    }, catch: function _catch(tryLoc) {
+      for (var i5 = this.tryEntries.length - 1; i5 >= 0; --i5) {
+        var entry = this.tryEntries[i5];
+        if (entry.tryLoc === tryLoc) {
+          var record = entry.completion;
+          if ("throw" === record.type) {
+            var thrown = record.arg;
+            resetTryEntry(entry);
+          }
+          return thrown;
+        }
+      }
+      throw new Error("illegal catch attempt");
+    }, delegateYield: function delegateYield(iterable, resultName, nextLoc) {
+      return this.delegate = { iterator: values2(iterable), resultName: resultName, nextLoc: nextLoc }, "next" === this.method && (this.arg = void 0), ContinueSentinel;
+    } }, exports;
+  }
+  function asyncGeneratorStep10(gen, resolve, reject, _next, _throw, key, arg) {
+    try {
+      var info = gen[key](arg);
+      var value = info.value;
+    } catch (error) {
+      reject(error);
+      return;
+    }
+    if (info.done) {
+      resolve(value);
+    } else {
+      Promise.resolve(value).then(_next, _throw);
+    }
+  }
+  function _asyncToGenerator10(fn) {
+    return function() {
+      var self2 = this, args = arguments;
+      return new Promise(function(resolve, reject) {
+        var gen = fn.apply(self2, args);
+        function _next(value) {
+          asyncGeneratorStep10(gen, resolve, reject, _next, _throw, "next", value);
+        }
+        function _throw(err) {
+          asyncGeneratorStep10(gen, resolve, reject, _next, _throw, "throw", err);
+        }
+        _next(void 0);
+      });
+    };
+  }
+  function _classCallCheck36(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties36(target, props) {
+    for (var i5 = 0; i5 < props.length; i5++) {
+      var descriptor = props[i5];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, _toPropertyKey37(descriptor.key), descriptor);
+    }
+  }
+  function _createClass36(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties36(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties36(Constructor, staticProps);
+    Object.defineProperty(Constructor, "prototype", { writable: false });
+    return Constructor;
+  }
+  function _defineProperty18(obj, key, value) {
+    key = _toPropertyKey37(key);
+    if (key in obj) {
+      Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
+    } else {
+      obj[key] = value;
+    }
+    return obj;
+  }
+  function _toPropertyKey37(arg) {
+    var key = _toPrimitive37(arg, "string");
+    return _typeof43(key) === "symbol" ? key : String(key);
+  }
+  function _toPrimitive37(input, hint) {
+    if (_typeof43(input) !== "object" || input === null)
+      return input;
+    var prim = input[Symbol.toPrimitive];
+    if (prim !== void 0) {
+      var res = prim.call(input, hint || "default");
+      if (_typeof43(res) !== "object")
+        return res;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return (hint === "string" ? String : Number)(input);
+  }
+  var AsyncQueue = /* @__PURE__ */ function() {
+    function AsyncQueue2() {
+      _classCallCheck36(this, AsyncQueue2);
+      _defineProperty18(this, "$promises", []);
+      _defineProperty18(this, "$resolvers", []);
+    }
+    _createClass36(AsyncQueue2, [{
+      key: "_add",
+      value: function _add() {
+        var _this = this;
+        var p3 = new Promise(function(resolve) {
+          _this.$resolvers.push(resolve);
+        });
+        this.$promises.push(p3);
+      }
+    }, {
+      key: "enqueue",
+      value: function enqueue(x2) {
+        if (!this.$resolvers.length)
+          this._add();
+        var resolve = this.$resolvers.shift();
+        resolve(x2);
+      }
+    }, {
+      key: "dequeue",
+      value: function() {
+        var _dequeue = _asyncToGenerator10(/* @__PURE__ */ _regeneratorRuntime10().mark(function _callee() {
+          var promise;
+          return _regeneratorRuntime10().wrap(function _callee$(_context) {
+            while (1)
+              switch (_context.prev = _context.next) {
+                case 0:
+                  if (!this.$promises.length)
+                    this._add();
+                  promise = this.$promises.shift();
+                  return _context.abrupt("return", promise);
+                case 3:
+                case "end":
+                  return _context.stop();
+              }
+          }, _callee, this);
+        }));
+        function dequeue() {
+          return _dequeue.apply(this, arguments);
+        }
+        return dequeue;
+      }()
+    }, {
+      key: "isEmpty",
+      value: function isEmpty() {
+        return !this.$promises.length;
+      }
+    }, {
+      key: "isBlocked",
+      value: function isBlocked() {
+        return !!this.$resolvers.length;
+      }
+    }, {
+      key: "length",
+      get: function get3() {
+        return this.$promises.length - this.$resolvers.length;
+      }
+    }]);
+    return AsyncQueue2;
+  }();
+
+  // node_modules/core-js/modules/es.object.freeze.js
+  var $73 = require_export();
+  var FREEZING = require_freezing();
+  var fails12 = require_fails();
+  var isObject5 = require_is_object();
+  var onFreeze = require_internal_metadata().onFreeze;
+  var $freeze = Object.freeze;
+  var FAILS_ON_PRIMITIVES3 = fails12(function() {
+    $freeze(1);
+  });
+  $73({ target: "Object", stat: true, forced: FAILS_ON_PRIMITIVES3, sham: !FREEZING }, {
+    freeze: function freeze(it) {
+      return $freeze && isObject5(it) ? $freeze(onFreeze(it)) : it;
+    }
+  });
+
+  // srcts/src/components/errorConsole.ts
+  var import_es_array_iterator48 = __toESM(require_es_array_iterator());
+
+  // node_modules/@lit/reactive-element/reactive-element.js
+  var import_es_regexp_exec12 = __toESM(require_es_regexp_exec(), 1);
+
+  // node_modules/core-js/modules/es.object.is.js
+  var $74 = require_export();
+  var is = require_same_value();
+  $74({ target: "Object", stat: true }, {
+    is: is
+  });
+
+  // node_modules/core-js/modules/es.object.get-own-property-names.js
+  var $75 = require_export();
+  var fails13 = require_fails();
+  var getOwnPropertyNames2 = require_object_get_own_property_names_external().f;
+  var FAILS_ON_PRIMITIVES4 = fails13(function() {
+    return !Object.getOwnPropertyNames(1);
+  });
+  $75({ target: "Object", stat: true, forced: FAILS_ON_PRIMITIVES4 }, {
+    getOwnPropertyNames: getOwnPropertyNames2
+  });
+
+  // node_modules/core-js/modules/es.global-this.js
+  var $76 = require_export();
+  var global9 = require_global();
+  $76({ global: true, forced: global9.globalThis !== global9 }, {
+    globalThis: global9
+  });
+
+  // node_modules/@lit/reactive-element/reactive-element.js
+  var import_es_json_stringify3 = __toESM(require_es_json_stringify(), 1);
+  var import_es_array_iterator45 = __toESM(require_es_array_iterator(), 1);
+
+  // node_modules/core-js/modules/es.weak-map.js
+  require_es_weak_map_constructor();
+
+  // node_modules/core-js/modules/es.array.flat.js
+  var $77 = require_export();
+  var flattenIntoArray = require_flatten_into_array();
+  var toObject5 = require_to_object();
+  var lengthOfArrayLike4 = require_length_of_array_like();
+  var toIntegerOrInfinity3 = require_to_integer_or_infinity();
+  var arraySpeciesCreate3 = require_array_species_create();
+  $77({ target: "Array", proto: true }, {
+    flat: function flat() {
+      var depthArg = arguments.length ? arguments[0] : void 0;
+      var O = toObject5(this);
+      var sourceLen = lengthOfArrayLike4(O);
+      var A2 = arraySpeciesCreate3(O, 0);
+      A2.length = flattenIntoArray(A2, O, O, sourceLen, 0, depthArg === void 0 ? 1 : toIntegerOrInfinity3(depthArg));
+      return A2;
+    }
+  });
+
+  // node_modules/core-js/modules/es.array.unscopables.flat.js
+  var addToUnscopables2 = require_add_to_unscopables();
+  addToUnscopables2("flat");
+
+  // node_modules/@lit/reactive-element/css-tag.js
+  var import_es_regexp_exec11 = __toESM(require_es_regexp_exec(), 1);
+  var import_es_array_iterator44 = __toESM(require_es_array_iterator(), 1);
+  function _typeof44(obj) {
+    "@babel/helpers - typeof";
+    return _typeof44 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
+      return typeof obj2;
+    } : function(obj2) {
+      return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+    }, _typeof44(obj);
+  }
+  function _createForOfIteratorHelper2(o4, allowArrayLike) {
+    var it = typeof Symbol !== "undefined" && o4[Symbol.iterator] || o4["@@iterator"];
+    if (!it) {
+      if (Array.isArray(o4) || (it = _unsupportedIterableToArray2(o4)) || allowArrayLike && o4 && typeof o4.length === "number") {
+        if (it)
+          o4 = it;
+        var i5 = 0;
+        var F = function F2() {
+        };
+        return { s: F, n: function n4() {
+          if (i5 >= o4.length)
+            return { done: true };
+          return { done: false, value: o4[i5++] };
+        }, e: function e4(_e3) {
+          throw _e3;
+        }, f: F };
+      }
+      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+    var normalCompletion = true, didErr = false, err;
+    return { s: function s4() {
+      it = it.call(o4);
+    }, n: function n4() {
+      var step = it.next();
+      normalCompletion = step.done;
+      return step;
+    }, e: function e4(_e4) {
+      didErr = true;
+      err = _e4;
+    }, f: function f4() {
+      try {
+        if (!normalCompletion && it.return != null)
+          it.return();
+      } finally {
+        if (didErr)
+          throw err;
+      }
+    } };
+  }
+  function _unsupportedIterableToArray2(o4, minLen) {
+    if (!o4)
+      return;
+    if (typeof o4 === "string")
+      return _arrayLikeToArray2(o4, minLen);
+    var n4 = Object.prototype.toString.call(o4).slice(8, -1);
+    if (n4 === "Object" && o4.constructor)
+      n4 = o4.constructor.name;
+    if (n4 === "Map" || n4 === "Set")
+      return Array.from(o4);
+    if (n4 === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n4))
+      return _arrayLikeToArray2(o4, minLen);
+  }
+  function _arrayLikeToArray2(arr, len) {
+    if (len == null || len > arr.length)
+      len = arr.length;
+    for (var i5 = 0, arr2 = new Array(len); i5 < len; i5++)
+      arr2[i5] = arr[i5];
+    return arr2;
+  }
+  function _classCallCheck37(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties37(target, props) {
+    for (var i5 = 0; i5 < props.length; i5++) {
+      var descriptor = props[i5];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, _toPropertyKey38(descriptor.key), descriptor);
+    }
+  }
+  function _createClass37(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties37(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties37(Constructor, staticProps);
+    Object.defineProperty(Constructor, "prototype", { writable: false });
+    return Constructor;
+  }
+  function _toPropertyKey38(arg) {
+    var key = _toPrimitive38(arg, "string");
+    return _typeof44(key) === "symbol" ? key : String(key);
+  }
+  function _toPrimitive38(input, hint) {
+    if (_typeof44(input) !== "object" || input === null)
+      return input;
+    var prim = input[Symbol.toPrimitive];
+    if (prim !== void 0) {
+      var res = prim.call(input, hint || "default");
+      if (_typeof44(res) !== "object")
+        return res;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return (hint === "string" ? String : Number)(input);
+  }
+  var t = globalThis;
+  var e = t.ShadowRoot && (void 0 === t.ShadyCSS || t.ShadyCSS.nativeShadow) && "adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype;
+  var s = Symbol();
+  var o = /* @__PURE__ */ new WeakMap();
+  var n = /* @__PURE__ */ function() {
+    function n4(t3, e4, o4) {
+      _classCallCheck37(this, n4);
+      if (this._$cssResult$ = true, o4 !== s)
+        throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");
+      this.cssText = t3, this.t = e4;
+    }
+    _createClass37(n4, [{
+      key: "styleSheet",
+      get: function get3() {
+        var t3 = this.o;
+        var s4 = this.t;
+        if (e && void 0 === t3) {
+          var _e = void 0 !== s4 && 1 === s4.length;
+          _e && (t3 = o.get(s4)), void 0 === t3 && ((this.o = t3 = new CSSStyleSheet()).replaceSync(this.cssText), _e && o.set(s4, t3));
+        }
+        return t3;
+      }
+    }, {
+      key: "toString",
+      value: function toString12() {
+        return this.cssText;
+      }
+    }]);
+    return n4;
+  }();
+  var r = function r2(t3) {
+    return new n("string" == typeof t3 ? t3 : t3 + "", void 0, s);
+  };
+  var i = function i2(t3) {
+    for (var _len = arguments.length, e4 = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+      e4[_key - 1] = arguments[_key];
+    }
+    var o4 = 1 === t3.length ? t3[0] : e4.reduce(function(e5, s4, o5) {
+      return e5 + function(t4) {
+        if (true === t4._$cssResult$)
+          return t4.cssText;
+        if ("number" == typeof t4)
+          return t4;
+        throw Error("Value passed to 'css' function must be a 'css' function result: " + t4 + ". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.");
+      }(s4) + t3[o5 + 1];
+    }, t3[0]);
+    return new n(o4, t3, s);
+  };
+  var S = function S2(s4, o4) {
+    if (e)
+      s4.adoptedStyleSheets = o4.map(function(t3) {
+        return t3 instanceof CSSStyleSheet ? t3 : t3.styleSheet;
+      });
+    else {
+      var _iterator = _createForOfIteratorHelper2(o4), _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+          var _e2 = _step.value;
+          var _o = document.createElement("style"), _n = t.litNonce;
+          void 0 !== _n && _o.setAttribute("nonce", _n), _o.textContent = _e2.cssText, s4.appendChild(_o);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+    }
+  };
+  var c = e ? function(t3) {
+    return t3;
+  } : function(t3) {
+    return t3 instanceof CSSStyleSheet ? function(t4) {
+      var e4 = "";
+      var _iterator2 = _createForOfIteratorHelper2(t4.cssRules), _step2;
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+          var _s = _step2.value;
+          e4 += _s.cssText;
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+      return r(e4);
+    }(t3) : t3;
+  };
+
+  // node_modules/@lit/reactive-element/reactive-element.js
+  function _typeof45(obj) {
+    "@babel/helpers - typeof";
+    return _typeof45 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
+      return typeof obj2;
+    } : function(obj2) {
+      return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+    }, _typeof45(obj);
+  }
+  var _Symbol$metadata;
+  var _a$litPropertyMetadat;
+  var _a$reactiveElementVer;
+  function _toConsumableArray(arr) {
+    return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray3(arr) || _nonIterableSpread();
+  }
+  function _nonIterableSpread() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArray(iter) {
+    if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null)
+      return Array.from(iter);
+  }
+  function _arrayWithoutHoles(arr) {
+    if (Array.isArray(arr))
+      return _arrayLikeToArray3(arr);
+  }
+  function _slicedToArray2(arr, i5) {
+    return _arrayWithHoles2(arr) || _iterableToArrayLimit2(arr, i5) || _unsupportedIterableToArray3(arr, i5) || _nonIterableRest2();
+  }
+  function _nonIterableRest2() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArrayLimit2(arr, i5) {
+    var _i = null == arr ? null : "undefined" != typeof Symbol && arr[Symbol.iterator] || arr["@@iterator"];
+    if (null != _i) {
+      var _s, _e, _x, _r, _arr = [], _n = true, _d = false;
+      try {
+        if (_x = (_i = _i.call(arr)).next, 0 === i5) {
+          if (Object(_i) !== _i)
+            return;
+          _n = false;
+        } else
+          for (; !(_n = (_s = _x.call(_i)).done) && (_arr.push(_s.value), _arr.length !== i5); _n = true)
+            ;
+      } catch (err) {
+        _d = true, _e = err;
+      } finally {
+        try {
+          if (!_n && null != _i.return && (_r = _i.return(), Object(_r) !== _r))
+            return;
+        } finally {
+          if (_d)
+            throw _e;
+        }
+      }
+      return _arr;
+    }
+  }
+  function _arrayWithHoles2(arr) {
+    if (Array.isArray(arr))
+      return arr;
+  }
+  function _regeneratorRuntime11() {
+    "use strict";
+    _regeneratorRuntime11 = function _regeneratorRuntime16() {
+      return exports;
+    };
+    var exports = {}, Op = Object.prototype, hasOwn5 = Op.hasOwnProperty, defineProperty3 = Object.defineProperty || function(obj, key, desc) {
+      obj[key] = desc.value;
+    }, $Symbol = "function" == typeof Symbol ? Symbol : {}, iteratorSymbol = $Symbol.iterator || "@@iterator", asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator", toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
+    function define(obj, key, value) {
+      return Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }), obj[key];
+    }
+    try {
+      define({}, "");
+    } catch (err) {
+      define = function define2(obj, key, value) {
+        return obj[key] = value;
+      };
+    }
+    function wrap(innerFn, outerFn, self2, tryLocsList) {
+      var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator, generator = Object.create(protoGenerator.prototype), context = new Context(tryLocsList || []);
+      return defineProperty3(generator, "_invoke", { value: makeInvokeMethod(innerFn, self2, context) }), generator;
+    }
+    function tryCatch(fn, obj, arg) {
+      try {
+        return { type: "normal", arg: fn.call(obj, arg) };
+      } catch (err) {
+        return { type: "throw", arg: err };
+      }
+    }
+    exports.wrap = wrap;
+    var ContinueSentinel = {};
+    function Generator() {
+    }
+    function GeneratorFunction() {
+    }
+    function GeneratorFunctionPrototype() {
+    }
+    var IteratorPrototype = {};
+    define(IteratorPrototype, iteratorSymbol, function() {
+      return this;
+    });
+    var getProto = Object.getPrototypeOf, NativeIteratorPrototype = getProto && getProto(getProto(values2([])));
+    NativeIteratorPrototype && NativeIteratorPrototype !== Op && hasOwn5.call(NativeIteratorPrototype, iteratorSymbol) && (IteratorPrototype = NativeIteratorPrototype);
+    var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(IteratorPrototype);
+    function defineIteratorMethods(prototype) {
+      ["next", "throw", "return"].forEach(function(method) {
+        define(prototype, method, function(arg) {
+          return this._invoke(method, arg);
+        });
+      });
+    }
+    function AsyncIterator(generator, PromiseImpl) {
+      function invoke(method, arg, resolve, reject) {
+        var record = tryCatch(generator[method], generator, arg);
+        if ("throw" !== record.type) {
+          var result = record.arg, value = result.value;
+          return value && "object" == _typeof45(value) && hasOwn5.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function(value2) {
+            invoke("next", value2, resolve, reject);
+          }, function(err) {
+            invoke("throw", err, resolve, reject);
+          }) : PromiseImpl.resolve(value).then(function(unwrapped) {
+            result.value = unwrapped, resolve(result);
+          }, function(error) {
+            return invoke("throw", error, resolve, reject);
+          });
+        }
+        reject(record.arg);
+      }
+      var previousPromise;
+      defineProperty3(this, "_invoke", { value: function value(method, arg) {
+        function callInvokeWithMethodAndArg() {
+          return new PromiseImpl(function(resolve, reject) {
+            invoke(method, arg, resolve, reject);
+          });
+        }
+        return previousPromise = previousPromise ? previousPromise.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg();
+      } });
+    }
+    function makeInvokeMethod(innerFn, self2, context) {
+      var state = "suspendedStart";
+      return function(method, arg) {
+        if ("executing" === state)
+          throw new Error("Generator is already running");
+        if ("completed" === state) {
+          if ("throw" === method)
+            throw arg;
+          return doneResult();
+        }
+        for (context.method = method, context.arg = arg; ; ) {
+          var delegate = context.delegate;
+          if (delegate) {
+            var delegateResult = maybeInvokeDelegate(delegate, context);
+            if (delegateResult) {
+              if (delegateResult === ContinueSentinel)
+                continue;
+              return delegateResult;
+            }
+          }
+          if ("next" === context.method)
+            context.sent = context._sent = context.arg;
+          else if ("throw" === context.method) {
+            if ("suspendedStart" === state)
+              throw state = "completed", context.arg;
+            context.dispatchException(context.arg);
+          } else
+            "return" === context.method && context.abrupt("return", context.arg);
+          state = "executing";
+          var record = tryCatch(innerFn, self2, context);
+          if ("normal" === record.type) {
+            if (state = context.done ? "completed" : "suspendedYield", record.arg === ContinueSentinel)
+              continue;
+            return { value: record.arg, done: context.done };
+          }
+          "throw" === record.type && (state = "completed", context.method = "throw", context.arg = record.arg);
+        }
+      };
+    }
+    function maybeInvokeDelegate(delegate, context) {
+      var methodName = context.method, method = delegate.iterator[methodName];
+      if (void 0 === method)
+        return context.delegate = null, "throw" === methodName && delegate.iterator.return && (context.method = "return", context.arg = void 0, maybeInvokeDelegate(delegate, context), "throw" === context.method) || "return" !== methodName && (context.method = "throw", context.arg = new TypeError("The iterator does not provide a '" + methodName + "' method")), ContinueSentinel;
+      var record = tryCatch(method, delegate.iterator, context.arg);
+      if ("throw" === record.type)
+        return context.method = "throw", context.arg = record.arg, context.delegate = null, ContinueSentinel;
+      var info = record.arg;
+      return info ? info.done ? (context[delegate.resultName] = info.value, context.next = delegate.nextLoc, "return" !== context.method && (context.method = "next", context.arg = void 0), context.delegate = null, ContinueSentinel) : info : (context.method = "throw", context.arg = new TypeError("iterator result is not an object"), context.delegate = null, ContinueSentinel);
+    }
+    function pushTryEntry(locs) {
+      var entry = { tryLoc: locs[0] };
+      1 in locs && (entry.catchLoc = locs[1]), 2 in locs && (entry.finallyLoc = locs[2], entry.afterLoc = locs[3]), this.tryEntries.push(entry);
+    }
+    function resetTryEntry(entry) {
+      var record = entry.completion || {};
+      record.type = "normal", delete record.arg, entry.completion = record;
+    }
+    function Context(tryLocsList) {
+      this.tryEntries = [{ tryLoc: "root" }], tryLocsList.forEach(pushTryEntry, this), this.reset(true);
+    }
+    function values2(iterable) {
+      if (iterable) {
+        var iteratorMethod = iterable[iteratorSymbol];
+        if (iteratorMethod)
+          return iteratorMethod.call(iterable);
+        if ("function" == typeof iterable.next)
+          return iterable;
+        if (!isNaN(iterable.length)) {
+          var i5 = -1, next2 = function next3() {
+            for (; ++i5 < iterable.length; )
+              if (hasOwn5.call(iterable, i5))
+                return next3.value = iterable[i5], next3.done = false, next3;
+            return next3.value = void 0, next3.done = true, next3;
+          };
+          return next2.next = next2;
+        }
+      }
+      return { next: doneResult };
+    }
+    function doneResult() {
+      return { value: void 0, done: true };
+    }
+    return GeneratorFunction.prototype = GeneratorFunctionPrototype, defineProperty3(Gp, "constructor", { value: GeneratorFunctionPrototype, configurable: true }), defineProperty3(GeneratorFunctionPrototype, "constructor", { value: GeneratorFunction, configurable: true }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, toStringTagSymbol, "GeneratorFunction"), exports.isGeneratorFunction = function(genFun) {
+      var ctor = "function" == typeof genFun && genFun.constructor;
+      return !!ctor && (ctor === GeneratorFunction || "GeneratorFunction" === (ctor.displayName || ctor.name));
+    }, exports.mark = function(genFun) {
+      return Object.setPrototypeOf ? Object.setPrototypeOf(genFun, GeneratorFunctionPrototype) : (genFun.__proto__ = GeneratorFunctionPrototype, define(genFun, toStringTagSymbol, "GeneratorFunction")), genFun.prototype = Object.create(Gp), genFun;
+    }, exports.awrap = function(arg) {
+      return { __await: arg };
+    }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, asyncIteratorSymbol, function() {
+      return this;
+    }), exports.AsyncIterator = AsyncIterator, exports.async = function(innerFn, outerFn, self2, tryLocsList, PromiseImpl) {
+      void 0 === PromiseImpl && (PromiseImpl = Promise);
+      var iter = new AsyncIterator(wrap(innerFn, outerFn, self2, tryLocsList), PromiseImpl);
+      return exports.isGeneratorFunction(outerFn) ? iter : iter.next().then(function(result) {
+        return result.done ? result.value : iter.next();
+      });
+    }, defineIteratorMethods(Gp), define(Gp, toStringTagSymbol, "Generator"), define(Gp, iteratorSymbol, function() {
+      return this;
+    }), define(Gp, "toString", function() {
+      return "[object Generator]";
+    }), exports.keys = function(val) {
+      var object = Object(val), keys2 = [];
+      for (var key in object)
+        keys2.push(key);
+      return keys2.reverse(), function next2() {
+        for (; keys2.length; ) {
+          var key2 = keys2.pop();
+          if (key2 in object)
+            return next2.value = key2, next2.done = false, next2;
+        }
+        return next2.done = true, next2;
+      };
+    }, exports.values = values2, Context.prototype = { constructor: Context, reset: function reset(skipTempReset) {
+      if (this.prev = 0, this.next = 0, this.sent = this._sent = void 0, this.done = false, this.delegate = null, this.method = "next", this.arg = void 0, this.tryEntries.forEach(resetTryEntry), !skipTempReset)
+        for (var name in this)
+          "t" === name.charAt(0) && hasOwn5.call(this, name) && !isNaN(+name.slice(1)) && (this[name] = void 0);
+    }, stop: function stop() {
+      this.done = true;
+      var rootRecord = this.tryEntries[0].completion;
+      if ("throw" === rootRecord.type)
+        throw rootRecord.arg;
+      return this.rval;
+    }, dispatchException: function dispatchException(exception) {
+      if (this.done)
+        throw exception;
+      var context = this;
+      function handle(loc, caught) {
+        return record.type = "throw", record.arg = exception, context.next = loc, caught && (context.method = "next", context.arg = void 0), !!caught;
+      }
+      for (var i5 = this.tryEntries.length - 1; i5 >= 0; --i5) {
+        var entry = this.tryEntries[i5], record = entry.completion;
+        if ("root" === entry.tryLoc)
+          return handle("end");
+        if (entry.tryLoc <= this.prev) {
+          var hasCatch = hasOwn5.call(entry, "catchLoc"), hasFinally = hasOwn5.call(entry, "finallyLoc");
+          if (hasCatch && hasFinally) {
+            if (this.prev < entry.catchLoc)
+              return handle(entry.catchLoc, true);
+            if (this.prev < entry.finallyLoc)
+              return handle(entry.finallyLoc);
+          } else if (hasCatch) {
+            if (this.prev < entry.catchLoc)
+              return handle(entry.catchLoc, true);
+          } else {
+            if (!hasFinally)
+              throw new Error("try statement without catch or finally");
+            if (this.prev < entry.finallyLoc)
+              return handle(entry.finallyLoc);
+          }
+        }
+      }
+    }, abrupt: function abrupt(type, arg) {
+      for (var i5 = this.tryEntries.length - 1; i5 >= 0; --i5) {
+        var entry = this.tryEntries[i5];
+        if (entry.tryLoc <= this.prev && hasOwn5.call(entry, "finallyLoc") && this.prev < entry.finallyLoc) {
+          var finallyEntry = entry;
+          break;
+        }
+      }
+      finallyEntry && ("break" === type || "continue" === type) && finallyEntry.tryLoc <= arg && arg <= finallyEntry.finallyLoc && (finallyEntry = null);
+      var record = finallyEntry ? finallyEntry.completion : {};
+      return record.type = type, record.arg = arg, finallyEntry ? (this.method = "next", this.next = finallyEntry.finallyLoc, ContinueSentinel) : this.complete(record);
+    }, complete: function complete(record, afterLoc) {
+      if ("throw" === record.type)
+        throw record.arg;
+      return "break" === record.type || "continue" === record.type ? this.next = record.arg : "return" === record.type ? (this.rval = this.arg = record.arg, this.method = "return", this.next = "end") : "normal" === record.type && afterLoc && (this.next = afterLoc), ContinueSentinel;
+    }, finish: function finish(finallyLoc) {
+      for (var i5 = this.tryEntries.length - 1; i5 >= 0; --i5) {
+        var entry = this.tryEntries[i5];
+        if (entry.finallyLoc === finallyLoc)
+          return this.complete(entry.completion, entry.afterLoc), resetTryEntry(entry), ContinueSentinel;
+      }
+    }, catch: function _catch(tryLoc) {
+      for (var i5 = this.tryEntries.length - 1; i5 >= 0; --i5) {
+        var entry = this.tryEntries[i5];
+        if (entry.tryLoc === tryLoc) {
+          var record = entry.completion;
+          if ("throw" === record.type) {
+            var thrown = record.arg;
+            resetTryEntry(entry);
+          }
+          return thrown;
+        }
+      }
+      throw new Error("illegal catch attempt");
+    }, delegateYield: function delegateYield(iterable, resultName, nextLoc) {
+      return this.delegate = { iterator: values2(iterable), resultName: resultName, nextLoc: nextLoc }, "next" === this.method && (this.arg = void 0), ContinueSentinel;
+    } }, exports;
+  }
+  function asyncGeneratorStep11(gen, resolve, reject, _next, _throw, key, arg) {
+    try {
+      var info = gen[key](arg);
+      var value = info.value;
+    } catch (error) {
+      reject(error);
+      return;
+    }
+    if (info.done) {
+      resolve(value);
+    } else {
+      Promise.resolve(value).then(_next, _throw);
+    }
+  }
+  function _asyncToGenerator11(fn) {
+    return function() {
+      var self2 = this, args = arguments;
+      return new Promise(function(resolve, reject) {
+        var gen = fn.apply(self2, args);
+        function _next(value) {
+          asyncGeneratorStep11(gen, resolve, reject, _next, _throw, "next", value);
+        }
+        function _throw(err) {
+          asyncGeneratorStep11(gen, resolve, reject, _next, _throw, "throw", err);
+        }
+        _next(void 0);
+      });
+    };
+  }
   function _createForOfIteratorHelper3(o4, allowArrayLike) {
     var it = typeof Symbol !== "undefined" && o4[Symbol.iterator] || o4["@@iterator"];
     if (!it) {
@@ -18702,85 +19963,85 @@
       arr2[i5] = arr[i5];
     return arr2;
   }
-  function _classCallCheck36(instance, Constructor) {
+  function _classCallCheck38(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties36(target, props) {
+  function _defineProperties38(target, props) {
     for (var i5 = 0; i5 < props.length; i5++) {
       var descriptor = props[i5];
       descriptor.enumerable = descriptor.enumerable || false;
       descriptor.configurable = true;
       if ("value" in descriptor)
         descriptor.writable = true;
-      Object.defineProperty(target, _toPropertyKey37(descriptor.key), descriptor);
+      Object.defineProperty(target, _toPropertyKey39(descriptor.key), descriptor);
     }
   }
-  function _createClass36(Constructor, protoProps, staticProps) {
+  function _createClass38(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties36(Constructor.prototype, protoProps);
+      _defineProperties38(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties36(Constructor, staticProps);
+      _defineProperties38(Constructor, staticProps);
     Object.defineProperty(Constructor, "prototype", { writable: false });
     return Constructor;
   }
-  function _toPropertyKey37(arg) {
-    var key = _toPrimitive37(arg, "string");
-    return _typeof42(key) === "symbol" ? key : String(key);
+  function _toPropertyKey39(arg) {
+    var key = _toPrimitive39(arg, "string");
+    return _typeof45(key) === "symbol" ? key : String(key);
   }
-  function _toPrimitive37(input, hint) {
-    if (_typeof42(input) !== "object" || input === null)
+  function _toPrimitive39(input, hint) {
+    if (_typeof45(input) !== "object" || input === null)
       return input;
     var prim = input[Symbol.toPrimitive];
     if (prim !== void 0) {
       var res = prim.call(input, hint || "default");
-      if (_typeof42(res) !== "object")
+      if (_typeof45(res) !== "object")
         return res;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return (hint === "string" ? String : Number)(input);
   }
-  function _inherits21(subClass, superClass) {
+  function _inherits22(subClass, superClass) {
     if (typeof superClass !== "function" && superClass !== null) {
       throw new TypeError("Super expression must either be null or a function");
     }
     subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } });
     Object.defineProperty(subClass, "prototype", { writable: false });
     if (superClass)
-      _setPrototypeOf21(subClass, superClass);
+      _setPrototypeOf22(subClass, superClass);
   }
-  function _createSuper21(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct21();
+  function _createSuper22(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct22();
     return function _createSuperInternal() {
-      var Super = _getPrototypeOf21(Derived), result;
+      var Super = _getPrototypeOf22(Derived), result;
       if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf21(this).constructor;
+        var NewTarget = _getPrototypeOf22(this).constructor;
         result = Reflect.construct(Super, arguments, NewTarget);
       } else {
         result = Super.apply(this, arguments);
       }
-      return _possibleConstructorReturn21(this, result);
+      return _possibleConstructorReturn22(this, result);
     };
   }
-  function _possibleConstructorReturn21(self2, call8) {
-    if (call8 && (_typeof42(call8) === "object" || typeof call8 === "function")) {
+  function _possibleConstructorReturn22(self2, call8) {
+    if (call8 && (_typeof45(call8) === "object" || typeof call8 === "function")) {
       return call8;
     } else if (call8 !== void 0) {
       throw new TypeError("Derived constructors may only return object or undefined");
     }
-    return _assertThisInitialized21(self2);
+    return _assertThisInitialized22(self2);
   }
-  function _assertThisInitialized21(self2) {
+  function _assertThisInitialized22(self2) {
     if (self2 === void 0) {
       throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
     }
     return self2;
   }
-  function _wrapNativeSuper(Class) {
+  function _wrapNativeSuper2(Class) {
     var _cache = typeof Map === "function" ? /* @__PURE__ */ new Map() : void 0;
-    _wrapNativeSuper = function _wrapNativeSuper3(Class2) {
-      if (Class2 === null || !_isNativeFunction(Class2))
+    _wrapNativeSuper2 = function _wrapNativeSuper3(Class2) {
+      if (Class2 === null || !_isNativeFunction2(Class2))
         return Class2;
       if (typeof Class2 !== "function") {
         throw new TypeError("Super expression must either be null or a function");
@@ -18791,30 +20052,30 @@
         _cache.set(Class2, Wrapper);
       }
       function Wrapper() {
-        return _construct(Class2, arguments, _getPrototypeOf21(this).constructor);
+        return _construct2(Class2, arguments, _getPrototypeOf22(this).constructor);
       }
       Wrapper.prototype = Object.create(Class2.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } });
-      return _setPrototypeOf21(Wrapper, Class2);
+      return _setPrototypeOf22(Wrapper, Class2);
     };
-    return _wrapNativeSuper(Class);
+    return _wrapNativeSuper2(Class);
   }
-  function _construct(Parent, args, Class) {
-    if (_isNativeReflectConstruct21()) {
-      _construct = Reflect.construct.bind();
+  function _construct2(Parent, args, Class) {
+    if (_isNativeReflectConstruct22()) {
+      _construct2 = Reflect.construct.bind();
     } else {
-      _construct = function _construct3(Parent2, args2, Class2) {
+      _construct2 = function _construct3(Parent2, args2, Class2) {
         var a3 = [null];
         a3.push.apply(a3, args2);
         var Constructor = Function.bind.apply(Parent2, a3);
         var instance = new Constructor();
         if (Class2)
-          _setPrototypeOf21(instance, Class2.prototype);
+          _setPrototypeOf22(instance, Class2.prototype);
         return instance;
       };
     }
-    return _construct.apply(null, arguments);
+    return _construct2.apply(null, arguments);
   }
-  function _isNativeReflectConstruct21() {
+  function _isNativeReflectConstruct22() {
     if (typeof Reflect === "undefined" || !Reflect.construct)
       return false;
     if (Reflect.construct.sham)
@@ -18829,21 +20090,21 @@
       return false;
     }
   }
-  function _isNativeFunction(fn) {
+  function _isNativeFunction2(fn) {
     return Function.toString.call(fn).indexOf("[native code]") !== -1;
   }
-  function _setPrototypeOf21(o4, p3) {
-    _setPrototypeOf21 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf25(o5, p4) {
+  function _setPrototypeOf22(o4, p3) {
+    _setPrototypeOf22 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf26(o5, p4) {
       o5.__proto__ = p4;
       return o5;
     };
-    return _setPrototypeOf21(o4, p3);
+    return _setPrototypeOf22(o4, p3);
   }
-  function _getPrototypeOf21(o4) {
-    _getPrototypeOf21 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf25(o5) {
+  function _getPrototypeOf22(o4) {
+    _getPrototypeOf22 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf26(o5) {
       return o5.__proto__ || Object.getPrototypeOf(o5);
     };
-    return _getPrototypeOf21(o4);
+    return _getPrototypeOf22(o4);
   }
   var i3 = Object.is;
   var e2 = Object.defineProperty;
@@ -18902,15 +20163,15 @@
   };
   (_Symbol$metadata = Symbol.metadata) !== null && _Symbol$metadata !== void 0 ? _Symbol$metadata : Symbol.metadata = Symbol("metadata"), (_a$litPropertyMetadat = a.litPropertyMetadata) !== null && _a$litPropertyMetadat !== void 0 ? _a$litPropertyMetadat : a.litPropertyMetadata = /* @__PURE__ */ new WeakMap();
   var b = /* @__PURE__ */ function(_HTMLElement) {
-    _inherits21(b3, _HTMLElement);
-    var _super = _createSuper21(b3);
+    _inherits22(b3, _HTMLElement);
+    var _super = _createSuper22(b3);
     function b3() {
       var _this;
-      _classCallCheck36(this, b3);
+      _classCallCheck38(this, b3);
       _this = _super.call(this), _this._$Ep = void 0, _this.isUpdatePending = false, _this.hasUpdated = false, _this._$Em = null, _this._$Ev();
       return _this;
     }
-    _createClass36(b3, [{
+    _createClass38(b3, [{
       key: "_$Ev",
       value: function _$Ev() {
         var _this2 = this, _this$constructor$l;
@@ -19027,9 +20288,9 @@
     }, {
       key: "_$EP",
       value: function() {
-        var _$EP2 = _asyncToGenerator9(/* @__PURE__ */ _regeneratorRuntime9().mark(function _callee() {
+        var _$EP2 = _asyncToGenerator11(/* @__PURE__ */ _regeneratorRuntime11().mark(function _callee() {
           var t3;
-          return _regeneratorRuntime9().wrap(function _callee$(_context) {
+          return _regeneratorRuntime11().wrap(function _callee$(_context) {
             while (1)
               switch (_context.prev = _context.next) {
                 case 0:
@@ -19306,7 +20567,7 @@
       }
     }]);
     return b3;
-  }(/* @__PURE__ */ _wrapNativeSuper(HTMLElement));
+  }(/* @__PURE__ */ _wrapNativeSuper2(HTMLElement));
   b.elementStyles = [], b.shadowRootOptions = {
     mode: "open"
   }, b[d("elementProperties")] = /* @__PURE__ */ new Map(), b[d("finalized")] = /* @__PURE__ */ new Map(), p !== null && p !== void 0 && p({
@@ -19314,12 +20575,12 @@
   }), ((_a$reactiveElementVer = a.reactiveElementVersions) !== null && _a$reactiveElementVer !== void 0 ? _a$reactiveElementVer : a.reactiveElementVersions = []).push("2.0.0");
 
   // node_modules/lit-html/lit-html.js
-  var import_es_array_iterator43 = __toESM(require_es_array_iterator(), 1);
+  var import_es_array_iterator46 = __toESM(require_es_array_iterator(), 1);
 
   // node_modules/core-js/modules/es.regexp.constructor.js
   var DESCRIPTORS8 = require_descriptors();
-  var global9 = require_global();
-  var uncurryThis10 = require_function_uncurry_this();
+  var global10 = require_global();
+  var uncurryThis11 = require_function_uncurry_this();
   var isForced2 = require_is_forced();
   var inheritIfRequired2 = require_inherit_if_required();
   var createNonEnumerableProperty3 = require_create_non_enumerable_property();
@@ -19331,29 +20592,29 @@
   var stickyHelpers2 = require_regexp_sticky_helpers();
   var proxyAccessor = require_proxy_accessor();
   var defineBuiltIn4 = require_define_built_in();
-  var fails13 = require_fails();
+  var fails14 = require_fails();
   var hasOwn4 = require_has_own_property();
   var enforceInternalState = require_internal_state().enforce;
-  var setSpecies = require_set_species();
+  var setSpecies2 = require_set_species();
   var wellKnownSymbol6 = require_well_known_symbol();
   var UNSUPPORTED_DOT_ALL = require_regexp_unsupported_dot_all();
   var UNSUPPORTED_NCG = require_regexp_unsupported_ncg();
   var MATCH = wellKnownSymbol6("match");
-  var NativeRegExp = global9.RegExp;
+  var NativeRegExp = global10.RegExp;
   var RegExpPrototype2 = NativeRegExp.prototype;
-  var SyntaxError = global9.SyntaxError;
-  var exec2 = uncurryThis10(RegExpPrototype2.exec);
-  var charAt2 = uncurryThis10("".charAt);
-  var replace = uncurryThis10("".replace);
-  var stringIndexOf2 = uncurryThis10("".indexOf);
-  var stringSlice4 = uncurryThis10("".slice);
+  var SyntaxError = global10.SyntaxError;
+  var exec2 = uncurryThis11(RegExpPrototype2.exec);
+  var charAt2 = uncurryThis11("".charAt);
+  var replace = uncurryThis11("".replace);
+  var stringIndexOf2 = uncurryThis11("".indexOf);
+  var stringSlice4 = uncurryThis11("".slice);
   var IS_NCG = /^\?<[^\s\d!#%&*+<=>@^][^\s!#%&*+<=>@^]*>/;
   var re1 = /a/g;
   var re2 = /a/g;
   var CORRECT_NEW = new NativeRegExp(re1) !== re1;
   var MISSED_STICKY = stickyHelpers2.MISSED_STICKY;
   var UNSUPPORTED_Y2 = stickyHelpers2.UNSUPPORTED_Y;
-  var BASE_FORCED = DESCRIPTORS8 && (!CORRECT_NEW || MISSED_STICKY || UNSUPPORTED_DOT_ALL || UNSUPPORTED_NCG || fails13(function() {
+  var BASE_FORCED = DESCRIPTORS8 && (!CORRECT_NEW || MISSED_STICKY || UNSUPPORTED_DOT_ALL || UNSUPPORTED_NCG || fails14(function() {
     re2[MATCH] = false;
     return NativeRegExp(re1) != re1 || NativeRegExp(re2) == re2 || NativeRegExp(re1, "i") != "/a/i";
   }));
@@ -19488,12 +20749,12 @@
     }
     RegExpPrototype2.constructor = RegExpWrapper;
     RegExpWrapper.prototype = RegExpPrototype2;
-    defineBuiltIn4(global9, "RegExp", RegExpWrapper, { constructor: true });
+    defineBuiltIn4(global10, "RegExp", RegExpWrapper, { constructor: true });
   }
   var RegExpWrapper;
   var keys2;
   var index;
-  setSpecies("RegExp");
+  setSpecies2("RegExp");
 
   // node_modules/lit-html/lit-html.js
   var import_es_regexp_exec13 = __toESM(require_es_regexp_exec(), 1);
@@ -19521,118 +20782,118 @@
   }
 
   // node_modules/core-js/modules/es.string.starts-with.js
-  var $75 = require_export();
-  var uncurryThis11 = require_function_uncurry_this_clause();
+  var $78 = require_export();
+  var uncurryThis12 = require_function_uncurry_this_clause();
   var getOwnPropertyDescriptor3 = require_object_get_own_property_descriptor().f;
-  var toLength4 = require_to_length();
+  var toLength5 = require_to_length();
   var toString10 = require_to_string();
   var notARegExp = require_not_a_regexp();
   var requireObjectCoercible5 = require_require_object_coercible();
   var correctIsRegExpLogic = require_correct_is_regexp_logic();
   var IS_PURE2 = require_is_pure();
-  var nativeStartsWith = uncurryThis11("".startsWith);
-  var stringSlice5 = uncurryThis11("".slice);
+  var nativeStartsWith = uncurryThis12("".startsWith);
+  var stringSlice5 = uncurryThis12("".slice);
   var min4 = Math.min;
   var CORRECT_IS_REGEXP_LOGIC = correctIsRegExpLogic("startsWith");
   var MDN_POLYFILL_BUG = !IS_PURE2 && !CORRECT_IS_REGEXP_LOGIC && !!function() {
     var descriptor = getOwnPropertyDescriptor3(String.prototype, "startsWith");
     return descriptor && !descriptor.writable;
   }();
-  $75({ target: "String", proto: true, forced: !MDN_POLYFILL_BUG && !CORRECT_IS_REGEXP_LOGIC }, {
+  $78({ target: "String", proto: true, forced: !MDN_POLYFILL_BUG && !CORRECT_IS_REGEXP_LOGIC }, {
     startsWith: function startsWith(searchString) {
       var that = toString10(requireObjectCoercible5(this));
       notARegExp(searchString);
-      var index = toLength4(min4(arguments.length > 1 ? arguments[1] : void 0, that.length));
+      var index = toLength5(min4(arguments.length > 1 ? arguments[1] : void 0, that.length));
       var search = toString10(searchString);
       return nativeStartsWith ? nativeStartsWith(that, search, index) : stringSlice5(that, index, index + search.length) === search;
     }
   });
 
   // node_modules/core-js/modules/es.string.ends-with.js
-  var $76 = require_export();
-  var uncurryThis12 = require_function_uncurry_this_clause();
+  var $79 = require_export();
+  var uncurryThis13 = require_function_uncurry_this_clause();
   var getOwnPropertyDescriptor4 = require_object_get_own_property_descriptor().f;
-  var toLength5 = require_to_length();
+  var toLength6 = require_to_length();
   var toString11 = require_to_string();
   var notARegExp2 = require_not_a_regexp();
   var requireObjectCoercible6 = require_require_object_coercible();
   var correctIsRegExpLogic2 = require_correct_is_regexp_logic();
   var IS_PURE3 = require_is_pure();
-  var nativeEndsWith = uncurryThis12("".endsWith);
-  var slice2 = uncurryThis12("".slice);
+  var nativeEndsWith = uncurryThis13("".endsWith);
+  var slice3 = uncurryThis13("".slice);
   var min5 = Math.min;
   var CORRECT_IS_REGEXP_LOGIC2 = correctIsRegExpLogic2("endsWith");
   var MDN_POLYFILL_BUG2 = !IS_PURE3 && !CORRECT_IS_REGEXP_LOGIC2 && !!function() {
     var descriptor = getOwnPropertyDescriptor4(String.prototype, "endsWith");
     return descriptor && !descriptor.writable;
   }();
-  $76({ target: "String", proto: true, forced: !MDN_POLYFILL_BUG2 && !CORRECT_IS_REGEXP_LOGIC2 }, {
+  $79({ target: "String", proto: true, forced: !MDN_POLYFILL_BUG2 && !CORRECT_IS_REGEXP_LOGIC2 }, {
     endsWith: function endsWith(searchString) {
       var that = toString11(requireObjectCoercible6(this));
       notARegExp2(searchString);
       var endPosition = arguments.length > 1 ? arguments[1] : void 0;
       var len = that.length;
-      var end = endPosition === void 0 ? len : min5(toLength5(endPosition), len);
+      var end = endPosition === void 0 ? len : min5(toLength6(endPosition), len);
       var search = toString11(searchString);
-      return nativeEndsWith ? nativeEndsWith(that, search, end) : slice2(that, end - search.length, end) === search;
+      return nativeEndsWith ? nativeEndsWith(that, search, end) : slice3(that, end - search.length, end) === search;
     }
   });
 
   // node_modules/core-js/modules/es.array.fill.js
-  var $77 = require_export();
+  var $80 = require_export();
   var fill = require_array_fill();
   var addToUnscopables3 = require_add_to_unscopables();
-  $77({ target: "Array", proto: true }, {
+  $80({ target: "Array", proto: true }, {
     fill: fill
   });
   addToUnscopables3("fill");
 
   // node_modules/lit-html/lit-html.js
   var _t$litHtmlVersions;
-  function _inherits22(subClass, superClass) {
+  function _inherits23(subClass, superClass) {
     if (typeof superClass !== "function" && superClass !== null) {
       throw new TypeError("Super expression must either be null or a function");
     }
     subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } });
     Object.defineProperty(subClass, "prototype", { writable: false });
     if (superClass)
-      _setPrototypeOf22(subClass, superClass);
+      _setPrototypeOf23(subClass, superClass);
   }
-  function _setPrototypeOf22(o4, p3) {
-    _setPrototypeOf22 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf25(o5, p4) {
+  function _setPrototypeOf23(o4, p3) {
+    _setPrototypeOf23 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf26(o5, p4) {
       o5.__proto__ = p4;
       return o5;
     };
-    return _setPrototypeOf22(o4, p3);
+    return _setPrototypeOf23(o4, p3);
   }
-  function _createSuper22(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct22();
+  function _createSuper23(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct23();
     return function _createSuperInternal() {
-      var Super = _getPrototypeOf22(Derived), result;
+      var Super = _getPrototypeOf23(Derived), result;
       if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf22(this).constructor;
+        var NewTarget = _getPrototypeOf23(this).constructor;
         result = Reflect.construct(Super, arguments, NewTarget);
       } else {
         result = Super.apply(this, arguments);
       }
-      return _possibleConstructorReturn22(this, result);
+      return _possibleConstructorReturn23(this, result);
     };
   }
-  function _possibleConstructorReturn22(self2, call8) {
-    if (call8 && (_typeof43(call8) === "object" || typeof call8 === "function")) {
+  function _possibleConstructorReturn23(self2, call8) {
+    if (call8 && (_typeof46(call8) === "object" || typeof call8 === "function")) {
       return call8;
     } else if (call8 !== void 0) {
       throw new TypeError("Derived constructors may only return object or undefined");
     }
-    return _assertThisInitialized22(self2);
+    return _assertThisInitialized23(self2);
   }
-  function _assertThisInitialized22(self2) {
+  function _assertThisInitialized23(self2) {
     if (self2 === void 0) {
       throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
     }
     return self2;
   }
-  function _isNativeReflectConstruct22() {
+  function _isNativeReflectConstruct23() {
     if (typeof Reflect === "undefined" || !Reflect.construct)
       return false;
     if (Reflect.construct.sham)
@@ -19647,11 +20908,11 @@
       return false;
     }
   }
-  function _getPrototypeOf22(o4) {
-    _getPrototypeOf22 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf25(o5) {
+  function _getPrototypeOf23(o4) {
+    _getPrototypeOf23 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf26(o5) {
       return o5.__proto__ || Object.getPrototypeOf(o5);
     };
-    return _getPrototypeOf22(o4);
+    return _getPrototypeOf23(o4);
   }
   function _createForOfIteratorHelper4(o4, allowArrayLike) {
     var it = typeof Symbol !== "undefined" && o4[Symbol.iterator] || o4["@@iterator"];
@@ -19762,52 +21023,52 @@
     if (Array.isArray(arr))
       return arr;
   }
-  function _classCallCheck37(instance, Constructor) {
+  function _classCallCheck39(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties37(target, props) {
+  function _defineProperties39(target, props) {
     for (var i5 = 0; i5 < props.length; i5++) {
       var descriptor = props[i5];
       descriptor.enumerable = descriptor.enumerable || false;
       descriptor.configurable = true;
       if ("value" in descriptor)
         descriptor.writable = true;
-      Object.defineProperty(target, _toPropertyKey38(descriptor.key), descriptor);
+      Object.defineProperty(target, _toPropertyKey40(descriptor.key), descriptor);
     }
   }
-  function _createClass37(Constructor, protoProps, staticProps) {
+  function _createClass39(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties37(Constructor.prototype, protoProps);
+      _defineProperties39(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties37(Constructor, staticProps);
+      _defineProperties39(Constructor, staticProps);
     Object.defineProperty(Constructor, "prototype", { writable: false });
     return Constructor;
   }
-  function _toPropertyKey38(arg) {
-    var key = _toPrimitive38(arg, "string");
-    return _typeof43(key) === "symbol" ? key : String(key);
+  function _toPropertyKey40(arg) {
+    var key = _toPrimitive40(arg, "string");
+    return _typeof46(key) === "symbol" ? key : String(key);
   }
-  function _toPrimitive38(input, hint) {
-    if (_typeof43(input) !== "object" || input === null)
+  function _toPrimitive40(input, hint) {
+    if (_typeof46(input) !== "object" || input === null)
       return input;
     var prim = input[Symbol.toPrimitive];
     if (prim !== void 0) {
       var res = prim.call(input, hint || "default");
-      if (_typeof43(res) !== "object")
+      if (_typeof46(res) !== "object")
         return res;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return (hint === "string" ? String : Number)(input);
   }
-  function _typeof43(obj) {
+  function _typeof46(obj) {
     "@babel/helpers - typeof";
-    return _typeof43 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
+    return _typeof46 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
       return typeof obj2;
     } : function(obj2) {
       return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-    }, _typeof43(obj);
+    }, _typeof46(obj);
   }
   var t2 = globalThis;
   var i4 = t2.trustedTypes;
@@ -19825,7 +21086,7 @@
     return r4.createComment("");
   };
   var c3 = function c4(t3) {
-    return null === t3 || "object" != _typeof43(t3) && "function" != typeof t3;
+    return null === t3 || "object" != _typeof46(t3) && "function" != typeof t3;
   };
   var a2 = Array.isArray;
   var u2 = function u3(t3) {
@@ -19838,7 +21099,7 @@
   var m = RegExp(">|".concat(d3, "(?:([^\\s\"'>=/]+)(").concat(d3, "*=").concat(d3, "*(?:[^ 	\n\f\r\"'`<>=]|(\"|')|))|$)"), "g");
   var p2 = /'/g;
   var g = /"/g;
-  var $78 = /^(?:script|style|textarea|title)$/i;
+  var $81 = /^(?:script|style|textarea|title)$/i;
   var y2 = function y3(t3) {
     return function(i5) {
       for (var _len = arguments.length, s4 = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
@@ -19870,7 +21131,7 @@
       var _a = void 0, _u = void 0, _d = -1, _y = 0;
       for (; _y < _s.length && (c5.lastIndex = _y, _u = c5.exec(_s), null !== _u); ) {
         var _r;
-        _y = c5.lastIndex, c5 === f3 ? "!--" === _u[1] ? c5 = v : void 0 !== _u[1] ? c5 = _ : void 0 !== _u[2] ? ($78.test(_u[2]) && (r6 = RegExp("</" + _u[2], "g")), c5 = m) : void 0 !== _u[3] && (c5 = m) : c5 === m ? ">" === _u[0] ? (c5 = (_r = r6) !== null && _r !== void 0 ? _r : f3, _d = -1) : void 0 === _u[1] ? _d = -2 : (_d = c5.lastIndex - _u[2].length, _a = _u[1], c5 = void 0 === _u[3] ? m : '"' === _u[3] ? g : p2) : c5 === g || c5 === p2 ? c5 = m : c5 === v || c5 === _ ? c5 = f3 : (c5 = m, r6 = void 0);
+        _y = c5.lastIndex, c5 === f3 ? "!--" === _u[1] ? c5 = v : void 0 !== _u[1] ? c5 = _ : void 0 !== _u[2] ? ($81.test(_u[2]) && (r6 = RegExp("</" + _u[2], "g")), c5 = m) : void 0 !== _u[3] && (c5 = m) : c5 === m ? ">" === _u[0] ? (c5 = (_r = r6) !== null && _r !== void 0 ? _r : f3, _d = -1) : void 0 === _u[1] ? _d = -2 : (_d = c5.lastIndex - _u[2].length, _a = _u[1], c5 = void 0 === _u[3] ? m : '"' === _u[3] ? g : p2) : c5 === g || c5 === p2 ? c5 = m : c5 === v || c5 === _ ? c5 = f3 : (c5 = m, r6 = void 0);
       }
       var _x = c5 === m && t3[_i + 1].startsWith("/>") ? " " : "";
       l4 += c5 === f3 ? _s + n3 : _d >= 0 ? (o4.push(_a), _s.slice(0, _d) + e3 + _s.slice(_d) + h2 + _x) : _s + h2 + (-2 === _d ? _i : _x);
@@ -19880,7 +21141,7 @@
   var V = /* @__PURE__ */ function() {
     function V2(_ref, n4) {
       var t3 = _ref.strings, s4 = _ref._$litType$;
-      _classCallCheck37(this, V2);
+      _classCallCheck39(this, V2);
       var r6;
       this.parts = [];
       var c5 = 0, a3 = 0;
@@ -19917,7 +21178,7 @@
               _iterator.f();
             }
           }
-          if ($78.test(r6.tagName)) {
+          if ($81.test(r6.tagName)) {
             var _t3 = r6.textContent.split(h2), _s3 = _t3.length - 1;
             if (_s3 > 0) {
               r6.textContent = i4 ? i4.emptyScript : "";
@@ -19946,7 +21207,7 @@
         c5++;
       }
     }
-    _createClass37(V2, null, [{
+    _createClass39(V2, null, [{
       key: "createElement",
       value: function createElement(t3, i5) {
         var s4 = r4.createElement("template");
@@ -19967,10 +21228,10 @@
   }
   var S3 = /* @__PURE__ */ function() {
     function S4(t3, i5) {
-      _classCallCheck37(this, S4);
+      _classCallCheck39(this, S4);
       this._$AV = [], this._$AN = void 0, this._$AD = t3, this._$AM = i5;
     }
-    _createClass37(S4, [{
+    _createClass39(S4, [{
       key: "parentNode",
       get: function get3() {
         return this._$AM.parentNode;
@@ -20019,10 +21280,10 @@
   var M = /* @__PURE__ */ function() {
     function M2(t3, i5, s4, e4) {
       var _e$isConnected;
-      _classCallCheck37(this, M2);
+      _classCallCheck39(this, M2);
       this.type = 2, this._$AH = T, this._$AN = void 0, this._$AA = t3, this._$AB = i5, this._$AM = s4, this.options = e4, this._$Cv = (_e$isConnected = e4 === null || e4 === void 0 ? void 0 : e4.isConnected) !== null && _e$isConnected !== void 0 ? _e$isConnected : true;
     }
-    _createClass37(M2, [{
+    _createClass39(M2, [{
       key: "_$AU",
       get: function get3() {
         var _this$_$AM$_$AU, _this$_$AM;
@@ -20126,10 +21387,10 @@
   }();
   var R = /* @__PURE__ */ function() {
     function R2(t3, i5, s4, e4, h3) {
-      _classCallCheck37(this, R2);
+      _classCallCheck39(this, R2);
       this.type = 1, this._$AH = T, this._$AN = void 0, this.element = t3, this.name = i5, this._$AM = e4, this.options = h3, s4.length > 2 || "" !== s4[0] || "" !== s4[1] ? (this._$AH = Array(s4.length - 1).fill(new String()), this.strings = s4) : this._$AH = T;
     }
-    _createClass37(R2, [{
+    _createClass39(R2, [{
       key: "tagName",
       get: function get3() {
         return this.element.tagName;
@@ -20168,15 +21429,15 @@
     return R2;
   }();
   var k = /* @__PURE__ */ function(_R) {
-    _inherits22(k2, _R);
-    var _super = _createSuper22(k2);
+    _inherits23(k2, _R);
+    var _super = _createSuper23(k2);
     function k2() {
       var _this;
-      _classCallCheck37(this, k2);
+      _classCallCheck39(this, k2);
       _this = _super.apply(this, arguments), _this.type = 3;
       return _this;
     }
-    _createClass37(k2, [{
+    _createClass39(k2, [{
       key: "j",
       value: function j3(t3) {
         this.element[this.name] = t3 === T ? void 0 : t3;
@@ -20185,15 +21446,15 @@
     return k2;
   }(R);
   var H = /* @__PURE__ */ function(_R2) {
-    _inherits22(H2, _R2);
-    var _super2 = _createSuper22(H2);
+    _inherits23(H2, _R2);
+    var _super2 = _createSuper23(H2);
     function H2() {
       var _this2;
-      _classCallCheck37(this, H2);
+      _classCallCheck39(this, H2);
       _this2 = _super2.apply(this, arguments), _this2.type = 4;
       return _this2;
     }
-    _createClass37(H2, [{
+    _createClass39(H2, [{
       key: "j",
       value: function j3(t3) {
         this.element.toggleAttribute(this.name, !!t3 && t3 !== T);
@@ -20202,15 +21463,15 @@
     return H2;
   }(R);
   var I = /* @__PURE__ */ function(_R3) {
-    _inherits22(I2, _R3);
-    var _super3 = _createSuper22(I2);
+    _inherits23(I2, _R3);
+    var _super3 = _createSuper23(I2);
     function I2(t3, i5, s4, e4, h3) {
       var _this3;
-      _classCallCheck37(this, I2);
+      _classCallCheck39(this, I2);
       _this3 = _super3.call(this, t3, i5, s4, e4, h3), _this3.type = 5;
       return _this3;
     }
-    _createClass37(I2, [{
+    _createClass39(I2, [{
       key: "_$AI",
       value: function _$AI(t3) {
         var _N;
@@ -20231,10 +21492,10 @@
   }(R);
   var L = /* @__PURE__ */ function() {
     function L2(t3, i5, s4) {
-      _classCallCheck37(this, L2);
+      _classCallCheck39(this, L2);
       this.element = t3, this.type = 6, this._$AN = void 0, this._$AM = i5, this.options = s4;
     }
-    _createClass37(L2, [{
+    _createClass39(L2, [{
       key: "_$AU",
       get: function get3() {
         return this._$AM._$AU;
@@ -20262,51 +21523,51 @@
   };
 
   // node_modules/lit-element/lit-element.js
-  var import_es_array_iterator44 = __toESM(require_es_array_iterator(), 1);
-  function _typeof44(obj) {
+  var import_es_array_iterator47 = __toESM(require_es_array_iterator(), 1);
+  function _typeof47(obj) {
     "@babel/helpers - typeof";
-    return _typeof44 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
+    return _typeof47 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
       return typeof obj2;
     } : function(obj2) {
       return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-    }, _typeof44(obj);
+    }, _typeof47(obj);
   }
   var _globalThis$litElemen;
   var _globalThis$litElemen2;
-  function _classCallCheck38(instance, Constructor) {
+  function _classCallCheck40(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties38(target, props) {
+  function _defineProperties40(target, props) {
     for (var i5 = 0; i5 < props.length; i5++) {
       var descriptor = props[i5];
       descriptor.enumerable = descriptor.enumerable || false;
       descriptor.configurable = true;
       if ("value" in descriptor)
         descriptor.writable = true;
-      Object.defineProperty(target, _toPropertyKey39(descriptor.key), descriptor);
+      Object.defineProperty(target, _toPropertyKey41(descriptor.key), descriptor);
     }
   }
-  function _createClass38(Constructor, protoProps, staticProps) {
+  function _createClass40(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties38(Constructor.prototype, protoProps);
+      _defineProperties40(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties38(Constructor, staticProps);
+      _defineProperties40(Constructor, staticProps);
     Object.defineProperty(Constructor, "prototype", { writable: false });
     return Constructor;
   }
-  function _toPropertyKey39(arg) {
-    var key = _toPrimitive39(arg, "string");
-    return _typeof44(key) === "symbol" ? key : String(key);
+  function _toPropertyKey41(arg) {
+    var key = _toPrimitive41(arg, "string");
+    return _typeof47(key) === "symbol" ? key : String(key);
   }
-  function _toPrimitive39(input, hint) {
-    if (_typeof44(input) !== "object" || input === null)
+  function _toPrimitive41(input, hint) {
+    if (_typeof47(input) !== "object" || input === null)
       return input;
     var prim = input[Symbol.toPrimitive];
     if (prim !== void 0) {
       var res = prim.call(input, hint || "default");
-      if (_typeof44(res) !== "object")
+      if (_typeof47(res) !== "object")
         return res;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
@@ -20331,502 +21592,11 @@
   }
   function _superPropBase2(object, property) {
     while (!Object.prototype.hasOwnProperty.call(object, property)) {
-      object = _getPrototypeOf23(object);
+      object = _getPrototypeOf24(object);
       if (object === null)
         break;
     }
     return object;
-  }
-  function _inherits23(subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } });
-    Object.defineProperty(subClass, "prototype", { writable: false });
-    if (superClass)
-      _setPrototypeOf23(subClass, superClass);
-  }
-  function _setPrototypeOf23(o4, p3) {
-    _setPrototypeOf23 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf25(o5, p4) {
-      o5.__proto__ = p4;
-      return o5;
-    };
-    return _setPrototypeOf23(o4, p3);
-  }
-  function _createSuper23(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct23();
-    return function _createSuperInternal() {
-      var Super = _getPrototypeOf23(Derived), result;
-      if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf23(this).constructor;
-        result = Reflect.construct(Super, arguments, NewTarget);
-      } else {
-        result = Super.apply(this, arguments);
-      }
-      return _possibleConstructorReturn23(this, result);
-    };
-  }
-  function _possibleConstructorReturn23(self2, call8) {
-    if (call8 && (_typeof44(call8) === "object" || typeof call8 === "function")) {
-      return call8;
-    } else if (call8 !== void 0) {
-      throw new TypeError("Derived constructors may only return object or undefined");
-    }
-    return _assertThisInitialized23(self2);
-  }
-  function _assertThisInitialized23(self2) {
-    if (self2 === void 0) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-    return self2;
-  }
-  function _isNativeReflectConstruct23() {
-    if (typeof Reflect === "undefined" || !Reflect.construct)
-      return false;
-    if (Reflect.construct.sham)
-      return false;
-    if (typeof Proxy === "function")
-      return true;
-    try {
-      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
-      }));
-      return true;
-    } catch (e4) {
-      return false;
-    }
-  }
-  function _getPrototypeOf23(o4) {
-    _getPrototypeOf23 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf25(o5) {
-      return o5.__proto__ || Object.getPrototypeOf(o5);
-    };
-    return _getPrototypeOf23(o4);
-  }
-  var s3 = /* @__PURE__ */ function(_t) {
-    _inherits23(s4, _t);
-    var _super = _createSuper23(s4);
-    function s4() {
-      var _this;
-      _classCallCheck38(this, s4);
-      _this = _super.apply(this, arguments), _this.renderOptions = {
-        host: _assertThisInitialized23(_this)
-      }, _this._$Do = void 0;
-      return _this;
-    }
-    _createClass38(s4, [{
-      key: "createRenderRoot",
-      value: function createRenderRoot() {
-        var _this$renderOptions, _this$renderOptions$r;
-        var t3 = _get2(_getPrototypeOf23(s4.prototype), "createRenderRoot", this).call(this);
-        return (_this$renderOptions$r = (_this$renderOptions = this.renderOptions).renderBefore) !== null && _this$renderOptions$r !== void 0 ? _this$renderOptions$r : _this$renderOptions.renderBefore = t3.firstChild, t3;
-      }
-    }, {
-      key: "update",
-      value: function update(t3) {
-        var i5 = this.render();
-        this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), _get2(_getPrototypeOf23(s4.prototype), "update", this).call(this, t3), this._$Do = j(i5, this.renderRoot, this.renderOptions);
-      }
-    }, {
-      key: "connectedCallback",
-      value: function connectedCallback() {
-        var _this$_$Do;
-        _get2(_getPrototypeOf23(s4.prototype), "connectedCallback", this).call(this), (_this$_$Do = this._$Do) === null || _this$_$Do === void 0 ? void 0 : _this$_$Do.setConnected(true);
-      }
-    }, {
-      key: "disconnectedCallback",
-      value: function disconnectedCallback() {
-        var _this$_$Do2;
-        _get2(_getPrototypeOf23(s4.prototype), "disconnectedCallback", this).call(this), (_this$_$Do2 = this._$Do) === null || _this$_$Do2 === void 0 ? void 0 : _this$_$Do2.setConnected(false);
-      }
-    }, {
-      key: "render",
-      value: function render() {
-        return w;
-      }
-    }]);
-    return s4;
-  }(b);
-  s3._$litElement$ = true, s3["finalized", "finalized"] = true, (_globalThis$litElemen = globalThis.litElementHydrateSupport) === null || _globalThis$litElemen === void 0 ? void 0 : _globalThis$litElemen.call(globalThis, {
-    LitElement: s3
-  });
-  var r5 = globalThis.litElementPolyfillSupport;
-  r5 === null || r5 === void 0 ? void 0 : r5({
-    LitElement: s3
-  });
-  ((_globalThis$litElemen2 = globalThis.litElementVersions) !== null && _globalThis$litElemen2 !== void 0 ? _globalThis$litElemen2 : globalThis.litElementVersions = []).push("4.0.0");
-
-  // srcts/src/components/errorConsole.ts
-  function _typeof45(obj) {
-    "@babel/helpers - typeof";
-    return _typeof45 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
-      return typeof obj2;
-    } : function(obj2) {
-      return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-    }, _typeof45(obj);
-  }
-  var _templateObject;
-  var _templateObject2;
-  var _templateObject3;
-  var _templateObject4;
-  var _templateObject5;
-  function _wrapNativeSuper2(Class) {
-    var _cache = typeof Map === "function" ? /* @__PURE__ */ new Map() : void 0;
-    _wrapNativeSuper2 = function _wrapNativeSuper3(Class2) {
-      if (Class2 === null || !_isNativeFunction2(Class2))
-        return Class2;
-      if (typeof Class2 !== "function") {
-        throw new TypeError("Super expression must either be null or a function");
-      }
-      if (typeof _cache !== "undefined") {
-        if (_cache.has(Class2))
-          return _cache.get(Class2);
-        _cache.set(Class2, Wrapper);
-      }
-      function Wrapper() {
-        return _construct2(Class2, arguments, _getPrototypeOf24(this).constructor);
-      }
-      Wrapper.prototype = Object.create(Class2.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } });
-      return _setPrototypeOf24(Wrapper, Class2);
-    };
-    return _wrapNativeSuper2(Class);
-  }
-  function _construct2(Parent, args, Class) {
-    if (_isNativeReflectConstruct24()) {
-      _construct2 = Reflect.construct.bind();
-    } else {
-      _construct2 = function _construct3(Parent2, args2, Class2) {
-        var a3 = [null];
-        a3.push.apply(a3, args2);
-        var Constructor = Function.bind.apply(Parent2, a3);
-        var instance = new Constructor();
-        if (Class2)
-          _setPrototypeOf24(instance, Class2.prototype);
-        return instance;
-      };
-    }
-    return _construct2.apply(null, arguments);
-  }
-  function _isNativeFunction2(fn) {
-    return Function.toString.call(fn).indexOf("[native code]") !== -1;
-  }
-  function _regeneratorRuntime10() {
-    "use strict";
-    _regeneratorRuntime10 = function _regeneratorRuntime16() {
-      return exports;
-    };
-    var exports = {}, Op = Object.prototype, hasOwn5 = Op.hasOwnProperty, defineProperty3 = Object.defineProperty || function(obj, key, desc) {
-      obj[key] = desc.value;
-    }, $Symbol = "function" == typeof Symbol ? Symbol : {}, iteratorSymbol = $Symbol.iterator || "@@iterator", asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator", toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
-    function define(obj, key, value) {
-      return Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }), obj[key];
-    }
-    try {
-      define({}, "");
-    } catch (err) {
-      define = function define2(obj, key, value) {
-        return obj[key] = value;
-      };
-    }
-    function wrap(innerFn, outerFn, self2, tryLocsList) {
-      var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator, generator = Object.create(protoGenerator.prototype), context = new Context(tryLocsList || []);
-      return defineProperty3(generator, "_invoke", { value: makeInvokeMethod(innerFn, self2, context) }), generator;
-    }
-    function tryCatch(fn, obj, arg) {
-      try {
-        return { type: "normal", arg: fn.call(obj, arg) };
-      } catch (err) {
-        return { type: "throw", arg: err };
-      }
-    }
-    exports.wrap = wrap;
-    var ContinueSentinel = {};
-    function Generator() {
-    }
-    function GeneratorFunction() {
-    }
-    function GeneratorFunctionPrototype() {
-    }
-    var IteratorPrototype = {};
-    define(IteratorPrototype, iteratorSymbol, function() {
-      return this;
-    });
-    var getProto = Object.getPrototypeOf, NativeIteratorPrototype = getProto && getProto(getProto(values2([])));
-    NativeIteratorPrototype && NativeIteratorPrototype !== Op && hasOwn5.call(NativeIteratorPrototype, iteratorSymbol) && (IteratorPrototype = NativeIteratorPrototype);
-    var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(IteratorPrototype);
-    function defineIteratorMethods(prototype) {
-      ["next", "throw", "return"].forEach(function(method) {
-        define(prototype, method, function(arg) {
-          return this._invoke(method, arg);
-        });
-      });
-    }
-    function AsyncIterator(generator, PromiseImpl) {
-      function invoke(method, arg, resolve, reject) {
-        var record = tryCatch(generator[method], generator, arg);
-        if ("throw" !== record.type) {
-          var result = record.arg, value = result.value;
-          return value && "object" == _typeof45(value) && hasOwn5.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function(value2) {
-            invoke("next", value2, resolve, reject);
-          }, function(err) {
-            invoke("throw", err, resolve, reject);
-          }) : PromiseImpl.resolve(value).then(function(unwrapped) {
-            result.value = unwrapped, resolve(result);
-          }, function(error) {
-            return invoke("throw", error, resolve, reject);
-          });
-        }
-        reject(record.arg);
-      }
-      var previousPromise;
-      defineProperty3(this, "_invoke", { value: function value(method, arg) {
-        function callInvokeWithMethodAndArg() {
-          return new PromiseImpl(function(resolve, reject) {
-            invoke(method, arg, resolve, reject);
-          });
-        }
-        return previousPromise = previousPromise ? previousPromise.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg();
-      } });
-    }
-    function makeInvokeMethod(innerFn, self2, context) {
-      var state = "suspendedStart";
-      return function(method, arg) {
-        if ("executing" === state)
-          throw new Error("Generator is already running");
-        if ("completed" === state) {
-          if ("throw" === method)
-            throw arg;
-          return doneResult();
-        }
-        for (context.method = method, context.arg = arg; ; ) {
-          var delegate = context.delegate;
-          if (delegate) {
-            var delegateResult = maybeInvokeDelegate(delegate, context);
-            if (delegateResult) {
-              if (delegateResult === ContinueSentinel)
-                continue;
-              return delegateResult;
-            }
-          }
-          if ("next" === context.method)
-            context.sent = context._sent = context.arg;
-          else if ("throw" === context.method) {
-            if ("suspendedStart" === state)
-              throw state = "completed", context.arg;
-            context.dispatchException(context.arg);
-          } else
-            "return" === context.method && context.abrupt("return", context.arg);
-          state = "executing";
-          var record = tryCatch(innerFn, self2, context);
-          if ("normal" === record.type) {
-            if (state = context.done ? "completed" : "suspendedYield", record.arg === ContinueSentinel)
-              continue;
-            return { value: record.arg, done: context.done };
-          }
-          "throw" === record.type && (state = "completed", context.method = "throw", context.arg = record.arg);
-        }
-      };
-    }
-    function maybeInvokeDelegate(delegate, context) {
-      var methodName = context.method, method = delegate.iterator[methodName];
-      if (void 0 === method)
-        return context.delegate = null, "throw" === methodName && delegate.iterator.return && (context.method = "return", context.arg = void 0, maybeInvokeDelegate(delegate, context), "throw" === context.method) || "return" !== methodName && (context.method = "throw", context.arg = new TypeError("The iterator does not provide a '" + methodName + "' method")), ContinueSentinel;
-      var record = tryCatch(method, delegate.iterator, context.arg);
-      if ("throw" === record.type)
-        return context.method = "throw", context.arg = record.arg, context.delegate = null, ContinueSentinel;
-      var info = record.arg;
-      return info ? info.done ? (context[delegate.resultName] = info.value, context.next = delegate.nextLoc, "return" !== context.method && (context.method = "next", context.arg = void 0), context.delegate = null, ContinueSentinel) : info : (context.method = "throw", context.arg = new TypeError("iterator result is not an object"), context.delegate = null, ContinueSentinel);
-    }
-    function pushTryEntry(locs) {
-      var entry = { tryLoc: locs[0] };
-      1 in locs && (entry.catchLoc = locs[1]), 2 in locs && (entry.finallyLoc = locs[2], entry.afterLoc = locs[3]), this.tryEntries.push(entry);
-    }
-    function resetTryEntry(entry) {
-      var record = entry.completion || {};
-      record.type = "normal", delete record.arg, entry.completion = record;
-    }
-    function Context(tryLocsList) {
-      this.tryEntries = [{ tryLoc: "root" }], tryLocsList.forEach(pushTryEntry, this), this.reset(true);
-    }
-    function values2(iterable) {
-      if (iterable) {
-        var iteratorMethod = iterable[iteratorSymbol];
-        if (iteratorMethod)
-          return iteratorMethod.call(iterable);
-        if ("function" == typeof iterable.next)
-          return iterable;
-        if (!isNaN(iterable.length)) {
-          var i5 = -1, next2 = function next3() {
-            for (; ++i5 < iterable.length; )
-              if (hasOwn5.call(iterable, i5))
-                return next3.value = iterable[i5], next3.done = false, next3;
-            return next3.value = void 0, next3.done = true, next3;
-          };
-          return next2.next = next2;
-        }
-      }
-      return { next: doneResult };
-    }
-    function doneResult() {
-      return { value: void 0, done: true };
-    }
-    return GeneratorFunction.prototype = GeneratorFunctionPrototype, defineProperty3(Gp, "constructor", { value: GeneratorFunctionPrototype, configurable: true }), defineProperty3(GeneratorFunctionPrototype, "constructor", { value: GeneratorFunction, configurable: true }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, toStringTagSymbol, "GeneratorFunction"), exports.isGeneratorFunction = function(genFun) {
-      var ctor = "function" == typeof genFun && genFun.constructor;
-      return !!ctor && (ctor === GeneratorFunction || "GeneratorFunction" === (ctor.displayName || ctor.name));
-    }, exports.mark = function(genFun) {
-      return Object.setPrototypeOf ? Object.setPrototypeOf(genFun, GeneratorFunctionPrototype) : (genFun.__proto__ = GeneratorFunctionPrototype, define(genFun, toStringTagSymbol, "GeneratorFunction")), genFun.prototype = Object.create(Gp), genFun;
-    }, exports.awrap = function(arg) {
-      return { __await: arg };
-    }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, asyncIteratorSymbol, function() {
-      return this;
-    }), exports.AsyncIterator = AsyncIterator, exports.async = function(innerFn, outerFn, self2, tryLocsList, PromiseImpl) {
-      void 0 === PromiseImpl && (PromiseImpl = Promise);
-      var iter = new AsyncIterator(wrap(innerFn, outerFn, self2, tryLocsList), PromiseImpl);
-      return exports.isGeneratorFunction(outerFn) ? iter : iter.next().then(function(result) {
-        return result.done ? result.value : iter.next();
-      });
-    }, defineIteratorMethods(Gp), define(Gp, toStringTagSymbol, "Generator"), define(Gp, iteratorSymbol, function() {
-      return this;
-    }), define(Gp, "toString", function() {
-      return "[object Generator]";
-    }), exports.keys = function(val) {
-      var object = Object(val), keys2 = [];
-      for (var key in object)
-        keys2.push(key);
-      return keys2.reverse(), function next2() {
-        for (; keys2.length; ) {
-          var key2 = keys2.pop();
-          if (key2 in object)
-            return next2.value = key2, next2.done = false, next2;
-        }
-        return next2.done = true, next2;
-      };
-    }, exports.values = values2, Context.prototype = { constructor: Context, reset: function reset(skipTempReset) {
-      if (this.prev = 0, this.next = 0, this.sent = this._sent = void 0, this.done = false, this.delegate = null, this.method = "next", this.arg = void 0, this.tryEntries.forEach(resetTryEntry), !skipTempReset)
-        for (var name in this)
-          "t" === name.charAt(0) && hasOwn5.call(this, name) && !isNaN(+name.slice(1)) && (this[name] = void 0);
-    }, stop: function stop() {
-      this.done = true;
-      var rootRecord = this.tryEntries[0].completion;
-      if ("throw" === rootRecord.type)
-        throw rootRecord.arg;
-      return this.rval;
-    }, dispatchException: function dispatchException(exception) {
-      if (this.done)
-        throw exception;
-      var context = this;
-      function handle(loc, caught) {
-        return record.type = "throw", record.arg = exception, context.next = loc, caught && (context.method = "next", context.arg = void 0), !!caught;
-      }
-      for (var i5 = this.tryEntries.length - 1; i5 >= 0; --i5) {
-        var entry = this.tryEntries[i5], record = entry.completion;
-        if ("root" === entry.tryLoc)
-          return handle("end");
-        if (entry.tryLoc <= this.prev) {
-          var hasCatch = hasOwn5.call(entry, "catchLoc"), hasFinally = hasOwn5.call(entry, "finallyLoc");
-          if (hasCatch && hasFinally) {
-            if (this.prev < entry.catchLoc)
-              return handle(entry.catchLoc, true);
-            if (this.prev < entry.finallyLoc)
-              return handle(entry.finallyLoc);
-          } else if (hasCatch) {
-            if (this.prev < entry.catchLoc)
-              return handle(entry.catchLoc, true);
-          } else {
-            if (!hasFinally)
-              throw new Error("try statement without catch or finally");
-            if (this.prev < entry.finallyLoc)
-              return handle(entry.finallyLoc);
-          }
-        }
-      }
-    }, abrupt: function abrupt(type, arg) {
-      for (var i5 = this.tryEntries.length - 1; i5 >= 0; --i5) {
-        var entry = this.tryEntries[i5];
-        if (entry.tryLoc <= this.prev && hasOwn5.call(entry, "finallyLoc") && this.prev < entry.finallyLoc) {
-          var finallyEntry = entry;
-          break;
-        }
-      }
-      finallyEntry && ("break" === type || "continue" === type) && finallyEntry.tryLoc <= arg && arg <= finallyEntry.finallyLoc && (finallyEntry = null);
-      var record = finallyEntry ? finallyEntry.completion : {};
-      return record.type = type, record.arg = arg, finallyEntry ? (this.method = "next", this.next = finallyEntry.finallyLoc, ContinueSentinel) : this.complete(record);
-    }, complete: function complete(record, afterLoc) {
-      if ("throw" === record.type)
-        throw record.arg;
-      return "break" === record.type || "continue" === record.type ? this.next = record.arg : "return" === record.type ? (this.rval = this.arg = record.arg, this.method = "return", this.next = "end") : "normal" === record.type && afterLoc && (this.next = afterLoc), ContinueSentinel;
-    }, finish: function finish(finallyLoc) {
-      for (var i5 = this.tryEntries.length - 1; i5 >= 0; --i5) {
-        var entry = this.tryEntries[i5];
-        if (entry.finallyLoc === finallyLoc)
-          return this.complete(entry.completion, entry.afterLoc), resetTryEntry(entry), ContinueSentinel;
-      }
-    }, catch: function _catch(tryLoc) {
-      for (var i5 = this.tryEntries.length - 1; i5 >= 0; --i5) {
-        var entry = this.tryEntries[i5];
-        if (entry.tryLoc === tryLoc) {
-          var record = entry.completion;
-          if ("throw" === record.type) {
-            var thrown = record.arg;
-            resetTryEntry(entry);
-          }
-          return thrown;
-        }
-      }
-      throw new Error("illegal catch attempt");
-    }, delegateYield: function delegateYield(iterable, resultName, nextLoc) {
-      return this.delegate = { iterator: values2(iterable), resultName: resultName, nextLoc: nextLoc }, "next" === this.method && (this.arg = void 0), ContinueSentinel;
-    } }, exports;
-  }
-  function asyncGeneratorStep10(gen, resolve, reject, _next, _throw, key, arg) {
-    try {
-      var info = gen[key](arg);
-      var value = info.value;
-    } catch (error) {
-      reject(error);
-      return;
-    }
-    if (info.done) {
-      resolve(value);
-    } else {
-      Promise.resolve(value).then(_next, _throw);
-    }
-  }
-  function _asyncToGenerator10(fn) {
-    return function() {
-      var self2 = this, args = arguments;
-      return new Promise(function(resolve, reject) {
-        var gen = fn.apply(self2, args);
-        function _next(value) {
-          asyncGeneratorStep10(gen, resolve, reject, _next, _throw, "next", value);
-        }
-        function _throw(err) {
-          asyncGeneratorStep10(gen, resolve, reject, _next, _throw, "throw", err);
-        }
-        _next(void 0);
-      });
-    };
-  }
-  function _classCallCheck39(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties39(target, props) {
-    for (var i5 = 0; i5 < props.length; i5++) {
-      var descriptor = props[i5];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, _toPropertyKey40(descriptor.key), descriptor);
-    }
-  }
-  function _createClass39(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties39(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties39(Constructor, staticProps);
-    Object.defineProperty(Constructor, "prototype", { writable: false });
-    return Constructor;
   }
   function _inherits24(subClass, superClass) {
     if (typeof superClass !== "function" && superClass !== null) {
@@ -20838,7 +21608,7 @@
       _setPrototypeOf24(subClass, superClass);
   }
   function _setPrototypeOf24(o4, p3) {
-    _setPrototypeOf24 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf25(o5, p4) {
+    _setPrototypeOf24 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf26(o5, p4) {
       o5.__proto__ = p4;
       return o5;
     };
@@ -20858,7 +21628,7 @@
     };
   }
   function _possibleConstructorReturn24(self2, call8) {
-    if (call8 && (_typeof45(call8) === "object" || typeof call8 === "function")) {
+    if (call8 && (_typeof47(call8) === "object" || typeof call8 === "function")) {
       return call8;
     } else if (call8 !== void 0) {
       throw new TypeError("Derived constructors may only return object or undefined");
@@ -20887,1254 +21657,65 @@
     }
   }
   function _getPrototypeOf24(o4) {
-    _getPrototypeOf24 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf25(o5) {
+    _getPrototypeOf24 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf26(o5) {
       return o5.__proto__ || Object.getPrototypeOf(o5);
     };
     return _getPrototypeOf24(o4);
   }
-  function _defineProperty17(obj, key, value) {
-    key = _toPropertyKey40(key);
-    if (key in obj) {
-      Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
-    } else {
-      obj[key] = value;
+  var s3 = /* @__PURE__ */ function(_t) {
+    _inherits24(s4, _t);
+    var _super = _createSuper24(s4);
+    function s4() {
+      var _this;
+      _classCallCheck40(this, s4);
+      _this = _super.apply(this, arguments), _this.renderOptions = {
+        host: _assertThisInitialized24(_this)
+      }, _this._$Do = void 0;
+      return _this;
     }
-    return obj;
-  }
-  function _toPropertyKey40(arg) {
-    var key = _toPrimitive40(arg, "string");
-    return _typeof45(key) === "symbol" ? key : String(key);
-  }
-  function _toPrimitive40(input, hint) {
-    if (_typeof45(input) !== "object" || input === null)
-      return input;
-    var prim = input[Symbol.toPrimitive];
-    if (prim !== void 0) {
-      var res = prim.call(input, hint || "default");
-      if (_typeof45(res) !== "object")
-        return res;
-      throw new TypeError("@@toPrimitive must return a primitive value.");
-    }
-    return (hint === "string" ? String : Number)(input);
-  }
-  function _taggedTemplateLiteral(strings, raw) {
-    if (!raw) {
-      raw = strings.slice(0);
-    }
-    return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } }));
-  }
-  var buttonStyles = i(_templateObject || (_templateObject = _taggedTemplateLiteral(["\n  button {\n    background-color: transparent;\n    outline: none;\n    border-style: none;\n    padding: var(--space-3);\n    border-radius: var(--space-1);\n    font-size: 1.5rem;\n    background-color: inherit;\n    display: block;\n  }\n\n  button > svg {\n    display: block;\n  }\n"])));
-  var ShinyErrorConsole = /* @__PURE__ */ function(_LitElement) {
-    _inherits24(ShinyErrorConsole2, _LitElement);
-    var _super = _createSuper24(ShinyErrorConsole2);
-    function ShinyErrorConsole2() {
-      _classCallCheck39(this, ShinyErrorConsole2);
-      return _super.apply(this, arguments);
-    }
-    _createClass39(ShinyErrorConsole2, [{
-      key: "toggleCollapsed",
-      value: function toggleCollapsed() {
-        var _this$querySelector;
-        this.classList.toggle("collapsed");
-        (_this$querySelector = this.querySelector(".toggle-button")) === null || _this$querySelector === void 0 ? void 0 : _this$querySelector.blur();
+    _createClass40(s4, [{
+      key: "createRenderRoot",
+      value: function createRenderRoot() {
+        var _this$renderOptions, _this$renderOptions$r;
+        var t3 = _get2(_getPrototypeOf24(s4.prototype), "createRenderRoot", this).call(this);
+        return (_this$renderOptions$r = (_this$renderOptions = this.renderOptions).renderBefore) !== null && _this$renderOptions$r !== void 0 ? _this$renderOptions$r : _this$renderOptions.renderBefore = t3.firstChild, t3;
       }
     }, {
-      key: "handleDismissAll",
-      value: function handleDismissAll() {
-        var _this = this;
-        this.classList.add("leaving");
-        this.addEventListener("animationend", function() {
-          _this.remove();
-        });
+      key: "update",
+      value: function update(t3) {
+        var i5 = this.render();
+        this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), _get2(_getPrototypeOf24(s4.prototype), "update", this).call(this, t3), this._$Do = j(i5, this.renderRoot, this.renderOptions);
+      }
+    }, {
+      key: "connectedCallback",
+      value: function connectedCallback() {
+        var _this$_$Do;
+        _get2(_getPrototypeOf24(s4.prototype), "connectedCallback", this).call(this), (_this$_$Do = this._$Do) === null || _this$_$Do === void 0 ? void 0 : _this$_$Do.setConnected(true);
+      }
+    }, {
+      key: "disconnectedCallback",
+      value: function disconnectedCallback() {
+        var _this$_$Do2;
+        _get2(_getPrototypeOf24(s4.prototype), "disconnectedCallback", this).call(this), (_this$_$Do2 = this._$Do) === null || _this$_$Do2 === void 0 ? void 0 : _this$_$Do2.setConnected(false);
       }
     }, {
       key: "render",
       value: function render() {
-        return x(_templateObject2 || (_templateObject2 = _taggedTemplateLiteral([' <div class="header">\n        <span class="title"> Shiny Client Errors </span>\n        <button\n          class="close-button"\n          @click=', '\n          title="Dismiss all console messages and close console"\n        >\n          <svg\n            xmlns="http://www.w3.org/2000/svg"\n            fill="none"\n            viewBox="0 0 24 24"\n            stroke-width="1.5"\n            height="1em"\n            width="1em"\n            stroke="currentColor"\n            class="close-icon"\n          >\n            <path\n              stroke-linecap="round"\n              stroke-linejoin="round"\n              d="M6 18L18 6M6 6l12 12"\n            />\n          </svg>\n          Dismiss all\n        </button>\n        <button class="toggle-button" @click=', '>\n          <svg\n            xmlns="http://www.w3.org/2000/svg"\n            fill="none"\n            viewBox="0 0 24 24"\n            stroke-width="1.5"\n            height="1em"\n            width="1em"\n            stroke="currentColor"\n            class="toggle-icon"\n          >\n            <path\n              class="collapse"\n              stroke-linecap="round"\n              stroke-linejoin="round"\n              d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"\n            />\n          </svg>\n        </button>\n      </div>\n      <slot class="content"></slot>'])), this.handleDismissAll, this.toggleCollapsed);
+        return w;
       }
     }]);
-    return ShinyErrorConsole2;
-  }(s3);
-  _defineProperty17(ShinyErrorConsole, "styles", [i(_templateObject4 || (_templateObject4 = _taggedTemplateLiteral(["\n      :host {\n        /* These are all taken from open-props */\n        --space-1: 0.5rem;\n        --space-2: calc(var(--space-1) * 2);\n        --space-3: calc(var(--space-1) * 3);\n        --space-4: calc(var(--space-1) * 4);\n\n        --red-2: #ffc9c9;\n        --red-6: #fa5252;\n        --red-7: #f03e3e;\n        --red-8: #e03131;\n        --red-10: #b02525;\n        --red-11: #962020;\n        --red-12: #7d1a1a;\n\n        --gray-1: #f8f9fa;\n        --gray-2: #e9ecef;\n        --gray-3: #dee2e6;\n        --gray-4: #ced4da;\n        --gray-6: #868e96;\n        --gray-8: #6c757d;\n\n        --green-8: #51cf66;\n\n        --shadow-color: 220 3% 15%;\n        --shadow-strength: 1%;\n        --shadow-3: 0 -1px 3px 0 hsl(var(--shadow-color) /\n                calc(var(--shadow-strength) + 2%)),\n          0 1px 2px -5px hsl(var(--shadow-color) /\n                calc(var(--shadow-strength) + 2%)),\n          0 2px 5px -5px hsl(var(--shadow-color) /\n                calc(var(--shadow-strength) + 4%)),\n          0 4px 12px -5px hsl(var(--shadow-color) /\n                calc(var(--shadow-strength) + 5%)),\n          0 12px 15px -5px hsl(var(--shadow-color) /\n                calc(var(--shadow-strength) + 7%));\n\n        --ring-shadow: 0 0 0 1px var(--gray-2);\n\n        /* How fast should the message pop in and out of the screen? */\n        --animation-speed: 500ms;\n\n        /* Taken from open-props */\n        --ease-3: cubic-bezier(0.25, 0, 0.3, 1);\n        --animation-slide-in-left: slide-in-left var(--animation-speed)\n          var(--ease-3);\n\n        --animation-slide-out-left: slide-out-left var(--animation-speed)\n          var(--ease-3);\n        --modal-bg-color: white;\n\n        position: fixed;\n        top: var(--space-1);\n        right: var(--space-1);\n        z-index: 1000;\n\n        display: flex;\n        flex-direction: column;\n\n        background-color: var(--modal-bg-color);\n        border-radius: var(--space-1);\n\n        animation: var(--animation-slide-in-left);\n        box-shadow: var(--shadow-3), var(--ring-shadow);\n\n        /* Dont let the error console burst out of the viewport */\n        max-height: calc(100vh - 2 * var(--space-1));\n      }\n\n      @keyframes slide-in-left {\n        from {\n          transform: translateX(100%);\n        }\n      }\n      @keyframes slide-out-left {\n        to {\n          transform: translateX(100%);\n        }\n      }\n\n      :host(.leaving) {\n        animation: var(--animation-slide-out-left);\n      }\n\n      .header {\n        display: flex;\n        justify-content: flex-end;\n        align-items: flex-start;\n        gap: var(--space-2);\n      }\n\n      .title {\n        font-size: 1.6rem;\n        margin-right: auto;\n        padding: var(--space-3);\n        line-height: 1;\n        font-weight: 600;\n        color: var(--red-12);\n      }\n\n      ", "\n\n      button:hover {\n        background-color: var(--gray-2);\n      }\n\n      .toggle-button {\n        width: fit-content;\n        border: none;\n        aspect-ratio: 1;\n        border-color: var(--gray-4);\n      }\n\n      .close-button {\n        display: flex;\n        align-items: center;\n        color: var(--red-11);\n      }\n\n      .close-button > svg {\n        margin-right: 3px;\n      }\n\n      .toggle-button:focus {\n        outline: 1px solid black;\n      }\n\n      .toggle-icon {\n        transition: transform var(--animation-speed) ease-in-out;\n      }\n\n      :host(.collapsed) .toggle-icon {\n        transform: scaleX(-1) scaleY(-1);\n      }\n\n      :host(.collapsed) .close-button {\n        display: none;\n      }\n\n      .content {\n        display: block;\n        padding: var(--space-4);\n        padding-top: var(--space-2);\n        max-height: 100%;\n        overflow: auto;\n      }\n\n      :host(.collapsed) .content {\n        display: none;\n      }\n    "])), buttonStyles)]);
-  customElements.define("shiny-error-console", ShinyErrorConsole);
-  var ShinyErrorMessage = /* @__PURE__ */ function(_LitElement2) {
-    _inherits24(ShinyErrorMessage2, _LitElement2);
-    var _super2 = _createSuper24(ShinyErrorMessage2);
-    function ShinyErrorMessage2() {
-      var _this2;
-      _classCallCheck39(this, ShinyErrorMessage2);
-      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
-      _this2 = _super2.call.apply(_super2, [this].concat(args));
-      _defineProperty17(_assertThisInitialized24(_this2), "headline", "");
-      _defineProperty17(_assertThisInitialized24(_this2), "message", "");
-      return _this2;
-    }
-    _createClass39(ShinyErrorMessage2, [{
-      key: "copyErrorToClipboard",
-      value: function() {
-        var _copyErrorToClipboard = _asyncToGenerator10(/* @__PURE__ */ _regeneratorRuntime10().mark(function _callee() {
-          var _this3 = this;
-          return _regeneratorRuntime10().wrap(function _callee$(_context) {
-            while (1)
-              switch (_context.prev = _context.next) {
-                case 0:
-                  _context.next = 2;
-                  return navigator.clipboard.writeText(this.message);
-                case 2:
-                  this.classList.add("copy-success");
-                  setTimeout(function() {
-                    _this3.classList.remove("copy-success");
-                  }, 1e3);
-                case 4:
-                case "end":
-                  return _context.stop();
-              }
-          }, _callee, this);
-        }));
-        function copyErrorToClipboard() {
-          return _copyErrorToClipboard.apply(this, arguments);
-        }
-        return copyErrorToClipboard;
-      }()
-    }, {
-      key: "render",
-      value: function render() {
-        return x(_templateObject3 || (_templateObject3 = _taggedTemplateLiteral(['\n      <div class="container">\n        <div class="decoration-container">\n          <div class="vertical-line"></div>\n          <div class="dot"></div>\n        </div>\n        <div class="contents">\n          <h3>', '</h3>\n          <p class="error-message">', '</p>\n        </div>\n\n        <div class="actions">\n          <button\n            class="copy-button"\n            @click=', '\n            title="Copy error to clipboard"\n          >\n            <div class="copy-button-inner">\n              <svg\n                class="front"\n                xmlns="http://www.w3.org/2000/svg"\n                fill="none"\n                viewBox="0 0 24 24"\n                stroke-width="1.5"\n                stroke="currentColor"\n                height="1em"\n                width="1em"\n              >\n                <path\n                  stroke-linecap="round"\n                  stroke-linejoin="round"\n                  d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184"\n                />\n              </svg>\n\n              <svg\n                class="back"\n                xmlns="http://www.w3.org/2000/svg"\n                fill="none"\n                viewBox="0 0 24 24"\n                stroke-width="1.5"\n                stroke="currentColor"\n                height="1em"\n                width="1em"\n              >\n                <path\n                  stroke-linecap="round"\n                  stroke-linejoin="round"\n                  d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"\n                />\n              </svg>\n            </div>\n          </button>\n        </div>\n      </div>\n    '])), this.headline, this.message, this.copyErrorToClipboard);
-      }
-    }]);
-    return ShinyErrorMessage2;
-  }(s3);
-  _defineProperty17(ShinyErrorMessage, "properties", {
-    headline: {},
-    message: {}
+    return s4;
+  }(b);
+  s3._$litElement$ = true, s3["finalized", "finalized"] = true, (_globalThis$litElemen = globalThis.litElementHydrateSupport) === null || _globalThis$litElemen === void 0 ? void 0 : _globalThis$litElemen.call(globalThis, {
+    LitElement: s3
   });
-  _defineProperty17(ShinyErrorMessage, "styles", [i(_templateObject5 || (_templateObject5 = _taggedTemplateLiteral(['\n      :host {\n        color: var(--red-11);\n        display: block;\n        font-size: 1.4rem;\n\n        position: relative;\n        --icon-size: 1.5rem;\n\n        --padding-top: var(--space-1);\n        --padding-bottom: var(--space-3);\n\n        /* Reset box sizing */\n        box-sizing: border-box;\n      }\n\n      .container {\n        display: flex;\n        gap: var(--space-2);\n      }\n\n      .contents {\n        width: 40ch;\n        display: flex;\n        flex-direction: column;\n        gap: var(--space-1);\n        padding-bottom: var(--padding-bottom);\n        padding-top: var(--padding-top);\n      }\n\n      :host(:last-of-type) .contents {\n        --padding-bottom: var(--space-1);\n      }\n\n      .contents > h3 {\n        font-size: 1em;\n        font-weight: 500;\n        color: var(--red-12);\n      }\n\n      .contents > * {\n        margin-block: 0;\n      }\n\n      .error-message {\n        font-family: "Courier New", Courier, monospace;\n      }\n\n      .decoration-container {\n        flex-shrink: 0;\n        padding-inline: var(0.375rem);\n        position: relative;\n\n        --line-w: 2px;\n        --dot-size: 1rem;\n      }\n\n      :host(:hover) .decoration-container {\n        --scale: 1.25;\n      }\n\n      .vertical-line {\n        margin-inline: auto;\n        width: var(--line-w);\n        height: 100%;\n\n        background-color: var(--red-10);\n      }\n\n      :host(:first-of-type) .vertical-line {\n        height: calc(100% - var(--dot-size));\n        margin-top: var(--dot-size);\n      }\n\n      .dot {\n        position: absolute;\n        width: var(--dot-size);\n        height: var(--dot-size);\n        top: var(--dot-size);\n        left: calc(50% - var(--dot-size) / 2);\n        border-radius: 100%;\n        transform: scale(var(--scale, 1));\n\n        color: var(--red-6);\n        background-color: var(--red-10);\n      }\n\n      .actions {\n        transform: scaleX(0);\n        transition: transform calc(var(--animation-speed) / 2) ease-in-out;\n        display: flex;\n        justify-content: center;\n        flex-direction: column;\n      }\n\n      /* Delay transition on mouseout so the buttons don\'t jump away if the user\n      overshoots them with their mouse */\n      :host(:not(:hover)) .actions {\n        transition-delay: 0.15s;\n      }\n\n      :host(:hover) .actions {\n        transform: scaleX(1);\n      }\n\n      ', "\n\n      .copy-button {\n        padding: 0;\n        width: 4rem;\n        height: 4rem;\n        position: relative;\n        --pad: var(--space-2);\n      }\n\n      .copy-button-inner {\n        position: relative;\n        width: 100%;\n        height: 100%;\n        border-radius: inherit;\n        transition: transform 0.5s;\n        transform-style: preserve-3d;\n      }\n\n      /* Animate flipping to the other side when the .copy-success class is\n      added to the host */\n      :host(.copy-success) .copy-button-inner {\n        transform: rotateY(180deg);\n      }\n\n      /* Position the front and back side */\n      .copy-button .front,\n      .copy-button .back {\n        --side: calc(100% - 2 * var(--pad));\n        position: absolute;\n        inset: var(--pad);\n        height: var(--side);\n        width: var(--side);\n        -webkit-backface-visibility: hidden; /* Safari */\n        backface-visibility: hidden;\n      }\n\n      .copy-button:hover .copy-button-inner {\n        background-color: var(--gray-2);\n      }\n\n      /* Style the back side */\n      .copy-button .back {\n        --pad: var(--space-1);\n        color: var(--green-8);\n        transform: rotateY(180deg);\n      }\n    "])), buttonStyles)]);
-  customElements.define("shiny-error-message", ShinyErrorMessage);
-  function showErrorInClientConsole(e4) {
-    var errorMsg = null;
-    var headline = "Error on client while running Shiny app";
-    if (typeof e4 === "string") {
-      errorMsg = e4;
-    } else if (e4 instanceof ShinyClientError) {
-      errorMsg = e4.message;
-      headline = e4.headline;
-    } else if (e4 instanceof Error) {
-      errorMsg = e4.message;
-    } else {
-      errorMsg = "Unknown error";
-    }
-    var errorConsoleContainer = document.querySelector("shiny-error-console");
-    if (!errorConsoleContainer) {
-      errorConsoleContainer = document.createElement("shiny-error-console");
-      document.body.appendChild(errorConsoleContainer);
-    }
-    var errorConsole = document.createElement("shiny-error-message");
-    errorConsole.setAttribute("headline", headline || "");
-    errorConsole.setAttribute("message", errorMsg);
-    errorConsoleContainer.appendChild(errorConsole);
-  }
-  var ShinyClientError = /* @__PURE__ */ function(_Error) {
-    _inherits24(ShinyClientError2, _Error);
-    var _super3 = _createSuper24(ShinyClientError2);
-    function ShinyClientError2(_ref) {
-      var _this4;
-      var headline = _ref.headline, message = _ref.message;
-      _classCallCheck39(this, ShinyClientError2);
-      _this4 = _super3.call(this, message);
-      _defineProperty17(_assertThisInitialized24(_this4), "headline", void 0);
-      _this4.name = "ShinyClientError";
-      _this4.headline = headline;
-      return _this4;
-    }
-    return _createClass39(ShinyClientError2);
-  }(/* @__PURE__ */ _wrapNativeSuper2(Error));
-
-  // srcts/src/shiny/bind.ts
-  function _typeof46(obj) {
-    "@babel/helpers - typeof";
-    return _typeof46 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
-      return typeof obj2;
-    } : function(obj2) {
-      return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-    }, _typeof46(obj);
-  }
-  function _regeneratorRuntime11() {
-    "use strict";
-    _regeneratorRuntime11 = function _regeneratorRuntime16() {
-      return exports;
-    };
-    var exports = {}, Op = Object.prototype, hasOwn5 = Op.hasOwnProperty, defineProperty3 = Object.defineProperty || function(obj, key, desc) {
-      obj[key] = desc.value;
-    }, $Symbol = "function" == typeof Symbol ? Symbol : {}, iteratorSymbol = $Symbol.iterator || "@@iterator", asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator", toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
-    function define(obj, key, value) {
-      return Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }), obj[key];
-    }
-    try {
-      define({}, "");
-    } catch (err) {
-      define = function define2(obj, key, value) {
-        return obj[key] = value;
-      };
-    }
-    function wrap(innerFn, outerFn, self2, tryLocsList) {
-      var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator, generator = Object.create(protoGenerator.prototype), context = new Context(tryLocsList || []);
-      return defineProperty3(generator, "_invoke", { value: makeInvokeMethod(innerFn, self2, context) }), generator;
-    }
-    function tryCatch(fn, obj, arg) {
-      try {
-        return { type: "normal", arg: fn.call(obj, arg) };
-      } catch (err) {
-        return { type: "throw", arg: err };
-      }
-    }
-    exports.wrap = wrap;
-    var ContinueSentinel = {};
-    function Generator() {
-    }
-    function GeneratorFunction() {
-    }
-    function GeneratorFunctionPrototype() {
-    }
-    var IteratorPrototype = {};
-    define(IteratorPrototype, iteratorSymbol, function() {
-      return this;
-    });
-    var getProto = Object.getPrototypeOf, NativeIteratorPrototype = getProto && getProto(getProto(values2([])));
-    NativeIteratorPrototype && NativeIteratorPrototype !== Op && hasOwn5.call(NativeIteratorPrototype, iteratorSymbol) && (IteratorPrototype = NativeIteratorPrototype);
-    var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(IteratorPrototype);
-    function defineIteratorMethods(prototype) {
-      ["next", "throw", "return"].forEach(function(method) {
-        define(prototype, method, function(arg) {
-          return this._invoke(method, arg);
-        });
-      });
-    }
-    function AsyncIterator(generator, PromiseImpl) {
-      function invoke(method, arg, resolve, reject) {
-        var record = tryCatch(generator[method], generator, arg);
-        if ("throw" !== record.type) {
-          var result = record.arg, value = result.value;
-          return value && "object" == _typeof46(value) && hasOwn5.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function(value2) {
-            invoke("next", value2, resolve, reject);
-          }, function(err) {
-            invoke("throw", err, resolve, reject);
-          }) : PromiseImpl.resolve(value).then(function(unwrapped) {
-            result.value = unwrapped, resolve(result);
-          }, function(error) {
-            return invoke("throw", error, resolve, reject);
-          });
-        }
-        reject(record.arg);
-      }
-      var previousPromise;
-      defineProperty3(this, "_invoke", { value: function value(method, arg) {
-        function callInvokeWithMethodAndArg() {
-          return new PromiseImpl(function(resolve, reject) {
-            invoke(method, arg, resolve, reject);
-          });
-        }
-        return previousPromise = previousPromise ? previousPromise.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg();
-      } });
-    }
-    function makeInvokeMethod(innerFn, self2, context) {
-      var state = "suspendedStart";
-      return function(method, arg) {
-        if ("executing" === state)
-          throw new Error("Generator is already running");
-        if ("completed" === state) {
-          if ("throw" === method)
-            throw arg;
-          return doneResult();
-        }
-        for (context.method = method, context.arg = arg; ; ) {
-          var delegate = context.delegate;
-          if (delegate) {
-            var delegateResult = maybeInvokeDelegate(delegate, context);
-            if (delegateResult) {
-              if (delegateResult === ContinueSentinel)
-                continue;
-              return delegateResult;
-            }
-          }
-          if ("next" === context.method)
-            context.sent = context._sent = context.arg;
-          else if ("throw" === context.method) {
-            if ("suspendedStart" === state)
-              throw state = "completed", context.arg;
-            context.dispatchException(context.arg);
-          } else
-            "return" === context.method && context.abrupt("return", context.arg);
-          state = "executing";
-          var record = tryCatch(innerFn, self2, context);
-          if ("normal" === record.type) {
-            if (state = context.done ? "completed" : "suspendedYield", record.arg === ContinueSentinel)
-              continue;
-            return { value: record.arg, done: context.done };
-          }
-          "throw" === record.type && (state = "completed", context.method = "throw", context.arg = record.arg);
-        }
-      };
-    }
-    function maybeInvokeDelegate(delegate, context) {
-      var methodName = context.method, method = delegate.iterator[methodName];
-      if (void 0 === method)
-        return context.delegate = null, "throw" === methodName && delegate.iterator.return && (context.method = "return", context.arg = void 0, maybeInvokeDelegate(delegate, context), "throw" === context.method) || "return" !== methodName && (context.method = "throw", context.arg = new TypeError("The iterator does not provide a '" + methodName + "' method")), ContinueSentinel;
-      var record = tryCatch(method, delegate.iterator, context.arg);
-      if ("throw" === record.type)
-        return context.method = "throw", context.arg = record.arg, context.delegate = null, ContinueSentinel;
-      var info = record.arg;
-      return info ? info.done ? (context[delegate.resultName] = info.value, context.next = delegate.nextLoc, "return" !== context.method && (context.method = "next", context.arg = void 0), context.delegate = null, ContinueSentinel) : info : (context.method = "throw", context.arg = new TypeError("iterator result is not an object"), context.delegate = null, ContinueSentinel);
-    }
-    function pushTryEntry(locs) {
-      var entry = { tryLoc: locs[0] };
-      1 in locs && (entry.catchLoc = locs[1]), 2 in locs && (entry.finallyLoc = locs[2], entry.afterLoc = locs[3]), this.tryEntries.push(entry);
-    }
-    function resetTryEntry(entry) {
-      var record = entry.completion || {};
-      record.type = "normal", delete record.arg, entry.completion = record;
-    }
-    function Context(tryLocsList) {
-      this.tryEntries = [{ tryLoc: "root" }], tryLocsList.forEach(pushTryEntry, this), this.reset(true);
-    }
-    function values2(iterable) {
-      if (iterable) {
-        var iteratorMethod = iterable[iteratorSymbol];
-        if (iteratorMethod)
-          return iteratorMethod.call(iterable);
-        if ("function" == typeof iterable.next)
-          return iterable;
-        if (!isNaN(iterable.length)) {
-          var i5 = -1, next2 = function next3() {
-            for (; ++i5 < iterable.length; )
-              if (hasOwn5.call(iterable, i5))
-                return next3.value = iterable[i5], next3.done = false, next3;
-            return next3.value = void 0, next3.done = true, next3;
-          };
-          return next2.next = next2;
-        }
-      }
-      return { next: doneResult };
-    }
-    function doneResult() {
-      return { value: void 0, done: true };
-    }
-    return GeneratorFunction.prototype = GeneratorFunctionPrototype, defineProperty3(Gp, "constructor", { value: GeneratorFunctionPrototype, configurable: true }), defineProperty3(GeneratorFunctionPrototype, "constructor", { value: GeneratorFunction, configurable: true }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, toStringTagSymbol, "GeneratorFunction"), exports.isGeneratorFunction = function(genFun) {
-      var ctor = "function" == typeof genFun && genFun.constructor;
-      return !!ctor && (ctor === GeneratorFunction || "GeneratorFunction" === (ctor.displayName || ctor.name));
-    }, exports.mark = function(genFun) {
-      return Object.setPrototypeOf ? Object.setPrototypeOf(genFun, GeneratorFunctionPrototype) : (genFun.__proto__ = GeneratorFunctionPrototype, define(genFun, toStringTagSymbol, "GeneratorFunction")), genFun.prototype = Object.create(Gp), genFun;
-    }, exports.awrap = function(arg) {
-      return { __await: arg };
-    }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, asyncIteratorSymbol, function() {
-      return this;
-    }), exports.AsyncIterator = AsyncIterator, exports.async = function(innerFn, outerFn, self2, tryLocsList, PromiseImpl) {
-      void 0 === PromiseImpl && (PromiseImpl = Promise);
-      var iter = new AsyncIterator(wrap(innerFn, outerFn, self2, tryLocsList), PromiseImpl);
-      return exports.isGeneratorFunction(outerFn) ? iter : iter.next().then(function(result) {
-        return result.done ? result.value : iter.next();
-      });
-    }, defineIteratorMethods(Gp), define(Gp, toStringTagSymbol, "Generator"), define(Gp, iteratorSymbol, function() {
-      return this;
-    }), define(Gp, "toString", function() {
-      return "[object Generator]";
-    }), exports.keys = function(val) {
-      var object = Object(val), keys2 = [];
-      for (var key in object)
-        keys2.push(key);
-      return keys2.reverse(), function next2() {
-        for (; keys2.length; ) {
-          var key2 = keys2.pop();
-          if (key2 in object)
-            return next2.value = key2, next2.done = false, next2;
-        }
-        return next2.done = true, next2;
-      };
-    }, exports.values = values2, Context.prototype = { constructor: Context, reset: function reset(skipTempReset) {
-      if (this.prev = 0, this.next = 0, this.sent = this._sent = void 0, this.done = false, this.delegate = null, this.method = "next", this.arg = void 0, this.tryEntries.forEach(resetTryEntry), !skipTempReset)
-        for (var name in this)
-          "t" === name.charAt(0) && hasOwn5.call(this, name) && !isNaN(+name.slice(1)) && (this[name] = void 0);
-    }, stop: function stop() {
-      this.done = true;
-      var rootRecord = this.tryEntries[0].completion;
-      if ("throw" === rootRecord.type)
-        throw rootRecord.arg;
-      return this.rval;
-    }, dispatchException: function dispatchException(exception) {
-      if (this.done)
-        throw exception;
-      var context = this;
-      function handle(loc, caught) {
-        return record.type = "throw", record.arg = exception, context.next = loc, caught && (context.method = "next", context.arg = void 0), !!caught;
-      }
-      for (var i5 = this.tryEntries.length - 1; i5 >= 0; --i5) {
-        var entry = this.tryEntries[i5], record = entry.completion;
-        if ("root" === entry.tryLoc)
-          return handle("end");
-        if (entry.tryLoc <= this.prev) {
-          var hasCatch = hasOwn5.call(entry, "catchLoc"), hasFinally = hasOwn5.call(entry, "finallyLoc");
-          if (hasCatch && hasFinally) {
-            if (this.prev < entry.catchLoc)
-              return handle(entry.catchLoc, true);
-            if (this.prev < entry.finallyLoc)
-              return handle(entry.finallyLoc);
-          } else if (hasCatch) {
-            if (this.prev < entry.catchLoc)
-              return handle(entry.catchLoc, true);
-          } else {
-            if (!hasFinally)
-              throw new Error("try statement without catch or finally");
-            if (this.prev < entry.finallyLoc)
-              return handle(entry.finallyLoc);
-          }
-        }
-      }
-    }, abrupt: function abrupt(type, arg) {
-      for (var i5 = this.tryEntries.length - 1; i5 >= 0; --i5) {
-        var entry = this.tryEntries[i5];
-        if (entry.tryLoc <= this.prev && hasOwn5.call(entry, "finallyLoc") && this.prev < entry.finallyLoc) {
-          var finallyEntry = entry;
-          break;
-        }
-      }
-      finallyEntry && ("break" === type || "continue" === type) && finallyEntry.tryLoc <= arg && arg <= finallyEntry.finallyLoc && (finallyEntry = null);
-      var record = finallyEntry ? finallyEntry.completion : {};
-      return record.type = type, record.arg = arg, finallyEntry ? (this.method = "next", this.next = finallyEntry.finallyLoc, ContinueSentinel) : this.complete(record);
-    }, complete: function complete(record, afterLoc) {
-      if ("throw" === record.type)
-        throw record.arg;
-      return "break" === record.type || "continue" === record.type ? this.next = record.arg : "return" === record.type ? (this.rval = this.arg = record.arg, this.method = "return", this.next = "end") : "normal" === record.type && afterLoc && (this.next = afterLoc), ContinueSentinel;
-    }, finish: function finish(finallyLoc) {
-      for (var i5 = this.tryEntries.length - 1; i5 >= 0; --i5) {
-        var entry = this.tryEntries[i5];
-        if (entry.finallyLoc === finallyLoc)
-          return this.complete(entry.completion, entry.afterLoc), resetTryEntry(entry), ContinueSentinel;
-      }
-    }, catch: function _catch(tryLoc) {
-      for (var i5 = this.tryEntries.length - 1; i5 >= 0; --i5) {
-        var entry = this.tryEntries[i5];
-        if (entry.tryLoc === tryLoc) {
-          var record = entry.completion;
-          if ("throw" === record.type) {
-            var thrown = record.arg;
-            resetTryEntry(entry);
-          }
-          return thrown;
-        }
-      }
-      throw new Error("illegal catch attempt");
-    }, delegateYield: function delegateYield(iterable, resultName, nextLoc) {
-      return this.delegate = { iterator: values2(iterable), resultName: resultName, nextLoc: nextLoc }, "next" === this.method && (this.arg = void 0), ContinueSentinel;
-    } }, exports;
-  }
-  function asyncGeneratorStep11(gen, resolve, reject, _next, _throw, key, arg) {
-    try {
-      var info = gen[key](arg);
-      var value = info.value;
-    } catch (error) {
-      reject(error);
-      return;
-    }
-    if (info.done) {
-      resolve(value);
-    } else {
-      Promise.resolve(value).then(_next, _throw);
-    }
-  }
-  function _asyncToGenerator11(fn) {
-    return function() {
-      var self2 = this, args = arguments;
-      return new Promise(function(resolve, reject) {
-        var gen = fn.apply(self2, args);
-        function _next(value) {
-          asyncGeneratorStep11(gen, resolve, reject, _next, _throw, "next", value);
-        }
-        function _throw(err) {
-          asyncGeneratorStep11(gen, resolve, reject, _next, _throw, "throw", err);
-        }
-        _next(void 0);
-      });
-    };
-  }
-  var boundInputs = {};
-  function valueChangeCallback(inputs, binding, el, allowDeferred) {
-    var id = binding.getId(el);
-    if (id) {
-      var value = binding.getValue(el);
-      var type = binding.getType(el);
-      if (type)
-        id = id + ":" + type;
-      var opts = {
-        priority: allowDeferred ? "deferred" : "immediate",
-        binding: binding,
-        el: el
-      };
-      inputs.setInput(id, value, opts);
-    }
-  }
-  var bindingIds = {
-    outputs: /* @__PURE__ */ new Set(),
-    inputs: /* @__PURE__ */ new Set()
-  };
-  function bindingIdExists(id) {
-    return bindingIds.outputs.has(id) || bindingIds.inputs.has(id);
-  }
-  function throwDuplicateIdError(duplicatedIds) {
-    throw new ShinyClientError({
-      headline: "Duplicate input/output IDs found",
-      message: "The following ".concat(duplicatedIds.size === 1 ? "ID was" : "IDs were", " repeated: ").concat(Array.from(duplicatedIds).map(function(id) {
-        return '"'.concat(id, '"');
-      }).join(", "), ".")
-    });
-  }
-  function bindInputs(shinyCtx) {
-    var scope = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : document.documentElement;
-    var inputs = shinyCtx.inputs, inputsRate = shinyCtx.inputsRate, inputBindings = shinyCtx.inputBindings;
-    var bindings = inputBindings.getBindings();
-    var inputDuplicateIds = /* @__PURE__ */ new Set();
-    var inputItems = {};
-    var _loop = function _loop2() {
-      var binding = bindings[i5].binding;
-      var matches = binding.find(scope) || [];
-      var _loop22 = function _loop23() {
-        var el = matches[j3];
-        if (el.hasAttribute("data-shiny-no-bind-input"))
-          return "continue";
-        var id = binding.getId(el);
-        var duplicateId = bindingIdExists(id);
-        if (duplicateId) {
-          inputDuplicateIds.add(id);
-        }
-        if (!id || boundInputs[id] || duplicateId)
-          return "continue";
-        bindingIds.inputs.add(id);
-        var type = binding.getType(el);
-        var effectiveId = type ? id + ":" + type : id;
-        inputItems[effectiveId] = {
-          value: binding.getValue(el),
-          opts: {
-            immediate: true,
-            binding: binding,
-            el: el
-          }
-        };
-        var thisCallback = function() {
-          var thisBinding = binding;
-          var thisEl = el;
-          return function(allowDeferred) {
-            valueChangeCallback(inputs, thisBinding, thisEl, allowDeferred);
-          };
-        }();
-        binding.subscribe(el, thisCallback);
-        (0, import_jquery37.default)(el).data("shiny-input-binding", binding);
-        (0, import_jquery37.default)(el).addClass("shiny-bound-input");
-        var ratePolicy = binding.getRatePolicy(el);
-        if (ratePolicy !== null) {
-          inputsRate.setRatePolicy(effectiveId, ratePolicy.policy, ratePolicy.delay);
-        }
-        boundInputs[id] = {
-          binding: binding,
-          node: el
-        };
-        (0, import_jquery37.default)(el).trigger({
-          type: "shiny:bound",
-          binding: binding,
-          bindingType: "input"
-        });
-      };
-      for (var j3 = 0; j3 < matches.length; j3++) {
-        var _ret = _loop22();
-        if (_ret === "continue")
-          continue;
-      }
-    };
-    for (var i5 = 0; i5 < bindings.length; i5++) {
-      _loop();
-    }
-    if (inputDuplicateIds.size > 0) {
-      throwDuplicateIdError(inputDuplicateIds);
-    }
-    return inputItems;
-  }
-  function bindOutputs(_x) {
-    return _bindOutputs.apply(this, arguments);
-  }
-  function _bindOutputs() {
-    _bindOutputs = _asyncToGenerator11(/* @__PURE__ */ _regeneratorRuntime11().mark(function _callee(_ref) {
-      var sendOutputHiddenState, maybeAddThemeObserver, outputBindings, scope, outputDuplicateIds, $scope, bindings, i5, binding, matches, j3, _el2, id, $el, bindingAdapter, _args = arguments;
-      return _regeneratorRuntime11().wrap(function _callee$(_context) {
-        while (1)
-          switch (_context.prev = _context.next) {
-            case 0:
-              sendOutputHiddenState = _ref.sendOutputHiddenState, maybeAddThemeObserver = _ref.maybeAddThemeObserver, outputBindings = _ref.outputBindings;
-              scope = _args.length > 1 && _args[1] !== void 0 ? _args[1] : document.documentElement;
-              outputDuplicateIds = /* @__PURE__ */ new Set();
-              $scope = (0, import_jquery37.default)(scope);
-              bindings = outputBindings.getBindings();
-              i5 = 0;
-            case 6:
-              if (!(i5 < bindings.length)) {
-                _context.next = 36;
-                break;
-              }
-              binding = bindings[i5].binding;
-              matches = binding.find($scope) || [];
-              j3 = 0;
-            case 10:
-              if (!(j3 < matches.length)) {
-                _context.next = 33;
-                break;
-              }
-              _el2 = matches[j3];
-              id = binding.getId(_el2);
-              if (id) {
-                _context.next = 15;
-                break;
-              }
-              return _context.abrupt("continue", 30);
-            case 15:
-              if (bindingIdExists(id)) {
-                outputDuplicateIds.add(id);
-              }
-              bindingIds.outputs.add(id);
-              if (import_jquery37.default.contains(document.documentElement, _el2)) {
-                _context.next = 19;
-                break;
-              }
-              return _context.abrupt("continue", 30);
-            case 19:
-              $el = (0, import_jquery37.default)(_el2);
-              if (!$el.hasClass("shiny-bound-output")) {
-                _context.next = 22;
-                break;
-              }
-              return _context.abrupt("continue", 30);
-            case 22:
-              maybeAddThemeObserver(_el2);
-              bindingAdapter = new OutputBindingAdapter(_el2, binding);
-              _context.next = 26;
-              return shinyAppBindOutput(id, bindingAdapter);
-            case 26:
-              $el.data("shiny-output-binding", bindingAdapter);
-              $el.addClass("shiny-bound-output");
-              if (!$el.attr("aria-live"))
-                $el.attr("aria-live", "polite");
-              $el.trigger({
-                type: "shiny:bound",
-                binding: binding,
-                bindingType: "output"
-              });
-            case 30:
-              j3++;
-              _context.next = 10;
-              break;
-            case 33:
-              i5++;
-              _context.next = 6;
-              break;
-            case 36:
-              if (outputDuplicateIds.size > 0) {
-                throwDuplicateIdError(outputDuplicateIds);
-              }
-              setTimeout(sendImageSizeFns.regular, 0);
-              setTimeout(sendOutputHiddenState, 0);
-            case 39:
-            case "end":
-              return _context.stop();
-          }
-      }, _callee);
-    }));
-    return _bindOutputs.apply(this, arguments);
-  }
-  function unbindInputs() {
-    var scope = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : document.documentElement;
-    var includeSelf = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
-    var inputs = (0, import_jquery37.default)(scope).find(".shiny-bound-input").toArray();
-    if (includeSelf && (0, import_jquery37.default)(scope).hasClass("shiny-bound-input")) {
-      inputs.push(scope);
-    }
-    for (var i5 = 0; i5 < inputs.length; i5++) {
-      var _el = inputs[i5];
-      var binding = (0, import_jquery37.default)(_el).data("shiny-input-binding");
-      if (!binding)
-        continue;
-      var id = binding.getId(_el);
-      (0, import_jquery37.default)(_el).removeClass("shiny-bound-input");
-      delete boundInputs[id];
-      bindingIds.inputs.delete(id);
-      binding.unsubscribe(_el);
-      (0, import_jquery37.default)(_el).trigger({
-        type: "shiny:unbound",
-        binding: binding,
-        bindingType: "input"
-      });
-    }
-  }
-  function unbindOutputs(_ref2) {
-    var sendOutputHiddenState = _ref2.sendOutputHiddenState;
-    var scope = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : document.documentElement;
-    var includeSelf = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false;
-    var outputs = (0, import_jquery37.default)(scope).find(".shiny-bound-output").toArray();
-    if (includeSelf && (0, import_jquery37.default)(scope).hasClass("shiny-bound-output")) {
-      outputs.push(scope);
-    }
-    for (var i5 = 0; i5 < outputs.length; i5++) {
-      var $el = (0, import_jquery37.default)(outputs[i5]);
-      var bindingAdapter = $el.data("shiny-output-binding");
-      if (!bindingAdapter)
-        continue;
-      var id = bindingAdapter.binding.getId(outputs[i5]);
-      shinyAppUnbindOutput(id, bindingAdapter);
-      bindingIds.outputs.delete(id);
-      $el.removeClass("shiny-bound-output");
-      $el.removeData("shiny-output-binding");
-      $el.trigger({
-        type: "shiny:unbound",
-        binding: bindingAdapter.binding,
-        bindingType: "output"
-      });
-    }
-    setTimeout(sendImageSizeFns.regular, 0);
-    setTimeout(sendOutputHiddenState, 0);
-  }
-  function _bindAll(_x2, _x3) {
-    return _bindAll2.apply(this, arguments);
-  }
-  function _bindAll2() {
-    _bindAll2 = _asyncToGenerator11(/* @__PURE__ */ _regeneratorRuntime11().mark(function _callee2(shinyCtx, scope) {
-      return _regeneratorRuntime11().wrap(function _callee2$(_context2) {
-        while (1)
-          switch (_context2.prev = _context2.next) {
-            case 0:
-              _context2.next = 2;
-              return bindOutputs(shinyCtx, scope);
-            case 2:
-              return _context2.abrupt("return", bindInputs(shinyCtx, scope));
-            case 3:
-            case "end":
-              return _context2.stop();
-          }
-      }, _callee2);
-    }));
-    return _bindAll2.apply(this, arguments);
-  }
-  function unbindAll(shinyCtx, scope) {
-    var includeSelf = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false;
-    unbindInputs(scope, includeSelf);
-    unbindOutputs(shinyCtx, scope, includeSelf);
-  }
-  function bindAll(_x4, _x5) {
-    return _bindAll3.apply(this, arguments);
-  }
-  function _bindAll3() {
-    _bindAll3 = _asyncToGenerator11(/* @__PURE__ */ _regeneratorRuntime11().mark(function _callee3(shinyCtx, scope) {
-      var currentInputItems, inputs;
-      return _regeneratorRuntime11().wrap(function _callee3$(_context3) {
-        while (1)
-          switch (_context3.prev = _context3.next) {
-            case 0:
-              _context3.next = 2;
-              return _bindAll(shinyCtx, scope);
-            case 2:
-              currentInputItems = _context3.sent;
-              inputs = shinyCtx.inputs;
-              import_jquery37.default.each(currentInputItems, function(name, item) {
-                inputs.setInput(name, item.value, item.opts);
-              });
-              shinyCtx.initDeferredIframes();
-            case 6:
-            case "end":
-              return _context3.stop();
-          }
-      }, _callee3);
-    }));
-    return _bindAll3.apply(this, arguments);
-  }
-
-  // srcts/src/shiny/shinyapp.ts
-  var import_es_regexp_exec14 = __toESM(require_es_regexp_exec());
-  var import_es_json_stringify4 = __toESM(require_es_json_stringify());
-
-  // node_modules/core-js/modules/es.array-buffer.constructor.js
-  var $80 = require_export();
-  var global10 = require_global();
-  var arrayBufferModule = require_array_buffer();
-  var setSpecies2 = require_set_species();
-  var ARRAY_BUFFER = "ArrayBuffer";
-  var ArrayBuffer2 = arrayBufferModule[ARRAY_BUFFER];
-  var NativeArrayBuffer = global10[ARRAY_BUFFER];
-  $80({ global: true, constructor: true, forced: NativeArrayBuffer !== ArrayBuffer2 }, {
-    ArrayBuffer: ArrayBuffer2
+  var r5 = globalThis.litElementPolyfillSupport;
+  r5 === null || r5 === void 0 ? void 0 : r5({
+    LitElement: s3
   });
-  setSpecies2(ARRAY_BUFFER);
+  ((_globalThis$litElemen2 = globalThis.litElementVersions) !== null && _globalThis$litElemen2 !== void 0 ? _globalThis$litElemen2 : globalThis.litElementVersions = []).push("4.0.0");
 
-  // node_modules/core-js/modules/es.array-buffer.slice.js
-  var $81 = require_export();
-  var uncurryThis13 = require_function_uncurry_this_clause();
-  var fails14 = require_fails();
-  var ArrayBufferModule = require_array_buffer();
-  var anObject9 = require_an_object();
-  var toAbsoluteIndex3 = require_to_absolute_index();
-  var toLength6 = require_to_length();
-  var speciesConstructor2 = require_species_constructor();
-  var ArrayBuffer3 = ArrayBufferModule.ArrayBuffer;
-  var DataView2 = ArrayBufferModule.DataView;
-  var DataViewPrototype = DataView2.prototype;
-  var nativeArrayBufferSlice = uncurryThis13(ArrayBuffer3.prototype.slice);
-  var getUint8 = uncurryThis13(DataViewPrototype.getUint8);
-  var setUint8 = uncurryThis13(DataViewPrototype.setUint8);
-  var INCORRECT_SLICE = fails14(function() {
-    return !new ArrayBuffer3(2).slice(1, void 0).byteLength;
-  });
-  $81({ target: "ArrayBuffer", proto: true, unsafe: true, forced: INCORRECT_SLICE }, {
-    slice: function slice3(start, end) {
-      if (nativeArrayBufferSlice && end === void 0) {
-        return nativeArrayBufferSlice(anObject9(this), start);
-      }
-      var length = anObject9(this).byteLength;
-      var first = toAbsoluteIndex3(start, length);
-      var fin = toAbsoluteIndex3(end === void 0 ? length : end, length);
-      var result = new (speciesConstructor2(this, ArrayBuffer3))(toLength6(fin - first));
-      var viewSource = new DataView2(this);
-      var viewTarget = new DataView2(result);
-      var index = 0;
-      while (first < fin) {
-        setUint8(viewTarget, index++, getUint8(viewSource, first++));
-      }
-      return result;
-    }
-  });
-
-  // node_modules/core-js/modules/es.data-view.js
-  require_es_data_view_constructor();
-
-  // srcts/src/shiny/shinyapp.ts
-  var import_es_array_iterator48 = __toESM(require_es_array_iterator());
-  var import_jquery38 = __toESM(require_jquery());
-
-  // srcts/src/utils/asyncQueue.ts
-  var import_es_array_iterator47 = __toESM(require_es_array_iterator());
-  function _typeof47(obj) {
-    "@babel/helpers - typeof";
-    return _typeof47 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
-      return typeof obj2;
-    } : function(obj2) {
-      return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-    }, _typeof47(obj);
-  }
-  function _regeneratorRuntime12() {
-    "use strict";
-    _regeneratorRuntime12 = function _regeneratorRuntime16() {
-      return exports;
-    };
-    var exports = {}, Op = Object.prototype, hasOwn5 = Op.hasOwnProperty, defineProperty3 = Object.defineProperty || function(obj, key, desc) {
-      obj[key] = desc.value;
-    }, $Symbol = "function" == typeof Symbol ? Symbol : {}, iteratorSymbol = $Symbol.iterator || "@@iterator", asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator", toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
-    function define(obj, key, value) {
-      return Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }), obj[key];
-    }
-    try {
-      define({}, "");
-    } catch (err) {
-      define = function define2(obj, key, value) {
-        return obj[key] = value;
-      };
-    }
-    function wrap(innerFn, outerFn, self2, tryLocsList) {
-      var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator, generator = Object.create(protoGenerator.prototype), context = new Context(tryLocsList || []);
-      return defineProperty3(generator, "_invoke", { value: makeInvokeMethod(innerFn, self2, context) }), generator;
-    }
-    function tryCatch(fn, obj, arg) {
-      try {
-        return { type: "normal", arg: fn.call(obj, arg) };
-      } catch (err) {
-        return { type: "throw", arg: err };
-      }
-    }
-    exports.wrap = wrap;
-    var ContinueSentinel = {};
-    function Generator() {
-    }
-    function GeneratorFunction() {
-    }
-    function GeneratorFunctionPrototype() {
-    }
-    var IteratorPrototype = {};
-    define(IteratorPrototype, iteratorSymbol, function() {
-      return this;
-    });
-    var getProto = Object.getPrototypeOf, NativeIteratorPrototype = getProto && getProto(getProto(values2([])));
-    NativeIteratorPrototype && NativeIteratorPrototype !== Op && hasOwn5.call(NativeIteratorPrototype, iteratorSymbol) && (IteratorPrototype = NativeIteratorPrototype);
-    var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(IteratorPrototype);
-    function defineIteratorMethods(prototype) {
-      ["next", "throw", "return"].forEach(function(method) {
-        define(prototype, method, function(arg) {
-          return this._invoke(method, arg);
-        });
-      });
-    }
-    function AsyncIterator(generator, PromiseImpl) {
-      function invoke(method, arg, resolve, reject) {
-        var record = tryCatch(generator[method], generator, arg);
-        if ("throw" !== record.type) {
-          var result = record.arg, value = result.value;
-          return value && "object" == _typeof47(value) && hasOwn5.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function(value2) {
-            invoke("next", value2, resolve, reject);
-          }, function(err) {
-            invoke("throw", err, resolve, reject);
-          }) : PromiseImpl.resolve(value).then(function(unwrapped) {
-            result.value = unwrapped, resolve(result);
-          }, function(error) {
-            return invoke("throw", error, resolve, reject);
-          });
-        }
-        reject(record.arg);
-      }
-      var previousPromise;
-      defineProperty3(this, "_invoke", { value: function value(method, arg) {
-        function callInvokeWithMethodAndArg() {
-          return new PromiseImpl(function(resolve, reject) {
-            invoke(method, arg, resolve, reject);
-          });
-        }
-        return previousPromise = previousPromise ? previousPromise.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg();
-      } });
-    }
-    function makeInvokeMethod(innerFn, self2, context) {
-      var state = "suspendedStart";
-      return function(method, arg) {
-        if ("executing" === state)
-          throw new Error("Generator is already running");
-        if ("completed" === state) {
-          if ("throw" === method)
-            throw arg;
-          return doneResult();
-        }
-        for (context.method = method, context.arg = arg; ; ) {
-          var delegate = context.delegate;
-          if (delegate) {
-            var delegateResult = maybeInvokeDelegate(delegate, context);
-            if (delegateResult) {
-              if (delegateResult === ContinueSentinel)
-                continue;
-              return delegateResult;
-            }
-          }
-          if ("next" === context.method)
-            context.sent = context._sent = context.arg;
-          else if ("throw" === context.method) {
-            if ("suspendedStart" === state)
-              throw state = "completed", context.arg;
-            context.dispatchException(context.arg);
-          } else
-            "return" === context.method && context.abrupt("return", context.arg);
-          state = "executing";
-          var record = tryCatch(innerFn, self2, context);
-          if ("normal" === record.type) {
-            if (state = context.done ? "completed" : "suspendedYield", record.arg === ContinueSentinel)
-              continue;
-            return { value: record.arg, done: context.done };
-          }
-          "throw" === record.type && (state = "completed", context.method = "throw", context.arg = record.arg);
-        }
-      };
-    }
-    function maybeInvokeDelegate(delegate, context) {
-      var methodName = context.method, method = delegate.iterator[methodName];
-      if (void 0 === method)
-        return context.delegate = null, "throw" === methodName && delegate.iterator.return && (context.method = "return", context.arg = void 0, maybeInvokeDelegate(delegate, context), "throw" === context.method) || "return" !== methodName && (context.method = "throw", context.arg = new TypeError("The iterator does not provide a '" + methodName + "' method")), ContinueSentinel;
-      var record = tryCatch(method, delegate.iterator, context.arg);
-      if ("throw" === record.type)
-        return context.method = "throw", context.arg = record.arg, context.delegate = null, ContinueSentinel;
-      var info = record.arg;
-      return info ? info.done ? (context[delegate.resultName] = info.value, context.next = delegate.nextLoc, "return" !== context.method && (context.method = "next", context.arg = void 0), context.delegate = null, ContinueSentinel) : info : (context.method = "throw", context.arg = new TypeError("iterator result is not an object"), context.delegate = null, ContinueSentinel);
-    }
-    function pushTryEntry(locs) {
-      var entry = { tryLoc: locs[0] };
-      1 in locs && (entry.catchLoc = locs[1]), 2 in locs && (entry.finallyLoc = locs[2], entry.afterLoc = locs[3]), this.tryEntries.push(entry);
-    }
-    function resetTryEntry(entry) {
-      var record = entry.completion || {};
-      record.type = "normal", delete record.arg, entry.completion = record;
-    }
-    function Context(tryLocsList) {
-      this.tryEntries = [{ tryLoc: "root" }], tryLocsList.forEach(pushTryEntry, this), this.reset(true);
-    }
-    function values2(iterable) {
-      if (iterable) {
-        var iteratorMethod = iterable[iteratorSymbol];
-        if (iteratorMethod)
-          return iteratorMethod.call(iterable);
-        if ("function" == typeof iterable.next)
-          return iterable;
-        if (!isNaN(iterable.length)) {
-          var i5 = -1, next2 = function next3() {
-            for (; ++i5 < iterable.length; )
-              if (hasOwn5.call(iterable, i5))
-                return next3.value = iterable[i5], next3.done = false, next3;
-            return next3.value = void 0, next3.done = true, next3;
-          };
-          return next2.next = next2;
-        }
-      }
-      return { next: doneResult };
-    }
-    function doneResult() {
-      return { value: void 0, done: true };
-    }
-    return GeneratorFunction.prototype = GeneratorFunctionPrototype, defineProperty3(Gp, "constructor", { value: GeneratorFunctionPrototype, configurable: true }), defineProperty3(GeneratorFunctionPrototype, "constructor", { value: GeneratorFunction, configurable: true }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, toStringTagSymbol, "GeneratorFunction"), exports.isGeneratorFunction = function(genFun) {
-      var ctor = "function" == typeof genFun && genFun.constructor;
-      return !!ctor && (ctor === GeneratorFunction || "GeneratorFunction" === (ctor.displayName || ctor.name));
-    }, exports.mark = function(genFun) {
-      return Object.setPrototypeOf ? Object.setPrototypeOf(genFun, GeneratorFunctionPrototype) : (genFun.__proto__ = GeneratorFunctionPrototype, define(genFun, toStringTagSymbol, "GeneratorFunction")), genFun.prototype = Object.create(Gp), genFun;
-    }, exports.awrap = function(arg) {
-      return { __await: arg };
-    }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, asyncIteratorSymbol, function() {
-      return this;
-    }), exports.AsyncIterator = AsyncIterator, exports.async = function(innerFn, outerFn, self2, tryLocsList, PromiseImpl) {
-      void 0 === PromiseImpl && (PromiseImpl = Promise);
-      var iter = new AsyncIterator(wrap(innerFn, outerFn, self2, tryLocsList), PromiseImpl);
-      return exports.isGeneratorFunction(outerFn) ? iter : iter.next().then(function(result) {
-        return result.done ? result.value : iter.next();
-      });
-    }, defineIteratorMethods(Gp), define(Gp, toStringTagSymbol, "Generator"), define(Gp, iteratorSymbol, function() {
-      return this;
-    }), define(Gp, "toString", function() {
-      return "[object Generator]";
-    }), exports.keys = function(val) {
-      var object = Object(val), keys2 = [];
-      for (var key in object)
-        keys2.push(key);
-      return keys2.reverse(), function next2() {
-        for (; keys2.length; ) {
-          var key2 = keys2.pop();
-          if (key2 in object)
-            return next2.value = key2, next2.done = false, next2;
-        }
-        return next2.done = true, next2;
-      };
-    }, exports.values = values2, Context.prototype = { constructor: Context, reset: function reset(skipTempReset) {
-      if (this.prev = 0, this.next = 0, this.sent = this._sent = void 0, this.done = false, this.delegate = null, this.method = "next", this.arg = void 0, this.tryEntries.forEach(resetTryEntry), !skipTempReset)
-        for (var name in this)
-          "t" === name.charAt(0) && hasOwn5.call(this, name) && !isNaN(+name.slice(1)) && (this[name] = void 0);
-    }, stop: function stop() {
-      this.done = true;
-      var rootRecord = this.tryEntries[0].completion;
-      if ("throw" === rootRecord.type)
-        throw rootRecord.arg;
-      return this.rval;
-    }, dispatchException: function dispatchException(exception) {
-      if (this.done)
-        throw exception;
-      var context = this;
-      function handle(loc, caught) {
-        return record.type = "throw", record.arg = exception, context.next = loc, caught && (context.method = "next", context.arg = void 0), !!caught;
-      }
-      for (var i5 = this.tryEntries.length - 1; i5 >= 0; --i5) {
-        var entry = this.tryEntries[i5], record = entry.completion;
-        if ("root" === entry.tryLoc)
-          return handle("end");
-        if (entry.tryLoc <= this.prev) {
-          var hasCatch = hasOwn5.call(entry, "catchLoc"), hasFinally = hasOwn5.call(entry, "finallyLoc");
-          if (hasCatch && hasFinally) {
-            if (this.prev < entry.catchLoc)
-              return handle(entry.catchLoc, true);
-            if (this.prev < entry.finallyLoc)
-              return handle(entry.finallyLoc);
-          } else if (hasCatch) {
-            if (this.prev < entry.catchLoc)
-              return handle(entry.catchLoc, true);
-          } else {
-            if (!hasFinally)
-              throw new Error("try statement without catch or finally");
-            if (this.prev < entry.finallyLoc)
-              return handle(entry.finallyLoc);
-          }
-        }
-      }
-    }, abrupt: function abrupt(type, arg) {
-      for (var i5 = this.tryEntries.length - 1; i5 >= 0; --i5) {
-        var entry = this.tryEntries[i5];
-        if (entry.tryLoc <= this.prev && hasOwn5.call(entry, "finallyLoc") && this.prev < entry.finallyLoc) {
-          var finallyEntry = entry;
-          break;
-        }
-      }
-      finallyEntry && ("break" === type || "continue" === type) && finallyEntry.tryLoc <= arg && arg <= finallyEntry.finallyLoc && (finallyEntry = null);
-      var record = finallyEntry ? finallyEntry.completion : {};
-      return record.type = type, record.arg = arg, finallyEntry ? (this.method = "next", this.next = finallyEntry.finallyLoc, ContinueSentinel) : this.complete(record);
-    }, complete: function complete(record, afterLoc) {
-      if ("throw" === record.type)
-        throw record.arg;
-      return "break" === record.type || "continue" === record.type ? this.next = record.arg : "return" === record.type ? (this.rval = this.arg = record.arg, this.method = "return", this.next = "end") : "normal" === record.type && afterLoc && (this.next = afterLoc), ContinueSentinel;
-    }, finish: function finish(finallyLoc) {
-      for (var i5 = this.tryEntries.length - 1; i5 >= 0; --i5) {
-        var entry = this.tryEntries[i5];
-        if (entry.finallyLoc === finallyLoc)
-          return this.complete(entry.completion, entry.afterLoc), resetTryEntry(entry), ContinueSentinel;
-      }
-    }, catch: function _catch(tryLoc) {
-      for (var i5 = this.tryEntries.length - 1; i5 >= 0; --i5) {
-        var entry = this.tryEntries[i5];
-        if (entry.tryLoc === tryLoc) {
-          var record = entry.completion;
-          if ("throw" === record.type) {
-            var thrown = record.arg;
-            resetTryEntry(entry);
-          }
-          return thrown;
-        }
-      }
-      throw new Error("illegal catch attempt");
-    }, delegateYield: function delegateYield(iterable, resultName, nextLoc) {
-      return this.delegate = { iterator: values2(iterable), resultName: resultName, nextLoc: nextLoc }, "next" === this.method && (this.arg = void 0), ContinueSentinel;
-    } }, exports;
-  }
-  function asyncGeneratorStep12(gen, resolve, reject, _next, _throw, key, arg) {
-    try {
-      var info = gen[key](arg);
-      var value = info.value;
-    } catch (error) {
-      reject(error);
-      return;
-    }
-    if (info.done) {
-      resolve(value);
-    } else {
-      Promise.resolve(value).then(_next, _throw);
-    }
-  }
-  function _asyncToGenerator12(fn) {
-    return function() {
-      var self2 = this, args = arguments;
-      return new Promise(function(resolve, reject) {
-        var gen = fn.apply(self2, args);
-        function _next(value) {
-          asyncGeneratorStep12(gen, resolve, reject, _next, _throw, "next", value);
-        }
-        function _throw(err) {
-          asyncGeneratorStep12(gen, resolve, reject, _next, _throw, "throw", err);
-        }
-        _next(void 0);
-      });
-    };
-  }
-  function _classCallCheck40(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties40(target, props) {
-    for (var i5 = 0; i5 < props.length; i5++) {
-      var descriptor = props[i5];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor)
-        descriptor.writable = true;
-      Object.defineProperty(target, _toPropertyKey41(descriptor.key), descriptor);
-    }
-  }
-  function _createClass40(Constructor, protoProps, staticProps) {
-    if (protoProps)
-      _defineProperties40(Constructor.prototype, protoProps);
-    if (staticProps)
-      _defineProperties40(Constructor, staticProps);
-    Object.defineProperty(Constructor, "prototype", { writable: false });
-    return Constructor;
-  }
-  function _defineProperty18(obj, key, value) {
-    key = _toPropertyKey41(key);
-    if (key in obj) {
-      Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
-    } else {
-      obj[key] = value;
-    }
-    return obj;
-  }
-  function _toPropertyKey41(arg) {
-    var key = _toPrimitive41(arg, "string");
-    return _typeof47(key) === "symbol" ? key : String(key);
-  }
-  function _toPrimitive41(input, hint) {
-    if (_typeof47(input) !== "object" || input === null)
-      return input;
-    var prim = input[Symbol.toPrimitive];
-    if (prim !== void 0) {
-      var res = prim.call(input, hint || "default");
-      if (_typeof47(res) !== "object")
-        return res;
-      throw new TypeError("@@toPrimitive must return a primitive value.");
-    }
-    return (hint === "string" ? String : Number)(input);
-  }
-  var AsyncQueue = /* @__PURE__ */ function() {
-    function AsyncQueue2() {
-      _classCallCheck40(this, AsyncQueue2);
-      _defineProperty18(this, "$promises", []);
-      _defineProperty18(this, "$resolvers", []);
-    }
-    _createClass40(AsyncQueue2, [{
-      key: "_add",
-      value: function _add() {
-        var _this = this;
-        var p3 = new Promise(function(resolve) {
-          _this.$resolvers.push(resolve);
-        });
-        this.$promises.push(p3);
-      }
-    }, {
-      key: "enqueue",
-      value: function enqueue(x2) {
-        if (!this.$resolvers.length)
-          this._add();
-        var resolve = this.$resolvers.shift();
-        resolve(x2);
-      }
-    }, {
-      key: "dequeue",
-      value: function() {
-        var _dequeue = _asyncToGenerator12(/* @__PURE__ */ _regeneratorRuntime12().mark(function _callee() {
-          var promise;
-          return _regeneratorRuntime12().wrap(function _callee$(_context) {
-            while (1)
-              switch (_context.prev = _context.next) {
-                case 0:
-                  if (!this.$promises.length)
-                    this._add();
-                  promise = this.$promises.shift();
-                  return _context.abrupt("return", promise);
-                case 3:
-                case "end":
-                  return _context.stop();
-              }
-          }, _callee, this);
-        }));
-        function dequeue() {
-          return _dequeue.apply(this, arguments);
-        }
-        return dequeue;
-      }()
-    }, {
-      key: "isEmpty",
-      value: function isEmpty() {
-        return !this.$promises.length;
-      }
-    }, {
-      key: "isBlocked",
-      value: function isBlocked() {
-        return !!this.$resolvers.length;
-      }
-    }, {
-      key: "length",
-      get: function get3() {
-        return this.$promises.length - this.$resolvers.length;
-      }
-    }]);
-    return AsyncQueue2;
-  }();
-
-  // srcts/src/shiny/shinyapp.ts
+  // srcts/src/components/errorConsole.ts
   function _typeof48(obj) {
     "@babel/helpers - typeof";
     return _typeof48 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
@@ -22143,68 +21724,14 @@
       return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
     }, _typeof48(obj);
   }
-  function _createForOfIteratorHelper5(o4, allowArrayLike) {
-    var it = typeof Symbol !== "undefined" && o4[Symbol.iterator] || o4["@@iterator"];
-    if (!it) {
-      if (Array.isArray(o4) || (it = _unsupportedIterableToArray5(o4)) || allowArrayLike && o4 && typeof o4.length === "number") {
-        if (it)
-          o4 = it;
-        var i5 = 0;
-        var F = function F2() {
-        };
-        return { s: F, n: function n4() {
-          if (i5 >= o4.length)
-            return { done: true };
-          return { done: false, value: o4[i5++] };
-        }, e: function e4(_e) {
-          throw _e;
-        }, f: F };
-      }
-      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-    }
-    var normalCompletion = true, didErr = false, err;
-    return { s: function s4() {
-      it = it.call(o4);
-    }, n: function n4() {
-      var step = it.next();
-      normalCompletion = step.done;
-      return step;
-    }, e: function e4(_e2) {
-      didErr = true;
-      err = _e2;
-    }, f: function f4() {
-      try {
-        if (!normalCompletion && it.return != null)
-          it.return();
-      } finally {
-        if (didErr)
-          throw err;
-      }
-    } };
-  }
-  function _unsupportedIterableToArray5(o4, minLen) {
-    if (!o4)
-      return;
-    if (typeof o4 === "string")
-      return _arrayLikeToArray5(o4, minLen);
-    var n4 = Object.prototype.toString.call(o4).slice(8, -1);
-    if (n4 === "Object" && o4.constructor)
-      n4 = o4.constructor.name;
-    if (n4 === "Map" || n4 === "Set")
-      return Array.from(o4);
-    if (n4 === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n4))
-      return _arrayLikeToArray5(o4, minLen);
-  }
-  function _arrayLikeToArray5(arr, len) {
-    if (len == null || len > arr.length)
-      len = arr.length;
-    for (var i5 = 0, arr2 = new Array(len); i5 < len; i5++)
-      arr2[i5] = arr[i5];
-    return arr2;
-  }
-  function _regeneratorRuntime13() {
+  var _templateObject;
+  var _templateObject2;
+  var _templateObject3;
+  var _templateObject4;
+  var _templateObject5;
+  function _regeneratorRuntime12() {
     "use strict";
-    _regeneratorRuntime13 = function _regeneratorRuntime16() {
+    _regeneratorRuntime12 = function _regeneratorRuntime16() {
       return exports;
     };
     var exports = {}, Op = Object.prototype, hasOwn5 = Op.hasOwnProperty, defineProperty3 = Object.defineProperty || function(obj, key, desc) {
@@ -22470,6 +21997,602 @@
       return this.delegate = { iterator: values2(iterable), resultName: resultName, nextLoc: nextLoc }, "next" === this.method && (this.arg = void 0), ContinueSentinel;
     } }, exports;
   }
+  function asyncGeneratorStep12(gen, resolve, reject, _next, _throw, key, arg) {
+    try {
+      var info = gen[key](arg);
+      var value = info.value;
+    } catch (error) {
+      reject(error);
+      return;
+    }
+    if (info.done) {
+      resolve(value);
+    } else {
+      Promise.resolve(value).then(_next, _throw);
+    }
+  }
+  function _asyncToGenerator12(fn) {
+    return function() {
+      var self2 = this, args = arguments;
+      return new Promise(function(resolve, reject) {
+        var gen = fn.apply(self2, args);
+        function _next(value) {
+          asyncGeneratorStep12(gen, resolve, reject, _next, _throw, "next", value);
+        }
+        function _throw(err) {
+          asyncGeneratorStep12(gen, resolve, reject, _next, _throw, "throw", err);
+        }
+        _next(void 0);
+      });
+    };
+  }
+  function _classCallCheck41(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties41(target, props) {
+    for (var i5 = 0; i5 < props.length; i5++) {
+      var descriptor = props[i5];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, _toPropertyKey42(descriptor.key), descriptor);
+    }
+  }
+  function _createClass41(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties41(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties41(Constructor, staticProps);
+    Object.defineProperty(Constructor, "prototype", { writable: false });
+    return Constructor;
+  }
+  function _inherits25(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } });
+    Object.defineProperty(subClass, "prototype", { writable: false });
+    if (superClass)
+      _setPrototypeOf25(subClass, superClass);
+  }
+  function _setPrototypeOf25(o4, p3) {
+    _setPrototypeOf25 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf26(o5, p4) {
+      o5.__proto__ = p4;
+      return o5;
+    };
+    return _setPrototypeOf25(o4, p3);
+  }
+  function _createSuper25(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct25();
+    return function _createSuperInternal() {
+      var Super = _getPrototypeOf25(Derived), result;
+      if (hasNativeReflectConstruct) {
+        var NewTarget = _getPrototypeOf25(this).constructor;
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+      return _possibleConstructorReturn25(this, result);
+    };
+  }
+  function _possibleConstructorReturn25(self2, call8) {
+    if (call8 && (_typeof48(call8) === "object" || typeof call8 === "function")) {
+      return call8;
+    } else if (call8 !== void 0) {
+      throw new TypeError("Derived constructors may only return object or undefined");
+    }
+    return _assertThisInitialized25(self2);
+  }
+  function _assertThisInitialized25(self2) {
+    if (self2 === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+    return self2;
+  }
+  function _isNativeReflectConstruct25() {
+    if (typeof Reflect === "undefined" || !Reflect.construct)
+      return false;
+    if (Reflect.construct.sham)
+      return false;
+    if (typeof Proxy === "function")
+      return true;
+    try {
+      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function() {
+      }));
+      return true;
+    } catch (e4) {
+      return false;
+    }
+  }
+  function _getPrototypeOf25(o4) {
+    _getPrototypeOf25 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf26(o5) {
+      return o5.__proto__ || Object.getPrototypeOf(o5);
+    };
+    return _getPrototypeOf25(o4);
+  }
+  function _defineProperty19(obj, key, value) {
+    key = _toPropertyKey42(key);
+    if (key in obj) {
+      Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
+    } else {
+      obj[key] = value;
+    }
+    return obj;
+  }
+  function _toPropertyKey42(arg) {
+    var key = _toPrimitive42(arg, "string");
+    return _typeof48(key) === "symbol" ? key : String(key);
+  }
+  function _toPrimitive42(input, hint) {
+    if (_typeof48(input) !== "object" || input === null)
+      return input;
+    var prim = input[Symbol.toPrimitive];
+    if (prim !== void 0) {
+      var res = prim.call(input, hint || "default");
+      if (_typeof48(res) !== "object")
+        return res;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return (hint === "string" ? String : Number)(input);
+  }
+  function _taggedTemplateLiteral(strings, raw) {
+    if (!raw) {
+      raw = strings.slice(0);
+    }
+    return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } }));
+  }
+  var buttonStyles = i(_templateObject || (_templateObject = _taggedTemplateLiteral(["\n  button {\n    background-color: transparent;\n    outline: none;\n    border-style: none;\n    padding: var(--space-3);\n    border-radius: var(--space-1);\n    font-size: 1.5rem;\n    background-color: inherit;\n    display: block;\n  }\n\n  button > svg {\n    display: block;\n  }\n"])));
+  var ShinyErrorConsole = /* @__PURE__ */ function(_LitElement) {
+    _inherits25(ShinyErrorConsole2, _LitElement);
+    var _super = _createSuper25(ShinyErrorConsole2);
+    function ShinyErrorConsole2() {
+      _classCallCheck41(this, ShinyErrorConsole2);
+      return _super.apply(this, arguments);
+    }
+    _createClass41(ShinyErrorConsole2, [{
+      key: "toggleCollapsed",
+      value: function toggleCollapsed() {
+        var _this$querySelector;
+        this.classList.toggle("collapsed");
+        (_this$querySelector = this.querySelector(".toggle-button")) === null || _this$querySelector === void 0 ? void 0 : _this$querySelector.blur();
+      }
+    }, {
+      key: "handleDismissAll",
+      value: function handleDismissAll() {
+        var _this = this;
+        this.classList.add("leaving");
+        this.addEventListener("animationend", function() {
+          _this.remove();
+        });
+      }
+    }, {
+      key: "render",
+      value: function render() {
+        return x(_templateObject2 || (_templateObject2 = _taggedTemplateLiteral([' <div class="header">\n        <span class="title"> Shiny Client Errors </span>\n        <button\n          class="close-button"\n          @click=', '\n          title="Dismiss all console messages and close console"\n        >\n          <svg\n            xmlns="http://www.w3.org/2000/svg"\n            fill="none"\n            viewBox="0 0 24 24"\n            stroke-width="1.5"\n            height="1em"\n            width="1em"\n            stroke="currentColor"\n            class="close-icon"\n          >\n            <path\n              stroke-linecap="round"\n              stroke-linejoin="round"\n              d="M6 18L18 6M6 6l12 12"\n            />\n          </svg>\n          Dismiss all\n        </button>\n        <button class="toggle-button" @click=', '>\n          <svg\n            xmlns="http://www.w3.org/2000/svg"\n            fill="none"\n            viewBox="0 0 24 24"\n            stroke-width="1.5"\n            height="1em"\n            width="1em"\n            stroke="currentColor"\n            class="toggle-icon"\n          >\n            <path\n              class="collapse"\n              stroke-linecap="round"\n              stroke-linejoin="round"\n              d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"\n            />\n          </svg>\n        </button>\n      </div>\n      <slot class="content"></slot>'])), this.handleDismissAll, this.toggleCollapsed);
+      }
+    }]);
+    return ShinyErrorConsole2;
+  }(s3);
+  _defineProperty19(ShinyErrorConsole, "styles", [i(_templateObject4 || (_templateObject4 = _taggedTemplateLiteral(["\n      :host {\n        /* These are all taken from open-props */\n        --space-1: 0.5rem;\n        --space-2: calc(var(--space-1) * 2);\n        --space-3: calc(var(--space-1) * 3);\n        --space-4: calc(var(--space-1) * 4);\n\n        --red-2: #ffc9c9;\n        --red-6: #fa5252;\n        --red-7: #f03e3e;\n        --red-8: #e03131;\n        --red-10: #b02525;\n        --red-11: #962020;\n        --red-12: #7d1a1a;\n\n        --gray-1: #f8f9fa;\n        --gray-2: #e9ecef;\n        --gray-3: #dee2e6;\n        --gray-4: #ced4da;\n        --gray-6: #868e96;\n        --gray-8: #6c757d;\n\n        --green-8: #51cf66;\n\n        --shadow-color: 220 3% 15%;\n        --shadow-strength: 1%;\n        --shadow-3: 0 -1px 3px 0 hsl(var(--shadow-color) /\n                calc(var(--shadow-strength) + 2%)),\n          0 1px 2px -5px hsl(var(--shadow-color) /\n                calc(var(--shadow-strength) + 2%)),\n          0 2px 5px -5px hsl(var(--shadow-color) /\n                calc(var(--shadow-strength) + 4%)),\n          0 4px 12px -5px hsl(var(--shadow-color) /\n                calc(var(--shadow-strength) + 5%)),\n          0 12px 15px -5px hsl(var(--shadow-color) /\n                calc(var(--shadow-strength) + 7%));\n\n        --ring-shadow: 0 0 0 1px var(--gray-2);\n\n        /* How fast should the message pop in and out of the screen? */\n        --animation-speed: 500ms;\n\n        /* Taken from open-props */\n        --ease-3: cubic-bezier(0.25, 0, 0.3, 1);\n        --animation-slide-in-left: slide-in-left var(--animation-speed)\n          var(--ease-3);\n\n        --animation-slide-out-left: slide-out-left var(--animation-speed)\n          var(--ease-3);\n        --modal-bg-color: white;\n\n        position: fixed;\n        top: var(--space-1);\n        right: var(--space-1);\n        z-index: 1000;\n\n        display: flex;\n        flex-direction: column;\n\n        background-color: var(--modal-bg-color);\n        border-radius: var(--space-1);\n\n        animation: var(--animation-slide-in-left);\n        box-shadow: var(--shadow-3), var(--ring-shadow);\n\n        /* Dont let the error console burst out of the viewport */\n        max-height: calc(100vh - 2 * var(--space-1));\n      }\n\n      @keyframes slide-in-left {\n        from {\n          transform: translateX(100%);\n        }\n      }\n      @keyframes slide-out-left {\n        to {\n          transform: translateX(100%);\n        }\n      }\n\n      :host(.leaving) {\n        animation: var(--animation-slide-out-left);\n      }\n\n      .header {\n        display: flex;\n        justify-content: flex-end;\n        align-items: flex-start;\n        gap: var(--space-2);\n      }\n\n      .title {\n        font-size: 1.6rem;\n        margin-right: auto;\n        padding: var(--space-3);\n        line-height: 1;\n        font-weight: 600;\n        color: var(--red-12);\n      }\n\n      ", "\n\n      button:hover {\n        background-color: var(--gray-2);\n      }\n\n      .toggle-button {\n        width: fit-content;\n        border: none;\n        aspect-ratio: 1;\n        border-color: var(--gray-4);\n      }\n\n      .close-button {\n        display: flex;\n        align-items: center;\n        color: var(--red-11);\n      }\n\n      .close-button > svg {\n        margin-right: 3px;\n      }\n\n      .toggle-button:focus {\n        outline: 1px solid black;\n      }\n\n      .toggle-icon {\n        transition: transform var(--animation-speed) ease-in-out;\n      }\n\n      :host(.collapsed) .toggle-icon {\n        transform: scaleX(-1) scaleY(-1);\n      }\n\n      :host(.collapsed) .close-button {\n        display: none;\n      }\n\n      .content {\n        display: block;\n        padding: var(--space-4);\n        padding-top: var(--space-2);\n        max-height: 100%;\n        overflow: auto;\n      }\n\n      :host(.collapsed) .content {\n        display: none;\n      }\n    "])), buttonStyles)]);
+  customElements.define("shiny-error-console", ShinyErrorConsole);
+  var ShinyErrorMessage = /* @__PURE__ */ function(_LitElement2) {
+    _inherits25(ShinyErrorMessage2, _LitElement2);
+    var _super2 = _createSuper25(ShinyErrorMessage2);
+    function ShinyErrorMessage2() {
+      var _this2;
+      _classCallCheck41(this, ShinyErrorMessage2);
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+      _this2 = _super2.call.apply(_super2, [this].concat(args));
+      _defineProperty19(_assertThisInitialized25(_this2), "headline", "");
+      _defineProperty19(_assertThisInitialized25(_this2), "message", "");
+      return _this2;
+    }
+    _createClass41(ShinyErrorMessage2, [{
+      key: "copyErrorToClipboard",
+      value: function() {
+        var _copyErrorToClipboard = _asyncToGenerator12(/* @__PURE__ */ _regeneratorRuntime12().mark(function _callee() {
+          var _this3 = this;
+          return _regeneratorRuntime12().wrap(function _callee$(_context) {
+            while (1)
+              switch (_context.prev = _context.next) {
+                case 0:
+                  _context.next = 2;
+                  return navigator.clipboard.writeText(this.message);
+                case 2:
+                  this.classList.add("copy-success");
+                  setTimeout(function() {
+                    _this3.classList.remove("copy-success");
+                  }, 1e3);
+                case 4:
+                case "end":
+                  return _context.stop();
+              }
+          }, _callee, this);
+        }));
+        function copyErrorToClipboard() {
+          return _copyErrorToClipboard.apply(this, arguments);
+        }
+        return copyErrorToClipboard;
+      }()
+    }, {
+      key: "render",
+      value: function render() {
+        return x(_templateObject3 || (_templateObject3 = _taggedTemplateLiteral(['\n      <div class="container">\n        <div class="decoration-container">\n          <div class="vertical-line"></div>\n          <div class="dot"></div>\n        </div>\n        <div class="contents">\n          <h3>', '</h3>\n          <p class="error-message">', '</p>\n        </div>\n\n        <div class="actions">\n          <button\n            class="copy-button"\n            @click=', '\n            title="Copy error to clipboard"\n          >\n            <div class="copy-button-inner">\n              <svg\n                class="front"\n                xmlns="http://www.w3.org/2000/svg"\n                fill="none"\n                viewBox="0 0 24 24"\n                stroke-width="1.5"\n                stroke="currentColor"\n                height="1em"\n                width="1em"\n              >\n                <path\n                  stroke-linecap="round"\n                  stroke-linejoin="round"\n                  d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184"\n                />\n              </svg>\n\n              <svg\n                class="back"\n                xmlns="http://www.w3.org/2000/svg"\n                fill="none"\n                viewBox="0 0 24 24"\n                stroke-width="1.5"\n                stroke="currentColor"\n                height="1em"\n                width="1em"\n              >\n                <path\n                  stroke-linecap="round"\n                  stroke-linejoin="round"\n                  d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"\n                />\n              </svg>\n            </div>\n          </button>\n        </div>\n      </div>\n    '])), this.headline, this.message, this.copyErrorToClipboard);
+      }
+    }]);
+    return ShinyErrorMessage2;
+  }(s3);
+  _defineProperty19(ShinyErrorMessage, "properties", {
+    headline: {},
+    message: {}
+  });
+  _defineProperty19(ShinyErrorMessage, "styles", [i(_templateObject5 || (_templateObject5 = _taggedTemplateLiteral(['\n      :host {\n        color: var(--red-11);\n        display: block;\n        font-size: 1.4rem;\n\n        position: relative;\n        --icon-size: 1.5rem;\n\n        --padding-top: var(--space-1);\n        --padding-bottom: var(--space-3);\n\n        /* Reset box sizing */\n        box-sizing: border-box;\n      }\n\n      .container {\n        display: flex;\n        gap: var(--space-2);\n      }\n\n      .contents {\n        width: 40ch;\n        display: flex;\n        flex-direction: column;\n        gap: var(--space-1);\n        padding-bottom: var(--padding-bottom);\n        padding-top: var(--padding-top);\n      }\n\n      :host(:last-of-type) .contents {\n        --padding-bottom: var(--space-1);\n      }\n\n      .contents > h3 {\n        font-size: 1em;\n        font-weight: 500;\n        color: var(--red-12);\n      }\n\n      .contents > * {\n        margin-block: 0;\n      }\n\n      .error-message {\n        font-family: "Courier New", Courier, monospace;\n      }\n\n      .decoration-container {\n        flex-shrink: 0;\n        padding-inline: var(0.375rem);\n        position: relative;\n\n        --line-w: 2px;\n        --dot-size: 1rem;\n      }\n\n      :host(:hover) .decoration-container {\n        --scale: 1.25;\n      }\n\n      .vertical-line {\n        margin-inline: auto;\n        width: var(--line-w);\n        height: 100%;\n\n        background-color: var(--red-10);\n      }\n\n      :host(:first-of-type) .vertical-line {\n        height: calc(100% - var(--dot-size));\n        margin-top: var(--dot-size);\n      }\n\n      .dot {\n        position: absolute;\n        width: var(--dot-size);\n        height: var(--dot-size);\n        top: var(--dot-size);\n        left: calc(50% - var(--dot-size) / 2);\n        border-radius: 100%;\n        transform: scale(var(--scale, 1));\n\n        color: var(--red-6);\n        background-color: var(--red-10);\n      }\n\n      .actions {\n        transform: scaleX(0);\n        transition: transform calc(var(--animation-speed) / 2) ease-in-out;\n        display: flex;\n        justify-content: center;\n        flex-direction: column;\n      }\n\n      /* Delay transition on mouseout so the buttons don\'t jump away if the user\n      overshoots them with their mouse */\n      :host(:not(:hover)) .actions {\n        transition-delay: 0.15s;\n      }\n\n      :host(:hover) .actions {\n        transform: scaleX(1);\n      }\n\n      ', "\n\n      .copy-button {\n        padding: 0;\n        width: 4rem;\n        height: 4rem;\n        position: relative;\n        --pad: var(--space-2);\n      }\n\n      .copy-button-inner {\n        position: relative;\n        width: 100%;\n        height: 100%;\n        border-radius: inherit;\n        transition: transform 0.5s;\n        transform-style: preserve-3d;\n      }\n\n      /* Animate flipping to the other side when the .copy-success class is\n      added to the host */\n      :host(.copy-success) .copy-button-inner {\n        transform: rotateY(180deg);\n      }\n\n      /* Position the front and back side */\n      .copy-button .front,\n      .copy-button .back {\n        --side: calc(100% - 2 * var(--pad));\n        position: absolute;\n        inset: var(--pad);\n        height: var(--side);\n        width: var(--side);\n        -webkit-backface-visibility: hidden; /* Safari */\n        backface-visibility: hidden;\n      }\n\n      .copy-button:hover .copy-button-inner {\n        background-color: var(--gray-2);\n      }\n\n      /* Style the back side */\n      .copy-button .back {\n        --pad: var(--space-1);\n        color: var(--green-8);\n        transform: rotateY(180deg);\n      }\n    "])), buttonStyles)]);
+  customElements.define("shiny-error-message", ShinyErrorMessage);
+  function showErrorInClientConsole(e4) {
+    var errorMsg = null;
+    var headline = "Error on client while running Shiny app";
+    if (typeof e4 === "string") {
+      errorMsg = e4;
+    } else if (e4 instanceof ShinyClientError) {
+      errorMsg = e4.message;
+      headline = e4.headline;
+    } else if (e4 instanceof Error) {
+      errorMsg = e4.message;
+    } else {
+      errorMsg = "Unknown error";
+    }
+    var errorConsoleContainer = document.querySelector("shiny-error-console");
+    if (!errorConsoleContainer) {
+      errorConsoleContainer = document.createElement("shiny-error-console");
+      document.body.appendChild(errorConsoleContainer);
+    }
+    var errorConsole = document.createElement("shiny-error-message");
+    errorConsole.setAttribute("headline", headline || "");
+    errorConsole.setAttribute("message", errorMsg);
+    errorConsoleContainer.appendChild(errorConsole);
+  }
+
+  // srcts/src/shiny/shinyapp.ts
+  function _typeof49(obj) {
+    "@babel/helpers - typeof";
+    return _typeof49 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
+      return typeof obj2;
+    } : function(obj2) {
+      return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+    }, _typeof49(obj);
+  }
+  function _createForOfIteratorHelper5(o4, allowArrayLike) {
+    var it = typeof Symbol !== "undefined" && o4[Symbol.iterator] || o4["@@iterator"];
+    if (!it) {
+      if (Array.isArray(o4) || (it = _unsupportedIterableToArray5(o4)) || allowArrayLike && o4 && typeof o4.length === "number") {
+        if (it)
+          o4 = it;
+        var i5 = 0;
+        var F = function F2() {
+        };
+        return { s: F, n: function n4() {
+          if (i5 >= o4.length)
+            return { done: true };
+          return { done: false, value: o4[i5++] };
+        }, e: function e4(_e) {
+          throw _e;
+        }, f: F };
+      }
+      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+    var normalCompletion = true, didErr = false, err;
+    return { s: function s4() {
+      it = it.call(o4);
+    }, n: function n4() {
+      var step = it.next();
+      normalCompletion = step.done;
+      return step;
+    }, e: function e4(_e2) {
+      didErr = true;
+      err = _e2;
+    }, f: function f4() {
+      try {
+        if (!normalCompletion && it.return != null)
+          it.return();
+      } finally {
+        if (didErr)
+          throw err;
+      }
+    } };
+  }
+  function _unsupportedIterableToArray5(o4, minLen) {
+    if (!o4)
+      return;
+    if (typeof o4 === "string")
+      return _arrayLikeToArray5(o4, minLen);
+    var n4 = Object.prototype.toString.call(o4).slice(8, -1);
+    if (n4 === "Object" && o4.constructor)
+      n4 = o4.constructor.name;
+    if (n4 === "Map" || n4 === "Set")
+      return Array.from(o4);
+    if (n4 === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n4))
+      return _arrayLikeToArray5(o4, minLen);
+  }
+  function _arrayLikeToArray5(arr, len) {
+    if (len == null || len > arr.length)
+      len = arr.length;
+    for (var i5 = 0, arr2 = new Array(len); i5 < len; i5++)
+      arr2[i5] = arr[i5];
+    return arr2;
+  }
+  function _regeneratorRuntime13() {
+    "use strict";
+    _regeneratorRuntime13 = function _regeneratorRuntime16() {
+      return exports;
+    };
+    var exports = {}, Op = Object.prototype, hasOwn5 = Op.hasOwnProperty, defineProperty3 = Object.defineProperty || function(obj, key, desc) {
+      obj[key] = desc.value;
+    }, $Symbol = "function" == typeof Symbol ? Symbol : {}, iteratorSymbol = $Symbol.iterator || "@@iterator", asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator", toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
+    function define(obj, key, value) {
+      return Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }), obj[key];
+    }
+    try {
+      define({}, "");
+    } catch (err) {
+      define = function define2(obj, key, value) {
+        return obj[key] = value;
+      };
+    }
+    function wrap(innerFn, outerFn, self2, tryLocsList) {
+      var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator, generator = Object.create(protoGenerator.prototype), context = new Context(tryLocsList || []);
+      return defineProperty3(generator, "_invoke", { value: makeInvokeMethod(innerFn, self2, context) }), generator;
+    }
+    function tryCatch(fn, obj, arg) {
+      try {
+        return { type: "normal", arg: fn.call(obj, arg) };
+      } catch (err) {
+        return { type: "throw", arg: err };
+      }
+    }
+    exports.wrap = wrap;
+    var ContinueSentinel = {};
+    function Generator() {
+    }
+    function GeneratorFunction() {
+    }
+    function GeneratorFunctionPrototype() {
+    }
+    var IteratorPrototype = {};
+    define(IteratorPrototype, iteratorSymbol, function() {
+      return this;
+    });
+    var getProto = Object.getPrototypeOf, NativeIteratorPrototype = getProto && getProto(getProto(values2([])));
+    NativeIteratorPrototype && NativeIteratorPrototype !== Op && hasOwn5.call(NativeIteratorPrototype, iteratorSymbol) && (IteratorPrototype = NativeIteratorPrototype);
+    var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(IteratorPrototype);
+    function defineIteratorMethods(prototype) {
+      ["next", "throw", "return"].forEach(function(method) {
+        define(prototype, method, function(arg) {
+          return this._invoke(method, arg);
+        });
+      });
+    }
+    function AsyncIterator(generator, PromiseImpl) {
+      function invoke(method, arg, resolve, reject) {
+        var record = tryCatch(generator[method], generator, arg);
+        if ("throw" !== record.type) {
+          var result = record.arg, value = result.value;
+          return value && "object" == _typeof49(value) && hasOwn5.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function(value2) {
+            invoke("next", value2, resolve, reject);
+          }, function(err) {
+            invoke("throw", err, resolve, reject);
+          }) : PromiseImpl.resolve(value).then(function(unwrapped) {
+            result.value = unwrapped, resolve(result);
+          }, function(error) {
+            return invoke("throw", error, resolve, reject);
+          });
+        }
+        reject(record.arg);
+      }
+      var previousPromise;
+      defineProperty3(this, "_invoke", { value: function value(method, arg) {
+        function callInvokeWithMethodAndArg() {
+          return new PromiseImpl(function(resolve, reject) {
+            invoke(method, arg, resolve, reject);
+          });
+        }
+        return previousPromise = previousPromise ? previousPromise.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg();
+      } });
+    }
+    function makeInvokeMethod(innerFn, self2, context) {
+      var state = "suspendedStart";
+      return function(method, arg) {
+        if ("executing" === state)
+          throw new Error("Generator is already running");
+        if ("completed" === state) {
+          if ("throw" === method)
+            throw arg;
+          return doneResult();
+        }
+        for (context.method = method, context.arg = arg; ; ) {
+          var delegate = context.delegate;
+          if (delegate) {
+            var delegateResult = maybeInvokeDelegate(delegate, context);
+            if (delegateResult) {
+              if (delegateResult === ContinueSentinel)
+                continue;
+              return delegateResult;
+            }
+          }
+          if ("next" === context.method)
+            context.sent = context._sent = context.arg;
+          else if ("throw" === context.method) {
+            if ("suspendedStart" === state)
+              throw state = "completed", context.arg;
+            context.dispatchException(context.arg);
+          } else
+            "return" === context.method && context.abrupt("return", context.arg);
+          state = "executing";
+          var record = tryCatch(innerFn, self2, context);
+          if ("normal" === record.type) {
+            if (state = context.done ? "completed" : "suspendedYield", record.arg === ContinueSentinel)
+              continue;
+            return { value: record.arg, done: context.done };
+          }
+          "throw" === record.type && (state = "completed", context.method = "throw", context.arg = record.arg);
+        }
+      };
+    }
+    function maybeInvokeDelegate(delegate, context) {
+      var methodName = context.method, method = delegate.iterator[methodName];
+      if (void 0 === method)
+        return context.delegate = null, "throw" === methodName && delegate.iterator.return && (context.method = "return", context.arg = void 0, maybeInvokeDelegate(delegate, context), "throw" === context.method) || "return" !== methodName && (context.method = "throw", context.arg = new TypeError("The iterator does not provide a '" + methodName + "' method")), ContinueSentinel;
+      var record = tryCatch(method, delegate.iterator, context.arg);
+      if ("throw" === record.type)
+        return context.method = "throw", context.arg = record.arg, context.delegate = null, ContinueSentinel;
+      var info = record.arg;
+      return info ? info.done ? (context[delegate.resultName] = info.value, context.next = delegate.nextLoc, "return" !== context.method && (context.method = "next", context.arg = void 0), context.delegate = null, ContinueSentinel) : info : (context.method = "throw", context.arg = new TypeError("iterator result is not an object"), context.delegate = null, ContinueSentinel);
+    }
+    function pushTryEntry(locs) {
+      var entry = { tryLoc: locs[0] };
+      1 in locs && (entry.catchLoc = locs[1]), 2 in locs && (entry.finallyLoc = locs[2], entry.afterLoc = locs[3]), this.tryEntries.push(entry);
+    }
+    function resetTryEntry(entry) {
+      var record = entry.completion || {};
+      record.type = "normal", delete record.arg, entry.completion = record;
+    }
+    function Context(tryLocsList) {
+      this.tryEntries = [{ tryLoc: "root" }], tryLocsList.forEach(pushTryEntry, this), this.reset(true);
+    }
+    function values2(iterable) {
+      if (iterable) {
+        var iteratorMethod = iterable[iteratorSymbol];
+        if (iteratorMethod)
+          return iteratorMethod.call(iterable);
+        if ("function" == typeof iterable.next)
+          return iterable;
+        if (!isNaN(iterable.length)) {
+          var i5 = -1, next2 = function next3() {
+            for (; ++i5 < iterable.length; )
+              if (hasOwn5.call(iterable, i5))
+                return next3.value = iterable[i5], next3.done = false, next3;
+            return next3.value = void 0, next3.done = true, next3;
+          };
+          return next2.next = next2;
+        }
+      }
+      return { next: doneResult };
+    }
+    function doneResult() {
+      return { value: void 0, done: true };
+    }
+    return GeneratorFunction.prototype = GeneratorFunctionPrototype, defineProperty3(Gp, "constructor", { value: GeneratorFunctionPrototype, configurable: true }), defineProperty3(GeneratorFunctionPrototype, "constructor", { value: GeneratorFunction, configurable: true }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, toStringTagSymbol, "GeneratorFunction"), exports.isGeneratorFunction = function(genFun) {
+      var ctor = "function" == typeof genFun && genFun.constructor;
+      return !!ctor && (ctor === GeneratorFunction || "GeneratorFunction" === (ctor.displayName || ctor.name));
+    }, exports.mark = function(genFun) {
+      return Object.setPrototypeOf ? Object.setPrototypeOf(genFun, GeneratorFunctionPrototype) : (genFun.__proto__ = GeneratorFunctionPrototype, define(genFun, toStringTagSymbol, "GeneratorFunction")), genFun.prototype = Object.create(Gp), genFun;
+    }, exports.awrap = function(arg) {
+      return { __await: arg };
+    }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, asyncIteratorSymbol, function() {
+      return this;
+    }), exports.AsyncIterator = AsyncIterator, exports.async = function(innerFn, outerFn, self2, tryLocsList, PromiseImpl) {
+      void 0 === PromiseImpl && (PromiseImpl = Promise);
+      var iter = new AsyncIterator(wrap(innerFn, outerFn, self2, tryLocsList), PromiseImpl);
+      return exports.isGeneratorFunction(outerFn) ? iter : iter.next().then(function(result) {
+        return result.done ? result.value : iter.next();
+      });
+    }, defineIteratorMethods(Gp), define(Gp, toStringTagSymbol, "Generator"), define(Gp, iteratorSymbol, function() {
+      return this;
+    }), define(Gp, "toString", function() {
+      return "[object Generator]";
+    }), exports.keys = function(val) {
+      var object = Object(val), keys2 = [];
+      for (var key in object)
+        keys2.push(key);
+      return keys2.reverse(), function next2() {
+        for (; keys2.length; ) {
+          var key2 = keys2.pop();
+          if (key2 in object)
+            return next2.value = key2, next2.done = false, next2;
+        }
+        return next2.done = true, next2;
+      };
+    }, exports.values = values2, Context.prototype = { constructor: Context, reset: function reset(skipTempReset) {
+      if (this.prev = 0, this.next = 0, this.sent = this._sent = void 0, this.done = false, this.delegate = null, this.method = "next", this.arg = void 0, this.tryEntries.forEach(resetTryEntry), !skipTempReset)
+        for (var name in this)
+          "t" === name.charAt(0) && hasOwn5.call(this, name) && !isNaN(+name.slice(1)) && (this[name] = void 0);
+    }, stop: function stop() {
+      this.done = true;
+      var rootRecord = this.tryEntries[0].completion;
+      if ("throw" === rootRecord.type)
+        throw rootRecord.arg;
+      return this.rval;
+    }, dispatchException: function dispatchException(exception) {
+      if (this.done)
+        throw exception;
+      var context = this;
+      function handle(loc, caught) {
+        return record.type = "throw", record.arg = exception, context.next = loc, caught && (context.method = "next", context.arg = void 0), !!caught;
+      }
+      for (var i5 = this.tryEntries.length - 1; i5 >= 0; --i5) {
+        var entry = this.tryEntries[i5], record = entry.completion;
+        if ("root" === entry.tryLoc)
+          return handle("end");
+        if (entry.tryLoc <= this.prev) {
+          var hasCatch = hasOwn5.call(entry, "catchLoc"), hasFinally = hasOwn5.call(entry, "finallyLoc");
+          if (hasCatch && hasFinally) {
+            if (this.prev < entry.catchLoc)
+              return handle(entry.catchLoc, true);
+            if (this.prev < entry.finallyLoc)
+              return handle(entry.finallyLoc);
+          } else if (hasCatch) {
+            if (this.prev < entry.catchLoc)
+              return handle(entry.catchLoc, true);
+          } else {
+            if (!hasFinally)
+              throw new Error("try statement without catch or finally");
+            if (this.prev < entry.finallyLoc)
+              return handle(entry.finallyLoc);
+          }
+        }
+      }
+    }, abrupt: function abrupt(type, arg) {
+      for (var i5 = this.tryEntries.length - 1; i5 >= 0; --i5) {
+        var entry = this.tryEntries[i5];
+        if (entry.tryLoc <= this.prev && hasOwn5.call(entry, "finallyLoc") && this.prev < entry.finallyLoc) {
+          var finallyEntry = entry;
+          break;
+        }
+      }
+      finallyEntry && ("break" === type || "continue" === type) && finallyEntry.tryLoc <= arg && arg <= finallyEntry.finallyLoc && (finallyEntry = null);
+      var record = finallyEntry ? finallyEntry.completion : {};
+      return record.type = type, record.arg = arg, finallyEntry ? (this.method = "next", this.next = finallyEntry.finallyLoc, ContinueSentinel) : this.complete(record);
+    }, complete: function complete(record, afterLoc) {
+      if ("throw" === record.type)
+        throw record.arg;
+      return "break" === record.type || "continue" === record.type ? this.next = record.arg : "return" === record.type ? (this.rval = this.arg = record.arg, this.method = "return", this.next = "end") : "normal" === record.type && afterLoc && (this.next = afterLoc), ContinueSentinel;
+    }, finish: function finish(finallyLoc) {
+      for (var i5 = this.tryEntries.length - 1; i5 >= 0; --i5) {
+        var entry = this.tryEntries[i5];
+        if (entry.finallyLoc === finallyLoc)
+          return this.complete(entry.completion, entry.afterLoc), resetTryEntry(entry), ContinueSentinel;
+      }
+    }, catch: function _catch(tryLoc) {
+      for (var i5 = this.tryEntries.length - 1; i5 >= 0; --i5) {
+        var entry = this.tryEntries[i5];
+        if (entry.tryLoc === tryLoc) {
+          var record = entry.completion;
+          if ("throw" === record.type) {
+            var thrown = record.arg;
+            resetTryEntry(entry);
+          }
+          return thrown;
+        }
+      }
+      throw new Error("illegal catch attempt");
+    }, delegateYield: function delegateYield(iterable, resultName, nextLoc) {
+      return this.delegate = { iterator: values2(iterable), resultName: resultName, nextLoc: nextLoc }, "next" === this.method && (this.arg = void 0), ContinueSentinel;
+    } }, exports;
+  }
   function asyncGeneratorStep13(gen, resolve, reject, _next, _throw, key, arg) {
     try {
       var info = gen[key](arg);
@@ -22499,31 +22622,31 @@
       });
     };
   }
-  function _classCallCheck41(instance, Constructor) {
+  function _classCallCheck42(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties41(target, props) {
+  function _defineProperties42(target, props) {
     for (var i5 = 0; i5 < props.length; i5++) {
       var descriptor = props[i5];
       descriptor.enumerable = descriptor.enumerable || false;
       descriptor.configurable = true;
       if ("value" in descriptor)
         descriptor.writable = true;
-      Object.defineProperty(target, _toPropertyKey42(descriptor.key), descriptor);
+      Object.defineProperty(target, _toPropertyKey43(descriptor.key), descriptor);
     }
   }
-  function _createClass41(Constructor, protoProps, staticProps) {
+  function _createClass42(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties41(Constructor.prototype, protoProps);
+      _defineProperties42(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties41(Constructor, staticProps);
+      _defineProperties42(Constructor, staticProps);
     Object.defineProperty(Constructor, "prototype", { writable: false });
     return Constructor;
   }
-  function _defineProperty19(obj, key, value) {
-    key = _toPropertyKey42(key);
+  function _defineProperty20(obj, key, value) {
+    key = _toPropertyKey43(key);
     if (key in obj) {
       Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
     } else {
@@ -22531,17 +22654,17 @@
     }
     return obj;
   }
-  function _toPropertyKey42(arg) {
-    var key = _toPrimitive42(arg, "string");
-    return _typeof48(key) === "symbol" ? key : String(key);
+  function _toPropertyKey43(arg) {
+    var key = _toPrimitive43(arg, "string");
+    return _typeof49(key) === "symbol" ? key : String(key);
   }
-  function _toPrimitive42(input, hint) {
-    if (_typeof48(input) !== "object" || input === null)
+  function _toPrimitive43(input, hint) {
+    if (_typeof49(input) !== "object" || input === null)
       return input;
     var prim = input[Symbol.toPrimitive];
     if (prim !== void 0) {
       var res = prim.call(input, hint || "default");
-      if (_typeof48(res) !== "object")
+      if (_typeof49(res) !== "object")
         return res;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
@@ -22583,22 +22706,22 @@
   }
   var ShinyApp = /* @__PURE__ */ function() {
     function ShinyApp2() {
-      _classCallCheck41(this, ShinyApp2);
-      _defineProperty19(this, "$socket", null);
-      _defineProperty19(this, "taskQueue", new AsyncQueue());
-      _defineProperty19(this, "config", null);
-      _defineProperty19(this, "$inputValues", {});
-      _defineProperty19(this, "$initialInput", null);
-      _defineProperty19(this, "$bindings", {});
-      _defineProperty19(this, "$values", {});
-      _defineProperty19(this, "$errors", {});
-      _defineProperty19(this, "$conditionals", {});
-      _defineProperty19(this, "$pendingMessages", []);
-      _defineProperty19(this, "$activeRequests", {});
-      _defineProperty19(this, "$nextRequestId", 0);
-      _defineProperty19(this, "$allowReconnect", false);
-      _defineProperty19(this, "scheduledReconnect", void 0);
-      _defineProperty19(this, "reconnectDelay", function() {
+      _classCallCheck42(this, ShinyApp2);
+      _defineProperty20(this, "$socket", null);
+      _defineProperty20(this, "taskQueue", new AsyncQueue());
+      _defineProperty20(this, "config", null);
+      _defineProperty20(this, "$inputValues", {});
+      _defineProperty20(this, "$initialInput", null);
+      _defineProperty20(this, "$bindings", {});
+      _defineProperty20(this, "$values", {});
+      _defineProperty20(this, "$errors", {});
+      _defineProperty20(this, "$conditionals", {});
+      _defineProperty20(this, "$pendingMessages", []);
+      _defineProperty20(this, "$activeRequests", {});
+      _defineProperty20(this, "$nextRequestId", 0);
+      _defineProperty20(this, "$allowReconnect", false);
+      _defineProperty20(this, "scheduledReconnect", void 0);
+      _defineProperty20(this, "reconnectDelay", function() {
         var attempts = 0;
         var delays = [1500, 1500, 2500, 2500, 5500, 5500, 10500];
         return {
@@ -22615,7 +22738,7 @@
           }
         };
       }());
-      _defineProperty19(this, "progressHandlers", {
+      _defineProperty20(this, "progressHandlers", {
         binding: function binding(message) {
           var key = message.id;
           var binding2 = this.$bindings[key];
@@ -22727,7 +22850,7 @@
       });
       this._init();
     }
-    _createClass41(ShinyApp2, [{
+    _createClass42(ShinyApp2, [{
       key: "connect",
       value: function connect(initialInput) {
         if (this.$socket)
@@ -23082,7 +23205,7 @@
         return Object.keys(scopeComponent).filter(function(k2) {
           return k2.indexOf(nsPrefix) === 0;
         }).map(function(k2) {
-          return _defineProperty19({}, k2.substring(nsPrefix.length), scopeComponent[k2]);
+          return _defineProperty20({}, k2.substring(nsPrefix.length), scopeComponent[k2]);
         }).reduce(function(obj, pair) {
           return import_jquery38.default.extend(obj, pair);
         }, {});
@@ -23850,13 +23973,13 @@
   }();
 
   // srcts/src/shiny/init.ts
-  function _typeof49(obj) {
+  function _typeof50(obj) {
     "@babel/helpers - typeof";
-    return _typeof49 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
+    return _typeof50 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
       return typeof obj2;
     } : function(obj2) {
       return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-    }, _typeof49(obj);
+    }, _typeof50(obj);
   }
   function _regeneratorRuntime14() {
     "use strict";
@@ -23914,7 +24037,7 @@
         var record = tryCatch(generator[method], generator, arg);
         if ("throw" !== record.type) {
           var result = record.arg, value = result.value;
-          return value && "object" == _typeof49(value) && hasOwn5.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function(value2) {
+          return value && "object" == _typeof50(value) && hasOwn5.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function(value2) {
             invoke("next", value2, resolve, reject);
           }, function(err) {
             invoke("throw", err, resolve, reject);
@@ -24500,13 +24623,13 @@
   }
 
   // srcts/src/shiny/index.ts
-  function _typeof50(obj) {
+  function _typeof51(obj) {
     "@babel/helpers - typeof";
-    return _typeof50 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
+    return _typeof51 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
       return typeof obj2;
     } : function(obj2) {
       return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-    }, _typeof50(obj);
+    }, _typeof51(obj);
   }
   function _regeneratorRuntime15() {
     "use strict";
@@ -24564,7 +24687,7 @@
         var record = tryCatch(generator[method], generator, arg);
         if ("throw" !== record.type) {
           var result = record.arg, value = result.value;
-          return value && "object" == _typeof50(value) && hasOwn5.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function(value2) {
+          return value && "object" == _typeof51(value) && hasOwn5.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function(value2) {
             invoke("next", value2, resolve, reject);
           }, function(err) {
             invoke("throw", err, resolve, reject);

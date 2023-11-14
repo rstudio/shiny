@@ -14,10 +14,6 @@ const buttonStyles = css`
     display: block;
   }
 
-  button:hover {
-    background-color: var(--gray-2);
-  }
-
   button > svg {
     display: block;
   }
@@ -46,6 +42,8 @@ class ShinyErrorConsole extends LitElement {
         --gray-4: #ced4da;
         --gray-6: #868e96;
         --gray-8: #6c757d;
+
+        --green-8: #51cf66;
 
         --shadow-color: 220 3% 15%;
         --shadow-strength: 1%;
@@ -125,6 +123,10 @@ class ShinyErrorConsole extends LitElement {
 
       ${buttonStyles}
 
+      button:hover {
+        background-color: var(--gray-2);
+      }
+
       .toggle-button {
         width: fit-content;
         border: none;
@@ -147,7 +149,7 @@ class ShinyErrorConsole extends LitElement {
       }
 
       .toggle-icon {
-        transition: transform var(--anim-speed) ease-in-out;
+        transition: transform var(--animation-speed) ease-in-out;
       }
 
       :host(.collapsed) .toggle-icon {
@@ -256,11 +258,13 @@ export class ShinyErrorMessage extends LitElement {
         font-size: 1.4rem;
 
         position: relative;
-        --anim-speed: 0.2s;
         --icon-size: 1.5rem;
 
         --padding-top: var(--space-1);
         --padding-bottom: var(--space-3);
+
+        /* Reset box sizing */
+        box-sizing: border-box;
       }
 
       .container {
@@ -336,7 +340,10 @@ export class ShinyErrorMessage extends LitElement {
 
       .actions {
         transform: scaleX(0);
-        transition: transform var(--anim-speed) ease-in-out;
+        transition: transform calc(var(--animation-speed) / 2) ease-in-out;
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
       }
 
       /* Delay transition on mouseout so the buttons don't jump away if the user
@@ -351,51 +358,50 @@ export class ShinyErrorMessage extends LitElement {
 
       ${buttonStyles}
 
-      .actions > button {
-        aspect-ratio: 1;
+      .copy-button {
+        padding: 0;
+        width: 4rem;
+        height: 4rem;
+        position: relative;
+        --pad: var(--space-2);
       }
 
-      .copy-success-msg {
-        animation: slide-in-and-out-left 2s ease-in-out;
-        position: absolute;
+      .copy-button-inner {
+        position: relative;
+        width: 100%;
         height: 100%;
-        display: grid;
-        place-content: center;
-
-        right: 0;
-        top: 0;
-      }
-      .copy-success-msg > div {
-        /* Blur content behind div */
-        backdrop-filter: blur(3px);
-        padding: var(--space-1);
+        border-radius: inherit;
+        transition: transform 0.5s;
+        transform-style: preserve-3d;
       }
 
-      @keyframes slide-in-and-out-left {
-        0% {
-          opacity: 0;
-          filter: brightness(1) blur(20px);
-        }
-        5% {
-          opacity: 1;
-          filter: brightness(2) blur(10px);
-        }
-        40% {
-          opacity: 1;
-          filter: brightness(1) blur(0);
-        }
-        60% {
-          opacity: 1;
-          filter: brightness(1) blur(0);
-        }
-        95% {
-          opacity: 1;
-          filter: brightness(2) blur(10px);
-        }
-        100% {
-          opacity: 0;
-          filter: brightness(1) blur(20px);
-        }
+      /* Animate flipping to the other side when the .copy-success class is
+      added to the host */
+      :host(.copy-success) .copy-button-inner {
+        transform: rotateY(180deg);
+      }
+
+      /* Position the front and back side */
+      .copy-button .front,
+      .copy-button .back {
+        --side: calc(100% - 2 * var(--pad));
+        position: absolute;
+        inset: var(--pad);
+        height: var(--side);
+        width: var(--side);
+        -webkit-backface-visibility: hidden; /* Safari */
+        backface-visibility: hidden;
+      }
+
+      .copy-button:hover .copy-button-inner {
+        background-color: var(--gray-2);
+      }
+
+      /* Style the back side */
+      .copy-button .back {
+        --pad: var(--space-1);
+        color: var(--green-8);
+        transform: rotateY(180deg);
       }
     `,
   ];
@@ -403,15 +409,12 @@ export class ShinyErrorMessage extends LitElement {
   async copyErrorToClipboard(): Promise<void> {
     await navigator.clipboard.writeText(this.message);
 
-    const copySuccessMsg = document.createElement("div");
-    copySuccessMsg.classList.add("copy-success-msg");
-    copySuccessMsg.innerHTML = "<div>Copied error!</div>";
-    this.shadowRoot?.appendChild(copySuccessMsg);
+    this.classList.add("copy-success");
 
-    // Remove after animation finishes
-    copySuccessMsg.addEventListener("animationend", () => {
-      copySuccessMsg.remove();
-    });
+    // After a second, remove the copy success class
+    setTimeout(() => {
+      this.classList.remove("copy-success");
+    }, 1000);
   }
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -429,24 +432,45 @@ export class ShinyErrorMessage extends LitElement {
 
         <div class="actions">
           <button
+            class="copy-button"
             @click=${this.copyErrorToClipboard}
             title="Copy error to clipboard"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke-width="1.5"
-              stroke="currentColor"
-              height="1em"
-              width="1em"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184"
-              />
-            </svg>
+            <div class="copy-button-inner">
+              <svg
+                class="front"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                height="1em"
+                width="1em"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184"
+                />
+              </svg>
+
+              <svg
+                class="back"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                height="1em"
+                width="1em"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
           </button>
         </div>
       </div>

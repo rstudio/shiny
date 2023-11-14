@@ -112,7 +112,6 @@ function setShiny(windowShiny_: Shiny): void {
     // Init Shiny a little later than document ready, so user code can
     // run first (i.e. to register bindings)
     setTimeout(async function () {
-      /* eslint-disable @typescript-eslint/no-floating-promises */
       try {
         await initShiny(windowShiny);
       } catch (e) {

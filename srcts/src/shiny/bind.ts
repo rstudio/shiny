@@ -44,14 +44,19 @@ function valueChangeCallback(
 /**
  * Registry for input and output binding IDs. Used to check for duplicate IDs
  * and to keep track of which IDs have already been added to the app. Use an
- * immediately invoked function to keep the internal datastructure private and
- * not clutter the scope.
+ * immediately invoked function to keep the sets private and not clutter the
+ * scope.
  */
 const bindingsRegistery = (() => {
   /**
-   * Set of IDs for for input and output bindings
+   * Set of IDs for output bindings. not exposed to user
    */
-  const bindingIds = new Set<string>();
+  const outputs = new Set<string>();
+
+  /**
+   * Set of IDs for input bindings
+   */
+  const inputs = new Set<string>();
 
   /**
    * Check if a binding id already exists in the bindingIds set across both inputs and outputs
@@ -59,14 +64,13 @@ const bindingsRegistery = (() => {
    * @returns boolean indicating if that binding Id has already been added to app
    */
   function bindingExists(id: string): boolean {
-    return bindingIds.has(id);
+    return outputs.has(id) || inputs.has(id);
   }
 
   /**
    * Add a binding id to the binding ids registery
    * @param id Id to add
    * @param inputOrOutput Whether the id is for an input or output binding
-   * @throws ShinyClientError if id is empty
    */
   function addBinding(id: string, inputOrOutput: "input" | "output"): void {
     if (id === "") {
@@ -75,15 +79,24 @@ const bindingsRegistery = (() => {
         message: "Binding IDs must not be empty.",
       });
     }
-    bindingIds.add(id);
+    if (inputOrOutput === "input") {
+      inputs.add(id);
+    } else {
+      outputs.add(id);
+    }
   }
 
   /**
    * Remove a binding id from the binding ids registery
    * @param id Id to remove
+   * @param inputOrOutput Whether the id is for an input or output binding
    */
-  function removeBinding(id: string): void {
-    bindingIds.delete(id);
+  function removeBinding(id: string, inputOrOutput: "input" | "output"): void {
+    if (inputOrOutput === "input") {
+      inputs.delete(id);
+    } else {
+      outputs.delete(id);
+    }
   }
 
   return {
@@ -315,7 +328,7 @@ function unbindInputs(
 
     $(el).removeClass("shiny-bound-input");
 
-    bindingsRegistery.removeBinding(id);
+    bindingsRegistery.removeBinding(id, "input");
     binding.unsubscribe(el);
     $(el).trigger({
       type: "shiny:unbound",
@@ -347,7 +360,7 @@ function unbindOutputs(
 
     shinyAppUnbindOutput(id, bindingAdapter);
 
-    bindingsRegistery.removeBinding(id);
+    bindingsRegistery.removeBinding(id, "output");
     $el.removeClass("shiny-bound-output");
     $el.removeData("shiny-output-binding");
     $el.trigger({

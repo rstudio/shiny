@@ -18496,9 +18496,10 @@
     }
   }
   var bindingsRegistery = function() {
-    var bindingIds = /* @__PURE__ */ new Set();
+    var outputs = /* @__PURE__ */ new Set();
+    var inputs = /* @__PURE__ */ new Set();
     function bindingExists(id) {
-      return bindingIds.has(id);
+      return outputs.has(id) || inputs.has(id);
     }
     function addBinding(id, inputOrOutput) {
       if (id === "") {
@@ -18507,10 +18508,18 @@
           message: "Binding IDs must not be empty."
         });
       }
-      bindingIds.add(id);
+      if (inputOrOutput === "input") {
+        inputs.add(id);
+      } else {
+        outputs.add(id);
+      }
     }
-    function removeBinding(id) {
-      bindingIds.delete(id);
+    function removeBinding(id, inputOrOutput) {
+      if (inputOrOutput === "input") {
+        inputs.delete(id);
+      } else {
+        outputs.delete(id);
+      }
     }
     return {
       bindingExists: bindingExists,
@@ -18697,7 +18706,7 @@
         continue;
       var id = binding.getId(_el);
       (0, import_jquery37.default)(_el).removeClass("shiny-bound-input");
-      bindingsRegistery.removeBinding(id);
+      bindingsRegistery.removeBinding(id, "input");
       binding.unsubscribe(_el);
       (0, import_jquery37.default)(_el).trigger({
         type: "shiny:unbound",
@@ -18721,7 +18730,7 @@
         continue;
       var id = bindingAdapter.binding.getId(outputs[i5]);
       shinyAppUnbindOutput(id, bindingAdapter);
-      bindingsRegistery.removeBinding(id);
+      bindingsRegistery.removeBinding(id, "output");
       $el.removeClass("shiny-bound-output");
       $el.removeData("shiny-output-binding");
       $el.trigger({

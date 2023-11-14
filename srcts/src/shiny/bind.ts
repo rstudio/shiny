@@ -48,20 +48,27 @@ function valueChangeCallback(
  * scope.
  */
 const bindingsRegistery = (() => {
-  type InputOrOutput = "input" | "output";
-  type DuplicateBindings = Map<string, InputOrOutput[]>;
+  /**
+   * Keyed by binding IDs to the array of each type of binding that ID is associated for in current app state.
+   *
+   * Ideally the
+   * value would be a length 1 array but in some (invalid) cases there could be
+   * multiple types for a single ID.
+   */
+  type IdToBindingTypes = Map<string, Array<"input" | "output">>;
 
-  const bindings = new Map<string, InputOrOutput[]>();
+  // Main store of bindings.
+  const bindings: IdToBindingTypes = new Map();
 
   /**
    * Checks if the bindings registery is valid. Currently this just checks for
    * duplicate IDs but in the future could be expanded to check more conditions
-   * @returns ShinyClientError if duplicate IDs are found, otherwise null
+   * @returns ShinyClientError if current ID bindings are invalid, otherwise null
    */
   function getValidity():
     | { status: "error"; error: ShinyClientError }
     | { status: "ok" } {
-    const duplicateIds: DuplicateBindings = new Map();
+    const duplicateIds: IdToBindingTypes = new Map();
 
     bindings.forEach((inputOrOutput, id) => {
       if (inputOrOutput.length > 1) {
@@ -128,7 +135,7 @@ const bindingsRegistery = (() => {
    * @param id Id to remove
    * @param inputOrOutput Whether the id is for an input or output binding
    */
-  function removeBinding(id: string, inputOrOutput: InputOrOutput): void {
+  function removeBinding(id: string, inputOrOutput: "input" | "output"): void {
     const existingBinding = bindings.get(id);
 
     if (existingBinding) {
@@ -393,7 +400,11 @@ async function _bindAll(
   await bindOutputs(shinyCtx, scope);
   const currentInputs = bindInputs(shinyCtx, scope);
 
-  // Check to make sure the bindings setup is valid
+  // Check to make sure the bindings setup is valid. By checking the validity
+  // _after_ we've attempted all the bindings we can give the user a more
+  // complete error message that contains everything they will need to fix. If
+  // we threw as we saw collisions then the user would fix the first collision,
+  // re-run, and then see the next collision, etc.
   const bindingValidity = bindingsRegistery.getValidity();
   if (bindingValidity.status === "error") {
     throw bindingValidity.error;

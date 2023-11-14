@@ -280,6 +280,7 @@ export class ShinyErrorMessage extends LitElement {
         gap: var(--space-1);
         padding-bottom: var(--padding-bottom);
         padding-top: var(--padding-top);
+        overflow: auto;
       }
 
       :host(:last-of-type) .contents {
@@ -428,7 +429,7 @@ export class ShinyErrorMessage extends LitElement {
         </div>
         <div class="contents">
           <h3>${this.headline}</h3>
-          <p class="error-message">${this.message}</p>
+          <pre class="error-message">${this.message}</pre>
         </div>
 
         <div class="actions">

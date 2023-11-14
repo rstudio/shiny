@@ -93,9 +93,9 @@ const bindingsRegistery = (() => {
           .filter((msg) => msg !== "")
           .join(" and ");
 
-        return `"${id}": (${messages})`;
+        return `- "${id}": ${messages}`;
       })
-      .join(",\n");
+      .join("\n");
 
     return {
       status: "error",
@@ -103,7 +103,7 @@ const bindingsRegistery = (() => {
         headline: "Duplicate input/output IDs found",
         message: `The following ${
           duplicateIds.size === 1 ? "ID was" : "IDs were"
-        } repeated: ${duplicateIdMsg}`,
+        } repeated:\n${duplicateIdMsg}`,
       }),
     };
   }

@@ -46,30 +46,63 @@ function valueChangeCallback(
 }
 
 /**
- * Sets for input and outputs to keep track of what IDs are bound so we can
- * detect duplicates and warn users. This is done outside of the
- * bindOutputs()/bindInputs() functions so that we can check for duplicate IDs
- * across all bindings and dynamically generated outputs.
+ * Registry for input and output binding IDs. Used to check for duplicate IDs
+ * and to keep track of which IDs have already been added to the app. Use an
+ * immediately invoked function to keep the sets private and not clutter the
+ * scope.
  */
-const bindingIds = {
+const bindingsRegistery = (() => {
   /**
-   * Set of IDs for output bindings
+   * Set of IDs for output bindings. not exposed to user
    */
-  outputs: new Set<string>(),
+  const outputs = new Set<string>();
+
   /**
    * Set of IDs for input bindings
    */
-  inputs: new Set<string>(),
-};
+  const inputs = new Set<string>();
 
-/**
- * Check if a binding id already exists in the bindingIds set across both inputs and outputs
- * @param id Id to check
- * @returns boolean indicating if that binding Id has already been added to app
- */
-function bindingIdExists(id: string): boolean {
-  return bindingIds.outputs.has(id) || bindingIds.inputs.has(id);
-}
+  /**
+   * Check if a binding id already exists in the bindingIds set across both inputs and outputs
+   * @param id Id to check
+   * @returns boolean indicating if that binding Id has already been added to app
+   */
+  function bindingExists(id: string): boolean {
+    return outputs.has(id) || inputs.has(id);
+  }
+
+  /**
+   * Add a binding id to the binding ids registery
+   * @param id Id to add
+   * @param inputOrOutput Whether the id is for an input or output binding
+   */
+  function addBinding(id: string, inputOrOutput: "input" | "output"): void {
+    if (inputOrOutput === "input") {
+      inputs.add(id);
+    } else {
+      outputs.add(id);
+    }
+  }
+
+  /**
+   * Remove a binding id from the binding ids registery
+   * @param id Id to remove
+   * @param inputOrOutput Whether the id is for an input or output binding
+   */
+  function removeBinding(id: string, inputOrOutput: "input" | "output"): void {
+    if (inputOrOutput === "input") {
+      inputs.delete(id);
+    } else {
+      outputs.delete(id);
+    }
+  }
+
+  return {
+    bindingExists,
+    addBinding,
+    removeBinding,
+  };
+})();
 
 /**
  * Create a new ShinyClientError with a message indicating which IDs are duplicated
@@ -132,7 +165,7 @@ function bindInputs(
       const id = binding.getId(el);
 
       // Check for duplicates in bindingIds array and keep track of them
-      const duplicateId = bindingIdExists(id);
+      const duplicateId = bindingsRegistery.bindingExists(id);
       if (duplicateId) {
         inputDuplicateIds.add(id);
       }
@@ -140,7 +173,7 @@ function bindInputs(
       // another input binding and if it is, skip
       if (!id || boundInputs[id] || duplicateId) continue;
 
-      bindingIds.inputs.add(id);
+      bindingsRegistery.addBinding(id, "input");
       const type = binding.getType(el);
       const effectiveId = type ? id + ":" + type : id;
 
@@ -227,11 +260,11 @@ async function bindOutputs(
       if (!id) continue;
 
       // Check for duplicates in bindingIds array and keep track of them
-      if (bindingIdExists(id)) {
+      if (bindingsRegistery.bindingExists(id)) {
         outputDuplicateIds.add(id);
       }
 
-      bindingIds.outputs.add(id);
+      bindingsRegistery.addBinding(id, "output");
 
       // In some uncommon cases, elements that are later in the
       // matches array can be removed from the document by earlier
@@ -299,7 +332,7 @@ function unbindInputs(
     $(el).removeClass("shiny-bound-input");
     delete boundInputs[id];
 
-    bindingIds.inputs.delete(id);
+    bindingsRegistery.removeBinding(id, "input");
     binding.unsubscribe(el);
     $(el).trigger({
       type: "shiny:unbound",
@@ -331,7 +364,7 @@ function unbindOutputs(
 
     shinyAppUnbindOutput(id, bindingAdapter);
 
-    bindingIds.outputs.delete(id);
+    bindingsRegistery.removeBinding(id, "output");
     $el.removeClass("shiny-bound-output");
     $el.removeData("shiny-output-binding");
     $el.trigger({

@@ -18496,15 +18496,34 @@
       inputs.setInput(id, value, opts);
     }
   }
-  var bindingIds = {
-    outputs: /* @__PURE__ */ new Set(),
-    inputs: /* @__PURE__ */ new Set()
-  };
-  function bindingIdExists(id) {
-    return bindingIds.outputs.has(id) || bindingIds.inputs.has(id);
-  }
-  function throwDuplicateIdError(duplicatedIds) {
-    throw new ShinyClientError({
+  var bindingsRegistery = function() {
+    var outputs = /* @__PURE__ */ new Set();
+    var inputs = /* @__PURE__ */ new Set();
+    function bindingExists(id) {
+      return outputs.has(id) || inputs.has(id);
+    }
+    function addBinding(id, inputOrOutput) {
+      if (inputOrOutput === "input") {
+        inputs.add(id);
+      } else {
+        outputs.add(id);
+      }
+    }
+    function removeBinding(id, inputOrOutput) {
+      if (inputOrOutput === "input") {
+        inputs.delete(id);
+      } else {
+        outputs.delete(id);
+      }
+    }
+    return {
+      bindingExists: bindingExists,
+      addBinding: addBinding,
+      removeBinding: removeBinding
+    };
+  }();
+  function createDuplicateIdError(duplicatedIds) {
+    return new ShinyClientError({
       headline: "Duplicate input/output IDs found",
       message: "The following ".concat(duplicatedIds.size === 1 ? "ID was" : "IDs were", " repeated: ").concat(Array.from(duplicatedIds).map(function(id) {
         return '"'.concat(id, '"');
@@ -18525,13 +18544,13 @@
         if (el.hasAttribute("data-shiny-no-bind-input"))
           return "continue";
         var id = binding.getId(el);
-        var duplicateId = bindingIdExists(id);
+        var duplicateId = bindingsRegistery.bindingExists(id);
         if (duplicateId) {
           inputDuplicateIds.add(id);
         }
         if (!id || boundInputs[id] || duplicateId)
           return "continue";
-        bindingIds.inputs.add(id);
+        bindingsRegistery.addBinding(id, "input");
         var type = binding.getType(el);
         var effectiveId = type ? id + ":" + type : id;
         inputItems[effectiveId] = {
@@ -18576,7 +18595,7 @@
       _loop();
     }
     if (inputDuplicateIds.size > 0) {
-      throwDuplicateIdError(inputDuplicateIds);
+      throw createDuplicateIdError(inputDuplicateIds);
     }
     return inputItems;
   }
@@ -18617,10 +18636,10 @@
               }
               return _context.abrupt("continue", 30);
             case 15:
-              if (bindingIdExists(id)) {
+              if (bindingsRegistery.bindingExists(id)) {
                 outputDuplicateIds.add(id);
               }
-              bindingIds.outputs.add(id);
+              bindingsRegistery.addBinding(id, "output");
               if (import_jquery37.default.contains(document.documentElement, _el2)) {
                 _context.next = 19;
                 break;
@@ -18657,12 +18676,15 @@
               _context.next = 6;
               break;
             case 36:
-              if (outputDuplicateIds.size > 0) {
-                throwDuplicateIdError(outputDuplicateIds);
+              if (!(outputDuplicateIds.size > 0)) {
+                _context.next = 38;
+                break;
               }
+              throw createDuplicateIdError(outputDuplicateIds);
+            case 38:
               setTimeout(sendImageSizeFns.regular, 0);
               setTimeout(sendOutputHiddenState, 0);
-            case 39:
+            case 40:
             case "end":
               return _context.stop();
           }
@@ -18685,7 +18707,7 @@
       var id = binding.getId(_el);
       (0, import_jquery37.default)(_el).removeClass("shiny-bound-input");
       delete boundInputs[id];
-      bindingIds.inputs.delete(id);
+      bindingsRegistery.removeBinding(id, "input");
       binding.unsubscribe(_el);
       (0, import_jquery37.default)(_el).trigger({
         type: "shiny:unbound",
@@ -18709,7 +18731,7 @@
         continue;
       var id = bindingAdapter.binding.getId(outputs[i5]);
       shinyAppUnbindOutput(id, bindingAdapter);
-      bindingIds.outputs.delete(id);
+      bindingsRegistery.removeBinding(id, "output");
       $el.removeClass("shiny-bound-output");
       $el.removeData("shiny-output-binding");
       $el.trigger({

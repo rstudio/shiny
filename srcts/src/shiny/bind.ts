@@ -72,12 +72,12 @@ function bindingIdExists(id: string): boolean {
 }
 
 /**
- * Throws a ShinyClientError with a message indicating which IDs are duplicated
+ * Create a new ShinyClientError with a message indicating which IDs are duplicated
  * @param duplicatedIds Set of duplicated IDs to throw error for
- * @throws ShinyClientError
+ * @returns ShinyClientError with message indicating which IDs are duplicated
  */
-function throwDuplicateIdError(duplicatedIds: Set<string>) {
-  throw new ShinyClientError({
+function createDuplicateIdError(duplicatedIds: Set<string>) {
+  return new ShinyClientError({
     headline: "Duplicate input/output IDs found",
     message: `The following ${
       duplicatedIds.size === 1 ? "ID was" : "IDs were"
@@ -192,7 +192,7 @@ function bindInputs(
 
   // Send error message to the user if duplicate IDs are found
   if (inputDuplicateIds.size > 0) {
-    throwDuplicateIdError(inputDuplicateIds);
+    throw createDuplicateIdError(inputDuplicateIds);
   }
 
   return inputItems;
@@ -269,7 +269,7 @@ async function bindOutputs(
 
   // Send error message to the user if duplicate IDs are found
   if (outputDuplicateIds.size > 0) {
-    throwDuplicateIdError(outputDuplicateIds);
+    throw createDuplicateIdError(outputDuplicateIds);
   }
 
   // Send later in case DOM layout isn't final yet.

@@ -18480,7 +18480,6 @@
       });
     };
   }
-  var boundInputs = {};
   function valueChangeCallback(inputs, binding, el, allowDeferred) {
     var id = binding.getId(el);
     if (id) {
@@ -18550,12 +18549,11 @@
         if (el.hasAttribute("data-shiny-no-bind-input"))
           return "continue";
         var id = binding.getId(el);
-        var duplicateId = bindingsRegistery.bindingExists(id);
-        if (duplicateId) {
+        if (!id)
+          return "continue";
+        if (bindingsRegistery.bindingExists(id)) {
           inputDuplicateIds.add(id);
         }
-        if (!id || boundInputs[id] || duplicateId)
-          return "continue";
         bindingsRegistery.addBinding(id, "input");
         var type = binding.getType(el);
         var effectiveId = type ? id + ":" + type : id;
@@ -18581,10 +18579,6 @@
         if (ratePolicy !== null) {
           inputsRate.setRatePolicy(effectiveId, ratePolicy.policy, ratePolicy.delay);
         }
-        boundInputs[id] = {
-          binding: binding,
-          node: el
-        };
         (0, import_jquery37.default)(el).trigger({
           type: "shiny:bound",
           binding: binding,
@@ -18712,7 +18706,6 @@
         continue;
       var id = binding.getId(_el);
       (0, import_jquery37.default)(_el).removeClass("shiny-bound-input");
-      delete boundInputs[id];
       bindingsRegistery.removeBinding(id, "input");
       binding.unsubscribe(_el);
       (0, import_jquery37.default)(_el).trigger({

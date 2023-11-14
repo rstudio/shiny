@@ -9,11 +9,6 @@ import type {
 import { shinyAppBindOutput, shinyAppUnbindOutput } from "./initedMethods";
 import { sendImageSizeFns } from "./sendImageSize";
 import { ShinyClientError } from "./error";
-import { head } from "lodash";
-
-const boundInputs: {
-  [key: string]: { binding: InputBinding; node: HTMLElement };
-} = {};
 
 type BindScope = HTMLElement | JQuery<HTMLElement>;
 
@@ -171,14 +166,14 @@ function bindInputs(
       if (el.hasAttribute("data-shiny-no-bind-input")) continue;
       const id = binding.getId(el);
 
-      // Check for duplicates in bindingIds array and keep track of them
-      const duplicateId = bindingsRegistery.bindingExists(id);
-      if (duplicateId) {
-        inputDuplicateIds.add(id);
-      }
       // Check if ID is falsy, or if already bound, or has the same ID as
       // another input binding and if it is, skip
-      if (!id || boundInputs[id] || duplicateId) continue;
+      if (!id) continue;
+
+      // Check for duplicates in bindingIds array and keep track of them
+      if (bindingsRegistery.bindingExists(id)) {
+        inputDuplicateIds.add(id);
+      }
 
       bindingsRegistery.addBinding(id, "input");
       const type = binding.getType(el);
@@ -215,11 +210,6 @@ function bindInputs(
           ratePolicy.delay
         );
       }
-
-      boundInputs[id] = {
-        binding: binding,
-        node: el,
-      };
 
       $(el).trigger({
         type: "shiny:bound",
@@ -337,7 +327,6 @@ function unbindInputs(
     const id = binding.getId(el);
 
     $(el).removeClass("shiny-bound-input");
-    delete boundInputs[id];
 
     bindingsRegistery.removeBinding(id, "input");
     binding.unsubscribe(el);

@@ -65,7 +65,7 @@ const bindingsRegistery = (() => {
    * duplicate IDs but in the future could be expanded to check more conditions
    * @returns ShinyClientError if current ID bindings are invalid, otherwise null
    */
-  function getValidity():
+  function checkValidity():
     | { status: "error"; error: ShinyClientError }
     | { status: "ok" } {
     const duplicateIds: IdToBindingTypes = new Map();
@@ -78,7 +78,7 @@ const bindingsRegistery = (() => {
 
     if (duplicateIds.size === 0) return { status: "ok" };
 
-    const duplicateIdMsg = [...duplicateIds.entries()]
+    const duplicateIdMsg = Array.from(duplicateIds.entries())
       .map(([id, idTypes]) => {
         const counts = { input: 0, output: 0 };
 
@@ -153,7 +153,7 @@ const bindingsRegistery = (() => {
   return {
     addBinding,
     removeBinding,
-    getValidity,
+    checkValidity,
   };
 })();
 
@@ -204,8 +204,7 @@ function bindInputs(
       if (el.hasAttribute("data-shiny-no-bind-input")) continue;
       const id = binding.getId(el);
 
-      // Check if ID is falsy, or if already bound, or has the same ID as
-      // another input binding and if it is, skip
+      // Check if ID is falsy, skip
       if (!id) continue;
 
       bindingsRegistery.addBinding(id, "input");
@@ -272,8 +271,7 @@ async function bindOutputs(
     const binding = bindings[i].binding;
     const matches = binding.find($scope) || [];
 
-    // First loop over the matches and assemble map of id->element and also note
-    // any duplicates
+    // First loop over the matches and assemble map of id->element
     for (let j = 0; j < matches.length; j++) {
       const el = matches[j];
       const id = binding.getId(el);
@@ -405,7 +403,7 @@ async function _bindAll(
   // complete error message that contains everything they will need to fix. If
   // we threw as we saw collisions then the user would fix the first collision,
   // re-run, and then see the next collision, etc.
-  const bindingValidity = bindingsRegistery.getValidity();
+  const bindingValidity = bindingsRegistery.checkValidity();
   if (bindingValidity.status === "error") {
     throw bindingValidity.error;
   }

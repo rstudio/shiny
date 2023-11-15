@@ -18482,6 +18482,26 @@
   function _nonIterableRest2() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
+  function _unsupportedIterableToArray2(o4, minLen) {
+    if (!o4)
+      return;
+    if (typeof o4 === "string")
+      return _arrayLikeToArray2(o4, minLen);
+    var n4 = Object.prototype.toString.call(o4).slice(8, -1);
+    if (n4 === "Object" && o4.constructor)
+      n4 = o4.constructor.name;
+    if (n4 === "Map" || n4 === "Set")
+      return Array.from(o4);
+    if (n4 === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n4))
+      return _arrayLikeToArray2(o4, minLen);
+  }
+  function _arrayLikeToArray2(arr, len) {
+    if (len == null || len > arr.length)
+      len = arr.length;
+    for (var i5 = 0, arr2 = new Array(len); i5 < len; i5++)
+      arr2[i5] = arr[i5];
+    return arr2;
+  }
   function _iterableToArrayLimit2(arr, i5) {
     var _i = null == arr ? null : "undefined" != typeof Symbol && arr[Symbol.iterator] || arr["@@iterator"];
     if (null != _i) {
@@ -18512,40 +18532,6 @@
     if (Array.isArray(arr))
       return arr;
   }
-  function _toConsumableArray(arr) {
-    return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray2(arr) || _nonIterableSpread();
-  }
-  function _nonIterableSpread() {
-    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _unsupportedIterableToArray2(o4, minLen) {
-    if (!o4)
-      return;
-    if (typeof o4 === "string")
-      return _arrayLikeToArray2(o4, minLen);
-    var n4 = Object.prototype.toString.call(o4).slice(8, -1);
-    if (n4 === "Object" && o4.constructor)
-      n4 = o4.constructor.name;
-    if (n4 === "Map" || n4 === "Set")
-      return Array.from(o4);
-    if (n4 === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n4))
-      return _arrayLikeToArray2(o4, minLen);
-  }
-  function _iterableToArray(iter) {
-    if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null)
-      return Array.from(iter);
-  }
-  function _arrayWithoutHoles(arr) {
-    if (Array.isArray(arr))
-      return _arrayLikeToArray2(arr);
-  }
-  function _arrayLikeToArray2(arr, len) {
-    if (len == null || len > arr.length)
-      len = arr.length;
-    for (var i5 = 0, arr2 = new Array(len); i5 < len; i5++)
-      arr2[i5] = arr[i5];
-    return arr2;
-  }
   function valueChangeCallback(inputs, binding, el, allowDeferred) {
     var id = binding.getId(el);
     if (id) {
@@ -18563,7 +18549,7 @@
   }
   var bindingsRegistery = function() {
     var bindings = /* @__PURE__ */ new Map();
-    function getValidity() {
+    function checkValidity() {
       var duplicateIds = /* @__PURE__ */ new Map();
       bindings.forEach(function(inputOrOutput, id) {
         if (inputOrOutput.length > 1) {
@@ -18574,7 +18560,7 @@
         return {
           status: "ok"
         };
-      var duplicateIdMsg = _toConsumableArray(duplicateIds.entries()).map(function(_ref) {
+      var duplicateIdMsg = Array.from(duplicateIds.entries()).map(function(_ref) {
         var _ref2 = _slicedToArray2(_ref, 2), id = _ref2[0], idTypes = _ref2[1];
         var counts = {
           input: 0,
@@ -18625,7 +18611,7 @@
     return {
       addBinding: addBinding,
       removeBinding: removeBinding,
-      getValidity: getValidity
+      checkValidity: checkValidity
     };
   }();
   function pluralize(num, word) {
@@ -18839,7 +18825,7 @@
               return bindOutputs(shinyCtx, scope);
             case 2:
               currentInputs = bindInputs(shinyCtx, scope);
-              bindingValidity = bindingsRegistery.getValidity();
+              bindingValidity = bindingsRegistery.checkValidity();
               if (!(bindingValidity.status === "error")) {
                 _context2.next = 6;
                 break;
@@ -19673,17 +19659,17 @@
   var _Symbol$metadata;
   var _a$litPropertyMetadat;
   var _a$reactiveElementVer;
-  function _toConsumableArray2(arr) {
-    return _arrayWithoutHoles2(arr) || _iterableToArray2(arr) || _unsupportedIterableToArray4(arr) || _nonIterableSpread2();
+  function _toConsumableArray(arr) {
+    return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray4(arr) || _nonIterableSpread();
   }
-  function _nonIterableSpread2() {
+  function _nonIterableSpread() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArray2(iter) {
+  function _iterableToArray(iter) {
     if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null)
       return Array.from(iter);
   }
-  function _arrayWithoutHoles2(arr) {
+  function _arrayWithoutHoles(arr) {
     if (Array.isArray(arr))
       return _arrayLikeToArray4(arr);
   }
@@ -20554,7 +20540,7 @@
     }, {
       key: "observedAttributes",
       get: function get3() {
-        return this.finalize(), this._$Eh && _toConsumableArray2(this._$Eh.keys());
+        return this.finalize(), this._$Eh && _toConsumableArray(this._$Eh.keys());
       }
     }, {
       key: "createProperty",
@@ -20601,7 +20587,7 @@
         if (this.hasOwnProperty(d("elementProperties")))
           return;
         var t3 = n2(this);
-        t3.finalize(), void 0 !== t3.l && (this.l = _toConsumableArray2(t3.l)), this.elementProperties = new Map(t3.elementProperties);
+        t3.finalize(), void 0 !== t3.l && (this.l = _toConsumableArray(t3.l)), this.elementProperties = new Map(t3.elementProperties);
       }
     }, {
       key: "finalize",
@@ -20609,7 +20595,7 @@
         if (this.hasOwnProperty(d("finalized")))
           return;
         if (this.finalized = true, this._$Ei(), this.hasOwnProperty(d("properties"))) {
-          var _t4 = this.properties, _s4 = [].concat(_toConsumableArray2(h(_t4)), _toConsumableArray2(o2(_t4)));
+          var _t4 = this.properties, _s4 = [].concat(_toConsumableArray(h(_t4)), _toConsumableArray(o2(_t4)));
           var _iterator4 = _createForOfIteratorHelper3(_s4), _step4;
           try {
             for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
@@ -21069,17 +21055,17 @@
       }
     } };
   }
-  function _toConsumableArray3(arr) {
-    return _arrayWithoutHoles3(arr) || _iterableToArray3(arr) || _unsupportedIterableToArray5(arr) || _nonIterableSpread3();
+  function _toConsumableArray2(arr) {
+    return _arrayWithoutHoles2(arr) || _iterableToArray2(arr) || _unsupportedIterableToArray5(arr) || _nonIterableSpread2();
   }
-  function _nonIterableSpread3() {
+  function _nonIterableSpread2() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArray3(iter) {
+  function _iterableToArray2(iter) {
     if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null)
       return Array.from(iter);
   }
-  function _arrayWithoutHoles3(arr) {
+  function _arrayWithoutHoles2(arr) {
     if (Array.isArray(arr))
       return _arrayLikeToArray5(arr);
   }
@@ -21264,7 +21250,7 @@
       var u4 = t3.length - 1, d4 = this.parts, _P = P(t3, s4), _P2 = _slicedToArray4(_P, 2), f4 = _P2[0], v2 = _P2[1];
       if (this.el = V2.createElement(f4, n4), E.currentNode = this.el.content, 2 === s4) {
         var _t = this.el.content.firstChild;
-        _t.replaceWith.apply(_t, _toConsumableArray3(_t.childNodes));
+        _t.replaceWith.apply(_t, _toConsumableArray2(_t.childNodes));
       }
       for (; null !== (r6 = E.nextNode()) && d4.length < u4; ) {
         if (1 === r6.nodeType) {

@@ -2,8 +2,6 @@ import $ from "jquery";
 import { InputBinding } from "./inputBinding";
 import { $escape, hasDefinedProperty, updateLabel } from "../../utils";
 import { indirectEval } from "../../utils/eval";
-import { shinyBindAll, shinyUnbindAll } from "../../shiny/initedMethods";
-import type { NotUndefined } from "../../utils/extraTypes";
 
 type SelectHTMLElement = HTMLSelectElement & { nonempty: boolean };
 
@@ -62,10 +60,14 @@ class SelectInputBinding extends InputBinding {
   getId(el: SelectHTMLElement): string {
     return InputBinding.prototype.getId.call(this, el) || el.name;
   }
-  getValue(
-    el: HTMLElement
-  ): NotUndefined<ReturnType<JQuery<HTMLElement>["val"]>> {
-    return $(el).val() as NotUndefined<ReturnType<JQuery<HTMLElement>["val"]>>;
+  getValue(el: SelectHTMLElement): any {
+    if (!isSelectize(el)) {
+      return $(el).val();
+    } else {
+      const selectize = this._selectize(el);
+
+      return selectize?.getValue();
+    }
   }
   setValue(el: SelectHTMLElement, value: string): void {
     if (!isSelectize(el)) {
@@ -285,33 +287,16 @@ class SelectInputBinding extends InputBinding {
         // @ts-expect-error; Need to type `options` keys to know exactly which values are accessed.
         options[x] = indirectEval("(" + options[x] + ")");
       });
-
-    let control = this._newSelectize($el, options);
-
+    let control = $el.selectize(options)[0].selectize as SelectizeInfo;
     // .selectize() does not really update settings; must destroy and rebuild
+
     if (update) {
       const settings = $.extend(control.settings, options);
 
       control.destroy();
-      control = this._newSelectize($el, settings);
+      control = $el.selectize(settings)[0].selectize as SelectizeInfo;
     }
 
-    return control;
-  }
-
-  protected _newSelectize(
-    $el: JQuery<HTMLSelectElement>,
-    options: SelectizeOptions
-  ): SelectizeInfo {
-    // Starting with selectize v0.15.2, $el.selectize() can prune the <select>
-    // element from the DOM, meaning that if we're already bound to it, we'll
-    // lose the binding. So if we are bound, unbind first, then rebind after.
-    // (Note this is quite similar to how Shiny.renderContent() works.)
-    const binding = $el.data("shiny-input-binding");
-    if (binding) shinyUnbindAll($el.parent());
-    const control = $el.selectize(options)[0].selectize as SelectizeInfo;
-    /* eslint-disable @typescript-eslint/no-floating-promises */
-    if (binding) shinyBindAll($el.parent());
     return control;
   }
 }

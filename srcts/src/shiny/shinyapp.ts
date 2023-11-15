@@ -718,7 +718,7 @@ class ShinyApp {
 
     addMessageHandler(
       "inputMessages",
-      (message: Array<{ id: string; message: unknown }>) => {
+      async (message: Array<{ id: string; message: unknown }>) => {
         // inputMessages should be an array
         for (let i = 0; i < message.length; i++) {
           const $obj = $(".shiny-bound-input#" + $escape(message[i].id));
@@ -735,7 +735,7 @@ class ShinyApp {
             $(el).trigger(evt);
             if (!evt.isDefaultPrevented()) {
               try {
-                inputBinding.receiveMessage(el, evt.message);
+                await inputBinding.receiveMessage(el, evt.message);
               } catch (error) {
                 console.error(
                   "[shiny] Error in inputBinding.receiveMessage()",

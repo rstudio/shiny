@@ -1,11 +1,11 @@
 import type { BindScope } from "./bind";
 import { renderHtml as singletonsRenderHtml } from "./singletons";
 import type { WherePosition } from "./singletons";
-declare function renderContent(el: BindScope, content: string | {
+declare function renderContentAsync(el: BindScope, content: string | {
     html: string;
     deps?: HtmlDep[];
 } | null, where?: WherePosition): Promise<void>;
-declare function renderContentAsync(el: BindScope, content: string | {
+declare function renderContent(el: BindScope, content: string | {
     html: string;
     deps?: HtmlDep[];
 } | null, where?: WherePosition): Promise<void>;

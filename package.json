@@ -76,7 +76,7 @@
   },
   "scripts": {
     "watch": "yarn run build_shiny --watch",
-    "build": "yarn run build_shiny && yarn run bundle_extras && yarn run bundle_external_libs",
+    "build2": "yarn run build_shiny && yarn run bundle_extras && yarn run bundle_external_libs",
     "build_shiny": "yarn run checks && yarn run bundle_shiny",
     "bundle_shiny": "ts-node srcts/build/shiny.ts",
     "bundle_external_libs": "ts-node srcts/build/external_libs.ts",

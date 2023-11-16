@@ -76,7 +76,6 @@
     "util-inspect": "https://github.com/deecewan/browser-util-inspect#c0b4350df4378ffd743e8c36dd3898ce3992823e"
   },
   "scripts": {
-    "prepare": "node --eval \"1+1; // help yarn users not install the whole repo; https://github.com/yarnpkg/yarn/issues/2822#issuecomment-847360267\"",
     "watch": "yarn run build_shiny --watch",
     "build": "yarn run build_shiny && yarn run bundle_extras && yarn run bundle_external_libs",
     "build_shiny": "yarn run checks && yarn run bundle_shiny",

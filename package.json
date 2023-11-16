@@ -15,8 +15,7 @@
     "srcts/types/**/*.d.ts"
   ],
   "engines": {
-    "node": ">= 14",
-    "yarn": ">= 1.22"
+    "node": ">= 14"
   },
   "dependencies": {
     "@types/bootstrap": "3.4.0",

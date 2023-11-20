@@ -48,7 +48,7 @@
     </div>
 
     <div class="section level2">
-<h2 class="page-header" data-toc-text="1.8.0" id="shiny-180">shiny 1.8.0<a class="anchor" aria-label="anchor" href="#shiny-180"></a></h2>
+<h2 class="page-header" data-toc-text="1.8.0" id="shiny-180">shiny 1.8.0<small>2023-11-17</small><a class="anchor" aria-label="anchor" href="#shiny-180"></a></h2>
 <div class="section level3">
 <h3 id="breaking-changes-1-8-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-1-8-0"></a></h3>
 <ul><li>Closed <a href="https://github.com/rstudio/shiny/issues/3899" class="external-link">#3899</a>: The JS function <code>Shiny.bindAll()</code> is now asynchronous. This change is driven by the recent push toward making dynamic UI rendering asynchronous, which is necessary for <a href="https://shinylive.io/r" class="external-link">shinylive</a> (and should’ve happened when it was first introduced in Shiny v1.7.5). The vast majority of existing <code>Shiny.bindAll()</code> uses should continue to work as before, but some cases may break if downstream code relies on it being synchronous (i.e., blocking the main thread). In this case, consider placing any downstream code in a <code>.then()</code> callback (or <code>await</code> the result in a <code>async</code> function). (<a href="https://github.com/rstudio/shiny/issues/3929" class="external-link">#3929</a>)

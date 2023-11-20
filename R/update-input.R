@@ -423,6 +423,23 @@ updateSliderInput <- function(session = getDefaultReactiveDomain(), inputId, lab
 {
   validate_session_object(session)
 
+  if (!is.null(value)) {
+    if (!is.null(min) && !is.null(max)) {
+      # Validate value/min/max together if all three are provided
+      tryCatch(
+        validate_slider_value(min, max, value, "updateSliderInput"),
+        error = function(err) warning(conditionMessage(err), call. = FALSE)
+      )
+    } else if (length(value) <  1 || length(value) > 2 || any(is.na(value))) {
+      # Otherwise ensure basic assumptions about value are met
+      warning(
+        "In updateSliderInput(): value must be a single value or a length-2 ",
+        "vector and cannot contain NA values.",
+        call. = FALSE
+      )
+    }
+  }
+
   # If no min/max/value is provided, we won't know the
   # type, and this will return an empty string
   dataType <- getSliderType(min, max, value)

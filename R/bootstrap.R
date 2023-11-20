@@ -374,8 +374,7 @@ collapseSizes <- function(padding) {
 #' @param inverse `TRUE` to use a dark background and light text for the
 #'   navigation bar
 #' @param collapsible `TRUE` to automatically collapse the navigation
-#'   elements into a menu when the width of the browser is less than 940 pixels
-#'   (useful for viewing on smaller touchscreen device)
+#'   elements into an expandable menu on mobile devices or narrow window widths.
 #' @param fluid `TRUE` to use a fluid layout. `FALSE` to use a fixed
 #'   layout.
 #' @param windowTitle the browser window title (as a character string). The
@@ -794,7 +793,7 @@ verbatimTextOutput <- function(outputId, placeholder = FALSE) {
 #' @export
 imageOutput <- function(outputId, width = "100%", height="400px",
                         click = NULL, dblclick = NULL, hover = NULL, brush = NULL,
-                        inline = FALSE) {
+                        inline = FALSE, fill = FALSE) {
 
   style <- if (!inline) {
     # Using `css()` here instead of paste/sprintf so that NULL values will
@@ -850,7 +849,8 @@ imageOutput <- function(outputId, width = "100%", height="400px",
   }
 
   container <- if (inline) span else div
-  do.call(container, args)
+  res <- do.call(container, args)
+  bindFillRole(res, item = fill)
 }
 
 #' Create an plot or image output element
@@ -918,6 +918,11 @@ imageOutput <- function(outputId, width = "100%", height="400px",
 #'   `imageOutput`/`plotOutput` calls may share the same `id`
 #'   value; brushing one image or plot will cause any other brushes with the
 #'   same `id` to disappear.
+#' @param fill Whether or not the returned tag should be treated as a fill item,
+#'   meaning that its `height` is allowed to grow/shrink to fit a fill container
+#'   with an opinionated height (see [htmltools::bindFillRole()]) with an
+#'   opinionated height. Examples of fill containers include `bslib::card()` and
+#'   `bslib::card_body_fill()`.
 #' @inheritParams textOutput
 #' @note The arguments `clickId` and `hoverId` only work for R base graphics
 #'   (see the \pkg{\link[graphics:graphics-package]{graphics}} package). They do
@@ -1088,11 +1093,11 @@ imageOutput <- function(outputId, width = "100%", height="400px",
 #' @export
 plotOutput <- function(outputId, width = "100%", height="400px",
                        click = NULL, dblclick = NULL, hover = NULL, brush = NULL,
-                       inline = FALSE) {
+                       inline = FALSE, fill = !inline) {
 
   # Result is the same as imageOutput, except for HTML class
   res <- imageOutput(outputId, width, height, click, dblclick,
-                     hover, brush, inline)
+                     hover, brush, inline, fill)
 
   res$attribs$class <- "shiny-plot-output"
   res
@@ -1135,15 +1140,21 @@ dataTableOutput <- function(outputId) {
 #' Create an HTML output element
 #'
 #' Render a reactive output variable as HTML within an application page. The
-#' text will be included within an HTML `div` tag, and is presumed to
-#' contain HTML content which should not be escaped.
+#' text will be included within an HTML `div` tag, and is presumed to contain
+#' HTML content which should not be escaped.
 #'
-#' `uiOutput` is intended to be used with `renderUI` on the server
-#' side. It is currently just an alias for `htmlOutput`.
+#' `uiOutput` is intended to be used with `renderUI` on the server side. It is
+#' currently just an alias for `htmlOutput`.
 #'
 #' @param outputId output variable to read the value from
 #' @param ... Other arguments to pass to the container tag function. This is
 #'   useful for providing additional classes for the tag.
+#' @param fill If `TRUE`, the result of `container` is treated as _both_ a fill
+#'   item and container (see [htmltools::bindFillRole()]), which means both the
+#'   `container` as well as its immediate children (i.e., the result of
+#'   `renderUI()`) are allowed to grow/shrink to fit a fill container with an
+#'   opinionated height. Set `fill = "item"` or `fill = "container"` to treat
+#'   `container` as just a fill item or a fill container.
 #' @inheritParams textOutput
 #' @return An HTML output element that can be included in a panel
 #' @examples
@@ -1155,12 +1166,16 @@ dataTableOutput <- function(outputId) {
 #' )
 #' @export
 htmlOutput <- function(outputId, inline = FALSE,
-  container = if (inline) span else div, ...)
+  container = if (inline) span else div, fill = FALSE, ...)
 {
   if (any_unnamed(list(...))) {
     warning("Unnamed elements in ... will be replaced with dynamic UI.")
   }
-  container(id = outputId, class="shiny-html-output", ...)
+  res <- container(id = outputId, class = "shiny-html-output", ...)
+  bindFillRole(
+    res, item = isTRUE(fill) || isTRUE("item" == fill),
+    container = isTRUE(fill) || isTRUE("container" == fill)
+  )
 }
 
 #' @rdname htmlOutput
@@ -1184,19 +1199,25 @@ uiOutput <- htmlOutput
 #' @examples
 #' \dontrun{
 #' ui <- fluidPage(
+#'   p("Choose a dataset to download."),
+#'   selectInput("dataset", "Dataset", choices = c("mtcars", "airquality")),
 #'   downloadButton("downloadData", "Download")
 #' )
 #'
 #' server <- function(input, output) {
-#'   # Our dataset
-#'   data <- mtcars
+#'   # The requested dataset
+#'   data <- reactive({
+#'     get(input$dataset)
+#'   })
 #'
 #'   output$downloadData <- downloadHandler(
 #'     filename = function() {
-#'       paste("data-", Sys.Date(), ".csv", sep="")
+#'       # Use the selected dataset as the suggested file name
+#'       paste0(input$dataset, ".csv")
 #'     },
 #'     content = function(file) {
-#'       write.csv(data, file)
+#'       # Write the dataset to the `file` that will be downloaded
+#'       write.csv(data(), file)
 #'     }
 #'   )
 #' }

@@ -1,6 +1,12 @@
 import $ from "jquery";
 import { shinyShinyApp } from "./initedMethods";
 import { showNotification } from "./notifications";
+import type { ShinyApp } from "./shinyapp";
+
+// We can use this method as `shinyShinyApp()` will throw if not initialized
+function shinyAppConfig() {
+  return shinyShinyApp().config as NonNullable<ShinyApp["config"]>;
+}
 
 function initReactlog(): void {
   $(document).on("keydown", function (e) {
@@ -8,9 +14,9 @@ function initReactlog(): void {
       return;
     const url =
       "reactlog?w=" +
-      window.escape(shinyShinyApp().config.workerId) +
+      window.escape(shinyAppConfig().workerId) +
       "&s=" +
-      window.escape(shinyShinyApp().config.sessionId);
+      window.escape(shinyAppConfig().sessionId);
 
     window.open(url);
     e.preventDefault();
@@ -39,11 +45,12 @@ function initReactlog(): void {
 
     const url =
       "reactlog/mark?w=" +
-      window.escape(shinyShinyApp().config.workerId) +
+      window.escape(shinyAppConfig().workerId) +
       "&s=" +
-      window.escape(shinyShinyApp().config.sessionId);
+      window.escape(shinyAppConfig().sessionId);
 
     // send notification
+    /* eslint-disable @typescript-eslint/no-floating-promises */
     $.get(url, function (result: "marked" | void) {
       if (result !== "marked") return;
 

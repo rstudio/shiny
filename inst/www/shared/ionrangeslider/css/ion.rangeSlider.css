@@ -1,5 +1,6 @@
 @charset "UTF-8";
 /* 'shiny' skin for Ion.RangeSlider, largely based on the 'big' skin, but with smaller dimensions, grayscale grid text, and without gradients
+© Posit, PBC, 2023
 © RStudio, Inc, 2014
 © Denis Ineshin, 2014  https://github.com/IonDen
 © guybowden, 2014  https://github.com/guybowden
@@ -174,6 +175,18 @@
   background-color: #ededed;
   border: 1px solid #cccccc;
   border-radius: 8px;
+  overflow: visible;
+}
+
+.irs--shiny .irs-line::before {
+  content: "";
+  display: block;
+  position: relative;
+  cursor: s-resize;
+  width: 100%;
+  height: 22px;
+  top: -9px;
+  z-index: 1;
 }
 
 .irs--shiny .irs-bar {
@@ -182,10 +195,22 @@
   border-top: 1px solid #428bca;
   border-bottom: 1px solid #428bca;
   background: #428bca;
+  cursor: s-resize;
+  z-index: 2;
 }
 
 .irs--shiny .irs-bar--single {
   border-radius: 8px 0 0 8px;
+}
+
+.irs--shiny .irs-bar::before {
+  content: "";
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 22px;
+  top: -9px;
+  z-index: 2;
 }
 
 .irs--shiny .irs-shadow {
@@ -207,6 +232,7 @@
   background-color: #dedede;
   box-shadow: 1px 1px 3px rgba(255, 255, 255, 0.3);
   border-radius: 22px;
+  z-index: 2;
 }
 
 .irs--shiny .irs-handle.state_hover, .irs--shiny .irs-handle:hover {

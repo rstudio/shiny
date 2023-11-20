@@ -413,11 +413,11 @@ test_that("captures ggplot2 outputs", {
 
   server <- function(input, output, session){
     output$fixed <- renderPlot({
-      ggplot2::qplot(iris$Sepal.Length, iris$Sepal.Width)
+      withr::with_namespace("ggplot2", { ggplot(iris) + geom_point(aes(Sepal.Length, Sepal.Width)) })
     }, width=300, height=350)
 
     output$dynamic <- renderPlot({
-      ggplot2::qplot(iris$Sepal.Length, iris$Sepal.Width)
+      withr::with_namespace("ggplot2", { ggplot(iris) + geom_point(aes(Sepal.Length, Sepal.Width)) })
     })
   }
 

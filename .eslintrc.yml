@@ -6,7 +6,6 @@ extends:
   - 'eslint:recommended'
   - 'plugin:@typescript-eslint/recommended'
   - 'plugin:jest/recommended'
-  - 'prettier/@typescript-eslint'
   - 'plugin:prettier/recommended'
   - 'plugin:jest-dom/recommended'
 globals:
@@ -16,6 +15,11 @@ parser: '@typescript-eslint/parser'
 parserOptions:
   ecmaVersion: 2018
   sourceType: module
+  project:
+    - './tsconfig.json'
+ignorePatterns: # mirrors tsconfig.json's exclude
+    - '**/__tests__'
+    - '**/*.d.ts'
 plugins:
   - '@typescript-eslint'
   - prettier
@@ -45,9 +49,6 @@ rules:
   semi:
     - error
     - always
-  newline-after-var:
-    - error
-    - always
   dot-location:
     - error
     - property
@@ -64,6 +65,7 @@ rules:
     - error
     - default: array-simple
       readonly: array-simple
+
   "@typescript-eslint/consistent-indexed-object-style":
     - error
     - index-signature
@@ -73,6 +75,10 @@ rules:
 
   "@typescript-eslint/consistent-type-imports":
     - error
+
+  "@typescript-eslint/no-floating-promises":
+    - error
+
   "@typescript-eslint/naming-convention":
     - error
 

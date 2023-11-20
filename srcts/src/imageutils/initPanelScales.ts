@@ -2,6 +2,7 @@
 
 import type { Offset } from "./findbox";
 import { mapValues } from "../utils";
+import type { Bounds } from "./createBrush";
 
 // range.
 function mapLinear(
@@ -35,10 +36,10 @@ function scaler1D(
   domainMax: number,
   rangeMin: number,
   rangeMax: number,
-  logbase: number
+  logbase: number | null
 ) {
   return {
-    scale: function (val: number, clip: boolean) {
+    scale: function (val: number, clip?: boolean) {
       if (logbase) val = Math.log(val) / Math.log(logbase);
       return mapLinear(val, domainMin, domainMax, rangeMin, rangeMax, clip);
     },
@@ -52,7 +53,7 @@ function scaler1D(
   };
 }
 
-type Panel = {
+type PanelInit = {
   domain: {
     top: number;
     bottom: number;
@@ -72,22 +73,22 @@ type Panel = {
   mapping: { [key: string]: string };
   // eslint-disable-next-line @typescript-eslint/naming-convention
   panel_vars?: { [key: string]: number | string };
-
-  scaleDataToImg?: (
-    val: { [key: string]: number },
-    clip?: boolean
-  ) => { [key: string]: number };
-  scaleImgToData?: {
+};
+type Panel = PanelInit & {
+  scaleDataToImg: {
+    (val: Bounds, clip?: boolean): Bounds;
+  };
+  scaleImgToData: {
     (val: Offset, clip?: boolean): Offset;
-    (val: { [key: string]: number }, clip?: boolean): { [key: string]: number };
   };
 
-  clipImg?: (offsetImg: { x: number; y: number }) => { x: number; y: number };
+  clipImg: (offsetImg: { x: number; y: number }) => { x: number; y: number };
 };
 
 // Modify panel, adding scale and inverse-scale functions that take objects
 // like {x:1, y:3}, and also add clip function.
-function addScaleFuns(panel: Panel) {
+function addScaleFuns(panel_: PanelInit): Panel {
+  const panel = panel_ as Panel;
   const d = panel.domain;
   const r = panel.range;
   const xlog = panel.log && panel.log.x ? panel.log.x : null;
@@ -98,7 +99,16 @@ function addScaleFuns(panel: Panel) {
   // Given an object of form {x:1, y:2}, or {x:1, xmin:2:, ymax: 3}, convert
   // from data coordinates to img. Whether a value is converted as x or y
   // depends on the first character of the key.
-  panel.scaleDataToImg = function (val, clip) {
+  // (val: Offset, clip?: boolean): Offset;
+  // (val: Bounds, clip?: boolean): Bounds;
+  // (val: { [key: `${"x" | "y"}${string}`]: number }, clip?: boolean): { [key: `${"x" | "y"}${string}`]: number }
+  // (val: { [key: string]: number | null }, clip?: boolean): {
+  //   [key: string]: number | null;
+  // };
+  function scaleDataToImg(
+    val: Bounds,
+    clip?: Parameters<typeof xscaler.scale>[1]
+  ): Bounds {
     return mapValues(val, (value, key) => {
       const prefix = key.substring(0, 1);
 
@@ -107,12 +117,13 @@ function addScaleFuns(panel: Panel) {
       } else if (prefix === "y") {
         return yscaler.scale(value, clip);
       }
+      // TODO-future; If we know the input is a valid input (starts with x/y), why do we still have this value?
       return null;
-    });
-  };
+    }) as Bounds;
+  }
+  panel.scaleDataToImg = scaleDataToImg;
 
-  function scaleImgToData(val: Offset, clip?: boolean);
-  function scaleImgToData(val: { [key: string]: number }, clip?: boolean) {
+  function scaleImgToData(val: Offset, clip?: boolean): Offset {
     return mapValues(val, (value, key) => {
       const prefix = key.substring(0, 1);
 
@@ -121,8 +132,9 @@ function addScaleFuns(panel: Panel) {
       } else if (prefix === "y") {
         return yscaler.scaleInv(value, clip);
       }
+      // TODO-future; If we know the input is a valid input (starts with x/y), why do we still have this value?
       return null;
-    });
+    }) as Offset;
   }
   panel.scaleImgToData = scaleImgToData;
 
@@ -143,20 +155,18 @@ function addScaleFuns(panel: Panel) {
 
     return newOffset;
   };
+
+  return panel;
 }
 
 // Modifies the panel objects in a coordmap, adding scaleImgToData(),
 // scaleDataToImg(), and clipImg() functions to each one. The panel objects
 // use img and data coordinates only; they do not use css coordinates. The
 // domain is in data coordinates; the range is in img coordinates.
-function initPanelScales(panels: Panel[]): void {
+function initPanelScales(panels: PanelInit[]): Panel[] {
   // Add the functions to each panel object.
-  for (let i = 0; i < panels.length; i++) {
-    const panel = panels[i];
-
-    addScaleFuns(panel);
-  }
+  return panels.map((panel) => addScaleFuns(panel));
 }
 
-export type { Panel };
+export type { Panel, PanelInit };
 export { initPanelScales };

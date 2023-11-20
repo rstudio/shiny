@@ -50,7 +50,7 @@ function renderHtml(
 }
 // Take an object where keys are names of singletons, and merges it into
 // knownSingletons
-function register(s) {
+function register(s: typeof knownSingletons) {
   $.extend(knownSingletons, s);
 }
 // Takes a string or array of strings and adds them to knownSingletons
@@ -66,7 +66,7 @@ function registerNames(s: string[] | string): void {
 // Inserts new content into document head
 function addToHead(head: string) {
   if (head.length > 0) {
-    const tempDiv = $("<div>" + head + "</div>").get(0);
+    const tempDiv = $("<div>" + head + "</div>").get(0) as HTMLDivElement;
     const $head = $("head");
 
     while (tempDiv.hasChildNodes()) {
@@ -84,7 +84,12 @@ function processHtml(val: string): {
   const newSingletons: typeof knownSingletons = {};
   let newVal: string;
 
-  const findNewPayload = function (match, p1, sig, payload) {
+  const findNewPayload = function (
+    match: string,
+    p1: string,
+    sig: string,
+    payload: string
+  ) {
     if (knownSingletons[sig] || newSingletons[sig]) return "";
     newSingletons[sig] = true;
     return payload;
@@ -97,8 +102,8 @@ function processHtml(val: string): {
     val = newVal;
   }
 
-  const heads = [];
-  const headAddPayload = function (match, payload) {
+  const heads: string[] = [];
+  const headAddPayload = function (match: string, payload: string) {
     heads.push(payload);
     return "";
   };

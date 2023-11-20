@@ -13,7 +13,8 @@ imageOutput(
   dblclick = NULL,
   hover = NULL,
   brush = NULL,
-  inline = FALSE
+  inline = FALSE,
+  fill = FALSE
 )
 
 plotOutput(
@@ -24,7 +25,8 @@ plotOutput(
   dblclick = NULL,
   hover = NULL,
   brush = NULL,
-  inline = FALSE
+  inline = FALSE,
+  fill = !inline
 )
 }
 \arguments{
@@ -76,6 +78,12 @@ same \code{id} to disappear.}
 
 \item{inline}{use an inline (\code{span()}) or block container (\code{div()})
 for the output}
+
+\item{fill}{Whether or not the returned tag should be treated as a fill item,
+meaning that its \code{height} is allowed to grow/shrink to fit a fill container
+with an opinionated height (see \code{\link[htmltools:bindFillRole]{htmltools::bindFillRole()}}) with an
+opinionated height. Examples of fill containers include \code{bslib::card()} and
+\code{bslib::card_body_fill()}.}
 }
 \value{
 A plot or image output element that can be included in a panel.

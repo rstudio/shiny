@@ -18,6 +18,9 @@ expect_snapshot2 <- function(...) {
   if (getRversion() < "3.6.0") {
     skip("Skipping snapshots on R < 3.6 because of different RNG method")
   }
+  if (packageVersion("htmltools") <= "0.5.6" && getRversion() > "4.3.1") {
+    skip("Skipping snapshots since htmltools is 'outdated'")
+  }
   expect_snapshot(...)
 }
 
@@ -41,7 +44,6 @@ panels <- list(
 )
 
 test_that("tabsetPanel() markup is correct", {
-
   default <- tabset_panel(!!!panels)
   pills <- tabset_panel(
     !!!panels, type = "pills", selected = "B",
@@ -54,6 +56,11 @@ test_that("tabsetPanel() markup is correct", {
   # BS4
   expect_snapshot_bslib(default)
   expect_snapshot_bslib(pills)
+
+  # Make sure .active class gets added to both the .dropdown as well as the
+  # .dropdown-menu's tab
+  dropdown_active <- tabset_panel(!!!panels, selected = "C")
+  expect_snapshot2(dropdown_active)
 })
 
 test_that("navbarPage() markup is correct", {

@@ -268,3 +268,27 @@ test_that("quoToFunction handles nested quosures", {
   func <- quoToFunction(quo_outer, "foo")
   expect_identical(func(), 2)
 })
+
+
+
+test_that("toJSON can set digits using options - default", {
+  withr::local_options(list(shiny.json.digits = NULL))
+  expect_equal(
+    as.character(toJSON(pi)),
+    "[3.141592653589793]"
+  )
+})
+test_that("toJSON can set digits using options - number", {
+  withr::local_options(list(shiny.json.digits = 4))
+  expect_equal(
+    as.character(toJSON(pi)),
+    "[3.1416]"
+  )
+})
+test_that("toJSON can set digits using options - asis number", {
+  withr::local_options(list(shiny.json.digits = I(4)))
+  expect_equal(
+    as.character(toJSON(pi)),
+    "[3.142]"
+  )
+})

@@ -71,7 +71,7 @@ registered \code{devmode_default} value will be used.}
 \code{TRUE} and the specified option is not set in \code{\link[=options]{options()}}.}
 }
 \description{
-\lifecycle{experimental}
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 
 Developer Mode enables a number of \code{\link[=options]{options()}} to make a developer's life
 easier, like enabling non-minified JS and printing messages about

@@ -33,8 +33,12 @@ createUniqueId <- function(bytes, prefix = "", suffix = "") {
 }
 
 toJSON <- function(x, ...,  dataframe = "columns", null = "null", na = "null",
-  auto_unbox = TRUE, digits = getOption("shiny.json.digits", 16),
-  use_signif = TRUE, force = TRUE, POSIXt = "ISO8601", UTC = TRUE,
+  auto_unbox = TRUE,
+  # Shiny has had a legacy value of 16 significant digits
+  # We can use `I(16)` mixed with the default behavior in jsonlite's `use_signif=`
+  # https://github.com/jeroen/jsonlite/commit/728efa9
+  digits = getOption("shiny.json.digits", I(16)), use_signif = is(digits, "AsIs"),
+  force = TRUE, POSIXt = "ISO8601", UTC = TRUE,
   rownames = FALSE, keep_vec_names = TRUE, strict_atomic = TRUE) {
 
   if (strict_atomic) {

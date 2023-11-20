@@ -3,13 +3,17 @@ import type { InputRatePolicy } from "../inputPolicies/inputRatePolicy";
 import type { AnyVoidFunction } from "../utils/extraTypes";
 
 class Debouncer<X extends AnyVoidFunction> implements InputRatePolicy<X> {
-  target: InputPolicy;
+  target: InputPolicy | null;
   func: X;
   delayMs: number | undefined;
   timerId: ReturnType<typeof setTimeout> | null;
   args: Parameters<X> | null;
 
-  constructor(target: InputPolicy, func: X, delayMs: number | undefined) {
+  constructor(
+    target: InputPolicy | null,
+    func: X,
+    delayMs: number | undefined
+  ) {
     this.target = target;
     this.func = func;
     this.delayMs = delayMs;

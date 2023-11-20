@@ -1,5 +1,5 @@
 import type { InputPolicy, InputPolicyOpts } from "./inputPolicy";
-import { hasOwnProperty } from "../utils";
+import { hasDefinedProperty } from "../utils";
 import { splitInputNameType } from "./splitInputNameType";
 
 type LastSentValues = { [key: string]: { [key: string]: string } };
@@ -40,7 +40,7 @@ class InputNoResendDecorator implements InputPolicy {
     } = {};
 
     for (const inputName in values) {
-      if (hasOwnProperty(values, inputName)) {
+      if (hasDefinedProperty(values, inputName)) {
         const { name, inputType } = splitInputNameType(inputName);
 
         cacheValues[name] = {

@@ -1,12 +1,15 @@
 import type { TextHTMLElement } from "./text";
 import { TextInputBindingBase } from "./text";
-declare type TimeFormatter = (fmt: string, dt: Date) => string;
-declare type SliderReceiveMessageData = {
+type TimeFormatter = (fmt: string, dt: Date) => string;
+type SliderReceiveMessageData = {
     label: string;
     value?: Array<number | string> | number | string;
     min?: number;
     max?: number;
     step?: number;
+    "data-type"?: string;
+    "time-format"?: string;
+    timezone?: string;
 };
 declare global {
     interface Window {
@@ -18,7 +21,7 @@ declare global {
 }
 declare class SliderInputBinding extends TextInputBindingBase {
     find(scope: HTMLElement): JQuery<HTMLElement>;
-    getType(el: HTMLElement): string | false;
+    getType(el: HTMLElement): string | null;
     getValue(el: TextHTMLElement): number | string | [number | string, number | string];
     setValue(el: HTMLElement, value: number | string | [number | string, number | string]): void;
     subscribe(el: HTMLElement, callback: (x: boolean) => void): void;

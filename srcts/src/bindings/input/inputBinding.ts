@@ -2,14 +2,13 @@ import type { RatePolicyModes } from "../../inputPolicies/inputRateDecorator";
 import type { BindScope } from "../../shiny/bind";
 
 class InputBinding {
-  name: string;
+  name!: string;
 
   // Returns a jQuery object or element array that contains the
   // descendants of scope that match this binding
   find(scope: BindScope): JQuery<HTMLElement> {
     throw "Not implemented";
-    // add so that typescript isn't mad about an unused var
-    scope;
+    scope; // unused var
   }
 
   getId(el: HTMLElement): string {
@@ -18,9 +17,9 @@ class InputBinding {
 
   // Gives the input a type in case the server needs to know it
   // to deserialize the JSON correctly
-  getType(el: HTMLElement): string | false {
-    return false;
-    el;
+  getType(el: HTMLElement): string | null {
+    return null;
+    el; // unused var
   }
   getValue(el: HTMLElement): any {
     throw "Not implemented";
@@ -32,12 +31,12 @@ class InputBinding {
   // getRatePolicy. If false, send value immediately. Default behavior is `false`
   subscribe(el: HTMLElement, callback: (value: boolean) => void): void {
     // empty
-    el;
-    callback;
+    el; // unused var
+    callback; // unused var
   }
   unsubscribe(el: HTMLElement): void {
     // empty
-    el;
+    el; // unused var
   }
 
   // This is used for receiving messages that tell the input object to do
@@ -45,21 +44,21 @@ class InputBinding {
   // 'data' should be an object with elements corresponding to value, min,
   // max, etc., as appropriate for the type of input object. It also should
   // trigger a change event.
-  receiveMessage(el: HTMLElement, data: unknown): void {
+  receiveMessage(el: HTMLElement, data: unknown): Promise<void> | void {
     throw "Not implemented";
-    el;
-    data;
+    el; // unused var
+    data; // unused var
   }
   getState(el: HTMLElement): unknown {
     throw "Not implemented";
-    el;
+    el; // unused var
   }
 
   getRatePolicy(
     el: HTMLElement
   ): { policy: RatePolicyModes; delay: number } | null {
     return null;
-    el;
+    el; // unused var
   }
 
   // Some input objects need initialization before being bound. This is

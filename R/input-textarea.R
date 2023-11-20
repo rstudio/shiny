@@ -52,7 +52,7 @@ textAreaInput <- function(inputId, label, value = "", width = NULL, height = NUL
 
   style <- css(
     # The width is specified on the parent div.
-    width = if (!is.null(width)) "width: 100%;",
+    width = if (!is.null(width)) "100%",
     height = validateCssUnit(height),
     resize = resize
   )
@@ -62,7 +62,7 @@ textAreaInput <- function(inputId, label, value = "", width = NULL, height = NUL
     style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
     tags$textarea(
       id = inputId,
-      class = "form-control",
+      class = "shiny-input-textarea form-control",
       placeholder = placeholder,
       style = style,
       rows = rows,

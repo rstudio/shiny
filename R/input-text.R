@@ -42,7 +42,7 @@ textInput <- function(inputId, label, value = "", width = NULL,
   div(class = "form-group shiny-input-container",
     style = css(width = validateCssUnit(width)),
     shinyInputLabel(inputId, label),
-    tags$input(id = inputId, type="text", class="form-control", value=value,
+    tags$input(id = inputId, type="text", class="shiny-input-text form-control", value=value,
       placeholder = placeholder)
   )
 }

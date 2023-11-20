@@ -24,9 +24,9 @@ fileInput(
 multiple files at once. \strong{Does not work on older browsers, including
 Internet Explorer 9 and earlier.}}
 
-\item{accept}{A character vector of "unique file type specifiers" which
-gives the browser a hint as to the type of file the server expects.
-Many browsers use this prevent the user from selecting an invalid file.
+\item{accept}{A character vector of "unique file type specifiers" which gives
+the browser a hint as to the type of file the server expects. Many browsers
+use this prevent the user from selecting an invalid file.
 
 A unique file type specifier can be:
 \itemize{
@@ -61,12 +61,19 @@ still photos only, also use \code{accept="image/*"}. For video only, use
 Create a file upload control that can be used to upload one or more files.
 }
 \details{
-Whenever a file upload completes, the corresponding input variable is set
-to a dataframe. See the \verb{Server value} section.
+Whenever a file upload completes, the corresponding input variable is set to
+a dataframe. See the \verb{Server value} section.
+
+Each time files are uploaded, they are written to a new random subdirectory
+inside of R's process-level temporary directory. The Shiny user session keeps
+track of all uploads in the session, and when the session ends, Shiny deletes
+all of the subdirectories where files where uploaded to.
 }
 \section{Server value}{
 
-A \code{data.frame} that contains one row for each selected file, and following columns:
+
+A \code{data.frame} that contains one row for each selected file, and following
+columns:
 \describe{
 \item{\code{name}}{The filename provided by the web browser. This is
 \strong{not} the path to read to get at the actual data that was uploaded

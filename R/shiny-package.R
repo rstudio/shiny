@@ -34,3 +34,11 @@ NULL
 # since we call require(shiny) as part of loading the app.
 #' @import methods
 NULL
+
+
+# For usethis::use_release_issue()
+release_bullets <- function() {
+  c(
+    "Update static imports: `staticimports::import()`"
+  )
+}

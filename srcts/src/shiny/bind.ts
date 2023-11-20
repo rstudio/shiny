@@ -9,12 +9,19 @@ import type {
 import { shinyAppBindOutput, shinyAppUnbindOutput } from "./initedMethods";
 import { sendImageSizeFns } from "./sendImageSize";
 
-const boundInputs = {};
+const boundInputs: {
+  [key: string]: { binding: InputBinding; node: HTMLElement };
+} = {};
 
 type BindScope = HTMLElement | JQuery<HTMLElement>;
 
 // todo make sure allowDeferred can NOT be supplied and still work
-function valueChangeCallback(inputs, binding, el, allowDeferred) {
+function valueChangeCallback(
+  inputs: InputValidateDecorator,
+  binding: InputBinding,
+  el: HTMLElement,
+  allowDeferred: boolean
+) {
   let id = binding.getId(el);
 
   if (id) {
@@ -23,7 +30,11 @@ function valueChangeCallback(inputs, binding, el, allowDeferred) {
 
     if (type) id = id + ":" + type;
 
-    const opts = {
+    const opts: {
+      priority: "deferred" | "immediate";
+      binding: typeof binding;
+      el: typeof el;
+    } = {
       priority: allowDeferred ? "deferred" : "immediate",
       binding: binding,
       el: el,
@@ -54,7 +65,16 @@ function bindInputs(
   const { inputs, inputsRate, inputBindings } = shinyCtx;
   const bindings = inputBindings.getBindings();
 
-  const inputItems = {};
+  const inputItems: {
+    [key: string]: {
+      value: any;
+      opts: {
+        immediate: true;
+        binding: InputBinding;
+        el: HTMLElement;
+      };
+    };
+  } = {};
 
   for (let i = 0; i < bindings.length; i++) {
     const binding = bindings[i].binding;
@@ -62,6 +82,7 @@ function bindInputs(
 
     for (let j = 0; j < matches.length; j++) {
       const el = matches[j];
+      if (el.hasAttribute("data-shiny-no-bind-input")) continue;
       const id = binding.getId(el);
 
       // Check if ID is falsy, or if already bound
@@ -84,7 +105,7 @@ function bindInputs(
         const thisBinding = binding;
         const thisEl = el;
 
-        return function (allowDeferred) {
+        return function (allowDeferred: boolean) {
           valueChangeCallback(inputs, thisBinding, thisEl, allowDeferred);
         };
       })();
@@ -119,14 +140,14 @@ function bindInputs(
   return inputItems;
 }
 
-function bindOutputs(
+async function bindOutputs(
   {
     sendOutputHiddenState,
     maybeAddThemeObserver,
     outputBindings,
   }: BindInputsCtx,
   scope: BindScope = document.documentElement
-): void {
+): Promise<void> {
   const $scope = $(scope);
 
   const bindings = outputBindings.getBindings();
@@ -163,7 +184,7 @@ function bindOutputs(
 
       const bindingAdapter = new OutputBindingAdapter(el, binding);
 
-      shinyAppBindOutput(id, bindingAdapter);
+      await shinyAppBindOutput(id, bindingAdapter);
       $el.data("shiny-output-binding", bindingAdapter);
       $el.addClass("shiny-bound-output");
       if (!$el.attr("aria-live")) $el.attr("aria-live", "polite");
@@ -249,11 +270,11 @@ function unbindOutputs(
 
 // (Named used before TS conversion)
 // eslint-disable-next-line @typescript-eslint/naming-convention
-function _bindAll(
+async function _bindAll(
   shinyCtx: BindInputsCtx,
   scope: BindScope
-): ReturnType<typeof bindInputs> {
-  bindOutputs(shinyCtx, scope);
+): Promise<ReturnType<typeof bindInputs>> {
+  await bindOutputs(shinyCtx, scope);
   return bindInputs(shinyCtx, scope);
 }
 function unbindAll(
@@ -264,10 +285,13 @@ function unbindAll(
   unbindInputs(scope, includeSelf);
   unbindOutputs(shinyCtx, scope, includeSelf);
 }
-function bindAll(shinyCtx: BindInputsCtx, scope: BindScope): void {
+async function bindAll(
+  shinyCtx: BindInputsCtx,
+  scope: BindScope
+): Promise<void> {
   // _bindAll returns input values; it doesn't send them to the server.
   // Shiny.bindAll needs to send the values to the server.
-  const currentInputItems = _bindAll(shinyCtx, scope);
+  const currentInputItems = await _bindAll(shinyCtx, scope);
 
   const inputs = shinyCtx.inputs;
 

@@ -6,7 +6,14 @@ import { $escape, compareVersion } from "../utils";
 import { showNotification, removeNotification } from "./notifications";
 import { showModal, removeModal } from "./modal";
 import { showReconnectDialog, hideReconnectDialog } from "./reconnectDialog";
-import { renderContent, renderDependencies, renderHtml } from "./render";
+import {
+  renderContentAsync,
+  renderContent,
+  renderDependenciesAsync,
+  renderDependencies,
+  renderHtmlAsync,
+  renderHtml,
+} from "./render";
 import { initShiny } from "./init";
 import type {
   shinyBindAll,
@@ -40,8 +47,11 @@ interface Shiny {
   createSocket?: () => WebSocket;
   showReconnectDialog: typeof showReconnectDialog;
   hideReconnectDialog: typeof hideReconnectDialog;
+  renderDependenciesAsync: typeof renderDependenciesAsync;
   renderDependencies: typeof renderDependencies;
+  renderContentAsync: typeof renderContentAsync;
   renderContent: typeof renderContent;
+  renderHtmlAsync: typeof renderHtmlAsync;
   renderHtml: typeof renderHtml;
   user: string;
   progressHandlers?: ShinyApp["progressHandlers"];
@@ -90,14 +100,18 @@ function setShiny(windowShiny_: Shiny): void {
   windowShiny.addCustomMessageHandler = addCustomMessageHandler;
   windowShiny.showReconnectDialog = showReconnectDialog;
   windowShiny.hideReconnectDialog = hideReconnectDialog;
+  windowShiny.renderDependenciesAsync = renderDependenciesAsync;
   windowShiny.renderDependencies = renderDependencies;
+  windowShiny.renderContentAsync = renderContentAsync;
   windowShiny.renderContent = renderContent;
+  windowShiny.renderHtmlAsync = renderHtmlAsync;
   windowShiny.renderHtml = renderHtml;
 
   $(function () {
     // Init Shiny a little later than document ready, so user code can
     // run first (i.e. to register bindings)
     setTimeout(function () {
+      /* eslint-disable @typescript-eslint/no-floating-promises */
       initShiny(windowShiny);
     }, 1);
   });

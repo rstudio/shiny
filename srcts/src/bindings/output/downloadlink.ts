@@ -24,7 +24,7 @@ $(document).on(
   function (e: Event) {
     e;
 
-    const evt: FileDownloadEvent = jQuery.Event("shiny:filedownload");
+    const evt: FileDownloadEvent = $.Event("shiny:filedownload");
 
     evt.name = this.id;
     evt.href = this.href;

@@ -133,8 +133,11 @@ shinyDependencyCSS <- function(theme) {
     ))
   }
 
+  bs_version <- bslib::theme_version(theme)
+  bootstrap_scss <- paste0("shiny.bootstrap", bs_version, ".scss")
+
   scss_home <- system_file("www/shared/shiny_scss", package = "shiny")
-  scss_files <- file.path(scss_home, c("bootstrap.scss", "shiny.scss"))
+  scss_files <- file.path(scss_home, c(bootstrap_scss, "shiny.scss"))
   scss_files <- lapply(scss_files, sass::sass_file)
 
   bslib::bs_dependency(
@@ -148,7 +151,7 @@ shinyDependencyCSS <- function(theme) {
 
 #' Create a Shiny UI handler
 #'
-#' @description \lifecycle{superseded}
+#' @description `r lifecycle::badge("superseded")`
 #'
 #' @description Historically this function was used in ui.R files to register a user
 #' interface with Shiny. It is no longer required as of Shiny 0.10; simply

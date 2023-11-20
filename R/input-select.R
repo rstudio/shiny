@@ -4,7 +4,7 @@
 #' from a list of values.
 #'
 #' By default, `selectInput()` and `selectizeInput()` use the JavaScript library
-#' \pkg{selectize.js} (<https://github.com/selectize/selectize.js>) instead of
+#' \pkg{selectize.js} (<https://selectize.dev/>) instead of
 #' the basic select input element. To use the standard HTML select input
 #' element, use `selectInput()` with `selectize=FALSE`.
 #'
@@ -106,6 +106,7 @@ selectInput <- function(inputId, label, choices, selected = NULL,
   # create select tag and add options
   selectTag <- tags$select(
     id = inputId,
+    class = "shiny-input-select",
     class = if (!selectize) "form-control",
     size = size,
     selectOptions(choices, selected, inputId, selectize)
@@ -172,7 +173,7 @@ needOptgroup <- function(choices) {
 
 #' @rdname selectInput
 #' @param ... Arguments passed to `selectInput()`.
-#' @param options A list of options. See the documentation of \pkg{selectize.js}
+#' @param options A list of options. See the documentation of \pkg{selectize.js}(<https://selectize.dev/docs/usage>)
 #'   for possible options (character option values inside [base::I()] will
 #'   be treated as literal JavaScript code; see [renderDataTable()]
 #'   for details).
@@ -252,9 +253,8 @@ selectizeDependencyFunc <- function(theme) {
   # name, the JS/CSS would be loaded/included twice, which leads to
   # strange issues, especially since we now include a 3rd party
   # accessibility plugin https://github.com/rstudio/shiny/pull/3153
-  script <- file.path(
-    selectizeDir, c("js/selectize.min.js", "accessibility/js/selectize-plugin-a11y.min.js")
-  )
+  script <- file.path(selectizeDir, selectizeScripts())
+
   bslib::bs_dependency(
     input = sass::sass_file(stylesheet),
     theme = theme,
@@ -272,10 +272,18 @@ selectizeStaticDependency <- function(version) {
     src = "www/shared/selectize",
     package = "shiny",
     stylesheet = "css/selectize.bootstrap3.css",
-    script = c(
-      "js/selectize.min.js",
-      "accessibility/js/selectize-plugin-a11y.min.js"
-    )
+    script = selectizeScripts()
+  )
+}
+
+selectizeScripts <- function() {
+  isMinified <- isTRUE(get_devmode_option("shiny.minified", TRUE))
+  paste0(
+    c(
+      "js/selectize",
+      "accessibility/js/selectize-plugin-a11y"
+    ),
+    if (isMinified) ".min.js" else ".js"
   )
 }
 
@@ -287,7 +295,7 @@ selectizeStaticDependency <- function(version) {
 #'
 #' By default, `varSelectInput()` and `selectizeInput()` use the
 #' JavaScript library \pkg{selectize.js}
-#' (<https://github.com/selectize/selectize.js>) to instead of the basic
+#' (<https://selectize.dev/>) to instead of the basic
 #' select input element. To use the standard HTML select input element, use
 #' `selectInput()` with `selectize=FALSE`.
 #'
@@ -383,7 +391,7 @@ varSelectInput <- function(
 
 #' @rdname varSelectInput
 #' @param ... Arguments passed to `varSelectInput()`.
-#' @param options A list of options. See the documentation of \pkg{selectize.js}
+#' @param options A list of options. See the documentation of \pkg{selectize.js}(<https://selectize.dev/docs/usage>)
 #'   for possible options (character option values inside [base::I()] will
 #'   be treated as literal JavaScript code; see [renderDataTable()]
 #'   for details).

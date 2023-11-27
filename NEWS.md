@@ -1,5 +1,9 @@
 # shiny (development version)
 
+## New features and improvements
+
+* Added an console that shows some errors in the browser. Also provide better error messages for duplicate input and output bindings. (#3931)
+
 # shiny 1.8.0
 
 ## Breaking changes
@@ -15,7 +19,7 @@
 
 * Default styles for `showNotification()` were tweaked slightly to improve accessibility, sizing, and padding. (#3913)
 
-* Shiny inputs and `{htmlwidgets}` are no longer treated as draggable inside of `absolutePanel()`/`fixedPanel()` with `draggable = TRUE`. As a result, interactions like zooming and panning now work as expected with widgets like `{plotly}` and `{leaflet}` when they appear in a draggable panel. (#3752, #3933) 
+* Shiny inputs and `{htmlwidgets}` are no longer treated as draggable inside of `absolutePanel()`/`fixedPanel()` with `draggable = TRUE`. As a result, interactions like zooming and panning now work as expected with widgets like `{plotly}` and `{leaflet}` when they appear in a draggable panel. (#3752, #3933)
 
 * For `InputBinding`s, the `.receiveMessage()` method can now be asynchronous or synchronous (previously it could only be synchronous). (#3930)
 

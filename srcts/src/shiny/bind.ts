@@ -61,6 +61,15 @@ const bindingsRegistery = (() => {
   const bindings: IdToBindingTypes = new Map();
 
   /**
+   * Checks if an ID is already registered to an input or output binding
+   * @param id ID of the possibly bound input or output
+   * @returns true if the ID is already registered to a binding, otherwise false
+   */
+  function isRegistered(id: string): boolean {
+    return bindings.has(id);
+  }
+
+  /**
    * Checks if the bindings registery is valid. Currently this just checks for
    * duplicate IDs but in the future could be expanded to check more conditions
    * @returns ShinyClientError if current ID bindings are invalid, otherwise null
@@ -151,6 +160,7 @@ const bindingsRegistery = (() => {
   }
 
   return {
+    isRegistered,
     addBinding,
     removeBinding,
     checkValidity,
@@ -204,8 +214,8 @@ function bindInputs(
       if (el.hasAttribute("data-shiny-no-bind-input")) continue;
       const id = binding.getId(el);
 
-      // Check if ID is falsy, skip
-      if (!id) continue;
+      // Check if ID is falsy, or if already registered with a binding
+      if (!id || bindingsRegistery.isRegistered(id)) continue;
 
       bindingsRegistery.addBinding(id, "input");
       const type = binding.getType(el);

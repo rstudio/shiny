@@ -18686,14 +18686,8 @@
         if (el.hasAttribute("data-shiny-no-bind-input"))
           return "continue";
         var id = binding.getId(el);
-        if (!id)
+        if (!id || (0, import_jquery37.default)(el).hasClass("shiny-bound-input"))
           return "continue";
-        if ((0, import_jquery37.default)(el).data("shiny-input-binding")) {
-          if (!bindingsRegistry.isRegistered(id, "input")) {
-            bindingsRegistry.addBinding(id, "input");
-          }
-          return "continue";
-        }
         var type = binding.getType(el);
         var effectiveId = type ? id + ":" + type : id;
         inputItems[effectiveId] = {

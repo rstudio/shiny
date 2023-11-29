@@ -61,23 +61,6 @@ const bindingsRegistry = (() => {
   const bindings: IdToBindingTypes = new Map();
 
   /**
-   * Checks if an ID is already registered to an input or output binding
-   * @param id ID of the possibly bound input or output
-   * @param type Type of binding to check for, either "input", "output", or
-   * "all".
-   * @returns true if the ID is already registered to a binding, otherwise false
-   */
-  function isRegistered(
-    id: string,
-    type: "all" | "input" | "output" = "all"
-  ): boolean {
-    const record = bindings.get(id);
-    if (!record) return false;
-    if (type === "all") return true;
-    return record.includes(type);
-  }
-
-  /**
    * Checks if the bindings registry is valid. Currently this just checks for
    * duplicate IDs but in the future could be expanded to check more conditions
    * @returns ShinyClientError if current ID bindings are invalid, otherwise
@@ -169,7 +152,6 @@ const bindingsRegistry = (() => {
   }
 
   return {
-    isRegistered,
     addBinding,
     removeBinding,
     checkValidity,

@@ -223,8 +223,16 @@ function bindInputs(
       if (el.hasAttribute("data-shiny-no-bind-input")) continue;
       const id = binding.getId(el);
 
-      // Check if ID is falsy, or if already registered with a binding
-      if (!id || bindingsRegistry.isRegistered(id, "input")) continue;
+      // Don't bind if ID is falsy...
+      if (!id) continue;
+
+      // ...or if this element is already registered with a binding
+      if ($(el).data("shiny-input-binding")) {
+        if (!bindingsRegistry.isRegistered(id, "input")) {
+          bindingsRegistry.addBinding(id, "input");
+        }
+        continue;
+      }
 
       const type = binding.getType(el);
       const effectiveId = type ? id + ":" + type : id;

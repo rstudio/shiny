@@ -69,8 +69,8 @@ const bindingsRegistry = (() => {
   function checkValidity():
     | { status: "error"; error: ShinyClientError }
     | { status: "ok" } {
-    const duplicateIds: { [id: string]: { input: number; output: number } } =
-      {};
+    const duplicateIds: Map<string, { input: number; output: number }> =
+      new Map();
 
     // count duplicate IDs of each binding type
     bindings.forEach((idTypes, id) => {
@@ -78,14 +78,13 @@ const bindingsRegistry = (() => {
       const nOutputs = idTypes.filter((s) => s === "output").length;
 
       if (nInputs > 1 || nOutputs > 1) {
-        duplicateIds[id] = { input: nInputs, output: nOutputs };
+        duplicateIds.set(id, { input: nInputs, output: nOutputs });
       }
     });
 
-    const nDuplicates = Object.keys(duplicateIds).length;
-    if (nDuplicates === 0) return { status: "ok" };
+    if (duplicateIds.size === 0) return { status: "ok" };
 
-    const duplicateIdMsg = Object.entries(duplicateIds)
+    const duplicateIdMsg = Array.from(duplicateIds.entries())
       .map(([id, counts]) => {
         const messages = [
           pluralize(counts.input, "input"),
@@ -103,7 +102,7 @@ const bindingsRegistry = (() => {
       error: new ShinyClientError({
         headline: "Duplicate input/output IDs found",
         message: `The following ${
-          nDuplicates === 1 ? "ID was" : "IDs were"
+          duplicateIds.size === 1 ? "ID was" : "IDs were"
         } repeated:\n${duplicateIdMsg}`,
       }),
     };

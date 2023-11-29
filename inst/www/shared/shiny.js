@@ -18556,7 +18556,7 @@
   var bindingsRegistry = function() {
     var bindings = /* @__PURE__ */ new Map();
     function checkValidity() {
-      var duplicateIds = {};
+      var duplicateIds = /* @__PURE__ */ new Map();
       bindings.forEach(function(idTypes, id) {
         var nInputs = idTypes.filter(function(s4) {
           return s4 === "input";
@@ -18565,18 +18565,17 @@
           return s4 === "output";
         }).length;
         if (nInputs > 1 || nOutputs > 1) {
-          duplicateIds[id] = {
+          duplicateIds.set(id, {
             input: nInputs,
             output: nOutputs
-          };
+          });
         }
       });
-      var nDuplicates = Object.keys(duplicateIds).length;
-      if (nDuplicates === 0)
+      if (duplicateIds.size === 0)
         return {
           status: "ok"
         };
-      var duplicateIdMsg = Object.entries(duplicateIds).map(function(_ref) {
+      var duplicateIdMsg = Array.from(duplicateIds.entries()).map(function(_ref) {
         var _ref2 = _slicedToArray2(_ref, 2), id = _ref2[0], counts = _ref2[1];
         var messages = [pluralize(counts.input, "input"), pluralize(counts.output, "output")].filter(function(msg) {
           return msg !== "";
@@ -18587,7 +18586,7 @@
         status: "error",
         error: new ShinyClientError({
           headline: "Duplicate input/output IDs found",
-          message: "The following ".concat(nDuplicates === 1 ? "ID was" : "IDs were", " repeated:\n").concat(duplicateIdMsg)
+          message: "The following ".concat(duplicateIds.size === 1 ? "ID was" : "IDs were", " repeated:\n").concat(duplicateIdMsg)
         })
       };
     }
@@ -18692,7 +18691,7 @@
   }
   function _bindOutputs() {
     _bindOutputs = _asyncToGenerator9(/* @__PURE__ */ _regeneratorRuntime9().mark(function _callee(_ref3) {
-      var sendOutputHiddenState, maybeAddThemeObserver, outputBindings, scope, $scope, bindings, i5, binding, matches, j3, _el2, _id3, $el, bindingAdapter, _args = arguments;
+      var sendOutputHiddenState, maybeAddThemeObserver, outputBindings, scope, $scope, bindings, i5, binding, matches, j3, _el2, id, $el, bindingAdapter, _args = arguments;
       return _regeneratorRuntime9().wrap(function _callee$(_context) {
         while (1)
           switch (_context.prev = _context.next) {
@@ -18716,8 +18715,8 @@
                 break;
               }
               _el2 = matches[j3];
-              _id3 = binding.getId(_el2);
-              if (_id3) {
+              id = binding.getId(_el2);
+              if (id) {
                 _context.next = 14;
                 break;
               }
@@ -18739,13 +18738,13 @@
               maybeAddThemeObserver(_el2);
               bindingAdapter = new OutputBindingAdapter(_el2, binding);
               _context.next = 23;
-              return shinyAppBindOutput(_id3, bindingAdapter);
+              return shinyAppBindOutput(id, bindingAdapter);
             case 23:
               $el.data("shiny-output-binding", bindingAdapter);
               $el.addClass("shiny-bound-output");
               if (!$el.attr("aria-live"))
                 $el.attr("aria-live", "polite");
-              bindingsRegistry.addBinding(_id3, "output");
+              bindingsRegistry.addBinding(id, "output");
               $el.trigger({
                 type: "shiny:bound",
                 binding: binding,
@@ -18782,9 +18781,9 @@
       var binding = (0, import_jquery37.default)(_el).data("shiny-input-binding");
       if (!binding)
         continue;
-      var _id = binding.getId(_el);
+      var id = binding.getId(_el);
       (0, import_jquery37.default)(_el).removeClass("shiny-bound-input");
-      bindingsRegistry.removeBinding(_id, "input");
+      bindingsRegistry.removeBinding(id, "input");
       binding.unsubscribe(_el);
       (0, import_jquery37.default)(_el).trigger({
         type: "shiny:unbound",
@@ -18806,9 +18805,9 @@
       var bindingAdapter = $el.data("shiny-output-binding");
       if (!bindingAdapter)
         continue;
-      var _id2 = bindingAdapter.binding.getId(outputs[i5]);
-      shinyAppUnbindOutput(_id2, bindingAdapter);
-      bindingsRegistry.removeBinding(_id2, "output");
+      var id = bindingAdapter.binding.getId(outputs[i5]);
+      shinyAppUnbindOutput(id, bindingAdapter);
+      bindingsRegistry.removeBinding(id, "output");
       $el.removeClass("shiny-bound-output");
       $el.removeData("shiny-output-binding");
       $el.trigger({

@@ -47,7 +47,7 @@ function valueChangeCallback(
  * immediately invoked function to keep the sets private and not clutter the
  * scope.
  */
-const bindingsRegistery = (() => {
+const bindingsRegistry = (() => {
   /**
    * Keyed by binding IDs to the array of each type of binding that ID is associated for in current app state.
    *
@@ -215,7 +215,7 @@ function bindInputs(
       const id = binding.getId(el);
 
       // Check if ID is falsy, or if already registered with a binding
-      if (!id || bindingsRegistery.isRegistered(id)) continue;
+      if (!id || bindingsRegistry.isRegistered(id)) continue;
 
       const type = binding.getType(el);
       const effectiveId = type ? id + ":" + type : id;
@@ -252,7 +252,7 @@ function bindInputs(
         );
       }
 
-      bindingsRegistery.addBinding(id, "input");
+      bindingsRegistry.addBinding(id, "input");
       $(el).trigger({
         type: "shiny:bound",
         // @ts-expect-error; Can not remove info on a established, malformed Event object
@@ -315,7 +315,7 @@ async function bindOutputs(
       $el.addClass("shiny-bound-output");
       if (!$el.attr("aria-live")) $el.attr("aria-live", "polite");
 
-      bindingsRegistery.addBinding(id, "output");
+      bindingsRegistry.addBinding(id, "output");
       $el.trigger({
         type: "shiny:bound",
         // @ts-expect-error; Can not remove info on a established, malformed Event object
@@ -351,7 +351,7 @@ function unbindInputs(
 
     $(el).removeClass("shiny-bound-input");
 
-    bindingsRegistery.removeBinding(id, "input");
+    bindingsRegistry.removeBinding(id, "input");
     binding.unsubscribe(el);
     $(el).trigger({
       type: "shiny:unbound",
@@ -383,7 +383,7 @@ function unbindOutputs(
 
     shinyAppUnbindOutput(id, bindingAdapter);
 
-    bindingsRegistery.removeBinding(id, "output");
+    bindingsRegistry.removeBinding(id, "output");
     $el.removeClass("shiny-bound-output");
     $el.removeData("shiny-output-binding");
     $el.trigger({
@@ -413,7 +413,7 @@ async function _bindAll(
   // complete error message that contains everything they will need to fix. If
   // we threw as we saw collisions then the user would fix the first collision,
   // re-run, and then see the next collision, etc.
-  const bindingValidity = bindingsRegistery.checkValidity();
+  const bindingValidity = bindingsRegistry.checkValidity();
   if (bindingValidity.status === "error") {
     throw bindingValidity.error;
   }

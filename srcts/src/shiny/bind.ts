@@ -63,10 +63,18 @@ const bindingsRegistry = (() => {
   /**
    * Checks if an ID is already registered to an input or output binding
    * @param id ID of the possibly bound input or output
+   * @param type Type of binding to check for, either "input", "output", or
+   * "all".
    * @returns true if the ID is already registered to a binding, otherwise false
    */
-  function isRegistered(id: string): boolean {
-    return bindings.has(id);
+  function isRegistered(
+    id: string,
+    type: "all" | "input" | "output" = "all"
+  ): boolean {
+    const record = bindings.get(id);
+    if (!record) return false;
+    if (type === "all") return true;
+    return record.includes(type);
   }
 
   /**
@@ -120,12 +128,12 @@ const bindingsRegistry = (() => {
   /**
    * Add a binding id to the binding ids registry
    * @param id Id to add
-   * @param inputOrOutput Whether the id is for an input or output binding
+   * @param type Binding type, either "input" or "output"
    */
-  function addBinding(id: string, inputOrOutput: "input" | "output"): void {
+  function addBinding(id: string, type: "input" | "output"): void {
     if (id === "") {
       throw new ShinyClientError({
-        headline: `Empty ${inputOrOutput} ID found`,
+        headline: `Empty ${type} ID found`,
         message: "Binding IDs must not be empty.",
       });
     }
@@ -133,22 +141,22 @@ const bindingsRegistry = (() => {
     const existingBinding = bindings.get(id);
 
     if (existingBinding) {
-      existingBinding.push(inputOrOutput);
+      existingBinding.push(type);
     } else {
-      bindings.set(id, [inputOrOutput]);
+      bindings.set(id, [type]);
     }
   }
 
   /**
    * Remove a binding id from the binding ids registry
    * @param id Id to remove
-   * @param inputOrOutput Whether the id is for an input or output binding
+   * @param type Binding type, either "input" or "output"
    */
-  function removeBinding(id: string, inputOrOutput: "input" | "output"): void {
+  function removeBinding(id: string, type: "input" | "output"): void {
     const existingBinding = bindings.get(id);
 
     if (existingBinding) {
-      const index = existingBinding.indexOf(inputOrOutput);
+      const index = existingBinding.indexOf(type);
       if (index > -1) {
         existingBinding.splice(index, 1);
       }
@@ -215,7 +223,7 @@ function bindInputs(
       const id = binding.getId(el);
 
       // Check if ID is falsy, or if already registered with a binding
-      if (!id || bindingsRegistry.isRegistered(id)) continue;
+      if (!id || bindingsRegistry.isRegistered(id, "input")) continue;
 
       const type = binding.getType(el);
       const effectiveId = type ? id + ":" + type : id;

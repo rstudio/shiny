@@ -10,7 +10,7 @@ const buttonStyles = css`
     border-style: none;
     padding: var(--space-3);
     border-radius: var(--space-1);
-    font-size: 1.5rem;
+    font-size: var(--font-lg);
     background-color: inherit;
     display: block;
   }
@@ -23,11 +23,19 @@ class ShinyErrorConsole extends LitElement {
   static styles = [
     css`
       :host {
+        /* We declare hard pixel values here to avoid body font size changes
+        messing up the size of the console. This was an issue with bslib setting
+        the body font-size at 16px relative to base shiny's 14px. */
+        --font-md: 14px;
+        --font-lg: 16px;
+        --font-xl: 18px;
+
         /* These are all taken from open-props */
-        --space-1: 0.5rem;
+        --space-1: 6px;
         --space-2: calc(var(--space-1) * 2);
         --space-3: calc(var(--space-1) * 3);
         --space-4: calc(var(--space-1) * 4);
+        --space-8: calc(var(--space-1) * 8);
 
         --red-2: #ffc9c9;
         --red-6: #fa5252;
@@ -114,7 +122,7 @@ class ShinyErrorConsole extends LitElement {
       }
 
       .title {
-        font-size: 1.6rem;
+        font-size: var(--font-xl);
         margin-right: auto;
         padding: var(--space-3);
         line-height: 1;
@@ -163,8 +171,9 @@ class ShinyErrorConsole extends LitElement {
 
       .content {
         display: block;
-        padding: var(--space-4);
-        padding-top: var(--space-2);
+        padding-inline: var(--space-4);
+        padding-block-start: 0;
+        padding-block-end: var(--space-4);
         max-height: 100%;
         overflow: auto;
       }
@@ -256,13 +265,10 @@ export class ShinyErrorMessage extends LitElement {
       :host {
         color: var(--red-11);
         display: block;
-        font-size: 1.4rem;
+        font-size: var(--font-md);
 
         position: relative;
-        --icon-size: 1.5rem;
-
-        --padding-top: var(--space-1);
-        --padding-bottom: var(--space-3);
+        --icon-size: var(--font-lg)
 
         /* Reset box sizing */
         box-sizing: border-box;
@@ -278,13 +284,14 @@ export class ShinyErrorMessage extends LitElement {
         display: flex;
         flex-direction: column;
         gap: var(--space-1);
-        padding-bottom: var(--padding-bottom);
-        padding-top: var(--padding-top);
+        padding-block-start: 0;
+        padding-block-end: var(--space-3);
         overflow: auto;
       }
 
       :host(:last-of-type) .contents {
-        --padding-bottom: var(--space-1);
+
+        padding-block-end: var(--space-1);
       }
 
       .contents > h3 {
@@ -303,11 +310,10 @@ export class ShinyErrorMessage extends LitElement {
 
       .decoration-container {
         flex-shrink: 0;
-        padding-inline: var(0.375rem);
         position: relative;
 
         --line-w: 2px;
-        --dot-size: 1rem;
+        --dot-size: 11px;
       }
 
       :host(:hover) .decoration-container {
@@ -331,7 +337,7 @@ export class ShinyErrorMessage extends LitElement {
         position: absolute;
         width: var(--dot-size);
         height: var(--dot-size);
-        top: var(--dot-size);
+        top: calc(-1px +  var(--dot-size) / 2);
         left: calc(50% - var(--dot-size) / 2);
         border-radius: 100%;
         transform: scale(var(--scale, 1));
@@ -362,8 +368,8 @@ export class ShinyErrorMessage extends LitElement {
 
       .copy-button {
         padding: 0;
-        width: 4rem;
-        height: 4rem;
+        width: var(--space-8);
+        height: var(--space-8);
         position: relative;
         --pad: var(--space-2);
       }

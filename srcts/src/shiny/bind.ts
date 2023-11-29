@@ -70,7 +70,7 @@ const bindingsRegistry = (() => {
   }
 
   /**
-   * Checks if the bindings registery is valid. Currently this just checks for
+   * Checks if the bindings registry is valid. Currently this just checks for
    * duplicate IDs but in the future could be expanded to check more conditions
    * @returns ShinyClientError if current ID bindings are invalid, otherwise null
    */
@@ -118,7 +118,7 @@ const bindingsRegistry = (() => {
   }
 
   /**
-   * Add a binding id to the binding ids registery
+   * Add a binding id to the binding ids registry
    * @param id Id to add
    * @param inputOrOutput Whether the id is for an input or output binding
    */
@@ -140,7 +140,7 @@ const bindingsRegistry = (() => {
   }
 
   /**
-   * Remove a binding id from the binding ids registery
+   * Remove a binding id from the binding ids registry
    * @param id Id to remove
    * @param inputOrOutput Whether the id is for an input or output binding
    */

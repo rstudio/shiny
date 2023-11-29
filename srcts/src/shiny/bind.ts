@@ -80,29 +80,30 @@ const bindingsRegistry = (() => {
   /**
    * Checks if the bindings registry is valid. Currently this just checks for
    * duplicate IDs but in the future could be expanded to check more conditions
-   * @returns ShinyClientError if current ID bindings are invalid, otherwise null
+   * @returns ShinyClientError if current ID bindings are invalid, otherwise
+   * returns an ok status.
    */
   function checkValidity():
     | { status: "error"; error: ShinyClientError }
     | { status: "ok" } {
-    const duplicateIds: IdToBindingTypes = new Map();
+    const duplicateIds: { [id: string]: { input: number; output: number } } =
+      {};
 
-    bindings.forEach((inputOrOutput, id) => {
-      if (inputOrOutput.length > 1) {
-        duplicateIds.set(id, inputOrOutput);
+    // count duplicate IDs of each binding type
+    bindings.forEach((idTypes, id) => {
+      const nInputs = idTypes.filter((s) => s === "input").length;
+      const nOutputs = idTypes.filter((s) => s === "output").length;
+
+      if (nInputs > 1 || nOutputs > 1) {
+        duplicateIds[id] = { input: nInputs, output: nOutputs };
       }
     });
 
-    if (duplicateIds.size === 0) return { status: "ok" };
+    const nDuplicates = Object.keys(duplicateIds).length;
+    if (nDuplicates === 0) return { status: "ok" };
 
-    const duplicateIdMsg = Array.from(duplicateIds.entries())
-      .map(([id, idTypes]) => {
-        const counts = { input: 0, output: 0 };
-
-        idTypes.forEach((idType) => {
-          counts[idType]++;
-        });
-
+    const duplicateIdMsg = Object.entries(duplicateIds)
+      .map(([id, counts]) => {
         const messages = [
           pluralize(counts.input, "input"),
           pluralize(counts.output, "output"),
@@ -119,7 +120,7 @@ const bindingsRegistry = (() => {
       error: new ShinyClientError({
         headline: "Duplicate input/output IDs found",
         message: `The following ${
-          duplicateIds.size === 1 ? "ID was" : "IDs were"
+          nDuplicates === 1 ? "ID was" : "IDs were"
         } repeated:\n${duplicateIdMsg}`,
       }),
     };

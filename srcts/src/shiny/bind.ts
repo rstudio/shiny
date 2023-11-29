@@ -8,10 +8,7 @@ import type {
 } from "../inputPolicies";
 import { shinyAppBindOutput, shinyAppUnbindOutput } from "./initedMethods";
 import { sendImageSizeFns } from "./sendImageSize";
-
-const boundInputs: {
-  [key: string]: { binding: InputBinding; node: HTMLElement };
-} = {};
+import { ShinyClientError } from "./error";
 
 type BindScope = HTMLElement | JQuery<HTMLElement>;
 
@@ -42,6 +39,128 @@ function valueChangeCallback(
 
     inputs.setInput(id, value, opts);
   }
+}
+
+/**
+ * Registry for input and output binding IDs. Used to check for duplicate IDs
+ * and to keep track of which IDs have already been added to the app. Use an
+ * immediately invoked function to keep the sets private and not clutter the
+ * scope.
+ */
+const bindingsRegistery = (() => {
+  /**
+   * Keyed by binding IDs to the array of each type of binding that ID is associated for in current app state.
+   *
+   * Ideally the
+   * value would be a length 1 array but in some (invalid) cases there could be
+   * multiple types for a single ID.
+   */
+  type IdToBindingTypes = Map<string, Array<"input" | "output">>;
+
+  // Main store of bindings.
+  const bindings: IdToBindingTypes = new Map();
+
+  /**
+   * Checks if the bindings registery is valid. Currently this just checks for
+   * duplicate IDs but in the future could be expanded to check more conditions
+   * @returns ShinyClientError if current ID bindings are invalid, otherwise null
+   */
+  function checkValidity():
+    | { status: "error"; error: ShinyClientError }
+    | { status: "ok" } {
+    const duplicateIds: IdToBindingTypes = new Map();
+
+    bindings.forEach((inputOrOutput, id) => {
+      if (inputOrOutput.length > 1) {
+        duplicateIds.set(id, inputOrOutput);
+      }
+    });
+
+    if (duplicateIds.size === 0) return { status: "ok" };
+
+    const duplicateIdMsg = Array.from(duplicateIds.entries())
+      .map(([id, idTypes]) => {
+        const counts = { input: 0, output: 0 };
+
+        idTypes.forEach((idType) => {
+          counts[idType]++;
+        });
+
+        const messages = [
+          pluralize(counts.input, "input"),
+          pluralize(counts.output, "output"),
+        ]
+          .filter((msg) => msg !== "")
+          .join(" and ");
+
+        return `- "${id}": ${messages}`;
+      })
+      .join("\n");
+
+    return {
+      status: "error",
+      error: new ShinyClientError({
+        headline: "Duplicate input/output IDs found",
+        message: `The following ${
+          duplicateIds.size === 1 ? "ID was" : "IDs were"
+        } repeated:\n${duplicateIdMsg}`,
+      }),
+    };
+  }
+
+  /**
+   * Add a binding id to the binding ids registery
+   * @param id Id to add
+   * @param inputOrOutput Whether the id is for an input or output binding
+   */
+  function addBinding(id: string, inputOrOutput: "input" | "output"): void {
+    if (id === "") {
+      throw new ShinyClientError({
+        headline: `Empty ${inputOrOutput} ID found`,
+        message: "Binding IDs must not be empty.",
+      });
+    }
+
+    const existingBinding = bindings.get(id);
+
+    if (existingBinding) {
+      existingBinding.push(inputOrOutput);
+    } else {
+      bindings.set(id, [inputOrOutput]);
+    }
+  }
+
+  /**
+   * Remove a binding id from the binding ids registery
+   * @param id Id to remove
+   * @param inputOrOutput Whether the id is for an input or output binding
+   */
+  function removeBinding(id: string, inputOrOutput: "input" | "output"): void {
+    const existingBinding = bindings.get(id);
+
+    if (existingBinding) {
+      const index = existingBinding.indexOf(inputOrOutput);
+      if (index > -1) {
+        existingBinding.splice(index, 1);
+      }
+    }
+
+    if (existingBinding?.length === 0) {
+      bindings.delete(id);
+    }
+  }
+
+  return {
+    addBinding,
+    removeBinding,
+    checkValidity,
+  };
+})();
+
+function pluralize(num: number, word: string): string {
+  if (num === 0) return "";
+  if (num === 1) return `${num} ${word}`;
+  return `${num} ${word}s`;
 }
 
 type BindInputsCtx = {
@@ -85,9 +204,10 @@ function bindInputs(
       if (el.hasAttribute("data-shiny-no-bind-input")) continue;
       const id = binding.getId(el);
 
-      // Check if ID is falsy, or if already bound
-      if (!id || boundInputs[id]) continue;
+      // Check if ID is falsy, skip
+      if (!id) continue;
 
+      bindingsRegistery.addBinding(id, "input");
       const type = binding.getType(el);
       const effectiveId = type ? id + ":" + type : id;
 
@@ -123,11 +243,6 @@ function bindInputs(
         );
       }
 
-      boundInputs[id] = {
-        binding: binding,
-        node: el,
-      };
-
       $(el).trigger({
         type: "shiny:bound",
         // @ts-expect-error; Can not remove info on a established, malformed Event object
@@ -156,12 +271,15 @@ async function bindOutputs(
     const binding = bindings[i].binding;
     const matches = binding.find($scope) || [];
 
+    // First loop over the matches and assemble map of id->element
     for (let j = 0; j < matches.length; j++) {
       const el = matches[j];
       const id = binding.getId(el);
 
       // Check if ID is falsy
       if (!id) continue;
+
+      bindingsRegistery.addBinding(id, "output");
 
       // In some uncommon cases, elements that are later in the
       // matches array can be removed from the document by earlier
@@ -222,7 +340,8 @@ function unbindInputs(
     const id = binding.getId(el);
 
     $(el).removeClass("shiny-bound-input");
-    delete boundInputs[id];
+
+    bindingsRegistery.removeBinding(id, "input");
     binding.unsubscribe(el);
     $(el).trigger({
       type: "shiny:unbound",
@@ -253,6 +372,8 @@ function unbindOutputs(
     const id = bindingAdapter.binding.getId(outputs[i]);
 
     shinyAppUnbindOutput(id, bindingAdapter);
+
+    bindingsRegistery.removeBinding(id, "output");
     $el.removeClass("shiny-bound-output");
     $el.removeData("shiny-output-binding");
     $el.trigger({
@@ -275,7 +396,19 @@ async function _bindAll(
   scope: BindScope
 ): Promise<ReturnType<typeof bindInputs>> {
   await bindOutputs(shinyCtx, scope);
-  return bindInputs(shinyCtx, scope);
+  const currentInputs = bindInputs(shinyCtx, scope);
+
+  // Check to make sure the bindings setup is valid. By checking the validity
+  // _after_ we've attempted all the bindings we can give the user a more
+  // complete error message that contains everything they will need to fix. If
+  // we threw as we saw collisions then the user would fix the first collision,
+  // re-run, and then see the next collision, etc.
+  const bindingValidity = bindingsRegistery.checkValidity();
+  if (bindingValidity.status === "error") {
+    throw bindingValidity.error;
+  }
+
+  return currentInputs;
 }
 function unbindAll(
   shinyCtx: BindInputsCtx,

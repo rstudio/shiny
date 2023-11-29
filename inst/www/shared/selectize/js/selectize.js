@@ -2757,7 +2757,7 @@ Selectize.defaults = {
   maxItems: null,
   hideSelected: null,
   addPrecedence: false,
-  selectOnTab: true,
+  selectOnTab: false,
   preload: false,
   allowEmptyOption: false,
   showEmptyOptionInDropdown: false,

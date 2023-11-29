@@ -217,7 +217,6 @@ function bindInputs(
       // Check if ID is falsy, or if already registered with a binding
       if (!id || bindingsRegistery.isRegistered(id)) continue;
 
-      bindingsRegistery.addBinding(id, "input");
       const type = binding.getType(el);
       const effectiveId = type ? id + ":" + type : id;
 
@@ -253,6 +252,7 @@ function bindInputs(
         );
       }
 
+      bindingsRegistery.addBinding(id, "input");
       $(el).trigger({
         type: "shiny:bound",
         // @ts-expect-error; Can not remove info on a established, malformed Event object
@@ -289,8 +289,6 @@ async function bindOutputs(
       // Check if ID is falsy
       if (!id) continue;
 
-      bindingsRegistery.addBinding(id, "output");
-
       // In some uncommon cases, elements that are later in the
       // matches array can be removed from the document by earlier
       // iterations. See https://github.com/rstudio/shiny/issues/1399
@@ -316,6 +314,8 @@ async function bindOutputs(
       $el.data("shiny-output-binding", bindingAdapter);
       $el.addClass("shiny-bound-output");
       if (!$el.attr("aria-live")) $el.attr("aria-live", "polite");
+
+      bindingsRegistery.addBinding(id, "output");
       $el.trigger({
         type: "shiny:bound",
         // @ts-expect-error; Can not remove info on a established, malformed Event object

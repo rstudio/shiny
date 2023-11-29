@@ -18557,13 +18557,14 @@
     var bindings = /* @__PURE__ */ new Map();
     function checkValidity() {
       var duplicateIds = /* @__PURE__ */ new Map();
+      var countBindingType = function countBindingType2(types, bindingType) {
+        return types.filter(function(type) {
+          return type === bindingType;
+        }).length;
+      };
       bindings.forEach(function(idTypes, id) {
-        var nInputs = idTypes.filter(function(s4) {
-          return s4 === "input";
-        }).length;
-        var nOutputs = idTypes.filter(function(s4) {
-          return s4 === "output";
-        }).length;
+        var nInputs = countBindingType(idTypes, "input");
+        var nOutputs = countBindingType(idTypes, "output");
         if (nInputs > 1 || nOutputs > 1) {
           duplicateIds.set(id, {
             input: nInputs,
@@ -18590,24 +18591,24 @@
         })
       };
     }
-    function addBinding(id, type) {
+    function addBinding(id, bindingType) {
       if (id === "") {
         throw new ShinyClientError({
-          headline: "Empty ".concat(type, " ID found"),
+          headline: "Empty ".concat(bindingType, " ID found"),
           message: "Binding IDs must not be empty."
         });
       }
       var existingBinding = bindings.get(id);
       if (existingBinding) {
-        existingBinding.push(type);
+        existingBinding.push(bindingType);
       } else {
-        bindings.set(id, [type]);
+        bindings.set(id, [bindingType]);
       }
     }
-    function removeBinding(id, type) {
+    function removeBinding(id, bindingType) {
       var existingBinding = bindings.get(id);
       if (existingBinding) {
-        var index = existingBinding.indexOf(type);
+        var index = existingBinding.indexOf(bindingType);
         if (index > -1) {
           existingBinding.splice(index, 1);
         }

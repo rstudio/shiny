@@ -9,6 +9,7 @@ import type {
 import { shinyAppBindOutput, shinyAppUnbindOutput } from "./initedMethods";
 import { sendImageSizeFns } from "./sendImageSize";
 import { ShinyClientError } from "./error";
+import { types } from "util";
 
 type BindScope = HTMLElement | JQuery<HTMLElement>;
 
@@ -48,6 +49,8 @@ function valueChangeCallback(
  * scope.
  */
 const bindingsRegistry = (() => {
+  type BindingTypes = "input" | "output";
+
   /**
    * Keyed by binding IDs to the array of each type of binding that ID is associated for in current app state.
    *
@@ -55,7 +58,7 @@ const bindingsRegistry = (() => {
    * value would be a length 1 array but in some (invalid) cases there could be
    * multiple types for a single ID.
    */
-  type IdToBindingTypes = Map<string, Array<"input" | "output">>;
+  type IdToBindingTypes = Map<string, BindingTypes[]>;
 
   // Main store of bindings.
   const bindings: IdToBindingTypes = new Map();
@@ -72,10 +75,17 @@ const bindingsRegistry = (() => {
     const duplicateIds: Map<string, { input: number; output: number }> =
       new Map();
 
+    const countBindingType = (
+      types: BindingTypes[],
+      bindingType: BindingTypes
+    ) => {
+      return types.filter((type) => type === bindingType).length;
+    };
+
     // count duplicate IDs of each binding type
     bindings.forEach((idTypes, id) => {
-      const nInputs = idTypes.filter((s) => s === "input").length;
-      const nOutputs = idTypes.filter((s) => s === "output").length;
+      const nInputs = countBindingType(idTypes, "input");
+      const nOutputs = countBindingType(idTypes, "output");
 
       if (nInputs > 1 || nOutputs > 1) {
         duplicateIds.set(id, { input: nInputs, output: nOutputs });
@@ -111,12 +121,12 @@ const bindingsRegistry = (() => {
   /**
    * Add a binding id to the binding ids registry
    * @param id Id to add
-   * @param type Binding type, either "input" or "output"
+   * @param bindingType Binding type, either "input" or "output"
    */
-  function addBinding(id: string, type: "input" | "output"): void {
+  function addBinding(id: string, bindingType: BindingTypes): void {
     if (id === "") {
       throw new ShinyClientError({
-        headline: `Empty ${type} ID found`,
+        headline: `Empty ${bindingType} ID found`,
         message: "Binding IDs must not be empty.",
       });
     }
@@ -124,22 +134,22 @@ const bindingsRegistry = (() => {
     const existingBinding = bindings.get(id);
 
     if (existingBinding) {
-      existingBinding.push(type);
+      existingBinding.push(bindingType);
     } else {
-      bindings.set(id, [type]);
+      bindings.set(id, [bindingType]);
     }
   }
 
   /**
    * Remove a binding id from the binding ids registry
    * @param id Id to remove
-   * @param type Binding type, either "input" or "output"
+   * @param bindingType Binding type, either "input" or "output"
    */
-  function removeBinding(id: string, type: "input" | "output"): void {
+  function removeBinding(id: string, bindingType: BindingTypes): void {
     const existingBinding = bindings.get(id);
 
     if (existingBinding) {
-      const index = existingBinding.indexOf(type);
+      const index = existingBinding.indexOf(bindingType);
       if (index > -1) {
         existingBinding.splice(index, 1);
       }

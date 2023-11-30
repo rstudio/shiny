@@ -70,7 +70,7 @@ const bindingsRegistry = (() => {
    * @description IDs are allowed to be duplicated across binding types, but
    * when duplicated within a binding type we report all uses of the ID.
    * Currently the IDs are typically stored in the bound element's `id`
-   * attribute, in which case they really *should* be unique for the
+   * attribute, in which case they really *should* be globally unique for
    * accessibility and other reasons. However, in practice our bindings still
    * work as long as inputs the IDs within a binding type don't overlap.
    *

@@ -9,7 +9,6 @@ import type {
 import { shinyAppBindOutput, shinyAppUnbindOutput } from "./initedMethods";
 import { sendImageSizeFns } from "./sendImageSize";
 import { ShinyClientError } from "./error";
-import { types } from "util";
 
 type BindScope = HTMLElement | JQuery<HTMLElement>;
 

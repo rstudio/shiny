@@ -78,11 +78,16 @@ const bindingsRegistry = (() => {
 
     // count duplicate IDs of each binding type
     bindings.forEach((idTypes, id) => {
-      const nInputs = countBindingType(idTypes, "input");
-      const nOutputs = countBindingType(idTypes, "output");
+      const counts: { [T in BindingTypes]: number } = { input: 0, output: 0 };
 
-      if (nInputs > 1 || nOutputs > 1) {
-        duplicateIds.set(id, { input: nInputs, output: nOutputs });
+      idTypes.forEach((type) => (counts[type] += 1));
+
+      // The reason this is `> 1` rather than `> 0` is we currently allow ids to
+      // be duplicated once across input and output. This is due to not wanting
+      // to break existing apps. In the future we should change this to not
+      // allow any duplicates.
+      if (counts.input > 1 || counts.output > 1) {
+        duplicateIds.set(id, counts);
       }
     });
 

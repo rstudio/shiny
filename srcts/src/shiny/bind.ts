@@ -72,15 +72,9 @@ const bindingsRegistry = (() => {
   function checkValidity():
     | { status: "error"; error: ShinyClientError }
     | { status: "ok" } {
-    const duplicateIds: Map<string, { input: number; output: number }> =
-      new Map();
+    type BindingCounts = { [T in BindingTypes]: number };
+    const duplicateIds = new Map<string, BindingCounts>();
 
-    const countBindingType = (
-      types: BindingTypes[],
-      bindingType: BindingTypes
-    ) => {
-      return types.filter((type) => type === bindingType).length;
-    };
 
     // count duplicate IDs of each binding type
     bindings.forEach((idTypes, id) => {

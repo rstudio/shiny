@@ -18553,13 +18553,22 @@
       inputs.setInput(id, value, opts);
     }
   }
-  var bindingsRegistery = function() {
+  var bindingsRegistry = function() {
     var bindings = /* @__PURE__ */ new Map();
     function checkValidity() {
       var duplicateIds = /* @__PURE__ */ new Map();
-      bindings.forEach(function(inputOrOutput, id) {
-        if (inputOrOutput.length > 1) {
-          duplicateIds.set(id, inputOrOutput);
+      bindings.forEach(function(idTypes, id) {
+        var counts = {
+          input: 0,
+          output: 0
+        };
+        idTypes.forEach(function(type) {
+          return counts[type] += 1;
+        });
+        if (Object.values(counts).some(function(count) {
+          return count > 1;
+        })) {
+          duplicateIds.set(id, counts);
         }
       });
       if (duplicateIds.size === 0)
@@ -18567,14 +18576,7 @@
           status: "ok"
         };
       var duplicateIdMsg = Array.from(duplicateIds.entries()).map(function(_ref) {
-        var _ref2 = _slicedToArray2(_ref, 2), id = _ref2[0], idTypes = _ref2[1];
-        var counts = {
-          input: 0,
-          output: 0
-        };
-        idTypes.forEach(function(idType) {
-          counts[idType]++;
-        });
+        var _ref2 = _slicedToArray2(_ref, 2), id = _ref2[0], counts = _ref2[1];
         var messages = [pluralize(counts.input, "input"), pluralize(counts.output, "output")].filter(function(msg) {
           return msg !== "";
         }).join(" and ");
@@ -18588,24 +18590,24 @@
         })
       };
     }
-    function addBinding(id, inputOrOutput) {
+    function addBinding(id, bindingType) {
       if (id === "") {
         throw new ShinyClientError({
-          headline: "Empty ".concat(inputOrOutput, " ID found"),
+          headline: "Empty ".concat(bindingType, " ID found"),
           message: "Binding IDs must not be empty."
         });
       }
       var existingBinding = bindings.get(id);
       if (existingBinding) {
-        existingBinding.push(inputOrOutput);
+        existingBinding.push(bindingType);
       } else {
-        bindings.set(id, [inputOrOutput]);
+        bindings.set(id, [bindingType]);
       }
     }
-    function removeBinding(id, inputOrOutput) {
+    function removeBinding(id, bindingType) {
       var existingBinding = bindings.get(id);
       if (existingBinding) {
-        var index = existingBinding.indexOf(inputOrOutput);
+        var index = existingBinding.indexOf(bindingType);
         if (index > -1) {
           existingBinding.splice(index, 1);
         }
@@ -18640,9 +18642,8 @@
         if (el.hasAttribute("data-shiny-no-bind-input"))
           return "continue";
         var id = binding.getId(el);
-        if (!id)
+        if (!id || (0, import_jquery37.default)(el).hasClass("shiny-bound-input"))
           return "continue";
-        bindingsRegistery.addBinding(id, "input");
         var type = binding.getType(el);
         var effectiveId = type ? id + ":" + type : id;
         inputItems[effectiveId] = {
@@ -18667,6 +18668,7 @@
         if (ratePolicy !== null) {
           inputsRate.setRatePolicy(effectiveId, ratePolicy.policy, ratePolicy.delay);
         }
+        bindingsRegistry.addBinding(id, "input");
         (0, import_jquery37.default)(el).trigger({
           type: "shiny:bound",
           binding: binding,
@@ -18720,29 +18722,29 @@
               }
               return _context.abrupt("continue", 28);
             case 14:
-              bindingsRegistery.addBinding(id, "output");
               if (import_jquery37.default.contains(document.documentElement, _el2)) {
-                _context.next = 17;
+                _context.next = 16;
                 break;
               }
               return _context.abrupt("continue", 28);
-            case 17:
+            case 16:
               $el = (0, import_jquery37.default)(_el2);
               if (!$el.hasClass("shiny-bound-output")) {
-                _context.next = 20;
+                _context.next = 19;
                 break;
               }
               return _context.abrupt("continue", 28);
-            case 20:
+            case 19:
               maybeAddThemeObserver(_el2);
               bindingAdapter = new OutputBindingAdapter(_el2, binding);
-              _context.next = 24;
+              _context.next = 23;
               return shinyAppBindOutput(id, bindingAdapter);
-            case 24:
+            case 23:
               $el.data("shiny-output-binding", bindingAdapter);
               $el.addClass("shiny-bound-output");
               if (!$el.attr("aria-live"))
                 $el.attr("aria-live", "polite");
+              bindingsRegistry.addBinding(id, "output");
               $el.trigger({
                 type: "shiny:bound",
                 binding: binding,
@@ -18781,7 +18783,7 @@
         continue;
       var id = binding.getId(_el);
       (0, import_jquery37.default)(_el).removeClass("shiny-bound-input");
-      bindingsRegistery.removeBinding(id, "input");
+      bindingsRegistry.removeBinding(id, "input");
       binding.unsubscribe(_el);
       (0, import_jquery37.default)(_el).trigger({
         type: "shiny:unbound",
@@ -18805,7 +18807,7 @@
         continue;
       var id = bindingAdapter.binding.getId(outputs[i5]);
       shinyAppUnbindOutput(id, bindingAdapter);
-      bindingsRegistery.removeBinding(id, "output");
+      bindingsRegistry.removeBinding(id, "output");
       $el.removeClass("shiny-bound-output");
       $el.removeData("shiny-output-binding");
       $el.trigger({
@@ -18831,7 +18833,7 @@
               return bindOutputs(shinyCtx, scope);
             case 2:
               currentInputs = bindInputs(shinyCtx, scope);
-              bindingValidity = bindingsRegistery.checkValidity();
+              bindingValidity = bindingsRegistry.checkValidity();
               if (!(bindingValidity.status === "error")) {
                 _context2.next = 6;
                 break;

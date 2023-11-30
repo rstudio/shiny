@@ -4,6 +4,10 @@
 
 * Added an console that shows some errors in the browser. Also provide better error messages for duplicate input and output bindings. (#3931)
 
+## Bug fixes
+
+* Notifications are now constrained to the width of the viewport for window widths smaller the default notification panel size. (#3949)
+
 # shiny 1.8.0
 
 ## Breaking changes

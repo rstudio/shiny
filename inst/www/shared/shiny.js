@@ -18565,7 +18565,9 @@
         idTypes.forEach(function(type) {
           return counts[type] += 1;
         });
-        if (counts.input > 1 || counts.output > 1) {
+        if (Object.values(counts).some(function(count) {
+          return count > 1;
+        })) {
           duplicateIds.set(id, counts);
         }
       });

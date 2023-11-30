@@ -6,7 +6,7 @@
 
 ## Bug fixes
 
-* Notifications are now constrained to the width of the viewport for window widths smaller the default notification panel size. ([posit-dev/py-shiny#832](https://github.com/posit-dev/py-shiny/issues/832))
+* Notifications are now constrained to the width of the viewport for window widths smaller the default notification panel size. (#3949)
 
 # shiny 1.8.0
 

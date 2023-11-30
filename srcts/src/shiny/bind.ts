@@ -63,8 +63,17 @@ const bindingsRegistry = (() => {
   const bindings: IdToBindingTypes = new Map();
 
   /**
-   * Checks if the bindings registry is valid. Currently this just checks for
-   * duplicate IDs but in the future could be expanded to check more conditions
+   * Checks if the bindings registry is valid. Currently this just checks if IDs
+   * are duplicated within a binding typ but in the future could be expanded to
+   * check more conditions.
+   *
+   * @description IDs are allowed to be duplicated across binding types, but
+   * when duplicated within a binding type we report all uses of the ID.
+   * Currently the IDs are typically stored in the bound element's `id`
+   * attribute, in which case they really *should* be unique for the
+   * accessibility and other reasons. However, in practice our bindings still
+   * work as long as inputs the IDs within a binding type don't overlap.
+   *
    * @returns ShinyClientError if current ID bindings are invalid, otherwise
    * returns an ok status.
    */
@@ -80,11 +89,7 @@ const bindingsRegistry = (() => {
 
       idTypes.forEach((type) => (counts[type] += 1));
 
-      // The reason this is `> 1` rather than `> 0` is we currently allow ids to
-      // be duplicated once across input and output. This is due to not wanting
-      // to break existing apps. In the future we should change this to not
-      // allow any duplicates.
-      if (counts.input > 1 || counts.output > 1) {
+      if (Object.values(counts).some((count) => count > 1)) {
         duplicateIds.set(id, counts);
       }
     });

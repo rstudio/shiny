@@ -75,7 +75,6 @@ const bindingsRegistry = (() => {
     type BindingCounts = { [T in BindingTypes]: number };
     const duplicateIds = new Map<string, BindingCounts>();
 
-
     // count duplicate IDs of each binding type
     bindings.forEach((idTypes, id) => {
       const counts: { [T in BindingTypes]: number } = { input: 0, output: 0 };

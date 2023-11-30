@@ -18557,19 +18557,16 @@
     var bindings = /* @__PURE__ */ new Map();
     function checkValidity() {
       var duplicateIds = /* @__PURE__ */ new Map();
-      var countBindingType = function countBindingType2(types, bindingType) {
-        return types.filter(function(type) {
-          return type === bindingType;
-        }).length;
-      };
       bindings.forEach(function(idTypes, id) {
-        var nInputs = countBindingType(idTypes, "input");
-        var nOutputs = countBindingType(idTypes, "output");
-        if (nInputs > 1 || nOutputs > 1) {
-          duplicateIds.set(id, {
-            input: nInputs,
-            output: nOutputs
-          });
+        var counts = {
+          input: 0,
+          output: 0
+        };
+        idTypes.forEach(function(type) {
+          return counts[type] += 1;
+        });
+        if (counts.input > 1 || counts.output > 1) {
+          duplicateIds.set(id, counts);
         }
       });
       if (duplicateIds.size === 0)

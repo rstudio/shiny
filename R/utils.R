@@ -1115,7 +1115,10 @@ need <- function(expr, message = paste(label, "must be provided"), label) {
 #' @param ... Values to check for truthiness.
 #' @param cancelOutput If `TRUE` and an output is being evaluated, stop
 #'   processing as usual but instead of clearing the output, leave it in
-#'   whatever state it happens to be in.
+#'   whatever state it happens to be in. If `"progress"`, do the same as `TRUE`,
+#'   but also keep the output in recalculating state; this is intended for cases
+#'   when an in-progress calculation will not be completed in this reactive
+#'   flush cycle, but is still expected to provide a result in the future.
 #' @return The first value that was passed in.
 #' @export
 #' @examples
@@ -1147,6 +1150,8 @@ req <- function(..., cancelOutput = FALSE) {
     if (!isTruthy(item)) {
       if (isTRUE(cancelOutput)) {
         cancelOutput()
+      } else if (identical(cancelOutput, "progress")) {
+        reactiveStop(class = "shiny.output.progress")
       } else {
         reactiveStop(class = "validation")
       }

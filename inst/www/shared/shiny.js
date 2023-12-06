@@ -4869,6 +4869,20 @@
     }
   });
 
+  // node_modules/core-js/modules/es.set.constructor.js
+  var require_es_set_constructor = __commonJS({
+    "node_modules/core-js/modules/es.set.constructor.js": function() {
+      "use strict";
+      var collection = require_collection();
+      var collectionStrong = require_collection_strong();
+      collection("Set", function(init2) {
+        return function Set2() {
+          return init2(this, arguments.length ? arguments[0] : void 0);
+        };
+      }, collectionStrong);
+    }
+  });
+
   // node_modules/core-js/internals/array-buffer-basic-detection.js
   var require_array_buffer_basic_detection = __commonJS({
     "node_modules/core-js/internals/array-buffer-basic-detection.js": function(exports, module) {
@@ -5556,20 +5570,6 @@
       var nativeDelete;
       var nativeHas;
       var nativeGet;
-    }
-  });
-
-  // node_modules/core-js/modules/es.set.constructor.js
-  var require_es_set_constructor = __commonJS({
-    "node_modules/core-js/modules/es.set.constructor.js": function() {
-      "use strict";
-      var collection = require_collection();
-      var collectionStrong = require_collection_strong();
-      collection("Set", function(init2) {
-        return function Set2() {
-          return init2(this, arguments.length ? arguments[0] : void 0);
-        };
-      }, collectionStrong);
     }
   });
 
@@ -18883,6 +18883,12 @@
   }
 
   // srcts/src/shiny/shinyapp.ts
+  var import_es_array_iterator49 = __toESM(require_es_array_iterator());
+
+  // node_modules/core-js/modules/es.set.js
+  require_es_set_constructor();
+
+  // srcts/src/shiny/shinyapp.ts
   var import_es_regexp_exec15 = __toESM(require_es_regexp_exec());
   var import_es_json_stringify4 = __toESM(require_es_json_stringify());
 
@@ -18955,7 +18961,6 @@
   });
 
   // srcts/src/shiny/shinyapp.ts
-  var import_es_array_iterator49 = __toESM(require_es_array_iterator());
   var import_jquery38 = __toESM(require_jquery());
 
   // srcts/src/utils/asyncQueue.ts
@@ -19432,9 +19437,6 @@
 
   // node_modules/core-js/modules/es.weak-map.js
   require_es_weak_map_constructor();
-
-  // node_modules/core-js/modules/es.set.js
-  require_es_set_constructor();
 
   // node_modules/core-js/modules/es.array.flat.js
   var $77 = require_export();
@@ -22823,6 +22825,7 @@
       _defineProperty20(this, "$inputValues", {});
       _defineProperty20(this, "$initialInput", null);
       _defineProperty20(this, "$bindings", {});
+      _defineProperty20(this, "$persistentProgress", /* @__PURE__ */ new Set());
       _defineProperty20(this, "$values", {});
       _defineProperty20(this, "$errors", {});
       _defineProperty20(this, "$conditionals", {});
@@ -22860,6 +22863,11 @@
             });
             if (binding2.showProgress)
               binding2.showProgress(true);
+            if (message.persistent) {
+              this.$persistentProgress.add(key);
+            } else {
+              this.$persistentProgress.delete(key);
+            }
           }
         },
         open: function() {
@@ -23460,37 +23468,44 @@
         return _sendMessagesToHandlers;
       }()
     }, {
+      key: "_clearProgress",
+      value: function _clearProgress() {
+        for (var name in this.$bindings) {
+          if (hasOwnProperty(this.$bindings, name) && !this.$persistentProgress.has(name)) {
+            this.$bindings[name].showProgress(false);
+          }
+        }
+      }
+    }, {
       key: "_init",
       value: function _init() {
         var _this3 = this;
         addMessageHandler("values", /* @__PURE__ */ function() {
           var _ref3 = _asyncToGenerator13(/* @__PURE__ */ _regeneratorRuntime13().mark(function _callee8(message) {
-            var name, _key;
+            var _key;
             return _regeneratorRuntime13().wrap(function _callee8$(_context8) {
               while (1)
                 switch (_context8.prev = _context8.next) {
                   case 0:
-                    for (name in _this3.$bindings) {
-                      if (hasOwnProperty(_this3.$bindings, name))
-                        _this3.$bindings[name].showProgress(false);
-                    }
+                    _this3._clearProgress();
                     _context8.t0 = _regeneratorRuntime13().keys(message);
                   case 2:
                     if ((_context8.t1 = _context8.t0()).done) {
-                      _context8.next = 9;
+                      _context8.next = 10;
                       break;
                     }
                     _key = _context8.t1.value;
                     if (!hasOwnProperty(message, _key)) {
-                      _context8.next = 7;
+                      _context8.next = 8;
                       break;
                     }
-                    _context8.next = 7;
+                    _this3.$persistentProgress.delete(_key);
+                    _context8.next = 8;
                     return _this3.receiveOutput(_key, message[_key]);
-                  case 7:
+                  case 8:
                     _context8.next = 2;
                     break;
-                  case 9:
+                  case 10:
                   case "end":
                     return _context8.stop();
                 }
@@ -23502,8 +23517,10 @@
         }());
         addMessageHandler("errors", function(message) {
           for (var _key2 in message) {
-            if (hasOwnProperty(message, _key2))
+            if (hasOwnProperty(message, _key2)) {
+              _this3.$persistentProgress.delete(_key2);
               _this3.receiveError(_key2, message[_key2]);
+            }
           }
         });
         addMessageHandler("inputMessages", /* @__PURE__ */ function() {

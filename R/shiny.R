@@ -1356,7 +1356,9 @@ ShinySession <- R6Class(
       if (self$closed)
         return()
 
-      private$progressKeys <- c(private$progressKeys, id)
+      if (!id %in% private$progressKeys) {
+        private$progressKeys <- c(private$progressKeys, id)
+      }
 
       self$sendProgress('binding', list(id = id, persistent = persistent))
     },

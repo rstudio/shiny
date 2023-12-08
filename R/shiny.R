@@ -780,7 +780,8 @@ ShinySession <- R6Class(
         config = list(
           workerId = workerId(),
           sessionId = self$token,
-          user = self$user
+          user = self$user,
+          inDevMode = in_devmode()
         )
       )
     },

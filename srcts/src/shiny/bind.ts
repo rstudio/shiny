@@ -417,8 +417,6 @@ async function _bindAll(
   shinyCtx: BindInputsCtx,
   scope: BindScope
 ): Promise<ReturnType<typeof bindInputs>> {
-  const devmode = Shiny.inDevMode();
-  console.log(`We are ${devmode ? "" : "not "}in devmode`);
   await bindOutputs(shinyCtx, scope);
   const currentInputs = bindInputs(shinyCtx, scope);
 

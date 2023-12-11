@@ -532,7 +532,12 @@ wellPanel <- function(...) {
 #' }
 #' @export
 conditionalPanel <- function(condition, ..., ns = NS(NULL)) {
-  div(`data-display-if`=condition, `data-ns-prefix`=ns(""), ...)
+  div(
+    class = "shiny-panel-conditional",
+    `data-display-if` = condition,
+    `data-ns-prefix` = ns(""),
+    ...
+  )
 }
 
 #' Create a help text element

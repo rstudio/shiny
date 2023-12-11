@@ -471,7 +471,7 @@ html.autoreload-enabled #shiny-disconnected-overlay.reloading {
 }
 
 /* Conditional panels and uiOutput */
-[data-display-if],
+.shiny-panel-conditional,
 div:where(.shiny-html-output) {
   display: contents;
 }

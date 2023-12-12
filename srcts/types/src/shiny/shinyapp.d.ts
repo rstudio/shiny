@@ -30,6 +30,7 @@ declare class ShinyApp {
     $bindings: {
         [key: string]: OutputBindingAdapter;
     };
+    $persistentProgress: Set<string>;
     $values: {
         [key: string]: any;
     };
@@ -74,10 +75,12 @@ declare class ShinyApp {
     $updateConditionals(): void;
     dispatchMessage(data: ArrayBufferLike | string): Promise<void>;
     private _sendMessagesToHandlers;
+    private _clearProgress;
     private _init;
     progressHandlers: {
         binding: (this: ShinyApp, message: {
             id: string;
+            persistent: boolean;
         }) => void;
         open: (message: {
             style: "notification" | "old";

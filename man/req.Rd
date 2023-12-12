@@ -11,7 +11,10 @@ req(..., cancelOutput = FALSE)
 
 \item{cancelOutput}{If \code{TRUE} and an output is being evaluated, stop
 processing as usual but instead of clearing the output, leave it in
-whatever state it happens to be in.}
+whatever state it happens to be in. If \code{"progress"}, do the same as \code{TRUE},
+but also keep the output in recalculating state; this is intended for cases
+when an in-progress calculation will not be completed in this reactive
+flush cycle, but is still expected to provide a result in the future.}
 }
 \value{
 The first value that was passed in.

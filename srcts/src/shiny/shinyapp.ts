@@ -130,6 +130,7 @@ class ShinyApp {
 
   // Output bindings
   $bindings: { [key: string]: OutputBindingAdapter } = {};
+  $persistentProgress: Set<string> = new Set();
 
   // Cached values/errors
   $values: { [key: string]: any } = {};
@@ -688,19 +689,28 @@ class ShinyApp {
     }
   }
 
+  private _clearProgress() {
+    for (const name in this.$bindings) {
+      if (
+        hasOwnProperty(this.$bindings, name) &&
+        !this.$persistentProgress.has(name)
+      ) {
+        this.$bindings[name].showProgress(false);
+      }
+    }
+  }
+
   private _init() {
     // Dev note:
     // * Use arrow functions to allow the Types to propagate.
     // * However, `_sendMessagesToHandlers()` will adjust the `this` context to the same _`this`_.
 
     addMessageHandler("values", async (message: { [key: string]: any }) => {
-      for (const name in this.$bindings) {
-        if (hasOwnProperty(this.$bindings, name))
-          this.$bindings[name].showProgress(false);
-      }
+      this._clearProgress();
 
       for (const key in message) {
         if (hasOwnProperty(message, key)) {
+          this.$persistentProgress.delete(key);
           await this.receiveOutput(key, message[key]);
         }
       }
@@ -710,8 +720,10 @@ class ShinyApp {
       "errors",
       (message: { [key: string]: ErrorsMessageValue }) => {
         for (const key in message) {
-          if (hasOwnProperty(message, key))
+          if (hasOwnProperty(message, key)) {
+            this.$persistentProgress.delete(key);
             this.receiveError(key, message[key]);
+          }
         }
       }
     );
@@ -1401,7 +1413,10 @@ class ShinyApp {
 
   progressHandlers = {
     // Progress for a particular object
-    binding: function (this: ShinyApp, message: { id: string }): void {
+    binding: function (
+      this: ShinyApp,
+      message: { id: string; persistent: boolean }
+    ): void {
       const key = message.id;
       const binding = this.$bindings[key];
 
@@ -1413,6 +1428,11 @@ class ShinyApp {
           name: key,
         });
         if (binding.showProgress) binding.showProgress(true);
+        if (message.persistent) {
+          this.$persistentProgress.add(key);
+        } else {
+          this.$persistentProgress.delete(key);
+        }
       }
     },
 

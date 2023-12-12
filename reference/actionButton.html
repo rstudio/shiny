@@ -55,7 +55,7 @@ each time it is pressed.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">actionButton</span><span class="op">(</span><span class="va">inputId</span>, <span class="va">label</span>, icon <span class="op">=</span> <span class="cn">NULL</span>, width <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">actionButton</span><span class="op">(</span><span class="va">inputId</span>, <span class="va">label</span>, icon <span class="op">=</span> <span class="cn">NULL</span>, width <span class="op">=</span> <span class="cn">NULL</span>, disabled <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">actionLink</span><span class="op">(</span><span class="va">inputId</span>, <span class="va">label</span>, icon <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -78,6 +78,11 @@ you could also use any other HTML, like an image.</p></dd>
 <dt>width</dt>
 <dd><p>The width of the input, e.g. <code>'400px'</code>, or <code>'100%'</code>;
 see <code><a href="https://rstudio.github.io/htmltools/reference/validateCssUnit.html" class="external-link">validateCssUnit()</a></code>.</p></dd>
+
+
+<dt>disabled</dt>
+<dd><p>If <code>TRUE</code>, the button will not be clickable. Use
+<code><a href="updateActionButton.html">updateActionButton()</a></code> to dynamically enable/disable the button.</p></dd>
 
 
 <dt>...</dt>

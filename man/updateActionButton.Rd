@@ -9,7 +9,8 @@ updateActionButton(
   session = getDefaultReactiveDomain(),
   inputId,
   label = NULL,
-  icon = NULL
+  icon = NULL,
+  disabled = NULL
 )
 
 updateActionLink(
@@ -28,6 +29,9 @@ updateActionLink(
 \item{label}{The label to set for the input object.}
 
 \item{icon}{An optional \code{\link[=icon]{icon()}} to appear on the button.}
+
+\item{disabled}{If \code{TRUE}, the button will not be clickable; if \code{FALSE}, it
+will be.}
 }
 \description{
 Change the label or icon of an action button on the client

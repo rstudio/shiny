@@ -9970,22 +9970,31 @@
       key: "receiveMessage",
       value: function receiveMessage(el, data) {
         var $el = (0, import_jquery16.default)(el);
-        var label = $el.text();
-        var icon = "";
-        if ($el.find("i[class]").length > 0) {
-          var iconHtml = $el.find("i[class]")[0];
-          if (iconHtml === $el.children()[0]) {
-            icon = (0, import_jquery16.default)(iconHtml).prop("outerHTML");
+        if (hasDefinedProperty(data, "label") || hasDefinedProperty(data, "icon")) {
+          var label = $el.text();
+          var icon = "";
+          if ($el.find("i[class]").length > 0) {
+            var iconHtml = $el.find("i[class]")[0];
+            if (iconHtml === $el.children()[0]) {
+              icon = (0, import_jquery16.default)(iconHtml).prop("outerHTML");
+            }
+          }
+          if (hasDefinedProperty(data, "label")) {
+            label = data.label;
+          }
+          if (hasDefinedProperty(data, "icon")) {
+            var _data$icon;
+            icon = Array.isArray(data.icon) ? "" : (_data$icon = data.icon) !== null && _data$icon !== void 0 ? _data$icon : "";
+          }
+          $el.html(icon + " " + label);
+        }
+        if (hasDefinedProperty(data, "disabled")) {
+          if (data.disabled) {
+            $el.attr("disabled", "");
+          } else {
+            $el.attr("disabled", null);
           }
         }
-        if (hasDefinedProperty(data, "label")) {
-          label = data.label;
-        }
-        if (hasDefinedProperty(data, "icon")) {
-          var _data$icon;
-          icon = Array.isArray(data.icon) ? "" : (_data$icon = data.icon) !== null && _data$icon !== void 0 ? _data$icon : "";
-        }
-        $el.html(icon + " " + label);
       }
     }, {
       key: "unsubscribe",

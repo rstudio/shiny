@@ -18,7 +18,6 @@
 #'    is_false list2
 #'    missing_arg is_missing maybe_missing
 #'    quo_is_missing fn_fmls<- fn_body fn_body<-
-#' @importFrom rlang
 #'    check_dots_empty check_dots_unnamed
 #' @import htmltools
 #' @import httpuv

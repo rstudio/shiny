@@ -93,7 +93,6 @@ Imports:
     glue (>= 1.3.2),
     bslib (>= 0.3.0),
     cachem,
-    ellipsis,
     lifecycle (>= 0.2.0)
 Suggests:
     datasets,

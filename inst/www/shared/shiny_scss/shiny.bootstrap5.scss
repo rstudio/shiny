@@ -37,3 +37,9 @@ $notification-content-action-color: RGB(var(--#{$prefix}primary-rgb, #{to-rgb($p
 $datepicker-disabled-color:         $dropdown-link-disabled-color !default;
 
 $shiny-file-active-shadow:          $input-focus-box-shadow !default;
+
+/* Treat conditional panels and uiOutput as "pass-through" containers */
+.shiny-panel-conditional,
+div:where(.shiny-html-output) {
+  display: contents;
+}

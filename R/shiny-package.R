@@ -1,7 +1,6 @@
 # See also R/reexports.R
 
 ## usethis namespace: start
-## usethis namespace: end
 #' @importFrom lifecycle deprecated is_present
 #' @importFrom grDevices dev.set dev.cur
 #' @importFrom fastmap fastmap
@@ -24,6 +23,7 @@
 #' @import xtable
 #' @import R6
 #' @import mime
+## usethis namespace: end
 NULL
 
 # It's necessary to Depend on methods so Rscript doesn't fail. It's necessary

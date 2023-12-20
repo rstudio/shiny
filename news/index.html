@@ -50,6 +50,10 @@
     <div class="section level2">
 <h2 class="page-header" data-toc-text="development version" id="shiny-development-version">shiny (development version)<a class="anchor" aria-label="anchor" href="#shiny-development-version"></a></h2>
 <div class="section level3">
+<h3 id="breaking-changes-development-version">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-development-version"></a></h3>
+<ul><li>Both <code><a href="../reference/conditionalPanel.html">conditionalPanel()</a></code> and <code><a href="../reference/htmlOutput.html">uiOutput()</a></code> are now styled with <code>display: contents</code> by default. This means that the elements they contain are positioned as if they were direct children of the parent container holding the <code><a href="../reference/conditionalPanel.html">conditionalPanel()</a></code> or <code><a href="../reference/htmlOutput.html">uiOutput()</a></code>. This is probably what most users intend when they use these functions, but it may break apps that applied styles directly to the container elements created by these two functions. In that case, you may include CSS rules to set <code>display: block</code> for the <code>.shiny-panel-conditional</code> or <code>.shiny-html-output</code> classes. (<a href="https://github.com/rstudio/shiny/issues/3957" class="external-link">#3957</a>)</li>
+</ul></div>
+<div class="section level3">
 <h3 id="new-features-and-improvements-development-version">New features and improvements<a class="anchor" aria-label="anchor" href="#new-features-and-improvements-development-version"></a></h3>
 <ul><li>Added an console that shows some errors in the browser. Also provide better error messages for duplicate input and output bindings. (<a href="https://github.com/rstudio/shiny/issues/3931" class="external-link">#3931</a>)</li>
 </ul></div>

@@ -29,7 +29,7 @@ ui <- page_sidebar(
 
   # Main panel for displaying outputs ----
   # Output: A tabset that combines three panels ----
-  navset_underline(
+  navset_card_underline(
 
     # Panel with plot ----
     nav_panel("Plot", plotOutput("plot")),

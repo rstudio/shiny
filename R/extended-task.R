@@ -62,7 +62,6 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE,
     initialize = function(func) {
       private$func <- func
       private$rv_status <- reactiveVal("initial")
-      private$rv_running <- reactiveVal(FALSE)
       private$rv_value <- reactiveVal(NULL)
       private$rv_error <- reactiveVal(NULL)
       private$invocation_queue <- fastmap::fastqueue()
@@ -201,3 +200,39 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE,
     }
   )
 )
+
+#' Bind `input_task_button` to `ExtendedTask`
+#'
+#' @description
+#' Sets up an [ExtendedTask] to relay its state to an existing
+#' [bslib::input_task_button()], so the task button stays in its "busy" state
+#' for as long as the extended task is running.
+#'
+#' Note that `bind_button_to_task` does _not_ automatically cause button presses
+#' to invoke the extended task; you still need to use [bindEvent()] (or
+#' [observeEvent()]) to cause the button press to trigger
+#' an invocation, as in the example below.
+#'
+#' @export
+bind_button_to_task <- function(task, task_button_id, priority = 1000,
+  session = getDefaultReactiveDomain()) {
+
+  force(task)
+  force(task_button_id)
+  force(session)
+
+  was_running <- FALSE
+  observe({
+    running <- task$status() == "running"
+    if (running != was_running) {
+      was_running <<- running
+      if (running) {
+        bslib::set_task_button_manual_reset(session, task_button_id, manual = TRUE)
+        bslib::update_task_button(task_button_id, busy = TRUE, session = session)
+      } else {
+        bslib::update_task_button(task_button_id, busy = FALSE, session = session)
+      }
+    }
+  }, priority = priority)
+  return(task)
+}

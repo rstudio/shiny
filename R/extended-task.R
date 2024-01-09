@@ -227,10 +227,9 @@ bind_button_to_task <- function(task, task_button_id, priority = 1000,
     if (running != was_running) {
       was_running <<- running
       if (running) {
-        bslib::set_task_button_manual_reset(session, task_button_id, manual = TRUE)
-        bslib::update_task_button(task_button_id, busy = TRUE, session = session)
+        bslib::update_task_button(task_button_id, state = "busy", session = session)
       } else {
-        bslib::update_task_button(task_button_id, busy = FALSE, session = session)
+        bslib::update_task_button(task_button_id, state = "ready", session = session)
       }
     }
   }, priority = priority)

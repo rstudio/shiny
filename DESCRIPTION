@@ -91,7 +91,7 @@ Imports:
     withr,
     commonmark (>= 1.7),
     glue (>= 1.3.2),
-    bslib (>= 0.3.0),
+    bslib (>= 0.6.1.9001),
     cachem,
     ellipsis,
     lifecycle (>= 0.2.0)

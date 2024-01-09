@@ -142,6 +142,10 @@ class SelectInputBinding extends InputBinding {
         };
       };
 
+      if (hasDefinedProperty(data, "value")) {
+        // Requested new `selected` choices, so reset value before new options
+        selectize.clear();
+      }
       selectize.clearOptions();
       let loaded = false;
 

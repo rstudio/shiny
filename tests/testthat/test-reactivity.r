@@ -1696,3 +1696,41 @@ test_that("Reactive expression labels", {
     "hello"
   )
 })
+
+
+test_that("Contexts can be masked off", {
+  expect_error(
+    {
+      r <- reactiveVal()
+      isolate({
+        maskReactiveContext({
+          r()
+        })
+      })
+    },
+    regexp = "Operation not allowed without an active reactive context"
+  )
+})
+
+
+test_that("Contexts can be masked off via promise domains", {
+  r <- reactiveVal()
+  done <- FALSE
+  isolate({
+    maskReactiveContext({
+      promises::promise_resolve(NULL)$then(function(value) {
+        done <<- TRUE
+        expect_error(
+          {
+            r()
+          },
+          regexp = "Operation not allowed without an active reactive context"
+        )
+      })
+    })
+  })
+  while (!done) {
+    later::run_now(all=FALSE)
+  }
+})
+

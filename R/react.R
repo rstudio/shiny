@@ -219,10 +219,10 @@ getDummyContext <- function() {
 
 wrapForContext <- function(func, ctx) {
   force(func)
-  force(ctx)
+  force(ctx) # may be NULL (in the case of maskReactiveContext())
 
   function(...) {
-    ctx$run(function() {
+    .getReactiveEnvironment()$runWith(ctx, function() {
       captureStackTraces(
         func(...)
       )
@@ -234,12 +234,18 @@ reactivePromiseDomain <- function() {
   promises::new_promise_domain(
     wrapOnFulfilled = function(onFulfilled) {
       force(onFulfilled)
-      ctx <- getCurrentContext()
+
+      # ctx will be NULL if we're in a maskReactiveContext()
+      ctx <- if (hasCurrentContext()) getCurrentContext() else NULL
+
       wrapForContext(onFulfilled, ctx)
     },
     wrapOnRejected = function(onRejected) {
       force(onRejected)
-      ctx <- getCurrentContext()
+
+      # ctx will be NULL if we're in a maskReactiveContext()
+      ctx <- if (hasCurrentContext()) getCurrentContext() else NULL
+
       wrapForContext(onRejected, ctx)
     }
   )

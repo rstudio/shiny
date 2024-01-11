@@ -55,7 +55,8 @@
 </ul></div>
 <div class="section level3">
 <h3 id="new-features-and-improvements-development-version">New features and improvements<a class="anchor" aria-label="anchor" href="#new-features-and-improvements-development-version"></a></h3>
-<ul><li>Added an console that shows some errors in the browser. Also provide better error messages for duplicate input and output bindings. (<a href="https://github.com/rstudio/shiny/issues/3931" class="external-link">#3931</a>)</li>
+<ul><li><p>Added an console that shows some errors in the browser. Also provide better error messages for duplicate input and output bindings. (<a href="https://github.com/rstudio/shiny/issues/3931" class="external-link">#3931</a>)</p></li>
+<li><p>Added a new <code>ExtendedTask</code> abstraction, for long-running asynchronous tasks that you don’t want to block the rest of the app, or even the rest of the session. Designed to be used with new <code>bslib::input_task_button()</code> and <code>bslib::bind_task_button()</code> functions that help give user feedback and prevent extra button clicks. (<a href="https://github.com/rstudio/shiny/issues/3958" class="external-link">#3958</a>)</p></li>
 </ul></div>
 <div class="section level3">
 <h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>

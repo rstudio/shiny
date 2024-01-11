@@ -22,6 +22,9 @@
     <loc>/news/index.html</loc>
   </url>
   <url>
+    <loc>/reference/ExtendedTask.html</loc>
+  </url>
+  <url>
     <loc>/reference/MockShinySession.html</loc>
   </url>
   <url>

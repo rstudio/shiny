@@ -72,7 +72,7 @@ Depends:
     R (>= 3.0.2),
     methods
 Remotes:
-    rstudio/bslib
+    rstudio/bslib@task-button
 Imports:
     utils,
     grDevices,

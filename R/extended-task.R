@@ -84,7 +84,7 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE,
       args <- rlang::dots_list(..., .ignore_empty = "none")
 
       if (
-        private$rv_status() == "running" ||
+        isolate(private$rv_status()) == "running" ||
           private$invocation_queue$size() > 0
       ) {
         private$invocation_queue$add(args)

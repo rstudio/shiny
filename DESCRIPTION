@@ -71,8 +71,6 @@ License: GPL-3 | file LICENSE
 Depends:
     R (>= 3.0.2),
     methods
-Remotes:
-    rstudio/bslib@task-button
 Imports:
     utils,
     grDevices,
@@ -93,7 +91,7 @@ Imports:
     withr,
     commonmark (>= 1.7),
     glue (>= 1.3.2),
-    bslib (>= 0.6.1.9001),
+    bslib (>= 0.3.0),
     cachem,
     ellipsis,
     lifecycle (>= 0.2.0)

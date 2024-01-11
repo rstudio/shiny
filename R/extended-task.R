@@ -54,7 +54,11 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE,
     #'   [\{promises\}](https://rstudio.github.io/promises/) package, most
     #'   likely in conjuction with the
     #'   [\{future\}](https://rstudio.github.io/promises/articles/promises_04_futures.html)
-    #'   package. It's also important that this logic does not read from any
+    #'   package. (In short, the return value of `func` should be a
+    #'   [`Future`][future::future()] object, or a `promise`, or something else
+    #'   that [promises::as.promise()] understands.)
+    #'
+    #'   It's also important that this logic does not read from any
     #'   reactive inputs/sources, as inputs may change after the function is
     #'   invoked; instead, if the function needs to access reactive inputs, it
     #'   should take parameters and the caller of the `invoke()` method should
@@ -90,6 +94,9 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE,
       invisible(NULL)
     },
     #' @description
+    #' This is a reactive read that invalidates the caller when the task's
+    #' status changes.
+    #'
     #' Returns one of the following values:
     #'
     #' * `"initial"`: This `ExtendedTask` has not yet been invoked
@@ -98,9 +105,6 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE,
     #'   retrieved via the `result()` method
     #' * `"error"`: An invocation completed with an error, which will be
     #'   re-thrown if you call the `result()` method
-    #'
-    #' This is a reactive read that invalidates the caller when the task's
-    #' status changes.
     status = function() {
       private$rv_status()
     },

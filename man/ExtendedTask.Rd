@@ -74,7 +74,11 @@ asynchronous function, meaning, it should use the
 \href{https://rstudio.github.io/promises/}{\{promises\}} package, most
 likely in conjuction with the
 \href{https://rstudio.github.io/promises/articles/promises_04_futures.html}{\{future\}}
-package. It's also important that this logic does not read from any
+package. (In short, the return value of \code{func} should be a
+\code{\link[future:future]{Future}} object, or a \code{promise}, or something else
+that \code{\link[promises:is.promise]{promises::as.promise()}} understands.)
+
+It's also important that this logic does not read from any
 reactive inputs/sources, as inputs may change after the function is
 invoked; instead, if the function needs to access reactive inputs, it
 should take parameters and the caller of the \code{invoke()} method should
@@ -110,6 +114,9 @@ arguments.}
 \if{html}{\out{<a id="method-ExtendedTask-status"></a>}}
 \if{latex}{\out{\hypertarget{method-ExtendedTask-status}{}}}
 \subsection{Method \code{status()}}{
+This is a reactive read that invalidates the caller when the task's
+status changes.
+
 Returns one of the following values:
 \itemize{
 \item \code{"initial"}: This \code{ExtendedTask} has not yet been invoked
@@ -119,9 +126,6 @@ retrieved via the \code{result()} method
 \item \code{"error"}: An invocation completed with an error, which will be
 re-thrown if you call the \code{result()} method
 }
-
-This is a reactive read that invalidates the caller when the task's
-status changes.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{ExtendedTask$status()}\if{html}{\out{</div>}}
 }

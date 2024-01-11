@@ -469,9 +469,3 @@ html.autoreload-enabled #shiny-disconnected-overlay.reloading {
   /* override anything bootstrap sets for `.nav` */
   display: none !important;
 }
-
-/* Conditional panels and uiOutput */
-.shiny-panel-conditional,
-div:where(.shiny-html-output) {
-  display: contents;
-}

@@ -71,6 +71,8 @@ License: GPL-3 | file LICENSE
 Depends:
     R (>= 3.0.2),
     methods
+Remotes:
+    rstudio/bslib
 Imports:
     utils,
     grDevices,

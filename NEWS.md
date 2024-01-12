@@ -8,6 +8,8 @@
 
 * Added an console that shows some errors in the browser. Also provide better error messages for duplicate input and output bindings. (#3931)
 
+* Added a new `ExtendedTask` abstraction, for long-running asynchronous tasks that you don't want to block the rest of the app, or even the rest of the session. Designed to be used with new `bslib::input_task_button()` and `bslib::bind_task_button()` functions that help give user feedback and prevent extra button clicks. (#3958)
+
 ## Bug fixes
 
 * Notifications are now constrained to the width of the viewport for window widths smaller the default notification panel size. (#3949)

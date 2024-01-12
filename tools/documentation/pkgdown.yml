@@ -121,6 +121,7 @@ reference:
       - reactiveValues
       - bindCache
       - bindEvent
+      - ExtendedTask
       - reactiveValuesToList
       - is.reactivevalues
       - isolate

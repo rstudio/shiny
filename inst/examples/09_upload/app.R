@@ -1,16 +1,14 @@
 library(shiny)
+library(bslib)
 
-# Define UI for data upload app ----
-ui <- fluidPage(
+# Define UI for slider demo app ----
+ui <- page_sidebar(
 
   # App title ----
-  titlePanel("Uploading Files"),
-
-  # Sidebar layout with input and output definitions ----
-  sidebarLayout(
-
-    # Sidebar panel for inputs ----
-    sidebarPanel(
+  title = "Uploading Files",
+  # Sidebar panel for inputs ----
+  sidebar =
+    sidebar(
 
       # Input: Select a file ----
       fileInput("file1", "Choose CSV File",
@@ -50,15 +48,8 @@ ui <- fluidPage(
 
     ),
 
-    # Main panel for displaying outputs ----
-    mainPanel(
-
-      # Output: Data file ----
-      tableOutput("contents")
-
-    )
-
-  )
+    # Output: Data file ----
+    tableOutput("contents")
 )
 
 # Define server logic to read selected file ----

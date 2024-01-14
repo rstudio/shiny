@@ -1853,7 +1853,7 @@ __metadata:
   peerDependenciesMeta:
     jquery-ui:
       optional: true
-  checksum: ba260ba5804c16b1455ff79f9d00ce860e12ae36e29d7a5f702da6b384c9454497421b8e06fe683d10fac53e2dc6ec008da4fa129a153cbbfe5396e027eb4247
+  checksum: 821744ebc11b9d40686fe29d1ce9e3579df6eaf377cce2008aaa38f672bb787083d770626d41ba2624ce56d9c0d9c03d51534decbe4d581810b837ee908edb0b
   languageName: node
   linkType: hard
 
@@ -2143,12 +2143,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jquery@npm:3.5.14":
-  version: 3.5.14
-  resolution: "@types/jquery@npm:3.5.14"
+"@types/jquery@npm:3.5.29":
+  version: 3.5.29
+  resolution: "@types/jquery@npm:3.5.29"
   dependencies:
     "@types/sizzle": "*"
-  checksum: 159d6f804ed1a204b3f79f2d591a271d82e866bd45bd49fb6ef40561a25dbe0f47ec7815681b44cc2db5598425f72811e7e80ab0e983d980470998ac56feb375
+  checksum: 5e959762d6f7050b07b4387b6507a308113384566a77cfc4f8d0f54c2fb0a79f6bc8c057706c6aa4840cde56f32ad0e5814fb53c5f078c5db9e01670a1ecd535
   languageName: node
   linkType: hard
 
@@ -2223,7 +2223,7 @@ __metadata:
     "@types/highlightjs": ^9.12.1
     "@types/ion-rangeslider": 2.3.0
     "@types/jest": ^26.0.23
-    "@types/jquery": 3.5.14
+    "@types/jquery": 3.5.29
     "@types/jqueryui": 1.12.16
     "@types/lodash": ^4.14.170
     "@types/node": ^18.14.2
@@ -2247,7 +2247,7 @@ __metadata:
     eslint-plugin-unicorn: ^43.0.2
     fs-readdir-recursive: ^1.1.0
     jest: ^26.6.3
-    jquery: ^3.6.0
+    jquery: 3.7.1
     lit: ^3.0.0
     lodash: ^4.17.21
     madge: ^4.0.2
@@ -4253,7 +4253,7 @@ __metadata:
   resolution: "esbuild-plugin-babel@https://github.com/schloerke/esbuild-plugin-babel.git#commit=40106e72776cf4e2e4da8e52926632ceed378da0"
   peerDependencies:
     "@babel/core": ^7.0.0
-  checksum: c89e123bc1944efcee5628ea6d8cb878384a4de5c19b4b598b660c03dd6429dd11e9120b5cbf54722331c69cb3bc25183b63ef1c28174ed44787228a44a58684
+  checksum: f8e2b6d45165364eb216cfb71185c9f3249bebf93ecad6a1d93469fa7b72017ce3efc3d616adb242f3b8bc9519d2011a765f6c630dcb59a88d9a2ede04517ae9
   languageName: node
   linkType: hard
 
@@ -6764,10 +6764,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jquery@npm:^3.6.0":
-  version: 3.6.3
-  resolution: "jquery@npm:3.6.3"
-  checksum: 0fd366bdcaa0c84a7a8751ce20f8192290141913978b5059574426d9b01f4365daa675f95aab3eec94fd794d27b08d32078a2236bef404b8ba78073009988ce6
+"jquery@npm:3.7.1":
+  version: 3.7.1
+  resolution: "jquery@npm:3.7.1"
+  checksum: 4370b8139d6ae82867eb6f7f21d1edccf1d1bdf41c0840920ea80d366c2cd5dbe1ceebb110ee9772aa839b04400faa1572c5c560b507c688ed7b61cea26c0e27
   languageName: node
   linkType: hard
 

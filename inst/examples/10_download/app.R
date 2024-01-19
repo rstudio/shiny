@@ -1,34 +1,22 @@
+library(bslib)
 library(shiny)
 
 # Define UI for data download app ----
-ui <- fluidPage(
+ui <- page_sidebar(
 
   # App title ----
-  titlePanel("Downloading Data"),
+  tableOutput("table"),
 
   # Sidebar layout with input and output definitions ----
-  sidebarLayout(
+  sidebar = sidebar(
+    # Input: Choose dataset ----
+    selectInput("dataset", "Choose a dataset:",
+                choices = c("rock", "pressure", "cars")),
 
-    # Sidebar panel for inputs ----
-    sidebarPanel(
-
-      # Input: Choose dataset ----
-      selectInput("dataset", "Choose a dataset:",
-                  choices = c("rock", "pressure", "cars")),
-
-      # Button
-      downloadButton("downloadData", "Download")
-
-    ),
-
-    # Main panel for displaying outputs ----
-    mainPanel(
-
-      tableOutput("table")
-
-    )
-
-  )
+    # Button
+    downloadButton("downloadData", "Download")
+  ),
+  title = "Downloading Data"
 )
 
 # Define server logic to display and download selected file ----

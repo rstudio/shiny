@@ -1,39 +1,31 @@
+library(bslib)
 library(shiny)
 
 # Define UI for dataset viewer app ----
-ui <- fluidPage(
+# Sidebar layout with a input and output definitions ----
+ui <- page_sidebar(
+  # Main panel for displaying outputs ----
+  # Output: Verbatim text for data summary ----
+  verbatimTextOutput("summary"),
+
+  # Output: HTML table with requested number of observations ----
+  tableOutput("view"),
+
+  # Sidebar panel for inputs ----
+  sidebar = sidebar(
+    # Input: Selector for choosing dataset ----
+    selectInput(inputId = "dataset",
+                label = "Choose a dataset:",
+                choices = c("rock", "pressure", "cars")),
+
+    # Input: Numeric entry for number of obs to view ----
+    numericInput(inputId = "obs",
+                 label = "Number of observations to view:",
+                 value = 10)
+  ),
 
   # App title ----
-  titlePanel("Shiny Text"),
-
-  # Sidebar layout with a input and output definitions ----
-  sidebarLayout(
-
-    # Sidebar panel for inputs ----
-    sidebarPanel(
-
-      # Input: Selector for choosing dataset ----
-      selectInput(inputId = "dataset",
-                  label = "Choose a dataset:",
-                  choices = c("rock", "pressure", "cars")),
-
-      # Input: Numeric entry for number of obs to view ----
-      numericInput(inputId = "obs",
-                   label = "Number of observations to view:",
-                   value = 10)
-    ),
-
-    # Main panel for displaying outputs ----
-    mainPanel(
-
-      # Output: Verbatim text for data summary ----
-      verbatimTextOutput("summary"),
-
-      # Output: HTML table with requested number of observations ----
-      tableOutput("view")
-
-    )
-  )
+  title = "Shiny Text"
 )
 
 # Define server logic to summarize and view selected dataset ----

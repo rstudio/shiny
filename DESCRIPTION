@@ -132,6 +132,7 @@ Collate:
     'deprecated.R'
     'devmode.R'
     'diagnose.R'
+    'extended-task.R'
     'fileupload.R'
     'graph.R'
     'reactives.R'

@@ -119,6 +119,8 @@ updateCheckboxInput <- function(session = getDefaultReactiveDomain(), inputId, l
 #' Change the label or icon of an action button on the client
 #'
 #' @template update-input
+#' @param disabled If `TRUE`, the button will not be clickable; if `FALSE`, it
+#'   will be.
 #' @inheritParams actionButton
 #'
 #' @seealso [actionButton()]
@@ -169,16 +171,18 @@ updateCheckboxInput <- function(session = getDefaultReactiveDomain(), inputId, l
 #' }
 #' @rdname updateActionButton
 #' @export
-updateActionButton <- function(session = getDefaultReactiveDomain(), inputId, label = NULL, icon = NULL) {
+updateActionButton <- function(session = getDefaultReactiveDomain(), inputId, label = NULL, icon = NULL, disabled = NULL) {
   validate_session_object(session)
 
   if (!is.null(icon)) icon <- as.character(validateIcon(icon))
-  message <- dropNulls(list(label=label, icon=icon))
+  message <- dropNulls(list(label=label, icon=icon, disabled=disabled))
   session$sendInputMessage(inputId, message)
 }
 #' @rdname updateActionButton
 #' @export
-updateActionLink <- updateActionButton
+updateActionLink <- function(session = getDefaultReactiveDomain(), inputId, label = NULL, icon = NULL) {
+  updateActionButton(session, inputId=inputId, label=label, icon=icon)
+}
 
 
 #' Change the value of a date input on the client

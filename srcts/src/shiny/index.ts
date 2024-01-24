@@ -68,6 +68,14 @@ interface Shiny {
   // Eventually deprecate
   // For old-style custom messages - should deprecate and migrate to new
   oncustommessage?: Handler;
+
+  /**
+   * Method to check if Shiny is running in development mode. By packaging as a
+   * method, we can we can avoid needing to look for the `__SHINY_DEV_MODE__`
+   * variable in the global scope.
+   * @returns `true` if Shiny is running in development mode, `false` otherwise.
+   */
+  inDevMode: () => boolean;
 }
 
 let windowShiny: Shiny;
@@ -107,6 +115,13 @@ function setShiny(windowShiny_: Shiny): void {
   windowShiny.renderContent = renderContent;
   windowShiny.renderHtmlAsync = renderHtmlAsync;
   windowShiny.renderHtml = renderHtml;
+
+  windowShiny.inDevMode = () => {
+    if ("__SHINY_DEV_MODE__" in window)
+      return Boolean(window.__SHINY_DEV_MODE__);
+
+    return false;
+  };
 
   $(function () {
     // Init Shiny a little later than document ready, so user code can

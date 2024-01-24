@@ -18577,7 +18577,7 @@
         if (counts.input === 1 && counts.output === 1 && !Shiny.inDevMode()) {
           return;
         }
-        if (counts.input > 0 || counts.output > 0) {
+        if (counts.input + counts.output > 1) {
           duplicateIds.set(id, counts);
         }
       });

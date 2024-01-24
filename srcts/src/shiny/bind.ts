@@ -99,7 +99,7 @@ const bindingsRegistry = (() => {
 
       // If we have duplicated IDs, then add them to the set of duplicated IDs
       // to be reported to the user.
-      if (counts.input > 0 || counts.output > 0) {
+      if (counts.input + counts.output > 1) {
         duplicateIds.set(id, counts);
       }
     });

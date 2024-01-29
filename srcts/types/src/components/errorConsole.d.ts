@@ -12,7 +12,7 @@ export declare class ShinyErrorMessage extends LitElement {
 }
 /**
  * Function to show an error message to user in shiny-error-message web
- * component
+ * component. Only shows the error if we're in development mode.
  * @param e - Error object to show to user. This is whatever is caught in
  * a try-catch statement so it may be a string or it may be a proper Error
  * object.

@@ -14,6 +14,8 @@
 
 * Notifications are now constrained to the width of the viewport for window widths smaller the default notification panel size. (#3949)
 
+* Fixed #2392: `downloadButton()` now visibly returns its HTML tag so that it renders correctly in R Markdown and Quarto output. (Thanks to @fennovj, #2672)
+
 # shiny 1.8.0
 
 ## Breaking changes
@@ -38,8 +40,6 @@
 * `fileInput()` no longer has unwanted round corners applied to the `buttonLabel`. (#3879)
 
 * Fixed #3898: `wrapFunctionLabel()` no longer throws an error if the `name` is longer than 10000 bytes. (#3903)
-
-* Fixed #2392: `downloadButton()` now visibly returns its HTML tag so that it renders correctly in R Markdown and Quarto output. (Thanks to @fennovj, #2672)
 
 # shiny 1.7.5.1
 

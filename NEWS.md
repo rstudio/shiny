@@ -14,6 +14,8 @@
 
 * Notifications are now constrained to the width of the viewport for window widths smaller the default notification panel size. (#3949)
 
+* Fixed #2392: `downloadButton()` now visibly returns its HTML tag so that it renders correctly in R Markdown and Quarto output. (Thanks to @fennovj, #2672)
+
 # shiny 1.8.0
 
 ## Breaking changes

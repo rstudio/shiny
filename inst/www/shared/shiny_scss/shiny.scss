@@ -391,6 +391,7 @@ html.autoreload-enabled #shiny-disconnected-overlay.reloading {
   background-color: rgba(0,0,0,0);
   padding: 2px;
   width: 300px;
+  max-width: 100%;
   z-index: 99999;
 }
 

@@ -1,7 +1,7 @@
 Package: shiny
 Type: Package
 Title: Web Application Framework for R
-Version: 1.7.5.9001
+Version: 1.8.0.9000
 Authors@R: c(
     person("Winston", "Chang", role = c("aut", "cre"), email = "winston@posit.co", comment = c(ORCID = "0000-0002-1576-2126")),
     person("Joe", "Cheng", role = "aut", email = "joe@posit.co"),
@@ -132,6 +132,7 @@ Collate:
     'deprecated.R'
     'devmode.R'
     'diagnose.R'
+    'extended-task.R'
     'fileupload.R'
     'graph.R'
     'reactives.R'
@@ -203,7 +204,7 @@ Collate:
     'version_selectize.R'
     'version_strftime.R'
     'viewer.R'
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RdMacros: lifecycle

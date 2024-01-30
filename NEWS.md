@@ -1,8 +1,24 @@
 # shiny (development version)
 
-## Possibly breaking changes
+## Breaking changes
 
-* Closed #3899: The JS function `Shiny.bindAll()` is now asynchronous. This change is driven by the recent push toward making dynamic UI rendering asynchronous (and should've happened when it was first introduced in Shiny v1.7.5). The vast majority of existing `Shiny.bindAll()` uses should continue to work as before, but some cases may break if downstream code relies on it being synchronous (i.e., blocking the main thread). In this case, consider placing any downstream code in a `.then()` callback (or `await` the result in a `async` function). (#3929)
+* Both `conditionalPanel()` and `uiOutput()` are now styled with `display: contents` by default in Shiny apps that use Bootstrap 5. This means that the elements they contain are positioned as if they were direct children of the parent container holding the `conditionalPanel()` or `uiOutput()`. This is probably what most users intend when they use these functions, but it may break apps that applied styles directly to the container elements created by these two functions. In that case, you may include CSS rules to set `display: block` for the `.shiny-panel-conditional` or `.shiny-html-output` classes. (#3957, #3960)
+
+## New features and improvements
+
+* Added an console that shows some errors in the browser. Also provide better error messages for duplicate input and output bindings. (#3931)
+
+* Added a new `ExtendedTask` abstraction, for long-running asynchronous tasks that you don't want to block the rest of the app, or even the rest of the session. Designed to be used with new `bslib::input_task_button()` and `bslib::bind_task_button()` functions that help give user feedback and prevent extra button clicks. (#3958)
+
+## Bug fixes
+
+* Notifications are now constrained to the width of the viewport for window widths smaller the default notification panel size. (#3949)
+
+# shiny 1.8.0
+
+## Breaking changes
+
+* Closed #3899: The JS function `Shiny.bindAll()` is now asynchronous. This change is driven by the recent push toward making dynamic UI rendering asynchronous, which is necessary for [shinylive](https://shinylive.io/r) (and should've happened when it was first introduced in Shiny v1.7.5). The vast majority of existing `Shiny.bindAll()` uses should continue to work as before, but some cases may break if downstream code relies on it being synchronous (i.e., blocking the main thread). In this case, consider placing any downstream code in a `.then()` callback (or `await` the result in a `async` function). (#3929)
   * Since `renderContent()` calls `bindAll()` (after it inserts content), it now returns a `Promise<void>` instead of `void`, which can be useful if downstream code needs to wait for the binding to complete.
 
 ## New features and improvements

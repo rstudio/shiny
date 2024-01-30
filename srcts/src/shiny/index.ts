@@ -27,6 +27,7 @@ import type { Handler, ShinyApp } from "./shinyapp";
 import { addCustomMessageHandler } from "./shinyapp";
 import { initInputBindings } from "../bindings/input";
 import { initOutputBindings } from "../bindings/output";
+import { showErrorInClientConsole } from "../components/errorConsole";
 
 interface Shiny {
   version: string;
@@ -67,6 +68,14 @@ interface Shiny {
   // Eventually deprecate
   // For old-style custom messages - should deprecate and migrate to new
   oncustommessage?: Handler;
+
+  /**
+   * Method to check if Shiny is running in development mode. By packaging as a
+   * method, we can we can avoid needing to look for the `__SHINY_DEV_MODE__`
+   * variable in the global scope.
+   * @returns `true` if Shiny is running in development mode, `false` otherwise.
+   */
+  inDevMode: () => boolean;
 }
 
 let windowShiny: Shiny;
@@ -107,12 +116,23 @@ function setShiny(windowShiny_: Shiny): void {
   windowShiny.renderHtmlAsync = renderHtmlAsync;
   windowShiny.renderHtml = renderHtml;
 
+  windowShiny.inDevMode = () => {
+    if ("__SHINY_DEV_MODE__" in window)
+      return Boolean(window.__SHINY_DEV_MODE__);
+
+    return false;
+  };
+
   $(function () {
     // Init Shiny a little later than document ready, so user code can
     // run first (i.e. to register bindings)
-    setTimeout(function () {
-      /* eslint-disable @typescript-eslint/no-floating-promises */
-      initShiny(windowShiny);
+    setTimeout(async function () {
+      try {
+        await initShiny(windowShiny);
+      } catch (e) {
+        showErrorInClientConsole(e);
+        throw e;
+      }
     }, 1);
   });
 }

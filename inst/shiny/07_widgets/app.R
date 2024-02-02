@@ -1,16 +1,14 @@
 library(shiny)
+library(bslib)
 
-# Define UI for dataset viewer app ----
-ui <- fluidPage(
+# Define UI for slider demo app ----
+ui <- page_sidebar(
 
   # App title ----
-  titlePanel("More Widgets"),
-
-  # Sidebar layout with input and output definitions ----
-  sidebarLayout(
-
-    # Sidebar panel for inputs ----
-    sidebarPanel(
+  title = "More Widgets",
+  # Sidebar panel for inputs ----
+  sidebar =
+    sidebar(
 
       # Input: Select a dataset ----
       selectInput("dataset", "Choose a dataset:",
@@ -33,19 +31,13 @@ ui <- fluidPage(
 
     ),
 
-    # Main panel for displaying outputs ----
-    mainPanel(
+    # Output: Header + summary of distribution ----
+    h4("Summary"),
+    verbatimTextOutput("summary"),
 
-      # Output: Header + summary of distribution ----
-      h4("Summary"),
-      verbatimTextOutput("summary"),
-
-      # Output: Header + table of distribution ----
-      h4("Observations"),
-      tableOutput("view")
-    )
-
-  )
+    # Output: Header + table of distribution ----
+    h4("Observations"),
+    tableOutput("view")
 )
 
 # Define server logic to summarize and view selected dataset ----

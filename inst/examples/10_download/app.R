@@ -1,14 +1,16 @@
 library(shiny)
-library(bslib)
 
-# Define UI for slider demo app ----
-ui <- page_sidebar(
+# Define UI for data download app ----
+ui <- fluidPage(
 
   # App title ----
-  title = "Downloading Data",
-  # Sidebar panel for inputs ----
-  sidebar =
-    sidebar(
+  titlePanel("Downloading Data"),
+
+  # Sidebar layout with input and output definitions ----
+  sidebarLayout(
+
+    # Sidebar panel for inputs ----
+    sidebarPanel(
 
       # Input: Choose dataset ----
       selectInput("dataset", "Choose a dataset:",
@@ -19,7 +21,14 @@ ui <- page_sidebar(
 
     ),
 
-    tableOutput("table")
+    # Main panel for displaying outputs ----
+    mainPanel(
+
+      tableOutput("table")
+
+    )
+
+  )
 )
 
 # Define server logic to display and download selected file ----

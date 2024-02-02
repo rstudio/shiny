@@ -1,16 +1,14 @@
 library(shiny)
+library(bslib)
 
 # Define UI for slider demo app ----
-ui <- fluidPage(
+ui <- page_sidebar(
 
   # App title ----
-  titlePanel("Sliders"),
-
-  # Sidebar layout with input and output definitions ----
-  sidebarLayout(
-
-    # Sidebar to demonstrate various slider options ----
-    sidebarPanel(
+  title = "Sliders",
+  # Sidebar panel for inputs ----
+  sidebar =
+    sidebar(
 
       # Input: Simple integer interval ----
       sliderInput("integer", "Integer:",
@@ -44,14 +42,8 @@ ui <- fluidPage(
 
     ),
 
-    # Main panel for displaying outputs ----
-    mainPanel(
-
-      # Output: Table summarizing the values entered ----
-      tableOutput("values")
-
-    )
-  )
+    # Output: Table summarizing the values entered ----
+    tableOutput("values")
 )
 
 # Define server logic for slider examples ----

@@ -1,5 +1,4 @@
 library(shiny)
-library(bslib)
 library(datasets)
 
 # Data pre-processing ----
@@ -11,12 +10,15 @@ mpgData$am <- factor(mpgData$am, labels = c("Automatic", "Manual"))
 
 
 # Define UI for miles per gallon app ----
-ui <- page_sidebar(
+ui <- fluidPage(
 
   # App title ----
-  title = "Miles Per Gallon",
-  # Sidebar panel for inputs ----
-  sidebar =
+  titlePanel("Miles Per Gallon"),
+
+  # Sidebar layout with input and output definitions ----
+  sidebarLayout(
+
+    # Sidebar panel for inputs ----
     sidebarPanel(
 
       # Input: Selector for variable to plot against mpg ----
@@ -30,11 +32,17 @@ ui <- page_sidebar(
 
     ),
 
-    # Output: Formatted text for caption ----
-    h3(textOutput("caption")),
+    # Main panel for displaying outputs ----
+    mainPanel(
 
-    # Output: Plot of the requested variable against mpg ----
-    plotOutput("mpgPlot")
+      # Output: Formatted text for caption ----
+      h3(textOutput("caption")),
+
+      # Output: Plot of the requested variable against mpg ----
+      plotOutput("mpgPlot")
+
+    )
+  )
 )
 
 # Define server logic to plot various variables against mpg ----

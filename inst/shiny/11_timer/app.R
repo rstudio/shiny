@@ -1,7 +1,8 @@
 library(shiny)
+library(bslib)
 
 # Define UI for displaying current time ----
-ui <- fluidPage(
+ui <- page_fillable(
 
   h2(textOutput("currentTime"))
 

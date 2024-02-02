@@ -1,4 +1,4 @@
-This example demonstrates the `navset_*` and `nav_panel` widgets from the `bslib` package.
+This example demonstrates the `tabsetPanel` and `tabPanel` widgets.
 
 Notice that outputs that are not visible are not re-evaluated until they become visible. Try this: 
 

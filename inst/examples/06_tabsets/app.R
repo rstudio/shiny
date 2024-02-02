@@ -1,44 +1,47 @@
 library(shiny)
-library(bslib)
 
 # Define UI for random distribution app ----
-# Sidebar layout with input and output definitions ----
-ui <- page_sidebar(
+ui <- fluidPage(
 
   # App title ----
-  title ="Tabsets",
+  titlePanel("Tabsets"),
 
-  # Sidebar panel for inputs ----
-  sidebar = sidebar(
+  # Sidebar layout with input and output definitions ----
+  sidebarLayout(
 
-    # Input: Select the random distribution type ----
-    radioButtons("dist", "Distribution type:",
-                 c("Normal" = "norm",
-                   "Uniform" = "unif",
-                   "Log-normal" = "lnorm",
-                   "Exponential" = "exp")),
-    # br() element to introduce extra vertical spacing ----
-    br(),
-    # Input: Slider for the number of observations to generate ----
-    sliderInput("n",
-                "Number of observations:",
-                value = 500,
-                min = 1,
-                max = 1000)
-  ),
+    # Sidebar panel for inputs ----
+    sidebarPanel(
 
-  # Main panel for displaying outputs ----
-  # Output: A tabset that combines three panels ----
-  navset_card_underline(
+      # Input: Select the random distribution type ----
+      radioButtons("dist", "Distribution type:",
+                   c("Normal" = "norm",
+                     "Uniform" = "unif",
+                     "Log-normal" = "lnorm",
+                     "Exponential" = "exp")),
 
-    # Panel with plot ----
-    nav_panel("Plot", plotOutput("plot")),
+      # br() element to introduce extra vertical spacing ----
+      br(),
 
-    # Panel with summary ----
-    nav_panel("Summary", verbatimTextOutput("summary")),
+      # Input: Slider for the number of observations to generate ----
+      sliderInput("n",
+                  "Number of observations:",
+                  value = 500,
+                  min = 1,
+                  max = 1000)
 
-    # Panel with table ----
-    nav_panel("Table", tableOutput("table"))
+    ),
+
+    # Main panel for displaying outputs ----
+    mainPanel(
+
+      # Output: Tabset w/ plot, summary, and table ----
+      tabsetPanel(type = "tabs",
+                  tabPanel("Plot", plotOutput("plot")),
+                  tabPanel("Summary", verbatimTextOutput("summary")),
+                  tabPanel("Table", tableOutput("table"))
+      )
+
+    )
   )
 )
 

@@ -460,7 +460,7 @@ See <code><a href="sizeGrowthRatio.html">sizeGrowthRatio()</a></code> for more i
 <span class="r-in"><span>      <span class="fu"><a href="bindEvent.html">bindEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">go</span><span class="op">)</span></span></span>
 <span class="r-in"><span>      <span class="co"># The cached, eventified reactive takes a reactive dependency on</span></span></span>
 <span class="r-in"><span>      <span class="co"># input$go, but doesn't use it for the cache key. It uses input$x and</span></span></span>
-<span class="r-in"><span>      <span class="co"># input$y for the cache key, but doesn't take a reactive depdency on</span></span></span>
+<span class="r-in"><span>      <span class="co"># input$y for the cache key, but doesn't take a reactive dependency on</span></span></span>
 <span class="r-in"><span>      <span class="co"># them, because the reactive dependency is superseded by addEvent().</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="va">output</span><span class="op">$</span><span class="va">txt</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderText</a></span><span class="op">(</span><span class="fu">r</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>

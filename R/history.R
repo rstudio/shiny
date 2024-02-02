@@ -14,7 +14,7 @@ NULL
 #' depending on the values in the query string / hash (e.g. instead of basing
 #' the conditional on an input or a calculated reactive, you can base it on the
 #' query string). However, note that, if you're changing the query string / hash
-#' programatically from within the server code, you must use
+#' programmatically from within the server code, you must use
 #' `updateQueryString(_yourNewQueryString_, mode = "push")`. The default
 #' `mode` for `updateQueryString` is `"replace"`, which doesn't
 #' raise any events, so any observers or reactives that depend on it will

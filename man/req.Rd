@@ -62,7 +62,7 @@ way to check for a value "inline" with its first use.
 
 You can use \code{req(FALSE)} (i.e. no condition) if you've already performed
 all the checks you needed to by that point and just want to stop the reactive
-chain now. There is no advantange to this, except perhaps ease of readibility
+chain now. There is no advantage to this, except perhaps ease of readability
 if you have a complicated condition to check for (or perhaps if you'd like to
 divide your condition into nested \code{if} statements).
 }

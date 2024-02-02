@@ -41,7 +41,7 @@ set to \code{FALSE}), then use \code{\link[ragg:agg_png]{ragg::agg_png()}}.
 \item If a quartz device is available (i.e., \code{capabilities("aqua")} is
 \code{TRUE}), then use \code{png(type = "quartz")}.
 \item If the Cairo package is installed (and the \code{shiny.usecairo} option
-is not set to \code{FALSE}), then use \code{\link[Cairo:Cairo]{Cairo::CairoPNG()}}.
+is not set to \code{FALSE}), then use \code{\link[Cairo:CairoPNG]{Cairo::CairoPNG()}}.
 \item Otherwise, use \code{\link[grDevices:png]{grDevices::png()}}. In this case, Linux and Windows
 may not antialias some point shapes, resulting in poor quality output.
 }

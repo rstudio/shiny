@@ -150,13 +150,13 @@ updateCheckboxInput <- function(session = getDefaultReactiveDomain(), inputId, l
 #'       label = "New label",
 #'       icon = icon("calendar"))
 #'
-#'     # Leaves goButton2's label unchaged and
+#'     # Leaves goButton2's label unchanged and
 #'     # removes its icon
 #'     updateActionButton(session, "goButton2",
 #'       icon = character(0))
 #'
 #'     # Leaves goButton3's icon, if it exists,
-#'     # unchaged and changes its label
+#'     # unchanged and changes its label
 #'     updateActionButton(session, "goButton3",
 #'       label = "New label 3")
 #'

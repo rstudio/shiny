@@ -174,7 +174,7 @@ shinyDependencyCSS <- function(theme) {
 #' This function is kept for backwards compatibility with older applications. It
 #' returns the value that is passed to it.
 #'
-#' @param ui A user interace definition
+#' @param ui A user interface definition
 #' @return The user interface definition, without modifications or side effects.
 #' @keywords internal
 #' @export

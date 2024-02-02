@@ -1,7 +1,6 @@
 # See also R/reexports.R
 
 ## usethis namespace: start
-## usethis namespace: end
 #' @importFrom lifecycle deprecated is_present
 #' @importFrom grDevices dev.set dev.cur
 #' @importFrom fastmap fastmap
@@ -18,13 +17,13 @@
 #'    is_false list2
 #'    missing_arg is_missing maybe_missing
 #'    quo_is_missing fn_fmls<- fn_body fn_body<-
-#' @importFrom ellipsis
 #'    check_dots_empty check_dots_unnamed
 #' @import htmltools
 #' @import httpuv
 #' @import xtable
 #' @import R6
 #' @import mime
+## usethis namespace: end
 NULL
 
 # It's necessary to Depend on methods so Rscript doesn't fail. It's necessary

@@ -148,7 +148,7 @@ showcaseCodeTabs <- function(codeLicense) {
     a(id="showcase-code-position-toggle",
       class="btn btn-default btn-sm",
       onclick="toggleCodePosition()",
-      icon("level-up-alt"),
+      icon("turn-up"),
       "show with app"),
     ul(class="nav nav-tabs",
        navTabsHelper(rFiles),

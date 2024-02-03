@@ -62,7 +62,7 @@
 #' ui <- fluidPage(
 #'   radioButtons("rb", "Choose one:",
 #'                choiceNames = list(
-#'                  icon("calendar"),
+#'                  icon("calendar-days"),
 #'                  HTML("<p style='color:red;'>Red Text</p>"),
 #'                  "Normal text"
 #'                ),

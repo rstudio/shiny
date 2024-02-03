@@ -50,8 +50,8 @@
 #' ui <- fluidPage(
 #'   checkboxGroupInput("icons", "Choose icons:",
 #'     choiceNames =
-#'       list(icon("calendar"), icon("bed"),
-#'            icon("cog"), icon("bug")),
+#'       list(icon("calendar-days"), icon("bed"),
+#'            icon("gear"), icon("bug")),
 #'     choiceValues =
 #'       list("calendar", "bed", "cog", "bug")
 #'   ),

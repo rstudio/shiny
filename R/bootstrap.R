@@ -532,7 +532,12 @@ wellPanel <- function(...) {
 #' }
 #' @export
 conditionalPanel <- function(condition, ..., ns = NS(NULL)) {
-  div(`data-display-if`=condition, `data-ns-prefix`=ns(""), ...)
+  div(
+    class = "shiny-panel-conditional",
+    `data-display-if` = condition,
+    `data-ns-prefix` = ns(""),
+    ...
+  )
 }
 
 #' Create a help text element
@@ -1233,13 +1238,13 @@ downloadButton <- function(outputId,
                            class=NULL,
                            ...,
                            icon = shiny::icon("download")) {
-  aTag <- tags$a(id=outputId,
-                 class=paste('btn btn-default shiny-download-link', class),
-                 href='',
-                 target='_blank',
-                 download=NA,
-                 validateIcon(icon),
-                 label, ...)
+  tags$a(id=outputId,
+         class=paste('btn btn-default shiny-download-link', class),
+         href='',
+         target='_blank',
+         download=NA,
+         validateIcon(icon),
+         label, ...)
 }
 
 #' @rdname downloadButton

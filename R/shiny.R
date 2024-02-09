@@ -215,7 +215,7 @@ workerId <- local({
 #'   Sends a custom message to the web page. `type` must be a
 #'   single-element character vector giving the type of message, while
 #'   `message` can be any jsonlite-encodable value. Custom messages
-#'   have no meaning to Shiny itself; they are used soley to convey information
+#'   have no meaning to Shiny itself; they are used solely to convey information
 #'   to custom JavaScript logic in the browser. You can do this by adding
 #'   JavaScript code to the browser that calls
 #'   \code{Shiny.addCustomMessageHandler(type, function(message){...})}
@@ -1156,6 +1156,8 @@ ShinySession <- R6Class(
                   structure(list(), class = "try-error", condition = cond)
                 } else if (inherits(cond, "shiny.output.cancel")) {
                   structure(list(), class = "cancel-output")
+                } else if (inherits(cond, "shiny.output.progress")) {
+                  structure(list(), class = "progress-output")
                 } else if (cnd_inherits(cond, "shiny.silent.error")) {
                   # The error condition might have been chained by
                   # foreign code, e.g. dplyr. Find the original error.
@@ -1183,6 +1185,33 @@ ShinySession <- R6Class(
               # outputs/errors are queued, it's necessary to flush so that the
               # client knows that progress is over.
               self$requestFlush()
+
+              if (inherits(value, "progress-output")) {
+                # This is the case where an output needs to compute for longer
+                # than this reactive flush. We put the output into progress mode
+                # (i.e. adding .recalculating) with a special flag that means
+                # the progress indication should not be cleared until this
+                # specific output receives a new value or error.
+                self$showProgress(name, persistent=TRUE)
+
+                # It's conceivable that this output already ran successfully
+                # within this reactive flush, in which case we could either show
+                # the new output while simultaneously making it .recalculating;
+                # or we squelch the new output and make whatever output is in
+                # the client .recalculating. I (jcheng) decided on the latter as
+                # it seems more in keeping with what we do with these kinds of
+                # intermediate output values/errors in general, i.e. ignore them
+                # and wait until we have a final answer. (Also kind of feels
+                # like a bug in the app code if you routinely have outputs that
+                # are executing successfully, only to be invalidated again
+                # within the same reactive flush--use priority to fix that.)
+                private$invalidatedOutputErrors$remove(name)
+                private$invalidatedOutputValues$remove(name)
+
+                # It's important that we return so that the existing output in
+                # the client remains untouched.
+                return()
+              }
 
               private$sendMessage(recalculating = list(
                 name = name, status = 'recalculated'
@@ -1316,23 +1345,29 @@ ShinySession <- R6Class(
         private$startCycle()
       }
     },
-    showProgress = function(id) {
+    showProgress = function(id, persistent=FALSE) {
       'Send a message to the client that recalculation of the output identified
       by \\code{id} is in progress. There is currently no mechanism for
       explicitly turning off progress for an output component; instead, all
-      progress is implicitly turned off when flushOutput is next called.'
+      progress is implicitly turned off when flushOutput is next called.
+
+      You can use persistent=TRUE if the progress for this output component
+      should stay on beyond the flushOutput (or any subsequent flushOutputs); in
+      that case, progress is only turned off (and the persistent flag cleared)
+      when the output component receives a value or error, or, if
+      showProgress(id, persistent=FALSE) is called and a subsequent flushOutput
+      occurs.'
 
       # If app is already closed, be sure not to show progress, otherwise we
       # will get an error because of the closed websocket
       if (self$closed)
         return()
 
-      if (id %in% private$progressKeys)
-        return()
+      if (!id %in% private$progressKeys) {
+        private$progressKeys <- c(private$progressKeys, id)
+      }
 
-      private$progressKeys <- c(private$progressKeys, id)
-
-      self$sendProgress('binding', list(id = id))
+      self$sendProgress('binding', list(id = id, persistent = persistent))
     },
     sendProgress = function(type, message) {
       private$sendMessage(

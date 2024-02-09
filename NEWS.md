@@ -1,26 +1,77 @@
-# shiny 1.7.4.9003
+# shiny (development version)
 
-## Full changelog
+## Breaking changes
 
-### Breaking changes
+* Both `conditionalPanel()` and `uiOutput()` are now styled with `display: contents` by default in Shiny apps that use Bootstrap 5. This means that the elements they contain are positioned as if they were direct children of the parent container holding the `conditionalPanel()` or `uiOutput()`. This is probably what most users intend when they use these functions, but it may break apps that applied styles directly to the container elements created by these two functions. In that case, you may include CSS rules to set `display: block` for the `.shiny-panel-conditional` or `.shiny-html-output` classes. (#3957, #3960)
 
-### New features and improvements
+## New features and improvements
 
-* Closed #789: Dynamic UI is now rendered asynchronously, thanks in part to the newly exported `Shiny.renderDependenciesAsync()`, `Shiny.renderHtmlAsync()`, and `Shiny.renderContentAsync()`. Importantly, this means `<script>` tags are now loaded asynchronously (the old way used `XMLHttpRequest`, which is synchronous). In addition, `Shiny` now manages a queue of async tasks (exposed via `Shiny.shinyapp.taskQueue`) so that order of execution is preserved. (#3666)
+* Added an console that shows some errors in the browser. Also provide better error messages for duplicate input and output bindings. (#3931)
+
+* Added a new `ExtendedTask` abstraction, for long-running asynchronous tasks that you don't want to block the rest of the app, or even the rest of the session. Designed to be used with new `bslib::input_task_button()` and `bslib::bind_task_button()` functions that help give user feedback and prevent extra button clicks. (#3958)
+
+## Bug fixes
+
+* Notifications are now constrained to the width of the viewport for window widths smaller the default notification panel size. (#3949)
+
+* Fixed #2392: `downloadButton()` now visibly returns its HTML tag so that it renders correctly in R Markdown and Quarto output. (Thanks to @fennovj, #2672)
+
+# shiny 1.8.0
+
+## Breaking changes
+
+* Closed #3899: The JS function `Shiny.bindAll()` is now asynchronous. This change is driven by the recent push toward making dynamic UI rendering asynchronous, which is necessary for [shinylive](https://shinylive.io/r) (and should've happened when it was first introduced in Shiny v1.7.5). The vast majority of existing `Shiny.bindAll()` uses should continue to work as before, but some cases may break if downstream code relies on it being synchronous (i.e., blocking the main thread). In this case, consider placing any downstream code in a `.then()` callback (or `await` the result in a `async` function). (#3929)
+  * Since `renderContent()` calls `bindAll()` (after it inserts content), it now returns a `Promise<void>` instead of `void`, which can be useful if downstream code needs to wait for the binding to complete.
+
+## New features and improvements
+
+* Updated `selectizeInput()`'s selectize.js dependency from v0.12.4 to v0.15.2. In addition to many bug fixes and improvements, this update also adds several new [plugin options](https://selectize.dev/docs/demos/plugins). (#3875)
+
+* Shiny's CSS styling (for things like `showNotification()`, `withProgress()`, `inputPanel()`, etc.), has been updated with `{bslib}`'s upcoming CSS-only dark mode feature in mind. (#3882, #3914)
+
+* Default styles for `showNotification()` were tweaked slightly to improve accessibility, sizing, and padding. (#3913)
+
+* Shiny inputs and `{htmlwidgets}` are no longer treated as draggable inside of `absolutePanel()`/`fixedPanel()` with `draggable = TRUE`. As a result, interactions like zooming and panning now work as expected with widgets like `{plotly}` and `{leaflet}` when they appear in a draggable panel. (#3752, #3933)
+
+* For `InputBinding`s, the `.receiveMessage()` method can now be asynchronous or synchronous (previously it could only be synchronous). (#3930)
+
+## Bug fixes
+
+* `fileInput()` no longer has unwanted round corners applied to the `buttonLabel`. (#3879)
+
+* Fixed #3898: `wrapFunctionLabel()` no longer throws an error if the `name` is longer than 10000 bytes. (#3903)
+
+# shiny 1.7.5.1
+
+## Bug fixes
+
+* On r-devel (R > 4.3.1), `isTruthy(NULL)` now returns `FALSE` (as it does with older versions of R). (#3906)
+
+# shiny 1.7.5
+
+## Possibly breaking changes
 
 * For `reactiveValues()` objects, whenever the `$names()` or `$values()` methods are called, the keys are now returned in the order that they were inserted. (#3774)
 
+* The value provided to `options(shiny.json.digits)` is now interpreted as number of _digits after the decimal_ instead of _significant digits_. To treat the value as significant digits, wrap it in `I()` (e.g., `options(shiny.json.digits = I(4))`). This new default behavior not only helps with reducing digits in testing snapshots, but is also more consistent with `{jsonlite}`'s default behavior. (#3819)
+
+## New features and improvements
+
+* Closed #789: Dynamic UI is now rendered asynchronously, thanks in part to the newly exported `Shiny.renderDependenciesAsync()`, `Shiny.renderHtmlAsync()`, and `Shiny.renderContentAsync()`. Importantly, this means `<script>` tags are now loaded asynchronously (the old way used `XMLHttpRequest`, which is synchronous). In addition, `Shiny` now manages a queue of async tasks (exposed via `Shiny.shinyapp.taskQueue`) so that order of execution is preserved. (#3666)
+
+* Fixes #3840: `updateSliderInput()` now warns when attempting to set invalid `min`, `max`, or `value` values. Sending an invalid update message to an input no longer causes other update messages to fail. (#3843)
+
+* `sliderInput()` now has a larger target area for clicking or tapping on the slider handle or range. (#3859)
+
+* Closed #2956: Component authors can now prevent Shiny from creating an input binding on specific elements by adding the `data-shiny-no-bind-input` attribute to the element. The attribute may have any or no value; its presence will prevent binding. This feature is primarily useful for input component authors who want to use standard HTML input elements without causing Shiny to create an input binding for them. Additionally, Shiny now adds custom classes to its inputs. For example, `checkboxInput()` now has a `shiny-input-checkbox` class. These custom classes may be utilized in future updates to Shiny's input binding logic. (#3861)
+
 * `Map` objects are now initialized at load time instead of build time. This avoids potential problems that could arise from storing `fastmap` objects into the built Shiny package. (#3775)
 
-* Allow for `shiny:::toJSON()` to respect if `digits=` has class `"AsIs"` which represents if `use_signif=` is `TRUE` or `FALSE`. This is useful for testing to keep the digits smaller. For example, setting `options(shiny.json.digits = 4)` will save 4 digits after the decimal, rather than the default of `I(16)` which will save 16 significant digits. (#3819)
-
-### Bug fixes
+## Bug fixes
 
 * Fixed #3771: Sometimes the error `ion.rangeSlider.min.js: i.stopPropagation is not a function` would appear in the JavaScript console. (#3772)
 
 * Fixed #3833: When `width` is provided to `textAreaInput()`, we now correctly set the width of the `<textarea>` element. (#3838)
-
-* Fixes #3840: `updateSliderInput()` now warns when attempting to set invalid `min`, `max`, or `value` values. Sending an invalid update message to an input no longer causes other update messages to fail. (#3843)
 
 
 # shiny 1.7.4.1

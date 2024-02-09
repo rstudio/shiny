@@ -62,7 +62,7 @@ async function renderContentAsync(
 
   if (where === "replace") {
     shinyInitializeInputs(el);
-    shinyBindAll(el);
+    await shinyBindAll(el);
   } else {
     const $parent = $(el).parent();
 
@@ -75,7 +75,7 @@ async function renderContentAsync(
       }
     }
     shinyInitializeInputs(scope);
-    shinyBindAll(scope);
+    await shinyBindAll(scope);
   }
 }
 
@@ -83,7 +83,7 @@ function renderContent(
   el: BindScope,
   content: string | { html: string; deps?: HtmlDep[] } | null,
   where: WherePosition = "replace"
-): void {
+): Promise<void> {
   if (where === "replace") {
     shinyUnbindAll(el);
   }
@@ -106,7 +106,7 @@ function renderContent(
 
   if (where === "replace") {
     shinyInitializeInputs(el);
-    shinyBindAll(el);
+    return shinyBindAll(el);
   } else {
     const $parent = $(el).parent();
 
@@ -119,7 +119,7 @@ function renderContent(
       }
     }
     shinyInitializeInputs(scope);
-    shinyBindAll(scope);
+    return shinyBindAll(scope);
   }
 }
 

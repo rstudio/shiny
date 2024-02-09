@@ -50,6 +50,7 @@ function initReactlog(): void {
       window.escape(shinyAppConfig().sessionId);
 
     // send notification
+    /* eslint-disable @typescript-eslint/no-floating-promises */
     $.get(url, function (result: "marked" | void) {
       if (result !== "marked") return;
 

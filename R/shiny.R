@@ -1059,8 +1059,9 @@ ShinySession <- R6Class(
       }
       # ..stacktraceon matches with the top-level ..stacktraceoff..
       withReactiveDomain(self, {
+        # TODO: should global callbacks be invoked before or after session specific ones?
         private$closedCallbacks$invoke(onError = printError, ..stacktraceon = TRUE)
-        .globals$onSessionEndedCallbacks$invoke(self, onError = printError, ..stacktraceon = TRUE)
+        .globals$onSessionEndedCallbacks$invoke(onError = printError, ..stacktraceon = TRUE)
         .globals$onSessionEndedCallbacks <- Callbacks$new()
       })
     },

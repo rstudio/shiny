@@ -360,6 +360,7 @@ ShinySession <- R6Class(
     .clientData = 'ANY', # Internal ReactiveValues object for other data sent from the client
     busyCount = 0L, # Number of observer callbacks that are pending. When 0, we are idle
     closedCallbacks = 'Callbacks',
+    globalClosedCallbacks = 'Callbacks',
     flushCallbacks = 'Callbacks',
     flushedCallbacks = 'Callbacks',
     inputReceivedCallbacks = 'Callbacks',
@@ -721,6 +722,7 @@ ShinySession <- R6Class(
       private$invalidatedOutputErrors <- Map$new()
       private$fileUploadContext <- FileUploadContext$new()
       private$closedCallbacks <- Callbacks$new()
+      private$globalClosedCallbacks <- Callbacks$new()
       private$flushCallbacks <- Callbacks$new()
       private$flushedCallbacks <- Callbacks$new()
       private$inputReceivedCallbacks <- Callbacks$new()
@@ -731,6 +733,10 @@ ShinySession <- R6Class(
       self$files <- Map$new()
       self$downloads <- Map$new()
       self$userData <- new.env(parent = emptyenv())
+
+      globalClosedCallback <- getOption("shiny.onSessionEnded")
+      if (is.function(globalClosedCallback))
+        private$globalClosedCallbacks$register(globalClosedCallback)
 
       self$input <- .createReactiveValues(private$.input, readonly=TRUE)
       self$clientData <- .createReactiveValues(private$.clientData, readonly=TRUE)
@@ -1059,10 +1065,8 @@ ShinySession <- R6Class(
       }
       # ..stacktraceon matches with the top-level ..stacktraceoff..
       withReactiveDomain(self, {
-        # TODO: should global callbacks be invoked before or after session specific ones?
         private$closedCallbacks$invoke(onError = printError, ..stacktraceon = TRUE)
-        .globals$onSessionEndedCallbacks$invoke(onError = printError, ..stacktraceon = TRUE)
-        .globals$onSessionEndedCallbacks <- Callbacks$new()
+        private$globalClosedCallbacks$invoke(onError = printError, ..stacktraceon = TRUE)
       })
     },
     isClosed = function() {
@@ -2407,11 +2411,7 @@ onFlushed <- function(fun, once = TRUE, session = getDefaultReactiveDomain()) {
 #'   invoked when the application exits, or when a session ends.
 #' @export
 onSessionEnded <- function(fun, session = getDefaultReactiveDomain()) {
-  if (is.null(session)) {
-    return(.globals$onSessionEndedCallbacks$register(fun))
-  } else {
-    session$onSessionEnded(fun)
-  }
+  session$onSessionEnded(fun)
 }
 
 
@@ -2431,7 +2431,6 @@ flushPendingSessions <- function() {
 }
 
 .globals$onStopCallbacks <- Callbacks$new()
-.globals$onSessionEndedCallbacks <- Callbacks$new()
 
 #' Run code after an application or session ends
 #'

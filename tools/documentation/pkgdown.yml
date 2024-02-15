@@ -145,6 +145,7 @@ reference:
       - viewer
       - isRunning
       - loadSupport
+      - availableExamples
   - title: Bookmarking state
     desc: Functions that are used for bookmarking and restoring state.
     contents:

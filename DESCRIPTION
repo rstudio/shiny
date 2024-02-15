@@ -176,6 +176,7 @@ Collate:
     'render-cached-plot.R'
     'render-plot.R'
     'render-table.R'
+    'run-example.R'
     'run-url.R'
     'runapp.R'
     'serializers.R'

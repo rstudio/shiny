@@ -16,8 +16,7 @@ NULL
 #'
 #' @name shiny-package
 #' @aliases shiny
-#' @docType package
-NULL
+"_PACKAGE"
 
 createUniqueId <- function(bytes, prefix = "", suffix = "") {
   withPrivateSeed({

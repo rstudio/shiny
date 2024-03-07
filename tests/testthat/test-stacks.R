@@ -194,6 +194,17 @@ test_that("shiny.error", {
   expect_null(caught)
 })
 
+test_that("shiny.error passes the error condition to the handler", {
+  caught <- NULL
+  op <- options(shiny.error = function(error) { caught <<- error })
+  on.exit(options(op))
+
+  # Regular errors can be handled by shiny.error
+  try(shiny:::shinyCallingHandlers(stop("boom")), silent = TRUE)
+  expect_equal(conditionMessage(caught), "boom")
+  expect_s3_class(caught, "error")
+})
+
 test_that("chained silent errors aren't intercepted (tidyverse/dplyr#5552)", {
   withr::local_options(
     shiny.error = function() caught <<- TRUE

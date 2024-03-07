@@ -59,7 +59,10 @@ deprecated functions in Shiny will be printed. See
 \code{\link[=shinyDeprecated]{shinyDeprecated()}} for more information.}
 \item{shiny.error (defaults to \code{NULL})}{This can be a function which is called when an error
 occurs. For example, \code{options(shiny.error=recover)} will result a
-the debugger prompt when an error occurs.}
+the debugger prompt when an error occurs. If the function takes an \code{error}
+argument, it will be called with the error object. For example,
+\code{options(shiny.error = function(error) { })} will receive the error
+condition object when an error occurs.}
 \item{shiny.fullstacktrace (defaults to \code{FALSE})}{Controls whether "pretty" (\code{FALSE}) or full
 stack traces (\code{TRUE}) are dumped to the console when errors occur during Shiny app execution.
 Pretty stack traces attempt to only show user-supplied code, but this pruning can't always

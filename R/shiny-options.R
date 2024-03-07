@@ -80,7 +80,10 @@ getShinyOption <- function(name, default = NULL) {
 #'   [shinyDeprecated()] for more information.}
 #' \item{shiny.error (defaults to `NULL`)}{This can be a function which is called when an error
 #'   occurs. For example, `options(shiny.error=recover)` will result a
-#'   the debugger prompt when an error occurs.}
+#'   the debugger prompt when an error occurs. If the function takes an `error`
+#'   argument, it will be called with the error object. For example,
+#'   `options(shiny.error = function(error) { })` will receive the error
+#'   condition object when an error occurs.}
 #' \item{shiny.fullstacktrace (defaults to `FALSE`)}{Controls whether "pretty" (`FALSE`) or full
 #'   stack traces (`TRUE`) are dumped to the console when errors occur during Shiny app execution.
 #'   Pretty stack traces attempt to only show user-supplied code, but this pruning can't always

@@ -126,6 +126,14 @@ deprecated functions in Shiny will be printed. See
 occurs. For example, <code>options(shiny.error=recover)</code> will result a
 the debugger prompt when an error occurs.</p></dd>
 
+<dt>shiny.error.unhandled (defaults to <code>NULL</code>)</dt>
+<dd><p>A function that will be
+called when an unhandled error that will stop the app session occurs. This
+function should take the error condition object as its first argument.
+Note that this function will not stop the error or prevent the session
+from ending, but it will provide you with an opportunity to log the error
+or clean up resources before the session is closed.</p></dd>
+
 <dt>shiny.fullstacktrace (defaults to <code>FALSE</code>)</dt>
 <dd><p>Controls whether "pretty" (<code>FALSE</code>) or full
 stack traces (<code>TRUE</code>) are dumped to the console when errors occur during Shiny app execution.

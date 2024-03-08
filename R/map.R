@@ -48,9 +48,12 @@ Map <- R6Class(
   )
 )
 
+#' @export
 as.list.Map <- function(x, ...) {
   x$values()
 }
+
+#' @export
 length.Map <- function(x) {
   x$size()
 }

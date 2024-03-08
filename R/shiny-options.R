@@ -81,6 +81,12 @@ getShinyOption <- function(name, default = NULL) {
 #' \item{shiny.error (defaults to `NULL`)}{This can be a function which is called when an error
 #'   occurs. For example, `options(shiny.error=recover)` will result a
 #'   the debugger prompt when an error occurs.}
+#' \item{shiny.error.unhandled (defaults to `NULL`)}{A function that will be
+#'   called when an unhandled error that will stop the app session occurs. This
+#'   function should take the error condition object as its first argument.
+#'   Note that this function will not stop the error or prevent the session
+#'   from ending, but it will provide you with an opportunity to log the error
+#'   or clean up resources before the session is closed.}
 #' \item{shiny.fullstacktrace (defaults to `FALSE`)}{Controls whether "pretty" (`FALSE`) or full
 #'   stack traces (`TRUE`) are dumped to the console when errors occur during Shiny app execution.
 #'   Pretty stack traces attempt to only show user-supplied code, but this pruning can't always

@@ -1044,7 +1044,25 @@ ShinySession <- R6Class(
       return(private$inputReceivedCallbacks$register(callback))
     },
     unhandledError = function(e) {
-      self$close()
+      "Call the user's unhandled error handler and then close the session."
+      on.exit(self$close())
+
+      handler  <- getShinyOption("shiny.error.unhandled", NULL)
+      if (is.null(handler)) return()
+
+      if (!is.function(handler) || length(formals(handler)) == 0) {
+        warning(
+          "`shiny.error.unhandled` must be a function ",
+          "that takes an error object as its first argument",
+          immediate. = TRUE
+        )
+        return()
+      }
+
+      tryCatch(
+        shinyCallingHandlers(handler(error)),
+        error = printError
+      )
     },
     close = function() {
       if (!self$closed) {

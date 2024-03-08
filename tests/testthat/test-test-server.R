@@ -507,6 +507,53 @@ test_that("session ended handlers work", {
   })
 })
 
+test_that("shiny.error.unhandled handles unhandled errors", {
+  caught <- NULL
+  op <- options(shiny.error.unhandled = function(error) {
+    caught <<- error
+    stop("bad user error handler")
+  })
+  on.exit(options(op))
+
+  server <- function(input, output, session) {
+    observe({
+      req(input$boom > 1)     # This signals an error that shiny handles
+      stop("unhandled error") # This error is *not* and brings down the app
+    })
+  }
+
+  testServer(server, {
+    session$setInputs(boom = 1)
+    # validation errors *are* handled and don't trigger the unhandled error
+    expect_null(caught)
+    expect_false(session$isEnded())
+    expect_false(session$isClosed())
+
+    # All errors are caught, even the error from the unhandled error handler
+    # And these errors are converted to warnings
+    expect_no_error(
+      expect_warning(
+        expect_warning(
+          # Setting input$boom = 2 throws two errors that become warnings:
+          # 1. The unhandled error in the observe
+          # 2. The error thrown by the user error handler
+          capture.output(
+            session$setInputs(boom = 2),
+            type = "message"
+          ),
+          "unhandled error"
+        ),
+        "bad user error handler"
+      )
+    )
+
+    expect_s3_class(caught, "error")
+    expect_equal(conditionMessage(caught), "unhandled error")
+    expect_true(session$isEnded())
+    expect_true(session$isClosed())
+  })
+})
+
 test_that("session flush handlers work", {
   server <- function(input, output, session) {
     rv <- reactiveValues(x = 0, flushCounter = 0, flushedCounter = 0,

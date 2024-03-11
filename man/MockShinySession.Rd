@@ -64,12 +64,20 @@ user. Always \code{NULL} for a \code{MockShinySesion}.}
 \code{MockShinySession}.}
 
 \item{\code{options}}{A list containing session-level shinyOptions.}
+
+\item{\code{unhandledErrorCallbacks}}{\code{Callbacks} called when an unhandled error
+occurs.
+output, or \code{NULL} if no output is currently executing.}
 }
 \if{html}{\out{</div>}}
 }
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
+\item{\code{unhandledErrorCallbacks}}{\code{Callbacks} called when an unhandled error
+occurs.
+output, or \code{NULL} if no output is currently executing.}
+
 \item{\code{files}}{For internal use only.}
 
 \item{\code{downloads}}{For internal use only.}
@@ -108,6 +116,7 @@ user. Always \code{NULL} for a \code{MockShinySesion}.}
 \item \href{#method-MockShinySession-getReturned}{\code{MockShinySession$getReturned()}}
 \item \href{#method-MockShinySession-genId}{\code{MockShinySession$genId()}}
 \item \href{#method-MockShinySession-rootScope}{\code{MockShinySession$rootScope()}}
+\item \href{#method-MockShinySession-onUnhandledError}{\code{MockShinySession$onUnhandledError()}}
 \item \href{#method-MockShinySession-unhandledError}{\code{MockShinySession$unhandledError()}}
 \item \href{#method-MockShinySession-freezeValue}{\code{MockShinySession$freezeValue()}}
 \item \href{#method-MockShinySession-onSessionEnded}{\code{MockShinySession$onSessionEnded()}}
@@ -513,6 +522,27 @@ The root \code{MockShinySession}.
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MockShinySession-onUnhandledError"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-onUnhandledError}{}}}
+\subsection{Method \code{onUnhandledError()}}{
+Add an unhandled error callback.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$onUnhandledError(callback)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{callback}}{The callback to add, which should accept an error object
+as its first argument.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A deregistration function.
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-MockShinySession-unhandledError"></a>}}
 \if{latex}{\out{\hypertarget{method-MockShinySession-unhandledError}{}}}
 \subsection{Method \code{unhandledError()}}{
@@ -610,7 +640,6 @@ executed.
 \subsection{Returns}{
 A list with with the \code{name} of the output. If no output is
 currently being executed, this will return \code{NULL}.
-output, or \code{NULL} if no output is currently executing.
 }
 }
 \if{html}{\out{<hr>}}

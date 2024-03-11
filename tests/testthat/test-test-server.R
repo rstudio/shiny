@@ -507,13 +507,13 @@ test_that("session ended handlers work", {
   })
 })
 
-test_that("shiny.error.unhandled handles unhandled errors", {
+test_that("session$unhandledError() handles unhandled errors", {
   caught <- NULL
-  op <- options(shiny.error.unhandled = function(error) {
+  clear <- onUnhandledError(function(error) {
     caught <<- error
     stop("bad user error handler")
   })
-  on.exit(options(op))
+  on.exit(clear())
 
   server <- function(input, output, session) {
     observe({

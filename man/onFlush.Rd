@@ -4,6 +4,7 @@
 \alias{onFlush}
 \alias{onFlushed}
 \alias{onSessionEnded}
+\alias{onUnhandledError}
 \title{Add callbacks for Shiny session events}
 \usage{
 onFlush(fun, once = TRUE, session = getDefaultReactiveDomain())
@@ -11,6 +12,8 @@ onFlush(fun, once = TRUE, session = getDefaultReactiveDomain())
 onFlushed(fun, once = TRUE, session = getDefaultReactiveDomain())
 
 onSessionEnded(fun, session = getDefaultReactiveDomain())
+
+onUnhandledError(fun, session = getDefaultReactiveDomain())
 }
 \arguments{
 \item{fun}{A callback function.}
@@ -23,10 +26,12 @@ re-run each time the event occurs. (Only for \code{onFlush} and
 }
 \description{
 These functions are for registering callbacks on Shiny session events.
-\code{onFlush} registers a function that will be called before Shiny flushes
-the reactive system. \code{onFlushed} registers a function that will be
-called after Shiny flushes the reactive system. \code{onSessionEnded}
-registers a function to be called after the client has disconnected.
+\code{onFlush} registers a function that will be called before Shiny flushes the
+reactive system. \code{onFlushed} registers a function that will be called after
+Shiny flushes the reactive system. \code{onUnhandledError} registers a function to
+be called when an unhandled error occurs before the session is closed.
+\code{onSessionEnded} registers a function to be called after the client has
+disconnected.
 }
 \details{
 These functions should be called within the application's server function.

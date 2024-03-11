@@ -362,6 +362,7 @@ ShinySession <- R6Class(
     flushCallbacks = 'Callbacks',
     flushedCallbacks = 'Callbacks',
     inputReceivedCallbacks = 'Callbacks',
+    unhandledErrorCallbacks = 'Callbacks',
     bookmarkCallbacks = 'Callbacks',
     bookmarkedCallbacks = 'Callbacks',
     restoreCallbacks = 'Callbacks',
@@ -723,6 +724,7 @@ ShinySession <- R6Class(
       private$flushCallbacks <- Callbacks$new()
       private$flushedCallbacks <- Callbacks$new()
       private$inputReceivedCallbacks <- Callbacks$new()
+      private$unhandledErrorCallbacks <- Callbacks$new()
       private$.input      <- ReactiveValues$new(dedupe = FALSE, label = "input")
       private$.clientData <- ReactiveValues$new(dedupe = TRUE, label = "clientData")
       private$timingRecorder <- ShinyServerTimingRecorder$new()
@@ -1043,9 +1045,14 @@ ShinySession <- R6Class(
       new data from the client."
       return(private$inputReceivedCallbacks$register(callback))
     },
+    onUnhandledError = function(callback) {
+      "Registers the callback to be invoked when an unhandled error occurs."
+      return(private$unhandledErrorCallbacks$register(callback))
+    },
     unhandledError = function(e) {
-      "Call the user's unhandled error handler and then close the session."
-      shinyUserErrorUnhandled(e)
+      "Call the global and session unhandled error handlers and then close the session."
+      private$unhandledErrorCallbacks$invoke(e, onError = printError)
+      .globals$onUnhandledErrorCallbacks$invoke(e, onError = printError)
       self$close()
     },
     close = function() {
@@ -2372,10 +2379,12 @@ getCurrentOutputInfo <- function(session = getDefaultReactiveDomain()) {
 #' Add callbacks for Shiny session events
 #'
 #' These functions are for registering callbacks on Shiny session events.
-#' `onFlush` registers a function that will be called before Shiny flushes
-#' the reactive system. `onFlushed` registers a function that will be
-#' called after Shiny flushes the reactive system. `onSessionEnded`
-#' registers a function to be called after the client has disconnected.
+#' `onFlush` registers a function that will be called before Shiny flushes the
+#' reactive system. `onFlushed` registers a function that will be called after
+#' Shiny flushes the reactive system. `onUnhandledError` registers a function to
+#' be called when an unhandled error occurs before the session is closed.
+#' `onSessionEnded` registers a function to be called after the client has
+#' disconnected.
 #'
 #' These functions should be called within the application's server function.
 #'
@@ -2406,6 +2415,24 @@ onFlushed <- function(fun, once = TRUE, session = getDefaultReactiveDomain()) {
 #' @export
 onSessionEnded <- function(fun, session = getDefaultReactiveDomain()) {
   session$onSessionEnded(fun)
+}
+
+.globals$onUnhandledErrorCallbacks <- Callbacks$new()
+
+#' @rdname onFlush
+#' @export
+onUnhandledError <- function(fun, session = getDefaultReactiveDomain()) {
+  if (!is.function(fun) || length(formals(fun)) == 0) {
+    rlang::abort(
+      "The unhandled error callback must be a function that takes an error object as its first argument."
+    )
+  }
+
+  if (is.null(session)) {
+    .globals$onUnhandledErrorCallbacks$register(fun)
+  } else {
+    session$onUnhandledError(fun)
+  }
 }
 
 

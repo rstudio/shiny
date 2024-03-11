@@ -560,10 +560,18 @@ MockShinySession <- R6Class(
     rootScope = function() {
       self
     },
+    #' @description Add an unhandled error callback.
+    #' @param callback The callback to add, which should accept an error object
+    #'   as its first argument.
+    #' @return A deregistration function.
+    onUnhandledError = function(callback) {
+      private$unhandledErrorCallbacks$register(callback)
+    },
     #' @description Called by observers when a reactive expression errors.
     #' @param e An error object.
     unhandledError = function(e) {
-      shinyUserErrorUnhandled(e)
+      private$unhandledErrorCallbacks$invoke(e, onError = printError)
+      .globals$onUnhandledErrorCallbacks$invoke(e, onError = printError)
       self$close()
     },
     #' @description Freeze a value until the flush cycle completes.
@@ -621,6 +629,9 @@ MockShinySession <- R6Class(
     flushedCBs = NULL,
     # @field endedCBs `Callbacks` called when session ends.
     endedCBs = NULL,
+    #' @field unhandledErrorCallbacks `Callbacks` called when an unhandled error
+    #'   occurs.
+    unhandledErrorCallbacks = Callbacks$new(),
     # @field timer `MockableTimerCallbacks` called at particular times.
     timer = NULL,
     # @field was_closed Set to `TRUE` once the session is closed.

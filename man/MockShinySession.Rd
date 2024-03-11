@@ -64,20 +64,12 @@ user. Always \code{NULL} for a \code{MockShinySesion}.}
 \code{MockShinySession}.}
 
 \item{\code{options}}{A list containing session-level shinyOptions.}
-
-\item{\code{unhandledErrorCallbacks}}{\code{Callbacks} called when an unhandled error
-occurs.
-output, or \code{NULL} if no output is currently executing.}
 }
 \if{html}{\out{</div>}}
 }
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
-\item{\code{unhandledErrorCallbacks}}{\code{Callbacks} called when an unhandled error
-occurs.
-output, or \code{NULL} if no output is currently executing.}
-
 \item{\code{files}}{For internal use only.}
 
 \item{\code{downloads}}{For internal use only.}
@@ -640,6 +632,7 @@ executed.
 \subsection{Returns}{
 A list with with the \code{name} of the output. If no output is
 currently being executed, this will return \code{NULL}.
+output, or \code{NULL} if no output is currently executing.
 }
 }
 \if{html}{\out{<hr>}}

@@ -629,8 +629,8 @@ MockShinySession <- R6Class(
     flushedCBs = NULL,
     # @field endedCBs `Callbacks` called when session ends.
     endedCBs = NULL,
-    #' @field unhandledErrorCallbacks `Callbacks` called when an unhandled error
-    #'   occurs.
+    # @field unhandledErrorCallbacks `Callbacks` called when an unhandled error
+    #   occurs.
     unhandledErrorCallbacks = Callbacks$new(),
     # @field timer `MockableTimerCallbacks` called at particular times.
     timer = NULL,

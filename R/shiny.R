@@ -1049,11 +1049,17 @@ ShinySession <- R6Class(
       "Registers the callback to be invoked when an unhandled error occurs."
       return(private$unhandledErrorCallbacks$register(callback))
     },
-    unhandledError = function(e) {
-      "Call the global and session unhandled error handlers and then close the session."
+    unhandledError = function(e, close = TRUE) {
+      "Call the global and session unhandled error handlers and then close the
+       session if the error is fatal."
+      if (close) {
+        class(e) <- c("shiny.error.fatal", class(e))
+      }
+
       private$unhandledErrorCallbacks$invoke(e, onError = printError)
       .globals$onUnhandledErrorCallbacks$invoke(e, onError = printError)
-      self$close()
+
+      if (close) self$close()
     },
     close = function() {
       if (!self$closed) {
@@ -1177,6 +1183,7 @@ ShinySession <- R6Class(
                       "logs or contact the app author for",
                       "clarification."))
                   }
+                  self$unhandledError(cond, close = FALSE)
                   invisible(structure(list(), class = "try-error", condition = cond))
                 }
               }
@@ -2445,7 +2452,10 @@ onSessionEnded <- function(fun, session = getDefaultReactiveDomain()) {
   session$onSessionEnded(fun)
 }
 
-.globals$onUnhandledErrorCallbacks <- Callbacks$new()
+.globals$onUnhandledErrorCallbacks <- NULL
+on_load({
+  .globals$onUnhandledErrorCallbacks <- Callbacks$new()
+})
 
 #' @rdname onFlush
 #' @export

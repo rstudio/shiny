@@ -457,6 +457,11 @@ MockShinySession <- R6Class(
           function(v){
             list(val = v, err = NULL)
           }, catch=function(e){
+            if (
+              !inherits(e, c("shiny.custom.error", "shiny.output.cancel", "shiny.output.progress", "shiny.silent.error"))
+            ) {
+              self$unhandledError(e, close = FALSE)
+            }
             list(val = NULL, err = e)
           })
       })
@@ -569,10 +574,15 @@ MockShinySession <- R6Class(
     },
     #' @description Called by observers when a reactive expression errors.
     #' @param e An error object.
-    unhandledError = function(e) {
+    unhandledError = function(e, close = TRUE) {
+      if (close) {
+        class(e) <- c("shiny.error.fatal", class(e))
+      }
+
       private$unhandledErrorCallbacks$invoke(e, onError = printError)
       .globals$onUnhandledErrorCallbacks$invoke(e, onError = printError)
-      self$close()
+
+      if (close) self$close()
     },
     #' @description Freeze a value until the flush cycle completes.
     #' @param x A `ReactiveValues` object.

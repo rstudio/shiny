@@ -548,9 +548,58 @@ test_that("session$unhandledError() handles unhandled errors", {
     )
 
     expect_s3_class(caught, "error")
+    expect_s3_class(caught, "shiny.error.fatal")
     expect_equal(conditionMessage(caught), "unhandled error")
     expect_true(session$isEnded())
     expect_true(session$isClosed())
+  })
+})
+
+test_that("session$unhandledError() handles unhandled render errors too", {
+  caught <- NULL
+  clear <- onUnhandledError(function(error) {
+    caught <<- error
+  })
+  on.exit(clear())
+
+  server <- function(input, output, session) {
+    output$text <- renderText({
+      req(input$boom > 1)     # This signals an error that shiny handles
+      stop("unhandled error") # This error shows up in the UI, doesn't crash app
+    })
+  }
+
+  testServer(server, {
+    expect_error(
+      {
+        session$setInputs(boom = 1)
+        output$text
+      },
+      class = "shiny.silent.error"
+    )
+    # validation errors are considered handled, aren't passed to unhandledError
+    expect_null(caught)
+    expect_false(session$isEnded())
+    expect_false(session$isClosed())
+
+    # Setting input$boom = 2 and calling output$text throws an error that isn't
+    # handled by shiny and is passed to unhandledError()
+    expect_error(
+      capture.output(
+        {
+          session$setInputs(boom = 2)
+          output$text
+        },
+        type = "message"
+      ),
+      "unhandled error"
+    )
+
+    expect_s3_class(caught, "error")
+    expect_false("shiny.error.fatal" %in% class(caught))
+    expect_equal(conditionMessage(caught), "unhandled error")
+    expect_false(session$isEnded())
+    expect_false(session$isClosed())
   })
 })
 

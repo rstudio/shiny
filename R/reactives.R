@@ -1216,7 +1216,7 @@ Observer <- R6Class(
 
             printError(e)
             if (!is.null(.domain)) {
-              .domain$unhandledError(e)
+              .domain$unhandledError(e, close = TRUE)
             }
           },
           finally = .domain$decrementBusyCount

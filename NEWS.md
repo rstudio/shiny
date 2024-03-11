@@ -8,9 +8,15 @@
 
 * Added an console that shows some errors in the browser. Also provide better error messages for duplicate input and output bindings. (#3931)
 
+* Added a new `ExtendedTask` abstraction, for long-running asynchronous tasks that you don't want to block the rest of the app, or even the rest of the session. Designed to be used with new `bslib::input_task_button()` and `bslib::bind_task_button()` functions that help give user feedback and prevent extra button clicks. (#3958)
+
+* Added a `shiny.error.unhandled` option that can be set to a function that will be called when an unhandled error occurs in a Shiny app. Note that this handler doesn't stop the error or prevent the session from closing, but it can be used to log the error or to clean up session-specific resources. (thanks @JohnCoene, #3989)
+
 ## Bug fixes
 
 * Notifications are now constrained to the width of the viewport for window widths smaller the default notification panel size. (#3949)
+
+* Fixed #2392: `downloadButton()` now visibly returns its HTML tag so that it renders correctly in R Markdown and Quarto output. (Thanks to @fennovj, #2672)
 
 # shiny 1.8.0
 

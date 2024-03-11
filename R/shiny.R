@@ -16,8 +16,7 @@ NULL
 #'
 #' @name shiny-package
 #' @aliases shiny
-#' @docType package
-NULL
+"_PACKAGE"
 
 createUniqueId <- function(bytes, prefix = "", suffix = "") {
   withPrivateSeed({
@@ -215,7 +214,7 @@ workerId <- local({
 #'   Sends a custom message to the web page. `type` must be a
 #'   single-element character vector giving the type of message, while
 #'   `message` can be any jsonlite-encodable value. Custom messages
-#'   have no meaning to Shiny itself; they are used soley to convey information
+#'   have no meaning to Shiny itself; they are used solely to convey information
 #'   to custom JavaScript logic in the browser. You can do this by adding
 #'   JavaScript code to the browser that calls
 #'   \code{Shiny.addCustomMessageHandler(type, function(message){...})}
@@ -1045,6 +1044,8 @@ ShinySession <- R6Class(
       return(private$inputReceivedCallbacks$register(callback))
     },
     unhandledError = function(e) {
+      "Call the user's unhandled error handler and then close the session."
+      shinyUserErrorUnhandled(e)
       self$close()
     },
     close = function() {

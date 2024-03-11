@@ -19,3 +19,49 @@ includes extensive annotated examples.
 \seealso{
 \link{shiny-options} for documentation about global options.
 }
+\author{
+\strong{Maintainer}: Winston Chang \email{winston@posit.co} (\href{https://orcid.org/0000-0002-1576-2126}{ORCID})
+
+Authors:
+\itemize{
+  \item Joe Cheng \email{joe@posit.co}
+  \item JJ Allaire \email{jj@posit.co}
+  \item Carson Sievert \email{carson@posit.co} (\href{https://orcid.org/0000-0002-4958-2844}{ORCID})
+  \item Barret Schloerke \email{barret@posit.co} (\href{https://orcid.org/0000-0001-9986-114X}{ORCID})
+  \item Yihui Xie \email{yihui@posit.co}
+  \item Jeff Allen
+  \item Jonathan McPherson \email{jonathan@posit.co}
+  \item Alan Dipert
+  \item Barbara Borges
+}
+
+Other contributors:
+\itemize{
+  \item Posit Software, PBC [copyright holder, funder]
+  \item  jQuery Foundation (jQuery library and jQuery UI library) [copyright holder]
+  \item  jQuery contributors (jQuery library; authors listed in inst/www/shared/jquery-AUTHORS.txt) [contributor, copyright holder]
+  \item  jQuery UI contributors (jQuery UI library; authors listed in inst/www/shared/jqueryui/AUTHORS.txt) [contributor, copyright holder]
+  \item Mark Otto (Bootstrap library) [contributor]
+  \item Jacob Thornton (Bootstrap library) [contributor]
+  \item  Bootstrap contributors (Bootstrap library) [contributor]
+  \item  Twitter, Inc (Bootstrap library) [copyright holder]
+  \item Prem Nawaz Khan (Bootstrap accessibility plugin) [contributor]
+  \item Victor Tsaran (Bootstrap accessibility plugin) [contributor]
+  \item Dennis Lembree (Bootstrap accessibility plugin) [contributor]
+  \item Srinivasu Chakravarthula (Bootstrap accessibility plugin) [contributor]
+  \item Cathy O'Connor (Bootstrap accessibility plugin) [contributor]
+  \item  PayPal, Inc (Bootstrap accessibility plugin) [copyright holder]
+  \item Stefan Petre (Bootstrap-datepicker library) [contributor, copyright holder]
+  \item Andrew Rowls (Bootstrap-datepicker library) [contributor, copyright holder]
+  \item Brian Reavis (selectize.js library) [contributor, copyright holder]
+  \item Salmen Bejaoui (selectize-plugin-a11y library) [contributor, copyright holder]
+  \item Denis Ineshin (ion.rangeSlider library) [contributor, copyright holder]
+  \item Sami Samhuri (Javascript strftime library) [contributor, copyright holder]
+  \item  SpryMedia Limited (DataTables library) [contributor, copyright holder]
+  \item John Fraser (showdown.js library) [contributor, copyright holder]
+  \item John Gruber (showdown.js library) [contributor, copyright holder]
+  \item Ivan Sagalaev (highlight.js library) [contributor, copyright holder]
+  \item  R Core Team (tar implementation from R) [contributor, copyright holder]
+}
+
+}

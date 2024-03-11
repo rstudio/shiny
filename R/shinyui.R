@@ -69,6 +69,21 @@ renderPage <- function(ui, showcase=0, testMode=FALSE) {
       )
   }
 
+  if (in_devmode()) {
+    # If we're in dev mode, add a simple script to the head that injects a
+    # global variable for the client to use to detect dev mode.
+    shiny_deps[[length(shiny_deps) + 1]] <-
+      htmlDependency(
+        "shiny-devmode",
+        get_package_version("shiny"),
+        src = "www/shared",
+        package = "shiny",
+        head="<script>window.__SHINY_DEV_MODE__ = true;</script>",
+        all_files = FALSE
+      )
+  }
+
+
   html <- renderDocument(ui, shiny_deps, processDep = createWebDependency)
   enc2utf8(paste(collapse = "\n", html))
 }
@@ -159,7 +174,7 @@ shinyDependencyCSS <- function(theme) {
 #' This function is kept for backwards compatibility with older applications. It
 #' returns the value that is passed to it.
 #'
-#' @param ui A user interace definition
+#' @param ui A user interface definition
 #' @return The user interface definition, without modifications or side effects.
 #' @keywords internal
 #' @export

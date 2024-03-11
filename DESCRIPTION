@@ -93,7 +93,6 @@ Imports:
     glue (>= 1.3.2),
     bslib (>= 0.3.0),
     cachem,
-    ellipsis,
     lifecycle (>= 0.2.0)
 Suggests:
     datasets,
@@ -132,6 +131,7 @@ Collate:
     'deprecated.R'
     'devmode.R'
     'diagnose.R'
+    'extended-task.R'
     'fileupload.R'
     'graph.R'
     'reactives.R'
@@ -203,7 +203,7 @@ Collate:
     'version_selectize.R'
     'version_strftime.R'
     'viewer.R'
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RdMacros: lifecycle

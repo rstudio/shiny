@@ -493,6 +493,30 @@ shinyCallingHandlers <- function(expr) {
   )
 }
 
+shinyUserErrorUnhandled <- function(error, handler = NULL) {
+  if (is.null(handler)) {
+    handler <- getShinyOption(
+      "shiny.error.unhandled",
+      getOption("shiny.error.unhandled", NULL)
+    )
+  }
+
+  if (is.null(handler)) return()
+
+  if (!is.function(handler) || length(formals(handler)) == 0) {
+    warning(
+      "`shiny.error.unhandled` must be a function ",
+      "that takes an error object as its first argument",
+      immediate. = TRUE
+    )
+    return()
+  }
+
+  tryCatch(
+    shinyCallingHandlers(handler(error)),
+    error = printError
+  )
+}
 
 #' Register a function with the debugger (if one is active).
 #'
@@ -1093,7 +1117,7 @@ need <- function(expr, message = paste(label, "must be provided"), label) {
 #'
 #' You can use `req(FALSE)` (i.e. no condition) if you've already performed
 #' all the checks you needed to by that point and just want to stop the reactive
-#' chain now. There is no advantange to this, except perhaps ease of readibility
+#' chain now. There is no advantage to this, except perhaps ease of readability
 #' if you have a complicated condition to check for (or perhaps if you'd like to
 #' divide your condition into nested `if` statements).
 #'

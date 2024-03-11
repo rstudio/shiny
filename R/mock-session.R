@@ -563,6 +563,7 @@ MockShinySession <- R6Class(
     #' @description Called by observers when a reactive expression errors.
     #' @param e An error object.
     unhandledError = function(e) {
+      shinyUserErrorUnhandled(e)
       self$close()
     },
     #' @description Freeze a value until the flush cycle completes.

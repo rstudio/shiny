@@ -540,7 +540,7 @@ A deregistration function.
 \subsection{Method \code{unhandledError()}}{
 Called by observers when a reactive expression errors.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$unhandledError(e)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$unhandledError(e, close = TRUE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{

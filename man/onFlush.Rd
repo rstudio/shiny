@@ -32,19 +32,45 @@ Shiny flushes the reactive system. \code{onUnhandledError} registers a function 
 be called when an unhandled error occurs before the session is closed.
 \code{onSessionEnded} registers a function to be called after the client has
 disconnected.
-}
-\details{
+
 These functions should be called within the application's server function.
 
 All of these functions return a function which can be called with no
 arguments to cancel the registration.
 }
+\section{Unhandled Errors}{
+
+Unhandled errors are errors that aren't otherwise handled by Shiny or by the
+application logic. In other words, they are errors that will either cause the
+application to crash or will result in "Error" output in the UI.
+
+You can use \code{onUnhandledError} to register a function that will be called
+when an unhandled error occurs. This function will be called with the error
+object as its first argument. If the error is fatal and will result in the
+session closing, the error condition will have the \code{shiny.error.fatal} class.
+
+Note that the \code{onUnhandledError} callbacks don't allow you to prevent the app
+from closing or to modify the error condition. Instead, they are intended to
+give you an opportunity to log the error or perform other cleanup operations.
+}
+
 \examples{
 \dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(shiny)
 
 ui <- fixedPage(
-  actionButton("crash", "Crash the app!"),
+  markdown(c(
+    "Set the number to 8 or higher to cause an error",
+    "in the `renderText()` output."
+  )),
+  sliderInput("number", "Number", 0, 10, 4),
+  textOutput("text"),
+  hr(),
+  markdown(c(
+    "Click the button below to crash the app with an unhandled error",
+    "in an `observe()` block."
+  )),
+  actionButton("crash", "Crash the app!")
 )
 
 log_event <- function(level, ...) {
@@ -56,14 +82,23 @@ server <- function(input, output, session) {
   log_event("INFO", "Session started")
 
   onUnhandledError(function(err) {
-    log_event("ERROR", conditionMessage(err))
+    # log the unhandled error
+    level <- if (inherits(err, "shiny.error.fatal")) "FATAL" else "ERROR"
+    log_event(level, conditionMessage(err))
   })
 
-  onSessionEnded(function() {
+  onStop(function() {
     log_event("INFO", "Session ended")
   })
 
   observeEvent(input$crash, stop("Oops, an unhandled error happened!"))
+
+  output$text <- renderText({
+    if (input$number > 7) {
+      stop("that's too high!")
+    }
+    sprintf("You picked number \%d.", input$number)
+  })
 }
 
 shinyApp(ui, server)

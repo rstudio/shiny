@@ -351,20 +351,6 @@ loadSupport <- function(appDir=NULL, renv=new.env(parent=globalenv()), globalren
     appDir <- findEnclosingApp(".")
   }
 
-  helpersDir <- file.path(appDir, "R")
-  disabled <- list.files(helpersDir, pattern="^_disable_autoload\\.r$", recursive=FALSE, ignore.case=TRUE)
-
-  descFile <- file.path.ci(appDir, "DESCRIPTION")
-  if (!disabled && (file.exists(file.path.ci(appDir, "NAMESPACE")) ||
-      (file.exists(descFile) &&
-       identical(as.character(read.dcf(descFile, fields = "Type")), "Package"))))
-  {
-    warning(
-      "Loading R/ subdirectory for Shiny application, but this directory appears ",
-      "to contain an R package. Sourcing files in R/ may cause unexpected behavior."
-    )
-  }
-
   if (!is.null(globalrenv)){
     # Evaluate global.R, if it exists.
     globalPath <- file.path.ci(appDir, "global.R")
@@ -375,9 +361,22 @@ loadSupport <- function(appDir=NULL, renv=new.env(parent=globalenv()), globalren
     }
   }
 
+  helpersDir <- file.path(appDir, "R")
+  disabled <- list.files(helpersDir, pattern="^_disable_autoload\\.r$", recursive=FALSE, ignore.case=TRUE)
 
-  if (length(disabled) > 0){
+  if (length(disabled) > 0) {
     return(invisible(renv))
+  }
+
+  descFile <- file.path.ci(appDir, "DESCRIPTION")
+  if (
+    file.exists(file.path.ci(appDir, "NAMESPACE")) ||
+      (file.exists(descFile) && identical(as.character(read.dcf(descFile, fields = "Type")), "Package"))
+  ) {
+    warning(
+      "Loading R/ subdirectory for Shiny application, but this directory appears ",
+      "to contain an R package. Sourcing files in R/ may cause unexpected behavior."
+    )
   }
 
   helpers <- list.files(helpersDir, pattern="\\.[rR]$", recursive=FALSE, full.names=TRUE)

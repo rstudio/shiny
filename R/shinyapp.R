@@ -368,16 +368,7 @@ loadSupport <- function(appDir=NULL, renv=new.env(parent=globalenv()), globalren
     return(invisible(renv))
   }
 
-  descFile <- file.path.ci(appDir, "DESCRIPTION")
-  if (
-    file.exists(file.path.ci(appDir, "NAMESPACE")) ||
-      (file.exists(descFile) && identical(as.character(read.dcf(descFile, fields = "Type")), "Package"))
-  ) {
-    warning(
-      "Loading R/ subdirectory for Shiny application, but this directory appears ",
-      "to contain an R package. Sourcing files in R/ may cause unexpected behavior."
-    )
-  }
+  warn_if_app_dir_is_package(appDir)
 
   helpers <- list.files(helpersDir, pattern="\\.[rR]$", recursive=FALSE, full.names=TRUE)
   # Ensure files in R/ are sorted according to the 'C' locale before sourcing.
@@ -391,6 +382,26 @@ loadSupport <- function(appDir=NULL, renv=new.env(parent=globalenv()), globalren
   })
 
   invisible(renv)
+}
+
+warn_if_app_dir_is_package <- function(appDir) {
+  has_namespace <- file.exists(file.path.ci(appDir, "NAMESPACE"))
+  has_desc_pkg <- FALSE
+
+  if (!has_namespace) {
+    descFile <- file.path.ci(appDir, "DESCRIPTION")
+
+    has_desc_pkg <-
+      file.exists(descFile) &&
+      identical(as.character(read.dcf(descFile, fields = "Type")), "Package")
+  }
+
+  if (has_namespace || has_desc_pkg) {
+    warning(
+      "Loading R/ subdirectory for Shiny application, but this directory appears ",
+      "to contain an R package. Sourcing files in R/ may cause unexpected behavior."
+    )
+  }
 }
 
 # This reads in an app dir for a single-file application (e.g. app.R), and

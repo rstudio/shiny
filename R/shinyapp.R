@@ -361,9 +361,10 @@ loadSupport <- function(appDir=NULL, renv=new.env(parent=globalenv()), globalren
     }
   }
 
-  helpersDir <- file.path(appDir, "R")
-  disabled <- list.files(helpersDir, pattern="^_disable_autoload\\.r$", recursive=FALSE, ignore.case=TRUE)
 
+  helpersDir <- file.path(appDir, "R")
+
+  disabled <- list.files(helpersDir, pattern="^_disable_autoload\\.r$", recursive=FALSE, ignore.case=TRUE)
   if (length(disabled) > 0) {
     return(invisible(renv))
   }

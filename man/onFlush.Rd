@@ -39,6 +39,36 @@ These functions should be called within the application's server function.
 All of these functions return a function which can be called with no
 arguments to cancel the registration.
 }
+\examples{
+\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+library(shiny)
+
+ui <- fixedPage(
+  actionButton("crash", "Crash the app!"),
+)
+
+log_event <- function(level, ...) {
+  ts <- strftime(Sys.time(), " [\%F \%T] ")
+  message(level, ts, ...)
+}
+
+server <- function(input, output, session) {
+  log_event("INFO", "Session started")
+
+  onUnhandledError(function(err) {
+    log_event("ERROR", conditionMessage(err))
+  })
+
+  onSessionEnded(function() {
+    log_event("INFO", "Session ended")
+  })
+
+  observeEvent(input$crash, stop("Oops, an unhandled error happened!"))
+}
+
+shinyApp(ui, server)
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 \code{\link[=onStop]{onStop()}} for registering callbacks that will be
 invoked when the application exits, or when a session ends.

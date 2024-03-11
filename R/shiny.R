@@ -2397,6 +2397,34 @@ getCurrentOutputInfo <- function(session = getDefaultReactiveDomain()) {
 #'   `onFlushed`.)
 #' @param session A shiny session object.
 #'
+#' @examplesIf interactive()
+#' library(shiny)
+#'
+#' ui <- fixedPage(
+#'   actionButton("crash", "Crash the app!"),
+#' )
+#'
+#' log_event <- function(level, ...) {
+#'   ts <- strftime(Sys.time(), " [%F %T] ")
+#'   message(level, ts, ...)
+#' }
+#'
+#' server <- function(input, output, session) {
+#'   log_event("INFO", "Session started")
+#'
+#'   onUnhandledError(function(err) {
+#'     log_event("ERROR", conditionMessage(err))
+#'   })
+#'
+#'   onSessionEnded(function() {
+#'     log_event("INFO", "Session ended")
+#'   })
+#'
+#'   observeEvent(input$crash, stop("Oops, an unhandled error happened!"))
+#' }
+#'
+#' shinyApp(ui, server)
+#'
 #' @export
 onFlush <- function(fun, once = TRUE, session = getDefaultReactiveDomain()) {
   session$onFlush(fun, once = once)

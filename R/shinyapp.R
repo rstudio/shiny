@@ -400,7 +400,8 @@ warn_if_app_dir_is_package <- function(appDir) {
   if (has_namespace || has_desc_pkg) {
     warning(
       "Loading R/ subdirectory for Shiny application, but this directory appears ",
-      "to contain an R package. Sourcing files in R/ may cause unexpected behavior."
+      "to contain an R package. Sourcing files in R/ may cause unexpected behavior. ",
+      "See `?loadSupport` for more details."
     )
   }
 }

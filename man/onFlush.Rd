@@ -44,14 +44,15 @@ Unhandled errors are errors that aren't otherwise handled by Shiny or by the
 application logic. In other words, they are errors that will either cause the
 application to crash or will result in "Error" output in the UI.
 
-You can use \code{onUnhandledError} to register a function that will be called
+You can use \code{onUnhandledError()} to register a function that will be called
 when an unhandled error occurs. This function will be called with the error
 object as its first argument. If the error is fatal and will result in the
 session closing, the error condition will have the \code{shiny.error.fatal} class.
 
-Note that the \code{onUnhandledError} callbacks don't allow you to prevent the app
-from closing or to modify the error condition. Instead, they are intended to
-give you an opportunity to log the error or perform other cleanup operations.
+Note that the \code{onUnhandledError()} callbacks cannot be used to prevent the
+app from closing or to modify the error condition. Instead, they are intended
+to give you an opportunity to log the error or perform other cleanup
+operations.
 }
 
 \examples{

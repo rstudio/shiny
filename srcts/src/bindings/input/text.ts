@@ -109,10 +109,13 @@ class TextInputBinding extends TextInputBindingBase {
       placeholder: el.placeholder,
     };
   }
-  receiveMessage(el: TextHTMLElement, data: TextReceiveMessageData): void {
+  async receiveMessage(
+    el: TextHTMLElement,
+    data: TextReceiveMessageData
+  ): Promise<void> {
     if (hasDefinedProperty(data, "value")) this.setValue(el, data.value);
 
-    updateLabel(data.label, getLabelNode(el));
+    await updateLabel(data.label, getLabelNode(el));
 
     if (hasDefinedProperty(data, "placeholder"))
       el.placeholder = data.placeholder;

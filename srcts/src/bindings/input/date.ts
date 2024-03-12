@@ -296,10 +296,13 @@ class DateInputBinding extends DateInputBindingBase {
       startview: startview,
     };
   }
-  receiveMessage(el: HTMLElement, data: DateReceiveMessageData): void {
+  async receiveMessage(
+    el: HTMLElement,
+    data: DateReceiveMessageData
+  ): Promise<void> {
     const $input = $(el).find("input");
 
-    updateLabel(data.label, this._getLabelNode(el));
+    await updateLabel(data.label, this._getLabelNode(el));
 
     if (hasDefinedProperty(data, "min")) this._setMin($input[0], data.min);
 

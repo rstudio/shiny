@@ -1755,3 +1755,11 @@ cnd_some <- function(.cnd, .p, ...) {
 
   FALSE
 }
+
+`%convert%` <- function(lhs, rhs) {
+  if (is.null(lhs)) {
+    lhs
+  } 
+
+  rhs(lhs)
+}

@@ -119,8 +119,8 @@ function makeResizeFilter(
   el: HTMLElement,
   func: (
     width: HTMLElement["offsetWidth"],
-    height: HTMLElement["offsetHeight"]
-  ) => void
+    height: HTMLElement["offsetHeight"],
+  ) => void,
 ): () => void {
   let lastSize: LastSizeInterface = {};
 
@@ -170,7 +170,7 @@ function scopeExprToFunc(expr: string): (scope: unknown) => boolean {
           console.error('Error evaluating expression: ${exprEscaped}');
           throw e;
         }
-      }`
+      }`,
     );
   } catch (e) {
     console.error("Error parsing expression: " + expr);
@@ -192,7 +192,7 @@ function asArray<T>(value: T | T[] | null | undefined): T[] {
 // bindings by priority and insertion order.
 function mergeSort<Item>(
   list: Item[],
-  sortfunc: (a: Item, b: Item) => boolean | number
+  sortfunc: (a: Item, b: Item) => boolean | number,
 ): Item[] {
   function merge(a: Item[], b: Item[]) {
     let ia = 0;
@@ -241,7 +241,7 @@ function $escape(val: string | undefined): string | undefined {
 // function from lodash.
 function mapValues<T extends { [key: string]: any }, R>(
   obj: T,
-  f: (value: MapValuesUnion<T>, key: string, object: typeof obj) => R
+  f: (value: MapValuesUnion<T>, key: string, object: typeof obj) => R,
 ): MapWithResult<T, R> {
   const newObj = {} as MapWithResult<T, R>;
 
@@ -302,7 +302,7 @@ function equal(...args: unknown[]): boolean {
 const compareVersion = function (
   a: string,
   op: "<" | "<=" | "==" | ">" | ">=",
-  b: string
+  b: string,
 ): boolean {
   function versionParts(ver: string) {
     return (ver + "")
@@ -338,7 +338,7 @@ const compareVersion = function (
 
 function updateLabel(
   labelTxt: string | undefined,
-  labelNode: JQuery<HTMLElement>
+  labelNode: JQuery<HTMLElement>,
 ): void {
   // Only update if label was specified in the update method
   if (typeof labelTxt === "undefined") return;
@@ -352,7 +352,7 @@ function updateLabel(
   if (emptyLabel) {
     labelNode.addClass("shiny-label-null");
   } else {
-    labelNode.text(labelTxt);
+    labelNode.html(labelTxt);
     labelNode.removeClass("shiny-label-null");
   }
 }

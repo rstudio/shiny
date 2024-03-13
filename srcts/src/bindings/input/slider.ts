@@ -259,11 +259,7 @@ class SliderInputBinding extends TextInputBindingBase {
     }
   }
   getRatePolicy(el: HTMLElement): { policy: "debounce"; delay: 250 } {
-    return {
-      policy: "debounce",
-      delay: 250,
-    };
-    el;
+    return null as any;
   }
   // TODO-barret Why not implemented?
   getState(el: HTMLInputElement): void {

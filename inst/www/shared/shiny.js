@@ -9094,11 +9094,7 @@
     }, {
       key: "getRatePolicy",
       value: function getRatePolicy(el) {
-        return {
-          policy: "debounce",
-          delay: 250
-        };
-        el;
+        return null;
       }
     }, {
       key: "getState",

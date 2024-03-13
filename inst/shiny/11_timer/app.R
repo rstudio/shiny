@@ -2,10 +2,8 @@ library(shiny)
 library(bslib)
 
 # Define UI for displaying current time ----
-ui <- page_fillable(
-
+ui <- page_fluid(
   h2(textOutput("currentTime"))
-
 )
 
 # Define server logic to show current time, update every second ----

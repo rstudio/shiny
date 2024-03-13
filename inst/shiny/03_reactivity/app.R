@@ -6,9 +6,9 @@ ui <- page_sidebar(
 
   # App title ----
   title = "Reactivity",
+
   # Sidebar panel for inputs ----
-  sidebar =
-    sidebar(
+  sidebar = sidebar(
 
       # Input: Text for providing a caption ----
       # Note: Changes made to the caption in the textInput control
@@ -26,17 +26,16 @@ ui <- page_sidebar(
       numericInput(inputId = "obs",
                    label = "Number of observations to view:",
                    value = 10)
+  ),
 
-    ),
+  # Output: Formatted text for caption ----
+  h3(textOutput("caption", container = span)),
 
-    # Output: Formatted text for caption ----
-    h3(textOutput("caption", container = span)),
+  # Output: Verbatim text for data summary ----
+  verbatimTextOutput("summary"),
 
-    # Output: Verbatim text for data summary ----
-    verbatimTextOutput("summary"),
-
-    # Output: HTML table with requested number of observations ----
-    tableOutput("view")
+  # Output: HTML table with requested number of observations ----
+  tableOutput("view")
 )
 
 # Define server logic to summarize and view selected dataset ----

@@ -6,9 +6,9 @@ ui <- page_sidebar(
 
   # App title ----
   title = "Sliders",
+
   # Sidebar panel for inputs ----
-  sidebar =
-    sidebar(
+  sidebar = sidebar(
 
       # Input: Simple integer interval ----
       sliderInput("integer", "Integer:",
@@ -40,10 +40,10 @@ ui <- page_sidebar(
                   animate =
                     animationOptions(interval = 300, loop = TRUE))
 
-    ),
+  ),
 
-    # Output: Table summarizing the values entered ----
-    tableOutput("values")
+  # Output: Table summarizing the values entered ----
+  tableOutput("values")
 )
 
 # Define server logic for slider examples ----

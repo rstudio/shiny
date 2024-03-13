@@ -8,18 +8,24 @@ ui <- page_sidebar(
   title = "Shiny Text",
 
   # Sidebar panel for inputs ----
-  sidebar =
-    sidebar(
-      # Input: Selector for choosing dataset ----
-      selectInput(inputId = "dataset",
-                  label = "Choose a dataset:",
-                  choices = c("rock", "pressure", "cars")),
+  sidebar = sidebar(
 
-      # Input: Numeric entry for number of obs to view ----
-      numericInput(inputId = "obs",
-                   label = "Number of observations to view:",
-                   value = 10)
+    # Input: Selector for choosing dataset ----
+    selectInput(
+      inputId = "dataset",
+      label = "Choose a dataset:",
+      choices = c("rock", "pressure", "cars")
     ),
+
+    # Input: Numeric entry for number of obs to view ----
+    numericInput(
+      inputId = "obs",
+      label = "Number of observations to view:",
+      value = 10
+    )
+
+  ),
+
   # Output: Verbatim text for data summary ----
   verbatimTextOutput("summary"),
 

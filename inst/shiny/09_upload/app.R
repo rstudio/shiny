@@ -6,9 +6,9 @@ ui <- page_sidebar(
 
   # App title ----
   title = "Uploading Files",
+
   # Sidebar panel for inputs ----
-  sidebar =
-    sidebar(
+  sidebar = sidebar(
 
       # Input: Select a file ----
       fileInput("file1", "Choose CSV File",
@@ -46,10 +46,10 @@ ui <- page_sidebar(
                                All = "all"),
                    selected = "head")
 
-    ),
+  ),
 
-    # Output: Data file ----
-    tableOutput("contents")
+  # Output: Data file ----
+  tableOutput("contents")
 )
 
 # Define server logic to read selected file ----

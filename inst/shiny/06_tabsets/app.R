@@ -6,7 +6,7 @@ library(bslib)
 ui <- page_sidebar(
 
   # App title ----
-  title ="Tabsets",
+  title = "Tabsets",
 
   # Sidebar panel for inputs ----
   sidebar = sidebar(

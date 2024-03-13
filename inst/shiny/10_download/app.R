@@ -6,9 +6,9 @@ ui <- page_sidebar(
 
   # App title ----
   title = "Downloading Data",
+
   # Sidebar panel for inputs ----
-  sidebar =
-    sidebar(
+  sidebar = sidebar(
 
       # Input: Choose dataset ----
       selectInput("dataset", "Choose a dataset:",
@@ -17,9 +17,9 @@ ui <- page_sidebar(
       # Button
       downloadButton("downloadData", "Download")
 
-    ),
+  ),
 
-    tableOutput("table")
+  tableOutput("table")
 )
 
 # Define server logic to display and download selected file ----

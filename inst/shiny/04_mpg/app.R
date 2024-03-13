@@ -15,9 +15,9 @@ ui <- page_sidebar(
 
   # App title ----
   title = "Miles Per Gallon",
+
   # Sidebar panel for inputs ----
-  sidebar =
-    sidebarPanel(
+  sidebar = sidebar(
 
       # Input: Selector for variable to plot against mpg ----
       selectInput("variable", "Variable:",
@@ -28,13 +28,13 @@ ui <- page_sidebar(
       # Input: Checkbox for whether outliers should be included ----
       checkboxInput("outliers", "Show outliers", TRUE)
 
-    ),
+  ),
 
-    # Output: Formatted text for caption ----
-    h3(textOutput("caption")),
+  # Output: Formatted text for caption ----
+  h3(textOutput("caption")),
 
-    # Output: Plot of the requested variable against mpg ----
-    plotOutput("mpgPlot")
+  # Output: Plot of the requested variable against mpg ----
+  plotOutput("mpgPlot")
 )
 
 # Define server logic to plot various variables against mpg ----

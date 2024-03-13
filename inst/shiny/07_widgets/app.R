@@ -6,9 +6,9 @@ ui <- page_sidebar(
 
   # App title ----
   title = "More Widgets",
+
   # Sidebar panel for inputs ----
-  sidebar =
-    sidebar(
+  sidebar = sidebar(
 
       # Input: Select a dataset ----
       selectInput("dataset", "Choose a dataset:",
@@ -29,15 +29,15 @@ ui <- page_sidebar(
       # time-consuming.
       actionButton("update", "Update View")
 
-    ),
+  ),
 
-    # Output: Header + summary of distribution ----
-    h4("Summary"),
-    verbatimTextOutput("summary"),
+  # Output: Header + summary of distribution ----
+  h4("Summary"),
+  verbatimTextOutput("summary"),
 
-    # Output: Header + table of distribution ----
-    h4("Observations"),
-    tableOutput("view")
+  # Output: Header + table of distribution ----
+  h4("Observations"),
+  tableOutput("view")
 )
 
 # Define server logic to summarize and view selected dataset ----

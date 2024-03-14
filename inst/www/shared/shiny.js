@@ -9684,10 +9684,10 @@
         }
         if (hasDefinedProperty(data, "url")) {
           var _selectize2 = this._selectize(el);
+          _selectize2.clearOptions();
           if (hasDefinedProperty(data, "value")) {
             _selectize2.clear();
           }
-          _selectize2.clearOptions();
           var loaded = false;
           _selectize2.settings.load = function(query, callback) {
             var settings = _selectize2.settings;

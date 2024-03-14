@@ -195,6 +195,7 @@ user. Always <code>NULL</code> for a <code>MockShinySesion</code>.</p></dd>
 <li><p><a href="#method-MockShinySession-getReturned"><code>MockShinySession$getReturned()</code></a></p></li>
 <li><p><a href="#method-MockShinySession-genId"><code>MockShinySession$genId()</code></a></p></li>
 <li><p><a href="#method-MockShinySession-rootScope"><code>MockShinySession$rootScope()</code></a></p></li>
+<li><p><a href="#method-MockShinySession-onUnhandledError"><code>MockShinySession$onUnhandledError()</code></a></p></li>
 <li><p><a href="#method-MockShinySession-unhandledError"><code>MockShinySession$unhandledError()</code></a></p></li>
 <li><p><a href="#method-MockShinySession-freezeValue"><code>MockShinySession$freezeValue()</code></a></p></li>
 <li><p><a href="#method-MockShinySession-onSessionEnded"><code>MockShinySession$onSessionEnded()</code></a></p></li>
@@ -586,15 +587,36 @@ any descendant proxy.</p><div class="section">
 <p>The root <code>MockShinySession</code>.</p>
 </div>
 
-</div><p></p><hr><a id="method-MockShinySession-unhandledError"></a><div class="section">
-<h3 id="method-unhandlederror-">Method <code>unhandledError()</code><a class="anchor" aria-label="anchor" href="#method-unhandlederror-"></a></h3>
-<p>Called by observers when a reactive expression errors.</p><div class="section">
+</div><p></p><hr><a id="method-MockShinySession-onUnhandledError"></a><div class="section">
+<h3 id="method-onunhandlederror-">Method <code><a href="onFlush.html">onUnhandledError()</a></code><a class="anchor" aria-label="anchor" href="#method-onunhandlederror-"></a></h3>
+<p>Add an unhandled error callback.</p><div class="section">
 <h4 id="usage-23">Usage<a class="anchor" aria-label="anchor" href="#usage-23"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">unhandledError</span><span class="op">(</span><span class="va">e</span><span class="op">)</span></span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">onUnhandledError</span><span class="op">(</span><span class="va">callback</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
 <h4 id="arguments-14">Arguments<a class="anchor" aria-label="anchor" href="#arguments-14"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>callback</code></dt>
+<dd><p>The callback to add, which should accept an error object
+as its first argument.</p></dd>
+
+
+</dl><p></p></div>
+</div>
+<div class="section">
+<h4 id="returns-9">Returns<a class="anchor" aria-label="anchor" href="#returns-9"></a></h4>
+<p>A deregistration function.</p>
+</div>
+
+</div><p></p><hr><a id="method-MockShinySession-unhandledError"></a><div class="section">
+<h3 id="method-unhandlederror-">Method <code>unhandledError()</code><a class="anchor" aria-label="anchor" href="#method-unhandlederror-"></a></h3>
+<p>Called by observers when a reactive expression errors.</p><div class="section">
+<h4 id="usage-24">Usage<a class="anchor" aria-label="anchor" href="#usage-24"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">unhandledError</span><span class="op">(</span><span class="va">e</span>, close <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="arguments-15">Arguments<a class="anchor" aria-label="anchor" href="#arguments-15"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>e</code></dt>
 <dd><p>An error object.</p></dd>
 
@@ -605,12 +627,12 @@ any descendant proxy.</p><div class="section">
 </div><p></p><hr><a id="method-MockShinySession-freezeValue"></a><div class="section">
 <h3 id="method-freezevalue-">Method <code>freezeValue()</code><a class="anchor" aria-label="anchor" href="#method-freezevalue-"></a></h3>
 <p>Freeze a value until the flush cycle completes.</p><div class="section">
-<h4 id="usage-24">Usage<a class="anchor" aria-label="anchor" href="#usage-24"></a></h4>
+<h4 id="usage-25">Usage<a class="anchor" aria-label="anchor" href="#usage-25"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">freezeValue</span><span class="op">(</span><span class="va">x</span>, <span class="va">name</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="arguments-15">Arguments<a class="anchor" aria-label="anchor" href="#arguments-15"></a></h4>
+<h4 id="arguments-16">Arguments<a class="anchor" aria-label="anchor" href="#arguments-16"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>x</code></dt>
 <dd><p>A <code>ReactiveValues</code> object.</p></dd>
 
@@ -629,12 +651,12 @@ is closed (i.e. the connection to the client has been severed). The
 return value is a function which unregisters the callback. If multiple
 callbacks are registered, the order in which they are invoked is not
 guaranteed.</p><div class="section">
-<h4 id="usage-25">Usage<a class="anchor" aria-label="anchor" href="#usage-25"></a></h4>
+<h4 id="usage-26">Usage<a class="anchor" aria-label="anchor" href="#usage-26"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">onSessionEnded</span><span class="op">(</span><span class="va">sessionEndedCallback</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="arguments-16">Arguments<a class="anchor" aria-label="anchor" href="#arguments-16"></a></h4>
+<h4 id="arguments-17">Arguments<a class="anchor" aria-label="anchor" href="#arguments-17"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>sessionEndedCallback</code></dt>
 <dd><p>Function to call when the session ends.</p></dd>
 
@@ -645,12 +667,12 @@ guaranteed.</p><div class="section">
 </div><p></p><hr><a id="method-MockShinySession-registerDownload"></a><div class="section">
 <h3 id="method-registerdownload-">Method <code>registerDownload()</code><a class="anchor" aria-label="anchor" href="#method-registerdownload-"></a></h3>
 <p>Associated a downloadable file with the session.</p><div class="section">
-<h4 id="usage-26">Usage<a class="anchor" aria-label="anchor" href="#usage-26"></a></h4>
+<h4 id="usage-27">Usage<a class="anchor" aria-label="anchor" href="#usage-27"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">registerDownload</span><span class="op">(</span><span class="va">name</span>, <span class="va">filename</span>, <span class="va">contentType</span>, <span class="va">content</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="arguments-17">Arguments<a class="anchor" aria-label="anchor" href="#arguments-17"></a></h4>
+<h4 id="arguments-18">Arguments<a class="anchor" aria-label="anchor" href="#arguments-18"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>name</code></dt>
 <dd><p>The un-namespaced output name to associate with the
 downloadable file.</p></dd>
@@ -679,12 +701,12 @@ function.)</p></dd>
 <h3 id="method-getcurrentoutputinfo-">Method <code><a href="getCurrentOutputInfo.html">getCurrentOutputInfo()</a></code><a class="anchor" aria-label="anchor" href="#method-getcurrentoutputinfo-"></a></h3>
 <p>Get information about the output that is currently being
 executed.</p><div class="section">
-<h4 id="usage-27">Usage<a class="anchor" aria-label="anchor" href="#usage-27"></a></h4>
+<h4 id="usage-28">Usage<a class="anchor" aria-label="anchor" href="#usage-28"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">getCurrentOutputInfo</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="returns-9">Returns<a class="anchor" aria-label="anchor" href="#returns-9"></a></h4>
+<h4 id="returns-10">Returns<a class="anchor" aria-label="anchor" href="#returns-10"></a></h4>
 <p>A list with with the <code>name</code> of the output. If no output is
 currently being executed, this will return <code>NULL</code>.
 output, or <code>NULL</code> if no output is currently executing.</p>
@@ -693,12 +715,12 @@ output, or <code>NULL</code> if no output is currently executing.</p>
 </div><p></p><hr><a id="method-MockShinySession-clone"></a><div class="section">
 <h3 id="method-clone-">Method <code>clone()</code><a class="anchor" aria-label="anchor" href="#method-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
-<h4 id="usage-28">Usage<a class="anchor" aria-label="anchor" href="#usage-28"></a></h4>
+<h4 id="usage-29">Usage<a class="anchor" aria-label="anchor" href="#usage-29"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="arguments-18">Arguments<a class="anchor" aria-label="anchor" href="#arguments-18"></a></h4>
+<h4 id="arguments-19">Arguments<a class="anchor" aria-label="anchor" href="#arguments-19"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>deep</code></dt>
 <dd><p>Whether to make a deep clone.</p></dd>
 

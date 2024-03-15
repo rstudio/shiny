@@ -96,6 +96,7 @@ Imports:
     lifecycle (>= 0.2.0)
 Suggests:
     datasets,
+    DT,
     Cairo (>= 1.5-5),
     testthat (>= 3.0.0),
     knitr (>= 1.6),

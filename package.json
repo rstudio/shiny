@@ -21,7 +21,7 @@
   "dependencies": {
     "@types/bootstrap": "3.4.0",
     "@types/bootstrap-datepicker": "0.0.14",
-    "@types/datatables.net": "^1.10.19",
+    "@types/datatables.net": "^1.10.22",
     "@types/ion-rangeslider": "2.3.0",
     "@types/jquery": "3.5.14",
     "@types/selectize": "0.12.34",

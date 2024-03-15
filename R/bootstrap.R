@@ -1158,23 +1158,22 @@ useLegacyDataTable <- function(from, to) {
 
   # If not set, use DT if a suitable version is available (and inform either way)
   hasDT <- is_installed("DT", "0.32.1")
+  details <- NULL
   if (hasDT) {
-    details <- c(
+    details <- paste0(c(
       "Since you have a suitable version of DT (> v0.32.1), ",
       from,
       " will automatically use ",
       to,
       " under-the-hood.\n",
       "If this happens to break your app, set `options(shiny.legacy.datatable = TRUE)` ",
-      "to get the legacy datatable implementation (or `FALSE` to squelch this message)."
-    )
-  } else {
-    details <- c(
-      "See <https://rstudio.github.io/DT/shiny.html> for more information"
-    )
+      "to get the legacy datatable implementation (or `FALSE` to squelch this message).\n"
+    ), collapse = "")
   }
 
-  shinyDeprecated("1.8.1", from, to, paste0(details, collapse = ""))
+  details <- paste0(details, "See <https://rstudio.github.io/DT/shiny.html> for more information.")
+
+  shinyDeprecated("1.8.1", from, to, details)
 
   !hasDT
 }

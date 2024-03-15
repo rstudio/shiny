@@ -357,7 +357,8 @@ async function updateLabel(
 
   // Should the label be empty?
   const emptyLabel =
-    Array.isArray(labelContent.html) && labelContent.html.length === 0;
+    (Array.isArray(labelContent.html) && labelContent.html.length === 0) ||
+    labelContent.html === "";
 
   if (emptyLabel) {
     labelNode.addClass("shiny-label-null");

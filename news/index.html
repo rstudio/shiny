@@ -64,6 +64,7 @@
 <ul><li><p>Notifications are now constrained to the width of the viewport for window widths smaller the default notification panel size. (<a href="https://github.com/rstudio/shiny/issues/3949" class="external-link">#3949</a>)</p></li>
 <li><p>Fixed <a href="https://github.com/rstudio/shiny/issues/2392" class="external-link">#2392</a>: <code><a href="../reference/downloadButton.html">downloadButton()</a></code> now visibly returns its HTML tag so that it renders correctly in R Markdown and Quarto output. (Thanks to <a href="https://github.com/fennovj" class="external-link">@fennovj</a>, <a href="https://github.com/rstudio/shiny/issues/2672" class="external-link">#2672</a>)</p></li>
 <li><p>Calling <code><a href="../reference/updateSelectInput.html">updateSelectizeInput()</a></code> with <code>choices</code> and <code>selected</code> now clears the current selection before updating the choices and selected value. (<a href="https://github.com/rstudio/shiny/issues/3967" class="external-link">#3967</a>)</p></li>
+<li><p>Loading a Shiny app in a package-like directory will no longer warn if autoloading is disabled by the presence of an <code>R/_disable_autoload.R</code> file. (Thanks to <a href="https://github.com/krlmlr" class="external-link">@krlmlr</a> and <a href="https://github.com/tanho63" class="external-link">@tanho63</a>, <a href="https://github.com/rstudio/shiny/issues/3513" class="external-link">#3513</a>)</p></li>
 </ul></div>
 </div>
     <div class="section level2">

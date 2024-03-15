@@ -113,7 +113,7 @@ getShinyOption <- function(name, default = NULL) {
 #'   production.}
 #' \item{shiny.sanitize.errors (defaults to `FALSE`)}{If `TRUE`, then normal errors (i.e.
 #'   errors not wrapped in `safeError`) won't show up in the app; a simple
-#'   generic error message is printed instead (the error and strack trace printed
+#'   generic error message is printed instead (the error and stack trace printed
 #'   to the console remain unchanged). If you want to sanitize errors in general, but you DO want a
 #'   particular error `e` to get displayed to the user, then set this option
 #'   to `TRUE` and use `stop(safeError(e))` for errors you want the

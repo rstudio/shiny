@@ -92,7 +92,7 @@ This incurs a substantial performance penalty and should not be used in
 production.}
 \item{shiny.sanitize.errors (defaults to \code{FALSE})}{If \code{TRUE}, then normal errors (i.e.
 errors not wrapped in \code{safeError}) won't show up in the app; a simple
-generic error message is printed instead (the error and strack trace printed
+generic error message is printed instead (the error and stack trace printed
 to the console remain unchanged). If you want to sanitize errors in general, but you DO want a
 particular error \code{e} to get displayed to the user, then set this option
 to \code{TRUE} and use \code{stop(safeError(e))} for errors you want the

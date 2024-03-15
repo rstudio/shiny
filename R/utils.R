@@ -493,7 +493,6 @@ shinyCallingHandlers <- function(expr) {
   )
 }
 
-
 #' Register a function with the debugger (if one is active).
 #'
 #' Call this function after exprToFunction to give any active debugger a hook
@@ -1093,7 +1092,7 @@ need <- function(expr, message = paste(label, "must be provided"), label) {
 #'
 #' You can use `req(FALSE)` (i.e. no condition) if you've already performed
 #' all the checks you needed to by that point and just want to stop the reactive
-#' chain now. There is no advantange to this, except perhaps ease of readibility
+#' chain now. There is no advantage to this, except perhaps ease of readability
 #' if you have a complicated condition to check for (or perhaps if you'd like to
 #' divide your condition into nested `if` statements).
 #'

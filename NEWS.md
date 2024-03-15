@@ -10,9 +10,17 @@
 
 * Added a new `ExtendedTask` abstraction, for long-running asynchronous tasks that you don't want to block the rest of the app, or even the rest of the session. Designed to be used with new `bslib::input_task_button()` and `bslib::bind_task_button()` functions that help give user feedback and prevent extra button clicks. (#3958)
 
+* Added `onUnhandledError()` to register a function that will be called when an unhandled error occurs in a Shiny app. Note that this handler doesn't stop the error or prevent the session from closing, but it can be used to log the error or to clean up session-specific resources. (thanks @JohnCoene, #3993)
+
 ## Bug fixes
 
 * Notifications are now constrained to the width of the viewport for window widths smaller the default notification panel size. (#3949)
+
+* Fixed #2392: `downloadButton()` now visibly returns its HTML tag so that it renders correctly in R Markdown and Quarto output. (Thanks to @fennovj, #2672)
+
+* Calling `updateSelectizeInput()` with `choices` and `selected` now clears the current selection before updating the choices and selected value. (#3967)
+
+* Loading a Shiny app in a package-like directory will no longer warn if autoloading is disabled by the presence of an `R/_disable_autoload.R` file. (Thanks to @krlmlr and @tanho63, #3513)
 
 # shiny 1.8.0
 

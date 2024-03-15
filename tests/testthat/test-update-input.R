@@ -16,7 +16,7 @@ test_that("Radio buttons and checkboxes work with modules", {
   resultA <- sessA$lastInputMessage
 
   expect_equal("test1", resultA$id)
-  expect_equal("Label", resultA$message$label)
+  expect_equal("Label", as.character(resultA$message$label$html))
   expect_equal("a", resultA$message$value)
   expect_true(grepl('"modA-test1"', resultA$message$options))
   expect_false(grepl('"test1"', resultA$message$options))
@@ -24,13 +24,13 @@ test_that("Radio buttons and checkboxes work with modules", {
 
   sessB <- createModuleSession("modB")
 
-  updateCheckboxGroupInput(sessB, "test2", label = "Label", choices = LETTERS[1:5])
+  updateCheckboxGroupInput(sessB, "test2", label = icon("eye"), choices = LETTERS[1:5])
   resultB <- sessB$lastInputMessage
 
   expect_equal("test2", resultB$id)
-  expect_equal("Label", resultB$message$label)
+  expect_length(resultB$message$label, 2)
+  expect_s3_class(resultB$message$label$html, "html")
   expect_null(resultB$message$value)
   expect_true(grepl('"modB-test2"', resultB$message$options))
   expect_false(grepl('"test2"', resultB$message$options))
-
 })

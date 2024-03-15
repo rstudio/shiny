@@ -30,6 +30,7 @@ declare class ShinyApp {
     $bindings: {
         [key: string]: OutputBindingAdapter;
     };
+    $persistentProgress: Set<string>;
     $values: {
         [key: string]: any;
     };
@@ -61,23 +62,25 @@ declare class ShinyApp {
         next: () => number;
         reset: () => void;
     };
-    onDisconnected(): void;
+    onDisconnected(reloading?: boolean): void;
     onConnected(): void;
     makeRequest(method: string, args: unknown[], onSuccess: OnSuccessRequest, onError: OnErrorRequest, blobs: Array<ArrayBuffer | Blob | string> | undefined): void;
     $sendMsg(msg: MessageValue): void;
     receiveError(name: string, error: ErrorsMessageValue): void;
     receiveOutput<T>(name: string, value: T): Promise<T | undefined>;
-    bindOutput(id: string, binding: OutputBindingAdapter): OutputBindingAdapter;
+    bindOutput(id: string, binding: OutputBindingAdapter): Promise<OutputBindingAdapter>;
     unbindOutput(id: string, binding: OutputBindingAdapter): boolean;
     private _narrowScopeComponent;
     private _narrowScope;
     $updateConditionals(): void;
     dispatchMessage(data: ArrayBufferLike | string): Promise<void>;
     private _sendMessagesToHandlers;
+    private _clearProgress;
     private _init;
     progressHandlers: {
         binding: (this: ShinyApp, message: {
             id: string;
+            persistent: boolean;
         }) => void;
         open: (message: {
             style: "notification" | "old";

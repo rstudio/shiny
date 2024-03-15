@@ -2,7 +2,6 @@ import $ from "jquery";
 import { InputBinding } from "./inputBinding";
 import { $escape, hasDefinedProperty, updateLabel } from "../../utils";
 import { indirectEval } from "../../utils/eval";
-import type { NotUndefined } from "../../utils/extraTypes";
 
 type SelectHTMLElement = HTMLSelectElement & { nonempty: boolean };
 
@@ -42,6 +41,7 @@ function isSelectize(el: HTMLElement): boolean {
 
 class SelectInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
+    // Inputs also have .shiny-input-select class
     return $(scope).find("select");
   }
   getType(el: HTMLElement): string | null {
@@ -60,10 +60,14 @@ class SelectInputBinding extends InputBinding {
   getId(el: SelectHTMLElement): string {
     return InputBinding.prototype.getId.call(this, el) || el.name;
   }
-  getValue(
-    el: HTMLElement
-  ): NotUndefined<ReturnType<JQuery<HTMLElement>["val"]>> {
-    return $(el).val() as NotUndefined<ReturnType<JQuery<HTMLElement>["val"]>>;
+  getValue(el: SelectHTMLElement): any {
+    if (!isSelectize(el)) {
+      return $(el).val();
+    } else {
+      const selectize = this._selectize(el);
+
+      return selectize?.getValue();
+    }
   }
   setValue(el: SelectHTMLElement, value: string): void {
     if (!isSelectize(el)) {
@@ -139,11 +143,18 @@ class SelectInputBinding extends InputBinding {
       };
 
       selectize.clearOptions();
+      // If a new `selected` value is provided, also clear the current selection (otherwise it gets added as an option).
+      // Note: although the selectize docs suggest otherwise, as of selectize.js >v0.15.2,
+      // .clearOptions() no longer implicitly .clear()s (see #3967)
+      if (hasDefinedProperty(data, "value")) {
+        selectize.clear();
+      }
       let loaded = false;
 
       selectize.settings.load = function (query: string, callback: CallbackFn) {
         const settings = selectize.settings;
 
+        /* eslint-disable @typescript-eslint/no-floating-promises */
         $.ajax({
           url: data.url,
           data: {
@@ -291,6 +302,7 @@ class SelectInputBinding extends InputBinding {
       control.destroy();
       control = $el.selectize(settings)[0].selectize as SelectizeInfo;
     }
+
     return control;
   }
 }

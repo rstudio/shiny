@@ -1,22 +1,9 @@
 $bg: $body-bg !default;
-
-$fg: null !default;
-$theme-colors: null !default;
-@if variable-exists('text-color') {
-  $fg: $text-color !default; // BS3
-  $theme-colors: ("primary": $brand-primary, "info": $brand-info, "warning": $brand-warning, "danger": $brand-danger) !default;
-} @else {
-  $fg: $body-color !default; // BS4
-}
-// No $border-width, $border-color, or $border-radius in BS3
-$border-width: 1px !default;
-$border-color: mix($bg, $fg, 70%) !default;
-$border-radius: $border-radius-base !default;
+$fg: $body-color !default;
 
 $shiny-disconnected-bg:             mix($bg, $fg, 58%) !default;
 $shiny-table-na:                    mix($bg, $fg, 54%) !default;
 $shiny-error-validated-color:       mix($bg, $fg, 50%) !default;
-// TODO: what should this be? mix of primary and bg?
 $shiny-progress-text-bg-color:      #eef8ff !default;
 $shiny-input-panel-bg:              mix($bg, $fg, 96%) !default;
 $shiny-input-panel-border:          $border-width solid $border-color !default;
@@ -40,10 +27,4 @@ $notification-close-hover-color:    $fg !default;
 $notification-content-action-color: map-get($theme-colors, "primary") !default;
 $datepicker-disabled-color:         $dropdown-link-disabled-color !default;
 
-// I don't think BS3 has a file input box shadow setting
-@if variable-exists('custom-file-focus-box-shadow') {
-  $shiny-file-active-shadow: $custom-file-focus-box-shadow !default;
-}
-
-// TODO: should this be changed to danger?
-//$shiny-error-color:                 red !default;
+$shiny-file-active-shadow: $custom-file-focus-box-shadow !default;

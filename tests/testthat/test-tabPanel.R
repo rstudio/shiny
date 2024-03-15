@@ -1,7 +1,6 @@
 # tabsetPanel() et al. use p_randomInt() to generate ids (which uses withPrivateSeed()),
 # so we need to fix Shiny's private seed in order to make their HTML output deterministic
 navlist_panel <- function(...) {
-
   withPrivateSeed(set.seed(100))
   navlistPanel(...)
 }
@@ -18,6 +17,9 @@ expect_snapshot2 <- function(...) {
   if (getRversion() < "3.6.0") {
     skip("Skipping snapshots on R < 3.6 because of different RNG method")
   }
+  if (packageVersion("htmltools") <= "0.5.6" && getRversion() > "4.3.1") {
+    skip("Skipping snapshots since htmltools is 'outdated'")
+  }
   expect_snapshot(...)
 }
 
@@ -28,6 +30,7 @@ expect_snapshot_bslib <- function(x, ...) {
 # Simulates the UI tags that would be produced by
 # shinyApp(bootstrapPage(theme), function(...) {})
 bslib_tags <- function(ui, theme = bslib::bs_theme()) {
+  skip_if_not_installed("bslib", "0.5.1.9000")
   old_theme <- getCurrentTheme()
   on.exit(setCurrentTheme(old_theme), add = TRUE)
   setCurrentTheme(theme)

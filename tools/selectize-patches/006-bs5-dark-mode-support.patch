@@ -1,0 +1,112 @@
+diff --git a/inst/www/shared/selectize/scss/plugins/dropdown_header.scss b/inst/www/shared/selectize/scss/plugins/dropdown_header.scss
+index 90846cd12..c60d9f326 100644
+--- a/inst/www/shared/selectize/scss/plugins/dropdown_header.scss
++++ b/inst/www/shared/selectize/scss/plugins/dropdown_header.scss
+@@ -4,7 +4,7 @@
+     padding: ($select-padding-dropdown-item-y * 2)
+       $select-padding-dropdown-item-x;
+     border-bottom: 1px solid $select-color-border;
+-    background: mix($select-color-dropdown, $select-color-border, 85%);
++    background: RGBA($select-color-dropdown, 0.15);
+     border-radius: $select-border-radius $select-border-radius 0 0;
+   }
+   .#{$selectize}-dropdown-header-close {
+@@ -19,6 +19,6 @@
+     text-decoration: none;
+   }
+   .#{$selectize}-dropdown-header-close:hover {
+-    color: darken($select-color-text, 25%);
++    color: RGB($select-color-rgb);
+   }
+ }
+diff --git a/inst/www/shared/selectize/scss/selectize.bootstrap5.scss b/inst/www/shared/selectize/scss/selectize.bootstrap5.scss
+index 4d991532d..39b27a81e 100644
+--- a/inst/www/shared/selectize/scss/selectize.bootstrap5.scss
++++ b/inst/www/shared/selectize/scss/selectize.bootstrap5.scss
+@@ -23,11 +23,7 @@ $select-color-optgroup: $dropdown-bg !default;
+ $select-color-optgroup-text: $dropdown-header-color !default;
+ $select-color-optgroup-border: $dropdown-divider-bg !default;
+ $select-color-dropdown: $dropdown-bg !default;
+-$select-color-dropdown-border-top: mix(
+-  $input-border-color,
+-  $input-bg,
+-  80%
+-) !default;
++$select-color-dropdown-border-top: rgba($input-border-color, 0.8) !default;
+ $select-color-dropdown-item-active: $dropdown-link-hover-bg !default;
+ $select-color-dropdown-item-active-text: $dropdown-link-hover-color !default;
+ $select-color-dropdown-item-create-active-text: $dropdown-link-hover-color !default;
+diff --git a/inst/www/shared/selectize/scss/selectize.bootstrap5.scss b/inst/www/shared/selectize/scss/selectize.bootstrap5.scss
+index 44fff4ae4..8364d3123 100644
+--- a/inst/www/shared/selectize/scss/selectize.bootstrap5.scss
++++ b/inst/www/shared/selectize/scss/selectize.bootstrap5.scss
+@@ -4,7 +4,8 @@ $select-font-family: if($input-btn-font-family, $input-btn-font-family, inherit) !default;
+ $select-font-size: $input-btn-font-size !default;
+ $select-line-height: $input-btn-line-height !default; //formerly line-height-computed
+ 
+-$select-color-text: $gray-800 !default; //$gray-800
++$select-color-rgb: var(--bs-emphasis-color-rgb, 0, 0, 0) !default;
++$select-color-text: RGBA($select-color-rgb, 0.83) !default;
+ $select-color-highlight: rgba(255, 237, 40, 0.4) !default;
+ $select-color-input: $input-bg !default;
+ $select-color-input-full: $input-bg !default;
+@@ -14,7 +15,7 @@ $select-color-input-error-focus: darken(
+   10%
+ ) !default;
+ $select-color-disabled: $input-bg !default;
+-$select-color-item: #efefef !default;
++$select-color-item: RGBA($select-color-rgb, 0.05) !default;
+ $select-color-item-border: $border-color !default;
+ $select-color-item-active: $component-active-bg !default;
+ $select-color-item-active-text: color-contrast($select-color-item-active) !default;
+diff --git a/inst/www/shared/selectize/scss/selectize.scss b/inst/www/shared/selectize/scss/selectize.scss
+index 321c8802b..53d09878b 100644
+--- a/inst/www/shared/selectize/scss/selectize.scss
++++ b/inst/www/shared/selectize/scss/selectize.scss
+@@ -7,7 +7,8 @@ $select-font-smoothing: inherit !default;
+ $select-font-size: 13px !default;
+ $select-line-height: 18px !default;
+ 
+-$select-color-text: #303030 !default;
++$select-color-rgb: 0,0,0 !default;
++$select-color-text: RGBA($select-color-rgb, 0.83) !default;
+ $select-color-border: #d0d0d0 !default;
+ $select-color-highlight: rgba(125, 168, 208, 0.2) !default;
+ $select-color-input: #fff !default;
+@@ -24,12 +25,7 @@ $select-color-dropdown-border: $select-color-border !default;
+ $select-color-dropdown-border-top: #f0f0f0 !default;
+ $select-color-dropdown-item-active: #f5fafd !default;
+ $select-color-dropdown-item-active-text: #495c68 !default;
+-$select-color-dropdown-item-create-text: rgba(
+-  red($select-color-text),
+-  green($select-color-text),
+-  blue($select-color-text),
+-  0.5
+-) !default;
++$select-color-dropdown-item-create-text: RGBA($select-color-rgb, 0.5) !default;
+ $select-color-dropdown-item-create-active-text: $select-color-dropdown-item-active-text !default;
+ $select-color-optgroup: $select-color-dropdown !default;
+ $select-color-optgroup-text: $select-color-text !default;
+@@ -161,19 +157,10 @@ $select-spinner-border-color: $select-color-border;
+   .#{$selectize}-control.multi &.disabled > div {
+     &,
+     &.active {
+-      color: lighten(
+-        desaturate($select-color-item-text, 100%),
+-        $select-lighten-disabled-item-text
+-      );
+-      background: lighten(
+-        desaturate($select-color-item, 100%),
+-        $select-lighten-disabled-item
+-      );
++      color: lighten(gray, $select-lighten-disabled-item-text);
++      background: lighten(gray, $select-lighten-disabled-item);
+       border: $select-width-item-border solid
+-        lighten(
+-          desaturate($select-color-item-border, 100%),
+-          $select-lighten-disabled-item-border
+-        );
++        lighten(gray, $select-lighten-disabled-item-border);
+     }
+   }
+   > input {

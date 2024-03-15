@@ -90,8 +90,9 @@ getShinyOption <- function(name, default = NULL) {
 #' \item{shiny.jquery.version (defaults to `3`)}{The major version of jQuery to use.
 #'   Currently only values of `3` or `1` are supported. If `1`, then jQuery 1.12.4 is used. If `3`,
 #'   then jQuery `r version_jquery` is used.}
-#' \item{shiny.json.digits (defaults to `16`)}{The number of digits to use when converting
-#'   numbers to JSON format to send to the client web browser.}
+#' \item{shiny.json.digits (defaults to `I(16)`)}{Max number of digits to use when converting
+#'   numbers to JSON format to send to the client web browser. Use [I()] to specify significant digits.
+#'   Use `NA` for max precision.}
 #' \item{shiny.launch.browser (defaults to `interactive()`)}{A boolean which controls the default behavior
 #'   when an app is run. See [runApp()] for more information.}
 #' \item{shiny.mathjax.url (defaults to `"https://mathjax.rstudio.com/latest/MathJax.js"`)}{
@@ -112,7 +113,7 @@ getShinyOption <- function(name, default = NULL) {
 #'   production.}
 #' \item{shiny.sanitize.errors (defaults to `FALSE`)}{If `TRUE`, then normal errors (i.e.
 #'   errors not wrapped in `safeError`) won't show up in the app; a simple
-#'   generic error message is printed instead (the error and strack trace printed
+#'   generic error message is printed instead (the error and stack trace printed
 #'   to the console remain unchanged). If you want to sanitize errors in general, but you DO want a
 #'   particular error `e` to get displayed to the user, then set this option
 #'   to `TRUE` and use `stop(safeError(e))` for errors you want the

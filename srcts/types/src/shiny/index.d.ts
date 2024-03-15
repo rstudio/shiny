@@ -47,6 +47,13 @@ interface Shiny {
     unbindAll?: typeof shinyUnbindAll;
     initializeInputs?: typeof shinyInitializeInputs;
     oncustommessage?: Handler;
+    /**
+     * Method to check if Shiny is running in development mode. By packaging as a
+     * method, we can we can avoid needing to look for the `__SHINY_DEV_MODE__`
+     * variable in the global scope.
+     * @returns `true` if Shiny is running in development mode, `false` otherwise.
+     */
+    inDevMode: () => boolean;
 }
 declare let windowShiny: Shiny;
 declare function setShiny(windowShiny_: Shiny): void;

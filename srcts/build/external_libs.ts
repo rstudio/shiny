@@ -57,6 +57,14 @@ build({
 
 build({
   ...opts,
+  entryPoints: [outDir + "selectize/js/selectize.js"],
+  outfile: outDir + "selectize/js/selectize.min.js",
+  minify: true,
+  target: "es6",
+});
+
+build({
+  ...opts,
   entryPoints: [outDir + "selectize/accessibility/js/selectize-plugin-a11y.js"],
   outfile: outDir + "selectize/accessibility/js/selectize-plugin-a11y.min.js",
   minify: true,

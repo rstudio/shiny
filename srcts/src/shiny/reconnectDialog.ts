@@ -22,7 +22,7 @@ function updateTime(reconnectTime: number): void {
   }, 1000);
 }
 
-function showReconnectDialog(delay: number): void {
+async function showReconnectDialog(delay: number): Promise<void> {
   const reconnectTime = new Date().getTime() + delay;
 
   // If there's already a reconnect dialog, don't add another
@@ -34,7 +34,7 @@ function showReconnectDialog(delay: number): void {
   const action =
     '<a id="shiny-reconnect-now" href="#" onclick="Shiny.shinyapp.reconnect();">Try now</a>';
 
-  showNotification({
+  await showNotification({
     id: "reconnect",
     html: html,
     action: action,

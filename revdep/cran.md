@@ -1,9 +1,9 @@
 ## revdepcheck results
 
-We checked 1039 reverse dependencies (1038 from CRAN + 1 from Bioconductor), comparing R CMD check results across CRAN and dev versions of this package.
+We checked 1172 reverse dependencies (1162 from CRAN + 10 from Bioconductor), comparing R CMD check results across CRAN and dev versions of this package.
 
  * We saw 0 new problems
- * We failed to check 4 packages
+ * We failed to check 5 packages
 
 Issues with CRAN packages are summarised below.
 
@@ -12,4 +12,5 @@ Issues with CRAN packages are summarised below.
 * ctsem      (NA)
 * diveR      (NA)
 * loon.shiny (NA)
-* SSVS       (NA)
+* RQuantLib  (NA)
+* rstanarm   (NA)

@@ -9,6 +9,7 @@ type CheckboxReceiveMessageData = { value?: CheckboxChecked; label?: string };
 
 class CheckboxInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
+    // Inputs also have .shiny-input-checkbox class
     return $(scope).find('input[type="checkbox"]');
   }
   getValue(el: CheckedHTMLElement): CheckboxChecked {

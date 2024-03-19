@@ -2,7 +2,7 @@
 
 ## Breaking changes
 
-* `renderDataTable()`/`dataTableOutput()` have been officially deprecated and will automatically dispatch to their `{DT}` equivalents (`renderDT()`/`DTOutput()`) when a recent version of `{DT}` is available. If this happens to degrade an existing app, set `options(shiny.legacy.datatable = TRUE)` to get the old implementation. (#3998)
+* `renderDataTable()`/`dataTableOutput()` are officially deprecated in favor of [their `{DT}` equivalents](https://rstudio.github.io/DT/shiny.html), `renderDT()`/`DTOutput()`. In most cases, simply changing `renderDataTable()` to `DT::renderDT()` and `dataTableOutput()` to `DT::DTOutput()` is sufficient for upgrading. Also, to promote migration, when a recent version of `{DT}` is available, `renderDataTable()`/`dataTableOutput()` now automatically use their `{DT}` equivalent (and provide a message that they are doing so). If this happens to degrade an existing app, set `options(shiny.legacy.datatable = TRUE)` to get the old (i.e., non-`{DT}`) implementation. (#3998)
 
 * Both `conditionalPanel()` and `uiOutput()` are now styled with `display: contents` by default in Shiny apps that use Bootstrap 5. This means that the elements they contain are positioned as if they were direct children of the parent container holding the `conditionalPanel()` or `uiOutput()`. This is probably what most users intend when they use these functions, but it may break apps that applied styles directly to the container elements created by these two functions. In that case, you may include CSS rules to set `display: block` for the `.shiny-panel-conditional` or `.shiny-html-output` classes. (#3957, #3960)
 

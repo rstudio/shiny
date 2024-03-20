@@ -1161,7 +1161,7 @@ useLegacyDataTable <- function(from, to) {
   details <- NULL
   if (hasDT) {
     details <- paste0(c(
-      "Since you have a suitable version of DT (> v0.32.1), ",
+      "Since you have a suitable version of DT (>= v0.32.1), ",
       from,
       " will automatically use ",
       to,

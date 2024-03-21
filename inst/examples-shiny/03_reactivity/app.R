@@ -3,29 +3,33 @@ library(bslib)
 
 # Define UI for dataset viewer app ----
 ui <- page_sidebar(
-
   # App title ----
   title = "Reactivity",
 
   # Sidebar panel for inputs ----
   sidebar = sidebar(
+    # Input: Text for providing a caption ----
+    # Note: Changes made to the caption in the textInput control
+    # are updated in the output area immediately as you type
+    textInput(
+      inputId = "caption",
+      label = "Caption:",
+      value = "Data Summary"
+    ),
 
-      # Input: Text for providing a caption ----
-      # Note: Changes made to the caption in the textInput control
-      # are updated in the output area immediately as you type
-      textInput(inputId = "caption",
-                label = "Caption:",
-                value = "Data Summary"),
+    # Input: Selector for choosing dataset ----
+    selectInput(
+      inputId = "dataset",
+      label = "Choose a dataset:",
+      choices = c("rock", "pressure", "cars")
+    ),
 
-      # Input: Selector for choosing dataset ----
-      selectInput(inputId = "dataset",
-                  label = "Choose a dataset:",
-                  choices = c("rock", "pressure", "cars")),
-
-      # Input: Numeric entry for number of obs to view ----
-      numericInput(inputId = "obs",
-                   label = "Number of observations to view:",
-                   value = 10)
+    # Input: Numeric entry for number of obs to view ----
+    numericInput(
+      inputId = "obs",
+      label = "Number of observations to view:",
+      value = 10
+    )
   ),
 
   # Output: Formatted text for caption ----
@@ -40,7 +44,6 @@ ui <- page_sidebar(
 
 # Define server logic to summarize and view selected dataset ----
 server <- function(input, output) {
-
   # Return the requested dataset ----
   # By declaring datasetInput as a reactive expression we ensure
   # that:
@@ -49,10 +52,12 @@ server <- function(input, output) {
   # 2. The computation and result are shared by all the callers,
   #    i.e. it only executes a single time
   datasetInput <- reactive({
-    switch(input$dataset,
-           "rock" = rock,
-           "pressure" = pressure,
-           "cars" = cars)
+    switch(
+      input$dataset,
+      "rock" = rock,
+      "pressure" = pressure,
+      "cars" = cars
+    )
   })
 
   # Create caption ----
@@ -86,7 +91,6 @@ server <- function(input, output) {
   output$view <- renderTable({
     head(datasetInput(), n = input$obs)
   })
-
 }
 
 # Create Shiny app ----

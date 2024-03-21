@@ -3,34 +3,34 @@ library(bslib)
 
 # Define UI for slider demo app ----
 ui <- page_sidebar(
-
   # App title ----
   title = "Downloading Data",
 
   # Sidebar panel for inputs ----
   sidebar = sidebar(
+    # Input: Choose dataset ----
+    selectInput(
+      "dataset",
+      "Choose a dataset:",
+      choices = c("rock", "pressure", "cars")
+    ),
 
-      # Input: Choose dataset ----
-      selectInput("dataset", "Choose a dataset:",
-                  choices = c("rock", "pressure", "cars")),
-
-      # Button
-      downloadButton("downloadData", "Download")
-
+    # Button
+    downloadButton("downloadData", "Download")
   ),
-
   tableOutput("table")
 )
 
 # Define server logic to display and download selected file ----
 server <- function(input, output) {
-
   # Reactive value for selected dataset ----
   datasetInput <- reactive({
-    switch(input$dataset,
-           "rock" = rock,
-           "pressure" = pressure,
-           "cars" = cars)
+    switch(
+      input$dataset,
+      "rock" = rock,
+      "pressure" = pressure,
+      "cars" = cars
+    )
   })
 
   # Table of selected dataset ----
@@ -47,7 +47,6 @@ server <- function(input, output) {
       write.csv(datasetInput(), file, row.names = FALSE)
     }
   )
-
 }
 
 # Create Shiny app ----

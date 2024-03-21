@@ -12,22 +12,24 @@ mpgData$am <- factor(mpgData$am, labels = c("Automatic", "Manual"))
 
 # Define UI for miles per gallon app ----
 ui <- page_sidebar(
-
   # App title ----
   title = "Miles Per Gallon",
 
   # Sidebar panel for inputs ----
   sidebar = sidebar(
+    # Input: Selector for variable to plot against mpg ----
+    selectInput(
+      "variable",
+      "Variable:",
+      c(
+        "Cylinders" = "cyl",
+        "Transmission" = "am",
+        "Gears" = "gear"
+      )
+    ),
 
-      # Input: Selector for variable to plot against mpg ----
-      selectInput("variable", "Variable:",
-                  c("Cylinders" = "cyl",
-                    "Transmission" = "am",
-                    "Gears" = "gear")),
-
-      # Input: Checkbox for whether outliers should be included ----
-      checkboxInput("outliers", "Show outliers", TRUE)
-
+    # Input: Checkbox for whether outliers should be included ----
+    checkboxInput("outliers", "Show outliers", TRUE)
   ),
 
   # Output: Formatted text for caption ----
@@ -39,7 +41,6 @@ ui <- page_sidebar(
 
 # Define server logic to plot various variables against mpg ----
 server <- function(input, output) {
-
   # Compute the formula text ----
   # This is in a reactive expression since it is shared by the
   # output$caption and output$mpgPlot functions
@@ -55,12 +56,14 @@ server <- function(input, output) {
   # Generate a plot of the requested variable against mpg ----
   # and only exclude outliers if requested
   output$mpgPlot <- renderPlot({
-    boxplot(as.formula(formulaText()),
-            data = mpgData,
-            outline = input$outliers,
-            col = "#75AADB", pch = 19)
+    boxplot(
+      as.formula(formulaText()),
+      data = mpgData,
+      outline = input$outliers,
+      col = "#75AADB",
+      pch = 19
+    )
   })
-
 }
 
 # Create Shiny app ----

@@ -16,6 +16,8 @@
 
 * Added `onUnhandledError()` to register a function that will be called when an unhandled error occurs in a Shiny app. Note that this handler doesn't stop the error or prevent the session from closing, but it can be used to log the error or to clean up session-specific resources. (thanks @JohnCoene, #3993)
 
+* `runExamples()` now uses the `{bslib}` package to build the user interface (UI). It also gains a `package` argument so that other packages can leverage this same function to run Shiny app examples. For more, see `?runExamples`. (#3963, #4005)
+
 ## Bug fixes
 
 * Notifications are now constrained to the width of the viewport for window widths smaller the default notification panel size. (#3949)

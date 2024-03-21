@@ -41,7 +41,7 @@ code or commentary.}
 
 To provide examples in your package, store examples in the
 \code{inst/examples-shiny} directory of your package. Each example should be
-in its own subdirectory and should be runnable when \code{\link[=runDir]{runDir()}} is called
+in its own subdirectory and should be runnable when \code{\link[=runApp]{runApp()}} is called
 on the subdirectory. Example apps can include a \code{DESCRIPTION} file and a
 \code{README.md} file to provide metadata and commentary about the example. See
 the article on \href{https://shiny.posit.co/r/articles/build/display-modes/}{Display Modes}

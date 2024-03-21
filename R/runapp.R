@@ -452,7 +452,7 @@ stopApp <- function(returnValue = invisible()) {
 #'
 #'   To provide examples in your package, store examples in the
 #'   `inst/examples-shiny` directory of your package. Each example should be
-#'   in its own subdirectory and should be runnable when [runDir()] is called
+#'   in its own subdirectory and should be runnable when [runApp()] is called
 #'   on the subdirectory. Example apps can include a `DESCRIPTION` file and a
 #'   `README.md` file to provide metadata and commentary about the example. See
 #'   the article on [Display Modes](https://shiny.posit.co/r/articles/build/display-modes/)

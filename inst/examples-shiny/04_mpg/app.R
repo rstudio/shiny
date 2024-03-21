@@ -18,6 +18,7 @@ ui <- page_sidebar(
 
   # Sidebar panel for inputs ----
   sidebar = sidebar(
+
     # Input: Selector for variable to plot against mpg ----
     selectInput(
       "variable",

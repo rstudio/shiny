@@ -9,6 +9,7 @@ ui <- page_sidebar(
 
   # Sidebar panel for inputs ----
   sidebar = sidebar(
+
     # Input: Text for providing a caption ----
     # Note: Changes made to the caption in the textInput control
     # are updated in the output area immediately as you type

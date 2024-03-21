@@ -9,6 +9,7 @@ ui <- page_sidebar(
 
   # Sidebar panel for inputs ----
   sidebar = sidebar(
+
     # Input: Choose dataset ----
     selectInput(
       "dataset",

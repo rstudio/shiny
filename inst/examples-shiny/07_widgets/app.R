@@ -10,25 +10,29 @@ ui <- page_sidebar(
   # Sidebar panel for inputs ----
   sidebar = sidebar(
 
-      # Input: Select a dataset ----
-      selectInput("dataset", "Choose a dataset:",
-                  choices = c("rock", "pressure", "cars")),
+    # Input: Select a dataset ----
+    selectInput(
+      "dataset",
+      "Choose a dataset:",
+      choices = c("rock", "pressure", "cars")
+    ),
 
-      # Input: Specify the number of observations to view ----
-      numericInput("obs", "Number of observations to view:", 10),
+    # Input: Specify the number of observations to view ----
+    numericInput("obs", "Number of observations to view:", 10),
 
-      # Include clarifying text ----
-      helpText("Note: while the data view will show only the specified",
-               "number of observations, the summary will still be based",
-               "on the full dataset."),
+    # Include clarifying text ----
+    helpText(
+      "Note: while the data view will show only the specified",
+      "number of observations, the summary will still be based",
+      "on the full dataset."
+    ),
 
-      # Input: actionButton() to defer the rendering of output ----
-      # until the user explicitly clicks the button (rather than
-      # doing it immediately when inputs change). This is useful if
-      # the computations required to render output are inordinately
-      # time-consuming.
-      actionButton("update", "Update View")
-
+    # Input: actionButton() to defer the rendering of output ----
+    # until the user explicitly clicks the button (rather than
+    # doing it immediately when inputs change). This is useful if
+    # the computations required to render output are inordinately
+    # time-consuming.
+    actionButton("update", "Update View")
   ),
 
   # Output: Header + summary of distribution ----
@@ -47,12 +51,18 @@ server <- function(input, output) {
   # Note that we use eventReactive() here, which depends on
   # input$update (the action button), so that the output is only
   # updated when the user clicks the button
-  datasetInput <- eventReactive(input$update, {
-    switch(input$dataset,
-           "rock" = rock,
-           "pressure" = pressure,
-           "cars" = cars)
-  }, ignoreNULL = FALSE)
+  datasetInput <- eventReactive(
+    input$update,
+    {
+      switch(
+        input$dataset,
+        "rock" = rock,
+        "pressure" = pressure,
+        "cars" = cars
+      )
+    },
+    ignoreNULL = FALSE
+  )
 
   # Generate a summary of the dataset ----
   output$summary <- renderPrint({
@@ -67,7 +77,6 @@ server <- function(input, output) {
   output$view <- renderTable({
     head(datasetInput(), n = isolate(input$obs))
   })
-
 }
 
 # Create Shiny app ----

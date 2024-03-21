@@ -19,15 +19,19 @@ ui <- page_sidebar(
   # Sidebar panel for inputs ----
   sidebar = sidebar(
 
-      # Input: Selector for variable to plot against mpg ----
-      selectInput("variable", "Variable:",
-                  c("Cylinders" = "cyl",
-                    "Transmission" = "am",
-                    "Gears" = "gear")),
+    # Input: Selector for variable to plot against mpg ----
+    selectInput(
+      "variable",
+      "Variable:",
+      c(
+        "Cylinders" = "cyl",
+        "Transmission" = "am",
+        "Gears" = "gear"
+      )
+    ),
 
-      # Input: Checkbox for whether outliers should be included ----
-      checkboxInput("outliers", "Show outliers", TRUE)
-
+    # Input: Checkbox for whether outliers should be included ----
+    checkboxInput("outliers", "Show outliers", TRUE)
   ),
 
   # Output: Formatted text for caption ----
@@ -55,12 +59,14 @@ server <- function(input, output) {
   # Generate a plot of the requested variable against mpg ----
   # and only exclude outliers if requested
   output$mpgPlot <- renderPlot({
-    boxplot(as.formula(formulaText()),
-            data = mpgData,
-            outline = input$outliers,
-            col = "#75AADB", pch = 19)
+    boxplot(
+      as.formula(formulaText()),
+      data = mpgData,
+      outline = input$outliers,
+      col = "#75AADB",
+      pch = 19
+    )
   })
-
 }
 
 # Create Shiny app ----

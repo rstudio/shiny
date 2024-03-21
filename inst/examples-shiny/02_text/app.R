@@ -23,7 +23,6 @@ ui <- page_sidebar(
       label = "Number of observations to view:",
       value = 10
     )
-
   ),
 
   # Output: Verbatim text for data summary ----
@@ -38,10 +37,12 @@ server <- function(input, output) {
 
   # Return the requested dataset ----
   datasetInput <- reactive({
-    switch(input$dataset,
-           "rock" = rock,
-           "pressure" = pressure,
-           "cars" = cars)
+    switch(
+      input$dataset,
+      "rock" = rock,
+      "pressure" = pressure,
+      "cars" = cars
+    )
   })
 
   # Generate a summary of the dataset ----
@@ -54,7 +55,6 @@ server <- function(input, output) {
   output$view <- renderTable({
     head(datasetInput(), n = input$obs)
   })
-
 }
 
 # Create Shiny app ----

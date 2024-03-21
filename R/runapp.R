@@ -480,12 +480,14 @@ runExample <- function(
   display.mode = c("auto", "normal", "showcase"),
   package = "shiny"
 ) {
-  legacy <- getOption('shiny.legacy.examples', FALSE)
-  examplesDir <- "examples-shiny"
-  if (identical(package, "shiny") && isTRUE(legacy)) {
-    examplesDir <- "examples"
-  }
-  examplesDir <- system_file(examplesDir, package = package)
+  use_legacy_shiny_examples <-
+    identical(package, "shiny") &&
+    isTRUE(getOption('shiny.legacy.examples', FALSE))
+
+  examplesDir <- system_file(
+    if (use_legacy_shiny_examples) "examples" else "examples-shiny",
+    package = package
+  )
   dir <- resolve(examplesDir, example)
   if (is.null(dir)) {
     if (is.na(example)) {

@@ -1209,8 +1209,8 @@ test_that("Custom render functions that call exprToFunction", {
 
 test_that("Some render functions can't be cached", {
   m <- cachem::cache_mem()
-  expect_error(
-    lifecycle::expect_deprecated(
+  lifecycle::expect_deprecated(
+    expect_error(
       renderDataTable({ cars }) %>% bindCache(1, cache = m)
     )
   )

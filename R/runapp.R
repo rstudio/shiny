@@ -468,7 +468,7 @@ runExample <- function(example=NA,
                        host=getOption('shiny.host', '127.0.0.1'),
                        display.mode=c("auto", "normal", "showcase")) {
   legacy <- getOption('shiny.legacy.examples', FALSE)
-  examplesDir <- if (isTRUE(legacy)) 'examples' else 'shiny'
+  examplesDir <- if (isTRUE(legacy)) 'examples' else 'examples-shiny'
   examplesDir <- system_file(examplesDir, package='shiny')
   dir <- resolve(examplesDir, example)
   if (is.null(dir)) {

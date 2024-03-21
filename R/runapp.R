@@ -488,26 +488,25 @@ runExample <- function(
     if (use_legacy_shiny_examples) "examples" else "examples-shiny",
     package = package
   )
+
   dir <- resolve(examplesDir, example)
+
   if (is.null(dir)) {
+    valid_examples <- sprintf(
+      'Valid examples are "%s"',
+      paste(list.files(examplesDir), collapse = '", "')
+    )
+
     if (is.na(example)) {
-      errFun <- message
-      errMsg <- ''
-    }
-    else {
-      errFun <- stop
-      errMsg <- paste('Example', example, 'does not exist. ')
+      message(valid_examples)
+      return(invisible())
     }
 
-    errFun(errMsg,
-           'Valid examples are "',
-           paste(list.files(examplesDir), collapse='", "'),
-           '"')
+    stop("Example '", example, "' does not exist. ", valid_examples)
   }
-  else {
-    runApp(dir, port = port, host = host, launch.browser = launch.browser,
-           display.mode = display.mode)
-  }
+
+  runApp(dir, port = port, host = host, launch.browser = launch.browser,
+         display.mode = display.mode)
 }
 
 #' Run a gadget

@@ -480,6 +480,10 @@ runExample <- function(
   display.mode = c("auto", "normal", "showcase"),
   package = "shiny"
 ) {
+  if (!identical(package, "shiny") && !is_installed(package)) {
+    rlang::check_installed(package)
+  }
+
   use_legacy_shiny_examples <-
     identical(package, "shiny") &&
     isTRUE(getOption('shiny.legacy.examples', FALSE))

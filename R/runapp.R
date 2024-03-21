@@ -493,7 +493,8 @@ runExample <- function(
 
   if (is.null(dir)) {
     valid_examples <- sprintf(
-      'Valid examples are "%s"',
+      'Valid examples in %s: "%s"',
+      package,
       paste(list.files(examplesDir), collapse = '", "')
     )
 

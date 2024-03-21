@@ -58,7 +58,8 @@
 <span>  port <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"shiny.port"</span><span class="op">)</span>,</span>
 <span>  launch.browser <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"shiny.launch.browser"</span>, <span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  host <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"shiny.host"</span>, <span class="st">"127.0.0.1"</span><span class="op">)</span>,</span>
-<span>  display.mode <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"normal"</span>, <span class="st">"showcase"</span><span class="op">)</span></span>
+<span>  display.mode <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"normal"</span>, <span class="st">"showcase"</span><span class="op">)</span>,</span>
+<span>  package <span class="op">=</span> <span class="st">"shiny"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -94,6 +95,18 @@ to the <code>shiny.host</code> option, if set, or <code>"127.0.0.1"</code> if no
 <dd><p>The mode in which to display the example. Defaults to
 <code>showcase</code>, but may be set to <code>normal</code> to see the example without
 code or commentary.</p></dd>
+
+
+<dt>package</dt>
+<dd><p>The package in which to find the example (defaults to
+<code>"shiny"</code>).</p>
+<p>To provide examples in your package, store examples in the
+<code>inst/examples-shiny</code> directory of your package. Each example should be
+in its own subdirectory and should be runnable when <code><a href="runApp.html">runApp()</a></code> is called
+on the subdirectory. Example apps can include a <code>DESCRIPTION</code> file and a
+<code>README.md</code> file to provide metadata and commentary about the example. See
+the article on <a href="https://shiny.posit.co/r/articles/build/display-modes/" class="external-link">Display Modes</a>
+on the Shiny website for more information.</p></dd>
 
 </dl></div>
 

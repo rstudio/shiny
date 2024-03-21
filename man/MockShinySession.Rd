@@ -547,6 +547,9 @@ Called by observers when a reactive expression errors.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{e}}{An error object.}
+
+\item{\code{close}}{If \code{TRUE}, the session will be closed after the error is
+handled, defaults to \code{FALSE}.}
 }
 \if{html}{\out{</div>}}
 }

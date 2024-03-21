@@ -574,6 +574,8 @@ MockShinySession <- R6Class(
     },
     #' @description Called by observers when a reactive expression errors.
     #' @param e An error object.
+    #' @param close If `TRUE`, the session will be closed after the error is
+    #'  handled, defaults to `FALSE`.
     unhandledError = function(e, close = TRUE) {
       if (close) {
         class(e) <- c("shiny.error.fatal", class(e))

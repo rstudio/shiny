@@ -3,6 +3,7 @@ library(bslib)
 
 # Define UI for slider demo app ----
 ui <- page_sidebar(
+
   # App title ----
   title = "Downloading Data",
 
@@ -23,6 +24,7 @@ ui <- page_sidebar(
 
 # Define server logic to display and download selected file ----
 server <- function(input, output) {
+
   # Reactive value for selected dataset ----
   datasetInput <- reactive({
     switch(

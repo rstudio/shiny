@@ -3,11 +3,13 @@ library(bslib)
 
 # Define UI for slider demo app ----
 ui <- page_sidebar(
+
   # App title ----
   title = "Sliders",
 
   # Sidebar panel for inputs ----
   sidebar = sidebar(
+
     # Input: Simple integer interval ----
     sliderInput(
       "integer",
@@ -69,6 +71,7 @@ ui <- page_sidebar(
 
 # Define server logic for slider examples ----
 server <- function(input, output) {
+
   # Reactive expression to create data frame of all input values ----
   sliderValues <- reactive({
     data.frame(

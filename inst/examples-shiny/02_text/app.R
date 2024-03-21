@@ -3,6 +3,7 @@ library(bslib)
 
 # Define UI for dataset viewer app ----
 ui <- page_sidebar(
+
   # App title ----
   title = "Shiny Text",
 
@@ -32,6 +33,7 @@ ui <- page_sidebar(
 
 # Define server logic to summarize and view selected dataset ----
 server <- function(input, output) {
+
   # Return the requested dataset ----
   datasetInput <- reactive({
     switch(

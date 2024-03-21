@@ -3,6 +3,7 @@ library(bslib)
 
 # Define UI for app that draws a histogram ----
 ui <- page_sidebar(
+
   # App title ----
   title = "Hello Shiny!",
 
@@ -25,6 +26,7 @@ ui <- page_sidebar(
 
 # Define server logic required to draw a histogram ----
 server <- function(input, output) {
+
   # Histogram of the Old Faithful Geyser Data ----
   # with requested number of bins
   # This expression that generates a histogram is wrapped in a call

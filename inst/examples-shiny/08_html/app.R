@@ -2,6 +2,7 @@ library(shiny)
 
 # Define server logic for random distribution app ----
 server <- function(input, output) {
+
   # Reactive expression to generate the requested distribution ----
   # This is called whenever the inputs change. The output functions
   # defined below then use the value computed from this expression

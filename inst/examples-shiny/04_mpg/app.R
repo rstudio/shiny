@@ -12,6 +12,7 @@ mpgData$am <- factor(mpgData$am, labels = c("Automatic", "Manual"))
 
 # Define UI for miles per gallon app ----
 ui <- page_sidebar(
+
   # App title ----
   title = "Miles Per Gallon",
 
@@ -41,6 +42,7 @@ ui <- page_sidebar(
 
 # Define server logic to plot various variables against mpg ----
 server <- function(input, output) {
+
   # Compute the formula text ----
   # This is in a reactive expression since it is shared by the
   # output$caption and output$mpgPlot functions

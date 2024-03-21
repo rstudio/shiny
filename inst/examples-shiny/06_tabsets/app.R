@@ -4,11 +4,13 @@ library(bslib)
 # Define UI for random distribution app ----
 # Sidebar layout with input and output definitions ----
 ui <- page_sidebar(
+
   # App title ----
   title = "Tabsets",
 
   # Sidebar panel for inputs ----
   sidebar = sidebar(
+
     # Input: Select the random distribution type ----
     radioButtons(
       "dist",
@@ -48,6 +50,7 @@ ui <- page_sidebar(
 
 # Define server logic for random distribution app ----
 server <- function(input, output) {
+
   # Reactive expression to generate the requested distribution ----
   # This is called whenever the inputs change. The output functions
   # defined below then use the value computed from this expression

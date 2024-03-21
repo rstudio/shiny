@@ -3,6 +3,7 @@ library(bslib)
 
 # Define UI for slider demo app ----
 ui <- page_sidebar(
+
   # App title ----
   title = "Uploading Files",
 

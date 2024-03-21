@@ -3,6 +3,7 @@ library(bslib)
 
 # Define UI for dataset viewer app ----
 ui <- page_sidebar(
+
   # App title ----
   title = "Reactivity",
 
@@ -44,6 +45,7 @@ ui <- page_sidebar(
 
 # Define server logic to summarize and view selected dataset ----
 server <- function(input, output) {
+
   # Return the requested dataset ----
   # By declaring datasetInput as a reactive expression we ensure
   # that:

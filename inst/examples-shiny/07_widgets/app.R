@@ -3,11 +3,13 @@ library(bslib)
 
 # Define UI for slider demo app ----
 ui <- page_sidebar(
+
   # App title ----
   title = "More Widgets",
 
   # Sidebar panel for inputs ----
   sidebar = sidebar(
+
     # Input: Select a dataset ----
     selectInput(
       "dataset",
@@ -44,6 +46,7 @@ ui <- page_sidebar(
 
 # Define server logic to summarize and view selected dataset ----
 server <- function(input, output) {
+
   # Return the requested dataset ----
   # Note that we use eventReactive() here, which depends on
   # input$update (the action button), so that the output is only

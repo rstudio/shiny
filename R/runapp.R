@@ -447,6 +447,16 @@ stopApp <- function(returnValue = invisible()) {
 #' @param display.mode The mode in which to display the example. Defaults to
 #'   `showcase`, but may be set to `normal` to see the example without
 #'   code or commentary.
+#' @param package The package in which to find the example (defaults to
+#'   `"shiny"`).
+#'
+#'   To provide examples in your package, store examples in the
+#'   `inst/examples-shiny` directory of your package. Each example should be
+#'   in its own subdirectory and should be runnable when [runDir()] is called
+#'   on the subdirectory. Example apps can include a `DESCRIPTION` file and a
+#'   `README.md` file to provide metadata and commentary about the example. See
+#'   the article on [Display Modes](https://shiny.posit.co/r/articles/build/display-modes/)
+#'   on the Shiny website for more information.
 #' @inheritParams runApp
 #'
 #' @examples
@@ -462,14 +472,20 @@ stopApp <- function(returnValue = invisible()) {
 #'   system.file("examples", package="shiny")
 #' }
 #' @export
-runExample <- function(example=NA,
-                       port=getOption("shiny.port"),
-                       launch.browser = getOption('shiny.launch.browser', interactive()),
-                       host=getOption('shiny.host', '127.0.0.1'),
-                       display.mode=c("auto", "normal", "showcase")) {
+runExample <- function(
+  example = NA,
+  port = getOption("shiny.port"),
+  launch.browser = getOption("shiny.launch.browser", interactive()),
+  host = getOption("shiny.host", "127.0.0.1"),
+  display.mode = c("auto", "normal", "showcase"),
+  package = "shiny"
+) {
   legacy <- getOption('shiny.legacy.examples', FALSE)
-  examplesDir <- if (isTRUE(legacy)) 'examples' else 'examples-shiny'
-  examplesDir <- system_file(examplesDir, package='shiny')
+  examplesDir <- "examples-shiny"
+  if (identical(package, "shiny") && isTRUE(legacy)) {
+    examplesDir <- "examples"
+  }
+  examplesDir <- system_file(examplesDir, package = package)
   dir <- resolve(examplesDir, example)
   if (is.null(dir)) {
     if (is.na(example)) {

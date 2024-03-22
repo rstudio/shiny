@@ -76,15 +76,13 @@ test_that("reactivePoll supported", {
 
 test_that("renderDataTable supported", {
   session <- MockShinySession$new()
-  lifecycle::expect_deprecated(
-    isolate({
-      rt <- renderDataTable({
-        head(iris)
-      })
-      res <- rt(session, "name")
-      expect_equal(res$colnames, colnames(iris))
+  isolate({
+    rt <- renderDataTable({
+      head(iris)
     })
-  )
+    res <- rt(session, "name")
+    expect_equal(res$colnames, colnames(iris))
+  })
 })
 
 test_that("renderImage supported", {

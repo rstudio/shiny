@@ -210,4 +210,5 @@ Roxygen: list(markdown = TRUE)
 RdMacros: lifecycle
 Config/testthat/edition: 3
 Config/Needs/check:
-  shinytest2
+  shinytest2,
+  rprojroot

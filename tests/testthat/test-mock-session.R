@@ -75,16 +75,16 @@ test_that("reactivePoll supported", {
 # })
 
 test_that("renderDataTable supported", {
+  withr::local_options(list(shiny.legacy.datatable = TRUE))
+
   session <- MockShinySession$new()
-  lifecycle::expect_deprecated(
-    isolate({
-      rt <- renderDataTable({
-        head(iris)
-      })
-      res <- rt(session, "name")
-      expect_equal(res$colnames, colnames(iris))
+  isolate({
+    rt <- renderDataTable({
+      head(iris)
     })
-  )
+    res <- rt(session, "name")
+    expect_equal(res$colnames, colnames(iris))
+  })
 })
 
 test_that("renderImage supported", {

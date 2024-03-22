@@ -30,13 +30,7 @@ shinyDeprecated <- function(
   }
 
   # lifecycle::deprecate_soft(when, what, with = with, details = details, id = id, env = env)
-  rlang::warn(
-    message = msg,
-    .frequency = "always",
-    .frequency_id = msg,
-    .file = stderr(),
-    class = "lifecycle_warning_deprecated"
-  )
+  rlang::inform(message = msg, .frequency = "always", .frequency_id = msg, .file = stderr())
 }
 
 

@@ -84,13 +84,13 @@ renderReactlog <- function(sessionToken = NULL, time = TRUE) {
 }
 
 check_reactlog <- function() {
-  if (!is_installed("reactlog", reactlog_version)) {
-    rlang::check_installed("reactlog", reactlog_version)
+  if (!is_installed("reactlog", reactlog_min_version)) {
+    rlang::check_installed("reactlog", reactlog_min_version)
   }
 }
 
 # Should match the (suggested) version in DESCRIPTION file
-reactlog_version <- "1.0.0"
+reactlog_min_version <- "1.0.0"
 
 RLog <- R6Class(
   "RLog",

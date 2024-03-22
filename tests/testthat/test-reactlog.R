@@ -129,7 +129,7 @@ test_that("message logger appears", {
 
 
 test_that("reactlog_version is as expected", {
-  suggests <- strsplit(packageDescription("shiny")$Suggests, "\n")[[1]]
+  suggests <- strsplit(packageDescription("shiny")$Suggests, ",")[[1]]
   reactlog <- trimws(
     grep("reactlog", suggests, value = TRUE)
   )

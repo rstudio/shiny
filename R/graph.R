@@ -1,31 +1,3 @@
-# Check that the version of an suggested package satisfies the requirements
-#
-# @param package The name of the suggested package
-# @param version The version of the package
-check_suggested <- function(package, version = NULL) {
-
-  if (is_installed(package, version)) {
-    return()
-  }
-
-  msg <- paste0(
-    sQuote(package),
-    if (is.na(version %||% NA)) "" else paste0("(>= ", version, ")"),
-    " must be installed for this functionality."
-  )
-
-  if (interactive()) {
-    message(msg, "\nWould you like to install it?")
-    if (utils::menu(c("Yes", "No")) == 1) {
-      return(utils::install.packages(package))
-    }
-  }
-
-  stop(msg, call. = FALSE)
-}
-
-
-
 
 # domain is like session
 
@@ -110,34 +82,15 @@ renderReactlog <- function(sessionToken = NULL, time = TRUE) {
     time = time
   )
 }
+
 check_reactlog <- function() {
-  check_suggested("reactlog", reactlog_version())
-}
-# read reactlog version from description file
-# prevents version mismatch in code and description file
-reactlog_version <- local({
-  version <- NULL
-  function() {
-    if (!is.null(version)) return(version)
-
-    desc <- read.dcf(system_file("DESCRIPTION", package = "shiny"))
-    suggests <- desc[1,"Suggests"][[1]]
-    suggests_pkgs <- strsplit(suggests, "\n")[[1]]
-
-    reactlog_info <- suggests_pkgs[grepl("reactlog", suggests_pkgs)]
-    if (length(reactlog_info) == 0) {
-      stop("reactlog can not be found in shiny DESCRIPTION file")
-    }
-
-    reactlog_info <- sub("^[^\\(]*\\(", "", reactlog_info)
-    reactlog_info <- sub("\\)[^\\)]*$", "", reactlog_info)
-    reactlog_info <- sub("^[>= ]*", "", reactlog_info)
-
-    version <<- package_version(reactlog_info)
-    version
+  if (!is_installed("reactlog", reactlog_min_version)) {
+    rlang::check_installed("reactlog", reactlog_min_version)
   }
-})
+}
 
+# Should match the (suggested) version in DESCRIPTION file
+reactlog_min_version <- "1.0.0"
 
 RLog <- R6Class(
   "RLog",

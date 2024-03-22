@@ -126,3 +126,15 @@ test_that("message logger appears", {
   })
 
 })
+
+
+test_that("reactlog_version is as expected", {
+  reactlog <- trimws(
+    grep("reactlog", readLines("../../DESCRIPTION"), value = TRUE)
+  )
+  expect_length(reactlog, 1)
+  expect_equal(
+    reactlog,
+    sprintf("reactlog (>= %s),", reactlog_version)
+  )
+})

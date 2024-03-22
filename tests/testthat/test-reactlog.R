@@ -136,6 +136,6 @@ test_that("reactlog_version is as expected", {
   expect_length(reactlog, 1)
   expect_equal(
     reactlog,
-    sprintf("reactlog (>= %s),", reactlog_min_version)
+    sprintf("reactlog (>= %s)", reactlog_min_version)
   )
 })

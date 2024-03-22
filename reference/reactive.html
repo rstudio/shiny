@@ -18,7 +18,7 @@ reactive expression is a expression whose result will change over time."><meta p
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.8.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.8.0.9000</span>
       </span>
     </div>
 
@@ -145,7 +145,7 @@ more information about reactive expressions.</p>
 <span class="r-in"><span><span class="fu"><a href="isolate.html">isolate</a></span><span class="op">(</span><span class="fu">reactiveC</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">&lt;quosure&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> expr: <span style="color: #0000BB;">^values$A + 2</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> env:  <span style="color: #0000BB;">0x556e10026810</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> env:  <span style="color: #0000BB;">0x5617f1d1ce60</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Instead, the quosure should be `rlang::inject()`ed</span></span></span>
 <span class="r-in"><span><span class="va">reactiveD</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/inject.html" class="external-link">inject</a></span><span class="op">(</span><span class="fu">reactive</span><span class="op">(</span><span class="op">!</span><span class="op">!</span><span class="va">myquo</span><span class="op">)</span><span class="op">)</span></span></span>

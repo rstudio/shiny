@@ -23,7 +23,7 @@
     "@types/bootstrap-datepicker": "0.0.14",
     "@types/datatables.net": "^1.10.19",
     "@types/ion-rangeslider": "2.3.0",
-    "@types/jquery": "3.5.14",
+    "@types/jquery": "3.5.29",
     "@types/selectize": "0.12.34",
     "lit": "^3.0.0"
   },
@@ -62,7 +62,7 @@
     "eslint-plugin-unicorn": "^43.0.2",
     "fs-readdir-recursive": "^1.1.0",
     "jest": "^26.6.3",
-    "jquery": "^3.6.0",
+    "jquery": "3.7.1",
     "lodash": "^4.17.21",
     "madge": "^4.0.2",
     "node-gyp": "^8.1.0",

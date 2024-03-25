@@ -237,6 +237,15 @@ function $escape(val: string | undefined): string | undefined {
   return val.replace(/([!"#$%&'()*+,./:;<=>?@[\\\]^`{|}~])/g, "\\$1");
 }
 
+// Returns a selector for an ID, preferring the #id syntax but falling back to
+// [id="id"] if the ID contains spaces (with a warning).
+function escapedIdSelector(val: string): string {
+  val = $escape(val);
+  if (val.indexOf(" ") === -1) return "#" + val;
+  console.warn("[shiny] Invalid ID, should not include spaces.", { id: val });
+  return `[id="${val}"]`;
+}
+
 // Maps a function over an object, preserving keys. Like the mapValues
 // function from lodash.
 function mapValues<T extends { [key: string]: any }, R>(
@@ -401,6 +410,7 @@ export {
   asArray,
   mergeSort,
   $escape,
+  escapedIdSelector,
   mapValues,
   isnan,
   _equal,

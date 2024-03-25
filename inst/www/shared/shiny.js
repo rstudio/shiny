@@ -6698,6 +6698,15 @@
       return val;
     return val.replace(/([!"#$%&'()*+,./:;<=>?@[\\\]^`{|}~])/g, "\\$1");
   }
+  function escapedIdSelector(val) {
+    val = $escape(val);
+    if (val.indexOf(" ") === -1)
+      return "#" + val;
+    console.warn("[shiny] Invalid ID, should not include spaces.", {
+      id: val
+    });
+    return '[id="'.concat(val, '"]');
+  }
   function mapValues(obj, f4) {
     var newObj = {};
     Object.keys(obj).forEach(function(key) {
@@ -23541,7 +23550,7 @@
         });
         addMessageHandler("inputMessages", /* @__PURE__ */ function() {
           var _ref4 = _asyncToGenerator13(/* @__PURE__ */ _regeneratorRuntime13().mark(function _callee9(message) {
-            var i5, $obj, inputBinding, el, evt;
+            var i5, inputSelector, $obj, inputBinding, el, evt;
             return _regeneratorRuntime13().wrap(function _callee9$(_context9) {
               while (1)
                 switch (_context9.prev = _context9.next) {
@@ -23549,13 +23558,14 @@
                     i5 = 0;
                   case 1:
                     if (!(i5 < message.length)) {
-                      _context9.next = 23;
+                      _context9.next = 24;
                       break;
                     }
-                    $obj = (0, import_jquery38.default)(".shiny-bound-input#" + $escape(message[i5].id));
+                    inputSelector = ".shiny-bound-input" + escapedIdSelector(message[i5].id);
+                    $obj = (0, import_jquery38.default)(inputSelector);
                     inputBinding = $obj.data("shiny-input-binding");
                     if (!($obj.length > 0)) {
-                      _context9.next = 20;
+                      _context9.next = 21;
                       break;
                     }
                     if (!$obj.attr("aria-live"))
@@ -23566,32 +23576,32 @@
                     evt.binding = inputBinding;
                     (0, import_jquery38.default)(el).trigger(evt);
                     if (evt.isDefaultPrevented()) {
-                      _context9.next = 20;
+                      _context9.next = 21;
                       break;
                     }
-                    _context9.prev = 12;
-                    _context9.next = 15;
+                    _context9.prev = 13;
+                    _context9.next = 16;
                     return inputBinding.receiveMessage(el, evt.message);
-                  case 15:
-                    _context9.next = 20;
+                  case 16:
+                    _context9.next = 21;
                     break;
-                  case 17:
-                    _context9.prev = 17;
-                    _context9.t0 = _context9["catch"](12);
+                  case 18:
+                    _context9.prev = 18;
+                    _context9.t0 = _context9["catch"](13);
                     console.error("[shiny] Error in inputBinding.receiveMessage()", {
                       error: _context9.t0,
                       binding: inputBinding,
                       message: evt.message
                     });
-                  case 20:
+                  case 21:
                     i5++;
                     _context9.next = 1;
                     break;
-                  case 23:
+                  case 24:
                   case "end":
                     return _context9.stop();
                 }
-            }, _callee9, null, [[12, 17]]);
+            }, _callee9, null, [[13, 18]]);
           }));
           return function(_x11) {
             return _ref4.apply(this, arguments);
@@ -23859,7 +23869,7 @@
           }
         });
         function getTabset(id) {
-          var $tabset = (0, import_jquery38.default)("#" + $escape(id));
+          var $tabset = (0, import_jquery38.default)(escapedIdSelector(id));
           if ($tabset.length === 0)
             throw "There is no tabsetPanel (or navbarPage or navlistPanel) with id equal to '" + id + "'";
           return $tabset;

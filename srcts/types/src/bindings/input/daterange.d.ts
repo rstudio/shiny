@@ -27,7 +27,7 @@ declare class DateRangeInputBinding extends DateInputBindingBase {
         language: string;
         startview: string;
     };
-    receiveMessage(el: HTMLElement, data: DateRangeReceiveMessageData): void;
+    receiveMessage(el: HTMLElement, data: DateRangeReceiveMessageData): Promise<void>;
     initialize(el: HTMLElement): void;
     subscribe(el: HTMLElement, callback: (x: boolean) => void): void;
     unsubscribe(el: HTMLElement): void;

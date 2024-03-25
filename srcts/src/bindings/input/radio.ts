@@ -103,7 +103,10 @@ class RadioInputBinding extends InputBinding {
       options: options,
     };
   }
-  receiveMessage(el: RadioHTMLElement, data: RadioReceiveMessageData): void {
+  async receiveMessage(
+    el: RadioHTMLElement,
+    data: RadioReceiveMessageData
+  ): Promise<void> {
     const $el = $(el);
     // This will replace all the options
 
@@ -122,7 +125,7 @@ class RadioInputBinding extends InputBinding {
       this.setValue(el, data.value);
     }
 
-    updateLabel(data.label, getLabelNode(el));
+    await updateLabel(data.label, getLabelNode(el));
 
     $(el).trigger("change");
   }

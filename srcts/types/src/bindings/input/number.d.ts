@@ -12,7 +12,7 @@ declare class NumberInputBinding extends TextInputBindingBase {
     getValue(el: NumberHTMLElement): string[] | number | string | null | undefined;
     setValue(el: NumberHTMLElement, value: number): void;
     getType(el: NumberHTMLElement): string;
-    receiveMessage(el: NumberHTMLElement, data: NumberReceiveMessageData): void;
+    receiveMessage(el: NumberHTMLElement, data: NumberReceiveMessageData): Promise<void>;
     getState(el: NumberHTMLElement): {
         label: string;
         value: ReturnType<NumberInputBinding["getValue"]>;

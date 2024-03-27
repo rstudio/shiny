@@ -42,7 +42,7 @@
 #'   session to immediately unblock and carry on with other user interactions.
 #'
 #' @export
-ExtendedTask <- R6Class("ExtendedTask", portable = TRUE,
+ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
   public = list(
     #' @description
     #' Creates a new `ExtendedTask` object. `ExtendedTask` should generally be

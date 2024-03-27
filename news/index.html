@@ -48,7 +48,7 @@
     </div>
 
     <div class="section level2">
-<h2 class="page-header" data-toc-text="1.8.1" id="shiny-181">shiny 1.8.1<a class="anchor" aria-label="anchor" href="#shiny-181"></a></h2>
+<h2 class="page-header" data-toc-text="1.8.1" id="shiny-181">shiny 1.8.1<small>2024-03-26</small><a class="anchor" aria-label="anchor" href="#shiny-181"></a></h2>
 <div class="section level3">
 <h3 id="new-features-and-improvements-1-8-1">New features and improvements<a class="anchor" aria-label="anchor" href="#new-features-and-improvements-1-8-1"></a></h3>
 <ul><li><p>Added <code>ExtendedTask</code>, a new simple way to launch long-running asynchronous tasks that are truly non-blocking. That is, even <em>within</em> a session, an <code>ExtendedTask</code> won’t block the main thread from flushing the reactive graph (i.e., UI updates won’t be blocked). <code>ExtendedTask</code> pairs nicely with new <code>bslib::input_task_button()</code> and <code>bslib::bind_task_button()</code> functions, which help give user feedback and prevent extra button clicks. (<a href="https://github.com/rstudio/shiny/issues/3958" class="external-link">#3958</a>)</p></li>

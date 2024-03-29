@@ -145,13 +145,6 @@ const bindingsRegistry = (() => {
    * @param bindingType Binding type, either "input" or "output"
    */
   function addBinding(id: string, bindingType: BindingTypes): void {
-    if (id === "") {
-      throw new ShinyClientError({
-        headline: `Empty ${bindingType} ID found`,
-        message: "Binding IDs must not be empty.",
-      });
-    }
-
     const existingBinding = bindings.get(id);
 
     if (existingBinding) {

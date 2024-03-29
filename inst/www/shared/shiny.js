@@ -18595,18 +18595,11 @@
         }).join(" and ");
         return '- "'.concat(id, '": ').concat(messages);
       }).join("\n");
-      var finalMsg = "The following ".concat(duplicateIds.size === 1 ? "ID was" : "IDs were", " repeated:\n").concat(duplicateIdMsg);
-      if (!Shiny.inDevMode()) {
-        console.warn("[shiny] " + finalMsg);
-        return {
-          status: "ok"
-        };
-      }
       return {
         status: "error",
         error: new ShinyClientError({
           headline: "Duplicate input/output IDs found",
-          message: finalMsg
+          message: "The following ".concat(duplicateIds.size === 1 ? "ID was" : "IDs were", " repeated:\n").concat(duplicateIdMsg)
         })
       };
     }
@@ -18849,13 +18842,19 @@
               currentInputs = bindInputs(shinyCtx, scope);
               bindingValidity = bindingsRegistry.checkValidity();
               if (!(bindingValidity.status === "error")) {
-                _context2.next = 6;
+                _context2.next = 10;
+                break;
+              }
+              if (!Shiny.inDevMode()) {
+                _context2.next = 9;
                 break;
               }
               throw bindingValidity.error;
-            case 6:
+            case 9:
+              console.warn("[shiny] " + bindingValidity.error.message);
+            case 10:
               return _context2.abrupt("return", currentInputs);
-            case 7:
+            case 11:
             case "end":
               return _context2.stop();
           }

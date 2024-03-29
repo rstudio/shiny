@@ -18597,7 +18597,7 @@
       }).join("\n");
       var finalMsg = "The following ".concat(duplicateIds.size === 1 ? "ID was" : "IDs were", " repeated:\n").concat(duplicateIdMsg);
       if (!Shiny.inDevMode()) {
-        console.warn(finalMsg);
+        console.warn("[shiny] " + finalMsg);
         return {
           status: "ok"
         };

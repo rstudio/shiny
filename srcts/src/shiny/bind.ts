@@ -125,7 +125,7 @@ const bindingsRegistry = (() => {
 
     // If we're not in dev mode, just log a warning and continue
     if (!Shiny.inDevMode()) {
-      console.warn(finalMsg);
+      console.warn("[shiny] " + finalMsg);
 
       return { status: "ok" };
     }

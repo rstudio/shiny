@@ -119,13 +119,22 @@ const bindingsRegistry = (() => {
       })
       .join("\n");
 
+    const finalMsg = `The following ${
+      duplicateIds.size === 1 ? "ID was" : "IDs were"
+    } repeated:\n${duplicateIdMsg}`;
+
+    // If we're not in dev mode, just log a warning and continue
+    if (!Shiny.inDevMode()) {
+      console.warn(finalMsg);
+
+      return { status: "ok" };
+    }
+
     return {
       status: "error",
       error: new ShinyClientError({
         headline: "Duplicate input/output IDs found",
-        message: `The following ${
-          duplicateIds.size === 1 ? "ID was" : "IDs were"
-        } repeated:\n${duplicateIdMsg}`,
+        message: finalMsg,
       }),
     };
   }

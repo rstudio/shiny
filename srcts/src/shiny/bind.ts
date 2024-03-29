@@ -119,22 +119,13 @@ const bindingsRegistry = (() => {
       })
       .join("\n");
 
-    const finalMsg = `The following ${
-      duplicateIds.size === 1 ? "ID was" : "IDs were"
-    } repeated:\n${duplicateIdMsg}`;
-
-    // If we're not in dev mode, just log a warning and continue
-    if (!Shiny.inDevMode()) {
-      console.warn("[shiny] " + finalMsg);
-
-      return { status: "ok" };
-    }
-
     return {
       status: "error",
       error: new ShinyClientError({
         headline: "Duplicate input/output IDs found",
-        message: finalMsg,
+        message: `The following ${
+          duplicateIds.size === 1 ? "ID was" : "IDs were"
+        } repeated:\n${duplicateIdMsg}`,
       }),
     };
   }
@@ -429,7 +420,12 @@ async function _bindAll(
   // re-run, and then see the next collision, etc.
   const bindingValidity = bindingsRegistry.checkValidity();
   if (bindingValidity.status === "error") {
-    throw bindingValidity.error;
+    // Only throw if we're in dev mode. Otherwise, just log a warning.
+    if (Shiny.inDevMode()) {
+      throw bindingValidity.error;
+    } else {
+      console.warn("[shiny] " + bindingValidity.error.message);
+    }
   }
 
   return currentInputs;

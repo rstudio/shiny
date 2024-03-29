@@ -18595,21 +18595,22 @@
         }).join(" and ");
         return '- "'.concat(id, '": ').concat(messages);
       }).join("\n");
+      var finalMsg = "The following ".concat(duplicateIds.size === 1 ? "ID was" : "IDs were", " repeated:\n").concat(duplicateIdMsg);
+      if (!Shiny.inDevMode()) {
+        console.warn(finalMsg);
+        return {
+          status: "ok"
+        };
+      }
       return {
         status: "error",
         error: new ShinyClientError({
           headline: "Duplicate input/output IDs found",
-          message: "The following ".concat(duplicateIds.size === 1 ? "ID was" : "IDs were", " repeated:\n").concat(duplicateIdMsg)
+          message: finalMsg
         })
       };
     }
     function addBinding(id, bindingType) {
-      if (id === "") {
-        throw new ShinyClientError({
-          headline: "Empty ".concat(bindingType, " ID found"),
-          message: "Binding IDs must not be empty."
-        });
-      }
       var existingBinding = bindings.get(id);
       if (existingBinding) {
         existingBinding.push(bindingType);

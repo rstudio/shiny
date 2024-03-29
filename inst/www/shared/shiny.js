@@ -18604,12 +18604,6 @@
       };
     }
     function addBinding(id, bindingType) {
-      if (id === "") {
-        throw new ShinyClientError({
-          headline: "Empty ".concat(bindingType, " ID found"),
-          message: "Binding IDs must not be empty."
-        });
-      }
       var existingBinding = bindings.get(id);
       if (existingBinding) {
         existingBinding.push(bindingType);
@@ -18848,13 +18842,19 @@
               currentInputs = bindInputs(shinyCtx, scope);
               bindingValidity = bindingsRegistry.checkValidity();
               if (!(bindingValidity.status === "error")) {
-                _context2.next = 6;
+                _context2.next = 10;
+                break;
+              }
+              if (!Shiny.inDevMode()) {
+                _context2.next = 9;
                 break;
               }
               throw bindingValidity.error;
-            case 6:
+            case 9:
+              console.warn("[shiny] " + bindingValidity.error.message);
+            case 10:
               return _context2.abrupt("return", currentInputs);
-            case 7:
+            case 11:
             case "end":
               return _context2.stop();
           }

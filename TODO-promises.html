@@ -50,101 +50,70 @@
 
 <div class="section level2">
 <h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a></h2>
-<ul class="task-list"><li>
-<input type="checkbox" checked>Motivation – why should I care about async? Why shouldn’t I (what are the limitations)?</li>
-<li>
-<input type="checkbox" checked>High level technical overview</li>
-<li>
-<input type="checkbox">Cookbook-style examples</li>
-<li>
-<input type="checkbox">Top-down porting of a sync app to async</li>
+<ul class="task-list"><li><label><input type="checkbox" checked>Motivation – why should I care about async? Why shouldn’t I (what are the limitations)?</label></li>
+<li><label><input type="checkbox" checked>High level technical overview</label></li>
+<li><label><input type="checkbox">Cookbook-style examples</label></li>
+<li><label><input type="checkbox">Top-down porting of a sync app to async</label></li>
 </ul></div>
 <div class="section level2">
 <h2 id="core-api">Core API<a class="anchor" aria-label="anchor" href="#core-api"></a></h2>
 <ul class="task-list"><li>
-<input type="checkbox" checked>Should as.promise() convert regular values to promises? Or throw?
-<ul class="task-list"><li>
-<input type="checkbox" checked>If as.promise() doesn’t convert regular values to promises, add promise_resolved(value) and promise_rejected(err) functions?</li>
+<label><input type="checkbox" checked>Should as.promise() convert regular values to promises? Or throw?</label>
+<ul class="task-list"><li><label><input type="checkbox" checked>If as.promise() doesn’t convert regular values to promises, add promise_resolved(value) and promise_rejected(err) functions?</label></li>
 </ul></li>
 </ul></div>
 <div class="section level2">
 <h2 id="later">later<a class="anchor" aria-label="anchor" href="#later"></a></h2>
-<ul class="task-list"><li>
-<input type="checkbox">Add support for multiple event loops</li>
-<li>
-<input type="checkbox" checked>Add timeout to run_now</li>
+<ul class="task-list"><li><label><input type="checkbox">Add support for multiple event loops</label></li>
+<li><label><input type="checkbox" checked>Add timeout to run_now</label></li>
 </ul></div>
 <div class="section level2">
 <h2 id="error-handlingdebugging">Error handling/debugging<a class="anchor" aria-label="anchor" href="#error-handlingdebugging"></a></h2>
-<ul class="task-list"><li>
-<input type="checkbox">..stacktraceon../..stacktraceoff.. and stack traces in general</li>
+<ul class="task-list"><li><label><input type="checkbox">..stacktraceon../..stacktraceoff.. and stack traces in general</label></li>
 <li>
-<input type="checkbox" checked>long stack traces
-<ul class="task-list"><li>
-<input type="checkbox" checked>require opt-in</li>
+<label><input type="checkbox" checked>long stack traces</label>
+<ul class="task-list"><li><label><input type="checkbox" checked>require opt-in</label></li>
 </ul></li>
-<li>
-<input type="checkbox">options(shiny.error) should work in promise handlers</li>
-<li>
-<input type="checkbox" checked>Detect when reactives are used across process boundaries, and error</li>
+<li><label><input type="checkbox">options(shiny.error) should work in promise handlers</label></li>
+<li><label><input type="checkbox" checked>Detect when reactives are used across process boundaries, and error</label></li>
 </ul></div>
 <div class="section level2">
 <h2 id="render-functions">Render functions<a class="anchor" aria-label="anchor" href="#render-functions"></a></h2>
-<ul class="task-list"><li>
-<input type="checkbox" checked>Non-async render functions should have their code all execute on the current tick. Otherwise order of execution will be surprising if they have side effects and explicit priorities.</li>
+<ul class="task-list"><li><label><input type="checkbox" checked>Non-async render functions should have their code all execute on the current tick. Otherwise order of execution will be surprising if they have side effects and explicit priorities.</label></li>
+<li><label><input type="checkbox" checked>Promise domains should maybe have an onExecute, for the “sync” part that kicks off async operations to also have wrapping behavior (like capturing output). Right now, I have to start off renderPrint with promise(~resolve(TRUE)) and then execute the user code in a then(), just to get the promise behavior. Same will be true when we tackle error handling (stack trace capture).</label></li>
+<li><label><input type="checkbox" checked>invisible() doesn’t seem to be working correctly with renderPrint. .visible doesn’t survive promise chaining, e.g. promise(<sub>resolve(promise(</sub>resolve(invisible(“Hi”))))) %&gt;% then(function(x, .visible) { cat(.visible) }) will print TRUE, not FALSE.</label></li>
+<li><label><input type="checkbox" checked>renderDataTable should support async</label></li>
 <li>
-<input type="checkbox" checked>Promise domains should maybe have an onExecute, for the “sync” part that kicks off async operations to also have wrapping behavior (like capturing output). Right now, I have to start off renderPrint with promise(~resolve(TRUE)) and then execute the user code in a then(), just to get the promise behavior. Same will be true when we tackle error handling (stack trace capture).</li>
-<li>
-<input type="checkbox" checked>invisible() doesn’t seem to be working correctly with renderPrint. .visible doesn’t survive promise chaining, e.g. promise(<sub>resolve(promise(</sub>resolve(invisible(“Hi”))))) %&gt;% then(function(x, .visible) { cat(.visible) }) will print TRUE, not FALSE.</li>
-<li>
-<input type="checkbox" checked>renderDataTable should support async</li>
-<li>
-<input type="checkbox" checked>Support downloadHandler
-<ul class="task-list"><li>
-<input type="checkbox">Support async filename?</li>
-<li>
-<input type="checkbox" checked>Should prevent session from continuing until download completes (ref count)</li>
+<label><input type="checkbox" checked>Support downloadHandler</label>
+<ul class="task-list"><li><label><input type="checkbox">Support async filename?</label></li>
+<li><label><input type="checkbox" checked>Should prevent session from continuing until download completes (ref count)</label></li>
 </ul></li>
 </ul></div>
 <div class="section level2">
 <h2 id="flush-lifecycle">Flush lifecycle<a class="anchor" aria-label="anchor" href="#flush-lifecycle"></a></h2>
-<ul class="task-list"><li>
-<input type="checkbox" checked>While async operations are running in a session, hold off on any further processing of inputs and scheduled task items until all operations are complete.</li>
-<li>
-<input type="checkbox" checked>Hold all outputs/errors until async operations are complete.</li>
-<li>
-<input type="checkbox">Allow both sync and async outputs to be displayed before all outputs are done. (opt-in)</li>
+<ul class="task-list"><li><label><input type="checkbox" checked>While async operations are running in a session, hold off on any further processing of inputs and scheduled task items until all operations are complete.</label></li>
+<li><label><input type="checkbox" checked>Hold all outputs/errors until async operations are complete.</label></li>
+<li><label><input type="checkbox">Allow both sync and async outputs to be displayed before all outputs are done. (opt-in)</label></li>
 </ul></div>
 <div class="section level2">
 <h2 id="testing">Testing<a class="anchor" aria-label="anchor" href="#testing"></a></h2>
-<ul class="task-list"><li>
-<input type="checkbox" checked>App that tests that all built-in render functions support async</li>
-<li>
-<input type="checkbox" checked>Apps that test flush lifecycle, including onFlushed(once = FALSE)</li>
-<li>
-<input type="checkbox" checked>Apps that test invisible() behavior for renderPrint, both sync and async</li>
-<li>
-<input type="checkbox" checked>Apps that ensure all render functions execute synchronous code before tick is over</li>
-<li>
-<input type="checkbox" checked>App that tests async downloadHandler</li>
-<li>
-<input type="checkbox" checked>App that verifies inputs/timers don’t fire for a session while it has async operations pending</li>
-<li>
-<input type="checkbox" checked>App that verifies req(FALSE), req(FALSE, cancelOutput = TRUE), validate/need, etc. all work in async</li>
+<ul class="task-list"><li><label><input type="checkbox" checked>App that tests that all built-in render functions support async</label></li>
+<li><label><input type="checkbox" checked>Apps that test flush lifecycle, including onFlushed(once = FALSE)</label></li>
+<li><label><input type="checkbox" checked>Apps that test invisible() behavior for renderPrint, both sync and async</label></li>
+<li><label><input type="checkbox" checked>Apps that ensure all render functions execute synchronous code before tick is over</label></li>
+<li><label><input type="checkbox" checked>App that tests async downloadHandler</label></li>
+<li><label><input type="checkbox" checked>App that verifies inputs/timers don’t fire for a session while it has async operations pending</label></li>
+<li><label><input type="checkbox" checked>App that verifies req(FALSE), req(FALSE, cancelOutput = TRUE), validate/need, etc. all work in async</label></li>
 </ul></div>
 <div class="section level2">
 <h2 id="external-packages">External packages<a class="anchor" aria-label="anchor" href="#external-packages"></a></h2>
-<ul class="task-list"><li>
-<input type="checkbox" checked>DT</li>
-<li>
-<input type="checkbox" checked>htmlwidgets: Don’t require async-aware version of Shiny if not using async</li>
-<li>
-<input type="checkbox" checked>Plotly</li>
+<ul class="task-list"><li><label><input type="checkbox" checked>DT</label></li>
+<li><label><input type="checkbox" checked>htmlwidgets: Don’t require async-aware version of Shiny if not using async</label></li>
+<li><label><input type="checkbox" checked>Plotly</label></li>
 </ul></div>
 <div class="section level2">
 <h2 id="bugs">Bugs<a class="anchor" aria-label="anchor" href="#bugs"></a></h2>
-<ul class="task-list"><li>
-<input type="checkbox" checked>req(FALSE, cancelOutput = TRUE) shows grey (even without async)</li>
+<ul class="task-list"><li><label><input type="checkbox" checked>req(FALSE, cancelOutput = TRUE) shows grey (even without async)</label></li>
 </ul></div>
 </div>
 

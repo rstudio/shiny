@@ -1,7 +1,7 @@
 Package: shiny
 Type: Package
 Title: Web Application Framework for R
-Version: 1.8.0.9000
+Version: 1.8.1.1
 Authors@R: c(
     person("Winston", "Chang", role = c("aut", "cre"), email = "winston@posit.co", comment = c(ORCID = "0000-0002-1576-2126")),
     person("Joe", "Cheng", role = "aut", email = "joe@posit.co"),
@@ -96,6 +96,7 @@ Imports:
     lifecycle (>= 0.2.0)
 Suggests:
     datasets,
+    DT,
     Cairo (>= 1.5-5),
     testthat (>= 3.0.0),
     knitr (>= 1.6),

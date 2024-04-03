@@ -136,13 +136,6 @@ const bindingsRegistry = (() => {
    * @param bindingType Binding type, either "input" or "output"
    */
   function addBinding(id: string, bindingType: BindingTypes): void {
-    if (id === "") {
-      throw new ShinyClientError({
-        headline: `Empty ${bindingType} ID found`,
-        message: "Binding IDs must not be empty.",
-      });
-    }
-
     const existingBinding = bindings.get(id);
 
     if (existingBinding) {
@@ -427,7 +420,12 @@ async function _bindAll(
   // re-run, and then see the next collision, etc.
   const bindingValidity = bindingsRegistry.checkValidity();
   if (bindingValidity.status === "error") {
-    throw bindingValidity.error;
+    // Only throw if we're in dev mode. Otherwise, just log a warning.
+    if (Shiny.inDevMode()) {
+      throw bindingValidity.error;
+    } else {
+      console.warn("[shiny] " + bindingValidity.error.message);
+    }
   }
 
   return currentInputs;

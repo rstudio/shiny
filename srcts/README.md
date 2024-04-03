@@ -236,7 +236,7 @@ To update the version of `core-js`:
 
 ### External libraries
 
-Shiny already has a handful of html dependencies that should NOT be bundled within `shiny.js`.  To update the dependencies below, see the directions in in [`tools/README.md`](../tools).
+Shiny already has a handful of html dependencies that should NOT be bundled within `shiny.js`.  To update the dependencies below, see the directions in [`tools/README.md`](../tools).
 * `jquery` / `@types/jquery`
 * `bootstrap` / `@types/bootstrap`
   * Bootstrap is not being updated anymore. Only bootstrap 3.4 will be utilized within shiny.js. To use the latest bootstrap, see [`rstudio/bslib`](https://github.com/rstudio/bslib)

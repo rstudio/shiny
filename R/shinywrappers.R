@@ -778,8 +778,8 @@ renderUI <- function(expr, env = parent.frame(), quoted = FALSE,
 #'   function.)
 #' @param contentType A string of the download's
 #'   [content type](https://en.wikipedia.org/wiki/Internet_media_type), for
-#'   example `"text/csv"` or `"image/png"`. If `NULL`, the content type 
-#'   will be guessed based on the filename extension, or 
+#'   example `"text/csv"` or `"image/png"`. If `NULL`, the content type
+#'   will be guessed based on the filename extension, or
 #'   `application/octet-stream` if the extension is unknown.
 #' @param outputArgs A list of arguments to be passed through to the implicit
 #'   call to [downloadButton()] when `downloadHandler` is used
@@ -822,20 +822,12 @@ downloadHandler <- function(filename, content, contentType=NULL, outputArgs=list
 #' Table output with the JavaScript DataTables library
 #'
 #' @description
-#' `r lifecycle::badge("superseded")` Please use
-#' \href{https://rstudio.github.io/DT/shiny.html}{\code{DT::renderDataTable()}}.
-#' (Shiny 0.11.1)
+#' `r lifecycle::badge("deprecated")`
 #'
-#' Makes a reactive version of the given function that returns a data frame (or
-#' matrix), which will be rendered with the [DataTables](https://datatables.net)
-#' library. Paging, searching, filtering, and sorting can be done on the R side
-#' using Shiny as the server infrastructure.
-#'
-#' This function only provides the server-side version of DataTables (using R
-#' to process the data object on the server side). There is a separate
-#' [DT](https://github.com/rstudio/DT) that allows you to create both
-#' server-side and client-side DataTables, and supports additional features.
-#' Learn more at <https://rstudio.github.io/DT/shiny.html>.
+#' This function is deprecated, use
+#' [DT::renderDT()](https://rstudio.github.io/DT/shiny.html) instead. It
+#' provides a superset of functionality, better performance, and better user
+#' experience.
 #'
 #' @param expr An expression that returns a data frame or a matrix.
 #' @inheritParams renderTable
@@ -887,18 +879,60 @@ downloadHandler <- function(filename, content, contentType=NULL, outputArgs=list
 #'     }
 #'   )
 #' }
+#' @keywords internal
 renderDataTable <- function(expr, options = NULL, searchDelay = 500,
                             callback = 'function(oTable) {}', escape = TRUE,
                             env = parent.frame(), quoted = FALSE,
-                            outputArgs=list())
-{
+                            outputArgs = list()) {
 
-  if (in_devmode()) {
-    shinyDeprecated(
-      "0.11.1", "shiny::renderDataTable()", "DT::renderDataTable()",
-      details = "See <https://rstudio.github.io/DT/shiny.html> for more information"
+  legacy <- useLegacyDataTable(
+    from = "shiny::renderDataTable()",
+    to = "DT::renderDT()"
+  )
+
+  if (!quoted) {
+    expr <- substitute(expr)
+    quoted <- TRUE
+  }
+
+  if (legacy) {
+
+    legacyRenderDataTable(
+      expr, env = env, quoted = quoted,
+      options = options,
+      searchDelay = searchDelay,
+      callback = callback,
+      escape = escape,
+      outputArgs = outputArgs
+    )
+
+  } else {
+
+    if (!missing(searchDelay)) {
+      warning("Ignoring renderDataTable()'s searchDelay value (since DT::renderDT() has no equivalent).")
+    }
+
+    force(options)
+    force(callback)
+    force(escape)
+    force(outputArgs)
+
+    DT::renderDataTable(
+      expr, env = env, quoted = quoted,
+      options = if (is.null(options)) list() else options,
+      # Turn function into a statement
+      callback = DT::JS(paste0("(", callback, ")(table)")),
+      escape = escape,
+      outputArgs = outputArgs
     )
   }
+}
+
+
+legacyRenderDataTable <- function(expr, options = NULL, searchDelay = 500,
+                                  callback = 'function(oTable) {}', escape = TRUE,
+                                  env = parent.frame(), quoted = FALSE,
+                                  outputArgs=list()) {
 
   func <- installExprFunction(expr, "func", env, quoted, label = "renderDataTable")
 

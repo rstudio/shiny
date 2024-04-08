@@ -1118,17 +1118,17 @@ tableOutput <- function(outputId) {
 dataTableDependency <- list(
   htmlDependency(
     "datatables",
-    "1.10.5",
+    "1.10.22",
     src = "www/shared/datatables",
     package = "shiny",
     script = "js/jquery.dataTables.min.js"
   ),
   htmlDependency(
     "datatables-bootstrap",
-    "1.10.5",
+    "1.10.22",
     src = "www/shared/datatables",
     package = "shiny",
-    stylesheet = c("css/dataTables.bootstrap.css", "css/dataTables.extra.css"),
+    stylesheet = "css/dataTables.bootstrap.css",
     script = "js/dataTables.bootstrap.js"
   )
 )
@@ -1136,11 +1136,48 @@ dataTableDependency <- list(
 #' @rdname renderDataTable
 #' @export
 dataTableOutput <- function(outputId) {
-  attachDependencies(
-    div(id = outputId, class="shiny-datatable-output"),
-    dataTableDependency
-  )
+  legacy <- useLegacyDataTable(from = "shiny::dataTableOutput()", to = "DT::DTOutput()")
+
+  if (legacy) {
+    attachDependencies(
+      div(id = outputId, class = "shiny-datatable-output"),
+      dataTableDependency
+    )
+  } else {
+    DT::DTOutput(outputId)
+  }
 }
+
+useLegacyDataTable <- function(from, to) {
+  legacy <- getOption("shiny.legacy.datatable")
+
+  # If option has been set, user knows what they're doing
+  if (!is.null(legacy)) {
+    return(legacy)
+  }
+
+  # If not set, use DT if a suitable version is available (and inform either way)
+  hasDT <- is_installed("DT", "0.32.1")
+  details <- NULL
+  if (hasDT) {
+    details <- paste0(c(
+      "Since you have a suitable version of DT (>= v0.32.1), ",
+      from,
+      " will automatically use ",
+      to,
+      " under-the-hood.\n",
+      "If this happens to break your app, set `options(shiny.legacy.datatable = TRUE)` ",
+      "to get the legacy datatable implementation (or `FALSE` to squelch this message).\n"
+    ), collapse = "")
+  }
+
+  details <- paste0(details, "See <https://rstudio.github.io/DT/shiny.html> for more information.")
+
+  shinyDeprecated("1.8.1", from, to, details)
+
+  !hasDT
+}
+
 
 #' Create an HTML output element
 #'

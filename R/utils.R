@@ -493,31 +493,6 @@ shinyCallingHandlers <- function(expr) {
   )
 }
 
-shinyUserErrorUnhandled <- function(error, handler = NULL) {
-  if (is.null(handler)) {
-    handler <- getShinyOption(
-      "shiny.error.unhandled",
-      getOption("shiny.error.unhandled", NULL)
-    )
-  }
-
-  if (is.null(handler)) return()
-
-  if (!is.function(handler) || length(formals(handler)) == 0) {
-    warning(
-      "`shiny.error.unhandled` must be a function ",
-      "that takes an error object as its first argument",
-      immediate. = TRUE
-    )
-    return()
-  }
-
-  tryCatch(
-    shinyCallingHandlers(handler(error)),
-    error = printError
-  )
-}
-
 #' Register a function with the debugger (if one is active).
 #'
 #' Call this function after exprToFunction to give any active debugger a hook

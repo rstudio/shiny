@@ -52,7 +52,6 @@ session to immediately unblock and carry on with other user interactions.
 \item \href{#method-ExtendedTask-invoke}{\code{ExtendedTask$invoke()}}
 \item \href{#method-ExtendedTask-status}{\code{ExtendedTask$status()}}
 \item \href{#method-ExtendedTask-result}{\code{ExtendedTask$result()}}
-\item \href{#method-ExtendedTask-clone}{\code{ExtendedTask$clone()}}
 }
 }
 \if{html}{\out{<hr>}}
@@ -165,22 +164,5 @@ invalidation will be ignored.
 \if{html}{\out{<div class="r">}}\preformatted{ExtendedTask$result()}\if{html}{\out{</div>}}
 }
 
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-ExtendedTask-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-ExtendedTask-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ExtendedTask$clone(deep = FALSE)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
 }
 }

@@ -1216,7 +1216,7 @@ Observer <- R6Class(
 
             printError(e)
             if (!is.null(.domain)) {
-              .domain$unhandledError(e)
+              .domain$unhandledError(e, close = TRUE)
             }
           },
           finally = .domain$decrementBusyCount
@@ -2396,7 +2396,7 @@ isNullEvent <- function(value) {
 #' reactive recently (within the time window) invalidated. New `r`
 #' invalidations do not reset the time window. This means that if invalidations
 #' continually come from `r` within the time window, the throttled reactive
-#' will invalidate regularly, at a rate equal to or slower than than the time
+#' will invalidate regularly, at a rate equal to or slower than the time
 #' window.
 #'
 #' `ooo-oo-oo---- => o--o--o--o---`

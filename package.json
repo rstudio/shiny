@@ -3,7 +3,7 @@
   "homepage": "https://shiny.rstudio.com",
   "repository": "github:rstudio/shiny",
   "name": "@types/rstudio-shiny",
-  "version": "1.8.0-alpha.9000",
+  "version": "1.8.1-alpha.9000",
   "license": "GPL-3.0-only",
   "main": "",
   "browser": "",

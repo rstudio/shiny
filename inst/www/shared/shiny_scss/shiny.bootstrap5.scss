@@ -38,8 +38,15 @@ $datepicker-disabled-color:         $dropdown-link-disabled-color !default;
 
 $shiny-file-active-shadow:          $input-focus-box-shadow !default;
 
-/* Treat conditional panels and uiOutput as "pass-through" containers */
+
 .shiny-panel-conditional,
 div:where(.shiny-html-output) {
-  display: contents;
+  /* uiOutput()/ conditionalPanel() are "pass-through" containers when they have children. */
+  &:has(> *) {
+    display: contents;
+  }
+  /* And since they display:contents, forward any styles that are applied to them to their children */
+  &.recalculating > * {
+    opacity: 0.3;
+  }
 }

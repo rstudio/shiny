@@ -1,5 +1,8 @@
 # shiny (development version)
 
+## Bug fixes
+
+* Fixed a recent issue with `uiOutput()` and `conditionalPanel()` not properly lower opacity when recalculation (in a Bootstrap 5 context). (#4027)
 
 # shiny 1.8.1.1
 

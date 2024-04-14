@@ -1,7 +1,9 @@
 import $ from "jquery";
 import { windowDevicePixelRatio } from "../window/pixelRatio";
 import type { MapValuesUnion, MapWithResult } from "./extraTypes";
+import type { HtmlDep } from "../shiny/render";
 import { hasOwnProperty, hasDefinedProperty } from "./object";
+import { renderContent } from "../shiny/render";
 
 function escapeHTML(str: string): string {
   /* eslint-disable @typescript-eslint/naming-convention */
@@ -336,23 +338,32 @@ const compareVersion = function (
   else throw `Unknown operator: ${op}`;
 };
 
-function updateLabel(
-  labelTxt: string | undefined,
+async function updateLabel(
+  labelContent: string | { html: string; deps: HtmlDep[] } | undefined,
   labelNode: JQuery<HTMLElement>
-): void {
+): Promise<void> {
   // Only update if label was specified in the update method
-  if (typeof labelTxt === "undefined") return;
+  if (typeof labelContent === "undefined") return;
   if (labelNode.length !== 1) {
     throw new Error("labelNode must be of length 1");
   }
 
+  if (typeof labelContent === "string") {
+    labelContent = {
+      html: labelContent,
+      deps: [],
+    };
+  }
+
   // Should the label be empty?
-  const emptyLabel = Array.isArray(labelTxt) && labelTxt.length === 0;
+  const emptyLabel =
+    (Array.isArray(labelContent.html) && labelContent.html.length === 0) ||
+    labelContent.html === "";
 
   if (emptyLabel) {
     labelNode.addClass("shiny-label-null");
   } else {
-    labelNode.text(labelTxt);
+    await renderContent(labelNode, labelContent);
     labelNode.removeClass("shiny-label-null");
   }
 }

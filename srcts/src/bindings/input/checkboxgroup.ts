@@ -113,10 +113,10 @@ class CheckboxGroupInputBinding extends InputBinding {
       options: options,
     };
   }
-  receiveMessage(
+  async receiveMessage(
     el: CheckboxGroupHTMLElement,
     data: CheckboxGroupReceiveMessageData
-  ): void {
+  ): Promise<void> {
     const $el = $(el);
 
     // This will replace all the options
@@ -132,7 +132,7 @@ class CheckboxGroupInputBinding extends InputBinding {
       this.setValue(el, data.value);
     }
 
-    updateLabel(data.label, getLabelNode(el));
+    await updateLabel(data.label, getLabelNode(el));
 
     $(el).trigger("change");
   }

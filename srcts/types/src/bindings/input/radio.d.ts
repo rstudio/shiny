@@ -18,7 +18,7 @@ declare class RadioInputBinding extends InputBinding {
         value: ReturnType<RadioInputBinding["getValue"]>;
         options: ValueLabelObject[];
     };
-    receiveMessage(el: RadioHTMLElement, data: RadioReceiveMessageData): void;
+    receiveMessage(el: RadioHTMLElement, data: RadioReceiveMessageData): Promise<void>;
     subscribe(el: RadioHTMLElement, callback: (x: boolean) => void): void;
     unsubscribe(el: RadioHTMLElement): void;
 }

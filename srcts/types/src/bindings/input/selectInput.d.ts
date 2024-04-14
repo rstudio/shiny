@@ -28,7 +28,7 @@ declare class SelectInputBinding extends InputBinding {
             label: string;
         }>;
     };
-    receiveMessage(el: SelectHTMLElement, data: SelectInputReceiveMessageData): void;
+    receiveMessage(el: SelectHTMLElement, data: SelectInputReceiveMessageData): Promise<void>;
     subscribe(el: SelectHTMLElement, callback: (x: boolean) => void): void;
     unsubscribe(el: HTMLElement): void;
     initialize(el: SelectHTMLElement): void;

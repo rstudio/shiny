@@ -20,7 +20,7 @@ declare class CheckboxGroupInputBinding extends InputBinding {
         value: ReturnType<CheckboxGroupInputBinding["getValue"]>;
         options: ValueLabelObject[];
     };
-    receiveMessage(el: CheckboxGroupHTMLElement, data: CheckboxGroupReceiveMessageData): void;
+    receiveMessage(el: CheckboxGroupHTMLElement, data: CheckboxGroupReceiveMessageData): Promise<void>;
     subscribe(el: CheckboxGroupHTMLElement, callback: (x: boolean) => void): void;
     unsubscribe(el: CheckboxGroupHTMLElement): void;
 }

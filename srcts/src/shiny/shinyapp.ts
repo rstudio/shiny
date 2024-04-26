@@ -461,12 +461,10 @@ class ShinyApp {
   }
 
   $sendMsg(msg: MessageValue): void {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    if (!this.$socket!.readyState) {
-      this.$pendingMessages.push(msg);
+    if (this.$socket && this.$socket.readyState) {
+      this.$socket.send(msg);
     } else {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.$socket!.send(msg);
+      this.$pendingMessages.push(msg);
     }
   }
 

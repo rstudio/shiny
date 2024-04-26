@@ -23217,10 +23217,10 @@
     }, {
       key: "$sendMsg",
       value: function $sendMsg(msg) {
-        if (!this.$socket.readyState) {
-          this.$pendingMessages.push(msg);
-        } else {
+        if (this.$socket && this.$socket.readyState) {
           this.$socket.send(msg);
+        } else {
+          this.$pendingMessages.push(msg);
         }
       }
     }, {

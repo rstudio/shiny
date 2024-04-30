@@ -359,6 +359,7 @@ class ShinyApp {
     ) {
       const delay = this.reconnectDelay.next();
 
+      /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
       showReconnectDialog(delay);
       this.$scheduleReconnect(delay);
     }

@@ -23646,19 +23646,23 @@
                     _context11.next = 3;
                     return show(message.message);
                   case 3:
-                    _context11.next = 10;
+                    _context11.next = 11;
                     break;
                   case 5:
                     if (!(message.type === "remove")) {
-                      _context11.next = 9;
+                      _context11.next = 10;
                       break;
                     }
-                    remove(message.message);
-                    _context11.next = 10;
+                    _context11.next = 8;
+                    return Promise.resolve(function() {
+                      return remove(message.message);
+                    });
+                  case 8:
+                    _context11.next = 11;
                     break;
-                  case 9:
-                    throw "Unkown notification type: " + message.type;
                   case 10:
+                    throw "Unknown notification type: " + message.type;
+                  case 11:
                   case "end":
                     return _context11.stop();
                 }
@@ -23681,19 +23685,23 @@
                     _context12.next = 3;
                     return show2(message.message);
                   case 3:
-                    _context12.next = 10;
+                    _context12.next = 11;
                     break;
                   case 5:
                     if (!(message.type === "remove")) {
-                      _context12.next = 9;
+                      _context12.next = 10;
                       break;
                     }
-                    remove2();
-                    _context12.next = 10;
+                    _context12.next = 8;
+                    return Promise.resolve(function() {
+                      return remove2();
+                    });
+                  case 8:
+                    _context12.next = 11;
                     break;
-                  case 9:
-                    throw "Unkown modal type: " + message.type;
                   case 10:
+                    throw "Unknown modal type: " + message.type;
+                  case 11:
                   case "end":
                     return _context12.stop();
                 }

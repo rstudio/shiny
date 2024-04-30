@@ -789,9 +789,13 @@ class ShinyApp {
           | { type: "show"; message: Parameters<typeof showNotification>[0] }
           | { type: void }
       ) => {
-        if (message.type === "show") await showNotification(message.message);
-        else if (message.type === "remove") removeNotification(message.message);
-        else throw "Unkown notification type: " + message.type;
+        if (message.type === "show") {
+          await showNotification(message.message);
+        } else if (message.type === "remove") {
+          await Promise.resolve(() => removeNotification(message.message));
+        } else {
+          throw "Unknown notification type: " + message.type;
+        }
       }
     );
 
@@ -803,10 +807,14 @@ class ShinyApp {
           | { type: "show"; message: Parameters<typeof showModal>[0] }
           | { type: void }
       ) => {
-        if (message.type === "show") await showModal(message.message);
-        // For 'remove', message content isn't used
-        else if (message.type === "remove") removeModal();
-        else throw "Unkown modal type: " + message.type;
+        if (message.type === "show") {
+          await showModal(message.message);
+        } else if (message.type === "remove") {
+          // For 'remove', message content isn't used
+          await Promise.resolve(() => removeModal());
+        } else {
+          throw "Unknown modal type: " + message.type;
+        }
       }
     );
 

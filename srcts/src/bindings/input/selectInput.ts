@@ -154,7 +154,7 @@ class SelectInputBinding extends InputBinding {
       selectize.settings.load = function (query: string, callback: CallbackFn) {
         const settings = selectize.settings;
 
-        /* eslint-disable @typescript-eslint/no-floating-promises */
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         $.ajax({
           url: data.url,
           data: {

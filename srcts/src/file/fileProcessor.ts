@@ -180,7 +180,7 @@ class FileUploader extends FileProcessor {
   onFile(file: File, cont: () => void): void {
     this.onProgress(file, 0);
 
-    /* eslint-disable @typescript-eslint/no-floating-promises */
+    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     $.ajax(this.uploadUrl, {
       type: "POST",
       cache: false,

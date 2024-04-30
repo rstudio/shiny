@@ -14,6 +14,7 @@ function escapeHTML(str: string): string {
     "'": "&#039;",
     "/": "&#x2F;",
   };
+  /* eslint-enable @typescript-eslint/naming-convention */
 
   return str.replace(/[&<>'"/]/g, function (m) {
     return escaped[m] as string;

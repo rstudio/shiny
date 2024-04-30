@@ -15,7 +15,7 @@
 /* This data atttribute is set by ui.busy_indicators.use() */
 [data-shiny-busy-spinners] {
   /* This class gets set by busy_indicators.ts */
-  .shiny-output-busy {
+  .recalculating {
     position: relative;
     overflow: visible; /* overflow:hidden can, in some cases, clip the spinner */
 
@@ -59,12 +59,12 @@
     }
 
     /*
-      shiny.css puts `opacity: 0.3` on .shiny-output-busy, which unfortunately applies to
+      shiny.css puts `opacity: 0.3` on .recalculating, which unfortunately applies to
       the spinner. Undo that, but still apply (smaller) opacity to immediate children
       that aren't shiny-output-busy.
     */
     opacity: 1;
-    > *:not(.shiny-output-busy) {
+    > *:not(.recalculating) {
       opacity: 0.2;
     }
 
@@ -120,10 +120,10 @@
   page is busy, but there are no shiny-output-busy elements.
 */
 [data-shiny-busy-spinners][data-shiny-busy-pulse] {
-  &.shiny-busy:not(:has(.shiny-output-busy))::after {
+  &.shiny-busy:not(:has(.recalculating))::after {
     @include shiny-page-busy;
   }
-  &.shiny-not-yet-idle:not(:has(.shiny-output-busy))::after {
+  &.shiny-not-yet-idle:not(:has(.recalculating))::after {
     @include shiny-page-busy;
   }
 }

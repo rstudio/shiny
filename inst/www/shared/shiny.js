@@ -12057,6 +12057,13 @@
       value: function renderValue(el, data) {
         (0, import_jquery23.default)(el).attr("href", data);
       }
+    }, {
+      key: "showProgress",
+      value: function showProgress(el, show3) {
+        return;
+        el;
+        show3;
+      }
     }]);
     return DownloadLinkOutputBinding2;
   }(OutputBinding);
@@ -18698,7 +18705,7 @@
   }
   function _bindOutputs() {
     _bindOutputs = _asyncToGenerator9(/* @__PURE__ */ _regeneratorRuntime9().mark(function _callee(_ref3) {
-      var sendOutputHiddenState, maybeAddThemeObserver, outputBindings, scope, $scope, bindings, i5, binding, matches, j3, _el2, id, $el, bindingAdapter, _args = arguments;
+      var sendOutputHiddenState, maybeAddThemeObserver, outputBindings, scope, $scope, bindings, i5, binding, matches, j3, _Shiny$shinyapp, _el2, id, $el, bindingAdapter, _args = arguments;
       return _regeneratorRuntime9().wrap(function _callee$(_context) {
         while (1)
           switch (_context.prev = _context.next) {
@@ -18710,7 +18717,7 @@
               i5 = 0;
             case 5:
               if (!(i5 < bindings.length)) {
-                _context.next = 34;
+                _context.next = 35;
                 break;
               }
               binding = bindings[i5].binding;
@@ -18718,7 +18725,7 @@
               j3 = 0;
             case 9:
               if (!(j3 < matches.length)) {
-                _context.next = 31;
+                _context.next = 32;
                 break;
               }
               _el2 = matches[j3];
@@ -18727,20 +18734,20 @@
                 _context.next = 14;
                 break;
               }
-              return _context.abrupt("continue", 28);
+              return _context.abrupt("continue", 29);
             case 14:
               if (import_jquery37.default.contains(document.documentElement, _el2)) {
                 _context.next = 16;
                 break;
               }
-              return _context.abrupt("continue", 28);
+              return _context.abrupt("continue", 29);
             case 16:
               $el = (0, import_jquery37.default)(_el2);
               if (!$el.hasClass("shiny-bound-output")) {
                 _context.next = 19;
                 break;
               }
-              return _context.abrupt("continue", 28);
+              return _context.abrupt("continue", 29);
             case 19:
               maybeAddThemeObserver(_el2);
               bindingAdapter = new OutputBindingAdapter(_el2, binding);
@@ -18749,6 +18756,10 @@
             case 23:
               $el.data("shiny-output-binding", bindingAdapter);
               $el.addClass("shiny-bound-output");
+              if ((_Shiny$shinyapp = Shiny.shinyapp) !== null && _Shiny$shinyapp !== void 0 && _Shiny$shinyapp.isRecalculating(id)) {
+                if (binding.showProgress)
+                  binding.showProgress(_el2, true);
+              }
               if (!$el.attr("aria-live"))
                 $el.attr("aria-live", "polite");
               bindingsRegistry.addBinding(id, "output");
@@ -18757,18 +18768,18 @@
                 binding: binding,
                 bindingType: "output"
               });
-            case 28:
+            case 29:
               j3++;
               _context.next = 9;
               break;
-            case 31:
+            case 32:
               i5++;
               _context.next = 5;
               break;
-            case 34:
+            case 35:
               setTimeout(sendImageSizeFns.regular, 0);
               setTimeout(sendOutputHiddenState, 0);
-            case 36:
+            case 37:
             case "end":
               return _context.stop();
           }
@@ -22844,6 +22855,7 @@
       _defineProperty20(this, "$persistentProgress", /* @__PURE__ */ new Set());
       _defineProperty20(this, "$values", {});
       _defineProperty20(this, "$errors", {});
+      _defineProperty20(this, "$invalidated", /* @__PURE__ */ new Set());
       _defineProperty20(this, "$conditionals", {});
       _defineProperty20(this, "$pendingMessages", []);
       _defineProperty20(this, "$activeRequests", {});
@@ -22871,6 +22883,8 @@
         binding: function binding(message) {
           var key = message.id;
           var binding2 = this.$bindings[key];
+          console.log("Adding ".concat(key, " to invalidated"));
+          this.$invalidated.add(key);
           if (binding2) {
             (0, import_jquery38.default)(binding2.el).trigger({
               type: "shiny:outputinvalidated",
@@ -23491,6 +23505,28 @@
             this.$bindings[name].showProgress(false);
           }
         }
+        var _iterator = _createForOfIteratorHelper5(this.$invalidated), _step;
+        try {
+          for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+            var _name = _step.value;
+            if (!this.$persistentProgress.has(_name)) {
+              this.$invalidated.delete(_name);
+            }
+          }
+        } catch (err) {
+          _iterator.e(err);
+        } finally {
+          _iterator.f();
+        }
+      }
+    }, {
+      key: "isRecalculating",
+      value: function isRecalculating(name) {
+        var hasResult = hasOwnProperty(this.$values, name) || hasOwnProperty(this.$errors, name);
+        var res = this.$invalidated.has(name) || !hasResult;
+        console.log("recalculating (".concat(name, "): "), res);
+        console.log(this.$invalidated);
+        return res;
       }
     }, {
       key: "_init",
@@ -23787,7 +23823,7 @@
         });
         addMessageHandler("shiny-insert-ui", /* @__PURE__ */ function() {
           var _ref9 = _asyncToGenerator13(/* @__PURE__ */ _regeneratorRuntime13().mark(function _callee14(message) {
-            var targets, _iterator, _step, target;
+            var targets, _iterator2, _step2, target;
             return _regeneratorRuntime13().wrap(function _callee14$(_context14) {
               while (1)
                 switch (_context14.prev = _context14.next) {
@@ -23804,15 +23840,15 @@
                     _context14.next = 26;
                     break;
                   case 7:
-                    _iterator = _createForOfIteratorHelper5(targets);
+                    _iterator2 = _createForOfIteratorHelper5(targets);
                     _context14.prev = 8;
-                    _iterator.s();
+                    _iterator2.s();
                   case 10:
-                    if ((_step = _iterator.n()).done) {
+                    if ((_step2 = _iterator2.n()).done) {
                       _context14.next = 18;
                       break;
                     }
-                    target = _step.value;
+                    target = _step2.value;
                     _context14.next = 14;
                     return renderContentAsync(target, message.content, message.where);
                   case 14:
@@ -23830,10 +23866,10 @@
                   case 20:
                     _context14.prev = 20;
                     _context14.t0 = _context14["catch"](8);
-                    _iterator.e(_context14.t0);
+                    _iterator2.e(_context14.t0);
                   case 23:
                     _context14.prev = 23;
-                    _iterator.f();
+                    _iterator2.f();
                     return _context14.finish(23);
                   case 26:
                   case "end":
@@ -23901,7 +23937,7 @@
         }
         addMessageHandler("shiny-insert-tab", /* @__PURE__ */ function() {
           var _ref10 = _asyncToGenerator13(/* @__PURE__ */ _regeneratorRuntime13().mark(function _callee15(message) {
-            var $parentTabset, $tabset, $tabContent, tabsetId, $divTag, $liTag, $aTag, $targetLiTag, targetInfo, dropdown, index, tabId, _iterator2, _step2, el, getTabIndex, getDropdown;
+            var $parentTabset, $tabset, $tabContent, tabsetId, $divTag, $liTag, $aTag, $targetLiTag, targetInfo, dropdown, index, tabId, _iterator3, _step3, el, getTabIndex, getDropdown;
             return _regeneratorRuntime13().wrap(function _callee15$(_context15) {
               while (1)
                 switch (_context15.prev = _context15.next) {
@@ -24004,15 +24040,15 @@
                       "beforeend"
                     );
                   case 24:
-                    _iterator2 = _createForOfIteratorHelper5($divTag.get());
+                    _iterator3 = _createForOfIteratorHelper5($divTag.get());
                     _context15.prev = 25;
-                    _iterator2.s();
+                    _iterator3.s();
                   case 27:
-                    if ((_step2 = _iterator2.n()).done) {
+                    if ((_step3 = _iterator3.n()).done) {
                       _context15.next = 34;
                       break;
                     }
-                    el = _step2.value;
+                    el = _step3.value;
                     $tabContent[0].appendChild(el);
                     _context15.next = 32;
                     return renderContentAsync(el, el.innerHTML || el.textContent);
@@ -24025,10 +24061,10 @@
                   case 36:
                     _context15.prev = 36;
                     _context15.t0 = _context15["catch"](25);
-                    _iterator2.e(_context15.t0);
+                    _iterator3.e(_context15.t0);
                   case 39:
                     _context15.prev = 39;
-                    _iterator2.f();
+                    _iterator3.f();
                     return _context15.finish(39);
                   case 42:
                     if (message.select) {

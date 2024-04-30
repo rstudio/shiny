@@ -135,6 +135,7 @@ class ShinyApp {
   // Cached values/errors
   $values: { [key: string]: any } = {};
   $errors: { [key: string]: ErrorsMessageValue } = {};
+  $invalidated: Set<string> = new Set();
 
   // Conditional bindings (show/hide element based on expression)
   $conditionals = {};
@@ -696,6 +697,21 @@ class ShinyApp {
         this.$bindings[name].showProgress(false);
       }
     }
+    // TODO: make sure mutating the set while iterating is safe
+    for (const name of this.$invalidated) {
+      if (!this.$persistentProgress.has(name)) {
+        this.$invalidated.delete(name);
+      }
+    }
+  }
+
+  isRecalculating(name: string): boolean {
+    const hasResult =
+      hasOwnProperty(this.$values, name) || hasOwnProperty(this.$errors, name);
+    const res = this.$invalidated.has(name) || !hasResult;
+    console.log(`recalculating (${name}): `, res);
+    console.log(this.$invalidated);
+    return res;
   }
 
   private _init() {
@@ -1417,6 +1433,9 @@ class ShinyApp {
     ): void {
       const key = message.id;
       const binding = this.$bindings[key];
+
+      console.log(`Adding ${key} to invalidated`);
+      this.$invalidated.add(key);
 
       if (binding) {
         $(binding.el).trigger({

@@ -37,6 +37,7 @@ declare class ShinyApp {
     $errors: {
         [key: string]: ErrorsMessageValue;
     };
+    $invalidated: Set<string>;
     $conditionals: {};
     $pendingMessages: MessageValue[];
     $activeRequests: {
@@ -76,6 +77,7 @@ declare class ShinyApp {
     dispatchMessage(data: ArrayBufferLike | string): Promise<void>;
     private _sendMessagesToHandlers;
     private _clearProgress;
+    isRecalculating(name: string): boolean;
     private _init;
     progressHandlers: {
         binding: (this: ShinyApp, message: {

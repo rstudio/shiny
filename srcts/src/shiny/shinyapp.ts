@@ -241,7 +241,7 @@ class ShinyApp {
 
       // This launches the action queue loop, which just runs in the background,
       // so we don't need to await it.
-      /* eslint-disable @typescript-eslint/no-floating-promises */
+      /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
       this.startActionQueueLoop();
     };
     socket.onmessage = (e) => {
@@ -359,6 +359,7 @@ class ShinyApp {
     ) {
       const delay = this.reconnectDelay.next();
 
+      /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
       showReconnectDialog(delay);
       this.$scheduleReconnect(delay);
     }

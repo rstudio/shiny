@@ -688,30 +688,19 @@ class ShinyApp {
     }
   }
 
-  private _clearProgress() {
-    for (const name in this.$bindings) {
-      if (
-        hasOwnProperty(this.$bindings, name) &&
-        !this.$persistentProgress.has(name)
-      ) {
-        this.$bindings[name].showProgress(false);
-      }
-    }
-    // TODO: make sure mutating the set while iterating is safe
-    for (const name of this.$invalidated) {
-      if (!this.$persistentProgress.has(name)) {
-        this.$invalidated.delete(name);
-      }
+  private _clearProgress(name: string) {
+    if (
+      hasOwnProperty(this.$bindings, name) &&
+      !this.$persistentProgress.has(name)
+    ) {
+      this.$bindings[name].showProgress(false);
     }
   }
 
   isRecalculating(name: string): boolean {
     const hasResult =
       hasOwnProperty(this.$values, name) || hasOwnProperty(this.$errors, name);
-    const res = this.$invalidated.has(name) || !hasResult;
-    console.log(`recalculating (${name}): `, res);
-    console.log(this.$invalidated);
-    return res;
+    return this.$invalidated.has(name) || !hasResult;
   }
 
   private _init() {
@@ -720,11 +709,11 @@ class ShinyApp {
     // * However, `_sendMessagesToHandlers()` will adjust the `this` context to the same _`this`_.
 
     addMessageHandler("values", async (message: { [key: string]: any }) => {
-      this._clearProgress();
-
       for (const key in message) {
         if (hasOwnProperty(message, key)) {
+          this._clearProgress(key);
           this.$persistentProgress.delete(key);
+          this.$invalidated.delete(key);
           await this.receiveOutput(key, message[key]);
         }
       }
@@ -1434,7 +1423,6 @@ class ShinyApp {
       const key = message.id;
       const binding = this.$bindings[key];
 
-      console.log(`Adding ${key} to invalidated`);
       this.$invalidated.add(key);
 
       if (binding) {

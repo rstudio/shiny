@@ -320,6 +320,10 @@ async function bindOutputs(
       $el.addClass("shiny-bound-output");
       if (!$el.attr("aria-live")) $el.attr("aria-live", "polite");
 
+      if (Shiny.shinyapp?.$outputProgressState.isRecalculating(id)) {
+        bindingAdapter.showProgress(true);
+      }
+
       bindingsRegistry.addBinding(id, "output");
       $el.trigger({
         type: "shiny:bound",

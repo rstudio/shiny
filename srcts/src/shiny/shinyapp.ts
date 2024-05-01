@@ -28,6 +28,8 @@ import type { UploadInitValue, UploadEndValue } from "../file/fileProcessor";
 import { AsyncQueue } from "../utils/asyncQueue";
 import { showErrorInClientConsole } from "../components/errorConsole";
 
+import { OutputProgressState } from "./outputProgress";
+
 type ResponseValue = UploadEndValue | UploadInitValue;
 type Handler = (message: any) => Promise<void> | void;
 
@@ -130,7 +132,9 @@ class ShinyApp {
 
   // Output bindings
   $bindings: { [key: string]: OutputBindingAdapter } = {};
-  $persistentProgress: Set<string> = new Set();
+
+  // Output progress state
+  $outputProgressState = new OutputProgressState();
 
   // Cached values/errors
   $values: { [key: string]: any } = {};
@@ -657,6 +661,9 @@ class ShinyApp {
     $(document).trigger(evt);
     if (evt.isDefaultPrevented()) return;
 
+    // Before actually handling the message, use it to set output progress state
+    this.$outputProgressState.processMessage(evt.message);
+
     // Send msgObj.foo and msgObj.bar to appropriate handlers
     await this._sendMessagesToHandlers(
       evt.message,
@@ -688,14 +695,11 @@ class ShinyApp {
     }
   }
 
-  private _clearProgress() {
+  private _updateProgress() {
     for (const name in this.$bindings) {
-      if (
-        hasOwnProperty(this.$bindings, name) &&
-        !this.$persistentProgress.has(name)
-      ) {
-        this.$bindings[name].showProgress(false);
-      }
+      if (!hasOwnProperty(this.$bindings, name)) continue;
+      const inProgress = this.$outputProgressState.isRecalculating(name);
+      this.$bindings[name].showProgress(inProgress);
     }
   }
 
@@ -705,11 +709,10 @@ class ShinyApp {
     // * However, `_sendMessagesToHandlers()` will adjust the `this` context to the same _`this`_.
 
     addMessageHandler("values", async (message: { [key: string]: any }) => {
-      this._clearProgress();
+      this._updateProgress();
 
       for (const key in message) {
         if (hasOwnProperty(message, key)) {
-          this.$persistentProgress.delete(key);
           await this.receiveOutput(key, message[key]);
         }
       }
@@ -720,7 +723,6 @@ class ShinyApp {
       (message: { [key: string]: ErrorsMessageValue }) => {
         for (const key in message) {
           if (hasOwnProperty(message, key)) {
-            this.$persistentProgress.delete(key);
             this.receiveError(key, message[key]);
           }
         }
@@ -1426,13 +1428,9 @@ class ShinyApp {
           binding: binding,
           name: key,
         });
-        if (binding.showProgress) binding.showProgress(true);
-        if (message.persistent) {
-          this.$persistentProgress.add(key);
-        } else {
-          this.$persistentProgress.delete(key);
-        }
       }
+
+      this._updateProgress();
     },
 
     // Open a page-level progress bar

@@ -1,13 +1,46 @@
 /*
  * A state machine for tracking Shiny output progress.
  *
- * Although there are a handful of states, the ultimate goal here is to be able
- * to say whether a given output `isRecalculating()` or not (and thus, whether
- * we should show progress indication or not).
+ * Although there are a handful of possible states, the ultimate goal here is to
+ * be able to say whether a given output `isRecalculating()` or not (and thus,
+ * whether we should show progress indication or not).
  *
- * When looking through this code, it's highly recommended to refer to the
- * visual representation of the state machine diagram. It's available under
+ * The diagram below depicts the state machine. Each node represents a possible
+ * state and each edge represents a server-->client message that moves outputs
+ * from one state to another. If a node name is all caps, then the output should
+ * be showing a busy state when visible (i.e., `binding.showProgress(true)`).
+ *
+ * A more polished SVG version of this diagram can be found here:
  * https://github.com/rstudio/shiny/blob/main/inst/diagrams/outputProgressStateMachine.svg
+ *
+ * +---------+ recalculating  +---------+
+ * | INITIAL +--------------->| RUNNING |<--------------+
+ * +---------+                +---+-----+               |
+ *               +-----------/     |                    |
+ *               |              recalculated            |
+ *               |                 |                    |
+ *               |              +--v---+                |
+ *               |           +--+ IDLE +--+-------+     |
+ *               |           |  +------+  |       |     |
+ *             1 |          2|           3|      4|     |
+ *               v           v            v       v     |
+ *          +------------+ +------+  +-----+   +-----+  |
+ *          | PERSISTENT | |cancel|  |value|   |error|  |
+ *          +-------+----+ +---+--+  +-+---+   +-+---+  |
+ *                  |          |       |         |      |
+ *                  |          v       v        5|      |
+ *                  |       +-------------+      |      |
+ *                  +------>| INVALIDATED |<-----+      |
+ *                          +-----+-------+             |
+ *                                |                     |
+ *                                |    recalculating    |
+ *                                +---------------------+
+ *
+ *  1. {progress: {type: "binding", message: {persistent: true}}}
+ *  2. No message
+ *  3. Value
+ *  4. Error
+ *  5. {progress: {type: "binding"}}
  */
 
 // The possible states of a given output.

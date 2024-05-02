@@ -695,6 +695,12 @@ class ShinyApp {
     }
   }
 
+  // Call showProgress() on any output bindings that have changed their
+  // recalculating status since the last call to takeChanges().
+  // Note that we only need to call this function when a "flush" (i.e. "values")
+  // message or a "progress" message is received since these are the only
+  // two types of messages that can change the recalculating status. For more,
+  // see the state machine diagram in outputProgress.ts.
   private _updateProgress() {
     const changed = this.$outputProgress.takeChanges();
     for (const [name, recalculating] of changed.entries()) {

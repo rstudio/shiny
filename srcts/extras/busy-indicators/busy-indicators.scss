@@ -5,6 +5,7 @@
   with the CSS (see js/build.ts).
 */
 :root {
+  --_shiny-spinner-type-default: url(default-spinner.svg);
   --_shiny-spinner-type-tadpole: url(tadpole-spinner.svg);
   --_shiny-spinner-type-disc: url(disc-spinner.svg);
   --_shiny-spinner-type-dots: url(dots-spinner.svg);
@@ -23,11 +24,11 @@
       position: absolute;
 
       /* ui.busy_indicators.spinner_options() */
-      --_shiny-spinner-mask-img: var(--shiny-spinner-mask-img, var(--_shiny-spinner-type-tadpole));
+      --_shiny-spinner-mask-img: var(--shiny-spinner-mask-img, var(--_shiny-spinner-type-default));
       --_shiny-spinner-color: var(--shiny-spinner-color, var(--bs-primary, #007bc2));
       --_shiny-spinner-size: var(--shiny-spinner-size, 32px);
-      --_shiny-spinner-easing: var(--shiny-spinner-easing, ease-in-out);
-      --_shiny-spinner-speed: var(--shiny-spinner-speed, 2s);
+      --_shiny-spinner-easing: var(--shiny-spinner-easing, linear);
+      --_shiny-spinner-speed: var(--shiny-spinner-speed, 0.75s);
       --_shiny-spinner-delay: var(--shiny-spinner-delay, 0.5s);
       --_shiny-spinner-animation: var(--shiny-spinner-animation, shiny-busy-spinner-spin);
 
@@ -143,6 +144,10 @@
   0% {
     scale: 1;
     rotate: 0deg;
+  }
+  33% {
+    scale: 1;
+    rotate: 180deg;
   }
   100% {
     scale: 1;

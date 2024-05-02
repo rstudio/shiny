@@ -130,7 +130,7 @@ spinnerOptions <- function(
   }
 
   # Supported types have a CSS var already defined with their SVG data
-  if (isTRUE(type %in% c("tadpole", "disc", "dots", "dot-track", "bounce"))) {
+  if (isTRUE(type %in% c("default", "tadpole", "disc", "dots", "dot-track", "bounce"))) {
     type <- sprintf("var(--_shiny-spinner-type-%s)", type)
   }
 

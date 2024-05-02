@@ -12071,6 +12071,13 @@
       value: function renderValue(el, data) {
         (0, import_jquery23.default)(el).attr("href", data);
       }
+    }, {
+      key: "showProgress",
+      value: function showProgress(el, show3) {
+        return;
+        el;
+        show3;
+      }
     }]);
     return DownloadLinkOutputBinding2;
   }(OutputBinding);

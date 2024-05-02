@@ -1,0 +1,193 @@
+/*
+  "Built-in" spinner types
+
+  It's important to list out all the types/svgs here so that esbuild can bundle them
+  with the CSS (see js/build.ts).
+*/
+:root {
+  --_shiny-spinner-type-tadpole: url(tadpole-spinner.svg);
+  --_shiny-spinner-type-disc: url(disc-spinner.svg);
+  --_shiny-spinner-type-dots: url(dots-spinner.svg);
+  --_shiny-spinner-type-dot-track: url(dot-track-spinner.svg);
+  --_shiny-spinner-type-bounce: url(ball.svg);
+}
+
+/* This data atttribute is set by ui.busy_indicators.use() */
+[data-shiny-busy-spinners] {
+  /* This class gets set by busy_indicators.ts */
+  .recalculating {
+    position: relative;
+    overflow: visible; /* overflow:hidden can, in some cases, clip the spinner */
+
+    &::after {
+      position: absolute;
+
+      /* ui.busy_indicators.spinner_options() */
+      --_shiny-spinner-mask-img: var(--shiny-spinner-mask-img, var(--_shiny-spinner-type-tadpole));
+      --_shiny-spinner-color: var(--shiny-spinner-color, var(--bs-primary, #007bc2));
+      --_shiny-spinner-size: var(--shiny-spinner-size, 32px);
+      --_shiny-spinner-easing: var(--shiny-spinner-easing, ease-in-out);
+      --_shiny-spinner-speed: var(--shiny-spinner-speed, 2s);
+      --_shiny-spinner-delay: var(--shiny-spinner-delay, 0.5s);
+      --_shiny-spinner-animation: var(--shiny-spinner-animation, shiny-busy-spinner-spin);
+
+      /* Apply the spinner type as a mask */
+      mask-image: var(--_shiny-spinner-mask-img);
+      mask-position: center;
+      mask-size: contain;
+      mask-repeat: no-repeat;
+      -webkit-mask-image: var(--_shiny-spinner-mask-img);
+      -webkit-mask-position: center;
+      -webkit-mask-size: contain;
+      -webkit-mask-repeat: no-repeat;
+
+      /* Color, sizing, & positioning */
+      background: var(--_shiny-spinner-color);
+      width: var(--_shiny-spinner-size);
+      height: var(--_shiny-spinner-size);
+      inset: calc(50% - var(--_shiny-spinner-size) / 2);
+
+      /* Animation */
+      animation-name: var(--_shiny-spinner-animation);
+      animation-duration: var(--_shiny-spinner-speed);
+      animation-iteration-count: infinite;
+      animation-timing-function: var(--_shiny-spinner-easing);
+      animation-delay: var(--_shiny-spinner-delay);
+
+      content: "";
+      scale: 0;
+    }
+
+    /*
+      shiny.css puts `opacity: 0.3` on .recalculating, which unfortunately applies to
+      the spinner. Undo that, but still apply (smaller) opacity to immediate children
+      that aren't shiny-output-busy.
+    */
+    opacity: 1;
+    > *:not(.recalculating) {
+      opacity: 0.2;
+    }
+
+    /*
+      Disable spinner on uiOutput() mainly because (for other reasons) it has
+      `display:contents`, which breaks the ::after positioning.
+      Note that, even if we could position it, we'd probably want to disable it
+      if it has shiny-output-busy children.
+    */
+    &.shiny-html-output::after {
+      display: none;
+    }
+  }
+}
+
+/* Styles for the page-level pulse banner */
+@mixin shiny-page-busy {
+  /* ui.busy_indicators.pulse_options() */
+  --_shiny-pulse-background: var(
+    --shiny-pulse-background,
+    linear-gradient(
+      120deg,
+      var(--bs-body-bg, #fff),
+      var(--bs-indigo, #4b00c1),
+      var(--bs-purple, #74149c),
+      var(--bs-pink, #bf007f),
+      var(--bs-body-bg, #fff)
+    )
+  );
+  --_shiny-pulse-height: var(--shiny-pulse-height, 5px);
+  --_shiny-pulse-speed: var(--shiny-pulse-speed, 1.85s);
+
+  /* Color, sizing, & positioning */
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: var(--_shiny-pulse-height);
+  background: var(--_shiny-pulse-background);
+  border-radius: 50%;
+  z-index: 9999;
+
+  /* Animation */
+  animation-name: busy-page-pulse;
+  animation-duration: var(--_shiny-pulse-speed);
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+
+  content: ""; /* Used in a ::after context */
+}
+
+/*
+  In spinners+pulse mode (the recommended default), show a page-level banner if the
+  page is busy, but there are no shiny-output-busy elements.
+*/
+[data-shiny-busy-spinners][data-shiny-busy-pulse] {
+  &.shiny-busy:not(:has(.recalculating))::after {
+    @include shiny-page-busy;
+  }
+  &.shiny-not-yet-idle:not(:has(.recalculating))::after {
+    @include shiny-page-busy;
+  }
+}
+
+/* In pulse _only_ mode, show a page-level banner whenever shiny is busy. */
+[data-shiny-busy-pulse]:not([data-shiny-busy-spinners]) {
+  &.shiny-busy::after {
+    @include shiny-page-busy;
+  }
+  &.shiny-not-yet-idle::after {
+    @include shiny-page-busy;
+  }
+}
+
+/* Keyframes behind most spinner types */
+@keyframes shiny-busy-spinner-spin {
+  0% {
+    scale: 1;
+    rotate: 0deg;
+  }
+  100% {
+    scale: 1;
+    rotate: 360deg;
+  }
+}
+
+/* For busy_indicators.spinner_options(type="bounce") */
+@keyframes shiny-busy-spinner-bounce {
+  0% {
+    animation-timing-function: cubic-bezier(0.33, 0, 0.66, 0.33);
+    translate: 0 calc(var(--_shiny-spinner-size) * (5 / 24));
+    scale: 1 1;
+  }
+  46.875% {
+    translate: 0 calc(var(--_shiny-spinner-size) * (20 / 24));
+    scale: 1 1;
+  }
+  50% {
+    animation-timing-function: cubic-bezier(0.33, 0.66, 0.66, 1);
+    translate: 0 calc(var(--_shiny-spinner-size) * (20.5 / 24));
+    scale: 1.2 0.85;
+  }
+  53.125% {
+    scale: 1 1;
+  }
+  100% {
+    translate: 0 calc(var(--_shiny-spinner-size) * (5 / 24));
+    scale: 1 1;
+  }
+}
+
+/* Keyframes for the pulsing banner */
+@keyframes busy-page-pulse {
+  0% {
+    left: -75%;
+    width: 75%;
+  }
+  50% {
+    left: 100%;
+    width: 75%;
+  }
+  /* Go back */
+  100% {
+    left: -75%;
+    width: 75%;
+  }
+}

@@ -9,6 +9,13 @@ class DownloadLinkOutputBinding extends OutputBinding {
   renderValue(el: HTMLElement, data: string): void {
     $(el).attr("href", data);
   }
+  // Progress shouldn't be shown on the download button
+  // (progress will be shown as a page level pulse instead)
+  showProgress(el: HTMLElement, show: boolean): void {
+    return;
+    el;
+    show;
+  }
 }
 
 interface FileDownloadEvent extends JQuery.Event {

@@ -17,6 +17,7 @@ build({
     "srcts/extras/shiny-autoreload.ts",
     "srcts/extras/shiny-showcase.ts",
     "srcts/extras/shiny-testmode.ts",
+    "srcts/extras/busy-indicators/busy-indicators.ts",
   ],
   outdir: outDir,
 });
@@ -24,7 +25,7 @@ build({
 // - Sass -----------------------------------------------------------
 
 import autoprefixer from "autoprefixer";
-import sassPlugin from "esbuild-plugin-sass";
+import sassPlugin from "esbuild-sass-plugin";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore; Type definitions are not found. This occurs when `strict: true` in tsconfig.json
 import postCssPlugin from "@deanc/esbuild-plugin-postcss";
@@ -52,4 +53,13 @@ build({
     outDir + "shiny_scss/shiny.scss",
   ],
   outfile: outDir + "shiny.min.css",
+});
+build({
+  ...sassOpts,
+  entryPoints: ["srcts/extras/busy-indicators/busy-indicators.scss"],
+  outfile: outDir + "busy-indicators/busy-indicators.css",
+  plugins: [sassPlugin({ type: "css", sourceMap: false })],
+  loader: { ".svg": "dataurl" },
+  bundle: true,
+  metafile: true,
 });

@@ -53,7 +53,7 @@
     "esbuild": "^0.15.10",
     "esbuild-plugin-babel": "https://github.com/schloerke/esbuild-plugin-babel#patch-2",
     "esbuild-plugin-globals": "^0.1.1",
-    "esbuild-plugin-sass": "^1.0.1",
+    "esbuild-sass-plugin": "^2.9.0",
     "eslint": "^8.24.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-jest": "^27.0.4",

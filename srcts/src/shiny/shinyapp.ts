@@ -696,10 +696,11 @@ class ShinyApp {
   }
 
   private _updateProgress() {
-    for (const name in this.$bindings) {
-      if (!hasOwnProperty(this.$bindings, name)) continue;
-      const inProgress = this.$outputProgress.isRecalculating(name);
-      this.$bindings[name].showProgress(inProgress);
+    const changed = this.$outputProgress.takeChanges();
+    for (const [name, recalculating] of changed.entries()) {
+      if (hasOwnProperty(this.$bindings, name)) {
+        this.$bindings[name].showProgress(recalculating);
+      }
     }
   }
 

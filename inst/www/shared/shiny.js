@@ -22634,8 +22634,16 @@
       _classPrivateMethodInitSpec(this, _updateStateFromFlush);
       _classPrivateMethodInitSpec(this, _updateStateFromRecalculating);
       _defineProperty20(this, "outputStates", /* @__PURE__ */ new Map());
+      _defineProperty20(this, "changedOutputs", /* @__PURE__ */ new Map());
     }
     _createClass42(OutputProgressReporter2, [{
+      key: "takeChanges",
+      value: function takeChanges() {
+        var result = this.changedOutputs;
+        this.changedOutputs = /* @__PURE__ */ new Map();
+        return result;
+      }
+    }, {
       key: "isRecalculating",
       value: function isRecalculating(name) {
         var state = _classPrivateMethodGet(this, _getState, _getState2).call(this, name);
@@ -22751,7 +22759,12 @@
     return (_this$outputStates$ge = this.outputStates.get(name)) !== null && _this$outputStates$ge !== void 0 ? _this$outputStates$ge : OutputStates.Initial;
   }
   function _setState2(name, state) {
+    var oldRecalc = this.isRecalculating(name);
     this.outputStates.set(name, state);
+    var newRecalc = this.isRecalculating(name);
+    if (oldRecalc !== newRecalc) {
+      this.changedOutputs.set(name, newRecalc);
+    }
   }
   function isRecalculatingMessage(x2) {
     var m2 = x2;
@@ -22775,6 +22788,42 @@
       return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
     }, _typeof50(obj);
   }
+  function _slicedToArray6(arr, i5) {
+    return _arrayWithHoles6(arr) || _iterableToArrayLimit6(arr, i5) || _unsupportedIterableToArray7(arr, i5) || _nonIterableRest6();
+  }
+  function _nonIterableRest6() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArrayLimit6(arr, i5) {
+    var _i = null == arr ? null : "undefined" != typeof Symbol && arr[Symbol.iterator] || arr["@@iterator"];
+    if (null != _i) {
+      var _s, _e, _x, _r, _arr = [], _n = true, _d = false;
+      try {
+        if (_x = (_i = _i.call(arr)).next, 0 === i5) {
+          if (Object(_i) !== _i)
+            return;
+          _n = false;
+        } else
+          for (; !(_n = (_s = _x.call(_i)).done) && (_arr.push(_s.value), _arr.length !== i5); _n = true)
+            ;
+      } catch (err) {
+        _d = true, _e = err;
+      } finally {
+        try {
+          if (!_n && null != _i.return && (_r = _i.return(), Object(_r) !== _r))
+            return;
+        } finally {
+          if (_d)
+            throw _e;
+        }
+      }
+      return _arr;
+    }
+  }
+  function _arrayWithHoles6(arr) {
+    if (Array.isArray(arr))
+      return arr;
+  }
   function _createForOfIteratorHelper6(o4, allowArrayLike) {
     var it = typeof Symbol !== "undefined" && o4[Symbol.iterator] || o4["@@iterator"];
     if (!it) {
@@ -22788,8 +22837,8 @@
           if (i5 >= o4.length)
             return { done: true };
           return { done: false, value: o4[i5++] };
-        }, e: function e4(_e) {
-          throw _e;
+        }, e: function e4(_e2) {
+          throw _e2;
         }, f: F };
       }
       throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
@@ -22801,9 +22850,9 @@
       var step = it.next();
       normalCompletion = step.done;
       return step;
-    }, e: function e4(_e2) {
+    }, e: function e4(_e3) {
       didErr = true;
-      err = _e2;
+      err = _e3;
     }, f: function f4() {
       try {
         if (!normalCompletion && it.return != null)
@@ -23862,11 +23911,19 @@
     }, {
       key: "_updateProgress",
       value: function _updateProgress() {
-        for (var name in this.$bindings) {
-          if (!hasOwnProperty(this.$bindings, name))
-            continue;
-          var inProgress = this.$outputProgress.isRecalculating(name);
-          this.$bindings[name].showProgress(inProgress);
+        var changed = this.$outputProgress.takeChanges();
+        var _iterator = _createForOfIteratorHelper6(changed.entries()), _step;
+        try {
+          for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+            var _step$value = _slicedToArray6(_step.value, 2), name = _step$value[0], recalculating = _step$value[1];
+            if (hasOwnProperty(this.$bindings, name)) {
+              this.$bindings[name].showProgress(recalculating);
+            }
+          }
+        } catch (err) {
+          _iterator.e(err);
+        } finally {
+          _iterator.f();
         }
       }
     }, {
@@ -24162,7 +24219,7 @@
         });
         addMessageHandler("shiny-insert-ui", /* @__PURE__ */ function() {
           var _ref9 = _asyncToGenerator13(/* @__PURE__ */ _regeneratorRuntime13().mark(function _callee14(message) {
-            var targets, _iterator, _step, target;
+            var targets, _iterator2, _step2, target;
             return _regeneratorRuntime13().wrap(function _callee14$(_context14) {
               while (1)
                 switch (_context14.prev = _context14.next) {
@@ -24179,15 +24236,15 @@
                     _context14.next = 26;
                     break;
                   case 7:
-                    _iterator = _createForOfIteratorHelper6(targets);
+                    _iterator2 = _createForOfIteratorHelper6(targets);
                     _context14.prev = 8;
-                    _iterator.s();
+                    _iterator2.s();
                   case 10:
-                    if ((_step = _iterator.n()).done) {
+                    if ((_step2 = _iterator2.n()).done) {
                       _context14.next = 18;
                       break;
                     }
-                    target = _step.value;
+                    target = _step2.value;
                     _context14.next = 14;
                     return renderContentAsync(target, message.content, message.where);
                   case 14:
@@ -24205,10 +24262,10 @@
                   case 20:
                     _context14.prev = 20;
                     _context14.t0 = _context14["catch"](8);
-                    _iterator.e(_context14.t0);
+                    _iterator2.e(_context14.t0);
                   case 23:
                     _context14.prev = 23;
-                    _iterator.f();
+                    _iterator2.f();
                     return _context14.finish(23);
                   case 26:
                   case "end":
@@ -24276,7 +24333,7 @@
         }
         addMessageHandler("shiny-insert-tab", /* @__PURE__ */ function() {
           var _ref10 = _asyncToGenerator13(/* @__PURE__ */ _regeneratorRuntime13().mark(function _callee15(message) {
-            var $parentTabset, $tabset, $tabContent, tabsetId, $divTag, $liTag, $aTag, $targetLiTag, targetInfo, dropdown, index, tabId, _iterator2, _step2, el, getTabIndex, getDropdown;
+            var $parentTabset, $tabset, $tabContent, tabsetId, $divTag, $liTag, $aTag, $targetLiTag, targetInfo, dropdown, index, tabId, _iterator3, _step3, el, getTabIndex, getDropdown;
             return _regeneratorRuntime13().wrap(function _callee15$(_context15) {
               while (1)
                 switch (_context15.prev = _context15.next) {
@@ -24379,15 +24436,15 @@
                       "beforeend"
                     );
                   case 24:
-                    _iterator2 = _createForOfIteratorHelper6($divTag.get());
+                    _iterator3 = _createForOfIteratorHelper6($divTag.get());
                     _context15.prev = 25;
-                    _iterator2.s();
+                    _iterator3.s();
                   case 27:
-                    if ((_step2 = _iterator2.n()).done) {
+                    if ((_step3 = _iterator3.n()).done) {
                       _context15.next = 34;
                       break;
                     }
-                    el = _step2.value;
+                    el = _step3.value;
                     $tabContent[0].appendChild(el);
                     _context15.next = 32;
                     return renderContentAsync(el, el.innerHTML || el.textContent);
@@ -24400,10 +24457,10 @@
                   case 36:
                     _context15.prev = 36;
                     _context15.t0 = _context15["catch"](25);
-                    _iterator2.e(_context15.t0);
+                    _iterator3.e(_context15.t0);
                   case 39:
                     _context15.prev = 39;
-                    _iterator2.f();
+                    _iterator3.f();
                     return _context15.finish(39);
                   case 42:
                     if (message.select) {

@@ -4,6 +4,8 @@ type Message = {
 declare class OutputProgressReporter {
     #private;
     private outputStates;
+    private changedOutputs;
+    takeChanges(): Map<string, boolean>;
     isRecalculating(name: string): boolean;
     updateStateFromMessage(message: Message): void;
 }

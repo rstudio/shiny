@@ -86,6 +86,15 @@ type Message = { [key: string]: unknown };
 // The state machine that tracks the progress of outputs in a Shiny app.
 class OutputProgressReporter {
   private outputStates: Map<string, OutputStates> = new Map();
+  // A map of outputs that have changed their progress status since the last call to takeChanges().
+  // The value is true if the output is recalculating, and false otherwise.
+  private changedOutputs: Map<string, boolean> = new Map();
+
+  takeChanges(): Map<string, boolean> {
+    const result = this.changedOutputs;
+    this.changedOutputs = new Map();
+    return result;
+  }
 
   // Returns whether the output is recalculating or not.
   isRecalculating(name: string): boolean {
@@ -242,7 +251,12 @@ class OutputProgressReporter {
   }
 
   #setState(name: string, state: OutputStates): void {
+    const oldRecalc = this.isRecalculating(name);
     this.outputStates.set(name, state);
+    const newRecalc = this.isRecalculating(name);
+    if (oldRecalc !== newRecalc) {
+      this.changedOutputs.set(name, newRecalc);
+    }
   }
 }
 

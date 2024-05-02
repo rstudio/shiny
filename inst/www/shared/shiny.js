@@ -18765,7 +18765,7 @@
               $el.addClass("shiny-bound-output");
               if (!$el.attr("aria-live"))
                 $el.attr("aria-live", "polite");
-              if ((_Shiny$shinyapp = Shiny.shinyapp) !== null && _Shiny$shinyapp !== void 0 && _Shiny$shinyapp.$outputProgressState.isRecalculating(id)) {
+              if ((_Shiny$shinyapp = Shiny.shinyapp) !== null && _Shiny$shinyapp !== void 0 && _Shiny$shinyapp.$outputProgress.isRecalculating(id)) {
                 bindingAdapter.showProgress(true);
               }
               bindingsRegistry.addBinding(id, "output");
@@ -22615,50 +22615,50 @@
     OutputStates2["Value"] = "value";
     OutputStates2["Error"] = "error";
     OutputStates2["Cancel"] = "cancel";
-    OutputStates2["Persisting"] = "persisting";
+    OutputStates2["Persistent"] = "persistent";
     OutputStates2["Invalidated"] = "invalidated";
   })(OutputStates || (OutputStates = {}));
-  var _processRecalculatingMessage = /* @__PURE__ */ new WeakSet();
-  var _processFlushMessage = /* @__PURE__ */ new WeakSet();
-  var _processProgressMessage = /* @__PURE__ */ new WeakSet();
-  var _processValueOrError = /* @__PURE__ */ new WeakSet();
+  var _updateStateFromRecalculating = /* @__PURE__ */ new WeakSet();
+  var _updateStateFromFlush = /* @__PURE__ */ new WeakSet();
+  var _updateStateFromProgress = /* @__PURE__ */ new WeakSet();
+  var _updateStateFromValueOrError = /* @__PURE__ */ new WeakSet();
   var _getState = /* @__PURE__ */ new WeakSet();
   var _setState = /* @__PURE__ */ new WeakSet();
-  var OutputProgressState = /* @__PURE__ */ function() {
-    function OutputProgressState2() {
-      _classCallCheck42(this, OutputProgressState2);
+  var OutputProgressReporter = /* @__PURE__ */ function() {
+    function OutputProgressReporter2() {
+      _classCallCheck42(this, OutputProgressReporter2);
       _classPrivateMethodInitSpec(this, _setState);
       _classPrivateMethodInitSpec(this, _getState);
-      _classPrivateMethodInitSpec(this, _processValueOrError);
-      _classPrivateMethodInitSpec(this, _processProgressMessage);
-      _classPrivateMethodInitSpec(this, _processFlushMessage);
-      _classPrivateMethodInitSpec(this, _processRecalculatingMessage);
+      _classPrivateMethodInitSpec(this, _updateStateFromValueOrError);
+      _classPrivateMethodInitSpec(this, _updateStateFromProgress);
+      _classPrivateMethodInitSpec(this, _updateStateFromFlush);
+      _classPrivateMethodInitSpec(this, _updateStateFromRecalculating);
       _defineProperty20(this, "outputStates", /* @__PURE__ */ new Map());
     }
-    _createClass42(OutputProgressState2, [{
+    _createClass42(OutputProgressReporter2, [{
       key: "isRecalculating",
       value: function isRecalculating(name) {
         var state = _classPrivateMethodGet(this, _getState, _getState2).call(this, name);
-        var recalculatingStates = [OutputStates.Initial, OutputStates.Running, OutputStates.Idle, OutputStates.Persisting, OutputStates.Invalidated];
+        var recalculatingStates = [OutputStates.Initial, OutputStates.Running, OutputStates.Idle, OutputStates.Persistent, OutputStates.Invalidated];
         return recalculatingStates.includes(state);
       }
     }, {
-      key: "processMessage",
-      value: function processMessage(message) {
+      key: "updateStateFromMessage",
+      value: function updateStateFromMessage(message) {
         if (isRecalculatingMessage(message)) {
-          _classPrivateMethodGet(this, _processRecalculatingMessage, _processRecalculatingMessage2).call(this, message);
+          _classPrivateMethodGet(this, _updateStateFromRecalculating, _updateStateFromRecalculating2).call(this, message);
         }
         if (isFlushMessage(message)) {
-          _classPrivateMethodGet(this, _processFlushMessage, _processFlushMessage2).call(this, message);
+          _classPrivateMethodGet(this, _updateStateFromFlush, _updateStateFromFlush2).call(this, message);
         }
         if (isProgressMessage(message)) {
-          _classPrivateMethodGet(this, _processProgressMessage, _processProgressMessage2).call(this, message);
+          _classPrivateMethodGet(this, _updateStateFromProgress, _updateStateFromProgress2).call(this, message);
         }
       }
     }]);
-    return OutputProgressState2;
+    return OutputProgressReporter2;
   }();
-  function _processRecalculatingMessage2(message) {
+  function _updateStateFromRecalculating2(message) {
     var _message$recalculatin = message.recalculating, name = _message$recalculatin.name, status = _message$recalculatin.status;
     var state = _classPrivateMethodGet(this, _getState, _getState2).call(this, name);
     if (status === "recalculating") {
@@ -22681,12 +22681,12 @@
       }
     }
   }
-  function _processFlushMessage2(message) {
+  function _updateStateFromFlush2(message) {
     for (var name in message.values) {
-      _classPrivateMethodGet(this, _processValueOrError, _processValueOrError2).call(this, name, OutputStates.Value);
+      _classPrivateMethodGet(this, _updateStateFromValueOrError, _updateStateFromValueOrError2).call(this, name, OutputStates.Value);
     }
     for (var _name in message.errors) {
-      _classPrivateMethodGet(this, _processValueOrError, _processValueOrError2).call(this, _name, OutputStates.Error);
+      _classPrivateMethodGet(this, _updateStateFromValueOrError, _updateStateFromValueOrError2).call(this, _name, OutputStates.Error);
     }
     var _iterator = _createForOfIteratorHelper5(this.outputStates), _step;
     try {
@@ -22699,7 +22699,7 @@
           case OutputStates.Value:
           case OutputStates.Error:
           case OutputStates.Cancel:
-          case OutputStates.Persisting:
+          case OutputStates.Persistent:
           case OutputStates.Invalidated:
             break;
           default:
@@ -22712,13 +22712,13 @@
       _iterator.f();
     }
   }
-  function _processProgressMessage2(message) {
+  function _updateStateFromProgress2(message) {
     var _message$progress$mes = message.progress.message, id = _message$progress$mes.id, persistent = _message$progress$mes.persistent;
     var state = _classPrivateMethodGet(this, _getState, _getState2).call(this, id);
     if (persistent) {
       switch (state) {
         case OutputStates.Running:
-          _classPrivateMethodGet(this, _setState, _setState2).call(this, id, OutputStates.Persisting);
+          _classPrivateMethodGet(this, _setState, _setState2).call(this, id, OutputStates.Persistent);
           break;
         default:
           throw new Error("Shiny server has sent a 'persistent progress' message for ".concat(id, ",\n            but the output is in an unexpected state of: ").concat(state));
@@ -22728,7 +22728,7 @@
         case OutputStates.Value:
         case OutputStates.Error:
         case OutputStates.Cancel:
-        case OutputStates.Persisting:
+        case OutputStates.Persistent:
           _classPrivateMethodGet(this, _setState, _setState2).call(this, id, OutputStates.Invalidated);
           break;
         default:
@@ -22736,7 +22736,7 @@
       }
     }
   }
-  function _processValueOrError2(name, type) {
+  function _updateStateFromValueOrError2(name, type) {
     var state = _classPrivateMethodGet(this, _getState, _getState2).call(this, name);
     switch (state) {
       case OutputStates.Idle:
@@ -23222,7 +23222,7 @@
       _defineProperty21(this, "$inputValues", {});
       _defineProperty21(this, "$initialInput", null);
       _defineProperty21(this, "$bindings", {});
-      _defineProperty21(this, "$outputProgressState", new OutputProgressState());
+      _defineProperty21(this, "$outputProgress", new OutputProgressReporter());
       _defineProperty21(this, "$values", {});
       _defineProperty21(this, "$errors", {});
       _defineProperty21(this, "$conditionals", {});
@@ -23806,7 +23806,7 @@
                   }
                   return _context6.abrupt("return");
                 case 7:
-                  this.$outputProgressState.processMessage(evt.message);
+                  this.$outputProgress.updateStateFromMessage(evt.message);
                   _context6.next = 10;
                   return this._sendMessagesToHandlers(evt.message, messageHandlers, messageHandlerOrder);
                 case 10:
@@ -23865,7 +23865,7 @@
         for (var name in this.$bindings) {
           if (!hasOwnProperty(this.$bindings, name))
             continue;
-          var inProgress = this.$outputProgressState.isRecalculating(name);
+          var inProgress = this.$outputProgress.isRecalculating(name);
           this.$bindings[name].showProgress(inProgress);
         }
       }

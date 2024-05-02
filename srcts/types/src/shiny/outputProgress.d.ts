@@ -1,20 +1,10 @@
-declare enum OutputStates {
-    Initial = "initial",
-    Running = "running",
-    Idle = "idle",
-    Value = "value",
-    Error = "error",
-    Cancel = "cancel",
-    Persisting = "persisting",
-    Invalidated = "invalidated"
-}
 type Message = {
     [key: string]: unknown;
 };
-declare class OutputProgressState {
+declare class OutputProgressReporter {
     #private;
-    outputStates: Map<string, OutputStates>;
+    private outputStates;
     isRecalculating(name: string): boolean;
-    processMessage(message: Message): void;
+    updateStateFromMessage(message: Message): void;
 }
-export { OutputProgressState };
+export { OutputProgressReporter };

@@ -1,7 +1,7 @@
 import type { OutputBindingAdapter } from "../bindings/outputAdapter";
 import type { UploadInitValue, UploadEndValue } from "../file/fileProcessor";
 import { AsyncQueue } from "../utils/asyncQueue";
-import { OutputProgressState } from "./outputProgress";
+import { OutputProgressReporter } from "./outputProgress";
 type ResponseValue = UploadEndValue | UploadInitValue;
 type Handler = (message: any) => Promise<void> | void;
 type ShinyWebSocket = WebSocket & {
@@ -31,7 +31,7 @@ declare class ShinyApp {
     $bindings: {
         [key: string]: OutputBindingAdapter;
     };
-    $outputProgressState: OutputProgressState;
+    $outputProgress: OutputProgressReporter;
     $values: {
         [key: string]: any;
     };

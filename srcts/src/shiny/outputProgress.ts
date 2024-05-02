@@ -5,9 +5,9 @@
  * to say whether a given output `isRecalculating()` or not (and thus, whether
  * we should show progress indication or not).
  *
- * When looking through this code, it's highly recommended to see the visual
- * representation of the state machine diagram. It's available under
- * `inst/diagrams/outputProgressStateMachine.svg`
+ * When looking through this code, it's highly recommended to refer to the
+ * visual representation of the state machine diagram. It's available under
+ * https://github.com/rstudio/shiny/blob/main/inst/diagrams/outputProgressStateMachine.svg
  */
 
 // The possible states of a given output.
@@ -18,7 +18,7 @@ enum OutputStates {
   Value = "value",
   Error = "error",
   Cancel = "cancel",
-  Persisting = "persisting",
+  Persistent = "persistent",
   Invalidated = "invalidated",
 }
 
@@ -51,9 +51,10 @@ type ProgressMessage = {
 type Message = { [key: string]: unknown };
 
 // The state machine that tracks the progress of outputs in a Shiny app.
-class OutputProgressState {
-  outputStates: Map<string, OutputStates> = new Map();
+class OutputProgressReporter {
+  private outputStates: Map<string, OutputStates> = new Map();
 
+  // Returns whether the output is recalculating or not.
   isRecalculating(name: string): boolean {
     const state = this.#getState(name);
 
@@ -62,31 +63,34 @@ class OutputProgressState {
       OutputStates.Initial,
       OutputStates.Running,
       OutputStates.Idle,
-      OutputStates.Persisting,
+      OutputStates.Persistent,
       OutputStates.Invalidated,
     ];
 
     return recalculatingStates.includes(state);
   }
 
-  processMessage(message: Message): void {
+  // Update output state based on the message received from the server.
+  // Note that any message can be passed to this method, but only the
+  // messages that are relevant to output progress do anything to the state.
+  updateStateFromMessage(message: Message): void {
     if (isRecalculatingMessage(message)) {
       // The "1st level" of the state machine diagram
-      this.#processRecalculatingMessage(message);
+      this.#updateStateFromRecalculating(message);
     }
 
     if (isFlushMessage(message)) {
       // The "2nd level" of the state machine diagram
-      this.#processFlushMessage(message);
+      this.#updateStateFromFlush(message);
     }
 
     if (isProgressMessage(message)) {
       // The "3rd level" of the state machine diagram
-      this.#processProgressMessage(message);
+      this.#updateStateFromProgress(message);
     }
   }
 
-  #processRecalculatingMessage(message: RecalculatingMessage): void {
+  #updateStateFromRecalculating(message: RecalculatingMessage): void {
     const { name, status } = message.recalculating;
 
     const state = this.#getState(name);
@@ -119,17 +123,17 @@ class OutputProgressState {
     }
   }
 
-  #processFlushMessage(message: FlushMessage): void {
+  #updateStateFromFlush(message: FlushMessage): void {
     for (const name in message.values) {
-      this.#processValueOrError(name, OutputStates.Value);
+      this.#updateStateFromValueOrError(name, OutputStates.Value);
     }
 
     for (const name in message.errors) {
-      this.#processValueOrError(name, OutputStates.Error);
+      this.#updateStateFromValueOrError(name, OutputStates.Error);
     }
 
     // Since req(F, cancelOutput = TRUE) doesn't send a message, we need to identify
-    // the situation by looking for idle outputs and moving them to cancel.
+    // the situation by looking for outputs that are still idle and move them to cancel.
     for (const [name, state] of this.outputStates) {
       switch (state) {
         case OutputStates.Idle:
@@ -138,7 +142,7 @@ class OutputProgressState {
         case OutputStates.Value:
         case OutputStates.Error:
         case OutputStates.Cancel:
-        case OutputStates.Persisting:
+        case OutputStates.Persistent:
         case OutputStates.Invalidated: // If the output is suspended
           break;
         default:
@@ -150,13 +154,13 @@ class OutputProgressState {
     }
   }
 
-  #processProgressMessage(message: ProgressMessage): void {
+  #updateStateFromProgress(message: ProgressMessage): void {
     const { id, persistent } = message.progress.message;
     const state = this.#getState(id);
     if (persistent) {
       switch (state) {
         case OutputStates.Running:
-          this.#setState(id, OutputStates.Persisting);
+          this.#setState(id, OutputStates.Persistent);
           break;
         default:
           throw new Error(
@@ -169,7 +173,7 @@ class OutputProgressState {
         case OutputStates.Value:
         case OutputStates.Error:
         case OutputStates.Cancel:
-        case OutputStates.Persisting:
+        case OutputStates.Persistent:
           this.#setState(id, OutputStates.Invalidated);
           break;
         default:
@@ -183,7 +187,7 @@ class OutputProgressState {
 
   // When receiving values/errors as part of a flush message, outputs should generally
   // be moving from Idle to Value/Error state.
-  #processValueOrError(
+  #updateStateFromValueOrError(
     name: string,
     type: OutputStates.Error | OutputStates.Value
   ): void {
@@ -225,4 +229,4 @@ function isProgressMessage(x: Message): x is ProgressMessage {
   return m.progress !== undefined && m.progress.type === "binding";
 }
 
-export { OutputProgressState };
+export { OutputProgressReporter };

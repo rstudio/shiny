@@ -28,7 +28,7 @@ import type { UploadInitValue, UploadEndValue } from "../file/fileProcessor";
 import { AsyncQueue } from "../utils/asyncQueue";
 import { showErrorInClientConsole } from "../components/errorConsole";
 
-import { OutputProgressState } from "./outputProgress";
+import { OutputProgressReporter } from "./outputProgress";
 
 type ResponseValue = UploadEndValue | UploadInitValue;
 type Handler = (message: any) => Promise<void> | void;
@@ -133,8 +133,8 @@ class ShinyApp {
   // Output bindings
   $bindings: { [key: string]: OutputBindingAdapter } = {};
 
-  // Output progress state
-  $outputProgressState = new OutputProgressState();
+  // Output progress states
+  $outputProgress = new OutputProgressReporter();
 
   // Cached values/errors
   $values: { [key: string]: any } = {};
@@ -661,8 +661,8 @@ class ShinyApp {
     $(document).trigger(evt);
     if (evt.isDefaultPrevented()) return;
 
-    // Before actually handling the message, use it to set output progress state
-    this.$outputProgressState.processMessage(evt.message);
+    // Before passing the message to handlers, use it to update output progress state
+    this.$outputProgress.updateStateFromMessage(evt.message);
 
     // Send msgObj.foo and msgObj.bar to appropriate handlers
     await this._sendMessagesToHandlers(
@@ -698,7 +698,7 @@ class ShinyApp {
   private _updateProgress() {
     for (const name in this.$bindings) {
       if (!hasOwnProperty(this.$bindings, name)) continue;
-      const inProgress = this.$outputProgressState.isRecalculating(name);
+      const inProgress = this.$outputProgress.isRecalculating(name);
       this.$bindings[name].showProgress(inProgress);
     }
   }

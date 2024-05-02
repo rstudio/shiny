@@ -56,8 +56,34 @@ class OutputBinding {
   showProgress(el: HTMLElement, show: boolean): void {
     const recalcClass = "recalculating";
 
-    if (show) $(el).addClass(recalcClass);
-    else $(el).removeClass(recalcClass);
+    if (show) {
+      el.classList.add(recalcClass);
+    } else {
+      el.classList.remove(recalcClass);
+    }
+
+    // Ideally the code below wouldn't be necessary, but Chromium has an odd
+    // bug where animations sometimes don't work on pseudo-elements (i.e., ::after).
+    // https://issues.chromium.org/issues/40932064
+    // To work around this, we add/remove a spinner element directly to the output
+    // container if necessary.
+    const spinners = document.documentElement.hasAttribute(
+      "data-shiny-busy-spinners"
+    );
+    if (!spinners) {
+      return;
+    }
+
+    if (show) {
+      const spinnerEl = document.createElement("div");
+      spinnerEl.classList.add("shiny-output-spinner");
+      el.appendChild(spinnerEl);
+    } else {
+      const spinnerEl = el.querySelector(":scope > .shiny-output-spinner");
+      if (spinnerEl) {
+        el.removeChild(spinnerEl);
+      }
+    }
   }
 }
 

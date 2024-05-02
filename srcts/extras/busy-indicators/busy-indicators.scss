@@ -15,12 +15,14 @@
 
 /* This data atttribute is set by ui.busy_indicators.use() */
 [data-shiny-busy-spinners] {
-  /* This class gets set by busy_indicators.ts */
   .recalculating {
     position: relative;
     overflow: visible; /* overflow:hidden can, in some cases, clip the spinner */
 
-    &::after {
+    // Ideally this selector would be &::after, but chromium currently has a bug where
+    // animations sometimes don't work on psuedo-elements https://issues.chromium.org/issues/40932064
+    // To work around this, showProgress() adds/removes a .shiny-output-spinner element
+    > .shiny-output-spinner {
       position: absolute;
 
       /* ui.busy_indicators.spinner_options() */
@@ -55,27 +57,28 @@
       animation-timing-function: var(--_shiny-spinner-easing);
       animation-delay: var(--_shiny-spinner-delay);
 
-      content: "";
+      
       scale: 0;
+      content: ""; /* Needed if applied to an ::after context */
     }
 
     /*
       shiny.css puts `opacity: 0.3` on .recalculating, which unfortunately applies to
       the spinner. Undo that, but still apply (smaller) opacity to immediate children
-      that aren't shiny-output-busy.
+      that aren't recalculating.
     */
     opacity: 1;
-    > *:not(.recalculating) {
+    > *:not(.shiny-output-spinner) {
       opacity: 0.2;
     }
 
     /*
       Disable spinner on uiOutput() mainly because (for other reasons) it has
-      `display:contents`, which breaks the ::after positioning.
+      `display:contents`, which breaks the absolute positioning.
       Note that, even if we could position it, we'd probably want to disable it
-      if it has shiny-output-busy children.
+      if it has recalculating children.
     */
-    &.shiny-html-output::after {
+    &.shiny-html-output > .shiny-output-spinner {
       display: none;
     }
   }

@@ -11798,10 +11798,25 @@
       key: "showProgress",
       value: function showProgress(el, show3) {
         var recalcClass = "recalculating";
-        if (show3)
-          (0, import_jquery21.default)(el).addClass(recalcClass);
-        else
-          (0, import_jquery21.default)(el).removeClass(recalcClass);
+        if (show3) {
+          el.classList.add(recalcClass);
+        } else {
+          el.classList.remove(recalcClass);
+        }
+        var spinners = document.documentElement.hasAttribute("data-shiny-busy-spinners");
+        if (!spinners) {
+          return;
+        }
+        if (show3) {
+          var spinnerEl = document.createElement("div");
+          spinnerEl.classList.add("shiny-output-spinner");
+          el.appendChild(spinnerEl);
+        } else {
+          var _spinnerEl = el.querySelector(":scope > .shiny-output-spinner");
+          if (_spinnerEl) {
+            el.removeChild(_spinnerEl);
+          }
+        }
       }
     }]);
     return OutputBinding2;

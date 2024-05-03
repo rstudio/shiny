@@ -1,62 +1,27 @@
-/*
-  "Built-in" spinner types
-
-  It's important to list out all the types/svgs here so that esbuild can bundle them
-  with the CSS (see js/build.ts).
-*/
-:root {
-  --_shiny-spinner-type-default: url(default-spinner.svg);
-  --_shiny-spinner-type-tadpole: url(tadpole-spinner.svg);
-  --_shiny-spinner-type-disc: url(disc-spinner.svg);
-  --_shiny-spinner-type-dots: url(dots-spinner.svg);
-  --_shiny-spinner-type-dot-track: url(dot-track-spinner.svg);
-  --_shiny-spinner-type-bounce: url(ball.svg);
-}
-
 /* This data atttribute is set by ui.busy_indicators.use() */
 [data-shiny-busy-spinners] {
-  /* This class gets set by busy_indicators.ts */
   .recalculating {
     position: relative;
-    overflow: visible; /* overflow:hidden can, in some cases, clip the spinner */
 
     &::after {
       position: absolute;
+      content: "";
 
       /* ui.busy_indicators.spinner_options() */
-      --_shiny-spinner-mask-img: var(--shiny-spinner-mask-img, var(--_shiny-spinner-type-default));
       --_shiny-spinner-color: var(--shiny-spinner-color, var(--bs-primary, #007bc2));
       --_shiny-spinner-size: var(--shiny-spinner-size, 32px);
-      --_shiny-spinner-easing: var(--shiny-spinner-easing, linear);
-      --_shiny-spinner-speed: var(--shiny-spinner-speed, 0.75s);
       --_shiny-spinner-delay: var(--shiny-spinner-delay, 0.5s);
-      --_shiny-spinner-animation: var(--shiny-spinner-animation, shiny-busy-spinner-spin);
 
-      /* Apply the spinner type as a mask */
-      mask-image: var(--_shiny-spinner-mask-img);
-      mask-position: center;
-      mask-size: contain;
-      mask-repeat: no-repeat;
-      -webkit-mask-image: var(--_shiny-spinner-mask-img);
-      -webkit-mask-position: center;
-      -webkit-mask-size: contain;
-      -webkit-mask-repeat: no-repeat;
-
-      /* Color, sizing, & positioning */
       background: var(--_shiny-spinner-color);
       width: var(--_shiny-spinner-size);
       height: var(--_shiny-spinner-size);
       inset: calc(50% - var(--_shiny-spinner-size) / 2);
 
-      /* Animation */
-      animation-name: var(--_shiny-spinner-animation);
-      animation-duration: var(--_shiny-spinner-speed);
-      animation-iteration-count: infinite;
-      animation-timing-function: var(--_shiny-spinner-easing);
-      animation-delay: var(--_shiny-spinner-delay);
-
-      content: "";
-      scale: 0;
+      mask-image: url(spinner.svg);
+      -webkit-mask-image: url(spinner.svg);
+      
+      animation-name: fade-in;
+      animation-duration: var(--_shiny-spinner-delay);
     }
 
     /*
@@ -139,44 +104,16 @@
   }
 }
 
-/* Keyframes behind most spinner types */
-@keyframes shiny-busy-spinner-spin {
+/* Keyframes for the fading spinner */
+@keyframes fade-in {
   0% {
-    scale: 1;
-    rotate: 0deg;
+    opacity: 0;
   }
-  33% {
-    scale: 1;
-    rotate: 180deg;
+  99% {
+    opacity: 0;
   }
   100% {
-    scale: 1;
-    rotate: 360deg;
-  }
-}
-
-/* For busy_indicators.spinner_options(type="bounce") */
-@keyframes shiny-busy-spinner-bounce {
-  0% {
-    animation-timing-function: cubic-bezier(0.33, 0, 0.66, 0.33);
-    translate: 0 calc(var(--_shiny-spinner-size) * (5 / 24));
-    scale: 1 1;
-  }
-  46.875% {
-    translate: 0 calc(var(--_shiny-spinner-size) * (20 / 24));
-    scale: 1 1;
-  }
-  50% {
-    animation-timing-function: cubic-bezier(0.33, 0.66, 0.66, 1);
-    translate: 0 calc(var(--_shiny-spinner-size) * (20.5 / 24));
-    scale: 1.2 0.85;
-  }
-  53.125% {
-    scale: 1 1;
-  }
-  100% {
-    translate: 0 calc(var(--_shiny-spinner-size) * (5 / 24));
-    scale: 1 1;
+    opacity: 1;
   }
 }
 

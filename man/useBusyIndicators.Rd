@@ -2,14 +2,16 @@
 % Please edit documentation in R/busy-indicators.R
 \name{useBusyIndicators}
 \alias{useBusyIndicators}
-\title{Use and customize busy indicator types.}
+\title{Enable/disable busy indication}
 \usage{
-useBusyIndicators(spinners = TRUE, pulse = TRUE)
+useBusyIndicators(..., spinners = TRUE, pulse = TRUE)
 }
 \arguments{
-\item{spinners}{Overlay a spinner on each calculating/recalculating output.}
+\item{...}{Currently ignored (for future expansion).}
 
-\item{pulse}{Show a pulsing banner at the top of the window when the server is busy.}
+\item{spinners}{Whether to show a spinner on each calculating/recalculating output.}
+
+\item{pulse}{Whether to show a pulsing banner at the top of the page when the app is busy.}
 }
 \description{
 To enable busy indicators, include the result of this function in the app's UI.
@@ -49,5 +51,5 @@ shinyApp(ui, server)
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[=spinnerOptions]{spinnerOptions()}} \code{\link[=pulseOptions]{pulseOptions()}}
+\code{\link[=busyIndicatorOptions]{busyIndicatorOptions()}} for customizing the appearance of the busy indicators.
 }

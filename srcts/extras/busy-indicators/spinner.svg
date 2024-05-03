@@ -1,0 +1,42 @@
+<svg stroke="#007BC2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+	<style>
+		.spinner-group {
+      transform-origin: center;
+      animation-name: spin_group;
+      animation-duration: 1.5s;
+      animation-timing-function: linear;
+      animation-iteration-count: infinite;
+      animation-delay: 0.5s;
+    }
+		.spinner-group circle {
+      stroke-linecap: round;
+      animation-name: spin_circle; 
+      animation-duration: 1.5s;
+      animation-timing-function: ease-in-out;
+      animation-iteration-count: infinite;
+      animation-delay: 0.5s;
+    }
+		@keyframes spin_group {
+      100%{
+        transform: rotate(360deg);
+      }
+    }
+		@keyframes spin_circle {
+      0% {
+        stroke-dasharray: 0 150;
+        stroke-dashoffset: 0;
+      }
+      47.5%{
+        stroke-dasharray: 42 150;
+        stroke-dashoffset: -16;
+      }
+      95%,100%{
+        stroke-dasharray: 42 150;
+        stroke-dashoffset: -59;
+      }
+    }
+	</style>
+	<g class="spinner-group">
+		<circle cx="12" cy="12" r="9.5" fill="none" stroke-width="2.5"></circle>
+	</g>
+</svg>

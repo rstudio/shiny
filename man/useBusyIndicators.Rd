@@ -9,18 +9,21 @@ useBusyIndicators(..., spinners = TRUE, pulse = TRUE)
 \arguments{
 \item{...}{Currently ignored (for future expansion).}
 
-\item{spinners}{Whether to show a spinner on each calculating/recalculating output.}
+\item{spinners}{Whether to show a spinner on each calculating/recalculating
+output.}
 
-\item{pulse}{Whether to show a pulsing banner at the top of the page when the app is busy.}
+\item{pulse}{Whether to show a pulsing banner at the top of the page when the
+app is busy.}
 }
 \description{
-To enable busy indicators, include the result of this function in the app's UI.
+To enable/disable busy indicators, include the result of this function in the
+app's UI.
 }
 \details{
-When both \code{spinners} and \code{pulse} are set to \code{TRUE}, the pulse is disabled
-when spinner(s) are active. When both \code{spinners} and \code{pulse} are set to
-\code{FALSE}, no busy indication is shown (other than the gray-ing out of
-recalculating outputs).
+When both \code{spinners} and \code{pulse} are set to \code{TRUE}, the pulse is
+automatically disabled when spinner(s) are active. When both \code{spinners} and
+\code{pulse} are set to \code{FALSE}, no busy indication is shown (other than the
+gray-ing out of recalculating outputs).
 }
 \examples{
 \dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
@@ -51,5 +54,6 @@ shinyApp(ui, server)
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[=busyIndicatorOptions]{busyIndicatorOptions()}} for customizing the appearance of the busy indicators.
+\code{\link[=busyIndicatorOptions]{busyIndicatorOptions()}} for customizing the appearance of the busy
+indicators.
 }

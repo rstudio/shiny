@@ -38,8 +38,8 @@ CSS size.}
 time.}
 }
 \description{
-To customize the appearance of the busy indicators, include the result of this
-function in the app's UI.
+To customize the appearance of the busy indicators, include the result of
+this function in the app's UI.
 }
 \examples{
 \dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}

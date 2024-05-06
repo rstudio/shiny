@@ -222,7 +222,7 @@ ionRangeSliderDependency <- function() {
   )
 }
 
-ionRangeSliderDependencyCSS <- function(theme) {
+ionRangeSliderDependencyCSS <- function(theme, as_sass = FALSE) {
   if (!is_bs_theme(theme)) {
     return(htmlDependency(
       "ionrangeslider-css",
@@ -233,13 +233,17 @@ ionRangeSliderDependencyCSS <- function(theme) {
     ))
   }
 
+  slider_sass <- list(
+    list(accent = "$component-active-bg"),
+    sass::sass_file(
+      system_file(package = "shiny", "www/shared/ionrangeslider/scss/shiny.scss")
+    )
+  )
+
+  if (isTRUE(as_sass)) return(slider_sass)
+
   bslib::bs_dependency(
-    input = list(
-      list(accent = "$component-active-bg"),
-      sass::sass_file(
-        system_file(package = "shiny", "www/shared/ionrangeslider/scss/shiny.scss")
-      )
-    ),
+    input = slider_sass,
     theme = theme,
     name = "ionRangeSlider",
     version = version_ion_range_slider,

@@ -236,7 +236,7 @@ selectizeDependency <- function() {
   bslib::bs_dependency_defer(selectizeDependencyFunc)
 }
 
-selectizeDependencyFunc <- function(theme) {
+selectizeDependencyFunc <- function(theme, as_sass = FALSE) {
   if (!is_bs_theme(theme)) {
     return(selectizeStaticDependency(version_selectize))
   }
@@ -246,6 +246,11 @@ selectizeDependencyFunc <- function(theme) {
   stylesheet <- file.path(
     selectizeDir, "scss", paste0("selectize.bootstrap", bs_version, ".scss")
   )
+
+  if (isTRUE(as_sass)) {
+    return(sass::sass_file(stylesheet))
+  }
+
   # It'd be cleaner to ship the JS in a separate, href-based,
   # HTML dependency (which we currently do for other themable widgets),
   # but DT, crosstalk, and maybe other pkgs include selectize JS/CSS

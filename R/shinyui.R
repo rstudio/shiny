@@ -134,7 +134,7 @@ shinyDependencies <- function() {
   )
 }
 
-shinyDependencyCSS <- function(theme) {
+shinyDependencyCSS <- function(theme, as_sass = FALSE) {
   version <- get_package_version("shiny")
 
   if (!is_bs_theme(theme)) {
@@ -154,6 +154,10 @@ shinyDependencyCSS <- function(theme) {
   scss_home <- system_file("www/shared/shiny_scss", package = "shiny")
   scss_files <- file.path(scss_home, c(bootstrap_scss, "shiny.scss"))
   scss_files <- lapply(scss_files, sass::sass_file)
+
+  if (isTRUE(as_sass)) {
+    return(scss_files)
+  }
 
   bslib::bs_dependency(
     input = scss_files,

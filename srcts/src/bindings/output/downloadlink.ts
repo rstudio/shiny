@@ -7,7 +7,10 @@ class DownloadLinkOutputBinding extends OutputBinding {
     return $(scope).find("a.shiny-download-link");
   }
   renderValue(el: HTMLElement, data: string): void {
-    $(el).attr("href", data);
+    el.setAttribute("href", data);
+    el.classList.remove("disabled");
+    el.removeAttribute("aria-disabled");
+    el.removeAttribute("tabindex");
   }
   // Progress shouldn't be shown on the download button
   // (progress will be shown as a page level pulse instead)

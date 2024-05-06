@@ -236,20 +236,12 @@ selectizeDependency <- function() {
   bslib::bs_dependency_defer(selectizeDependencyFunc)
 }
 
-selectizeDependencyFunc <- function(theme, as_sass = FALSE) {
+selectizeDependencyFunc <- function(theme) {
   if (!is_bs_theme(theme)) {
     return(selectizeStaticDependency(version_selectize))
   }
 
-  selectizeDir <- system_file(package = "shiny", "www/shared/selectize/")
   bs_version <- bslib::theme_version(theme)
-  stylesheet <- file.path(
-    selectizeDir, "scss", paste0("selectize.bootstrap", bs_version, ".scss")
-  )
-
-  if (isTRUE(as_sass)) {
-    return(sass::sass_file(stylesheet))
-  }
 
   # It'd be cleaner to ship the JS in a separate, href-based,
   # HTML dependency (which we currently do for other themable widgets),
@@ -261,13 +253,21 @@ selectizeDependencyFunc <- function(theme, as_sass = FALSE) {
   script <- file.path(selectizeDir, selectizeScripts())
 
   bslib::bs_dependency(
-    input = sass::sass_file(stylesheet),
+    input = selectizeSassLayer(bs_version),
     theme = theme,
     name = "selectize",
     version = version_selectize,
     cache_key_extra = get_package_version("shiny"),
     .dep_args = list(script = script)
   )
+}
+
+selectizeSassLayer <- function(bs_version) {
+  selectizeDir <- system_file(package = "shiny", "www/shared/selectize/")
+  stylesheet <- file.path(
+    selectizeDir, "scss", paste0("selectize.bootstrap", bs_version, ".scss")
+  )
+  sass::sass_file(stylesheet)
 }
 
 selectizeStaticDependency <- function(version) {

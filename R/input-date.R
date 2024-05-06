@@ -153,7 +153,7 @@ datePickerDependency <- function(theme) {
   )
 }
 
-datePickerSassLayer <- function() {
+datePickerSass <- function() {
   sass::sass_file(
     system_file(package = "shiny", "www/shared/datepicker/scss/build3.scss")
   )
@@ -171,7 +171,7 @@ datePickerCSS <- function(theme) {
   }
 
   bslib::bs_dependency(
-    input = datePickerSassLayer(),
+    input = datePickerSass(),
     theme = theme,
     name = "bootstrap-datepicker",
     version = version_bs_date_picker,

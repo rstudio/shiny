@@ -222,7 +222,7 @@ ionRangeSliderDependency <- function() {
   )
 }
 
-ionRangeSliderDependencySassLayer <- function() {
+ionRangeSliderDependencySass <- function() {
   list(
     list(accent = "$component-active-bg"),
     sass::sass_file(
@@ -243,7 +243,7 @@ ionRangeSliderDependencyCSS <- function(theme) {
   }
 
   bslib::bs_dependency(
-    input = ionRangeSliderDependencySassLayer(),
+    input = ionRangeSliderDependencySass(),
     theme = theme,
     name = "ionRangeSlider",
     version = version_ion_range_slider,

@@ -254,7 +254,7 @@ selectizeDependencyFunc <- function(theme) {
   script <- file.path(selectizeDir, selectizeScripts())
 
   bslib::bs_dependency(
-    input = selectizeSassLayer(bs_version),
+    input = selectizeSass(bs_version),
     theme = theme,
     name = "selectize",
     version = version_selectize,
@@ -263,7 +263,7 @@ selectizeDependencyFunc <- function(theme) {
   )
 }
 
-selectizeSassLayer <- function(bs_version) {
+selectizeSass <- function(bs_version) {
   selectizeDir <- system_file(package = "shiny", "www/shared/selectize/")
   stylesheet <- file.path(
     selectizeDir, "scss", paste0("selectize.bootstrap", bs_version, ".scss")

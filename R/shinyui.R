@@ -134,7 +134,7 @@ shinyDependencies <- function() {
   )
 }
 
-shinyDependencySassLayer <- function(bs_version) {
+shinyDependencySass <- function(bs_version) {
   bootstrap_scss <- paste0("shiny.bootstrap", bs_version, ".scss")
 
   scss_home <- system_file("www/shared/shiny_scss", package = "shiny")
@@ -159,7 +159,7 @@ shinyDependencyCSS <- function(theme) {
   bs_version <- bslib::theme_version(theme)
 
   bslib::bs_dependency(
-    input = shinyDependencySassLayer(bs_version),
+    input = shinyDependencySass(bs_version),
     theme = theme,
     name = "shiny-sass",
     version = version,

@@ -55,7 +55,9 @@
 </ul></div>
 <div class="section level3">
 <h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>
-<ul><li>Output bindings that are removed, invalidated, then inserted again (while invalidated) now correctly include the <code>.recalculating</code> CSS class. (<a href="https://github.com/rstudio/shiny/issues/4039" class="external-link">#4039</a>)</li>
+<ul><li>
+<code><a href="../reference/downloadButton.html">downloadButton()</a></code> and <code><a href="../reference/downloadButton.html">downloadLink()</a></code> are now disabled up until they are fully initialized. This prevents the user from clicking the button/link before the download is ready. (<a href="https://github.com/rstudio/shiny/issues/4041" class="external-link">#4041</a>)</li>
+<li>Output bindings that are removed, invalidated, then inserted again (while invalidated) now correctly include the <code>.recalculating</code> CSS class. (<a href="https://github.com/rstudio/shiny/issues/4039" class="external-link">#4039</a>)</li>
 <li>Fixed a recent issue with <code><a href="../reference/htmlOutput.html">uiOutput()</a></code> and <code><a href="../reference/conditionalPanel.html">conditionalPanel()</a></code> not properly lower opacity when recalculation (in a Bootstrap 5 context). (<a href="https://github.com/rstudio/shiny/issues/4027" class="external-link">#4027</a>)</li>
 </ul></div>
 </div>

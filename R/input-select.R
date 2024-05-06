@@ -250,6 +250,7 @@ selectizeDependencyFunc <- function(theme) {
   # name, the JS/CSS would be loaded/included twice, which leads to
   # strange issues, especially since we now include a 3rd party
   # accessibility plugin https://github.com/rstudio/shiny/pull/3153
+  selectizeDir <- system_file(package = "shiny", "www/shared/selectize/")
   script <- file.path(selectizeDir, selectizeScripts())
 
   bslib::bs_dependency(

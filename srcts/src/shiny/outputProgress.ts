@@ -14,27 +14,27 @@
  * https://github.com/rstudio/shiny/blob/main/inst/diagrams/outputProgressStateMachine.svg
  *
  * +---------+ recalculating  +---------+
- * | INITIAL +--------------->| RUNNING |<--------------+
- * +---------+                +---+-----+               |
- *               +-----------/     |                    |
- *               |              recalculated            |
- *               |                 |                    |
- *               |              +--v---+                |
- *               |           +--+ IDLE +--+-------+     |
- *               |           |  +------+  |       |     |
- *             1 |          2|           3|      4|     |
- *               v           v            v       v     |
- *          +------------+ +------+  +-----+   +-----+  |
- *          | PERSISTENT | |cancel|  |value|   |error|  |
- *          +-------+----+ +---+--+  +-+---+   +-+---+  |
- *                  |         5|      5|         |      |
- *                 5|          v       v        5|      |
- *                  |       +-------------+      |      |
- *                  +------>| INVALIDATED |<-----+      |
- *                          +-----+-------+             |
- *                                |                     |
- *                                |    recalculating    |
- *                                +---------------------+
+ * | INITIAL +--------------->| RUNNING |<----------------+
+ * +---------+                +---+-----+                 |
+ *               +-----------/     |                      |
+ *               |              recalculated              |
+ *               |                 |                      |
+ *               |              +--v---+---------------+  |
+ *               |           +--+ IDLE +--+-------+    |  |
+ *               |           |  +------+  |       |    |  |
+ *             1 |          2|           3|      4|    |  |
+ *               v           v            v       v    |  |
+ *          +------------+ +------+  +-----+   +-----+ |  |
+ *          | PERSISTENT | |cancel|  |value|   |error| |  |
+ *          +-------+----+ +---+--+  +-+---+   +-+---+ |  |
+ *                  |         5|      5|         |     |  |
+ *                 5|          v       v        5|     |  |
+ *                  |       +-------------+      |     |  |
+ *                  +------>| INVALIDATED |<-----+     |  |
+ *                          +-----+-------+<-----------+  |
+ *                                |                       |
+ *                                |    recalculating      |
+ *                                +-----------------------+
  *
  *  1. {progress: {type: "binding", message: {persistent: true}}}
  *  2. No message
@@ -216,6 +216,7 @@ class OutputProgressReporter {
         case OutputStates.Error:
         case OutputStates.Cancel:
         case OutputStates.Persistent:
+        case OutputStates.Idle:
           this.#setState(id, OutputStates.Invalidated);
           break;
         default:

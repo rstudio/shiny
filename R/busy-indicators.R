@@ -6,7 +6,7 @@
 #' When both `spinners` and `pulse` are set to `TRUE`, the pulse is
 #' automatically disabled when spinner(s) are active. When both `spinners` and
 #' `pulse` are set to `FALSE`, no busy indication is shown (other than the
-#' gray-ing out of recalculating outputs).
+#' graying out of recalculating outputs).
 #'
 #' @param ... Currently ignored (for future expansion).
 #' @param spinners Whether to show a spinner on each calculating/recalculating
@@ -17,7 +17,7 @@
 #' @export
 #' @seealso [busyIndicatorOptions()] for customizing the appearance of the busy
 #'   indicators.
-#' @examplesIf interactive()
+#' @examplesIf rlang::is_interactive()
 #'
 #' library(bslib)
 #'
@@ -48,13 +48,13 @@ useBusyIndicators <- function(..., spinners = TRUE, pulse = TRUE) {
 
   attrs <- list("shinyBusySpinners" = spinners, "shinyBusyPulse" = pulse)
 
-  js <- Map(function(key, value) {
-    if (value) {
+  js <- vapply(names(attrs), character(1), FUN = function(key) {
+    if (attrs[[key]]) {
       sprintf("document.documentElement.dataset.%s = 'true';", key)
     } else {
       sprintf("delete document.documentElement.dataset.%s;", key)
     }
-  }, names(attrs), attrs)
+  })
 
   js <- HTML(paste(js, collapse = "\n"))
 
@@ -68,15 +68,14 @@ useBusyIndicators <- function(..., spinners = TRUE, pulse = TRUE) {
 #' To customize the appearance of the busy indicators, include the result of
 #' this function in the app's UI.
 #'
-#'
 #' @param ... Currently ignored (for future expansion).
 #' @param spinner_color The color of the spinner. This can be any valid CSS
-#'   color. Defaults to the app's "primary" color (if Bootstrap is on the page).
+#'   color. Defaults to the app's "primary" color if Bootstrap is on the page.
 #' @param spinner_size The size of the spinner. This can be any valid CSS size.
 #' @param spinner_delay The amount of time to wait before showing the spinner.
-#'   This can be any valid CSS time and can useful for not showing the spinner
+#'   This can be any valid CSS time and can be useful for not showing the spinner
 #'   if the computation finishes quickly.
-#' @param pulse_background A CCS background definition for the pulse. The
+#' @param pulse_background A CSS background definition for the pulse. The
 #'   default uses a
 #'   [linear-gradient](https://developer.mozilla.org/en-US/docs/Web/CSS/gradient/linear-gradient)
 #'   of the theme's indigo, purple, and pink colors.
@@ -87,7 +86,7 @@ useBusyIndicators <- function(..., spinners = TRUE, pulse = TRUE) {
 #'
 #' @export
 #' @seealso [useBusyIndicators()] for enabling/disabling busy indicators.
-#' @examplesIf interactive()
+#' @examplesIf rlang::is_interactive()
 #'
 #' library(bslib)
 #'

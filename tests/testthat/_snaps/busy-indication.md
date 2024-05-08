@@ -1,7 +1,9 @@
 # useBusyIndicators()
 
     Code
-      res
+      tagList(useBusyIndicators(), useBusyIndicators(spinners = FALSE),
+      useBusyIndicators(pulse = FALSE), useBusyIndicators(spinners = FALSE, pulse = FALSE),
+      )
     Output
       <script>document.documentElement.dataset.shinyBusySpinners = 'true';
       document.documentElement.dataset.shinyBusyPulse = 'true';</script>
@@ -15,7 +17,13 @@
 # busyIndicatorOptions()
 
     Code
-      res
+      tagList(busyIndicatorOptions(), busyIndicatorOptions(spinner_color = "red"),
+      busyIndicatorOptions(spinner_size = "10px"), busyIndicatorOptions(
+        spinner_delay = "1s"), busyIndicatorOptions(pulse_background = "blue"),
+      busyIndicatorOptions(pulse_height = "10px"), busyIndicatorOptions(pulse_speed = "1s"),
+      busyIndicatorOptions(spinner_color = "red", spinner_size = "10px",
+        spinner_delay = "1s", pulse_background = "blue", pulse_height = "10px",
+        pulse_speed = "1s"))
     Output
       <style>:root {--shiny-spinner-color: #FF0000}</style>
       <style>:root {--shiny-spinner-size: 10px}</style>

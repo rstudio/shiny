@@ -22747,6 +22747,7 @@
         case OutputStates.Error:
         case OutputStates.Cancel:
         case OutputStates.Persistent:
+        case OutputStates.Idle:
           _classPrivateMethodGet(this, _setState, _setState2).call(this, id, OutputStates.Invalidated);
           break;
         default:

@@ -12069,7 +12069,10 @@
     }, {
       key: "renderValue",
       value: function renderValue(el, data) {
-        (0, import_jquery23.default)(el).attr("href", data);
+        el.setAttribute("href", data);
+        el.classList.remove("disabled");
+        el.removeAttribute("aria-disabled");
+        el.removeAttribute("tabindex");
       }
     }]);
     return DownloadLinkOutputBinding2;
@@ -22737,6 +22740,7 @@
         case OutputStates.Error:
         case OutputStates.Cancel:
         case OutputStates.Persistent:
+        case OutputStates.Idle:
           _classPrivateMethodGet(this, _setState, _setState2).call(this, id, OutputStates.Invalidated);
           break;
         default:

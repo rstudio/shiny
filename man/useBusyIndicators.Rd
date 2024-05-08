@@ -23,10 +23,10 @@ app's UI.
 When both \code{spinners} and \code{pulse} are set to \code{TRUE}, the pulse is
 automatically disabled when spinner(s) are active. When both \code{spinners} and
 \code{pulse} are set to \code{FALSE}, no busy indication is shown (other than the
-gray-ing out of recalculating outputs).
+graying out of recalculating outputs).
 }
 \examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (rlang::is_interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 
 library(bslib)
 

@@ -18,15 +18,15 @@ busyIndicatorOptions(
 \item{...}{Currently ignored (for future expansion).}
 
 \item{spinner_color}{The color of the spinner. This can be any valid CSS
-color. Defaults to the app's "primary" color (if Bootstrap is on the page).}
+color. Defaults to the app's "primary" color if Bootstrap is on the page.}
 
 \item{spinner_size}{The size of the spinner. This can be any valid CSS size.}
 
 \item{spinner_delay}{The amount of time to wait before showing the spinner.
-This can be any valid CSS time and can useful for not showing the spinner
+This can be any valid CSS time and can be useful for not showing the spinner
 if the computation finishes quickly.}
 
-\item{pulse_background}{A CCS background definition for the pulse. The
+\item{pulse_background}{A CSS background definition for the pulse. The
 default uses a
 \href{https://developer.mozilla.org/en-US/docs/Web/CSS/gradient/linear-gradient}{linear-gradient}
 of the theme's indigo, purple, and pink colors.}
@@ -42,7 +42,7 @@ To customize the appearance of the busy indicators, include the result of
 this function in the app's UI.
 }
 \examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (rlang::is_interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 
 library(bslib)
 

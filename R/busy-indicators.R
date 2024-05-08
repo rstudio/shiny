@@ -75,6 +75,9 @@ useBusyIndicators <- function(..., spinners = TRUE, pulse = TRUE) {
 #' @param spinner_delay The amount of time to wait before showing the spinner.
 #'   This can be any valid CSS time and can be useful for not showing the spinner
 #'   if the computation finishes quickly.
+#' @param spinner_selector A CSS selector for scoping the spinner customization.
+#'   This can be useful if you want to have different spinners for different
+#'   parts of the app. Defaults to the root document element.
 #' @param pulse_background A CSS background definition for the pulse. The
 #'   default uses a
 #'   [linear-gradient](https://developer.mozilla.org/en-US/docs/Web/CSS/gradient/linear-gradient)
@@ -117,6 +120,7 @@ busyIndicatorOptions <- function(
   spinner_color = NULL,
   spinner_size = NULL,
   spinner_delay = NULL,
+  spinner_selector = NULL,
   pulse_background = NULL,
   pulse_height = NULL,
   pulse_speed = NULL
@@ -128,7 +132,8 @@ busyIndicatorOptions <- function(
     spinnerOptions(
       color = spinner_color,
       size = spinner_size,
-      delay = spinner_delay
+      delay = spinner_delay,
+      selector = spinner_selector
     ),
     pulseOptions(
       background = pulse_background,
@@ -142,8 +147,8 @@ busyIndicatorOptions <- function(
 
 
 # TODO: allow for customization of the spinner type.
-spinnerOptions <- function(color = NULL, size = NULL, delay = NULL) {
-  if (is.null(color) && is.null(size) && is.null(delay))  {
+spinnerOptions <- function(color = NULL, size = NULL, delay = NULL, selector = NULL) {
+  if (is.null(color) && is.null(size) && is.null(delay) && is.null(selector)) {
     return(NULL)
   }
 
@@ -154,7 +159,9 @@ spinnerOptions <- function(color = NULL, size = NULL, delay = NULL) {
     if (!is.null(delay)) sprintf("--shiny-spinner-delay: %s", delay)
   ), collapse = ";")
 
-  tags$style(HTML(paste0(":root {", css_vars, "}")))
+  selector <- if (is.null(selector)) ":root" else selector
+
+  tags$style(HTML(paste0(selector, " {", css_vars, "}")))
 }
 
 pulseOptions <- function(background = NULL, height = NULL, speed = NULL) {

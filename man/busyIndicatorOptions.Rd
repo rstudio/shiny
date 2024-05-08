@@ -9,6 +9,7 @@ busyIndicatorOptions(
   spinner_color = NULL,
   spinner_size = NULL,
   spinner_delay = NULL,
+  spinner_selector = NULL,
   pulse_background = NULL,
   pulse_height = NULL,
   pulse_speed = NULL
@@ -25,6 +26,10 @@ color. Defaults to the app's "primary" color if Bootstrap is on the page.}
 \item{spinner_delay}{The amount of time to wait before showing the spinner.
 This can be any valid CSS time and can be useful for not showing the spinner
 if the computation finishes quickly.}
+
+\item{spinner_selector}{A CSS selector for scoping the spinner customization.
+This can be useful if you want to have different spinners for different
+parts of the app. Defaults to the root document element.}
 
 \item{pulse_background}{A CSS background definition for the pulse. The
 default uses a

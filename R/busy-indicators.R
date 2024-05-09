@@ -43,27 +43,17 @@
 #'
 #' shinyApp(ui, server)
 useBusyIndicators <- function(..., spinners = TRUE, pulse = TRUE) {
-
   rlang::check_dots_empty()
 
-  js <- c()
+  attrs <- list("shinyBusySpinners" = spinners, "shinyBusyPulse" = pulse)
 
-  if (rlang::is_logical(spinners) || rlang::is_string(spinners)) {
-    if (rlang::is_string(spinners)) {
-      spinners <- rlang::arg_match(spinners, .spinner_names)
+  js <- vapply(names(attrs), character(1), FUN = function(key) {
+    if (attrs[[key]]) {
+      sprintf("document.documentElement.dataset.%s = 'true';", key)
+    } else {
+      sprintf("delete document.documentElement.dataset.%s;", key)
     }
-    js <- c(js, js_root_data_set_or_delete("shinyBusySpinners", spinners))
-  } else {
-    # TODO: better error message
-    abort("Invalid value for `spinners` argument. Must be a logical or a string.")
-  }
-
-  if (rlang::is_logical(pulse)) {
-    js <- c(js, js_root_data_set_or_delete("shinyBusyPulse", pulse))
-  } else {
-    # TODO: better error message
-    abort("`pulse` must be a logical TRUE/FALSE value.")
-  }
+  })
 
   js <- HTML(paste(js, collapse = "\n"))
 
@@ -72,22 +62,22 @@ useBusyIndicators <- function(..., spinners = TRUE, pulse = TRUE) {
   tags$script(js)
 }
 
-js_root_data_set_or_delete <- function(key, value) {
-  if (isTRUE(value)) {
-    sprintf("document.documentElement.dataset.%s = 'true';", key)
-  } else if (is.character(value) && nzchar(value)) {
-    sprintf("document.documentElement.dataset.%s = '%s';", key, value)
-  } else {
-    sprintf("delete document.documentElement.dataset.%s;", key)
-  }
-}
-
 #' Customize busy indicator options.
 #'
 #' To customize the appearance of the busy indicators, include the result of
 #' this function in the app's UI.
 #'
 #' @param ... Currently ignored (for future expansion).
+#' @param spinner_type The type of spinner to use for the busy indicator. This
+#'   can be any of the spinner types from the `shiny` package.
+#'
+#'   Available spinner types include:
+#'   "`r paste0(.spinner_types, collapse = '", "')`".
+#'
+#'    Alternatively, you can provide a CSS URL to a custom spinner, e.g.
+#'   `../spinners/my-spinning-loader.svg` (use [shiny::addResourcePath()] to
+#'   ensure the `spinner` directory is accessible). Custom URLs must start with
+#'   `.`, `/` or `http`.
 #' @param spinner_color The color of the spinner. This can be any valid CSS
 #'   color. Defaults to the app's "primary" color if Bootstrap is on the page.
 #' @param spinner_size The size of the spinner. This can be any valid CSS size.
@@ -136,6 +126,7 @@ js_root_data_set_or_delete <- function(key, value) {
 #' shinyApp(ui, server)
 busyIndicatorOptions <- function(
   ...,
+  spinner_type = NULL,
   spinner_color = NULL,
   spinner_size = NULL,
   spinner_delay = NULL,
@@ -149,6 +140,7 @@ busyIndicatorOptions <- function(
 
   res <- tagList(
     spinnerOptions(
+      type = spinner_type,
       color = spinner_color,
       size = spinner_size,
       delay = spinner_delay,
@@ -165,18 +157,42 @@ busyIndicatorOptions <- function(
 }
 
 
-# TODO: allow for customization of the spinner type.
-spinnerOptions <- function(color = NULL, size = NULL, delay = NULL, selector = NULL) {
-  if (is.null(color) && is.null(size) && is.null(delay) && is.null(selector)) {
+spinnerOptions <- function(
+  type = NULL,
+  color = NULL,
+  size = NULL,
+  delay = NULL,
+  selector = NULL
+) {
+  if (is.null(type) && is.null(color) && is.null(size) && is.null(delay) && is.null(selector)) {
     return(NULL)
   }
 
+  if (!is.null(type)) {
+    if (!rlang::is_string(type)) {
+      spinners <- paste0(.spinner_types, collapse = '", "')
+      abort(
+        sprintf(
+          "`spinner_type` must be a string. Choose from \"%s\".",
+          spinners
+        )
+      )
+    }
+    if (grepl("^(http|[./])", type)) {
+      type <- sprintf("url('%s')", type)
+    } else {
+      type <- rlang::arg_match(type, .spinner_types)
+      type <- sprintf("url('spinners/%s.svg')", type)
+    }
+  }
+
   # Options controlled via CSS variables.
-  css_vars <- paste0(c(
-    if (!is.null(color)) sprintf("--shiny-spinner-color: %s", htmltools::parseCssColors(color)),
-    if (!is.null(size)) sprintf("--shiny-spinner-size: %s", htmltools::validateCssUnit(size)),
-    if (!is.null(delay)) sprintf("--shiny-spinner-delay: %s", delay)
-  ), collapse = ";")
+  css_vars <- htmltools::css(
+    `--shiny-spinner-url` = type,
+    `--shiny-spinner-color` = htmltools::parseCssColors(color),
+    `--shiny-spinner-size` = htmltools::validateCssUnit(size),
+    `--shiny-spinner-delay` = delay
+  )
 
   selector <- if (is.null(selector)) ":root" else selector
 
@@ -188,11 +204,11 @@ pulseOptions <- function(background = NULL, height = NULL, speed = NULL) {
     return(NULL)
   }
 
-  css_vars <- paste0(c(
-    if (!is.null(background)) sprintf("--shiny-pulse-background: %s", background),
-    if (!is.null(height)) sprintf("--shiny-pulse-height: %s", htmltools::validateCssUnit(height)),
-    if (!is.null(speed)) sprintf("--shiny-pulse-speed: %s", speed)
-  ), collapse = ";")
+  htmltools::css(
+    `--shiny-pulse-background` = background,
+    `--shiny-pulse-height` = htmltools::validateCssUnit(height),
+    `--shiny-pulse-speed` = speed
+  )
 
   tags$style(HTML(paste0(":root {", css_vars, "}")))
 }

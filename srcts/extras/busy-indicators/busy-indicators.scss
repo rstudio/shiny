@@ -50,59 +50,6 @@
   }
 }
 
-@mixin spinner-svg($name) {
-  [data-shiny-busy-spinners="#{$name}"] {
-    --_shiny-spinner-url: url("spinners/#{$name}.svg");
-  }
-}
-
-@include spinner-svg("12-dots-scale-rotate");
-@include spinner-svg("180-ring-with-bg");
-@include spinner-svg("180-ring");
-@include spinner-svg("270-ring-with-bg");
-@include spinner-svg("270-ring");
-@include spinner-svg("3-dots-bounce");
-@include spinner-svg("3-dots-fade");
-@include spinner-svg("3-dots-move");
-@include spinner-svg("3-dots-rotate");
-@include spinner-svg("3-dots-scale-middle");
-@include spinner-svg("3-dots-scale");
-@include spinner-svg("6-dots-rotate");
-@include spinner-svg("6-dots-scale-middle");
-@include spinner-svg("6-dots-scale");
-@include spinner-svg("8-dots-rotate");
-@include spinner-svg("90-ring-with-bg");
-@include spinner-svg("90-ring");
-@include spinner-svg("bars-fade");
-@include spinner-svg("bars-rotate-fade");
-@include spinner-svg("bars-scale-fade");
-@include spinner-svg("bars-scale-middle");
-@include spinner-svg("bars-scale");
-@include spinner-svg("blocks-scale");
-@include spinner-svg("blocks-shuffle-2");
-@include spinner-svg("blocks-shuffle-3");
-@include spinner-svg("blocks-wave");
-@include spinner-svg("bouncing-ball");
-@include spinner-svg("clock");
-@include spinner-svg("dot-revolve");
-@include spinner-svg("eclipse-half");
-@include spinner-svg("eclipse");
-@include spinner-svg("gooey-balls-1");
-@include spinner-svg("gooey-balls-2");
-@include spinner-svg("pulse-2");
-@include spinner-svg("pulse-3");
-@include spinner-svg("pulse-multiple");
-@include spinner-svg("pulse-ring");
-@include spinner-svg("pulse-rings-2");
-@include spinner-svg("pulse-rings-3");
-@include spinner-svg("pulse-rings-multiple");
-@include spinner-svg("pulse");
-@include spinner-svg("ring-resize");
-@include spinner-svg("tadpole");
-@include spinner-svg("wifi-fade");
-@include spinner-svg("wifi");
-@include spinner-svg("wind-toy");
-
 /* Styles for the page-level pulse banner */
 @mixin shiny-page-busy {
   /* ui.busy_indicators.pulse_options() */

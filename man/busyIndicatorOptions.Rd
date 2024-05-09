@@ -6,6 +6,7 @@
 \usage{
 busyIndicatorOptions(
   ...,
+  spinner_type = NULL,
   spinner_color = NULL,
   spinner_size = NULL,
   spinner_delay = NULL,
@@ -17,6 +18,17 @@ busyIndicatorOptions(
 }
 \arguments{
 \item{...}{Currently ignored (for future expansion).}
+
+\item{spinner_type}{The type of spinner to use for the busy indicator. This
+can be any of the spinner types from the \code{shiny} package.
+
+Available spinner types include:
+"12-dots-scale-rotate", "180-ring-with-bg", "180-ring", "270-ring-with-bg", "270-ring", "3-dots-bounce", "3-dots-fade", "3-dots-move", "3-dots-rotate", "3-dots-scale-middle", "3-dots-scale", "6-dots-rotate", "6-dots-scale-middle", "6-dots-scale", "8-dots-rotate", "90-ring-with-bg", "90-ring", "bars-fade", "bars-rotate-fade", "bars-scale-fade", "bars-scale-middle", "bars-scale", "blocks-scale", "blocks-shuffle-2", "blocks-shuffle-3", "blocks-wave", "bouncing-ball", "clock", "dot-revolve", "eclipse-half", "eclipse", "gooey-balls-1", "gooey-balls-2", "pulse-2", "pulse-3", "pulse-multiple", "pulse-ring", "pulse-rings-2", "pulse-rings-3", "pulse-rings-multiple", "pulse", "ring-resize", "tadpole", "wifi-fade", "wifi", "wind-toy".
+
+Alternatively, you can provide a CSS URL to a custom spinner, e.g.
+\code{../spinners/my-spinning-loader.svg} (use \code{\link[=addResourcePath]{addResourcePath()}} to
+ensure the \code{spinner} directory is accessible). Custom URLs must start with
+\code{.}, \code{/} or \code{http}.}
 
 \item{spinner_color}{The color of the spinner. This can be any valid CSS
 color. Defaults to the app's "primary" color if Bootstrap is on the page.}

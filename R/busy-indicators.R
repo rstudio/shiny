@@ -86,7 +86,9 @@ useBusyIndicators <- function(..., spinners = TRUE, pulse = TRUE) {
 #'   if the computation finishes quickly.
 #' @param spinner_selector A CSS selector for scoping the spinner customization.
 #'   This can be useful if you want to have different spinners for different
-#'   parts of the app. Defaults to the root document element.
+#'   parts of the app. Defaults to the root document element. Use `NULL` to
+#'   return inline styles for spinner customizations (note that you cannot
+#'   customize both the pulse and the spinner without providing a selector).
 #' @param pulse_background A CSS background definition for the pulse. The
 #'   default uses a
 #'   [linear-gradient](https://developer.mozilla.org/en-US/docs/Web/CSS/gradient/linear-gradient)
@@ -130,7 +132,7 @@ busyIndicatorOptions <- function(
   spinner_color = NULL,
   spinner_size = NULL,
   spinner_delay = NULL,
-  spinner_selector = NULL,
+  spinner_selector = ":root",
   pulse_background = NULL,
   pulse_height = NULL,
   pulse_speed = NULL
@@ -138,22 +140,31 @@ busyIndicatorOptions <- function(
 
   rlang::check_dots_empty()
 
-  res <- tagList(
-    spinnerOptions(
-      type = spinner_type,
-      color = spinner_color,
-      size = spinner_size,
-      delay = spinner_delay,
-      selector = spinner_selector
-    ),
-    pulseOptions(
-      background = pulse_background,
-      height = pulse_height,
-      speed = pulse_speed
-    )
+  pulse_opts <- pulseOptions(
+    background = pulse_background,
+    height = pulse_height,
+    speed = pulse_speed
   )
 
-  dropNulls(res)
+  spinner_opts <- spinnerOptions(
+    type = spinner_type,
+    color = spinner_color,
+    size = spinner_size,
+    delay = spinner_delay,
+    selector = spinner_selector
+  )
+
+  if (!is.null(spinner_opts) && is.null(spinner_selector)) {
+    if (!is.null(pulse_opts)) {
+      abort(c(
+        "`spinner_selector` must be provided when customizing both the pulse and the spinner.",
+        "i" = "`spinner_selector = NULL` returns inline styles for spinner customizations."
+      ))
+    }
+    return(spinner_opts)
+  }
+
+  dropNulls(tagList(spinner_opts, pulse_opts))
 }
 
 
@@ -162,9 +173,9 @@ spinnerOptions <- function(
   color = NULL,
   size = NULL,
   delay = NULL,
-  selector = NULL
+  selector = ":root"
 ) {
-  if (is.null(type) && is.null(color) && is.null(size) && is.null(delay) && is.null(selector)) {
+  if (is.null(type) && is.null(color) && is.null(size) && is.null(delay)) {
     return(NULL)
   }
 
@@ -194,7 +205,9 @@ spinnerOptions <- function(
     `--shiny-spinner-delay` = delay
   )
 
-  selector <- if (is.null(selector)) ":root" else selector
+  if (is.null(selector)) {
+    return(css_vars)
+  }
 
   tags$style(HTML(paste0(selector, " {", css_vars, "}")))
 }

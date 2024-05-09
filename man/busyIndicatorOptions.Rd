@@ -10,7 +10,7 @@ busyIndicatorOptions(
   spinner_color = NULL,
   spinner_size = NULL,
   spinner_delay = NULL,
-  spinner_selector = NULL,
+  spinner_selector = ":root",
   pulse_background = NULL,
   pulse_height = NULL,
   pulse_speed = NULL
@@ -41,7 +41,9 @@ if the computation finishes quickly.}
 
 \item{spinner_selector}{A CSS selector for scoping the spinner customization.
 This can be useful if you want to have different spinners for different
-parts of the app. Defaults to the root document element.}
+parts of the app. Defaults to the root document element. Use \code{NULL} to
+return inline styles for spinner customizations (note that you cannot
+customize both the pulse and the spinner without providing a selector).}
 
 \item{pulse_background}{A CSS background definition for the pulse. The
 default uses a

@@ -21,8 +21,8 @@
       height: var(--_shiny-spinner-size);
       inset: calc(50% - var(--_shiny-spinner-size) / 2);
 
-      mask-image: var(--_shiny-spinner-url);
-      -webkit-mask-image: var(--_shiny-spinner-url);
+      mask-image: var(--shiny-spinner-url, var(--_shiny-spinner-url));
+      -webkit-mask-image: var(--shiny-spinner-url, var(--_shiny-spinner-url));
 
       animation-name: fade-in;
       animation-duration: var(--_shiny-spinner-delay);

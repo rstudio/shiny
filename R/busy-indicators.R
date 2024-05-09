@@ -46,21 +46,40 @@ useBusyIndicators <- function(..., spinners = TRUE, pulse = TRUE) {
 
   rlang::check_dots_empty()
 
-  attrs <- list("shinyBusySpinners" = spinners, "shinyBusyPulse" = pulse)
+  js <- c()
 
-  js <- vapply(names(attrs), character(1), FUN = function(key) {
-    if (attrs[[key]]) {
-      sprintf("document.documentElement.dataset.%s = 'true';", key)
-    } else {
-      sprintf("delete document.documentElement.dataset.%s;", key)
+  if (rlang::is_logical(spinners) || rlang::is_string(spinners)) {
+    if (rlang::is_string(spinners)) {
+      spinners <- rlang::arg_match(spinners, .spinner_names)
     }
-  })
+    js <- c(js, js_root_data_set_or_delete("shinyBusySpinners", spinners))
+  } else {
+    # TODO: better error message
+    abort("Invalid value for `spinners` argument. Must be a logical or a string.")
+  }
+
+  if (rlang::is_logical(pulse)) {
+    js <- c(js, js_root_data_set_or_delete("shinyBusyPulse", pulse))
+  } else {
+    # TODO: better error message
+    abort("`pulse` must be a logical TRUE/FALSE value.")
+  }
 
   js <- HTML(paste(js, collapse = "\n"))
 
   # TODO: it'd be nice if htmltools had something like a page_attrs() that allowed us
   # to do this without needing to inject JS into the head.
   tags$script(js)
+}
+
+js_root_data_set_or_delete <- function(key, value) {
+  if (isTRUE(value)) {
+    sprintf("document.documentElement.dataset.%s = 'true';", key)
+  } else if (is.character(value) && nzchar(value)) {
+    sprintf("document.documentElement.dataset.%s = '%s';", key, value)
+  } else {
+    sprintf("delete document.documentElement.dataset.%s;", key)
+  }
 }
 
 #' Customize busy indicator options.

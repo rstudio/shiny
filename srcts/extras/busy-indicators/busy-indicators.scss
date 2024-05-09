@@ -1,8 +1,10 @@
 /* This data atttribute is set by ui.busy_indicators.use() */
+:where([data-shiny-busy-spinners] .recalculating) {
+  position: relative;
+}
+
 [data-shiny-busy-spinners] {
   .recalculating {
-    position: relative;
-
     &::after {
       position: absolute;
       content: "";

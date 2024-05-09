@@ -167,7 +167,6 @@ busyIndicatorOptions <- function(
   dropNulls(tagList(spinner_opts, pulse_opts))
 }
 
-
 spinnerOptions <- function(
   type = NULL,
   color = NULL,
@@ -179,18 +178,13 @@ spinnerOptions <- function(
     return(NULL)
   }
 
+  type_is_file <- file.exists(type) && grepl("\\.svg$", type)
   if (!is.null(type)) {
-    if (!rlang::is_string(type)) {
-      spinners <- paste0(.spinner_types, collapse = '", "')
-      abort(
-        sprintf(
-          "`spinner_type` must be a string. Choose from \"%s\".",
-          spinners
-        )
-      )
-    }
-    if (grepl("^(http|[./])", type)) {
-      type <- sprintf("url('%s')", type)
+    if (type_is_file) {
+      stopifnot(file.exists(type) && grepl("\\.svg$", type))
+      typeData <- readBin(type, "raw", n = file.info(type)$size)
+      type_base64 <- rawToBase64(typeData)
+      type <- sprintf("url('data:image/svg+xml;base64,%s')", type_base64)
     } else {
       type <- rlang::arg_match(type, .spinner_types)
       type <- sprintf("url('spinners/%s.svg')", type)

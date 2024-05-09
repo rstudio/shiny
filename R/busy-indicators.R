@@ -74,10 +74,9 @@ useBusyIndicators <- function(..., spinners = TRUE, pulse = TRUE) {
 #'   Available spinner types include:
 #'   "`r paste0(.spinner_types, collapse = '", "')`".
 #'
-#'    Alternatively, you can provide a CSS URL to a custom spinner, e.g.
-#'   `../spinners/my-spinning-loader.svg` (use [shiny::addResourcePath()] to
-#'   ensure the `spinner` directory is accessible). Custom URLs must start with
-#'   `.`, `/` or `http`.
+#'    Alternatively, you can provide a path to a custom spinner SVG file. There
+#'    are many free spinner SVGs available online, such as those from
+#'    the [svg-spinners](https://github.com/n3r4zzurr0/svg-spinners) repository.
 #' @param spinner_color The color of the spinner. This can be any valid CSS
 #'   color. Defaults to the app's "primary" color if Bootstrap is on the page.
 #' @param spinner_size The size of the spinner. This can be any valid CSS size.

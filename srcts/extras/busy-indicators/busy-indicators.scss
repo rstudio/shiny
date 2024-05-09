@@ -1,5 +1,6 @@
 /* This data atttribute is set by ui.busy_indicators.use() */
 [data-shiny-busy-spinners] {
+
   .recalculating {
     position: relative;
 
@@ -8,6 +9,7 @@
       content: "";
 
       /* ui.busy_indicators.spinner_options() */
+      --_shiny-spinner-type: var(--shiny-spinner-type, url(spinners/ring.svg));
       --_shiny-spinner-color: var(--shiny-spinner-color, var(--bs-primary, #007bc2));
       --_shiny-spinner-size: var(--shiny-spinner-size, 32px);
       --_shiny-spinner-delay: var(--shiny-spinner-delay, 0.5s);
@@ -17,8 +19,8 @@
       height: var(--_shiny-spinner-size);
       inset: calc(50% - var(--_shiny-spinner-size) / 2);
 
-      mask-image: url(spinner.svg);
-      -webkit-mask-image: url(spinner.svg);
+      mask-image: var(--_shiny-spinner-type);
+      -webkit-mask-image: var(--_shiny-spinner-type);
       
       animation-name: fade-in;
       animation-duration: var(--_shiny-spinner-delay);

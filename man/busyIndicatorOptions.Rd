@@ -6,6 +6,7 @@
 \usage{
 busyIndicatorOptions(
   ...,
+  spinner_type = NULL,
   spinner_color = NULL,
   spinner_size = NULL,
   spinner_delay = NULL,
@@ -18,6 +19,19 @@ busyIndicatorOptions(
 \arguments{
 \item{...}{Currently ignored (for future expansion).}
 
+\item{spinner_type}{The type of spinner. Pre-bundled types include:
+'ring', 'ring2', 'ring3', 'bars', 'bars2', 'bars3', 'pulse', 'pulse2', 'pulse3', 'dots', 'dots2', 'dots3'.
+
+A path to a local SVG file can also be provided. The SVG should adhere to
+the following rules:
+\itemize{
+\item The SVG itself should contain the animation.
+\item It should avoid absolute sizes (the spinner's containing DOM element
+size is set in CSS by \code{spinner_size}, so it should fill that container).
+\item It should avoid setting absolute colors (the spinner's containing DOM element
+color is set in CSS by \code{spinner_color}, so it should inherit that color).
+}}
+
 \item{spinner_color}{The color of the spinner. This can be any valid CSS
 color. Defaults to the app's "primary" color if Bootstrap is on the page.}
 
@@ -27,9 +41,11 @@ color. Defaults to the app's "primary" color if Bootstrap is on the page.}
 This can be any valid CSS time and can be useful for not showing the spinner
 if the computation finishes quickly.}
 
-\item{spinner_selector}{A CSS selector for scoping the spinner customization.
-This can be useful if you want to have different spinners for different
-parts of the app. Defaults to the root document element.}
+\item{spinner_selector}{A character string containing a CSS selector for
+scoping the spinner customization. The default (\code{NULL}) applies the
+customization globally (i.e., to the root DOM element). Can also be set to
+\code{NA} to apply the customization as inline styles to a specific element
+(e.g., \code{div(busyIndicatorOptions(..., spinner_selector = NA))}).}
 
 \item{pulse_background}{A CSS background definition for the pulse. The
 default uses a
@@ -53,7 +69,11 @@ library(bslib)
 
 ui <- page_fillable(
   useBusyIndicators(),
-  busyIndicatorOptions(spinner_color = "orange"),
+  busyIndicatorOptions(
+    spinner_type = "bars",
+    spinner_color = "indigo",
+    spinner_size = "4rem"
+  ),
   card(
     card_header(
       "A plot",

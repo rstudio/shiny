@@ -128,6 +128,7 @@ Collate:
     'map.R'
     'utils.R'
     'bootstrap.R'
+    'busy-indicators-spinners.R'
     'busy-indicators.R'
     'cache-utils.R'
     'deprecated.R'

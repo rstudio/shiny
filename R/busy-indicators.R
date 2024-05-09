@@ -69,15 +69,27 @@ useBusyIndicators <- function(..., spinners = TRUE, pulse = TRUE) {
 #' this function in the app's UI.
 #'
 #' @param ... Currently ignored (for future expansion).
+#' @param spinner_type The type of spinner. Pre-bundled types include:
+#'   '`r paste0(.busySpinnerTypes, collapse = "', '")`'.
+#'
+#'   A path to a local SVG file can also be provided. The SVG should adhere to
+#'   the following rules:
+#'   * The SVG itself should contain the animation.
+#'   * It should avoid absolute sizes (the spinner's containing DOM element
+#'     size is set in CSS by `spinner_size`, so it should fill that container).
+#'   * It should avoid setting absolute colors (the spinner's containing DOM element
+#'     color is set in CSS by `spinner_color`, so it should inherit that color).
 #' @param spinner_color The color of the spinner. This can be any valid CSS
 #'   color. Defaults to the app's "primary" color if Bootstrap is on the page.
 #' @param spinner_size The size of the spinner. This can be any valid CSS size.
 #' @param spinner_delay The amount of time to wait before showing the spinner.
 #'   This can be any valid CSS time and can be useful for not showing the spinner
 #'   if the computation finishes quickly.
-#' @param spinner_selector A CSS selector for scoping the spinner customization.
-#'   This can be useful if you want to have different spinners for different
-#'   parts of the app. Defaults to the root document element.
+#' @param spinner_selector A character string containing a CSS selector for
+#'   scoping the spinner customization. The default (`NULL`) applies the
+#'   customization globally (i.e., to the root DOM element). Can also be set to
+#'   `NA` to apply the customization as inline styles to a specific element
+#'   (e.g., `div(busyIndicatorOptions(..., spinner_selector = NA))`).
 #' @param pulse_background A CSS background definition for the pulse. The
 #'   default uses a
 #'   [linear-gradient](https://developer.mozilla.org/en-US/docs/Web/CSS/gradient/linear-gradient)
@@ -95,7 +107,11 @@ useBusyIndicators <- function(..., spinners = TRUE, pulse = TRUE) {
 #'
 #' ui <- page_fillable(
 #'   useBusyIndicators(),
-#'   busyIndicatorOptions(spinner_color = "orange"),
+#'   busyIndicatorOptions(
+#'     spinner_type = "bars",
+#'     spinner_color = "indigo",
+#'     spinner_size = "4rem"
+#'   ),
 #'   card(
 #'     card_header(
 #'       "A plot",
@@ -117,6 +133,7 @@ useBusyIndicators <- function(..., spinners = TRUE, pulse = TRUE) {
 #' shinyApp(ui, server)
 busyIndicatorOptions <- function(
   ...,
+  spinner_type = NULL,
   spinner_color = NULL,
   spinner_size = NULL,
   spinner_delay = NULL,
@@ -128,36 +145,58 @@ busyIndicatorOptions <- function(
 
   rlang::check_dots_empty()
 
-  res <- tagList(
-    spinnerOptions(
-      color = spinner_color,
-      size = spinner_size,
-      delay = spinner_delay,
-      selector = spinner_selector
-    ),
-    pulseOptions(
-      background = pulse_background,
-      height = pulse_height,
-      speed = pulse_speed
-    )
+  spinner <- spinnerOptions(
+    type = spinner_type,
+    color = spinner_color,
+    size = spinner_size,
+    delay = spinner_delay,
+    selector = spinner_selector
   )
 
-  dropNulls(res)
+  pulse <- pulseOptions(
+    background = pulse_background,
+    height = pulse_height,
+    speed = pulse_speed
+  )
+
+  if (isTRUE(is.na(spinner_selector))) {
+    if (!is.null(pulse)) {
+      abort("pulse cannot be customized when spinner_selector is set to NA")
+    }
+    return(spinner)
+  }
+
+  dropNulls(tagList(spinner, pulse))
 }
 
 
-# TODO: allow for customization of the spinner type.
-spinnerOptions <- function(color = NULL, size = NULL, delay = NULL, selector = NULL) {
-  if (is.null(color) && is.null(size) && is.null(delay) && is.null(selector)) {
+spinnerOptions <- function(type = NULL, color = NULL, size = NULL, delay = NULL, selector = NULL) {
+  if (is.null(type) && is.null(color) && is.null(size) && is.null(delay) && is.null(selector)) {
     return(NULL)
   }
 
+  if (!is.null(type)) {
+    stopifnot(is.character(type) && length(type) == 1)
+    if (file.exists(type) && grepl("\\.svg$", type)) {
+      typeRaw <- readBin(type, "raw", n = file.info(type)$size)
+      type <- sprintf("url('data:image/svg+xml;base64,%s')", rawToBase64(typeRaw))
+    } else {
+      type <- rlang::arg_match(type, .busySpinnerTypes)
+      type <- sprintf("url('spinners/%s.svg')", type)
+    }
+  }
+
   # Options controlled via CSS variables.
-  css_vars <- paste0(c(
-    if (!is.null(color)) sprintf("--shiny-spinner-color: %s", htmltools::parseCssColors(color)),
-    if (!is.null(size)) sprintf("--shiny-spinner-size: %s", htmltools::validateCssUnit(size)),
-    if (!is.null(delay)) sprintf("--shiny-spinner-delay: %s", delay)
-  ), collapse = ";")
+  css_vars <- htmltools::css(
+    "--shiny-spinner-type" = type,
+    "--shiny-spinner-color" = htmltools::parseCssColors(color),
+    "--shiny-spinner-size" = htmltools::validateCssUnit(size),
+    "--shiny-spinner-delay" = delay
+  )
+
+  if (isTRUE(is.na(selector))) {
+    return(rlang::splice(list(style = css_vars)))
+  }
 
   selector <- if (is.null(selector)) ":root" else selector
 
@@ -169,11 +208,11 @@ pulseOptions <- function(background = NULL, height = NULL, speed = NULL) {
     return(NULL)
   }
 
-  css_vars <- paste0(c(
-    if (!is.null(background)) sprintf("--shiny-pulse-background: %s", background),
-    if (!is.null(height)) sprintf("--shiny-pulse-height: %s", htmltools::validateCssUnit(height)),
-    if (!is.null(speed)) sprintf("--shiny-pulse-speed: %s", speed)
-  ), collapse = ";")
+  css_vars <- htmltools::css(
+    "--shiny-pulse-background" = background,
+    "--shiny-pulse-height" = htmltools::validateCssUnit(height),
+    "--shiny-pulse-speed" = speed
+  )
 
   tags$style(HTML(paste0(":root {", css_vars, "}")))
 }

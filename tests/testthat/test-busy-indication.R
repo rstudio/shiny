@@ -12,26 +12,22 @@ test_that("useBusyIndicators()", {
   expect_error(useBusyIndicators(foo = "bar"))
 })
 
-busy_indicator_options <- function(...) {
-  withPrivateSeed(set.seed(100))
-  busyIndicatorOptions(...)
-}
-
 test_that("busyIndicatorOptions()", {
+  withPrivateSeed(set.seed(100))
 
   expect_snapshot(
     tagList(
-      busy_indicator_options(),
-      busy_indicator_options(spinner_type = "bars"),
-      busy_indicator_options(spinner_type = "pulse"),
-      busy_indicator_options(spinner_type = "dots"),
-      busy_indicator_options(spinner_color = "red"),
-      busy_indicator_options(spinner_size = "10px"),
-      busy_indicator_options(spinner_delay = "1s"),
-      busy_indicator_options(pulse_background = "blue"),
-      busy_indicator_options(pulse_height = "10px"),
-      busy_indicator_options(pulse_speed = "1s"),
-      busy_indicator_options(
+      busyIndicatorOptions(),
+      busyIndicatorOptions(spinner_type = "bars"),
+      busyIndicatorOptions(spinner_type = "pulse"),
+      busyIndicatorOptions(spinner_type = "dots"),
+      busyIndicatorOptions(spinner_color = "red"),
+      busyIndicatorOptions(spinner_size = "10px"),
+      busyIndicatorOptions(spinner_delay = "1s"),
+      busyIndicatorOptions(pulse_background = "blue"),
+      busyIndicatorOptions(pulse_height = "10px"),
+      busyIndicatorOptions(pulse_speed = "1s"),
+      busyIndicatorOptions(
         spinner_color = "red",
         spinner_size = "10px",
         spinner_delay = "1s",
@@ -42,12 +38,12 @@ test_that("busyIndicatorOptions()", {
     )
   )
 
-  expect_error(busy_indicator_options("foo"))
-  expect_error(busy_indicator_options(foo = "bar"))
-  expect_error(busy_indicator_options(spinner_type = "dsflds"))
-  expect_error(busy_indicator_options(spinner_color = "dsflds"))
-  expect_error(busy_indicator_options(spinner_size = "dsflds"))
-  expect_error(busy_indicator_options(pulse_height = "dsflds"))
+  expect_error(busyIndicatorOptions("foo"))
+  expect_error(busyIndicatorOptions(foo = "bar"))
+  expect_error(busyIndicatorOptions(spinner_type = "dsflds"))
+  expect_error(busyIndicatorOptions(spinner_color = "dsflds"))
+  expect_error(busyIndicatorOptions(spinner_size = "dsflds"))
+  expect_error(busyIndicatorOptions(pulse_height = "dsflds"))
 })
 
 
@@ -58,7 +54,8 @@ test_that("Can provide svg file for busyIndicatorOptions(spinner_type)", {
   writeLines("<svg></svg>", tmpsvg)
   on.exit(unlink(tmpsvg))
 
+  withPrivateSeed(set.seed(100))
   expect_snapshot(
-    busy_indicator_options(spinner_type = tmpsvg)
+    busyIndicatorOptions(spinner_type = tmpsvg)
   )
 })

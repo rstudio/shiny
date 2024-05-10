@@ -1,4 +1,4 @@
-/*! shiny 1.8.1.9000 | (c) 2012-2024 RStudio, PBC. | License: GPL-3 | file LICENSE */
+/*! shiny 1.8.1.9001 | (c) 2012-2024 RStudio, PBC. | License: GPL-3 | file LICENSE */
 "use strict";
 (function() {
   var __create = Object.create;
@@ -12073,6 +12073,13 @@
         el.classList.remove("disabled");
         el.removeAttribute("aria-disabled");
         el.removeAttribute("tabindex");
+      }
+    }, {
+      key: "showProgress",
+      value: function showProgress(el, show3) {
+        return;
+        el;
+        show3;
       }
     }]);
     return DownloadLinkOutputBinding2;
@@ -25542,7 +25549,7 @@
   var windowShiny2;
   function setShiny(windowShiny_) {
     windowShiny2 = windowShiny_;
-    windowShiny2.version = "1.8.1.9000";
+    windowShiny2.version = "1.8.1.9001";
     var _initInputBindings = initInputBindings(), inputBindings = _initInputBindings.inputBindings, fileInputBinding2 = _initInputBindings.fileInputBinding;
     var _initOutputBindings = initOutputBindings(), outputBindings = _initOutputBindings.outputBindings;
     setFileInputBinding(fileInputBinding2);

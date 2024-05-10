@@ -1,0 +1,140 @@
+:where([data-shiny-busy-spinners] .recalculating) {
+  position: relative;
+}
+
+/* This data atttribute is set by ui.busy_indicators.use() */
+[data-shiny-busy-spinners] {
+
+  .recalculating {
+
+    &::after {
+      position: absolute;
+      content: "";
+
+      /* ui.busy_indicators.spinner_options() */
+      --_shiny-spinner-url: var(--shiny-spinner-url, url(spinners/ring.svg));
+      --_shiny-spinner-color: var(--shiny-spinner-color, var(--bs-primary, #007bc2));
+      --_shiny-spinner-size: var(--shiny-spinner-size, 32px);
+      --_shiny-spinner-delay: var(--shiny-spinner-delay, 0.5s);
+
+      background: var(--_shiny-spinner-color);
+      width: var(--_shiny-spinner-size);
+      height: var(--_shiny-spinner-size);
+      inset: calc(50% - var(--_shiny-spinner-size) / 2);
+
+      mask-image: var(--_shiny-spinner-url);
+      -webkit-mask-image: var(--_shiny-spinner-url);
+      
+      animation-name: fade-in;
+      animation-duration: var(--_shiny-spinner-delay);
+    }
+
+    /*
+      shiny.css puts `opacity: 0.3` on .recalculating, which unfortunately applies to
+      the spinner. Undo that, but still apply (smaller) opacity to immediate children
+      that aren't recalculating.
+    */
+    opacity: 1;
+    > *:not(.recalculating) {
+      opacity: 0.2;
+    }
+
+    /*
+      Disable spinner on uiOutput() mainly because (for other reasons) it has
+      `display:contents`, which breaks the ::after positioning.
+      Note that, even if we could position it, we'd probably want to disable it
+      if it has recalculating children.
+    */
+    &.shiny-html-output::after {
+      display: none;
+    }
+  }
+}
+
+/* Styles for the page-level pulse banner */
+@mixin shiny-page-busy {
+  /* ui.busy_indicators.pulse_options() */
+  --_shiny-pulse-background: var(
+    --shiny-pulse-background,
+    linear-gradient(
+      120deg,
+      var(--bs-body-bg, #fff),
+      var(--bs-indigo, #4b00c1),
+      var(--bs-purple, #74149c),
+      var(--bs-pink, #bf007f),
+      var(--bs-body-bg, #fff)
+    )
+  );
+  --_shiny-pulse-height: var(--shiny-pulse-height, 5px);
+  --_shiny-pulse-speed: var(--shiny-pulse-speed, 1.85s);
+
+  /* Color, sizing, & positioning */
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: var(--_shiny-pulse-height);
+  background: var(--_shiny-pulse-background);
+  border-radius: 50%;
+  z-index: 9999;
+
+  /* Animation */
+  animation-name: busy-page-pulse;
+  animation-duration: var(--_shiny-pulse-speed);
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+
+  content: ""; /* Used in a ::after context */
+}
+
+/*
+  In spinners+pulse mode (the recommended default), show a page-level banner if the
+  page is busy, but there are no recalculating elements.
+*/
+[data-shiny-busy-spinners][data-shiny-busy-pulse] {
+  &.shiny-busy:not(:has(.recalculating))::after {
+    @include shiny-page-busy;
+  }
+  &.shiny-not-yet-idle:not(:has(.recalculating))::after {
+    @include shiny-page-busy;
+  }
+}
+
+/* In pulse _only_ mode, show a page-level banner whenever shiny is busy. */
+[data-shiny-busy-pulse]:not([data-shiny-busy-spinners]) {
+  &.shiny-busy::after {
+    @include shiny-page-busy;
+  }
+  &.shiny-not-yet-idle::after {
+    @include shiny-page-busy;
+  }
+}
+
+/* Keyframes for the fading spinner */
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  99% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Keyframes for the pulsing banner */
+@keyframes busy-page-pulse {
+  0% {
+    left: -75%;
+    width: 75%;
+  }
+  50% {
+    left: 100%;
+    width: 75%;
+  }
+  /* Go back */
+  100% {
+    left: -75%;
+    width: 75%;
+  }
+}

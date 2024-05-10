@@ -114,6 +114,7 @@ jqueryDependency <- function() {
 shinyDependencies <- function() {
   list(
     bslib::bs_dependency_defer(shinyDependencyCSS),
+    busyIndicatorDependency(),
     htmlDependency(
       name = "shiny-javascript",
       version = get_package_version("shiny"),

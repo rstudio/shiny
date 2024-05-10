@@ -17,6 +17,7 @@ build({
     "srcts/extras/shiny-autoreload.ts",
     "srcts/extras/shiny-showcase.ts",
     "srcts/extras/shiny-testmode.ts",
+    "srcts/extras/busy-indicators/busy-indicators.ts",
   ],
   outdir: outDir,
 });
@@ -52,4 +53,12 @@ build({
     outDir + "shiny_scss/shiny.scss",
   ],
   outfile: outDir + "shiny.min.css",
+});
+build({
+  ...sassOpts,
+  entryPoints: ["srcts/extras/busy-indicators/busy-indicators.scss"],
+  outfile: outDir + "busy-indicators/busy-indicators.css",
+  plugins: [sassPlugin()],
+  bundle: false,
+  metafile: true,
 });

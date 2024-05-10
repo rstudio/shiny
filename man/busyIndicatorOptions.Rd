@@ -62,9 +62,8 @@ time.}
 When busy indicators are enabled (see \code{\link[=useBusyIndicators]{useBusyIndicators()}}), a spinner is
 shown on each calculating/recalculating output, and a pulsing banner is shown
 at the top of the page when the app is otherwise busy. This function allows
-you to customize the appearance of the busy indicators. To apply the
-customization, include the result of this function in anywhere in the app's
-UI.
+you to customize the appearance of those busy indicators. To apply the
+customization, include the result of this function inside the app's UI.
 }
 \examples{
 \dontshow{if (rlang::is_interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}

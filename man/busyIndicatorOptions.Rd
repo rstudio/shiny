@@ -42,10 +42,8 @@ This can be any valid CSS time and can be useful for not showing the spinner
 if the computation finishes quickly.}
 
 \item{spinner_selector}{A character string containing a CSS selector for
-scoping the spinner customization. The default (\code{NULL}) applies the
-customization globally (i.e., to the root DOM element). Can also be set to
-\code{NA} to apply the customization as inline styles to a specific element
-(e.g., \code{div(busyIndicatorOptions(..., spinner_selector = NA))}).}
+scoping the spinner customization. The default (\code{NULL}) will apply the
+spinner customization to the parent element of the spinner.}
 
 \item{pulse_background}{A CSS background definition for the pulse. The
 default uses a
@@ -72,10 +70,7 @@ library(bslib)
 
 card_ui <- function(id, spinner_type = id) {
   card(
-    busyIndicatorOptions(
-      spinner_type = spinner_type,
-      spinner_selector = NA
-    ),
+    busyIndicatorOptions(spinner_type = spinner_type),
     card_header(paste("Spinner:", spinner_type)),
     plotOutput(shiny::NS(id, "plot"))
   )

@@ -95,10 +95,8 @@ useBusyIndicators <- function(..., spinners = TRUE, pulse = TRUE) {
 #'   This can be any valid CSS time and can be useful for not showing the spinner
 #'   if the computation finishes quickly.
 #' @param spinner_selector A character string containing a CSS selector for
-#'   scoping the spinner customization. The default (`NULL`) applies the
-#'   customization globally (i.e., to the root DOM element). Can also be set to
-#'   `NA` to apply the customization as inline styles to a specific element
-#'   (e.g., `div(busyIndicatorOptions(..., spinner_selector = NA))`).
+#'   scoping the spinner customization. The default (`NULL`) will apply the
+#'   spinner customization to the parent element of the spinner.
 #' @param pulse_background A CSS background definition for the pulse. The
 #'   default uses a
 #'   [linear-gradient](https://developer.mozilla.org/en-US/docs/Web/CSS/gradient/linear-gradient)
@@ -116,10 +114,7 @@ useBusyIndicators <- function(..., spinners = TRUE, pulse = TRUE) {
 #'
 #' card_ui <- function(id, spinner_type = id) {
 #'   card(
-#'     busyIndicatorOptions(
-#'       spinner_type = spinner_type,
-#'       spinner_selector = NA
-#'     ),
+#'     busyIndicatorOptions(spinner_type = spinner_type),
 #'     card_header(paste("Spinner:", spinner_type)),
 #'     plotOutput(shiny::NS(id, "plot"))
 #'   )
@@ -174,28 +169,23 @@ busyIndicatorOptions <- function(
 
   rlang::check_dots_empty()
 
-  spinner <- spinnerOptions(
-    type = spinner_type,
-    color = spinner_color,
-    size = spinner_size,
-    delay = spinner_delay,
-    selector = spinner_selector
+
+  res <- tagList(
+    spinnerOptions(
+      type = spinner_type,
+      color = spinner_color,
+      size = spinner_size,
+      delay = spinner_delay,
+      selector = spinner_selector
+    ),
+    pulseOptions(
+      background = pulse_background,
+      height = pulse_height,
+      speed = pulse_speed
+    )
   )
 
-  pulse <- pulseOptions(
-    background = pulse_background,
-    height = pulse_height,
-    speed = pulse_speed
-  )
-
-  if (isTRUE(is.na(spinner_selector))) {
-    if (!is.null(pulse)) {
-      rlang::abort("pulse cannot be customized when spinner_selector is set to NA")
-    }
-    return(spinner)
-  }
-
-  dropNulls(tagList(spinner, pulse))
+  bslib::as.card_item(dropNulls(res))
 }
 
 
@@ -224,13 +214,15 @@ spinnerOptions <- function(type = NULL, color = NULL, size = NULL, delay = NULL,
     "--shiny-spinner-delay" = delay
   )
 
-  if (isTRUE(is.na(selector))) {
-    return(rlang::splice(list(style = css_vars)))
+  id <- NULL
+  if (is.null(selector)) {
+    id <- paste0("bslib-spinner-opts-", p_randomInt(100, 10000))
+    selector <- sprintf(":has(> #%s)", id)
   }
 
-  selector <- if (is.null(selector)) ":root" else selector
+  css <- HTML(paste0(selector, " {", css_vars, "}"))
 
-  tags$style(HTML(paste0(selector, " {", css_vars, "}")))
+  tags$style(css, id = id)
 }
 
 pulseOptions <- function(background = NULL, height = NULL, speed = NULL) {

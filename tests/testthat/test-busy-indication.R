@@ -15,7 +15,7 @@ test_that("useBusyIndicators()", {
 test_that("busyIndicatorOptions()", {
 
   tmpsvg <- tempfile(fileext = ".svg")
-  writeLines("<svg></svg>", tmpsvg)
+  writeLines("svg", tmpsvg)
   on.exit(unlink(tmpsvg))
 
   expect_snapshot(

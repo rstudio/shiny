@@ -190,7 +190,7 @@ busyIndicatorOptions <- function(
 
   if (isTRUE(is.na(spinner_selector))) {
     if (!is.null(pulse)) {
-      abort("pulse cannot be customized when spinner_selector is set to NA")
+      rlang::abort("pulse cannot be customized when spinner_selector is set to NA")
     }
     return(spinner)
   }

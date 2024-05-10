@@ -1,14 +1,20 @@
 #' Enable/disable busy indication
 #'
-#' To enable/disable busy indicators, include the result of this function in the
-#' app's UI.
+#' Busy indicators provide a visual cue to users when the server is busy
+#' calculating outputs or otherwise performing tasks (e.g., producing
+#' downloads). When enabled, a spinner is shown on each
+#' calculating/recalculating output, and a pulsing banner is shown at the top of
+#' the page when the app is otherwise busy. Busy indication is enabled by
+#' default for UI created with \pkg{bslib}, but must be enabled otherwise. To
+#' enable/disable, include the result of this function in anywhere in the app's
+#' UI.
 #'
 #' When both `spinners` and `pulse` are set to `TRUE`, the pulse is
 #' automatically disabled when spinner(s) are active. When both `spinners` and
 #' `pulse` are set to `FALSE`, no busy indication is shown (other than the
 #' graying out of recalculating outputs).
 #'
-#' @param ... Currently ignored (for future expansion).
+#' @param ... Currently ignored.
 #' @param spinners Whether to show a spinner on each calculating/recalculating
 #'   output.
 #' @param pulse Whether to show a pulsing banner at the top of the page when the
@@ -63,12 +69,15 @@ useBusyIndicators <- function(..., spinners = TRUE, pulse = TRUE) {
   tags$script(js)
 }
 
-#' Customize busy indicator options.
+#' Customize busy indicator options
 #'
-#' To customize the appearance of the busy indicators, include the result of
-#' this function in the app's UI.
+#' When busy indicators are enabled (see [useBusyIndicators()]), a spinner is
+#' shown on each calculating/recalculating output, and a pulsing banner is shown
+#' at the top of the page when the app is otherwise busy. This function allows
+#' you to customize the appearance of those busy indicators. To apply the
+#' customization, include the result of this function inside the app's UI.
 #'
-#' @param ... Currently ignored (for future expansion).
+#' @param ... Currently ignored.
 #' @param spinner_type The type of spinner. Pre-bundled types include:
 #'   '`r paste0(.busySpinnerTypes, collapse = "', '")`'.
 #'
@@ -105,32 +114,52 @@ useBusyIndicators <- function(..., spinners = TRUE, pulse = TRUE) {
 #'
 #' library(bslib)
 #'
+#' card_ui <- function(id, spinner_type = id) {
+#'   card(
+#'     busyIndicatorOptions(
+#'       spinner_type = spinner_type,
+#'       spinner_selector = NA
+#'     ),
+#'     card_header(paste("Spinner:", spinner_type)),
+#'     plotOutput(shiny::NS(id, "plot"))
+#'   )
+#' }
+#'
+#' card_server <- function(id, simulate = reactive()) {
+#'   moduleServer(
+#'     id = id,
+#'     function(input, output, session) {
+#'       output$plot <- renderPlot({
+#'         Sys.sleep(1)
+#'         simulate()
+#'         plot(x = rnorm(100), y = rnorm(100))
+#'       })
+#'     }
+#'   )
+#' }
+#'
 #' ui <- page_fillable(
 #'   useBusyIndicators(),
-#'   busyIndicatorOptions(
-#'     spinner_type = "bars",
-#'     spinner_color = "indigo",
-#'     spinner_size = "4rem"
-#'   ),
-#'   card(
-#'     card_header(
-#'       "A plot",
-#'       input_task_button("simulate", "Simulate"),
-#'       class = "d-flex justify-content-between align-items-center"
-#'     ),
-#'     plotOutput("p"),
+#'   input_task_button("simulate", "Simulate", icon = icon("refresh")),
+#'   layout_columns(
+#'     card_ui("ring"),
+#'     card_ui("bars"),
+#'     card_ui("dots"),
+#'     card_ui("pulse"),
+#'     col_widths = 6
 #'   )
 #' )
 #'
-#' server <- function(input, output) {
-#'   output$p <- renderPlot({
-#'     input$simulate
-#'     Sys.sleep(4)
-#'     plot(x = rnorm(100), y = rnorm(100))
-#'   })
+#' server <- function(input, output, session) {
+#'   simulate <- reactive(input$simulate)
+#'   card_server("ring", simulate)
+#'   card_server("bars", simulate)
+#'   card_server("dots", simulate)
+#'   card_server("pulse", simulate)
 #' }
 #'
 #' shinyApp(ui, server)
+#'
 busyIndicatorOptions <- function(
   ...,
   spinner_type = NULL,
@@ -175,20 +204,21 @@ spinnerOptions <- function(type = NULL, color = NULL, size = NULL, delay = NULL,
     return(NULL)
   }
 
+  url <- NULL
   if (!is.null(type)) {
     stopifnot(is.character(type) && length(type) == 1)
     if (file.exists(type) && grepl("\\.svg$", type)) {
       typeRaw <- readBin(type, "raw", n = file.info(type)$size)
-      type <- sprintf("url('data:image/svg+xml;base64,%s')", rawToBase64(typeRaw))
+      url <- sprintf("url('data:image/svg+xml;base64,%s')", rawToBase64(typeRaw))
     } else {
       type <- rlang::arg_match(type, .busySpinnerTypes)
-      type <- sprintf("url('spinners/%s.svg')", type)
+      url <- sprintf("url('spinners/%s.svg')", type)
     }
   }
 
   # Options controlled via CSS variables.
   css_vars <- htmltools::css(
-    "--shiny-spinner-type" = type,
+    "--shiny-spinner-url" = url,
     "--shiny-spinner-color" = htmltools::parseCssColors(color),
     "--shiny-spinner-size" = htmltools::validateCssUnit(size),
     "--shiny-spinner-delay" = delay

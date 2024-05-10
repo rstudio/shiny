@@ -29,7 +29,6 @@ import sassPlugin from "esbuild-plugin-sass";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore; Type definitions are not found. This occurs when `strict: true` in tsconfig.json
 import postCssPlugin from "@deanc/esbuild-plugin-postcss";
-import fs from "fs";
 
 const sassOpts = {
   minify: true,
@@ -62,15 +61,4 @@ build({
   plugins: [sassPlugin()],
   bundle: false,
   metafile: true,
-});
-
-// First remove the existing spinners directory
-const spinnersDir = outDir + "busy-indicators/spinners";
-fs.rmSync(spinnersDir, { recursive: true, force: true });
-// Then copy over the spinners so that they can imported at runtime by the CSS.
-// Doing this, as opposed to bundling the
-// the spinners is intentional (we can have many spinners without bloating the CSS file,
-// and better previewing in the browser).
-fs.cpSync("srcts/extras/busy-indicators/spinners", spinnersDir, {
-  recursive: true,
 });

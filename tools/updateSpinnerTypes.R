@@ -3,7 +3,7 @@ library(rprojroot)
 
 url_root <- "https://raw.githubusercontent.com/n3r4zzurr0/svg-spinners/main/"
 pkg_root <- find_package_root_file()
-dest_dir <- file.path(pkg_root, "srcts/extras/busy-indicators/spinners")
+dest_dir <- file.path(pkg_root, "inst/www/shared/busy-indicators/spinners")
 
 unlink(dest_dir, recursive = TRUE)
 dir.create(dest_dir)

@@ -2,7 +2,7 @@
 % Please edit documentation in R/busy-indicators.R
 \name{busyIndicatorOptions}
 \alias{busyIndicatorOptions}
-\title{Customize busy indicator options.}
+\title{Customize busy indicator options}
 \usage{
 busyIndicatorOptions(
   ...,
@@ -17,7 +17,7 @@ busyIndicatorOptions(
 )
 }
 \arguments{
-\item{...}{Currently ignored (for future expansion).}
+\item{...}{Currently ignored.}
 
 \item{spinner_type}{The type of spinner. Pre-bundled types include:
 'ring', 'ring2', 'ring3', 'bars', 'bars2', 'bars3', 'pulse', 'pulse2', 'pulse3', 'dots', 'dots2', 'dots3'.
@@ -59,37 +59,60 @@ CSS size.}
 time.}
 }
 \description{
-To customize the appearance of the busy indicators, include the result of
-this function in the app's UI.
+When busy indicators are enabled (see \code{\link[=useBusyIndicators]{useBusyIndicators()}}), a spinner is
+shown on each calculating/recalculating output, and a pulsing banner is shown
+at the top of the page when the app is otherwise busy. This function allows
+you to customize the appearance of the busy indicators. To apply the
+customization, include the result of this function in anywhere in the app's
+UI.
 }
 \examples{
 \dontshow{if (rlang::is_interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 
 library(bslib)
 
+card_ui <- function(id, spinner_type = id) {
+  card(
+    busyIndicatorOptions(
+      spinner_type = spinner_type,
+      spinner_selector = NA
+    ),
+    card_header(paste("Spinner:", spinner_type)),
+    plotOutput(shiny::NS(id, "plot"))
+  )
+}
+
+card_server <- function(id, simulate = reactive()) {
+  moduleServer(
+    id = id,
+    function(input, output, session) {
+      output$plot <- renderPlot({
+        Sys.sleep(1)
+        simulate()
+        plot(x = rnorm(100), y = rnorm(100))
+      })
+    }
+  )
+}
+
 ui <- page_fillable(
   useBusyIndicators(),
-  busyIndicatorOptions(
-    spinner_type = "bars",
-    spinner_color = "indigo",
-    spinner_size = "4rem"
-  ),
-  card(
-    card_header(
-      "A plot",
-      input_task_button("simulate", "Simulate"),
-      class = "d-flex justify-content-between align-items-center"
-    ),
-    plotOutput("p"),
+  input_task_button("simulate", "Simulate", icon = icon("refresh")),
+  layout_columns(
+    card_ui("ring"),
+    card_ui("bars"),
+    card_ui("dots"),
+    card_ui("pulse"),
+    col_widths = 6
   )
 )
 
-server <- function(input, output) {
-  output$p <- renderPlot({
-    input$simulate
-    Sys.sleep(4)
-    plot(x = rnorm(100), y = rnorm(100))
-  })
+server <- function(input, output, session) {
+  simulate <- reactive(input$simulate)
+  card_server("ring", simulate)
+  card_server("bars", simulate)
+  card_server("dots", simulate)
+  card_server("pulse", simulate)
 }
 
 shinyApp(ui, server)

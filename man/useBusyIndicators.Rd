@@ -7,7 +7,7 @@
 useBusyIndicators(..., spinners = TRUE, pulse = TRUE)
 }
 \arguments{
-\item{...}{Currently ignored (for future expansion).}
+\item{...}{Currently ignored.}
 
 \item{spinners}{Whether to show a spinner on each calculating/recalculating
 output.}
@@ -16,8 +16,14 @@ output.}
 app is busy.}
 }
 \description{
-To enable/disable busy indicators, include the result of this function in the
-app's UI.
+Busy indicators provide a visual cue to users when the server is busy
+calculating outputs or otherwise performing tasks (e.g., producing
+downloads). When enabled, a spinner is shown on each
+calculating/recalculating output, and a pulsing banner is shown at the top of
+the page when the app is otherwise busy. Busy indication is enabled by
+default for UI created with \pkg{bslib}, but must be enabled otherwise. To
+enable/disable, include the result of this function in anywhere in the app's
+UI.
 }
 \details{
 When both \code{spinners} and \code{pulse} are set to \code{TRUE}, the pulse is

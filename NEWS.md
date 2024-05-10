@@ -2,8 +2,7 @@
 
 ## New features and improvements
 
-* Added new functions, `useBusyIndicators()` and `busyIndicatorOptions()`, for enabling and customizing busy indication. Busy indicators provide a visual cue to users when the server is busy calculating outputs or otherwise serving requests to the client. When enabled, a spinner is shown on each
-calculating/recalculating output, and a pulsing banner is shown at the top of the page when the app is otherwise busy. (#4040)
+* Added new functions, `useBusyIndicators()` and `busyIndicatorOptions()`, for enabling and customizing busy indication. Busy indicators provide a visual cue to users when the server is busy calculating outputs or otherwise serving requests to the client. When enabled, a spinner is shown on each calculating/recalculating output, and a pulsing banner is shown at the top of the page when the app is otherwise busy. (#4040)
 * Output bindings now include the `.recalculating` CSS class when they are first bound, up until the first render. This makes it possible/easier to show progress indication when the output is calculating for the first time. (#4039)
 
 ## Bug fixes

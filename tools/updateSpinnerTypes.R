@@ -14,15 +14,15 @@ spinner_types <- list(
   "ring-resize.svg" = "ring.svg",
   "90-ring-with-bg.svg" = "ring2.svg",
   "180-ring.svg" = "ring3.svg",
-  "bars-rotate-fade.svg" = "bars.svg",
-  "bars-scale-fade.svg" = "bars2.svg",
-  "bars-scale.svg" = "bars3.svg",
-  "pulse-rings-2.svg" = "pulse.svg",
-  "pulse-2.svg" = "pulse2.svg",
+  "bars-scale-fade.svg" = "bars.svg",
+  "bars-scale.svg" = "bars2.svg",
+  "bars-rotate-fade.svg" = "bars3.svg",
+  "pulse-2.svg" = "pulse.svg",
+  "pulse-rings-2.svg" = "pulse2.svg",
   "pulse-rings-multiple.svg" = "pulse3.svg",
-  "6-dots-rotate.svg" = "dots.svg",
-  "6-dots-scale.svg" = "dots2.svg",
-  "3-dots-scale.svg" = "dots3.svg"
+  "3-dots-scale.svg" = "dots.svg",
+  "6-dots-rotate.svg" = "dots2.svg",
+  "6-dots-scale.svg" = "dots3.svg"
 )
 
 # Download and remove width/height attributes

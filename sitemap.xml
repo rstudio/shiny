@@ -64,6 +64,9 @@
     <loc>/reference/brushedPoints.html</loc>
   </url>
   <url>
+    <loc>/reference/busyIndicatorOptions.html</loc>
+  </url>
+  <url>
     <loc>/reference/callModule.html</loc>
   </url>
   <url>
@@ -500,6 +503,9 @@
   </url>
   <url>
     <loc>/reference/urlModal.html</loc>
+  </url>
+  <url>
+    <loc>/reference/useBusyIndicators.html</loc>
   </url>
   <url>
     <loc>/reference/validate.html</loc>

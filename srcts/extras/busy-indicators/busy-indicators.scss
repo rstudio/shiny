@@ -29,7 +29,7 @@
     /*
       shiny.css puts `opacity: 0.3` on .recalculating, which unfortunately applies to
       the spinner. Undo that, but still apply (smaller) opacity to immediate children
-      that aren't shiny-output-busy.
+      that aren't recalculating.
     */
     opacity: 1;
     > *:not(.recalculating) {
@@ -40,7 +40,7 @@
       Disable spinner on uiOutput() mainly because (for other reasons) it has
       `display:contents`, which breaks the ::after positioning.
       Note that, even if we could position it, we'd probably want to disable it
-      if it has shiny-output-busy children.
+      if it has recalculating children.
     */
     &.shiny-html-output::after {
       display: none;
@@ -85,7 +85,7 @@
 
 /*
   In spinners+pulse mode (the recommended default), show a page-level banner if the
-  page is busy, but there are no shiny-output-busy elements.
+  page is busy, but there are no recalculating elements.
 */
 [data-shiny-busy-spinners][data-shiny-busy-pulse] {
   &.shiny-busy:not(:has(.recalculating))::after {

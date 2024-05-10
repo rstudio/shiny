@@ -19,9 +19,9 @@
     Code
       tagList(busyIndicatorOptions(), busyIndicatorOptions(spinner_type = "bars"),
       busyIndicatorOptions(spinner_type = "pulse"), busyIndicatorOptions(
-        spinner_type = "dots"), busyIndicatorOptions(spinner_type = tmpsvg),
-      busyIndicatorOptions(spinner_color = "red"), busyIndicatorOptions(spinner_size = "10px"),
-      busyIndicatorOptions(spinner_delay = "1s"), busyIndicatorOptions(spinner_color = "red",
+        spinner_type = "dots"), busyIndicatorOptions(spinner_color = "red"),
+      busyIndicatorOptions(spinner_size = "10px"), busyIndicatorOptions(
+        spinner_delay = "1s"), busyIndicatorOptions(spinner_color = "red",
         spinner_selector = NA), busyIndicatorOptions(pulse_background = "blue"),
       busyIndicatorOptions(pulse_height = "10px"), busyIndicatorOptions(pulse_speed = "1s"),
       busyIndicatorOptions(spinner_color = "red", spinner_size = "10px",
@@ -31,7 +31,6 @@
       <style>:root {--shiny-spinner-url:url('spinners/bars.svg');}</style>
       <style>:root {--shiny-spinner-url:url('spinners/pulse.svg');}</style>
       <style>:root {--shiny-spinner-url:url('spinners/dots.svg');}</style>
-      <style>:root {--shiny-spinner-url:url('data:image/svg+xml;base64,c3ZnCg==');}</style>
       <style>:root {--shiny-spinner-color:#FF0000;}</style>
       <style>:root {--shiny-spinner-size:10px;}</style>
       <style>:root {--shiny-spinner-delay:1s;}</style>
@@ -41,4 +40,13 @@
       <style>:root {--shiny-pulse-speed:1s;}</style>
       <style>:root {--shiny-spinner-color:#FF0000;--shiny-spinner-size:10px;--shiny-spinner-delay:1s;}</style>
       <style>:root {--shiny-pulse-background:blue;--shiny-pulse-height:10px;--shiny-pulse-speed:1s;}</style>
+
+# Can provide svg file for busyIndicatorOptions(spinner_type)
+
+    Code
+      busyIndicatorOptions(spinner_type = tmpsvg)
+    Output
+      [[1]]
+      <style>:root {--shiny-spinner-url:url('data:image/svg+xml;base64,PHN2Zz48L3N2Zz4K');}</style>
+      
 

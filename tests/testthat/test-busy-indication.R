@@ -14,17 +14,12 @@ test_that("useBusyIndicators()", {
 
 test_that("busyIndicatorOptions()", {
 
-  tmpsvg <- tempfile(fileext = ".svg")
-  writeLines("svg", tmpsvg)
-  on.exit(unlink(tmpsvg))
-
   expect_snapshot(
     tagList(
       busyIndicatorOptions(),
       busyIndicatorOptions(spinner_type = "bars"),
       busyIndicatorOptions(spinner_type = "pulse"),
       busyIndicatorOptions(spinner_type = "dots"),
-      busyIndicatorOptions(spinner_type = tmpsvg),
       busyIndicatorOptions(spinner_color = "red"),
       busyIndicatorOptions(spinner_size = "10px"),
       busyIndicatorOptions(spinner_delay = "1s"),
@@ -49,4 +44,17 @@ test_that("busyIndicatorOptions()", {
   expect_error(busyIndicatorOptions(spinner_color = "dsflds"))
   expect_error(busyIndicatorOptions(spinner_size = "dsflds"))
   expect_error(busyIndicatorOptions(pulse_height = "dsflds"))
+})
+
+
+test_that("Can provide svg file for busyIndicatorOptions(spinner_type)", {
+  skip_if(.Platform$OS.type == "windows")
+
+  tmpsvg <- tempfile(fileext = ".svg")
+  writeLines("<svg></svg>", tmpsvg)
+  on.exit(unlink(tmpsvg))
+
+  expect_snapshot(
+    busyIndicatorOptions(spinner_type = tmpsvg)
+  )
 })

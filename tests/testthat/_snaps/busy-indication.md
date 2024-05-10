@@ -27,16 +27,16 @@
         spinner_size = "10px", spinner_delay = "1s", pulse_background = "blue",
         pulse_height = "10px", pulse_speed = "1s"))
     Output
-      <style id="bslib-spinner-opts-3885">:has(> #bslib-spinner-opts-3885) {--shiny-spinner-url:url('spinners/bars.svg');}</style>
-      <style id="bslib-spinner-opts-3885">:has(> #bslib-spinner-opts-3885) {--shiny-spinner-url:url('spinners/pulse.svg');}</style>
-      <style id="bslib-spinner-opts-3885">:has(> #bslib-spinner-opts-3885) {--shiny-spinner-url:url('spinners/dots.svg');}</style>
-      <style id="bslib-spinner-opts-3885">:has(> #bslib-spinner-opts-3885) {--shiny-spinner-color:#FF0000;}</style>
-      <style id="bslib-spinner-opts-3885">:has(> #bslib-spinner-opts-3885) {--shiny-spinner-size:10px;}</style>
-      <style id="bslib-spinner-opts-3885">:has(> #bslib-spinner-opts-3885) {--shiny-spinner-delay:1s;}</style>
+      <style id="spinner-options-606810">:has(> #spinner-options-606810) {--shiny-spinner-url:url('spinners/bars.svg');}</style>
+      <style id="spinner-options-606810">:has(> #spinner-options-606810) {--shiny-spinner-url:url('spinners/pulse.svg');}</style>
+      <style id="spinner-options-606810">:has(> #spinner-options-606810) {--shiny-spinner-url:url('spinners/dots.svg');}</style>
+      <style id="spinner-options-606810">:has(> #spinner-options-606810) {--shiny-spinner-color:#FF0000;}</style>
+      <style id="spinner-options-606810">:has(> #spinner-options-606810) {--shiny-spinner-size:10px;}</style>
+      <style id="spinner-options-606810">:has(> #spinner-options-606810) {--shiny-spinner-delay:1s;}</style>
       <style>:root {--shiny-pulse-background:blue;}</style>
       <style>:root {--shiny-pulse-height:10px;}</style>
       <style>:root {--shiny-pulse-speed:1s;}</style>
-      <style id="bslib-spinner-opts-3885">:has(> #bslib-spinner-opts-3885) {--shiny-spinner-color:#FF0000;--shiny-spinner-size:10px;--shiny-spinner-delay:1s;}</style>
+      <style id="spinner-options-606810">:has(> #spinner-options-606810) {--shiny-spinner-color:#FF0000;--shiny-spinner-size:10px;--shiny-spinner-delay:1s;}</style>
       <style>:root {--shiny-pulse-background:blue;--shiny-pulse-height:10px;--shiny-pulse-speed:1s;}</style>
 
 # Can provide svg file for busyIndicatorOptions(spinner_type)
@@ -45,7 +45,7 @@
       busy_indicator_options(spinner_type = tmpsvg)
     Output
       [[1]]
-      <style id="bslib-spinner-opts-3885">:has(> #bslib-spinner-opts-3885) {--shiny-spinner-url:url('data:image/svg+xml;base64,PHN2Zz48L3N2Zz4K');}</style>
+      <style id="spinner-options-606810">:has(> #spinner-options-606810) {--shiny-spinner-url:url('data:image/svg+xml;base64,PHN2Zz48L3N2Zz4K');}</style>
       
       attr(,"class")
       [1] "card_item" "list"     

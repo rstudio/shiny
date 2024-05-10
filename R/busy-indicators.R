@@ -169,7 +169,6 @@ busyIndicatorOptions <- function(
 
   rlang::check_dots_empty()
 
-
   res <- tagList(
     spinnerOptions(
       type = spinner_type,
@@ -216,7 +215,7 @@ spinnerOptions <- function(type = NULL, color = NULL, size = NULL, delay = NULL,
 
   id <- NULL
   if (is.null(selector)) {
-    id <- paste0("bslib-spinner-opts-", p_randomInt(100, 10000))
+    id <- paste0("spinner-options-", p_randomInt(100, 1000000))
     selector <- sprintf(":has(> #%s)", id)
   }
 

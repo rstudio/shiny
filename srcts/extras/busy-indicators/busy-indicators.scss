@@ -24,7 +24,7 @@
 
       mask-image: var(--_shiny-spinner-url);
       -webkit-mask-image: var(--_shiny-spinner-url);
-      
+
       animation-name: fade-in;
       animation-duration: var(--_shiny-spinner-delay);
     }
@@ -74,7 +74,6 @@
   left: 0;
   height: var(--_shiny-pulse-height);
   background: var(--_shiny-pulse-background);
-  border-radius: 50%;
   z-index: 9999;
 
   /* Animation */

@@ -17,7 +17,6 @@ build({
     "srcts/extras/shiny-autoreload.ts",
     "srcts/extras/shiny-showcase.ts",
     "srcts/extras/shiny-testmode.ts",
-    "srcts/extras/busy-indicators/busy-indicators.ts",
   ],
   outdir: outDir,
 });

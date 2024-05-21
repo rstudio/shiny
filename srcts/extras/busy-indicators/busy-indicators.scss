@@ -15,7 +15,7 @@
       --_shiny-spinner-url: var(--shiny-spinner-url, url(spinners/ring.svg));
       --_shiny-spinner-color: var(--shiny-spinner-color, var(--bs-primary, #007bc2));
       --_shiny-spinner-size: var(--shiny-spinner-size, 32px);
-      --_shiny-spinner-delay: var(--shiny-spinner-delay, 1s);
+      --_shiny-spinner-delay: var(--shiny-spinner-delay, 750ms);
 
       background: var(--_shiny-spinner-color);
       width: var(--_shiny-spinner-size);
@@ -107,7 +107,7 @@
   0% {
     opacity: 0;
   }
-  50% {
+  67% {
     opacity: 0;
   }
   100% {

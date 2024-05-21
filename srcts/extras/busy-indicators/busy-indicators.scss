@@ -93,17 +93,11 @@
   &.shiny-busy:not(:has(.recalculating))::after {
     @include shiny-page-busy;
   }
-  &.shiny-not-yet-idle:not(:has(.recalculating))::after {
-    @include shiny-page-busy;
-  }
 }
 
 /* In pulse _only_ mode, show a page-level banner whenever shiny is busy. */
 [data-shiny-busy-pulse]:not([data-shiny-busy-spinners]) {
   &.shiny-busy::after {
-    @include shiny-page-busy;
-  }
-  &.shiny-not-yet-idle::after {
     @include shiny-page-busy;
   }
 }

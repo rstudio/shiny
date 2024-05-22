@@ -90,8 +90,14 @@
   page is busy, but there are no recalculating elements.
 */
 [data-shiny-busy-spinners][data-shiny-busy-pulse] {
-  &.shiny-busy:not(:has(.recalculating))::after {
+  &.shiny-busy::after {
     @include shiny-page-busy;
+  }
+  &.shiny-busy:has(.recalculating)::after {
+    display: none;
+  }
+  &.shiny-busy:has(#shiny-disconnected-overlay)::after {
+    display: none;
   }
 }
 
@@ -99,6 +105,9 @@
 [data-shiny-busy-pulse]:not([data-shiny-busy-spinners]) {
   &.shiny-busy::after {
     @include shiny-page-busy;
+  }
+  &.shiny-busy:has(#shiny-disconnected-overlay)::after {
+    display: none;
   }
 }
 

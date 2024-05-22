@@ -14,7 +14,4 @@ declare global {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     Shiny: ShinyClass;
   }
-
-  // Make `Shiny` a globally available type definition. (No need to import the type)
-  type Shiny = ShinyClass;
 }

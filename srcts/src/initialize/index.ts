@@ -2,15 +2,14 @@ import { determineBrowserInfo } from "./browser";
 import { disableFormSubmission } from "./disableForm";
 import { trackHistory } from "./history";
 
-import { setShiny } from "../shiny";
+import { Shiny } from "../shiny";
 import { setUserAgent } from "../utils/userAgent";
-import { windowShiny } from "../window/libraries";
 import { windowUserAgent } from "../window/userAgent";
 
 import { initReactlog } from "../shiny/reactlog";
 
 function init(): void {
-  setShiny(windowShiny());
+  window.Shiny = window.Shiny || new Shiny();
   setUserAgent(windowUserAgent()); // before determineBrowserInfo()
 
   determineBrowserInfo();

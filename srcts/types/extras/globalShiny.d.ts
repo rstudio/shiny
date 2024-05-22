@@ -1,8 +1,8 @@
-import type { Shiny as RStudioShiny } from "../src/shiny/index";
+import type { Shiny as ShinyClass } from "../src/shiny/index";
 declare global {
-    const Shiny: RStudioShiny;
+    const Shiny: ShinyClass;
     interface Window {
-        Shiny: RStudioShiny;
+        Shiny: ShinyClass;
     }
-    type Shiny = RStudioShiny;
+    type Shiny = ShinyClass;
 }

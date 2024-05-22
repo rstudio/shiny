@@ -10,7 +10,7 @@ import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
 import { renderContent, renderContentAsync, renderDependencies, renderDependenciesAsync, renderHtml, renderHtmlAsync } from "./render";
 import type { Handler, ShinyApp } from "./shinyapp";
 import { addCustomMessageHandler } from "./shinyapp";
-interface Shiny {
+declare class Shiny {
     version: string;
     $escape: typeof $escape;
     compareVersion: typeof compareVersion;
@@ -36,7 +36,7 @@ interface Shiny {
     renderContent: typeof renderContent;
     renderHtmlAsync: typeof renderHtmlAsync;
     renderHtml: typeof renderHtml;
-    user: string;
+    user?: string;
     progressHandlers?: ShinyApp["progressHandlers"];
     addCustomMessageHandler: typeof addCustomMessageHandler;
     shinyapp?: ShinyApp;
@@ -47,15 +47,13 @@ interface Shiny {
     unbindAll?: typeof shinyUnbindAll;
     initializeInputs?: typeof shinyInitializeInputs;
     oncustommessage?: Handler;
+    constructor();
     /**
      * Method to check if Shiny is running in development mode. By packaging as a
      * method, we can we can avoid needing to look for the `__SHINY_DEV_MODE__`
      * variable in the global scope.
      * @returns `true` if Shiny is running in development mode, `false` otherwise.
      */
-    inDevMode: () => boolean;
+    inDevMode(): boolean;
 }
-declare let windowShiny: Shiny;
-declare function setShiny(windowShiny_: Shiny): void;
-export { windowShiny, setShiny };
-export type { Shiny };
+export { Shiny };

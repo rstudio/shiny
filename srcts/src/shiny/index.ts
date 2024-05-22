@@ -29,7 +29,7 @@ import {
 import type { Handler, ShinyApp } from "./shinyapp";
 import { addCustomMessageHandler } from "./shinyapp";
 
-interface Shiny {
+class Shiny {
   version: string;
   $escape: typeof $escape;
   compareVersion: typeof compareVersion;
@@ -54,7 +54,7 @@ interface Shiny {
   renderContent: typeof renderContent;
   renderHtmlAsync: typeof renderHtmlAsync;
   renderHtml: typeof renderHtml;
-  user: string;
+  user?: string;
   progressHandlers?: ShinyApp["progressHandlers"];
   addCustomMessageHandler: typeof addCustomMessageHandler;
   shinyapp?: ShinyApp;
@@ -69,73 +69,65 @@ interface Shiny {
   // For old-style custom messages - should deprecate and migrate to new
   oncustommessage?: Handler;
 
+  constructor() {
+    // `process.env.SHINY_VERSION` is overwritten to the Shiny version at build time.
+    // During testing, the `Shiny.version` will be `"development"`
+    this.version = process.env.SHINY_VERSION || "development";
+
+    const { inputBindings, fileInputBinding } = initInputBindings();
+    const { outputBindings } = initOutputBindings();
+
+    setFileInputBinding(fileInputBinding);
+
+    this.$escape = $escape;
+    this.compareVersion = compareVersion;
+    this.inputBindings = inputBindings;
+    this.InputBinding = InputBinding;
+    this.outputBindings = outputBindings;
+    this.OutputBinding = OutputBinding;
+    this.resetBrush = resetBrush;
+    this.notifications = {
+      show: showNotification,
+      remove: removeNotification,
+    };
+    this.modal = { show: showModal, remove: removeModal };
+
+    this.addCustomMessageHandler = addCustomMessageHandler;
+    this.showReconnectDialog = showReconnectDialog;
+    this.hideReconnectDialog = hideReconnectDialog;
+    this.renderDependenciesAsync = renderDependenciesAsync;
+    this.renderDependencies = renderDependencies;
+    this.renderContentAsync = renderContentAsync;
+    this.renderContent = renderContent;
+    this.renderHtmlAsync = renderHtmlAsync;
+    this.renderHtml = renderHtml;
+
+    $(() => {
+      // Init Shiny a little later than document ready, so user code can
+      // run first (i.e. to register bindings)
+      setTimeout(async () => {
+        try {
+          await initShiny(this);
+        } catch (e) {
+          showErrorInClientConsole(e);
+          throw e;
+        }
+      }, 1);
+    });
+  }
+
   /**
    * Method to check if Shiny is running in development mode. By packaging as a
    * method, we can we can avoid needing to look for the `__SHINY_DEV_MODE__`
    * variable in the global scope.
    * @returns `true` if Shiny is running in development mode, `false` otherwise.
    */
-  inDevMode: () => boolean;
-}
-
-let windowShiny: Shiny;
-
-function setShiny(windowShiny_: Shiny): void {
-  windowShiny = windowShiny_;
-
-  // `process.env.SHINY_VERSION` is overwritten to the Shiny version at build time.
-  // During testing, the `Shiny.version` will be `"development"`
-  windowShiny.version = process.env.SHINY_VERSION || "development";
-
-  const { inputBindings, fileInputBinding } = initInputBindings();
-  const { outputBindings } = initOutputBindings();
-
-  // set variable to be retrieved later
-  setFileInputBinding(fileInputBinding);
-
-  windowShiny.$escape = $escape;
-  windowShiny.compareVersion = compareVersion;
-  windowShiny.inputBindings = inputBindings;
-  windowShiny.InputBinding = InputBinding;
-  windowShiny.outputBindings = outputBindings;
-  windowShiny.OutputBinding = OutputBinding;
-  windowShiny.resetBrush = resetBrush;
-  windowShiny.notifications = {
-    show: showNotification,
-    remove: removeNotification,
-  };
-  windowShiny.modal = { show: showModal, remove: removeModal };
-
-  windowShiny.addCustomMessageHandler = addCustomMessageHandler;
-  windowShiny.showReconnectDialog = showReconnectDialog;
-  windowShiny.hideReconnectDialog = hideReconnectDialog;
-  windowShiny.renderDependenciesAsync = renderDependenciesAsync;
-  windowShiny.renderDependencies = renderDependencies;
-  windowShiny.renderContentAsync = renderContentAsync;
-  windowShiny.renderContent = renderContent;
-  windowShiny.renderHtmlAsync = renderHtmlAsync;
-  windowShiny.renderHtml = renderHtml;
-
-  windowShiny.inDevMode = () => {
+  inDevMode(): boolean {
     if ("__SHINY_DEV_MODE__" in window)
       return Boolean(window.__SHINY_DEV_MODE__);
 
     return false;
-  };
-
-  $(function () {
-    // Init Shiny a little later than document ready, so user code can
-    // run first (i.e. to register bindings)
-    setTimeout(async function () {
-      try {
-        await initShiny(windowShiny);
-      } catch (e) {
-        showErrorInClientConsole(e);
-        throw e;
-      }
-    }, 1);
-  });
+  }
 }
 
-export { windowShiny, setShiny };
-export type { Shiny };
+export { Shiny };

@@ -69,6 +69,7 @@
     "phantomjs-prebuilt": "^2.1.16",
     "postcss": "^8.3.5",
     "prettier": "^2.7.1",
+    "prettier-plugin-organize-imports": "^3.2.4",
     "readcontrol": "^1.0.0",
     "replace": "^1.2.1",
     "ts-jest": "^26",
@@ -94,5 +95,11 @@
     "coverage": "type-coverage -p tsconfig.json --at-least 90",
     "circular": "madge --circular --extensions ts srcts/src",
     "circular_image": "madge --circular --extensions ts --image madge.svg srcts/src"
+  },
+  "prettier": {
+    "plugins": [
+      "prettier-plugin-organize-imports"
+    ],
+    "organizeImportsSkipDestructiveCodeActions": true
   }
 }

@@ -4,5 +4,4 @@ declare global {
     interface Window {
         Shiny: ShinyClass;
     }
-    type Shiny = ShinyClass;
 }

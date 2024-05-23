@@ -1,6 +1,5 @@
 import { InputBinding, OutputBinding } from "../bindings";
-import { initInputBindings } from "../bindings/input";
-import { initOutputBindings } from "../bindings/output";
+import type { BindingRegistry } from "../bindings/registry";
 import { resetBrush } from "../imageutils/resetBrush";
 import { $escape, compareVersion } from "../utils";
 import type { shinyBindAll, shinyForgetLastInputValue, shinyInitializeInputs, shinySetInputValue, shinyUnbindAll } from "./initedMethods";
@@ -14,9 +13,9 @@ declare class Shiny {
     version: string;
     $escape: typeof $escape;
     compareVersion: typeof compareVersion;
-    inputBindings: ReturnType<typeof initInputBindings>["inputBindings"];
+    inputBindings: BindingRegistry<InputBinding>;
     InputBinding: typeof InputBinding;
-    outputBindings: ReturnType<typeof initOutputBindings>["outputBindings"];
+    outputBindings: BindingRegistry<OutputBinding>;
     OutputBinding: typeof OutputBinding;
     resetBrush: typeof resetBrush;
     notifications: {

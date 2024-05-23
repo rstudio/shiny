@@ -3,6 +3,7 @@ import $ from "jquery";
 import { InputBinding, OutputBinding } from "../bindings";
 import { initInputBindings } from "../bindings/input";
 import { initOutputBindings } from "../bindings/output";
+import type { BindingRegistry } from "../bindings/registry";
 import { showErrorInClientConsole } from "../components/errorConsole";
 import { resetBrush } from "../imageutils/resetBrush";
 import { $escape, compareVersion } from "../utils";
@@ -33,10 +34,10 @@ class Shiny {
   version: string;
   $escape: typeof $escape;
   compareVersion: typeof compareVersion;
-  inputBindings: ReturnType<typeof initInputBindings>["inputBindings"];
+  inputBindings: BindingRegistry<InputBinding>;
   // eslint-disable-next-line @typescript-eslint/naming-convention
   InputBinding: typeof InputBinding;
-  outputBindings: ReturnType<typeof initOutputBindings>["outputBindings"];
+  outputBindings: BindingRegistry<OutputBinding>;
   // eslint-disable-next-line @typescript-eslint/naming-convention
   OutputBinding: typeof OutputBinding;
   resetBrush: typeof resetBrush;

@@ -517,8 +517,15 @@ async function initShiny(windowShiny: Shiny): Promise<void> {
   // We've collected all the initial values--start the server process!
   inputsNoResend.reset(initialValues);
   shinyapp.connect(initialValues);
-  $(document).one("shiny:connected", function () {
+  $(document).one("shiny:connected", (event) => {
     initDeferredIframes();
+    // @ts-expect-error; .socket property isn't a known property of
+    // JQuery.TriggeredEvent, but it was added on there anyway.
+    windowShiny._resolveConnectedPromise(event.socket);
+  });
+
+  $(document).one("shiny:sessioninitialized", () => {
+    windowShiny._resolveSessionInitPromise();
   });
 
   // window.console.log("Shiny version: ", windowShiny.version);

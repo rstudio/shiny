@@ -1610,4 +1610,4 @@ class ShinyApp {
 }
 
 export { ShinyApp, addCustomMessageHandler };
-export type { Handler, ErrorsMessageValue };
+export type { Handler, ErrorsMessageValue, ShinyWebSocket };

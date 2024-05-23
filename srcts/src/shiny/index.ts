@@ -7,6 +7,7 @@ import type { BindingRegistry } from "../bindings/registry";
 import { showErrorInClientConsole } from "../components/errorConsole";
 import { resetBrush } from "../imageutils/resetBrush";
 import { $escape, compareVersion } from "../utils";
+import { promiseWithResolvers } from "../utils/promise";
 import { initShiny } from "./init";
 import type {
   shinyBindAll,
@@ -27,7 +28,7 @@ import {
   renderHtml,
   renderHtmlAsync,
 } from "./render";
-import type { Handler, ShinyApp } from "./shinyapp";
+import type { Handler, ShinyApp, ShinyWebSocket } from "./shinyapp";
 import { addCustomMessageHandler } from "./shinyapp";
 
 class Shiny {
@@ -66,6 +67,13 @@ class Shiny {
   unbindAll?: typeof shinyUnbindAll;
   initializeInputs?: typeof shinyInitializeInputs;
 
+  sessionInitPromise: Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  _resolveSessionInitPromise: (value: void) => void;
+  connectedPromise: Promise<ShinyWebSocket>;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  _resolveConnectedPromise: (value: ShinyWebSocket) => void;
+
   // Eventually deprecate
   // For old-style custom messages - should deprecate and migrate to new
   oncustommessage?: Handler;
@@ -102,6 +110,14 @@ class Shiny {
     this.renderContent = renderContent;
     this.renderHtmlAsync = renderHtmlAsync;
     this.renderHtml = renderHtml;
+
+    const connectedPromise = promiseWithResolvers<ShinyWebSocket>();
+    this.connectedPromise = connectedPromise.promise;
+    this._resolveConnectedPromise = connectedPromise.resolve;
+
+    const initPromise = promiseWithResolvers<void>();
+    this.sessionInitPromise = initPromise.promise;
+    this._resolveSessionInitPromise = initPromise.resolve;
 
     $(() => {
       // Init Shiny a little later than document ready, so user code can

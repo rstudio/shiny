@@ -5,7 +5,8 @@ export function promiseWithResolvers<T>(): {
   resolve: (value: PromiseLike<T> | T) => void;
   reject: (reason?: any) => void;
 } {
-  let resolve, reject;
+  let resolve: (value: PromiseLike<T> | T) => void;
+  let reject: (reason?: any) => void;
   const promise = new Promise(
     (res: (value: PromiseLike<T> | T) => void, rej: (reason?: any) => void) => {
       resolve = res;

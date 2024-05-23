@@ -15,7 +15,7 @@
       --_shiny-spinner-url: var(--shiny-spinner-url, url(spinners/ring.svg));
       --_shiny-spinner-color: var(--shiny-spinner-color, var(--bs-primary, #007bc2));
       --_shiny-spinner-size: var(--shiny-spinner-size, 32px);
-      --_shiny-spinner-delay: var(--shiny-spinner-delay, 750ms);
+      --_shiny-spinner-delay: var(--shiny-spinner-delay, 500ms);
 
       background: var(--_shiny-spinner-color);
       width: var(--_shiny-spinner-size);
@@ -25,8 +25,10 @@
       mask-image: var(--_shiny-spinner-url);
       -webkit-mask-image: var(--_shiny-spinner-url);
 
+      opacity: 0;
+      animation-delay: var(--_shiny-spinner-delay);
       animation-name: fade-in;
-      animation-duration: var(--_shiny-spinner-delay);
+      animation-duration: 250ms;
     }
 
     /*
@@ -37,8 +39,7 @@
     opacity: 1;
     > *:not(.recalculating) {
       opacity: 0.2;
-      transition: opacity 250ms ease 500ms;
-
+      transition: opacity 250ms ease var(--_shiny-spinner-delay);
     }
 
     /*
@@ -116,9 +117,6 @@
 /* Keyframes for the fading spinner */
 @keyframes fade-in {
   0% {
-    opacity: 0;
-  }
-  67% {
     opacity: 0;
   }
   100% {

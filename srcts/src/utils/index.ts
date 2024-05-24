@@ -1,7 +1,7 @@
 import $ from "jquery";
 import { windowDevicePixelRatio } from "../window/pixelRatio";
 import type { MapValuesUnion, MapWithResult } from "./extraTypes";
-import { hasOwnProperty, hasDefinedProperty } from "./object";
+import { hasDefinedProperty, hasOwnProperty } from "./object";
 
 function escapeHTML(str: string): string {
   /* eslint-disable @typescript-eslint/naming-convention */

@@ -1,6 +1,6 @@
 /// <reference types="jquery" />
-import type { Offset } from "./findbox";
 import type { Bounds } from "./createBrush";
+import type { Offset } from "./findbox";
 import type { Panel, PanelInit } from "./initPanelScales";
 declare function findOrigin($el: JQuery<HTMLElement>): Offset;
 type OffsetCss = {

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { LitElement, html, css } from "lit";
+import { css, html, LitElement } from "lit";
 import { ShinyClientError } from "../shiny/error";
 
 const buttonStyles = css`

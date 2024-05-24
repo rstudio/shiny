@@ -1,5 +1,5 @@
 import type { OutputBindingAdapter } from "../bindings/outputAdapter";
-import type { UploadInitValue, UploadEndValue } from "../file/fileProcessor";
+import type { UploadEndValue, UploadInitValue } from "../file/fileProcessor";
 import { AsyncQueue } from "../utils/asyncQueue";
 import { OutputProgressReporter } from "./outputProgress";
 type ResponseValue = UploadEndValue | UploadInitValue;

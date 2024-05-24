@@ -1,15 +1,15 @@
 import { InputBinding, OutputBinding } from "../bindings";
-import { resetBrush } from "../imageutils/resetBrush";
-import { $escape, compareVersion } from "../utils";
-import { showNotification, removeNotification } from "./notifications";
-import { showModal, removeModal } from "./modal";
-import { showReconnectDialog, hideReconnectDialog } from "./reconnectDialog";
-import { renderContentAsync, renderContent, renderDependenciesAsync, renderDependencies, renderHtmlAsync, renderHtml } from "./render";
-import type { shinyBindAll, shinyForgetLastInputValue, shinySetInputValue, shinyInitializeInputs, shinyUnbindAll } from "./initedMethods";
-import type { Handler, ShinyApp } from "./shinyapp";
-import { addCustomMessageHandler } from "./shinyapp";
 import { initInputBindings } from "../bindings/input";
 import { initOutputBindings } from "../bindings/output";
+import { resetBrush } from "../imageutils/resetBrush";
+import { $escape, compareVersion } from "../utils";
+import type { shinyBindAll, shinyForgetLastInputValue, shinyInitializeInputs, shinySetInputValue, shinyUnbindAll } from "./initedMethods";
+import { removeModal, showModal } from "./modal";
+import { removeNotification, showNotification } from "./notifications";
+import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
+import { renderContent, renderContentAsync, renderDependencies, renderDependenciesAsync, renderHtml, renderHtmlAsync } from "./render";
+import type { Handler, ShinyApp } from "./shinyapp";
+import { addCustomMessageHandler } from "./shinyapp";
 interface Shiny {
     version: string;
     $escape: typeof $escape;

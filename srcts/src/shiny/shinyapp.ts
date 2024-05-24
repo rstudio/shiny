@@ -1,5 +1,19 @@
 import $ from "jquery";
+import type { InputBinding } from "../bindings";
+import type { OutputBindingAdapter } from "../bindings/outputAdapter";
+import { showErrorInClientConsole } from "../components/errorConsole";
+import type {
+  ShinyEventError,
+  ShinyEventMessage,
+  ShinyEventUpdateInput,
+  ShinyEventValue,
+} from "../events/shinyEvents";
+import type { UploadEndValue, UploadInitValue } from "../file/fileProcessor";
+import { resetBrush } from "../imageutils/resetBrush";
 import { $escape, hasOwnProperty, randomId, scopeExprToFunc } from "../utils";
+import { AsyncQueue } from "../utils/asyncQueue";
+import { isQt } from "../utils/browser";
+import { indirectEval } from "../utils/eval";
 import {
   getShinyCreateWebsocket,
   getShinyOnCustomMessage,
@@ -7,26 +21,12 @@ import {
   shinyForgetLastInputValue,
   shinyUnbindAll,
 } from "./initedMethods";
-import { isQt } from "../utils/browser";
-import { showNotification, removeNotification } from "./notifications";
-import { showModal, removeModal } from "./modal";
-import { renderContentAsync, renderHtmlAsync } from "./render";
-import type { HtmlDep } from "./render";
+import { removeModal, showModal } from "./modal";
+import { removeNotification, showNotification } from "./notifications";
 import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
-import { resetBrush } from "../imageutils/resetBrush";
-import type { OutputBindingAdapter } from "../bindings/outputAdapter";
-import type {
-  ShinyEventError,
-  ShinyEventMessage,
-  ShinyEventValue,
-  ShinyEventUpdateInput,
-} from "../events/shinyEvents";
-import type { InputBinding } from "../bindings";
-import { indirectEval } from "../utils/eval";
+import type { HtmlDep } from "./render";
+import { renderContentAsync, renderHtmlAsync } from "./render";
 import type { WherePosition } from "./singletons";
-import type { UploadInitValue, UploadEndValue } from "../file/fileProcessor";
-import { AsyncQueue } from "../utils/asyncQueue";
-import { showErrorInClientConsole } from "../components/errorConsole";
 
 import { OutputProgressReporter } from "./outputProgress";
 

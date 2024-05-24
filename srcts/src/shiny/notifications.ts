@@ -3,8 +3,7 @@ import $ from "jquery";
 import { $escape, randomId } from "../utils";
 import { shinyUnbindAll } from "./initedMethods";
 import type { HtmlDep } from "./render";
-import { renderDependenciesAsync } from "./render";
-import { renderContentAsync } from "./render";
+import { renderContentAsync, renderDependenciesAsync } from "./render";
 
 // Milliseconds to fade in or out
 const fadeDuration = 250;

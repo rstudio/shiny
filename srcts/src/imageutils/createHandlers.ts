@@ -1,13 +1,13 @@
 import $ from "jquery";
 import { imageOutputBinding } from "../bindings/output/image";
+import type { InputRatePolicy } from "../inputPolicies";
 import { shinySetInputValue } from "../shiny/initedMethods";
 import { Debouncer, Throttler } from "../time";
+import type { Bounds, BoundsCss, BrushOpts } from "./createBrush";
 import { createBrush } from "./createBrush";
-import type { BoundsCss, Bounds, BrushOpts } from "./createBrush";
 import type { Offset } from "./findbox";
 import type { Coordmap } from "./initCoordmap";
 import type { Panel } from "./initPanelScales";
-import type { InputRatePolicy } from "../inputPolicies";
 
 // ----------------------------------------------------------
 // Handler creators for click, hover, brush.

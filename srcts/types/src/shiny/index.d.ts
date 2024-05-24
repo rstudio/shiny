@@ -7,8 +7,7 @@ import { removeModal, showModal } from "./modal";
 import { removeNotification, showNotification } from "./notifications";
 import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
 import { renderContent, renderContentAsync, renderDependencies, renderDependenciesAsync, renderHtml, renderHtmlAsync } from "./render";
-import type { Handler, ShinyApp } from "./shinyapp";
-import { addCustomMessageHandler } from "./shinyapp";
+import { addCustomMessageHandler, ShinyApp, type Handler, type ShinyWebSocket } from "./shinyapp";
 declare class ShinyClass {
     version: string;
     $escape: typeof $escape;
@@ -26,7 +25,6 @@ declare class ShinyClass {
         show: typeof showModal;
         remove: typeof removeModal;
     };
-    createSocket?: () => WebSocket;
     showReconnectDialog: typeof showReconnectDialog;
     hideReconnectDialog: typeof hideReconnectDialog;
     renderDependenciesAsync: typeof renderDependenciesAsync;
@@ -35,9 +33,10 @@ declare class ShinyClass {
     renderContent: typeof renderContent;
     renderHtmlAsync: typeof renderHtmlAsync;
     renderHtml: typeof renderHtml;
+    addCustomMessageHandler: typeof addCustomMessageHandler;
+    createSocket?: () => WebSocket;
     user?: string;
     progressHandlers?: ShinyApp["progressHandlers"];
-    addCustomMessageHandler: typeof addCustomMessageHandler;
     shinyapp?: ShinyApp;
     setInputValue?: typeof shinySetInputValue;
     onInputChange?: typeof shinySetInputValue;
@@ -45,6 +44,10 @@ declare class ShinyClass {
     bindAll?: typeof shinyBindAll;
     unbindAll?: typeof shinyUnbindAll;
     initializeInputs?: typeof shinyInitializeInputs;
+    connectedPromise: Promise<ShinyWebSocket>;
+    _resolveConnectedPromise: (value: ShinyWebSocket) => void;
+    sessionInitPromise: Promise<void>;
+    _resolveSessionInitPromise: (value: void) => void;
     oncustommessage?: Handler;
     constructor();
     /**
@@ -54,5 +57,6 @@ declare class ShinyClass {
      * @returns `true` if Shiny is running in development mode, `false` otherwise.
      */
     inDevMode(): boolean;
+    initialize(): Promise<void>;
 }
 export { ShinyClass };

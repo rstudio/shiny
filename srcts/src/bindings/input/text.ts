@@ -1,5 +1,5 @@
 import $ from "jquery";
-import { $escape, updateLabel, hasDefinedProperty } from "../../utils";
+import { $escape, hasDefinedProperty, updateLabel } from "../../utils";
 
 import { InputBinding } from "./inputBinding";
 
@@ -122,5 +122,4 @@ class TextInputBinding extends TextInputBindingBase {
 }
 
 export { TextInputBinding, TextInputBindingBase };
-
 export type { TextHTMLElement, TextReceiveMessageData };

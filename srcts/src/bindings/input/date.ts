@@ -1,13 +1,13 @@
 import $ from "jquery";
-import { InputBinding } from "./inputBinding";
 import {
-  formatDateUTC,
-  updateLabel,
   $escape,
-  parseDate,
+  formatDateUTC,
   hasDefinedProperty,
+  parseDate,
+  updateLabel,
 } from "../../utils";
 import type { NotUndefined } from "../../utils/extraTypes";
+import { InputBinding } from "./inputBinding";
 
 declare global {
   interface JQuery {

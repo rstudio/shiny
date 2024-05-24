@@ -6,9 +6,9 @@ import type {
   InputRateDecorator,
   InputValidateDecorator,
 } from "../inputPolicies";
+import { ShinyClientError } from "./error";
 import { shinyAppBindOutput, shinyAppUnbindOutput } from "./initedMethods";
 import { sendImageSizeFns } from "./sendImageSize";
-import { ShinyClientError } from "./error";
 
 type BindScope = HTMLElement | JQuery<HTMLElement>;
 
@@ -464,5 +464,4 @@ async function bindAll(
 }
 
 export { unbindAll, bindAll, _bindAll };
-
 export type { BindScope, BindInputsCtx };

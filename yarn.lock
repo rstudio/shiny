@@ -2255,6 +2255,7 @@ __metadata:
     phantomjs-prebuilt: ^2.1.16
     postcss: ^8.3.5
     prettier: ^2.7.1
+    prettier-plugin-organize-imports: ^3.2.4
     readcontrol: ^1.0.0
     replace: ^1.2.1
     ts-jest: ^26
@@ -8278,6 +8279,23 @@ __metadata:
   dependencies:
     fast-diff: ^1.1.2
   checksum: 00ce8011cf6430158d27f9c92cfea0a7699405633f7f1d4a45f07e21bf78e99895911cbcdc3853db3a824201a7c745bd49bfea8abd5fb9883e765a90f74f8392
+  languageName: node
+  linkType: hard
+
+"prettier-plugin-organize-imports@npm:^3.2.4":
+  version: 3.2.4
+  resolution: "prettier-plugin-organize-imports@npm:3.2.4"
+  peerDependencies:
+    "@volar/vue-language-plugin-pug": ^1.0.4
+    "@volar/vue-typescript": ^1.0.4
+    prettier: ">=2.0"
+    typescript: ">=2.9"
+  peerDependenciesMeta:
+    "@volar/vue-language-plugin-pug":
+      optional: true
+    "@volar/vue-typescript":
+      optional: true
+  checksum: 57ae97d7e403445e650ae92b7da586761d1d88a47e46b3ea274baeb96782165bebd0132db9c652081e185c41b50701ba1d30d615ad1c9000300cc0c67eb12b7a
   languageName: node
   linkType: hard
 

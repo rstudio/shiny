@@ -1,9 +1,9 @@
 import { createBrush } from "./createBrush";
 import { createClickInfo } from "./createClickInfo";
 import {
+  createBrushHandler,
   createClickHandler,
   createHoverHandler,
-  createBrushHandler,
 } from "./createHandlers";
 import { disableDrag } from "./disableDrag";
 import { findBox } from "./findbox";

@@ -1,10 +1,10 @@
+import { determineBrowserInfo } from "./browser";
 import { disableFormSubmission } from "./disableForm";
 import { trackHistory } from "./history";
-import { determineBrowserInfo } from "./browser";
 
-import { windowShiny } from "../window/libraries";
 import { setShiny } from "../shiny";
 import { setUserAgent } from "../utils/userAgent";
+import { windowShiny } from "../window/libraries";
 import { windowUserAgent } from "../window/userAgent";
 
 import { initReactlog } from "../shiny/reactlog";

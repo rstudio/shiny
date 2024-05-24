@@ -25,8 +25,7 @@
     "@types/ion-rangeslider": "2.3.0",
     "@types/jquery": "3.5.14",
     "@types/selectize": "0.12.34",
-    "lit": "^3.0.0",
-    "prettier-plugin-organize-imports": "^3.2.4"
+    "lit": "^3.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.14.3",

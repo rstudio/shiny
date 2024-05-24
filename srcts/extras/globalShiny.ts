@@ -5,10 +5,6 @@
 import type { ShinyClass } from "../src/shiny/index";
 
 declare global {
-  // Tell Shiny variable globally exists
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const Shiny: ShinyClass;
-
   // Tell window.Shiny exists
   interface Window {
     // eslint-disable-next-line @typescript-eslint/naming-convention

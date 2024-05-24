@@ -1,3 +1,4 @@
 import { ShinyClass } from "../shiny";
+declare let Shiny: ShinyClass;
 declare function init(): void;
-export { init, type ShinyClass };
+export { init, Shiny, type ShinyClass };

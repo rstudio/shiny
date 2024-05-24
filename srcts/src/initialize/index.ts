@@ -8,8 +8,11 @@ import { windowUserAgent } from "../window/userAgent";
 
 import { initReactlog } from "../shiny/reactlog";
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
+let Shiny: ShinyClass;
+
 function init(): void {
-  window.Shiny = window.Shiny || new ShinyClass();
+  Shiny = window.Shiny = window.Shiny || new ShinyClass();
   setUserAgent(windowUserAgent()); // before determineBrowserInfo()
 
   determineBrowserInfo();
@@ -20,4 +23,4 @@ function init(): void {
   initReactlog();
 }
 
-export { init, type ShinyClass };
+export { init, Shiny, type ShinyClass };

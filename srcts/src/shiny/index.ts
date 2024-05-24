@@ -47,7 +47,6 @@ class ShinyClass {
     remove: typeof removeNotification;
   };
   modal: { show: typeof showModal; remove: typeof removeModal };
-  createSocket?: () => WebSocket;
   showReconnectDialog: typeof showReconnectDialog;
   hideReconnectDialog: typeof hideReconnectDialog;
   renderDependenciesAsync: typeof renderDependenciesAsync;
@@ -56,9 +55,12 @@ class ShinyClass {
   renderContent: typeof renderContent;
   renderHtmlAsync: typeof renderHtmlAsync;
   renderHtml: typeof renderHtml;
+  addCustomMessageHandler: typeof addCustomMessageHandler;
+
+  // The following are added in the initialization, by initShiny()
+  createSocket?: () => WebSocket;
   user?: string;
   progressHandlers?: ShinyApp["progressHandlers"];
-  addCustomMessageHandler: typeof addCustomMessageHandler;
   shinyapp?: ShinyApp;
   setInputValue?: typeof shinySetInputValue;
   onInputChange?: typeof shinySetInputValue;
@@ -67,12 +69,13 @@ class ShinyClass {
   unbindAll?: typeof shinyUnbindAll;
   initializeInputs?: typeof shinyInitializeInputs;
 
-  sessionInitPromise: Promise<void>;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  _resolveSessionInitPromise: (value: void) => void;
   connectedPromise: Promise<ShinyWebSocket>;
   // eslint-disable-next-line @typescript-eslint/naming-convention
   _resolveConnectedPromise: (value: ShinyWebSocket) => void;
+
+  sessionInitPromise: Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  _resolveSessionInitPromise: (value: void) => void;
 
   // Eventually deprecate
   // For old-style custom messages - should deprecate and migrate to new

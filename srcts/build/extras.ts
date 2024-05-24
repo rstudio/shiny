@@ -5,13 +5,13 @@
 
 // - TypeScript -----------------------------------------------------------
 
-import { banner, build, outDir, babelPlugin } from "./_build";
+import { banner, build, outDir } from "./_build";
 
 build({
   bundle: true,
   sourcemap: true,
   minify: true,
-  plugins: [babelPlugin()],
+  plugins: [],
   banner: banner,
   entryPoints: [
     "srcts/extras/shiny-autoreload.ts",

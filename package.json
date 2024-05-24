@@ -28,11 +28,6 @@
     "lit": "^3.0.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.14.3",
-    "@babel/plugin-proposal-class-properties": "^7.13.0",
-    "@babel/preset-env": "^7.14.2",
-    "@babel/preset-typescript": "^7.13.0",
-    "@babel/runtime": "^7.14.0",
     "@deanc/esbuild-plugin-postcss": "^1.0.2",
     "@selectize/selectize": "https://github.com/selectize/selectize.js.git#e3f2e0b4aa251375bc21b5fcd8ca7d374a921f08",
     "@testing-library/dom": "^7.31.0",
@@ -51,7 +46,6 @@
     "caniuse-lite": "^1.0.30001312",
     "core-js": "^3.13.0",
     "esbuild": "^0.15.10",
-    "esbuild-plugin-babel": "https://github.com/schloerke/esbuild-plugin-babel#patch-2",
     "esbuild-plugin-globals": "^0.1.1",
     "esbuild-plugin-sass": "^1.0.1",
     "eslint": "^8.24.0",

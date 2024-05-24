@@ -7,16 +7,12 @@ import type {
 } from "esbuild";
 import { build as esbuildBuild } from "esbuild";
 
-import process from "process";
 import { basename } from "path";
+import process from "process";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore; Type definitions are not found. This occurs when `strict: true` in tsconfig.json
 import readcontrol from "readcontrol";
-
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore; Type definitions are not found. This occurs when `strict: true` in tsconfig.json
-import babelPlugin from "esbuild-plugin-babel";
 
 const outDir = "./inst/www/shared/";
 
@@ -25,7 +21,7 @@ const shinyDesc = readcontrol.readSync("./DESCRIPTION") as ShinyDesc;
 
 const bannerTxt = [
   `/*! ${shinyDesc.package} ${shinyDesc.version}`,
-  `(c) 2012-${new Date().getFullYear()} RStudio, PBC.`,
+  `(c) 2012-${new Date().getFullYear()} Posit, PBC.`,
   `License: ${shinyDesc.license} */`,
 ].join(" | ");
 const banner = {
@@ -79,7 +75,7 @@ async function build(
   return esbuildBuild({
     incremental: incremental,
     watch: watch,
-    target: "es5",
+    target: "es2020",
     preserveSymlinks: true,
     ...opts,
   }).then((x) => {
@@ -88,4 +84,4 @@ async function build(
   });
 }
 
-export { outDir, build, shinyDesc, banner, babelPlugin };
+export { outDir, build, shinyDesc, banner };

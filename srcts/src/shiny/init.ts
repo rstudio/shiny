@@ -1,5 +1,5 @@
 import $ from "jquery";
-import type { Shiny } from ".";
+import type { ShinyClass } from ".";
 import type { InputPolicy } from "../inputPolicies";
 import {
   InputBatchSender,
@@ -28,7 +28,7 @@ import { ShinyApp } from "./shinyapp";
 import { registerNames as singletonsRegisterNames } from "./singletons";
 
 // "init_shiny.js"
-async function initShiny(windowShiny: Shiny): Promise<void> {
+async function initShiny(windowShiny: ShinyClass): Promise<void> {
   setShinyObj(windowShiny);
   const shinyapp = (windowShiny.shinyapp = new ShinyApp());
 

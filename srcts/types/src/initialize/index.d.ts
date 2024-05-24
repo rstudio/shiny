@@ -1,2 +1,3 @@
+import { ShinyClass } from "../shiny";
 declare function init(): void;
-export { init };
+export { init, type ShinyClass };

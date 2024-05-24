@@ -1,1 +1,1 @@
-export {};
+export type { ShinyClass } from "./initialize";

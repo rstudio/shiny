@@ -9,7 +9,7 @@ import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
 import { renderContent, renderContentAsync, renderDependencies, renderDependenciesAsync, renderHtml, renderHtmlAsync } from "./render";
 import type { Handler, ShinyApp } from "./shinyapp";
 import { addCustomMessageHandler } from "./shinyapp";
-declare class Shiny {
+declare class ShinyClass {
     version: string;
     $escape: typeof $escape;
     compareVersion: typeof compareVersion;
@@ -55,4 +55,4 @@ declare class Shiny {
      */
     inDevMode(): boolean;
 }
-export { Shiny };
+export { ShinyClass };

@@ -31,7 +31,7 @@ import {
 import type { Handler, ShinyApp, ShinyWebSocket } from "./shinyapp";
 import { addCustomMessageHandler } from "./shinyapp";
 
-class Shiny {
+class ShinyClass {
   version: string;
   $escape: typeof $escape;
   compareVersion: typeof compareVersion;
@@ -147,4 +147,4 @@ class Shiny {
   }
 }
 
-export { Shiny };
+export { ShinyClass };

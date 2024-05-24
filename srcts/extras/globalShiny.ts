@@ -2,7 +2,7 @@
 // Project: Shiny <https://shiny.rstudio.com/>
 // Definitions by: RStudio <https://www.rstudio.com/>
 
-import type { Shiny as ShinyClass } from "../src/shiny/index";
+import type { ShinyClass } from "../src/shiny/index";
 
 declare global {
   // Tell Shiny variable globally exists

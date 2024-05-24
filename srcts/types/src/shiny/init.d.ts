@@ -1,3 +1,3 @@
-import type { Shiny } from ".";
-declare function initShiny(windowShiny: Shiny): Promise<void>;
+import type { ShinyClass } from ".";
+declare function initShiny(windowShiny: ShinyClass): Promise<void>;
 export { initShiny };

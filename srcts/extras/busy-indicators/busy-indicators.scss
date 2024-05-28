@@ -29,6 +29,7 @@
       animation-delay: var(--_shiny-spinner-delay);
       animation-name: fade-in;
       animation-duration: 250ms;
+      animation-fill-mode: forwards;
     }
 
     /*

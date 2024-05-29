@@ -12,7 +12,10 @@ import { initReactlog } from "../shiny/reactlog";
 let Shiny: ShinyClass;
 
 function init(): void {
-  Shiny = window.Shiny = window.Shiny || new ShinyClass();
+  if (window.Shiny) {
+    throw new Error("Trying to create window.Shiny, but it already exists!");
+  }
+  Shiny = window.Shiny = new ShinyClass();
   setUserAgent(windowUserAgent()); // before determineBrowserInfo()
 
   determineBrowserInfo();

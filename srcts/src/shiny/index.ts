@@ -27,7 +27,11 @@ import {
   mapValues,
   pixelRatio,
 } from "../utils";
-import { promiseWithResolvers } from "../utils/promise";
+import {
+  createInitStatus,
+  promiseWithResolvers,
+  type InitStatusPromise,
+} from "../utils/promise";
 import type { BindInputsCtx, BindScope } from "./bind";
 import { bindAll, unbindAll, _bindAll } from "./bind";
 import type {
@@ -97,13 +101,9 @@ class ShinyClass {
   unbindAll?: typeof shinyUnbindAll;
   initializeInputs?: typeof shinyInitializeInputs;
 
-  isConnected: PromiseLike<ShinyWebSocket>;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  _resolveIsConnected: (value: ShinyWebSocket) => void;
-
-  isInitialized: PromiseLike<void>;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  _resolveIsInitialized: (value: void) => void;
+  // Promise-like objects that are resolved at various stages of initialization.
+  isConnected: InitStatusPromise<ShinyWebSocket>;
+  isInitialized: InitStatusPromise<void>;
 
   // Eventually deprecate
   // For old-style custom messages - should deprecate and migrate to new
@@ -142,13 +142,8 @@ class ShinyClass {
     this.renderHtmlAsync = renderHtmlAsync;
     this.renderHtml = renderHtml;
 
-    const connectedPromise = promiseWithResolvers<ShinyWebSocket>();
-    this.isConnected = connectedPromise.promise;
-    this._resolveIsConnected = connectedPromise.resolve;
-
-    const initPromise = promiseWithResolvers<void>();
-    this.isInitialized = initPromise.promise;
-    this._resolveIsInitialized = initPromise.resolve;
+    this.isConnected = createInitStatus<ShinyWebSocket>();
+    this.isInitialized = createInitStatus<void>();
 
     $(() => {
       // Init Shiny a little later than document ready, so user code can
@@ -689,11 +684,11 @@ class ShinyClass {
       initDeferredIframes();
       // @ts-expect-error; .socket property isn't a known property of
       // JQuery.TriggeredEvent, but it was added on there anyway.
-      this._resolveIsConnected(event.socket);
+      this.isConnected.resolve(event.socket);
     });
 
     $(document).one("shiny:sessioninitialized", () => {
-      this._resolveIsInitialized();
+      this.isInitialized.resolve();
     });
   }
 }

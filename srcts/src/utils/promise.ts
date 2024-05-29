@@ -17,3 +17,30 @@ export function promiseWithResolvers<T>(): {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   return { promise, resolve: resolve!, reject: reject! };
 }
+
+export interface InitStatusPromise<T> extends Promise<T> {
+  promise: Promise<T>;
+  resolve(x: T): void;
+  resolved(): boolean;
+}
+
+export function createInitStatus<T>(): InitStatusPromise<T> {
+  const { promise, resolve } = promiseWithResolvers<T>();
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  let _resolved = false;
+
+  return {
+    promise,
+    resolve(x: T) {
+      _resolved = true;
+      resolve(x);
+    },
+    then: promise.then.bind(promise),
+    catch: promise.catch.bind(promise),
+    finally: promise.finally.bind(promise),
+    [Symbol.toStringTag]: "InitStatus",
+    resolved() {
+      return _resolved;
+    },
+  };
+}

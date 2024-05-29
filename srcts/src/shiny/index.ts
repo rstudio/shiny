@@ -97,13 +97,13 @@ class ShinyClass {
   unbindAll?: typeof shinyUnbindAll;
   initializeInputs?: typeof shinyInitializeInputs;
 
-  connectedPromise: Promise<ShinyWebSocket>;
+  isConnected: PromiseLike<ShinyWebSocket>;
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  _resolveConnectedPromise: (value: ShinyWebSocket) => void;
+  _resolveIsConnected: (value: ShinyWebSocket) => void;
 
-  sessionInitPromise: Promise<void>;
+  isInitialized: PromiseLike<void>;
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  _resolveSessionInitPromise: (value: void) => void;
+  _resolveIsInitialized: (value: void) => void;
 
   // Eventually deprecate
   // For old-style custom messages - should deprecate and migrate to new
@@ -143,12 +143,12 @@ class ShinyClass {
     this.renderHtml = renderHtml;
 
     const connectedPromise = promiseWithResolvers<ShinyWebSocket>();
-    this.connectedPromise = connectedPromise.promise;
-    this._resolveConnectedPromise = connectedPromise.resolve;
+    this.isConnected = connectedPromise.promise;
+    this._resolveIsConnected = connectedPromise.resolve;
 
     const initPromise = promiseWithResolvers<void>();
-    this.sessionInitPromise = initPromise.promise;
-    this._resolveSessionInitPromise = initPromise.resolve;
+    this.isInitialized = initPromise.promise;
+    this._resolveIsInitialized = initPromise.resolve;
 
     $(() => {
       // Init Shiny a little later than document ready, so user code can
@@ -689,11 +689,11 @@ class ShinyClass {
       initDeferredIframes();
       // @ts-expect-error; .socket property isn't a known property of
       // JQuery.TriggeredEvent, but it was added on there anyway.
-      this._resolveConnectedPromise(event.socket);
+      this._resolveIsConnected(event.socket);
     });
 
     $(document).one("shiny:sessioninitialized", () => {
-      this._resolveSessionInitPromise();
+      this._resolveIsInitialized();
     });
   }
 }

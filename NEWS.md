@@ -2,13 +2,20 @@
 
 ## New features and improvements
 
+* The client-side TypeScript code for Shiny has been refactored so that the `Shiny` object is now an instance of class `ShinyClass`. (#4063)
+
+* In TypeScript, the `Shiny` object now has properties `isConnected` and `isInitialized`, which are Promise-like objects that can be `await`ed or chained with `.then()`. These Promise-like objects correspond to the `shiny:connected` and `shiny:sessioninitialized` JavaScript events, but are easier to use because they can be used both before and after the events have occurred. (#4063)
+
 * Added new functions, `useBusyIndicators()` and `busyIndicatorOptions()`, for enabling and customizing busy indication. Busy indicators provide a visual cue to users when the server is busy calculating outputs or otherwise serving requests to the client. When enabled, a spinner is shown on each calculating/recalculating output, and a pulsing banner is shown at the top of the page when the app is otherwise busy. (#4040)
+
 * Output bindings now include the `.recalculating` CSS class when they are first bound, up until the first render. This makes it possible/easier to show progress indication when the output is calculating for the first time. (#4039)
 
 ## Bug fixes
 
 * `downloadButton()` and `downloadLink()` are now disabled up until they are fully initialized. This prevents the user from clicking the button/link before the download is ready. (#4041)
+
 * Output bindings that are removed, invalidated, then inserted again (while invalidated) now correctly include the `.recalculating` CSS class. (#4039)
+
 * Fixed a recent issue with `uiOutput()` and `conditionalPanel()` not properly lower opacity when recalculation (in a Bootstrap 5 context). (#4027)
 
 # shiny 1.8.1.1

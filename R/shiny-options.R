@@ -151,6 +151,11 @@ getShinyOption <- function(name, default = NULL) {
 # ' \item{shiny.devmode.verbose (defaults to `TRUE`)}{If `TRUE`, will display messages printed
 # '   about which options are being set. See [devmode()] for more details. }
 ### (end not documenting 'shiny.devmode.verbose')
+### start shiny.client_devmode is primarily for niche, internal shinylive usage
+# ' \item{shiny.client_devmode (defaults to `FALSE`)}{If `TRUE`, enables client-
+# '  side devmode features. Currently the primary feature is the client-side
+# '  error console.}
+### end shiny.client.devmode
 #' }
 #'
 #'

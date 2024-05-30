@@ -155,7 +155,7 @@ getShinyOption <- function(name, default = NULL) {
 # ' \item{shiny.client_devmode (defaults to `FALSE`)}{If `TRUE`, enables client-
 # '  side devmode features. Currently the primary feature is the client-side
 # '  error console.}
-### end shiny.client.devmode
+### end shiny.client_devmode
 #' }
 #'
 #'

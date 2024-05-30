@@ -2,6 +2,7 @@ import { InputBinding, OutputBinding } from "../bindings";
 import type { BindingRegistry } from "../bindings/registry";
 import { resetBrush } from "../imageutils/resetBrush";
 import { $escape, compareVersion } from "../utils";
+import { type InitStatusPromise } from "../utils/promise";
 import type { shinyBindAll, shinyForgetLastInputValue, shinyInitializeInputs, shinySetInputValue, shinyUnbindAll } from "./initedMethods";
 import { removeModal, showModal } from "./modal";
 import { removeNotification, showNotification } from "./notifications";
@@ -44,10 +45,8 @@ declare class ShinyClass {
     bindAll?: typeof shinyBindAll;
     unbindAll?: typeof shinyUnbindAll;
     initializeInputs?: typeof shinyInitializeInputs;
-    connectedPromise: Promise<ShinyWebSocket>;
-    _resolveConnectedPromise: (value: ShinyWebSocket) => void;
-    sessionInitPromise: Promise<void>;
-    _resolveSessionInitPromise: (value: void) => void;
+    isConnected: InitStatusPromise<ShinyWebSocket>;
+    isInitialized: InitStatusPromise<void>;
     oncustommessage?: Handler;
     constructor();
     /**

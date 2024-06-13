@@ -1,6 +1,6 @@
 import $ from "jquery";
-import { InputBinding } from "./inputBinding";
 import { $escape, hasDefinedProperty, updateLabel } from "../../utils";
+import { InputBinding } from "./inputBinding";
 
 type RadioHTMLElement = HTMLInputElement;
 

@@ -1,7 +1,7 @@
 import $ from "jquery";
-import { InputBinding } from "./inputBinding";
 import { $escape, hasDefinedProperty, updateLabel } from "../../utils";
 import { indirectEval } from "../../utils/eval";
+import { InputBinding } from "./inputBinding";
 
 type SelectHTMLElement = HTMLSelectElement & { nonempty: boolean };
 

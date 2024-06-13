@@ -1,5 +1,6 @@
 import $ from "jquery";
 import type { Shiny } from ".";
+import type { InputPolicy } from "../inputPolicies";
 import {
   InputBatchSender,
   InputDeferDecorator,
@@ -8,7 +9,7 @@ import {
   InputRateDecorator,
   InputValidateDecorator,
 } from "../inputPolicies";
-import type { InputPolicy } from "../inputPolicies";
+import type { InputPolicyOpts } from "../inputPolicies/inputPolicy";
 import { addDefaultInputOpts } from "../inputPolicies/inputValidateDecorator";
 import { debounce, Debouncer } from "../time";
 import {
@@ -18,14 +19,13 @@ import {
   mapValues,
   pixelRatio,
 } from "../utils";
-import { bindAll, unbindAll, _bindAll } from "./bind";
 import type { BindInputsCtx, BindScope } from "./bind";
+import { bindAll, unbindAll, _bindAll } from "./bind";
 import { setShinyObj } from "./initedMethods";
 import { registerDependency } from "./render";
 import { sendImageSizeFns } from "./sendImageSize";
 import { ShinyApp } from "./shinyapp";
 import { registerNames as singletonsRegisterNames } from "./singletons";
-import type { InputPolicyOpts } from "../inputPolicies/inputPolicy";
 
 // "init_shiny.js"
 async function initShiny(windowShiny: Shiny): Promise<void> {

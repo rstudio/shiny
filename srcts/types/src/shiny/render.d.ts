@@ -1,6 +1,6 @@
 import type { BindScope } from "./bind";
-import { renderHtml as singletonsRenderHtml } from "./singletons";
 import type { WherePosition } from "./singletons";
+import { renderHtml as singletonsRenderHtml } from "./singletons";
 declare function renderContentAsync(el: BindScope, content: string | {
     html: string;
     deps?: HtmlDep[];

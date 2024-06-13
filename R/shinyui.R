@@ -69,7 +69,7 @@ renderPage <- function(ui, showcase=0, testMode=FALSE) {
       )
   }
 
-  if (in_devmode()) {
+  if (in_devmode() || in_client_devmode()) {
     # If we're in dev mode, add a simple script to the head that injects a
     # global variable for the client to use to detect dev mode.
     shiny_deps[[length(shiny_deps) + 1]] <-
@@ -114,6 +114,7 @@ jqueryDependency <- function() {
 shinyDependencies <- function() {
   list(
     bslib::bs_dependency_defer(shinyDependencyCSS),
+    busyIndicatorDependency(),
     htmlDependency(
       name = "shiny-javascript",
       version = get_package_version("shiny"),

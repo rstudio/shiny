@@ -1,33 +1,33 @@
 import $ from "jquery";
 
 import { InputBinding, OutputBinding } from "../bindings";
+import { initInputBindings } from "../bindings/input";
+import { initOutputBindings } from "../bindings/output";
+import { showErrorInClientConsole } from "../components/errorConsole";
 import { resetBrush } from "../imageutils/resetBrush";
 import { $escape, compareVersion } from "../utils";
-import { showNotification, removeNotification } from "./notifications";
-import { showModal, removeModal } from "./modal";
-import { showReconnectDialog, hideReconnectDialog } from "./reconnectDialog";
-import {
-  renderContentAsync,
-  renderContent,
-  renderDependenciesAsync,
-  renderDependencies,
-  renderHtmlAsync,
-  renderHtml,
-} from "./render";
 import { initShiny } from "./init";
 import type {
   shinyBindAll,
   shinyForgetLastInputValue,
-  shinySetInputValue,
   shinyInitializeInputs,
+  shinySetInputValue,
   shinyUnbindAll,
 } from "./initedMethods";
 import { setFileInputBinding } from "./initedMethods";
+import { removeModal, showModal } from "./modal";
+import { removeNotification, showNotification } from "./notifications";
+import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
+import {
+  renderContent,
+  renderContentAsync,
+  renderDependencies,
+  renderDependenciesAsync,
+  renderHtml,
+  renderHtmlAsync,
+} from "./render";
 import type { Handler, ShinyApp } from "./shinyapp";
 import { addCustomMessageHandler } from "./shinyapp";
-import { initInputBindings } from "../bindings/input";
-import { initOutputBindings } from "../bindings/output";
-import { showErrorInClientConsole } from "../components/errorConsole";
 
 interface Shiny {
   version: string;
@@ -138,5 +138,4 @@ function setShiny(windowShiny_: Shiny): void {
 }
 
 export { windowShiny, setShiny };
-
 export type { Shiny };

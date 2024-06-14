@@ -19,6 +19,9 @@ type InputValues = {
 };
 type MessageValue = Parameters<WebSocket["send"]>[0];
 declare function addCustomMessageHandler(type: string, handler: Handler): void;
+/**
+ * The ShinyApp class handles the communication with the Shiny Server.
+ */
 declare class ShinyApp {
     $socket: ShinyWebSocket | null;
     taskQueue: AsyncQueue<() => Promise<void> | void>;
@@ -104,4 +107,4 @@ declare class ShinyApp {
     }): string;
 }
 export { ShinyApp, addCustomMessageHandler };
-export type { Handler, ErrorsMessageValue };
+export type { Handler, ErrorsMessageValue, ShinyWebSocket };

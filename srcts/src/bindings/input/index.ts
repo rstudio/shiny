@@ -18,11 +18,10 @@ import { TextInputBinding } from "./text";
 import { TextareaInputBinding } from "./textarea";
 
 // TODO-barret make this an init method
-type InitInputBindings = {
+function initInputBindings(): {
   inputBindings: BindingRegistry<InputBinding>;
   fileInputBinding: FileInputBinding;
-};
-function initInputBindings(): InitInputBindings {
+} {
   const inputBindings = new BindingRegistry<InputBinding>();
 
   inputBindings.register(new TextInputBinding(), "shiny.textInput");

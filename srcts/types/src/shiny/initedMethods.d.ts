@@ -1,10 +1,10 @@
-import type { Shiny } from ".";
+import type { ShinyClass } from ".";
 import type { FileInputBinding } from "../bindings/input/fileinput";
 import type { OutputBindingAdapter } from "../bindings/outputAdapter";
 import type { EventPriority } from "../inputPolicies";
 import type { BindScope } from "./bind";
 import type { Handler, ShinyApp } from "./shinyapp";
-declare function setShinyObj(shiny: Shiny): void;
+declare function setShinyObj(shiny: ShinyClass): void;
 declare function shinySetInputValue(name: string, value: unknown, opts?: {
     priority?: EventPriority;
 }): void;

@@ -1,4 +1,4 @@
-import type { Shiny } from ".";
+import type { ShinyClass } from ".";
 import type { FileInputBinding } from "../bindings/input/fileinput";
 import type { OutputBindingAdapter } from "../bindings/outputAdapter";
 import type { EventPriority } from "../inputPolicies";
@@ -10,7 +10,7 @@ let fullShinyObj: FullShinyDef;
 // TODO-future; It would be nice to have a way to export this type value instead of / in addition to `Shiny`
 type FullShinyDef = Required<
   Pick<
-    Shiny,
+    ShinyClass,
     | "bindAll"
     | "forgetLastInputValue"
     | "initializeInputs"
@@ -21,9 +21,9 @@ type FullShinyDef = Required<
     | "user"
   >
 > &
-  Shiny;
+  ShinyClass;
 
-function setShinyObj(shiny: Shiny): void {
+function setShinyObj(shiny: ShinyClass): void {
   fullShinyObj = shiny as FullShinyDef;
 }
 

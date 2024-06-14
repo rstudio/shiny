@@ -1,4 +1,5 @@
 import $ from "jquery";
+import { Shiny } from "..";
 import type { InputBinding, OutputBinding } from "../bindings";
 import { OutputBindingAdapter } from "../bindings/outputAdapter";
 import type { BindingRegistry } from "../bindings/registry";

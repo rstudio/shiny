@@ -14507,8 +14507,8 @@
       var bounds = {
         top: 0,
         left: 0,
-        right: img.clientWidth - 1,
-        bottom: img.clientHeight - 1
+        right: img.naturalWidth - 1,
+        bottom: img.naturalHeight - 1
       };
       coordmap_.panels[0] = {
         domain: bounds,
@@ -14581,10 +14581,15 @@
       };
       var matches = [];
       var dists = [];
-      var b3;
       var i5;
       for (i5 = 0; i5 < coordmap.panels.length; i5++) {
-        b3 = coordmap.panels[i5].range;
+        var panelRange = coordmap.panels[i5].range;
+        var b3 = {
+          top: panelRange.top * cssToImgRatio.y,
+          bottom: panelRange.bottom * cssToImgRatio.y,
+          left: panelRange.left * cssToImgRatio.x,
+          right: panelRange.right * cssToImgRatio.x
+        };
         if (x2 <= b3.right + expandImg.x && x2 >= b3.left - expandImg.x && y4 <= b3.bottom + expandImg.y && y4 >= b3.top - expandImg.y) {
           matches.push(coordmap.panels[i5]);
           var xdist = 0;

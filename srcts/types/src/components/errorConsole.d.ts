@@ -10,6 +10,10 @@ export declare class ShinyErrorMessage extends LitElement {
     copyErrorToClipboard(): Promise<void>;
     render(): import("lit-html").TemplateResult<1>;
 }
+type ShinyClientMessage = {
+    headline?: string;
+    message: string;
+};
 /**
  * Function to show an error message to user in shiny-error-message web
  * component. Only shows the error if we're in development mode.
@@ -18,3 +22,7 @@ export declare class ShinyErrorMessage extends LitElement {
  * object.
  */
 export declare function showErrorInClientConsole(e: unknown): void;
+export declare class ShinyClientMessageEvent extends CustomEvent<ShinyClientMessage> {
+    constructor(detail: ShinyClientMessage);
+}
+export {};

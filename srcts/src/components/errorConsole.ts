@@ -541,3 +541,20 @@ export function showErrorInClientConsole(e: unknown): void {
 
   showMessageInClientConsole({ headline, message: errorMsg });
 }
+
+export class ShinyClientMessageEvent extends CustomEvent<ShinyClientMessage> {
+  constructor(detail: ShinyClientMessage) {
+    super("shiny:client-message", { detail, bubbles: true, cancelable: true });
+  }
+}
+
+window.addEventListener("shiny:client-message", (ev: Event) => {
+  if (!(ev instanceof CustomEvent)) {
+    return;
+  }
+  const { headline, message } = ev.detail;
+  if (!message) {
+    return;
+  }
+  showMessageInClientConsole({ headline, message });
+});

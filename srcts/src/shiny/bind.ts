@@ -78,7 +78,7 @@ const bindingsRegistry = (() => {
    * returns an ok status.
    */
   function checkValidity():
-    | { status: "error"; error: ShinyClientMessageEvent }
+    | { status: "error"; event: ShinyClientMessageEvent }
     | { status: "ok" } {
     type BindingCounts = { [T in BindingTypes]: number };
     const duplicateIds = new Map<string, BindingCounts>();
@@ -113,7 +113,7 @@ const bindingsRegistry = (() => {
 
     return {
       status: "error",
-      error: new ShinyClientMessageEvent({
+      event: new ShinyClientMessageEvent({
         headline: "Duplicate input/output IDs found",
         message: `The following ${
           duplicateIds.size === 1 ? "ID was" : "IDs were"
@@ -417,7 +417,7 @@ async function _bindAll(
   const bindingValidity = bindingsRegistry.checkValidity();
   if (bindingValidity.status === "error") {
     const scopeElement = scope instanceof HTMLElement ? scope : scope.get(0);
-    (scopeElement || window).dispatchEvent(bindingValidity.error);
+    (scopeElement || window).dispatchEvent(bindingValidity.event);
   }
 
   return currentInputs;

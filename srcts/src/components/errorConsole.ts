@@ -497,6 +497,11 @@ function showMessageInClientConsole({
   headline = "",
   message,
 }: ShinyClientMessage): void {
+  if (!Shiny.inDevMode()) {
+    console.warn(`[shiny] ${headline}${headline ? " - " : ""}${message}`);
+    return;
+  }
+
   // Check to see if an Error Console Container element already exists. If it
   // doesn't we need to add it before putting an error on the screen
   let errorConsoleContainer = document.querySelector("shiny-error-console");
@@ -520,11 +525,6 @@ function showMessageInClientConsole({
  * object.
  */
 export function showErrorInClientConsole(e: unknown): void {
-  if (!Shiny.inDevMode()) {
-    // If we're in production, don't show the error to the user
-    return;
-  }
-
   let errorMsg: string | null = null;
   let headline = "Error on client while running Shiny app";
 

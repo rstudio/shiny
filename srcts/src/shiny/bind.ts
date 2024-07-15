@@ -417,13 +417,7 @@ async function _bindAll(
   const bindingValidity = bindingsRegistry.checkValidity();
   if (bindingValidity.status === "error") {
     const scopeElement = scope instanceof HTMLElement ? scope : scope.get(0);
-    // Only show the message if we're in dev mode. Otherwise, log a warning.
-    if (scopeElement && Shiny.inDevMode()) {
-      scopeElement.dispatchEvent(bindingValidity.error);
-    } else {
-      const { headline = "", message } = bindingValidity.error.detail;
-      console.warn(`[shiny] ${headline}${headline ? " - " : ""}${message}`);
-    }
+    (scopeElement || window).dispatchEvent(bindingValidity.error);
   }
 
   return currentInputs;

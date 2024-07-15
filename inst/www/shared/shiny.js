@@ -18967,7 +18967,7 @@
     headline: {},
     message: {}
   });
-  _defineProperty11(ShinyErrorMessage, "styles", [i(_templateObject5 || (_templateObject5 = _taggedTemplateLiteral(['\n      :host {\n        color: var(--red-11);\n        display: block;\n        font-size: var(--font-md);\n\n        position: relative;\n        --icon-size: var(--font-lg)\n\n        /* Reset box sizing */\n        box-sizing: border-box;\n      }\n\n      .container {\n        display: flex;\n        gap: var(--space-2);\n      }\n\n      .contents {\n        width: 40ch;\n        display: flex;\n        flex-direction: column;\n        gap: var(--space-1);\n        padding-block-start: 0;\n        padding-block-end: var(--space-3);\n        overflow: auto;\n      }\n\n      :host(:last-of-type) .contents {\n\n        padding-block-end: var(--space-1);\n      }\n\n      .contents > h3 {\n        font-size: 1em;\n        font-weight: 500;\n        color: var(--red-12);\n      }\n\n      .contents > * {\n        margin-block: 0;\n      }\n\n      .error-message {\n        font-family: "Courier New", Courier, monospace;\n      }\n\n      .decoration-container {\n        flex-shrink: 0;\n        position: relative;\n\n        --line-w: 2px;\n        --dot-size: 11px;\n      }\n\n      :host(:hover) .decoration-container {\n        --scale: 1.25;\n      }\n\n      .vertical-line {\n        margin-inline: auto;\n        width: var(--line-w);\n        height: 100%;\n\n        background-color: var(--red-10);\n      }\n\n      :host(:first-of-type) .vertical-line {\n        height: calc(100% - var(--dot-size));\n        margin-top: var(--dot-size);\n      }\n\n      .dot {\n        position: absolute;\n        width: var(--dot-size);\n        height: var(--dot-size);\n        top: calc(-1px +  var(--dot-size) / 2);\n        left: calc(50% - var(--dot-size) / 2);\n        border-radius: 100%;\n        transform: scale(var(--scale, 1));\n\n        color: var(--red-6);\n        background-color: var(--red-10);\n      }\n\n      .actions {\n        transform: scaleX(0);\n        transition: transform calc(var(--animation-speed) / 2) ease-in-out;\n        display: flex;\n        justify-content: center;\n        flex-direction: column;\n      }\n\n      /* Delay transition on mouseout so the buttons don\'t jump away if the user\n      overshoots them with their mouse */\n      :host(:not(:hover)) .actions {\n        transition-delay: 0.15s;\n      }\n\n      :host(:hover) .actions {\n        transform: scaleX(1);\n      }\n\n      ', "\n\n      .copy-button {\n        padding: 0;\n        width: var(--space-8);\n        height: var(--space-8);\n        position: relative;\n        --pad: var(--space-2);\n      }\n\n      .copy-button-inner {\n        position: relative;\n        width: 100%;\n        height: 100%;\n        border-radius: inherit;\n        transition: transform 0.5s;\n        transform-style: preserve-3d;\n      }\n\n      /* Animate flipping to the other side when the .copy-success class is\n      added to the host */\n      :host(.copy-success) .copy-button-inner {\n        transform: rotateY(180deg);\n      }\n\n      /* Position the front and back side */\n      .copy-button .front,\n      .copy-button .back {\n        --side: calc(100% - 2 * var(--pad));\n        position: absolute;\n        inset: var(--pad);\n        height: var(--side);\n        width: var(--side);\n        -webkit-backface-visibility: hidden; /* Safari */\n        backface-visibility: hidden;\n      }\n\n      .copy-button:hover .copy-button-inner {\n        background-color: var(--gray-2);\n      }\n\n      /* Style the back side */\n      .copy-button .back {\n        --pad: var(--space-1);\n        color: var(--green-8);\n        transform: rotateY(180deg);\n      }\n    "])), buttonStyles)]);
+  _defineProperty11(ShinyErrorMessage, "styles", [i(_templateObject5 || (_templateObject5 = _taggedTemplateLiteral(['\n      :host {\n        color: var(--red-11);\n        display: block;\n        font-size: var(--font-md);\n\n        position: relative;\n        --icon-size: var(--font-lg)\n\n        /* Reset box sizing */\n        box-sizing: border-box;\n      }\n\n      .container {\n        display: flex;\n        gap: var(--space-2);\n      }\n\n      .contents {\n        width: 40ch;\n        display: flex;\n        flex-direction: column;\n        gap: var(--space-1);\n        padding-block-start: 0;\n        padding-block-end: var(--space-3);\n        overflow: auto;\n      }\n\n      :host(:last-of-type) .contents {\n\n        padding-block-end: var(--space-1);\n      }\n\n      .contents > h3 {\n        font-size: 1em;\n        font-weight: 500;\n        color: var(--red-12);\n      }\n\n      .contents > * {\n        margin-block: 0;\n      }\n\n      .error-message {\n        font-family: "Courier New", Courier, monospace;\n        white-space: pre-wrap;\n      }\n\n      .decoration-container {\n        flex-shrink: 0;\n        position: relative;\n\n        --line-w: 2px;\n        --dot-size: 11px;\n      }\n\n      :host(:hover) .decoration-container {\n        --scale: 1.25;\n      }\n\n      .vertical-line {\n        margin-inline: auto;\n        width: var(--line-w);\n        height: 100%;\n\n        background-color: var(--red-10);\n      }\n\n      :host(:first-of-type) .vertical-line {\n        height: calc(100% - var(--dot-size));\n        margin-top: var(--dot-size);\n      }\n\n      .dot {\n        position: absolute;\n        width: var(--dot-size);\n        height: var(--dot-size);\n        top: calc(-1px +  var(--dot-size) / 2);\n        left: calc(50% - var(--dot-size) / 2);\n        border-radius: 100%;\n        transform: scale(var(--scale, 1));\n\n        color: var(--red-6);\n        background-color: var(--red-10);\n      }\n\n      .actions {\n        transform: scaleX(0);\n        transition: transform calc(var(--animation-speed) / 2) ease-in-out;\n        display: flex;\n        justify-content: center;\n        flex-direction: column;\n      }\n\n      /* Delay transition on mouseout so the buttons don\'t jump away if the user\n      overshoots them with their mouse */\n      :host(:not(:hover)) .actions {\n        transition-delay: 0.15s;\n      }\n\n      :host(:hover) .actions {\n        transform: scaleX(1);\n      }\n\n      ', "\n\n      .copy-button {\n        padding: 0;\n        width: var(--space-8);\n        height: var(--space-8);\n        position: relative;\n        --pad: var(--space-2);\n      }\n\n      .copy-button-inner {\n        position: relative;\n        width: 100%;\n        height: 100%;\n        border-radius: inherit;\n        transition: transform 0.5s;\n        transform-style: preserve-3d;\n      }\n\n      /* Animate flipping to the other side when the .copy-success class is\n      added to the host */\n      :host(.copy-success) .copy-button-inner {\n        transform: rotateY(180deg);\n      }\n\n      /* Position the front and back side */\n      .copy-button .front,\n      .copy-button .back {\n        --side: calc(100% - 2 * var(--pad));\n        position: absolute;\n        inset: var(--pad);\n        height: var(--side);\n        width: var(--side);\n        -webkit-backface-visibility: hidden; /* Safari */\n        backface-visibility: hidden;\n      }\n\n      .copy-button:hover .copy-button-inner {\n        background-color: var(--gray-2);\n      }\n\n      /* Style the back side */\n      .copy-button .back {\n        --pad: var(--space-1);\n        color: var(--green-8);\n        transform: rotateY(180deg);\n      }\n    "])), buttonStyles)]);
   customElements.define("shiny-error-message", ShinyErrorMessage);
   function showMessageInClientConsole(_ref) {
     var _ref$headline = _ref.headline, headline = _ref$headline === void 0 ? "" : _ref$headline, message = _ref.message;
@@ -20507,6 +20507,7 @@
     var bindings = /* @__PURE__ */ new Map();
     function checkValidity() {
       var duplicateIds = /* @__PURE__ */ new Map();
+      var status = "ok";
       bindings.forEach(function(idTypes, id) {
         var counts = {
           input: 0,
@@ -20515,8 +20516,16 @@
         idTypes.forEach(function(type) {
           return counts[type] += 1;
         });
-        if (counts.input + counts.output > 1) {
-          duplicateIds.set(id, counts);
+        if (counts.input + counts.output < 2) {
+          return;
+        }
+        duplicateIds.set(id, counts);
+        if (status === "error")
+          return;
+        if (counts.input > 1 || counts.output > 1) {
+          status = "error";
+        } else {
+          status = "warning";
         }
       });
       if (duplicateIds.size === 0)
@@ -20530,11 +20539,21 @@
         }).join(" and ");
         return '- "'.concat(id, '": ').concat(messages);
       }).join("\n");
+      var message = "The following ".concat(duplicateIds.size === 1 ? "ID was" : "IDs were", " repeated across input and output bindings:\n").concat(duplicateIdMsg);
+      if (status === "warning") {
+        return {
+          status: "warning",
+          event: new ShinyClientMessageEvent({
+            headline: "Shared input/output IDs found",
+            message: message
+          })
+        };
+      }
       return {
         status: "error",
-        event: new ShinyClientMessageEvent({
+        error: new ShinyClientError({
           headline: "Duplicate input/output IDs found",
-          message: "The following ".concat(duplicateIds.size === 1 ? "ID was" : "IDs were", " repeated:\n").concat(duplicateIdMsg)
+          message: message
         })
       };
     }
@@ -20779,12 +20798,23 @@
             case 2:
               currentInputs = bindInputs(shinyCtx, scope);
               bindingValidity = bindingsRegistry.checkValidity();
-              if (bindingValidity.status === "error") {
-                scopeElement = scope instanceof HTMLElement ? scope : scope.get(0);
-                (scopeElement || window).dispatchEvent(bindingValidity.event);
+              if (!(bindingValidity.status === "warning")) {
+                _context2.next = 9;
+                break;
               }
+              scopeElement = scope instanceof HTMLElement ? scope : scope.get(0);
+              (scopeElement || window).dispatchEvent(bindingValidity.event);
+              _context2.next = 11;
+              break;
+            case 9:
+              if (!(bindingValidity.status === "error")) {
+                _context2.next = 11;
+                break;
+              }
+              throw bindingValidity.error;
+            case 11:
               return _context2.abrupt("return", currentInputs);
-            case 6:
+            case 12:
             case "end":
               return _context2.stop();
           }

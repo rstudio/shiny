@@ -2,11 +2,11 @@ import $ from "jquery";
 import type { InputBinding, OutputBinding } from "../bindings";
 import { OutputBindingAdapter } from "../bindings/outputAdapter";
 import type { BindingRegistry } from "../bindings/registry";
+import { ShinyClientMessageEvent } from "../components/errorConsole";
 import type {
   InputRateDecorator,
   InputValidateDecorator,
 } from "../inputPolicies";
-import { ShinyClientError } from "./error";
 import { shinyAppBindOutput, shinyAppUnbindOutput } from "./initedMethods";
 import { sendImageSizeFns } from "./sendImageSize";
 
@@ -78,7 +78,7 @@ const bindingsRegistry = (() => {
    * returns an ok status.
    */
   function checkValidity():
-    | { status: "error"; error: ShinyClientError }
+    | { status: "error"; error: ShinyClientMessageEvent }
     | { status: "ok" } {
     type BindingCounts = { [T in BindingTypes]: number };
     const duplicateIds = new Map<string, BindingCounts>();
@@ -121,7 +121,7 @@ const bindingsRegistry = (() => {
 
     return {
       status: "error",
-      error: new ShinyClientError({
+      error: new ShinyClientMessageEvent({
         headline: "Duplicate input/output IDs found",
         message: `The following ${
           duplicateIds.size === 1 ? "ID was" : "IDs were"
@@ -424,11 +424,13 @@ async function _bindAll(
   // re-run, and then see the next collision, etc.
   const bindingValidity = bindingsRegistry.checkValidity();
   if (bindingValidity.status === "error") {
-    // Only throw if we're in dev mode. Otherwise, just log a warning.
-    if (Shiny.inDevMode()) {
-      throw bindingValidity.error;
+    const scopeElement = scope instanceof HTMLElement ? scope : scope.get(0);
+    // Only show the message if we're in dev mode. Otherwise, log a warning.
+    if (scopeElement && Shiny.inDevMode()) {
+      scopeElement.dispatchEvent(bindingValidity.error);
     } else {
-      console.warn("[shiny] " + bindingValidity.error.message);
+      const { headline = "", message } = bindingValidity.error.detail;
+      console.warn(`[shiny] ${headline}${headline ? " - " : ""}${message}`);
     }
   }
 

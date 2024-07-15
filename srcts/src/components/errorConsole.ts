@@ -306,6 +306,7 @@ export class ShinyErrorMessage extends LitElement {
 
       .error-message {
         font-family: "Courier New", Courier, monospace;
+        white-space: pre-wrap;
       }
 
       .decoration-container {

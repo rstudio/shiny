@@ -7,6 +7,7 @@ import type {
   InputRateDecorator,
   InputValidateDecorator,
 } from "../inputPolicies";
+import { ShinyClientError } from "./error";
 import { shinyAppBindOutput, shinyAppUnbindOutput } from "./initedMethods";
 import { sendImageSizeFns } from "./sendImageSize";
 
@@ -78,10 +79,18 @@ const bindingsRegistry = (() => {
    * returns an ok status.
    */
   function checkValidity():
-    | { status: "error"; event: ShinyClientMessageEvent }
+    | {
+        status: "error";
+        error: ShinyClientError;
+      }
+    | {
+        status: "warning";
+        event: ShinyClientMessageEvent;
+      }
     | { status: "ok" } {
     type BindingCounts = { [T in BindingTypes]: number };
     const duplicateIds = new Map<string, BindingCounts>();
+    let status = "ok";
 
     // count duplicate IDs of each binding type
     bindings.forEach((idTypes, id) => {
@@ -89,10 +98,20 @@ const bindingsRegistry = (() => {
 
       idTypes.forEach((type) => (counts[type] += 1));
 
-      // If we have duplicated IDs, then add them to the set of duplicated IDs
-      // to be reported to the user.
-      if (counts.input + counts.output > 1) {
-        duplicateIds.set(id, counts);
+      if (counts.input + counts.output < 2) {
+        return;
+      }
+      // We have duplicated IDs, add them to the set of duplicated IDs to be
+      // reported to the user.
+      duplicateIds.set(id, counts);
+
+      if (status === "error") return;
+      if (counts.input > 1 || counts.output > 1) {
+        // Duplicates within a single binding type are an error.
+        status = "error";
+      } else {
+        // Duplicates across binding types are a warning.
+        status = "warning";
       }
     });
 
@@ -111,13 +130,25 @@ const bindingsRegistry = (() => {
       })
       .join("\n");
 
+    const message = `The following ${
+      duplicateIds.size === 1 ? "ID was" : "IDs were"
+    } repeated across input and output bindings:\n${duplicateIdMsg}`;
+
+    if (status === "warning") {
+      return {
+        status: "warning",
+        event: new ShinyClientMessageEvent({
+          headline: "Shared input/output IDs found",
+          message: message,
+        }),
+      };
+    }
+
     return {
       status: "error",
-      event: new ShinyClientMessageEvent({
+      error: new ShinyClientError({
         headline: "Duplicate input/output IDs found",
-        message: `The following ${
-          duplicateIds.size === 1 ? "ID was" : "IDs were"
-        } repeated:\n${duplicateIdMsg}`,
+        message,
       }),
     };
   }
@@ -415,9 +446,11 @@ async function _bindAll(
   // we threw as we saw collisions then the user would fix the first collision,
   // re-run, and then see the next collision, etc.
   const bindingValidity = bindingsRegistry.checkValidity();
-  if (bindingValidity.status === "error") {
+  if (bindingValidity.status === "warning") {
     const scopeElement = scope instanceof HTMLElement ? scope : scope.get(0);
     (scopeElement || window).dispatchEvent(bindingValidity.event);
+  } else if (bindingValidity.status === "error") {
+    throw bindingValidity.error;
   }
 
   return currentInputs;

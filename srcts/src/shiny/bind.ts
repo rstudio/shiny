@@ -89,14 +89,6 @@ const bindingsRegistry = (() => {
 
       idTypes.forEach((type) => (counts[type] += 1));
 
-      // If there's a single duplication of ids across both binding types, then
-      // when we're not in devmode, we allow this to pass because a good amount of
-      // existing applications use this pattern even though its invalid. Eventually
-      // this behavior should be removed.
-      if (counts.input === 1 && counts.output === 1 && !Shiny.inDevMode()) {
-        return;
-      }
-
       // If we have duplicated IDs, then add them to the set of duplicated IDs
       // to be reported to the user.
       if (counts.input + counts.output > 1) {

@@ -1,531 +1,179 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>/404.html</loc>
-  </url>
-  <url>
-    <loc>/CONTRIBUTING.html</loc>
-  </url>
-  <url>
-    <loc>/LICENSE-text.html</loc>
-  </url>
-  <url>
-    <loc>/TODO-promises.html</loc>
-  </url>
-  <url>
-    <loc>/authors.html</loc>
-  </url>
-  <url>
-    <loc>/index.html</loc>
-  </url>
-  <url>
-    <loc>/news/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ExtendedTask.html</loc>
-  </url>
-  <url>
-    <loc>/reference/MockShinySession.html</loc>
-  </url>
-  <url>
-    <loc>/reference/NS.html</loc>
-  </url>
-  <url>
-    <loc>/reference/Progress.html</loc>
-  </url>
-  <url>
-    <loc>/reference/absolutePanel.html</loc>
-  </url>
-  <url>
-    <loc>/reference/actionButton.html</loc>
-  </url>
-  <url>
-    <loc>/reference/applyInputHandlers.html</loc>
-  </url>
-  <url>
-    <loc>/reference/bindCache.html</loc>
-  </url>
-  <url>
-    <loc>/reference/bindEvent.html</loc>
-  </url>
-  <url>
-    <loc>/reference/bookmarkButton.html</loc>
-  </url>
-  <url>
-    <loc>/reference/bootstrapLib.html</loc>
-  </url>
-  <url>
-    <loc>/reference/bootstrapPage.html</loc>
-  </url>
-  <url>
-    <loc>/reference/brushOpts.html</loc>
-  </url>
-  <url>
-    <loc>/reference/brushedPoints.html</loc>
-  </url>
-  <url>
-    <loc>/reference/busyIndicatorOptions.html</loc>
-  </url>
-  <url>
-    <loc>/reference/callModule.html</loc>
-  </url>
-  <url>
-    <loc>/reference/checkboxGroupInput.html</loc>
-  </url>
-  <url>
-    <loc>/reference/checkboxInput.html</loc>
-  </url>
-  <url>
-    <loc>/reference/clickOpts.html</loc>
-  </url>
-  <url>
-    <loc>/reference/column.html</loc>
-  </url>
-  <url>
-    <loc>/reference/conditionalPanel.html</loc>
-  </url>
-  <url>
-    <loc>/reference/createRenderFunction.html</loc>
-  </url>
-  <url>
-    <loc>/reference/createWebDependency.html</loc>
-  </url>
-  <url>
-    <loc>/reference/dateInput.html</loc>
-  </url>
-  <url>
-    <loc>/reference/dateRangeInput.html</loc>
-  </url>
-  <url>
-    <loc>/reference/debounce.html</loc>
-  </url>
-  <url>
-    <loc>/reference/devmode.html</loc>
-  </url>
-  <url>
-    <loc>/reference/diskCache.html</loc>
-  </url>
-  <url>
-    <loc>/reference/domains.html</loc>
-  </url>
-  <url>
-    <loc>/reference/downloadButton.html</loc>
-  </url>
-  <url>
-    <loc>/reference/downloadHandler.html</loc>
-  </url>
-  <url>
-    <loc>/reference/enableBookmarking.html</loc>
-  </url>
-  <url>
-    <loc>/reference/exportTestValues.html</loc>
-  </url>
-  <url>
-    <loc>/reference/exprToFunction.html</loc>
-  </url>
-  <url>
-    <loc>/reference/fileInput.html</loc>
-  </url>
-  <url>
-    <loc>/reference/fillPage.html</loc>
-  </url>
-  <url>
-    <loc>/reference/fillRow.html</loc>
-  </url>
-  <url>
-    <loc>/reference/fixedPage.html</loc>
-  </url>
-  <url>
-    <loc>/reference/flowLayout.html</loc>
-  </url>
-  <url>
-    <loc>/reference/fluidPage.html</loc>
-  </url>
-  <url>
-    <loc>/reference/freezeReactiveValue.html</loc>
-  </url>
-  <url>
-    <loc>/reference/getCurrentOutputInfo.html</loc>
-  </url>
-  <url>
-    <loc>/reference/getCurrentTheme.html</loc>
-  </url>
-  <url>
-    <loc>/reference/getQueryString.html</loc>
-  </url>
-  <url>
-    <loc>/reference/headerPanel.html</loc>
-  </url>
-  <url>
-    <loc>/reference/helpText.html</loc>
-  </url>
-  <url>
-    <loc>/reference/htmlOutput.html</loc>
-  </url>
-  <url>
-    <loc>/reference/httpResponse.html</loc>
-  </url>
-  <url>
-    <loc>/reference/icon.html</loc>
-  </url>
-  <url>
-    <loc>/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/inputPanel.html</loc>
-  </url>
-  <url>
-    <loc>/reference/insertTab.html</loc>
-  </url>
-  <url>
-    <loc>/reference/insertUI.html</loc>
-  </url>
-  <url>
-    <loc>/reference/invalidateLater.html</loc>
-  </url>
-  <url>
-    <loc>/reference/is.reactivevalues.html</loc>
-  </url>
-  <url>
-    <loc>/reference/isRunning.html</loc>
-  </url>
-  <url>
-    <loc>/reference/isTruthy.html</loc>
-  </url>
-  <url>
-    <loc>/reference/isolate.html</loc>
-  </url>
-  <url>
-    <loc>/reference/knitr_methods.html</loc>
-  </url>
-  <url>
-    <loc>/reference/loadSupport.html</loc>
-  </url>
-  <url>
-    <loc>/reference/makeReactiveBinding.html</loc>
-  </url>
-  <url>
-    <loc>/reference/markOutputAttrs.html</loc>
-  </url>
-  <url>
-    <loc>/reference/markRenderFunction.html</loc>
-  </url>
-  <url>
-    <loc>/reference/markdown.html</loc>
-  </url>
-  <url>
-    <loc>/reference/maskReactiveContext.html</loc>
-  </url>
-  <url>
-    <loc>/reference/memoryCache.html</loc>
-  </url>
-  <url>
-    <loc>/reference/modalDialog.html</loc>
-  </url>
-  <url>
-    <loc>/reference/moduleServer.html</loc>
-  </url>
-  <url>
-    <loc>/reference/navbarPage.html</loc>
-  </url>
-  <url>
-    <loc>/reference/navlistPanel.html</loc>
-  </url>
-  <url>
-    <loc>/reference/numericInput.html</loc>
-  </url>
-  <url>
-    <loc>/reference/observe.html</loc>
-  </url>
-  <url>
-    <loc>/reference/observeEvent.html</loc>
-  </url>
-  <url>
-    <loc>/reference/onBookmark.html</loc>
-  </url>
-  <url>
-    <loc>/reference/onFlush.html</loc>
-  </url>
-  <url>
-    <loc>/reference/onStop.html</loc>
-  </url>
-  <url>
-    <loc>/reference/outputOptions.html</loc>
-  </url>
-  <url>
-    <loc>/reference/pageWithSidebar.html</loc>
-  </url>
-  <url>
-    <loc>/reference/parseQueryString.html</loc>
-  </url>
-  <url>
-    <loc>/reference/passwordInput.html</loc>
-  </url>
-  <url>
-    <loc>/reference/plotOutput.html</loc>
-  </url>
-  <url>
-    <loc>/reference/plotPNG.html</loc>
-  </url>
-  <url>
-    <loc>/reference/radioButtons.html</loc>
-  </url>
-  <url>
-    <loc>/reference/reactive.html</loc>
-  </url>
-  <url>
-    <loc>/reference/reactiveConsole.html</loc>
-  </url>
-  <url>
-    <loc>/reference/reactiveFileReader.html</loc>
-  </url>
-  <url>
-    <loc>/reference/reactivePoll.html</loc>
-  </url>
-  <url>
-    <loc>/reference/reactiveTimer.html</loc>
-  </url>
-  <url>
-    <loc>/reference/reactiveVal.html</loc>
-  </url>
-  <url>
-    <loc>/reference/reactiveValues.html</loc>
-  </url>
-  <url>
-    <loc>/reference/reactiveValuesToList.html</loc>
-  </url>
-  <url>
-    <loc>/reference/reactlog.html</loc>
-  </url>
-  <url>
-    <loc>/reference/reexports.html</loc>
-  </url>
-  <url>
-    <loc>/reference/registerInputHandler.html</loc>
-  </url>
-  <url>
-    <loc>/reference/registerThemeDependency.html</loc>
-  </url>
-  <url>
-    <loc>/reference/removeInputHandler.html</loc>
-  </url>
-  <url>
-    <loc>/reference/renderCachedPlot.html</loc>
-  </url>
-  <url>
-    <loc>/reference/renderDataTable.html</loc>
-  </url>
-  <url>
-    <loc>/reference/renderImage.html</loc>
-  </url>
-  <url>
-    <loc>/reference/renderPlot.html</loc>
-  </url>
-  <url>
-    <loc>/reference/renderPrint.html</loc>
-  </url>
-  <url>
-    <loc>/reference/renderTable.html</loc>
-  </url>
-  <url>
-    <loc>/reference/renderUI.html</loc>
-  </url>
-  <url>
-    <loc>/reference/repeatable.html</loc>
-  </url>
-  <url>
-    <loc>/reference/req.html</loc>
-  </url>
-  <url>
-    <loc>/reference/resourcePaths.html</loc>
-  </url>
-  <url>
-    <loc>/reference/restoreInput.html</loc>
-  </url>
-  <url>
-    <loc>/reference/runApp.html</loc>
-  </url>
-  <url>
-    <loc>/reference/runExample.html</loc>
-  </url>
-  <url>
-    <loc>/reference/runGadget.html</loc>
-  </url>
-  <url>
-    <loc>/reference/runTests.html</loc>
-  </url>
-  <url>
-    <loc>/reference/runUrl.html</loc>
-  </url>
-  <url>
-    <loc>/reference/safeError.html</loc>
-  </url>
-  <url>
-    <loc>/reference/selectInput.html</loc>
-  </url>
-  <url>
-    <loc>/reference/serverInfo.html</loc>
-  </url>
-  <url>
-    <loc>/reference/session.html</loc>
-  </url>
-  <url>
-    <loc>/reference/setBookmarkExclude.html</loc>
-  </url>
-  <url>
-    <loc>/reference/setSerializer.html</loc>
-  </url>
-  <url>
-    <loc>/reference/shiny-package.html</loc>
-  </url>
-  <url>
-    <loc>/reference/shiny.appobj.html</loc>
-  </url>
-  <url>
-    <loc>/reference/shinyApp.html</loc>
-  </url>
-  <url>
-    <loc>/reference/shinyAppTemplate.html</loc>
-  </url>
-  <url>
-    <loc>/reference/shinyDeprecated.html</loc>
-  </url>
-  <url>
-    <loc>/reference/shinyOptions.html</loc>
-  </url>
-  <url>
-    <loc>/reference/shinyServer.html</loc>
-  </url>
-  <url>
-    <loc>/reference/shinyUI.html</loc>
-  </url>
-  <url>
-    <loc>/reference/showBookmarkUrlModal.html</loc>
-  </url>
-  <url>
-    <loc>/reference/showModal.html</loc>
-  </url>
-  <url>
-    <loc>/reference/showNotification.html</loc>
-  </url>
-  <url>
-    <loc>/reference/showTab.html</loc>
-  </url>
-  <url>
-    <loc>/reference/sidebarLayout.html</loc>
-  </url>
-  <url>
-    <loc>/reference/sizeGrowthRatio.html</loc>
-  </url>
-  <url>
-    <loc>/reference/sliderInput.html</loc>
-  </url>
-  <url>
-    <loc>/reference/snapshotExclude.html</loc>
-  </url>
-  <url>
-    <loc>/reference/snapshotPreprocessInput.html</loc>
-  </url>
-  <url>
-    <loc>/reference/snapshotPreprocessOutput.html</loc>
-  </url>
-  <url>
-    <loc>/reference/splitLayout.html</loc>
-  </url>
-  <url>
-    <loc>/reference/stacktrace.html</loc>
-  </url>
-  <url>
-    <loc>/reference/stopApp.html</loc>
-  </url>
-  <url>
-    <loc>/reference/submitButton.html</loc>
-  </url>
-  <url>
-    <loc>/reference/tabPanel.html</loc>
-  </url>
-  <url>
-    <loc>/reference/tabsetPanel.html</loc>
-  </url>
-  <url>
-    <loc>/reference/testServer.html</loc>
-  </url>
-  <url>
-    <loc>/reference/textAreaInput.html</loc>
-  </url>
-  <url>
-    <loc>/reference/textInput.html</loc>
-  </url>
-  <url>
-    <loc>/reference/textOutput.html</loc>
-  </url>
-  <url>
-    <loc>/reference/titlePanel.html</loc>
-  </url>
-  <url>
-    <loc>/reference/updateActionButton.html</loc>
-  </url>
-  <url>
-    <loc>/reference/updateCheckboxGroupInput.html</loc>
-  </url>
-  <url>
-    <loc>/reference/updateCheckboxInput.html</loc>
-  </url>
-  <url>
-    <loc>/reference/updateDateInput.html</loc>
-  </url>
-  <url>
-    <loc>/reference/updateDateRangeInput.html</loc>
-  </url>
-  <url>
-    <loc>/reference/updateNumericInput.html</loc>
-  </url>
-  <url>
-    <loc>/reference/updateQueryString.html</loc>
-  </url>
-  <url>
-    <loc>/reference/updateRadioButtons.html</loc>
-  </url>
-  <url>
-    <loc>/reference/updateSelectInput.html</loc>
-  </url>
-  <url>
-    <loc>/reference/updateSliderInput.html</loc>
-  </url>
-  <url>
-    <loc>/reference/updateTabsetPanel.html</loc>
-  </url>
-  <url>
-    <loc>/reference/updateTextAreaInput.html</loc>
-  </url>
-  <url>
-    <loc>/reference/updateTextInput.html</loc>
-  </url>
-  <url>
-    <loc>/reference/urlModal.html</loc>
-  </url>
-  <url>
-    <loc>/reference/useBusyIndicators.html</loc>
-  </url>
-  <url>
-    <loc>/reference/validate.html</loc>
-  </url>
-  <url>
-    <loc>/reference/varSelectInput.html</loc>
-  </url>
-  <url>
-    <loc>/reference/verticalLayout.html</loc>
-  </url>
-  <url>
-    <loc>/reference/viewer.html</loc>
-  </url>
-  <url>
-    <loc>/reference/wellPanel.html</loc>
-  </url>
-  <url>
-    <loc>/reference/withMathJax.html</loc>
-  </url>
-  <url>
-    <loc>/reference/withProgress.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>/404.html</loc></url>
+<url><loc>/CONTRIBUTING.html</loc></url>
+<url><loc>/LICENSE-text.html</loc></url>
+<url><loc>/TODO-promises.html</loc></url>
+<url><loc>/authors.html</loc></url>
+<url><loc>/index.html</loc></url>
+<url><loc>/news/index.html</loc></url>
+<url><loc>/reference/ExtendedTask.html</loc></url>
+<url><loc>/reference/MockShinySession.html</loc></url>
+<url><loc>/reference/NS.html</loc></url>
+<url><loc>/reference/Progress.html</loc></url>
+<url><loc>/reference/absolutePanel.html</loc></url>
+<url><loc>/reference/actionButton.html</loc></url>
+<url><loc>/reference/applyInputHandlers.html</loc></url>
+<url><loc>/reference/bindCache.html</loc></url>
+<url><loc>/reference/bindEvent.html</loc></url>
+<url><loc>/reference/bookmarkButton.html</loc></url>
+<url><loc>/reference/bootstrapLib.html</loc></url>
+<url><loc>/reference/bootstrapPage.html</loc></url>
+<url><loc>/reference/brushOpts.html</loc></url>
+<url><loc>/reference/brushedPoints.html</loc></url>
+<url><loc>/reference/busyIndicatorOptions.html</loc></url>
+<url><loc>/reference/callModule.html</loc></url>
+<url><loc>/reference/checkboxGroupInput.html</loc></url>
+<url><loc>/reference/checkboxInput.html</loc></url>
+<url><loc>/reference/clickOpts.html</loc></url>
+<url><loc>/reference/column.html</loc></url>
+<url><loc>/reference/conditionalPanel.html</loc></url>
+<url><loc>/reference/createRenderFunction.html</loc></url>
+<url><loc>/reference/createWebDependency.html</loc></url>
+<url><loc>/reference/dateInput.html</loc></url>
+<url><loc>/reference/dateRangeInput.html</loc></url>
+<url><loc>/reference/debounce.html</loc></url>
+<url><loc>/reference/devmode.html</loc></url>
+<url><loc>/reference/diskCache.html</loc></url>
+<url><loc>/reference/domains.html</loc></url>
+<url><loc>/reference/downloadButton.html</loc></url>
+<url><loc>/reference/downloadHandler.html</loc></url>
+<url><loc>/reference/enableBookmarking.html</loc></url>
+<url><loc>/reference/exportTestValues.html</loc></url>
+<url><loc>/reference/exprToFunction.html</loc></url>
+<url><loc>/reference/fileInput.html</loc></url>
+<url><loc>/reference/fillPage.html</loc></url>
+<url><loc>/reference/fillRow.html</loc></url>
+<url><loc>/reference/fixedPage.html</loc></url>
+<url><loc>/reference/flowLayout.html</loc></url>
+<url><loc>/reference/fluidPage.html</loc></url>
+<url><loc>/reference/freezeReactiveValue.html</loc></url>
+<url><loc>/reference/getCurrentOutputInfo.html</loc></url>
+<url><loc>/reference/getCurrentTheme.html</loc></url>
+<url><loc>/reference/getQueryString.html</loc></url>
+<url><loc>/reference/headerPanel.html</loc></url>
+<url><loc>/reference/helpText.html</loc></url>
+<url><loc>/reference/htmlOutput.html</loc></url>
+<url><loc>/reference/httpResponse.html</loc></url>
+<url><loc>/reference/icon.html</loc></url>
+<url><loc>/reference/index.html</loc></url>
+<url><loc>/reference/inputPanel.html</loc></url>
+<url><loc>/reference/insertTab.html</loc></url>
+<url><loc>/reference/insertUI.html</loc></url>
+<url><loc>/reference/invalidateLater.html</loc></url>
+<url><loc>/reference/is.reactivevalues.html</loc></url>
+<url><loc>/reference/isRunning.html</loc></url>
+<url><loc>/reference/isTruthy.html</loc></url>
+<url><loc>/reference/isolate.html</loc></url>
+<url><loc>/reference/knitr_methods.html</loc></url>
+<url><loc>/reference/loadSupport.html</loc></url>
+<url><loc>/reference/makeReactiveBinding.html</loc></url>
+<url><loc>/reference/markOutputAttrs.html</loc></url>
+<url><loc>/reference/markRenderFunction.html</loc></url>
+<url><loc>/reference/markdown.html</loc></url>
+<url><loc>/reference/maskReactiveContext.html</loc></url>
+<url><loc>/reference/memoryCache.html</loc></url>
+<url><loc>/reference/modalDialog.html</loc></url>
+<url><loc>/reference/moduleServer.html</loc></url>
+<url><loc>/reference/navbarPage.html</loc></url>
+<url><loc>/reference/navlistPanel.html</loc></url>
+<url><loc>/reference/numericInput.html</loc></url>
+<url><loc>/reference/observe.html</loc></url>
+<url><loc>/reference/observeEvent.html</loc></url>
+<url><loc>/reference/onBookmark.html</loc></url>
+<url><loc>/reference/onFlush.html</loc></url>
+<url><loc>/reference/onStop.html</loc></url>
+<url><loc>/reference/outputOptions.html</loc></url>
+<url><loc>/reference/pageWithSidebar.html</loc></url>
+<url><loc>/reference/parseQueryString.html</loc></url>
+<url><loc>/reference/passwordInput.html</loc></url>
+<url><loc>/reference/plotOutput.html</loc></url>
+<url><loc>/reference/plotPNG.html</loc></url>
+<url><loc>/reference/radioButtons.html</loc></url>
+<url><loc>/reference/reactive.html</loc></url>
+<url><loc>/reference/reactiveConsole.html</loc></url>
+<url><loc>/reference/reactiveFileReader.html</loc></url>
+<url><loc>/reference/reactivePoll.html</loc></url>
+<url><loc>/reference/reactiveTimer.html</loc></url>
+<url><loc>/reference/reactiveVal.html</loc></url>
+<url><loc>/reference/reactiveValues.html</loc></url>
+<url><loc>/reference/reactiveValuesToList.html</loc></url>
+<url><loc>/reference/reactlog.html</loc></url>
+<url><loc>/reference/reexports.html</loc></url>
+<url><loc>/reference/registerInputHandler.html</loc></url>
+<url><loc>/reference/registerThemeDependency.html</loc></url>
+<url><loc>/reference/removeInputHandler.html</loc></url>
+<url><loc>/reference/renderCachedPlot.html</loc></url>
+<url><loc>/reference/renderDataTable.html</loc></url>
+<url><loc>/reference/renderImage.html</loc></url>
+<url><loc>/reference/renderPlot.html</loc></url>
+<url><loc>/reference/renderPrint.html</loc></url>
+<url><loc>/reference/renderTable.html</loc></url>
+<url><loc>/reference/renderUI.html</loc></url>
+<url><loc>/reference/repeatable.html</loc></url>
+<url><loc>/reference/req.html</loc></url>
+<url><loc>/reference/resourcePaths.html</loc></url>
+<url><loc>/reference/restoreInput.html</loc></url>
+<url><loc>/reference/runApp.html</loc></url>
+<url><loc>/reference/runExample.html</loc></url>
+<url><loc>/reference/runGadget.html</loc></url>
+<url><loc>/reference/runTests.html</loc></url>
+<url><loc>/reference/runUrl.html</loc></url>
+<url><loc>/reference/safeError.html</loc></url>
+<url><loc>/reference/selectInput.html</loc></url>
+<url><loc>/reference/serverInfo.html</loc></url>
+<url><loc>/reference/session.html</loc></url>
+<url><loc>/reference/setBookmarkExclude.html</loc></url>
+<url><loc>/reference/setSerializer.html</loc></url>
+<url><loc>/reference/shiny-package.html</loc></url>
+<url><loc>/reference/shiny.appobj.html</loc></url>
+<url><loc>/reference/shinyApp.html</loc></url>
+<url><loc>/reference/shinyAppTemplate.html</loc></url>
+<url><loc>/reference/shinyDeprecated.html</loc></url>
+<url><loc>/reference/shinyOptions.html</loc></url>
+<url><loc>/reference/shinyServer.html</loc></url>
+<url><loc>/reference/shinyUI.html</loc></url>
+<url><loc>/reference/showBookmarkUrlModal.html</loc></url>
+<url><loc>/reference/showModal.html</loc></url>
+<url><loc>/reference/showNotification.html</loc></url>
+<url><loc>/reference/showTab.html</loc></url>
+<url><loc>/reference/sidebarLayout.html</loc></url>
+<url><loc>/reference/sizeGrowthRatio.html</loc></url>
+<url><loc>/reference/sliderInput.html</loc></url>
+<url><loc>/reference/snapshotExclude.html</loc></url>
+<url><loc>/reference/snapshotPreprocessInput.html</loc></url>
+<url><loc>/reference/snapshotPreprocessOutput.html</loc></url>
+<url><loc>/reference/splitLayout.html</loc></url>
+<url><loc>/reference/stacktrace.html</loc></url>
+<url><loc>/reference/stopApp.html</loc></url>
+<url><loc>/reference/submitButton.html</loc></url>
+<url><loc>/reference/tabPanel.html</loc></url>
+<url><loc>/reference/tabsetPanel.html</loc></url>
+<url><loc>/reference/testServer.html</loc></url>
+<url><loc>/reference/textAreaInput.html</loc></url>
+<url><loc>/reference/textInput.html</loc></url>
+<url><loc>/reference/textOutput.html</loc></url>
+<url><loc>/reference/titlePanel.html</loc></url>
+<url><loc>/reference/updateActionButton.html</loc></url>
+<url><loc>/reference/updateCheckboxGroupInput.html</loc></url>
+<url><loc>/reference/updateCheckboxInput.html</loc></url>
+<url><loc>/reference/updateDateInput.html</loc></url>
+<url><loc>/reference/updateDateRangeInput.html</loc></url>
+<url><loc>/reference/updateNumericInput.html</loc></url>
+<url><loc>/reference/updateQueryString.html</loc></url>
+<url><loc>/reference/updateRadioButtons.html</loc></url>
+<url><loc>/reference/updateSelectInput.html</loc></url>
+<url><loc>/reference/updateSliderInput.html</loc></url>
+<url><loc>/reference/updateTabsetPanel.html</loc></url>
+<url><loc>/reference/updateTextAreaInput.html</loc></url>
+<url><loc>/reference/updateTextInput.html</loc></url>
+<url><loc>/reference/urlModal.html</loc></url>
+<url><loc>/reference/useBusyIndicators.html</loc></url>
+<url><loc>/reference/validate.html</loc></url>
+<url><loc>/reference/varSelectInput.html</loc></url>
+<url><loc>/reference/verticalLayout.html</loc></url>
+<url><loc>/reference/viewer.html</loc></url>
+<url><loc>/reference/wellPanel.html</loc></url>
+<url><loc>/reference/withMathJax.html</loc></url>
+<url><loc>/reference/withProgress.html</loc></url>
 </urlset>
+

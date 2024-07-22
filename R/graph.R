@@ -1,4 +1,3 @@
-
 # domain is like session
 
 
@@ -54,8 +53,9 @@ reactIdStr <- function(num) {
 NULL
 
 
-#' @describeIn reactlog Return a list of reactive information.  Can be used in conjunction with
-#'   [reactlog::reactlog_show] to later display the reactlog graph.
+#' @describeIn reactlog Return a list of reactive information.  Can be used in
+#'   conjunction with [reactlog::reactlog_show] to later display the reactlog
+#'   graph.
 #' @export
 reactlog <- function() {
   rLog$asList()
@@ -70,27 +70,27 @@ reactlogShow <- function(time = TRUE) {
   reactlog::reactlog_show(reactlog(), time = time)
 }
 
-#' @describeIn reactlog Resets the entire reactlog stack.  Useful for debugging and removing all prior reactive history.
+#' @describeIn reactlog Resets the entire reactlog stack.  Useful for debugging
+#' and removing all prior reactive history.
 #' @export
 reactlogReset <- function() {
   rLog$reset()
 }
 
-#' @describeIn reactlog Adds "mark" entry into the reactlog stack. 
-#'   This is useful for programmatically adding a marked entry in the reactlog, rather than using your keyboard's key combination.
-#' 
-#'   For example, we can _mark_ the reactlog at the beginning of an `observeEvent`'s calculation:
-#'   ```r
-#'   observeEvent(input$my_event_trigger, {
-#'     # Add a mark in the reactlog
-#'     reactlogAddMark()
-#'     # Run your regular event reaction code here...
-#'     ....
-#'   })
-#'   ```
+#' @describeIn reactlog Adds "mark" entry into the reactlog stack. This is
+#' useful for programmatically adding a marked entry in the reactlog, rather
+#' than using your keyboard's key combination. For example, we can _mark_ the
+#' reactlog at the beginning of an `observeEvent`'s calculation:
+#'
+#' ```r
+#' observeEvent(input$my_event_trigger, {
+#'   # Add a mark in the reactlog
+#'   reactlogAddMark()
+#'   # Run your regular event reaction code here...
+#'   ....
+#' })
+#' ```
 #' @export
-#' @examples
-#' 
 reactlogAddMark <- function(session = getDefaultReactiveDomain()) {
   rLog$userMark(session)
 }
@@ -120,7 +120,6 @@ RLog <- R6Class(
   private = list(
     option = "shiny.reactlog",
     msgOption = "shiny.reactlog.console",
-
     appendEntry = function(domain, logEntry) {
       if (self$isLogging()) {
         sessionToken <- if (is.null(domain)) NULL else domain$token
@@ -135,20 +134,19 @@ RLog <- R6Class(
   public = list(
     msg = "<MessageLogger>",
     logStack = "<Stack>",
-
     noReactIdLabel = "NoCtxReactId",
     noReactId = reactIdStr("NoCtxReactId"),
     dummyReactIdLabel = "DummyReactId",
     dummyReactId = reactIdStr("DummyReactId"),
-
     asList = function() {
       ret <- self$logStack$as_list()
       attr(ret, "version") <- "1"
       ret
     },
-
     ctxIdStr = function(ctxId) {
-      if (is.null(ctxId) || identical(ctxId, "")) return(NULL)
+      if (is.null(ctxId) || identical(ctxId, "")) {
+        return(NULL)
+      }
       paste0("ctx", ctxId)
     },
     namesIdStr = function(reactId) {
@@ -163,7 +161,6 @@ RLog <- R6Class(
     keyIdStr = function(reactId, key) {
       paste0(reactId, "$", key)
     },
-
     valueStr = function(value, n = 200) {
       if (!self$isLogging()) {
         # return a placeholder string to avoid calling str
@@ -173,10 +170,9 @@ RLog <- R6Class(
         # only capture the first level of the object
         utils::capture.output(utils::str(value, max.level = 1))
       })
-      outputTxt <- paste0(output, collapse="\n")
+      outputTxt <- paste0(output, collapse = "\n")
       msg$shortenString(outputTxt, n = n)
     },
-
     initialize = function(rlogOption = "shiny.reactlog", msgOption = "shiny.reactlog.console") {
       private$option <- rlogOption
       private$msgOption <- msgOption
@@ -196,7 +192,6 @@ RLog <- R6Class(
     isLogging = function() {
       isTRUE(getOption(private$option, FALSE))
     },
-
     define = function(reactId, value, label, type, domain) {
       valueStr <- self$valueStr(value)
       if (msg$hasReact(reactId)) {
@@ -227,9 +222,10 @@ RLog <- R6Class(
     defineObserver = function(reactId, label, domain) {
       self$define(reactId, value = NULL, label, "observer", domain)
     },
-
     dependsOn = function(reactId, depOnReactId, ctxId, domain) {
-      if (is.null(reactId)) return()
+      if (is.null(reactId)) {
+        return()
+      }
       ctxId <- ctxIdStr(ctxId)
       msg$log("dependsOn:", msg$reactStr(reactId), " on", msg$reactStr(depOnReactId), msg$ctxStr(ctxId))
       private$appendEntry(domain, list(
@@ -242,7 +238,6 @@ RLog <- R6Class(
     dependsOnKey = function(reactId, depOnReactId, key, ctxId, domain) {
       self$dependsOn(reactId, self$keyIdStr(depOnReactId, key), ctxId, domain)
     },
-
     dependsOnRemove = function(reactId, depOnReactId, ctxId, domain) {
       ctxId <- self$ctxIdStr(ctxId)
       msg$log("dependsOnRemove:", msg$reactStr(reactId), " on", msg$reactStr(depOnReactId), msg$ctxStr(ctxId))
@@ -256,7 +251,6 @@ RLog <- R6Class(
     dependsOnKeyRemove = function(reactId, depOnReactId, key, ctxId, domain) {
       self$dependsOnRemove(reactId, self$keyIdStr(depOnReactId, key), ctxId, domain)
     },
-
     createContext = function(ctxId, label, type, prevCtxId, domain) {
       ctxId <- self$ctxIdStr(ctxId)
       prevCtxId <- self$ctxIdStr(prevCtxId)
@@ -267,10 +261,9 @@ RLog <- R6Class(
         label = msg$shortenString(label),
         type = type,
         prevCtxId = prevCtxId,
-        srcref = as.vector(attr(label, "srcref")), srcfile=attr(label, "srcfile")
+        srcref = as.vector(attr(label, "srcref")), srcfile = attr(label, "srcfile")
       ))
     },
-
     enter = function(reactId, ctxId, type, domain) {
       ctxId <- self$ctxIdStr(ctxId)
       if (identical(type, "isolate")) {
@@ -313,7 +306,6 @@ RLog <- R6Class(
         ))
       }
     },
-
     valueChange = function(reactId, value, domain) {
       valueStr <- self$valueStr(value)
       msg$log("valueChange:", msg$reactStr(reactId), msg$valueStr(valueStr))
@@ -335,8 +327,6 @@ RLog <- R6Class(
     valueChangeKey = function(reactId, key, value, domain) {
       self$valueChange(self$keyIdStr(reactId, key), value, domain)
     },
-
-
     invalidateStart = function(reactId, ctxId, type, domain) {
       ctxId <- self$ctxIdStr(ctxId)
       if (identical(type, "isolate")) {
@@ -379,7 +369,6 @@ RLog <- R6Class(
         ))
       }
     },
-
     invalidateLater = function(reactId, runningCtx, millis, domain) {
       msg$log("invalidateLater: ", millis, "ms", msg$reactStr(reactId), msg$ctxStr(runningCtx))
       private$appendEntry(domain, list(
@@ -389,14 +378,12 @@ RLog <- R6Class(
         millis = millis
       ))
     },
-
     idle = function(domain = NULL) {
       msg$log("idle")
       private$appendEntry(domain, list(
         action = "idle"
       ))
     },
-
     asyncStart = function(domain = NULL) {
       msg$log("asyncStart")
       private$appendEntry(domain, list(
@@ -409,7 +396,6 @@ RLog <- R6Class(
         action = "asyncStop"
       ))
     },
-
     freezeReactiveVal = function(reactId, domain) {
       msg$log("freeze:", msg$reactStr(reactId))
       private$appendEntry(domain, list(
@@ -420,7 +406,6 @@ RLog <- R6Class(
     freezeReactiveKey = function(reactId, key, domain) {
       self$freezeReactiveVal(self$keyIdStr(reactId, key), domain)
     },
-
     thawReactiveVal = function(reactId, domain) {
       msg$log("thaw:", msg$reactStr(reactId))
       private$appendEntry(domain, list(
@@ -431,54 +416,60 @@ RLog <- R6Class(
     thawReactiveKey = function(reactId, key, domain) {
       self$thawReactiveVal(self$keyIdStr(reactId, key), domain)
     },
-
     userMark = function(domain = NULL) {
       msg$log("userMark")
       private$appendEntry(domain, list(
         action = "userMark"
       ))
     }
-
   )
 )
 
-MessageLogger = R6Class(
+MessageLogger <- R6Class(
   "MessageLogger",
   portable = FALSE,
   public = list(
     depth = 0L,
     reactCache = list(),
     option = "shiny.reactlog.console",
-
     initialize = function(option = "shiny.reactlog.console", depth = 0L) {
       if (!missing(depth)) self$depth <- depth
       if (!missing(option)) self$option <- option
     },
-
     isLogging = function() {
       isTRUE(getOption(self$option))
     },
     isNotLogging = function() {
-      ! isTRUE(getOption(self$option))
+      !isTRUE(getOption(self$option))
     },
     depthIncrement = function() {
-      if (self$isNotLogging()) return(NULL)
+      if (self$isNotLogging()) {
+        return(NULL)
+      }
       self$depth <- self$depth + 1L
     },
     depthDecrement = function() {
-      if (self$isNotLogging()) return(NULL)
+      if (self$isNotLogging()) {
+        return(NULL)
+      }
       self$depth <- self$depth - 1L
     },
     hasReact = function(reactId) {
-      if (self$isNotLogging()) return(FALSE)
+      if (self$isNotLogging()) {
+        return(FALSE)
+      }
       !is.null(self$getReact(reactId))
     },
     getReact = function(reactId, force = FALSE) {
-      if (identical(force, FALSE) && self$isNotLogging()) return(NULL)
+      if (identical(force, FALSE) && self$isNotLogging()) {
+        return(NULL)
+      }
       self$reactCache[[reactId]]
     },
     setReact = function(reactObj, force = FALSE) {
-      if (identical(force, FALSE) && self$isNotLogging()) return(NULL)
+      if (identical(force, FALSE) && self$isNotLogging()) {
+        return(NULL)
+      }
       self$reactCache[[reactObj$reactId]] <- reactObj
     },
     shortenString = function(txt, n = 250) {
@@ -497,13 +488,17 @@ MessageLogger = R6Class(
     },
     valueStr = function(valueStr) {
       paste0(
-        " '",  self$shortenString(self$singleLine(valueStr)), "'"
+        " '", self$shortenString(self$singleLine(valueStr)), "'"
       )
     },
     reactStr = function(reactId) {
-      if (self$isNotLogging()) return(NULL)
+      if (self$isNotLogging()) {
+        return(NULL)
+      }
       reactInfo <- self$getReact(reactId)
-      if (is.null(reactInfo)) return(" <UNKNOWN_REACTID>")
+      if (is.null(reactInfo)) {
+        return(" <UNKNOWN_REACTID>")
+      }
       paste0(
         " ", reactInfo$reactId, ":'", self$shortenString(self$singleLine(reactInfo$label)), "'"
       )
@@ -512,11 +507,15 @@ MessageLogger = R6Class(
       self$ctxStr(ctxId = NULL, type = type)
     },
     ctxStr = function(ctxId = NULL, type = NULL) {
-      if (self$isNotLogging()) return(NULL)
+      if (self$isNotLogging()) {
+        return(NULL)
+      }
       self$ctxPrevCtxStr(ctxId = ctxId, prevCtxId = NULL, type = type)
     },
     ctxPrevCtxStr = function(ctxId = NULL, prevCtxId = NULL, type = NULL, preCtxIdTxt = " in ") {
-      if (self$isNotLogging()) return(NULL)
+      if (self$isNotLogging()) {
+        return(NULL)
+      }
       paste0(
         if (!is.null(ctxId)) paste0(preCtxIdTxt, ctxId),
         if (!is.null(prevCtxId)) paste0(" from ", prevCtxId),
@@ -524,7 +523,9 @@ MessageLogger = R6Class(
       )
     },
     log = function(...) {
-      if (self$isNotLogging()) return(NULL)
+      if (self$isNotLogging()) {
+        return(NULL)
+      }
       msg <- paste0(
         paste0(rep("= ", depth), collapse = ""), "- ", paste0(..., collapse = ""),
         collapse = ""

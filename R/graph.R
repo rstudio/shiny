@@ -91,6 +91,8 @@ reactlogReset <- function() {
 #'   ....
 #' })
 #' ```
+#' @param session The Shiny session to assign the mark to. Defaults to the
+#' current session.
 #' @export
 reactlogAddMark <- function(session = getDefaultReactiveDomain()) {
   rLog$userMark(session)

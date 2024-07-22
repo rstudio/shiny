@@ -18,6 +18,9 @@ reactlogAddMark(session = getDefaultReactiveDomain())
 \arguments{
 \item{time}{A boolean that specifies whether or not to display the
 time that each reactive takes to calculate a result.}
+
+\item{session}{The Shiny session to assign the mark to. Defaults to the
+current session.}
 }
 \description{
 Provides an interactive browser-based tool for visualizing reactive

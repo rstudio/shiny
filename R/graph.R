@@ -20,7 +20,7 @@ reactIdStr <- function(num) {
 #' dependencies and execution in your application.
 #'
 #' To use the reactive log visualizer, start with a fresh R session and
-#' run the command `options(shiny.reactlog=TRUE)`; then launch your
+#' run the command `reactlog::reactlog_enable()`; then launch your
 #' application in the usual way (e.g. using [runApp()]). At
 #' any time you can hit Ctrl+F3 (or for Mac users, Command+F3) in your
 #' web browser to launch the reactive log visualization.
@@ -43,9 +43,12 @@ reactIdStr <- function(num) {
 #' call `reactlogShow()` explicitly.
 #'
 #' For security and performance reasons, do not enable
-#' `shiny.reactlog` in production environments. When the option is
-#' enabled, it's possible for any user of your app to see at least some
-#' of the source code of your reactive expressions and observers.
+#' `options(shiny.reactlog=TRUE)` (or `reactlog::reactlog_enable()`) in
+#' production environments. When the option is enabled, it's possible
+#' for any user of your app to see at least some of the source code of
+#' your reactive expressions and observers. In addition, reactlog
+#' should be considered a memory leak as it will constantly grow and
+#' will never reset until the R session is restarted.
 #'
 #' @name reactlog
 NULL
@@ -71,6 +74,25 @@ reactlogShow <- function(time = TRUE) {
 #' @export
 reactlogReset <- function() {
   rLog$reset()
+}
+
+#' @describeIn reactlog Adds "mark" entry into the reactlog stack. 
+#'   This is useful for programmatically adding a marked entry in the reactlog, rather than using your keyboard's key combination.
+#' 
+#'   For example, we can _mark_ the reactlog at the beginning of an `observeEvent`'s calculation:
+#'   ```r
+#'   observeEvent(input$my_event_trigger, {
+#'     # Add a mark in the reactlog
+#'     reactlogAddMark()
+#'     # Run your regular event reaction code here...
+#'     ....
+#'   })
+#'   ```
+#' @export
+#' @examples
+#' 
+reactlogAddMark <- function(session = getDefaultReactiveDomain()) {
+  rLog$userMark(session)
 }
 
 # called in "/reactlog" middleware

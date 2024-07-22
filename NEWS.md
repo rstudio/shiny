@@ -8,6 +8,8 @@
 
 * A new `shiny.client_devmode` option controls client-side devmode features, in particular the client-side error console introduced in shiny 1.8.1, independently of the R-side features of `shiny::devmode()`. This usage is primarily intended for automatic use in Shinylive. (#4073)
 
+* Added function `reactlogAddMark()` to programmatically add _mark_ed locations in the reactlog log without the requirement of keyboard bindings during an idle reactive moment. (#4103)
+
 ## Bug fixes
 
 * `downloadButton()` and `downloadLink()` are now disabled up until they are fully initialized. This prevents the user from clicking the button/link before the download is ready. (#4041)

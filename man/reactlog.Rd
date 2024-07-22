@@ -57,17 +57,21 @@ will never reset until the R session is restarted.
 }
 \section{Functions}{
 \itemize{
-\item \code{reactlog()}: Return a list of reactive information.  Can be used in conjunction with
-\link[reactlog:reactlog_show]{reactlog::reactlog_show} to later display the reactlog graph.
+\item \code{reactlog()}: Return a list of reactive information.  Can be used in
+conjunction with \link[reactlog:reactlog_show]{reactlog::reactlog_show} to later display the reactlog
+graph.
 
 \item \code{reactlogShow()}: Display a full reactlog graph for all sessions.
 
-\item \code{reactlogReset()}: Resets the entire reactlog stack.  Useful for debugging and removing all prior reactive history.
+\item \code{reactlogReset()}: Resets the entire reactlog stack.  Useful for debugging
+and removing all prior reactive history.
 
-\item \code{reactlogAddMark()}: Adds "mark" entry into the reactlog stack.
-This is useful for programmatically adding a marked entry in the reactlog, rather than using your keyboard's key combination.
+\item \code{reactlogAddMark()}: Adds "mark" entry into the reactlog stack. This is
+useful for programmatically adding a marked entry in the reactlog, rather
+than using your keyboard's key combination.
 
-For example, we can \emph{mark} the reactlog at the beginning of an \code{observeEvent}'s calculation:
+For example, we can \emph{mark} the reactlog at the beginning of an
+\code{observeEvent}'s calculation:
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{observeEvent(input$my_event_trigger, \{
   # Add a mark in the reactlog

@@ -79,9 +79,10 @@ reactlogReset <- function() {
 
 #' @describeIn reactlog Adds "mark" entry into the reactlog stack. This is
 #' useful for programmatically adding a marked entry in the reactlog, rather
-#' than using your keyboard's key combination. For example, we can _mark_ the
-#' reactlog at the beginning of an `observeEvent`'s calculation:
+#' than using your keyboard's key combination.
 #'
+#' For example, we can _mark_ the reactlog at the beginning of an
+#' `observeEvent`'s calculation:
 #' ```r
 #' observeEvent(input$my_event_trigger, {
 #'   # Add a mark in the reactlog

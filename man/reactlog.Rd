@@ -4,6 +4,7 @@
 \alias{reactlog}
 \alias{reactlogShow}
 \alias{reactlogReset}
+\alias{reactlogAddMark}
 \title{Reactive Log Visualizer}
 \usage{
 reactlog()
@@ -11,6 +12,8 @@ reactlog()
 reactlogShow(time = TRUE)
 
 reactlogReset()
+
+reactlogAddMark(session = getDefaultReactiveDomain())
 }
 \arguments{
 \item{time}{A boolean that specifies whether or not to display the
@@ -22,7 +25,7 @@ dependencies and execution in your application.
 }
 \details{
 To use the reactive log visualizer, start with a fresh R session and
-run the command \code{options(shiny.reactlog=TRUE)}; then launch your
+run the command \code{reactlog::reactlog_enable()}; then launch your
 application in the usual way (e.g. using \code{\link[=runApp]{runApp()}}). At
 any time you can hit Ctrl+F3 (or for Mac users, Command+F3) in your
 web browser to launch the reactive log visualization.
@@ -45,9 +48,12 @@ browser will not load new activity into the report; you will need to
 call \code{reactlogShow()} explicitly.
 
 For security and performance reasons, do not enable
-\code{shiny.reactlog} in production environments. When the option is
-enabled, it's possible for any user of your app to see at least some
-of the source code of your reactive expressions and observers.
+\code{options(shiny.reactlog=TRUE)} (or \code{reactlog::reactlog_enable()}) in
+production environments. When the option is enabled, it's possible
+for any user of your app to see at least some of the source code of
+your reactive expressions and observers. In addition, reactlog
+should be considered a memory leak as it will constantly grow and
+will never reset until the R session is restarted.
 }
 \section{Functions}{
 \itemize{
@@ -57,5 +63,18 @@ of the source code of your reactive expressions and observers.
 \item \code{reactlogShow()}: Display a full reactlog graph for all sessions.
 
 \item \code{reactlogReset()}: Resets the entire reactlog stack.  Useful for debugging and removing all prior reactive history.
+
+\item \code{reactlogAddMark()}: Adds "mark" entry into the reactlog stack.
+This is useful for programmatically adding a marked entry in the reactlog, rather than using your keyboard's key combination.
+
+For example, we can \emph{mark} the reactlog at the beginning of an \code{observeEvent}'s calculation:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{observeEvent(input$my_event_trigger, \{
+  # Add a mark in the reactlog
+  reactlogAddMark()
+  # Run your regular event reaction code here...
+  ....
+\})
+}\if{html}{\out{</div>}}
 
 }}

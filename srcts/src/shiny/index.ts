@@ -27,11 +27,7 @@ import {
   mapValues,
   pixelRatio,
 } from "../utils";
-import {
-  createInitStatus,
-  promiseWithResolvers,
-  type InitStatusPromise,
-} from "../utils/promise";
+import { createInitStatus, type InitStatusPromise } from "../utils/promise";
 import type { BindInputsCtx, BindScope } from "./bind";
 import { bindAll, unbindAll, _bindAll } from "./bind";
 import type {
@@ -55,12 +51,7 @@ import {
   renderHtmlAsync,
 } from "./render";
 import { sendImageSizeFns } from "./sendImageSize";
-import {
-  addCustomMessageHandler,
-  ShinyApp,
-  type Handler,
-  type ShinyWebSocket,
-} from "./shinyapp";
+import { addCustomMessageHandler, ShinyApp, type Handler } from "./shinyapp";
 import { registerNames as singletonsRegisterNames } from "./singletons";
 
 class ShinyClass {
@@ -101,8 +92,7 @@ class ShinyClass {
   unbindAll?: typeof shinyUnbindAll;
   initializeInputs?: typeof shinyInitializeInputs;
 
-  // Promise-like objects that are resolved at various stages of initialization.
-  isConnected: InitStatusPromise<ShinyWebSocket>;
+  // Promise-like object that is resolved after initialization.
   isInitialized: InitStatusPromise<void>;
 
   // Eventually deprecate
@@ -142,7 +132,6 @@ class ShinyClass {
     this.renderHtmlAsync = renderHtmlAsync;
     this.renderHtml = renderHtml;
 
-    this.isConnected = createInitStatus<ShinyWebSocket>();
     this.isInitialized = createInitStatus<void>();
 
     $(() => {
@@ -680,11 +669,8 @@ class ShinyClass {
     // We've collected all the initial values--start the server process!
     inputsNoResend.reset(initialValues);
     shinyapp.connect(initialValues);
-    $(document).one("shiny:connected", (event) => {
+    $(document).one("shiny:connected", () => {
       initDeferredIframes();
-      // @ts-expect-error; .socket property isn't a known property of
-      // JQuery.TriggeredEvent, but it was added on there anyway.
-      this.isConnected.resolve(event.socket);
     });
 
     $(document).one("shiny:sessioninitialized", () => {

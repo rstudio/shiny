@@ -8,7 +8,7 @@ import { removeModal, showModal } from "./modal";
 import { removeNotification, showNotification } from "./notifications";
 import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
 import { renderContent, renderContentAsync, renderDependencies, renderDependenciesAsync, renderHtml, renderHtmlAsync } from "./render";
-import { addCustomMessageHandler, ShinyApp, type Handler, type ShinyWebSocket } from "./shinyapp";
+import { addCustomMessageHandler, ShinyApp, type Handler } from "./shinyapp";
 declare class ShinyClass {
     version: string;
     $escape: typeof $escape;
@@ -45,7 +45,6 @@ declare class ShinyClass {
     bindAll?: typeof shinyBindAll;
     unbindAll?: typeof shinyUnbindAll;
     initializeInputs?: typeof shinyInitializeInputs;
-    isConnected: InitStatusPromise<ShinyWebSocket>;
     isInitialized: InitStatusPromise<void>;
     oncustommessage?: Handler;
     constructor();

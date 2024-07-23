@@ -244,6 +244,7 @@ busyIndicatorDependency <- function() {
     version = get_package_version("shiny"),
     src = "www/shared/busy-indicators",
     package = "shiny",
-    stylesheet = "busy-indicators.css"
+    stylesheet = "busy-indicators.css",
+    head = as.character(useBusyIndicators())
   )
 }

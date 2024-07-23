@@ -306,6 +306,7 @@ export class ShinyErrorMessage extends LitElement {
 
       .error-message {
         font-family: "Courier New", Courier, monospace;
+        white-space: pre-wrap;
       }
 
       .decoration-container {
@@ -488,6 +489,35 @@ export class ShinyErrorMessage extends LitElement {
 
 customElements.define("shiny-error-message", ShinyErrorMessage);
 
+type ShinyClientMessage = {
+  headline?: string;
+  message: string;
+};
+
+function showMessageInClientConsole({
+  headline = "",
+  message,
+}: ShinyClientMessage): void {
+  if (!Shiny.inDevMode()) {
+    console.warn(`[shiny] ${headline}${headline ? " - " : ""}${message}`);
+    return;
+  }
+
+  // Check to see if an Error Console Container element already exists. If it
+  // doesn't we need to add it before putting an error on the screen
+  let errorConsoleContainer = document.querySelector("shiny-error-console");
+  if (!errorConsoleContainer) {
+    errorConsoleContainer = document.createElement("shiny-error-console");
+    document.body.appendChild(errorConsoleContainer);
+  }
+
+  const errorConsole = document.createElement("shiny-error-message");
+  errorConsole.setAttribute("headline", headline);
+  errorConsole.setAttribute("message", message);
+
+  errorConsoleContainer.appendChild(errorConsole);
+}
+
 /**
  * Function to show an error message to user in shiny-error-message web
  * component. Only shows the error if we're in development mode.
@@ -496,11 +526,6 @@ customElements.define("shiny-error-message", ShinyErrorMessage);
  * object.
  */
 export function showErrorInClientConsole(e: unknown): void {
-  if (!Shiny.inDevMode()) {
-    // If we're in production, don't show the error to the user
-    return;
-  }
-
   let errorMsg: string | null = null;
   let headline = "Error on client while running Shiny app";
 
@@ -515,17 +540,22 @@ export function showErrorInClientConsole(e: unknown): void {
     errorMsg = "Unknown error";
   }
 
-  // Check to see if an Error Console Container element already exists. If it
-  // doesn't we need to add it before putting an error on the screen
-  let errorConsoleContainer = document.querySelector("shiny-error-console");
-  if (!errorConsoleContainer) {
-    errorConsoleContainer = document.createElement("shiny-error-console");
-    document.body.appendChild(errorConsoleContainer);
-  }
-
-  const errorConsole = document.createElement("shiny-error-message");
-  errorConsole.setAttribute("headline", headline || "");
-  errorConsole.setAttribute("message", errorMsg);
-
-  errorConsoleContainer.appendChild(errorConsole);
+  showMessageInClientConsole({ headline, message: errorMsg });
 }
+
+export class ShinyClientMessageEvent extends CustomEvent<ShinyClientMessage> {
+  constructor(detail: ShinyClientMessage) {
+    super("shiny:client-message", { detail, bubbles: true, cancelable: true });
+  }
+}
+
+window.addEventListener("shiny:client-message", (ev: Event) => {
+  if (!(ev instanceof CustomEvent)) {
+    return;
+  }
+  const { headline, message } = ev.detail;
+  if (!message) {
+    return;
+  }
+  showMessageInClientConsole({ headline, message });
+});

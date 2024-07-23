@@ -141,3 +141,12 @@
     width: 75%;
   }
 }
+
+
+// Effectively disable the spinner when it's wrapped in shinycssloader::withSpinner()
+// since that's a sign our spinner isn't needed.
+// The reason this sets size to 0px instead of display:none is so, if someone
+// really wants to show the spinner, they can override this with a custom size.
+.shiny-spinner-output-container {
+  --shiny-spinner-size: 0px;
+}

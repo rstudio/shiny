@@ -1,6 +1,6 @@
 import $ from "jquery";
 
-import { showNotification, removeNotification } from "./notifications";
+import { removeNotification, showNotification } from "./notifications";
 
 function updateTime(reconnectTime: number): void {
   const $time = $("#shiny-reconnect-time");

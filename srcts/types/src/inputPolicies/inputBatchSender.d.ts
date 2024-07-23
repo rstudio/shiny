@@ -1,5 +1,5 @@
-import type { InputPolicy, InputPolicyOpts } from "./inputPolicy";
 import type { ShinyApp } from "../shiny/shinyapp";
+import type { InputPolicy, InputPolicyOpts } from "./inputPolicy";
 declare class InputBatchSender implements InputPolicy {
     target: InputPolicy;
     shinyapp: ShinyApp;

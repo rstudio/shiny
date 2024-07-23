@@ -1276,10 +1276,13 @@ downloadButton <- function(outputId,
                            ...,
                            icon = shiny::icon("download")) {
   tags$a(id=outputId,
-         class=paste('btn btn-default shiny-download-link', class),
+         class='btn btn-default shiny-download-link disabled',
+         class=class,
          href='',
          target='_blank',
          download=NA,
+         "aria-disabled"="true",
+         tabindex="-1",
          validateIcon(icon),
          label, ...)
 }
@@ -1288,10 +1291,13 @@ downloadButton <- function(outputId,
 #' @export
 downloadLink <- function(outputId, label="Download", class=NULL, ...) {
   tags$a(id=outputId,
-         class=paste(c('shiny-download-link', class), collapse=" "),
+         class='shiny-download-link disabled',
+         class=class,
          href='',
          target='_blank',
          download=NA,
+         "aria-disabled"="true",
+         tabindex="-1",
          label, ...)
 }
 

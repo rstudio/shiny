@@ -6,9 +6,9 @@ import type {
   InputRateDecorator,
   InputValidateDecorator,
 } from "../inputPolicies";
+import { ShinyClientError } from "./error";
 import { shinyAppBindOutput, shinyAppUnbindOutput } from "./initedMethods";
 import { sendImageSizeFns } from "./sendImageSize";
-import { ShinyClientError } from "./error";
 
 type BindScope = HTMLElement | JQuery<HTMLElement>;
 
@@ -320,6 +320,10 @@ async function bindOutputs(
       $el.addClass("shiny-bound-output");
       if (!$el.attr("aria-live")) $el.attr("aria-live", "polite");
 
+      if (Shiny.shinyapp?.$outputProgress.isRecalculating(id)) {
+        bindingAdapter.showProgress(true);
+      }
+
       bindingsRegistry.addBinding(id, "output");
       $el.trigger({
         type: "shiny:bound",
@@ -460,5 +464,4 @@ async function bindAll(
 }
 
 export { unbindAll, bindAll, _bindAll };
-
 export type { BindScope, BindInputsCtx };

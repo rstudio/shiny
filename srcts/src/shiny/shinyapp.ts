@@ -1,5 +1,19 @@
 import $ from "jquery";
+import type { InputBinding } from "../bindings";
+import type { OutputBindingAdapter } from "../bindings/outputAdapter";
+import { showErrorInClientConsole } from "../components/errorConsole";
+import type {
+  ShinyEventError,
+  ShinyEventMessage,
+  ShinyEventUpdateInput,
+  ShinyEventValue,
+} from "../events/shinyEvents";
+import type { UploadEndValue, UploadInitValue } from "../file/fileProcessor";
+import { resetBrush } from "../imageutils/resetBrush";
 import { $escape, hasOwnProperty, randomId, scopeExprToFunc } from "../utils";
+import { AsyncQueue } from "../utils/asyncQueue";
+import { isQt } from "../utils/browser";
+import { indirectEval } from "../utils/eval";
 import {
   getShinyCreateWebsocket,
   getShinyOnCustomMessage,
@@ -7,26 +21,14 @@ import {
   shinyForgetLastInputValue,
   shinyUnbindAll,
 } from "./initedMethods";
-import { isQt } from "../utils/browser";
-import { showNotification, removeNotification } from "./notifications";
-import { showModal, removeModal } from "./modal";
-import { renderContentAsync, renderHtmlAsync } from "./render";
-import type { HtmlDep } from "./render";
+import { removeModal, showModal } from "./modal";
+import { removeNotification, showNotification } from "./notifications";
 import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
-import { resetBrush } from "../imageutils/resetBrush";
-import type { OutputBindingAdapter } from "../bindings/outputAdapter";
-import type {
-  ShinyEventError,
-  ShinyEventMessage,
-  ShinyEventValue,
-  ShinyEventUpdateInput,
-} from "../events/shinyEvents";
-import type { InputBinding } from "../bindings";
-import { indirectEval } from "../utils/eval";
+import type { HtmlDep } from "./render";
+import { renderContentAsync, renderHtmlAsync } from "./render";
 import type { WherePosition } from "./singletons";
-import type { UploadInitValue, UploadEndValue } from "../file/fileProcessor";
-import { AsyncQueue } from "../utils/asyncQueue";
-import { showErrorInClientConsole } from "../components/errorConsole";
+
+import { OutputProgressReporter } from "./outputProgress";
 
 type ResponseValue = UploadEndValue | UploadInitValue;
 type Handler = (message: any) => Promise<void> | void;
@@ -130,7 +132,9 @@ class ShinyApp {
 
   // Output bindings
   $bindings: { [key: string]: OutputBindingAdapter } = {};
-  $persistentProgress: Set<string> = new Set();
+
+  // Output progress states
+  $outputProgress = new OutputProgressReporter();
 
   // Cached values/errors
   $values: { [key: string]: any } = {};
@@ -657,6 +661,9 @@ class ShinyApp {
     $(document).trigger(evt);
     if (evt.isDefaultPrevented()) return;
 
+    // Before passing the message to handlers, use it to update output progress state
+    this.$outputProgress.updateStateFromMessage(evt.message);
+
     // Send msgObj.foo and msgObj.bar to appropriate handlers
     await this._sendMessagesToHandlers(
       evt.message,
@@ -688,13 +695,17 @@ class ShinyApp {
     }
   }
 
-  private _clearProgress() {
-    for (const name in this.$bindings) {
-      if (
-        hasOwnProperty(this.$bindings, name) &&
-        !this.$persistentProgress.has(name)
-      ) {
-        this.$bindings[name].showProgress(false);
+  // Call showProgress() on any output bindings that have changed their
+  // recalculating status since the last call to takeChanges().
+  // Note that we only need to call this function when a "flush" (i.e. "values")
+  // message or a "progress" message is received since these are the only
+  // two types of messages that can change the recalculating status. For more,
+  // see the state machine diagram in outputProgress.ts.
+  private _updateProgress() {
+    const changed = this.$outputProgress.takeChanges();
+    for (const [name, recalculating] of changed.entries()) {
+      if (hasOwnProperty(this.$bindings, name)) {
+        this.$bindings[name].showProgress(recalculating);
       }
     }
   }
@@ -705,11 +716,10 @@ class ShinyApp {
     // * However, `_sendMessagesToHandlers()` will adjust the `this` context to the same _`this`_.
 
     addMessageHandler("values", async (message: { [key: string]: any }) => {
-      this._clearProgress();
+      this._updateProgress();
 
       for (const key in message) {
         if (hasOwnProperty(message, key)) {
-          this.$persistentProgress.delete(key);
           await this.receiveOutput(key, message[key]);
         }
       }
@@ -720,7 +730,6 @@ class ShinyApp {
       (message: { [key: string]: ErrorsMessageValue }) => {
         for (const key in message) {
           if (hasOwnProperty(message, key)) {
-            this.$persistentProgress.delete(key);
             this.receiveError(key, message[key]);
           }
         }
@@ -1426,13 +1435,9 @@ class ShinyApp {
           binding: binding,
           name: key,
         });
-        if (binding.showProgress) binding.showProgress(true);
-        if (message.persistent) {
-          this.$persistentProgress.add(key);
-        } else {
-          this.$persistentProgress.delete(key);
-        }
       }
+
+      this._updateProgress();
     },
 
     // Open a page-level progress bar

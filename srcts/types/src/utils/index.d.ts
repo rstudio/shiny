@@ -1,5 +1,5 @@
 import type { MapValuesUnion, MapWithResult } from "./extraTypes";
-import { hasOwnProperty, hasDefinedProperty } from "./object";
+import { hasDefinedProperty, hasOwnProperty } from "./object";
 declare function escapeHTML(str: string): string;
 declare function randomId(): string;
 declare function strToBool(str: string): boolean | undefined;

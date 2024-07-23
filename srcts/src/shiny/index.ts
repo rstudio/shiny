@@ -93,7 +93,7 @@ class ShinyClass {
   initializeInputs?: typeof shinyInitializeInputs;
 
   // Promise-like object that is resolved after initialization.
-  isInitialized: InitStatusPromise<void>;
+  initializedPromise: InitStatusPromise<void>;
 
   // Eventually deprecate
   // For old-style custom messages - should deprecate and migrate to new
@@ -132,7 +132,7 @@ class ShinyClass {
     this.renderHtmlAsync = renderHtmlAsync;
     this.renderHtml = renderHtml;
 
-    this.isInitialized = createInitStatus<void>();
+    this.initializedPromise = createInitStatus<void>();
 
     $(() => {
       // Init Shiny a little later than document ready, so user code can
@@ -674,7 +674,7 @@ class ShinyClass {
     });
 
     $(document).one("shiny:sessioninitialized", () => {
-      this.isInitialized.resolve();
+      this.initializedPromise.resolve();
     });
   }
 }

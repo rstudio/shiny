@@ -153,6 +153,12 @@ datePickerDependency <- function(theme) {
   )
 }
 
+datePickerSass <- function() {
+  sass::sass_file(
+    system_file(package = "shiny", "www/shared/datepicker/scss/build3.scss")
+  )
+}
+
 datePickerCSS <- function(theme) {
   if (!is_bs_theme(theme)) {
     return(htmlDependency(
@@ -164,10 +170,8 @@ datePickerCSS <- function(theme) {
     ))
   }
 
-  scss_file <- system_file(package = "shiny", "www/shared/datepicker/scss/build3.scss")
-
   bslib::bs_dependency(
-    input = sass::sass_file(scss_file),
+    input = datePickerSass(),
     theme = theme,
     name = "bootstrap-datepicker",
     version = version_bs_date_picker,

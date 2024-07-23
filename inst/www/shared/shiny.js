@@ -25077,8 +25077,7 @@
       _defineProperty23(this, "bindAll", void 0);
       _defineProperty23(this, "unbindAll", void 0);
       _defineProperty23(this, "initializeInputs", void 0);
-      _defineProperty23(this, "isConnected", void 0);
-      _defineProperty23(this, "isInitialized", void 0);
+      _defineProperty23(this, "initializedPromise", void 0);
       _defineProperty23(this, "oncustommessage", void 0);
       this.version = "1.8.1.9001";
       var _initInputBindings = initInputBindings(), inputBindings = _initInputBindings.inputBindings, fileInputBinding2 = _initInputBindings.fileInputBinding;
@@ -25108,8 +25107,7 @@
       this.renderContent = renderContent;
       this.renderHtmlAsync = renderHtmlAsync;
       this.renderHtml = renderHtml2;
-      this.isConnected = createInitStatus();
-      this.isInitialized = createInitStatus();
+      this.initializedPromise = createInitStatus();
       (0, import_jquery39.default)(function() {
         setTimeout(/* @__PURE__ */ _asyncToGenerator14(/* @__PURE__ */ _regeneratorRuntime14().mark(function _callee() {
           return _regeneratorRuntime14().wrap(function _callee$(_context) {
@@ -25464,12 +25462,11 @@
                   });
                   inputsNoResend.reset(initialValues);
                   shinyapp.connect(initialValues);
-                  (0, import_jquery39.default)(document).one("shiny:connected", function(event) {
+                  (0, import_jquery39.default)(document).one("shiny:connected", function() {
                     initDeferredIframes();
-                    _this2.isConnected.resolve(event.socket);
                   });
                   (0, import_jquery39.default)(document).one("shiny:sessioninitialized", function() {
-                    _this2.isInitialized.resolve();
+                    _this2.initializedPromise.resolve();
                   });
                 case 69:
                 case "end":

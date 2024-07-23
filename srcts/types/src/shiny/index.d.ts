@@ -45,7 +45,7 @@ declare class ShinyClass {
     bindAll?: typeof shinyBindAll;
     unbindAll?: typeof shinyUnbindAll;
     initializeInputs?: typeof shinyInitializeInputs;
-    isInitialized: InitStatusPromise<void>;
+    initializedPromise: InitStatusPromise<void>;
     oncustommessage?: Handler;
     constructor();
     /**

@@ -66,12 +66,21 @@ CSS size.}
 time.}
 }
 \description{
-By default, a spinner (and fade) is applied to calculating/recalculating output.
-Also, when no outputs are calculating/recalculating, but Shiny is busy doing
-something else (e.g., processing a download), then a pulsing banner is shown
-at the top of the page. This function allows
-you to customize the appearance of those busy indicators. To apply the
-customization, include the result of this function inside the app's UI.
+Shiny automatically includes busy indicators, which more specifically means:
+\enumerate{
+\item Calculating/recalculating outputs have a spinner overlay.
+\item Outputs fade out/in when recalculating.
+\item When no outputs are calculating/recalculating, but Shiny is busy
+doing something else (e.g., a download, side-effect, etc), a page-level
+pulsing banner is shown.
+}
+
+This function allows you to customize the appearance of these busy indicators
+by including the result of this function inside the app's UI. Note that,
+unless \code{spinner_selector} (or \code{fade_selector}) is specified, the spinner/fade
+customization applies to the parent element. If the customization should
+instead apply to the entire page, set \code{spinner_selector = 'html'} and
+\code{fade_selector = 'html'}.
 }
 \examples{
 \dontshow{if (rlang::is_interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}

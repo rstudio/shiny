@@ -19,6 +19,8 @@
 #'   output.
 #' @param pulse Whether to show a pulsing banner at the top of the page when the
 #'   app is busy.
+#' @param fade Whether to fade recalculating outputs. A value of `FALSE` is
+#'   equivalent to `busyIndicatorOptions(fade_opacity=1)`.
 #'
 #' @export
 #' @seealso [busyIndicatorOptions()] for customizing the appearance of the busy
@@ -75,12 +77,20 @@ useBusyIndicators <- function(..., spinners = TRUE, pulse = TRUE, fade = TRUE) {
 
 #' Customize busy indicator options
 #'
-#' By default, a spinner (and fade) is applied to calculating/recalculating output.
-#' Also, when no outputs are calculating/recalculating, but Shiny is busy doing
-#' something else (e.g., processing a download), then a pulsing banner is shown
-#' at the top of the page. This function allows
-#' you to customize the appearance of those busy indicators. To apply the
-#' customization, include the result of this function inside the app's UI.
+#' @description
+#' Shiny automatically includes busy indicators, which more specifically means:
+#'   1. Calculating/recalculating outputs have a spinner overlay.
+#'   2. Outputs fade out/in when recalculating.
+#'   3. When no outputs are calculating/recalculating, but Shiny is busy
+#'     doing something else (e.g., a download, side-effect, etc), a page-level
+#'     pulsing banner is shown.
+#'
+#' This function allows you to customize the appearance of these busy indicators
+#' by including the result of this function inside the app's UI. Note that,
+#' unless `spinner_selector` (or `fade_selector`) is specified, the spinner/fade
+#' customization applies to the parent element. If the customization should
+#' instead apply to the entire page, set `spinner_selector = 'html'` and
+#' `fade_selector = 'html'`.
 #'
 #' @param ... Currently ignored.
 #' @param spinner_type The type of spinner. Pre-bundled types include:

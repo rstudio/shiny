@@ -4,7 +4,7 @@
 
 * The client-side TypeScript code for Shiny has been refactored so that the `Shiny` object is now an instance of class `ShinyClass`. (#4063)
 
-* In TypeScript, the `Shiny` object now has properties `isConnected` and `isInitialized`, which are Promise-like objects that can be `await`ed or chained with `.then()`. These Promise-like objects correspond to the `shiny:connected` and `shiny:sessioninitialized` JavaScript events, but are easier to use because they can be used both before and after the events have occurred. (#4063)
+* In TypeScript, the `Shiny` object has a new property `initializedPromise`, which is a Promise-like object that can be `await`ed or chained with `.then()`. This Promise-like object corresponds to the `shiny:sessioninitialized` JavaScript event, but is easier to use because it can be used both before and after the events have occurred. (#4063)
 
 * Added new functions, `useBusyIndicators()` and `busyIndicatorOptions()`, for enabling and customizing busy indication. Busy indicators provide a visual cue to users when the server is busy calculating outputs or otherwise serving requests to the client. When enabled, a spinner is shown on each calculating/recalculating output, and a pulsing banner is shown at the top of the page when the app is otherwise busy. (#4040)
 

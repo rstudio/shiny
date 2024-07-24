@@ -4,7 +4,7 @@
 \alias{useBusyIndicators}
 \title{Enable/disable busy indication}
 \usage{
-useBusyIndicators(..., spinners = TRUE, pulse = TRUE)
+useBusyIndicators(..., spinners = TRUE, pulse = TRUE, fade = TRUE)
 }
 \arguments{
 \item{...}{Currently ignored.}
@@ -14,6 +14,9 @@ output.}
 
 \item{pulse}{Whether to show a pulsing banner at the top of the page when the
 app is busy.}
+
+\item{fade}{Whether to fade recalculating outputs. A value of \code{FALSE} is
+equivalent to \code{busyIndicatorOptions(fade_opacity=1)}.}
 }
 \description{
 Busy indicators provide a visual cue to users when the server is busy

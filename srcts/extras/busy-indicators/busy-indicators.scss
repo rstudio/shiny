@@ -37,9 +37,11 @@
       the spinner. Undo that, but still apply (smaller) opacity to immediate children
       that aren't recalculating.
     */
-    opacity: 1;
+    &:has(> *), &:empty {
+      opacity: 1;
+    }
     > *:not(.recalculating) {
-      opacity: 0.2;
+      opacity: var(--_shiny-fade-opacity);
       transition: opacity 250ms ease var(--shiny-spinner-delay, 1s);
     }
 
@@ -140,4 +142,13 @@
     left: -75%;
     width: 75%;
   }
+}
+
+
+// Effectively disable the spinner when it's wrapped in shinycssloader::withSpinner()
+// since that's a sign our spinner isn't needed.
+// The reason this sets size to 0px instead of display:none is so, if someone
+// really wants to show the spinner, they can override this with a custom size.
+.shiny-spinner-output-container {
+  --shiny-spinner-size: 0px;
 }

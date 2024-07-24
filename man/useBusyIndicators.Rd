@@ -4,7 +4,7 @@
 \alias{useBusyIndicators}
 \title{Enable/disable busy indication}
 \usage{
-useBusyIndicators(..., spinners = TRUE, pulse = TRUE)
+useBusyIndicators(..., spinners = TRUE, pulse = TRUE, fade = TRUE)
 }
 \arguments{
 \item{...}{Currently ignored.}

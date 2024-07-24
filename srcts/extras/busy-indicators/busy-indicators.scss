@@ -37,7 +37,7 @@
       the spinner. Undo that, but still apply (smaller) opacity to immediate children
       that aren't recalculating.
     */
-    &:has(> *) {
+    &:has(> *), &:empty {
       opacity: 1;
     }
     > *:not(.recalculating) {

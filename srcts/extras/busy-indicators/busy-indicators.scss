@@ -37,7 +37,9 @@
       the spinner. Undo that, but still apply (smaller) opacity to immediate children
       that aren't recalculating.
     */
-    opacity: 1;
+    &:has(> *) {
+      opacity: 1;
+    }
     > *:not(.recalculating) {
       opacity: var(--_shiny-fade-opacity);
       transition: opacity 250ms ease var(--shiny-spinner-delay, 1s);

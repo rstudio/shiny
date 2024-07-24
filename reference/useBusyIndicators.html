@@ -24,7 +24,7 @@ UI."><meta property="og:image" content="/logo.png"><!-- mathjax --><script src="
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.8.1.9001</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.9.0</span>
       </span>
     </div>
 
@@ -51,7 +51,7 @@ UI."><meta property="og:image" content="/logo.png"><!-- mathjax --><script src="
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Enable/disable busy indication</h1>
-    <small class="dont-index">Source: <a href="https://github.com/rstudio/shiny/blob/main/R/busy-indicators.R" class="external-link"><code>R/busy-indicators.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/rstudio/shiny/blob/rc-v1.9.0/R/busy-indicators.R" class="external-link"><code>R/busy-indicators.R</code></a></small>
     <div class="hidden name"><code>useBusyIndicators.Rd</code></div>
     </div>
 
@@ -112,12 +112,12 @@ indicators.</p></div>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/bslib/" class="external-link">bslib</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/bslib/man/page_fillable.html" class="external-link">page_fillable</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rstudio.github.io/bslib/reference/page_fillable.html" class="external-link">page_fillable</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="fu">useBusyIndicators</span><span class="op">(</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/pkg/bslib/man/card.html" class="external-link">card</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/pkg/bslib/man/card_body.html" class="external-link">card_header</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rstudio.github.io/bslib/reference/card.html" class="external-link">card</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rstudio.github.io/bslib/reference/card_body.html" class="external-link">card_header</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>      <span class="st">"A plot"</span>,</span></span>
-<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/pkg/bslib/man/input_task_button.html" class="external-link">input_task_button</a></span><span class="op">(</span><span class="st">"simulate"</span>, <span class="st">"Simulate"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rstudio.github.io/bslib/reference/input_task_button.html" class="external-link">input_task_button</a></span><span class="op">(</span><span class="st">"simulate"</span>, <span class="st">"Simulate"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>      class <span class="op">=</span> <span class="st">"d-flex justify-content-between align-items-center"</span></span></span>
 <span class="r-in"><span>    <span class="op">)</span>,</span></span>
 <span class="r-in"><span>    <span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="st">"p"</span><span class="op">)</span>,</span></span>

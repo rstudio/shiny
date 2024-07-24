@@ -18,7 +18,7 @@ toggle a set of tabPanel() elements."><meta property="og:image" content="/logo.p
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.8.1.9001</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.9.0</span>
       </span>
     </div>
 
@@ -45,7 +45,7 @@ toggle a set of tabPanel() elements."><meta property="og:image" content="/logo.p
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Create a page with a top level navigation bar</h1>
-    <small class="dont-index">Source: <a href="https://github.com/rstudio/shiny/blob/main/R/bootstrap.R" class="external-link"><code>R/bootstrap.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/rstudio/shiny/blob/rc-v1.9.0/R/bootstrap.R" class="external-link"><code>R/bootstrap.R</code></a></small>
     <div class="hidden name"><code>navbarPage.Rd</code></div>
     </div>
 
@@ -139,7 +139,7 @@ layout.</p></dd>
 
 <dt id="arg-theme">theme<a class="anchor" aria-label="anchor" href="#arg-theme"></a></dt>
 <dd><p>One of the following:</p><ul><li><p><code>NULL</code> (the default), which implies a "stock" build of Bootstrap 3.</p></li>
-<li><p>A <code><a href="https://rdrr.io/pkg/bslib/man/bs_theme.html" class="external-link">bslib::bs_theme()</a></code> object. This can be used to replace a stock
+<li><p>A <code><a href="https://rstudio.github.io/bslib/reference/bs_theme.html" class="external-link">bslib::bs_theme()</a></code> object. This can be used to replace a stock
 build of Bootstrap 3 with a customized version of Bootstrap 3 or higher.</p></li>
 <li><p>A character string pointing to an alternative Bootstrap stylesheet
 (normally a css file within the www directory, e.g. <code>www/bootstrap.css</code>).</p></li>
@@ -207,24 +207,24 @@ example below).</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;div class="navbar-header"&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;span class="navbar-brand"&gt;App Title&lt;/span&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;/div&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;ul class="nav navbar-nav nav-underline" data-tabsetid="6720"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;ul class="nav navbar-nav nav-underline" data-tabsetid="7311"&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;li class="active"&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;a href="#tab-6720-1" data-toggle="tab" data-bs-toggle="tab" data-value="Plot"&gt;Plot&lt;/a&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;a href="#tab-7311-1" data-toggle="tab" data-bs-toggle="tab" data-value="Plot"&gt;Plot&lt;/a&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;/li&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;li&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;a href="#tab-6720-2" data-toggle="tab" data-bs-toggle="tab" data-value="Summary"&gt;Summary&lt;/a&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;a href="#tab-7311-2" data-toggle="tab" data-bs-toggle="tab" data-value="Summary"&gt;Summary&lt;/a&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;/li&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;li&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;a href="#tab-6720-3" data-toggle="tab" data-bs-toggle="tab" data-value="Table"&gt;Table&lt;/a&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;a href="#tab-7311-3" data-toggle="tab" data-bs-toggle="tab" data-value="Table"&gt;Table&lt;/a&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;/li&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;/ul&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;/div&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;/nav&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;div class="container-fluid"&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;div class="tab-content" data-tabsetid="6720"&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;div class="tab-pane active" data-value="Plot" id="tab-6720-1"&gt;&lt;/div&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;div class="tab-pane" data-value="Summary" id="tab-6720-2"&gt;&lt;/div&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;div class="tab-pane" data-value="Table" id="tab-6720-3"&gt;&lt;/div&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;div class="tab-content" data-tabsetid="7311"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;div class="tab-pane active" data-value="Plot" id="tab-7311-1"&gt;&lt;/div&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;div class="tab-pane" data-value="Summary" id="tab-7311-2"&gt;&lt;/div&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;div class="tab-pane" data-value="Table" id="tab-7311-3"&gt;&lt;/div&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;/div&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;/div&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;/body&gt;</span>
@@ -244,23 +244,23 @@ example below).</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;div class="navbar-header"&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;span class="navbar-brand"&gt;App Title&lt;/span&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;/div&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;ul class="nav navbar-nav nav-underline" data-tabsetid="6583"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;ul class="nav navbar-nav nav-underline" data-tabsetid="8064"&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;li class="active"&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;a href="#tab-6583-1" data-toggle="tab" data-bs-toggle="tab" data-value="Plot"&gt;Plot&lt;/a&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;a href="#tab-8064-1" data-toggle="tab" data-bs-toggle="tab" data-value="Plot"&gt;Plot&lt;/a&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;/li&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;li class="dropdown"&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;a href="#" class="dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" data-value="More"&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             More</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             &lt;b class="caret"&gt;&lt;/b&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;/a&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;ul class="dropdown-menu" data-tabsetid="8040"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;ul class="dropdown-menu" data-tabsetid="1918"&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             &lt;li&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>               &lt;a href="#tab-8040-1" data-toggle="tab" data-bs-toggle="tab" data-value="Summary"&gt;Summary&lt;/a&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               &lt;a href="#tab-1918-1" data-toggle="tab" data-bs-toggle="tab" data-value="Summary"&gt;Summary&lt;/a&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             &lt;/li&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             &lt;li class="divider"&gt;&lt;/li&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             &lt;li class="dropdown-header"&gt;Section header&lt;/li&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             &lt;li&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>               &lt;a href="#tab-8040-4" data-toggle="tab" data-bs-toggle="tab" data-value="Table"&gt;Table&lt;/a&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               &lt;a href="#tab-1918-4" data-toggle="tab" data-bs-toggle="tab" data-value="Table"&gt;Table&lt;/a&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             &lt;/li&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;/ul&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         &lt;/li&gt;</span>
@@ -268,10 +268,10 @@ example below).</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;/div&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;/nav&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;div class="container-fluid"&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;div class="tab-content" data-tabsetid="6583"&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;div class="tab-pane active" data-value="Plot" id="tab-6583-1"&gt;&lt;/div&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;div class="tab-pane" data-value="Summary" id="tab-8040-1"&gt;&lt;/div&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;div class="tab-pane" data-value="Table" id="tab-8040-4"&gt;&lt;/div&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;div class="tab-content" data-tabsetid="8064"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;div class="tab-pane active" data-value="Plot" id="tab-8064-1"&gt;&lt;/div&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;div class="tab-pane" data-value="Summary" id="tab-1918-1"&gt;&lt;/div&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;div class="tab-pane" data-value="Table" id="tab-1918-4"&gt;&lt;/div&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;/div&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;/div&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;/body&gt;</span>

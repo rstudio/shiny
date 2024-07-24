@@ -30,7 +30,7 @@ fade_selector = 'html'."><meta property="og:image" content="/logo.png"><!-- math
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.8.1.9001</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.9.0</span>
       </span>
     </div>
 
@@ -57,7 +57,7 @@ fade_selector = 'html'."><meta property="og:image" content="/logo.png"><!-- math
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Customize busy indicator options</h1>
-    <small class="dont-index">Source: <a href="https://github.com/rstudio/shiny/blob/main/R/busy-indicators.R" class="external-link"><code>R/busy-indicators.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/rstudio/shiny/blob/rc-v1.9.0/R/busy-indicators.R" class="external-link"><code>R/busy-indicators.R</code></a></small>
     <div class="hidden name"><code>busyIndicatorOptions.Rd</code></div>
     </div>
 
@@ -172,9 +172,9 @@ time.</p></dd>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/bslib/" class="external-link">bslib</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">card_ui</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">id</span>, <span class="va">spinner_type</span> <span class="op">=</span> <span class="va">id</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/pkg/bslib/man/card.html" class="external-link">card</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rstudio.github.io/bslib/reference/card.html" class="external-link">card</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    <span class="fu">busyIndicatorOptions</span><span class="op">(</span>spinner_type <span class="op">=</span> <span class="va">spinner_type</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/pkg/bslib/man/card_body.html" class="external-link">card_header</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Spinner:"</span>, <span class="va">spinner_type</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rstudio.github.io/bslib/reference/card_body.html" class="external-link">card_header</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Spinner:"</span>, <span class="va">spinner_type</span><span class="op">)</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    <span class="fu"><a href="plotOutput.html">plotOutput</a></span><span class="op">(</span><span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="NS.html">NS</a></span><span class="op">(</span><span class="va">id</span>, <span class="st">"plot"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
@@ -192,10 +192,10 @@ time.</p></dd>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/bslib/man/page_fillable.html" class="external-link">page_fillable</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rstudio.github.io/bslib/reference/page_fillable.html" class="external-link">page_fillable</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="useBusyIndicators.html">useBusyIndicators</a></span><span class="op">(</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/pkg/bslib/man/input_task_button.html" class="external-link">input_task_button</a></span><span class="op">(</span><span class="st">"simulate"</span>, <span class="st">"Simulate"</span>, icon <span class="op">=</span> <span class="fu"><a href="icon.html">icon</a></span><span class="op">(</span><span class="st">"refresh"</span><span class="op">)</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/pkg/bslib/man/layout_columns.html" class="external-link">layout_columns</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rstudio.github.io/bslib/reference/input_task_button.html" class="external-link">input_task_button</a></span><span class="op">(</span><span class="st">"simulate"</span>, <span class="st">"Simulate"</span>, icon <span class="op">=</span> <span class="fu"><a href="icon.html">icon</a></span><span class="op">(</span><span class="st">"refresh"</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rstudio.github.io/bslib/reference/layout_columns.html" class="external-link">layout_columns</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    <span class="fu">card_ui</span><span class="op">(</span><span class="st">"ring"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    <span class="fu">card_ui</span><span class="op">(</span><span class="st">"bars"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    <span class="fu">card_ui</span><span class="op">(</span><span class="st">"dots"</span><span class="op">)</span>,</span></span>

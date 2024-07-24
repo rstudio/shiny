@@ -39,7 +39,7 @@
     */
     opacity: 1;
     > *:not(.recalculating) {
-      opacity: 0.2;
+      opacity: var(--_shiny-fade-opacity);
       transition: opacity 250ms ease var(--shiny-spinner-delay, 1s);
     }
 

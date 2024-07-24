@@ -156,7 +156,8 @@ html.autoreload-enabled #shiny-disconnected-overlay.reloading {
 }
 
 .recalculating {
-  opacity: 0.3;
+  --_shiny-fade-opacity: var(--shiny-fade-opacity, 0.3);
+  opacity: var(--_shiny-fade-opacity);
   transition: opacity 250ms ease 500ms;
 }
 

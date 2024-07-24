@@ -67,7 +67,7 @@ UI.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">useBusyIndicators</span><span class="op">(</span><span class="va">...</span>, spinners <span class="op">=</span> <span class="cn">TRUE</span>, pulse <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">useBusyIndicators</span><span class="op">(</span><span class="va">...</span>, spinners <span class="op">=</span> <span class="cn">TRUE</span>, pulse <span class="op">=</span> <span class="cn">TRUE</span>, fade <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -86,6 +86,11 @@ output.</p></dd>
 <dt id="arg-pulse">pulse<a class="anchor" aria-label="anchor" href="#arg-pulse"></a></dt>
 <dd><p>Whether to show a pulsing banner at the top of the page when the
 app is busy.</p></dd>
+
+
+<dt id="arg-fade">fade<a class="anchor" aria-label="anchor" href="#arg-fade"></a></dt>
+<dd><p>Whether to fade recalculating outputs. A value of <code>FALSE</code> is
+equivalent to <code>busyIndicatorOptions(fade_opacity=1)</code>.</p></dd>
 
 </dl></div>
     <div id="details">

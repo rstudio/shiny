@@ -1,7 +1,8 @@
 import { InputBinding } from "./inputBinding";
-declare type ActionButtonReceiveMessageData = {
+type ActionButtonReceiveMessageData = {
     label?: string;
     icon?: string | [];
+    disabled?: boolean;
 };
 declare class ActionButtonInputBinding extends InputBinding {
     find(scope: HTMLElement): JQuery<HTMLElement>;

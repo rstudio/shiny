@@ -1,6 +1,6 @@
 #' Insert and remove UI objects
 #'
-#' These functions allow you to dynamically add and remove arbirary UI
+#' These functions allow you to dynamically add and remove arbitrary UI
 #' into your app, whenever you want, as many times as you want.
 #' Unlike [renderUI()], the UI generated with `insertUI()` is persistent:
 #' once it's created, it stays there until removed by `removeUI()`. Each
@@ -11,7 +11,7 @@
 #' function.
 #'
 #' It's particularly useful to pair `removeUI` with `insertUI()`, but there is
-#' no restriction on what you can use on. Any element that can be selected
+#' no restriction on what you can use it on. Any element that can be selected
 #' through a jQuery selector can be removed through this function.
 #'
 #' @param selector A string that is accepted by jQuery's selector

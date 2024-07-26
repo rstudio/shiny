@@ -1,5 +1,5 @@
 import type { InputPolicy, InputPolicyOpts } from "./inputPolicy";
-declare type LastSentValues = {
+type LastSentValues = {
     [key: string]: {
         [key: string]: string;
     };

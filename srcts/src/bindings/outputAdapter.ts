@@ -31,8 +31,8 @@ class OutputBindingAdapter {
   getId(): string {
     return this.binding.getId(this.el);
   }
-  onValueChange(data: unknown): void {
-    this.binding.onValueChange(this.el, data);
+  async onValueChange(data: unknown): Promise<void> {
+    await this.binding.onValueChange(this.el, data);
   }
   onValueError(err: ErrorsMessageValue): void {
     this.binding.onValueError(this.el, err);

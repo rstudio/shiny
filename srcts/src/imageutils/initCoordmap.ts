@@ -1,8 +1,8 @@
 import $ from "jquery";
 import { shinySetInputValue } from "../shiny/initedMethods";
 import { mapValues } from "../utils";
-import type { Offset } from "./findbox";
 import type { Bounds } from "./createBrush";
+import type { Offset } from "./findbox";
 import type { Panel, PanelInit } from "./initPanelScales";
 import { initPanelScales } from "./initPanelScales";
 

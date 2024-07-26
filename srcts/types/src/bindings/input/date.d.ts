@@ -9,7 +9,7 @@ declare global {
         bsDatepicker(methodName: string, params: Date | null): void;
     }
 }
-declare type DateReceiveMessageData = {
+type DateReceiveMessageData = {
     label: string;
     min?: Date | null;
     max?: Date | null;

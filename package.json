@@ -3,7 +3,7 @@
   "homepage": "https://shiny.rstudio.com",
   "repository": "github:rstudio/shiny",
   "name": "@types/rstudio-shiny",
-  "version": "1.7.4-alpha.9000",
+  "version": "1.8.1-alpha.9001",
   "license": "GPL-3.0-only",
   "main": "",
   "browser": "",
@@ -24,7 +24,8 @@
     "@types/datatables.net": "^1.10.19",
     "@types/ion-rangeslider": "2.3.0",
     "@types/jquery": "3.5.14",
-    "@types/selectize": "0.12.34"
+    "@types/selectize": "0.12.34",
+    "lit": "^3.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.14.3",
@@ -33,6 +34,7 @@
     "@babel/preset-typescript": "^7.13.0",
     "@babel/runtime": "^7.14.0",
     "@deanc/esbuild-plugin-postcss": "^1.0.2",
+    "@selectize/selectize": "https://github.com/selectize/selectize.js.git#e3f2e0b4aa251375bc21b5fcd8ca7d374a921f08",
     "@testing-library/dom": "^7.31.0",
     "@testing-library/jest-dom": "^5.12.0",
     "@testing-library/user-event": "^13.1.9",
@@ -40,12 +42,11 @@
     "@types/jest": "^26.0.23",
     "@types/jqueryui": "1.12.16",
     "@types/lodash": "^4.14.170",
-    "@types/node": "^15.6.1",
+    "@types/node": "^18.14.2",
     "@types/showdown": "^1.9.3",
     "@typescript-eslint/eslint-plugin": "^5.38.1",
     "@typescript-eslint/parser": "^5.38.1",
     "autoprefixer": "^10.2.6",
-    "bootstrap-datepicker": "1.9.0",
     "browserslist": "^4.19.1",
     "caniuse-lite": "^1.0.30001312",
     "core-js": "^3.13.0",
@@ -60,19 +61,17 @@
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-unicorn": "^43.0.2",
     "fs-readdir-recursive": "^1.1.0",
-    "ion-rangeslider": "2.3.1",
     "jest": "^26.6.3",
-    "jquery": "3.6.0",
+    "jquery": "^3.6.0",
     "lodash": "^4.17.21",
     "madge": "^4.0.2",
     "node-gyp": "^8.1.0",
     "phantomjs-prebuilt": "^2.1.16",
     "postcss": "^8.3.5",
     "prettier": "^2.7.1",
+    "prettier-plugin-organize-imports": "^3.2.4",
     "readcontrol": "^1.0.0",
     "replace": "^1.2.1",
-    "selectize": "0.12.4",
-    "strftime": "0.9.2",
     "ts-jest": "^26",
     "ts-node": "^10.9.1",
     "type-coverage": "^2.22.0",
@@ -96,5 +95,11 @@
     "coverage": "type-coverage -p tsconfig.json --at-least 90",
     "circular": "madge --circular --extensions ts srcts/src",
     "circular_image": "madge --circular --extensions ts --image madge.svg srcts/src"
+  },
+  "prettier": {
+    "plugins": [
+      "prettier-plugin-organize-imports"
+    ],
+    "organizeImportsSkipDestructiveCodeActions": true
   }
 }

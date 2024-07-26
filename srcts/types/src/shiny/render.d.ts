@@ -1,33 +1,39 @@
 import type { BindScope } from "./bind";
-import { renderHtml as singletonsRenderHtml } from "./singletons";
 import type { WherePosition } from "./singletons";
-declare function renderDependencies(dependencies: HtmlDep[] | null): void;
+import { renderHtml as singletonsRenderHtml } from "./singletons";
+declare function renderContentAsync(el: BindScope, content: string | {
+    html: string;
+    deps?: HtmlDep[];
+} | null, where?: WherePosition): Promise<void>;
 declare function renderContent(el: BindScope, content: string | {
     html: string;
     deps?: HtmlDep[];
-} | null, where?: WherePosition): void;
+} | null, where?: WherePosition): Promise<void>;
+declare function renderHtmlAsync(html: string, el: BindScope, dependencies: HtmlDep[], where?: WherePosition): Promise<ReturnType<typeof singletonsRenderHtml>>;
 declare function renderHtml(html: string, el: BindScope, dependencies: HtmlDep[], where?: WherePosition): ReturnType<typeof singletonsRenderHtml>;
-declare type HtmlDepVersion = string;
-declare type MetaItem = {
+declare function renderDependenciesAsync(dependencies: HtmlDep[] | null): Promise<void>;
+declare function renderDependencies(dependencies: HtmlDep[] | null): void;
+type HtmlDepVersion = string;
+type MetaItem = {
     name: string;
     content: string;
     [x: string]: string;
 };
-declare type StylesheetItem = {
+type StylesheetItem = {
     href: string;
     rel?: string;
     type?: string;
 };
-declare type ScriptItem = {
+type ScriptItem = {
     src: string;
     [x: string]: string;
 };
-declare type AttachmentItem = {
+type AttachmentItem = {
     key: string;
     href: string;
     [x: string]: string;
 };
-declare type HtmlDep = {
+type HtmlDep = {
     name: string;
     version: HtmlDepVersion;
     restyle?: boolean;
@@ -45,5 +51,5 @@ declare type HtmlDep = {
     head?: string;
 };
 declare function registerDependency(name: string, version: HtmlDepVersion): void;
-export { renderDependencies, renderContent, renderHtml, registerDependency };
+export { renderContentAsync, renderContent, renderHtmlAsync, renderHtml, renderDependenciesAsync, renderDependencies, registerDependency, };
 export type { HtmlDep };

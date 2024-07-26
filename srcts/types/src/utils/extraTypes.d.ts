@@ -1,11 +1,11 @@
-declare type AnyFunction = (...args: any[]) => any;
-declare type AnyVoidFunction = (...args: any[]) => void;
-declare type MapValuesUnion<T> = T[keyof T];
-declare type MapWithResult<X, R> = {
+type AnyFunction = (...args: any[]) => any;
+type AnyVoidFunction = (...args: any[]) => void;
+type MapValuesUnion<T> = T[keyof T];
+type MapWithResult<X, R> = {
     [Property in keyof X]: R;
 };
 /**
  * Exclude undefined from T
  */
-declare type NotUndefined<T> = T extends undefined ? never : T;
+type NotUndefined<T> = T extends undefined ? never : T;
 export type { AnyFunction, AnyVoidFunction, MapValuesUnion, MapWithResult, NotUndefined, };

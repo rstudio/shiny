@@ -1,13 +1,13 @@
 import $ from "jquery";
 import { imageOutputBinding } from "../bindings/output/image";
+import type { InputRatePolicy } from "../inputPolicies";
 import { shinySetInputValue } from "../shiny/initedMethods";
 import { Debouncer, Throttler } from "../time";
+import type { Bounds, BoundsCss, BrushOpts } from "./createBrush";
 import { createBrush } from "./createBrush";
-import type { BoundsCss, Bounds, BrushOpts } from "./createBrush";
 import type { Offset } from "./findbox";
 import type { Coordmap } from "./initCoordmap";
 import type { Panel } from "./initPanelScales";
-import type { InputRatePolicy } from "../inputPolicies";
 
 // ----------------------------------------------------------
 // Handler creators for click, hover, brush.
@@ -57,6 +57,9 @@ function createClickHandler(
 ): CreateHandler {
   const clickInfoSender = coordmap.mouseCoordinateSender(inputId, clip);
 
+  // Send initial (null) value on creation.
+  clickInfoSender(null);
+
   return {
     mousedown: function (e) {
       // Listen for left mouse button only
@@ -89,6 +92,9 @@ function createHoverHandler(
   if (delayType === "throttle")
     hoverInfoSender = new Throttler(null, sendHoverInfo, delay);
   else hoverInfoSender = new Debouncer(null, sendHoverInfo, delay);
+
+  // Send initial (null) value on creation.
+  hoverInfoSender.immediateCall(null);
 
   // What to do when mouse exits the image
   let mouseout: () => void;
@@ -231,6 +237,11 @@ function createBrushHandler(
     brushInfoSender = new Throttler(null, sendBrushInfo, opts.brushDelay);
   } else {
     brushInfoSender = new Debouncer(null, sendBrushInfo, opts.brushDelay);
+  }
+
+  // Send initial (null) value on creation.
+  if (!brush.hasOldBrush()) {
+    brushInfoSender.immediateCall();
   }
 
   function mousedown(e: JQuery.MouseDownEvent) {

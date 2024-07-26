@@ -44,7 +44,7 @@ class InputBinding {
   // 'data' should be an object with elements corresponding to value, min,
   // max, etc., as appropriate for the type of input object. It also should
   // trigger a change event.
-  receiveMessage(el: HTMLElement, data: unknown): void {
+  receiveMessage(el: HTMLElement, data: unknown): Promise<void> | void {
     throw "Not implemented";
     el; // unused var
     data; // unused var

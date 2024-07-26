@@ -4,7 +4,7 @@ NULL
 
 # @staticimports pkg:staticimports
 #   is_installed get_package_version system_file
-#   s3_register register_upgrade_message
+#   s3_register
 #   any_named any_unnamed
 
 #' Make a random number generator repeatable
@@ -492,7 +492,6 @@ shinyCallingHandlers <- function(expr) {
     }
   )
 }
-
 
 #' Register a function with the debugger (if one is active).
 #'
@@ -1093,7 +1092,7 @@ need <- function(expr, message = paste(label, "must be provided"), label) {
 #'
 #' You can use `req(FALSE)` (i.e. no condition) if you've already performed
 #' all the checks you needed to by that point and just want to stop the reactive
-#' chain now. There is no advantange to this, except perhaps ease of readibility
+#' chain now. There is no advantage to this, except perhaps ease of readability
 #' if you have a complicated condition to check for (or perhaps if you'd like to
 #' divide your condition into nested `if` statements).
 #'
@@ -1115,7 +1114,10 @@ need <- function(expr, message = paste(label, "must be provided"), label) {
 #' @param ... Values to check for truthiness.
 #' @param cancelOutput If `TRUE` and an output is being evaluated, stop
 #'   processing as usual but instead of clearing the output, leave it in
-#'   whatever state it happens to be in.
+#'   whatever state it happens to be in. If `"progress"`, do the same as `TRUE`,
+#'   but also keep the output in recalculating state; this is intended for cases
+#'   when an in-progress calculation will not be completed in this reactive
+#'   flush cycle, but is still expected to provide a result in the future.
 #' @return The first value that was passed in.
 #' @export
 #' @examples
@@ -1147,6 +1149,8 @@ req <- function(..., cancelOutput = FALSE) {
     if (!isTruthy(item)) {
       if (isTRUE(cancelOutput)) {
         cancelOutput()
+      } else if (identical(cancelOutput, "progress")) {
+        reactiveStop(class = "shiny.output.progress")
       } else {
         reactiveStop(class = "validation")
       }
@@ -1240,14 +1244,12 @@ dotloop <- function(fun_, ...) {
 #' @param x An expression whose truthiness value we want to determine
 #' @export
 isTruthy <- function(x) {
-  if (inherits(x, 'try-error'))
-    return(FALSE)
-
-  if (!is.atomic(x))
-    return(TRUE)
-
   if (is.null(x))
     return(FALSE)
+  if (inherits(x, 'try-error'))
+    return(FALSE)
+  if (!is.atomic(x))
+    return(TRUE)
   if (length(x) == 0)
     return(FALSE)
   if (all(is.na(x)))
@@ -1431,6 +1433,12 @@ wrapFunctionLabel <- function(func, name, ..stacktraceon = FALSE, dots = TRUE) {
   if (name == "name" || name == "func" || name == "relabelWrapper") {
     stop("Invalid name for wrapFunctionLabel: ", name)
   }
+  if (nchar(name, "bytes") > 10000) {
+    # Max variable length in R is 10000 bytes. Truncate to a shorter number of
+    # chars because some characters could be multi-byte.
+    name <- substr(name, 1, 5000)
+  }
+
   assign(name, func, environment())
   registerDebugHook(name, environment(), name)
 

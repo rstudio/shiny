@@ -1,6 +1,6 @@
 import { InputBinding } from "./inputBinding";
-declare type TextHTMLElement = HTMLInputElement;
-declare type TextReceiveMessageData = {
+type TextHTMLElement = HTMLInputElement;
+type TextReceiveMessageData = {
     label: string;
     value?: TextHTMLElement["value"];
     placeholder?: TextHTMLElement["placeholder"];

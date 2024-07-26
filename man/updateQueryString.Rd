@@ -13,7 +13,7 @@ updateQueryString(
 \arguments{
 \item{queryString}{The new query string to show in the location bar.}
 
-\item{mode}{When the query string is updated, should the the current history
+\item{mode}{When the query string is updated, should the current history
 entry be replaced (default), or should a new history entry be pushed onto
 the history stack? The former should only be used in a live bookmarking
 context. The latter is useful if you want to navigate between states using

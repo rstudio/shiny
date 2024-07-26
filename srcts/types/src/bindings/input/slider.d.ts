@@ -1,7 +1,7 @@
 import type { TextHTMLElement } from "./text";
 import { TextInputBindingBase } from "./text";
-declare type TimeFormatter = (fmt: string, dt: Date) => string;
-declare type SliderReceiveMessageData = {
+type TimeFormatter = (fmt: string, dt: Date) => string;
+type SliderReceiveMessageData = {
     label: string;
     value?: Array<number | string> | number | string;
     min?: number;

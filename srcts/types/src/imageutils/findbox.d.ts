@@ -1,5 +1,5 @@
 import type { Bounds } from "./createBrush";
-declare type Offset = {
+type Offset = {
     x: number;
     y: number;
 };

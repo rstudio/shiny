@@ -1,12 +1,28 @@
 import $ from "jquery";
 import { shinyUnbindAll } from "./initedMethods";
-import { renderContent } from "./render";
+import type { HtmlDep } from "./render";
+import { renderContentAsync, renderDependenciesAsync } from "./render";
 
 // Show a modal dialog. This is meant to handle two types of cases: one is
 // that the content is a Bootstrap modal dialog, and the other is that the
 // content is non-Bootstrap. Bootstrap modals require some special handling,
 // which is coded in here.
-function show({ html = "", deps = [] } = {}): void {
+async function show({
+  html = "",
+  deps = [],
+}: {
+  html?: string;
+  deps?: HtmlDep[];
+} = {}): Promise<void> {
+  // Normally we'd first create the modal's DOM elements, then call
+  // `renderContentAsync(x, {html: html, deps: deps})`, but that has a potential
+  // problem with async rendering. If we did that, then an empty modal (from
+  // this function) could show up and then sit there empty while the
+  // dependencies load (asynchronously), and only after all that get filled with
+  // content for the modal. So instead we'll render the deps here, then render
+  // the modal, then render the content in the modal.
+  await renderDependenciesAsync(deps);
+
   // If there was an existing Bootstrap modal, then there will be a modal-
   // backdrop div that was added outside of the modal wrapper, and it must be
   // removed; otherwise there can be multiple of these divs.
@@ -44,7 +60,7 @@ function show({ html = "", deps = [] } = {}): void {
   });
 
   // Set/replace contents of wrapper with html.
-  renderContent($modal, { html: html, deps: deps });
+  await renderContentAsync($modal, { html: html });
 }
 
 function remove(): void {

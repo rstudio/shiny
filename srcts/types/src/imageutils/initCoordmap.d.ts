@@ -1,15 +1,15 @@
 /// <reference types="jquery" />
-import type { Offset } from "./findbox";
 import type { Bounds } from "./createBrush";
+import type { Offset } from "./findbox";
 import type { Panel, PanelInit } from "./initPanelScales";
 declare function findOrigin($el: JQuery<HTMLElement>): Offset;
-declare type OffsetCss = {
+type OffsetCss = {
     [key: string]: number;
 };
-declare type OffsetImg = {
+type OffsetImg = {
     [key: string]: number;
 };
-declare type CoordmapInit = {
+type CoordmapInit = {
     panels: PanelInit[];
     dims: {
         height: number;
@@ -19,7 +19,7 @@ declare type CoordmapInit = {
         width: null;
     };
 };
-declare type Coordmap = {
+type Coordmap = {
     panels: Panel[];
     dims: {
         height: number;

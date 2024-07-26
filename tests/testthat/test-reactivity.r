@@ -126,6 +126,23 @@ test_that("ReactiveValues", {
   expect_error(values$a <- 1)
 })
 
+test_that("reactiveValues keys are sorted", {
+  values <- reactiveValues(b=2, a=0)
+  values$C <- 13
+  values$A <- 0
+  values$c <- 3
+  values$B <- 12
+  # Setting an existing value shouldn't change order
+  values$a <- 1
+  values$A <- 11
+
+  expect_identical(isolate(names(values)), c("b", "a", "C", "A", "c", "B"))
+  expect_identical(
+    isolate(reactiveValuesToList(values)),
+    list(b=2, a=1, C=13, A=11, c=3, B=12)
+  )
+})
+
 test_that("reactiveValues() has useful print method", {
   verify_output(test_path("print-reactiveValues.txt"), {
     x <- reactiveValues(x = 1, y = 2, z = 3)
@@ -1679,3 +1696,41 @@ test_that("Reactive expression labels", {
     "hello"
   )
 })
+
+
+test_that("Contexts can be masked off", {
+  expect_error(
+    {
+      r <- reactiveVal()
+      isolate({
+        maskReactiveContext({
+          r()
+        })
+      })
+    },
+    regexp = "Operation not allowed without an active reactive context"
+  )
+})
+
+
+test_that("Contexts can be masked off via promise domains", {
+  r <- reactiveVal()
+  done <- FALSE
+  isolate({
+    maskReactiveContext({
+      promises::promise_resolve(NULL)$then(function(value) {
+        done <<- TRUE
+        expect_error(
+          {
+            r()
+          },
+          regexp = "Operation not allowed without an active reactive context"
+        )
+      })
+    })
+  })
+  while (!done) {
+    later::run_now(all=FALSE)
+  }
+})
+

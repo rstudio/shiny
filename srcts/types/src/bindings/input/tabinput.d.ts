@@ -1,5 +1,5 @@
 import { InputBinding } from "./inputBinding";
-declare type TabInputReceiveMessageData = {
+type TabInputReceiveMessageData = {
     value?: string;
 };
 declare class BootstrapTabInputBinding extends InputBinding {

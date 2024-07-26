@@ -64,7 +64,7 @@ updated and all observers have been run (default).}
 \item{session}{The shiny session. Advanced use only.}
 }
 \description{
-These functions allow you to dynamically add and remove arbirary UI
+These functions allow you to dynamically add and remove arbitrary UI
 into your app, whenever you want, as many times as you want.
 Unlike \code{\link[=renderUI]{renderUI()}}, the UI generated with \code{insertUI()} is persistent:
 once it's created, it stays there until removed by \code{removeUI()}. Each
@@ -76,7 +76,7 @@ function.
 }
 \details{
 It's particularly useful to pair \code{removeUI} with \code{insertUI()}, but there is
-no restriction on what you can use on. Any element that can be selected
+no restriction on what you can use it on. Any element that can be selected
 through a jQuery selector can be removed through this function.
 }
 \examples{

@@ -1,25 +1,24 @@
 /// <reference types="selectize" />
 import { InputBinding } from "./inputBinding";
-import type { NotUndefined } from "../../utils/extraTypes";
-declare type SelectHTMLElement = HTMLSelectElement & {
+type SelectHTMLElement = HTMLSelectElement & {
     nonempty: boolean;
 };
-declare type SelectInputReceiveMessageData = {
+type SelectInputReceiveMessageData = {
     label: string;
     options?: string;
     config?: string;
     url?: string;
     value?: string;
 };
-declare type SelectizeOptions = Selectize.IOptions<string, unknown>;
-declare type SelectizeInfo = Selectize.IApi<string, unknown> & {
+type SelectizeOptions = Selectize.IOptions<string, unknown>;
+type SelectizeInfo = Selectize.IApi<string, unknown> & {
     settings: SelectizeOptions;
 };
 declare class SelectInputBinding extends InputBinding {
     find(scope: HTMLElement): JQuery<HTMLElement>;
     getType(el: HTMLElement): string | null;
     getId(el: SelectHTMLElement): string;
-    getValue(el: HTMLElement): NotUndefined<ReturnType<JQuery<HTMLElement>["val"]>>;
+    getValue(el: SelectHTMLElement): any;
     setValue(el: SelectHTMLElement, value: string): void;
     getState(el: SelectHTMLElement): {
         label: JQuery<HTMLElement>;

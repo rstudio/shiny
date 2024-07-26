@@ -69,8 +69,9 @@ be done 100\% correctly.}
 \item{shiny.jquery.version (defaults to \code{3})}{The major version of jQuery to use.
 Currently only values of \code{3} or \code{1} are supported. If \code{1}, then jQuery 1.12.4 is used. If \code{3},
 then jQuery 3.6.0 is used.}
-\item{shiny.json.digits (defaults to \code{16})}{The number of digits to use when converting
-numbers to JSON format to send to the client web browser.}
+\item{shiny.json.digits (defaults to \code{I(16)})}{Max number of digits to use when converting
+numbers to JSON format to send to the client web browser. Use \code{\link[=I]{I()}} to specify significant digits.
+Use \code{NA} for max precision.}
 \item{shiny.launch.browser (defaults to \code{interactive()})}{A boolean which controls the default behavior
 when an app is run. See \code{\link[=runApp]{runApp()}} for more information.}
 \item{shiny.mathjax.url (defaults to \code{"https://mathjax.rstudio.com/latest/MathJax.js"})}{
@@ -91,7 +92,7 @@ This incurs a substantial performance penalty and should not be used in
 production.}
 \item{shiny.sanitize.errors (defaults to \code{FALSE})}{If \code{TRUE}, then normal errors (i.e.
 errors not wrapped in \code{safeError}) won't show up in the app; a simple
-generic error message is printed instead (the error and strack trace printed
+generic error message is printed instead (the error and stack trace printed
 to the console remain unchanged). If you want to sanitize errors in general, but you DO want a
 particular error \code{e} to get displayed to the user, then set this option
 to \code{TRUE} and use \code{stop(safeError(e))} for errors you want the

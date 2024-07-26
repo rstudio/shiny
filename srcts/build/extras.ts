@@ -53,3 +53,11 @@ build({
   ],
   outfile: outDir + "shiny.min.css",
 });
+build({
+  ...sassOpts,
+  entryPoints: ["srcts/extras/busy-indicators/busy-indicators.scss"],
+  outfile: outDir + "busy-indicators/busy-indicators.css",
+  plugins: [sassPlugin()],
+  bundle: false,
+  metafile: true,
+});

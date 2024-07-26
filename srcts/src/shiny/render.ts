@@ -9,23 +9,81 @@ import {
 } from "./initedMethods";
 import { sendImageSizeFns } from "./sendImageSize";
 
-import { renderHtml as singletonsRenderHtml } from "./singletons";
 import type { WherePosition } from "./singletons";
+import { renderHtml as singletonsRenderHtml } from "./singletons";
 
-function renderDependencies(dependencies: HtmlDep[] | null): void {
-  if (dependencies) {
-    dependencies.forEach(renderDependency);
-  }
-}
+// There are synchronous and asynchronous versions of the exported functions
+// renderContent(), renderHtml(), and renderDependencies(). This is because they
+// the original versions of these functions were synchronous, but we added
+// support for asynchronous rendering, to avoid the deprecated XMLHttpRequest
+// function (https://github.com/rstudio/shiny/pull/3666).
+//
+// At the bottom, there is the appendScriptTags(), which calls $.append(), which
+// in turn calls (synchronous) XMLHttpRequest(); and its counterpart
+// appendScriptTagsAsync(), which uses a different (asynchronous) method. The
+// sync and async versions of this function necessitate the sync and async
+// versions of the other functions.
+//
+// The async versions of these functions are used internally and should be used
+// for new external code when possible, but for backward compatibility for
+// external code that calls these functions, we'll keep the synchronous versions
+// around as well.
 
+// =============================================================================
+// renderContent
+// =============================================================================
 // Render HTML in a DOM element, add dependencies, and bind Shiny
 // inputs/outputs. `content` can be null, a string, or an object with
 // properties 'html' and 'deps'.
+async function renderContentAsync(
+  el: BindScope,
+  content: string | { html: string; deps?: HtmlDep[] } | null,
+  where: WherePosition = "replace"
+): Promise<void> {
+  if (where === "replace") {
+    shinyUnbindAll(el);
+  }
+
+  let html = "";
+  let dependencies: HtmlDep[] = [];
+
+  if (content === null) {
+    html = "";
+  } else if (typeof content === "string") {
+    html = content;
+  } else if (typeof content === "object") {
+    html = content.html;
+    dependencies = content.deps || [];
+  }
+
+  await renderHtmlAsync(html, el, dependencies, where);
+
+  let scope: BindScope = el;
+
+  if (where === "replace") {
+    shinyInitializeInputs(el);
+    await shinyBindAll(el);
+  } else {
+    const $parent = $(el).parent();
+
+    if ($parent.length > 0) {
+      scope = $parent;
+      if (where === "beforeBegin" || where === "afterEnd") {
+        const $grandparent = $parent.parent();
+
+        if ($grandparent.length > 0) scope = $grandparent;
+      }
+    }
+    shinyInitializeInputs(scope);
+    await shinyBindAll(scope);
+  }
+}
+
 function renderContent(
   el: BindScope,
   content: string | { html: string; deps?: HtmlDep[] } | null,
   where: WherePosition = "replace"
-): void {
+): Promise<void> {
   if (where === "replace") {
     shinyUnbindAll(el);
   }
@@ -48,7 +106,7 @@ function renderContent(
 
   if (where === "replace") {
     shinyInitializeInputs(el);
-    shinyBindAll(el);
+    return shinyBindAll(el);
   } else {
     const $parent = $(el).parent();
 
@@ -61,8 +119,22 @@ function renderContent(
       }
     }
     shinyInitializeInputs(scope);
-    shinyBindAll(scope);
+    return shinyBindAll(scope);
   }
+}
+
+// =============================================================================
+// renderHtml
+// =============================================================================
+// Render HTML in a DOM element, inserting singletons into head as needed
+async function renderHtmlAsync(
+  html: string,
+  el: BindScope,
+  dependencies: HtmlDep[],
+  where: WherePosition = "replace"
+): Promise<ReturnType<typeof singletonsRenderHtml>> {
+  await renderDependenciesAsync(dependencies);
+  return singletonsRenderHtml(html, el, where);
 }
 
 // Render HTML in a DOM element, inserting singletons into head as needed
@@ -76,6 +148,30 @@ function renderHtml(
   return singletonsRenderHtml(html, el, where);
 }
 
+// =============================================================================
+// renderDependencies
+// =============================================================================
+async function renderDependenciesAsync(
+  dependencies: HtmlDep[] | null
+): Promise<void> {
+  if (dependencies) {
+    for (const dep of dependencies) {
+      await renderDependencyAsync(dep);
+    }
+  }
+}
+
+function renderDependencies(dependencies: HtmlDep[] | null): void {
+  if (dependencies) {
+    for (const dep of dependencies) {
+      renderDependency(dep);
+    }
+  }
+}
+
+// =============================================================================
+// HTML dependency types
+// =============================================================================
 type HtmlDepVersion = string;
 
 type MetaItem = {
@@ -126,6 +222,10 @@ type HtmlDepNormalized = {
   attachment: AttachmentItem[];
   head?: string;
 };
+
+// =============================================================================
+// renderDependency helper functions
+// =============================================================================
 const htmlDependencies: { [key: string]: HtmlDepVersion } = {};
 
 function registerDependency(name: string, version: HtmlDepVersion): void {
@@ -145,93 +245,6 @@ function needsRestyle(dep: HtmlDepNormalized) {
     return false;
   }
   return htmlDependencies[names[idx]] === dep.version;
-}
-
-// Client-side dependency resolution and rendering
-function renderDependency(dep_: HtmlDep) {
-  const dep = normalizeHtmlDependency(dep_);
-
-  // Convert stylesheet objs to links early, because if `restyle` is true, we'll
-  // pass them through to `addStylesheetsAndRestyle` below.
-  const stylesheetLinks = dep.stylesheet.map((x) => {
-    // Add "rel" and "type" fields if not already present.
-    if (!hasDefinedProperty(x, "rel")) x.rel = "stylesheet";
-    if (!hasDefinedProperty(x, "type")) x.type = "text/css";
-
-    const link = document.createElement("link");
-
-    Object.entries(x).forEach(function ([attr, val]: [
-      string,
-      string | undefined
-    ]) {
-      if (attr === "href") {
-        val = encodeURI(val as string);
-      }
-      // If val isn't truthy (e.g., null), consider it a boolean attribute
-      link.setAttribute(attr, val ? val : "");
-    });
-
-    return link;
-  });
-
-  // If a restyle is needed, do that stuff and return. Note that other items
-  // (like scripts) aren't added, because they would have been added in a
-  // previous run.
-  if (needsRestyle(dep)) {
-    addStylesheetsAndRestyle(stylesheetLinks);
-    return true;
-  }
-
-  if (hasDefinedProperty(htmlDependencies, dep.name)) return false;
-
-  registerDependency(dep.name, dep.version);
-
-  const $head = $("head").first();
-
-  // Add each type of element to the DOM.
-
-  dep.meta.forEach((x) => {
-    const meta = document.createElement("meta");
-
-    for (const [attr, val] of Object.entries(x)) {
-      meta.setAttribute(attr, val);
-    }
-    $head.append(meta);
-  });
-
-  if (stylesheetLinks.length !== 0) {
-    $head.append(stylesheetLinks);
-  }
-
-  dep.script.forEach((x) => {
-    const script = document.createElement("script");
-
-    Object.entries(x).forEach(function ([attr, val]) {
-      if (attr === "src") {
-        val = encodeURI(val);
-      }
-      // If val isn't truthy (e.g., null), consider it a boolean attribute
-      script.setAttribute(attr, val ? val : "");
-    });
-
-    $head.append(script);
-  });
-
-  dep.attachment.forEach((x) => {
-    const link = $("<link rel='attachment'>")
-      .attr("id", dep.name + "-" + x.key + "-attachment")
-      .attr("href", encodeURI(x.href));
-
-    $head.append(link);
-  });
-
-  if (dep.head) {
-    const $newHead = $("<head></head>");
-
-    $newHead.html(dep.head);
-    $head.append($newHead.children());
-  }
-  return true;
 }
 
 function addStylesheetsAndRestyle(links: HTMLLinkElement[]): void {
@@ -354,6 +367,206 @@ function addStylesheetsAndRestyle(links: HTMLLinkElement[]): void {
   });
 }
 
+function getStylesheetLinkTags(dep: HtmlDepNormalized): HTMLLinkElement[] {
+  // Convert stylesheet objs to links early, because if `restyle` is true, we'll
+  // pass them through to `addStylesheetsAndRestyle` below.
+  return dep.stylesheet.map((x) => {
+    // Add "rel" and "type" fields if not already present.
+    if (!hasDefinedProperty(x, "rel")) x.rel = "stylesheet";
+    if (!hasDefinedProperty(x, "type")) x.type = "text/css";
+
+    const link = document.createElement("link");
+
+    Object.entries(x).forEach(function ([attr, val]: [
+      string,
+      string | undefined
+    ]) {
+      if (attr === "href") {
+        val = encodeURI(val as string);
+      }
+      // If val isn't truthy (e.g., null), consider it a boolean attribute
+      link.setAttribute(attr, val ? val : "");
+    });
+
+    return link;
+  });
+}
+
+function appendStylesheetLinkTags(
+  dep: HtmlDepNormalized,
+  $head: JQuery<HTMLElement>
+): void {
+  const stylesheetLinks = getStylesheetLinkTags(dep);
+
+  if (stylesheetLinks.length !== 0) {
+    $head.append(stylesheetLinks);
+  }
+}
+
+function appendScriptTags(dep: HtmlDepNormalized, $head: JQuery<HTMLElement>) {
+  dep.script.forEach((x) => {
+    const script = document.createElement("script");
+
+    Object.entries(x).forEach(function ([attr, val]) {
+      if (attr === "src") {
+        val = encodeURI(val);
+      }
+      // If val isn't truthy (e.g., null), consider it a boolean attribute
+      script.setAttribute(attr, val ? val : "");
+    });
+
+    $head.append(script);
+  });
+}
+
+async function appendScriptTagsAsync(dep: HtmlDepNormalized): Promise<void> {
+  const scriptPromises: Array<Promise<any>> = [];
+
+  dep.script.forEach((x) => {
+    const script = document.createElement("script");
+
+    if (!hasDefinedProperty(x, "async")) {
+      // Set async to false by default, so that if there are multiple script
+      // tags, they are guaranteed to run in order. For dynamically added
+      // <script> tags, browsers set async to true by default, which differs
+      // from static <script> tags in the html, which default to false.
+      //
+      // Refs:
+      // https://stackoverflow.com/a/8996894/412655
+      // https://jason-ge.medium.com/dynamically-load-javascript-files-in-order-5318ac6bcc61
+      //
+      // Note that one odd thing about these dynamically-created <script> tags
+      // is that even though the JS object's `x.script` property is true, it
+      // does NOT show up as a property on the <script> element.
+      script.async = false;
+    }
+
+    Object.entries(x).forEach(function ([attr, val]) {
+      if (attr === "src") {
+        val = encodeURI(val);
+      }
+      // If val isn't truthy (e.g., null), consider it a boolean attribute
+      script.setAttribute(attr, val ? val : "");
+    });
+
+    const p = new Promise((resolve, reject) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      script.onload = (e: Event) => {
+        resolve(null);
+      };
+      script.onerror = (e: Event | string) => {
+        reject(e);
+      };
+    });
+
+    scriptPromises.push(p);
+    document.head.append(script);
+  });
+
+  await Promise.allSettled(scriptPromises);
+}
+
+function appendMetaTags(
+  dep: HtmlDepNormalized,
+  $head: JQuery<HTMLElement>
+): void {
+  dep.meta.forEach((x) => {
+    const meta = document.createElement("meta");
+
+    for (const [attr, val] of Object.entries(x)) {
+      meta.setAttribute(attr, val);
+    }
+    $head.append(meta);
+  });
+}
+
+function appendAttachmentLinkTags(
+  dep: HtmlDepNormalized,
+  $head: JQuery<HTMLElement>
+): void {
+  dep.attachment.forEach((x) => {
+    const link = $("<link rel='attachment'>")
+      .attr("id", dep.name + "-" + x.key + "-attachment")
+      .attr("href", encodeURI(x.href));
+
+    $head.append(link);
+  });
+}
+
+function appendExtraHeadContent(
+  dep: HtmlDepNormalized,
+  $head: JQuery<HTMLElement>
+): void {
+  if (dep.head) {
+    const $newHead = $("<head></head>");
+
+    $newHead.html(dep.head);
+    $head.append($newHead.children());
+  }
+}
+
+// =============================================================================
+// renderDependency
+// =============================================================================
+// Client-side dependency resolution and rendering
+async function renderDependencyAsync(dep_: HtmlDep): Promise<boolean> {
+  const dep = normalizeHtmlDependency(dep_);
+
+  // If a restyle is needed, do that stuff and return. Note that other items
+  // (like scripts) aren't added, because they would have been added in a
+  // previous run.
+  if (needsRestyle(dep)) {
+    addStylesheetsAndRestyle(getStylesheetLinkTags(dep));
+    return true;
+  }
+
+  if (hasDefinedProperty(htmlDependencies, dep.name)) return false;
+
+  registerDependency(dep.name, dep.version);
+
+  const $head = $("head").first();
+
+  // Add each type of element to the DOM.
+  appendMetaTags(dep, $head);
+  appendStylesheetLinkTags(dep, $head);
+  await appendScriptTagsAsync(dep);
+  appendAttachmentLinkTags(dep, $head);
+  appendExtraHeadContent(dep, $head);
+
+  return true;
+}
+
+// Old-school synchronous version of renderDependencyAsync. This function is
+// here to preserve compatibility with outside packages that use it. The
+// implementation is the same except that it calls appendScriptTags() instead of
+// appendScriptTagsAsync().
+function renderDependency(dep_: HtmlDep): boolean {
+  const dep = normalizeHtmlDependency(dep_);
+
+  // If a restyle is needed, do that stuff and return. Note that other items
+  // (like scripts) aren't added, because they would have been added in a
+  // previous run.
+  if (needsRestyle(dep)) {
+    addStylesheetsAndRestyle(getStylesheetLinkTags(dep));
+    return true;
+  }
+
+  if (hasDefinedProperty(htmlDependencies, dep.name)) return false;
+
+  registerDependency(dep.name, dep.version);
+
+  const $head = $("head").first();
+
+  // Add each type of element to the DOM.
+  appendMetaTags(dep, $head);
+  appendStylesheetLinkTags(dep, $head);
+  appendScriptTags(dep, $head);
+  appendAttachmentLinkTags(dep, $head);
+  appendExtraHeadContent(dep, $head);
+
+  return true;
+}
+
 // Convert legacy HtmlDependency to new HTMLDependency format. This is
 // idempotent; new HTMLDependency objects are returned unchanged.
 function normalizeHtmlDependency(dep: HtmlDep): HtmlDepNormalized {
@@ -470,5 +683,13 @@ function normalizeHtmlDependency(dep: HtmlDep): HtmlDepNormalized {
   return result;
 }
 
-export { renderDependencies, renderContent, renderHtml, registerDependency };
+export {
+  renderContentAsync,
+  renderContent,
+  renderHtmlAsync,
+  renderHtml,
+  renderDependenciesAsync,
+  renderDependencies,
+  registerDependency,
+};
 export type { HtmlDep };

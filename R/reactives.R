@@ -326,6 +326,9 @@ ReactiveValues <- R6Class(
     .dedupe = logical(0),
     # Key, asList(), or names() have been retrieved
     .hasRetrieved = list(),
+    # All names, in insertion order. The names are also stored in the .values
+    # object, but it does not preserve order.
+    .nameOrder = character(0),
 
 
     initialize = function(
@@ -403,6 +406,11 @@ ReactiveValues <- R6Class(
         return(invisible())
       }
 
+      # If it's new, append key to the name order
+      if (!key_exists) {
+        .nameOrder[length(.nameOrder) + 1] <<- key
+      }
+
       # set the value for better logging
       .values$set(key, value)
 
@@ -444,14 +452,13 @@ ReactiveValues <- R6Class(
     },
 
     names = function() {
-      nameValues <- .values$keys()
       if (!isTRUE(.hasRetrieved$names)) {
         domain <- getDefaultReactiveDomain()
-        rLog$defineNames(.reactId, nameValues, .label, domain)
+        rLog$defineNames(.reactId, .nameOrder, .label, domain)
         .hasRetrieved$names <<- TRUE
       }
       .namesDeps$register()
-      return(nameValues)
+      return(.nameOrder)
     },
 
     # Get a metadata value. Does not trigger reactivity.
@@ -499,7 +506,7 @@ ReactiveValues <- R6Class(
     },
 
     toList = function(all.names=FALSE) {
-      listValue <- .values$values()
+      listValue <- .values$mget(.nameOrder)
       if (!all.names) {
         listValue <- listValue[!grepl("^\\.", base::names(listValue))]
       }
@@ -1209,7 +1216,7 @@ Observer <- R6Class(
 
             printError(e)
             if (!is.null(.domain)) {
-              .domain$unhandledError(e)
+              .domain$unhandledError(e, close = TRUE)
             }
           },
           finally = .domain$decrementBusyCount
@@ -2180,8 +2187,8 @@ maskReactiveContext <- function(expr) {
 #' @param autoDestroy If `TRUE` (the default), the observer will be
 #'   automatically destroyed when its domain (if any) ends.
 #' @param ignoreNULL Whether the action should be triggered (or value
-#'   calculated, in the case of `eventReactive`) when the input is
-#'   `NULL`. See Details.
+#'   calculated, in the case of `eventReactive`) when the input event expression
+#'   is `NULL`. See Details.
 #' @param ignoreInit If `TRUE`, then, when this `observeEvent` is
 #'   first created/initialized, ignore the `handlerExpr` (the second
 #'   argument), whether it is otherwise supposed to run or not. The default is
@@ -2389,7 +2396,7 @@ isNullEvent <- function(value) {
 #' reactive recently (within the time window) invalidated. New `r`
 #' invalidations do not reset the time window. This means that if invalidations
 #' continually come from `r` within the time window, the throttled reactive
-#' will invalidate regularly, at a rate equal to or slower than than the time
+#' will invalidate regularly, at a rate equal to or slower than the time
 #' window.
 #'
 #' `ooo-oo-oo---- => o--o--o--o---`

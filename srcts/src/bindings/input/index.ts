@@ -2,27 +2,26 @@ import { BindingRegistry } from "../registry";
 
 import { InputBinding } from "./inputBinding";
 
+import { ActionButtonInputBinding } from "./actionbutton";
 import { CheckboxInputBinding } from "./checkbox";
 import { CheckboxGroupInputBinding } from "./checkboxgroup";
+import { DateInputBinding } from "./date";
+import { DateRangeInputBinding } from "./daterange";
+import { FileInputBinding } from "./fileinput";
 import { NumberInputBinding } from "./number";
 import { PasswordInputBinding } from "./password";
+import { RadioInputBinding } from "./radio";
+import { SelectInputBinding } from "./selectInput";
+import { SliderInputBinding } from "./slider";
+import { BootstrapTabInputBinding } from "./tabinput";
 import { TextInputBinding } from "./text";
 import { TextareaInputBinding } from "./textarea";
-import { RadioInputBinding } from "./radio";
-import { DateInputBinding } from "./date";
-import { SliderInputBinding } from "./slider";
-import { DateRangeInputBinding } from "./daterange";
-import { SelectInputBinding } from "./selectInput";
-import { ActionButtonInputBinding } from "./actionbutton";
-import { BootstrapTabInputBinding } from "./tabinput";
-import { FileInputBinding } from "./fileinput";
 
 // TODO-barret make this an init method
-type InitInputBindings = {
+function initInputBindings(): {
   inputBindings: BindingRegistry<InputBinding>;
   fileInputBinding: FileInputBinding;
-};
-function initInputBindings(): InitInputBindings {
+} {
   const inputBindings = new BindingRegistry<InputBinding>();
 
   inputBindings.register(new TextInputBinding(), "shiny.textInput");

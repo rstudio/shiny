@@ -1,6 +1,6 @@
 import { formatDateUTC } from "../../utils";
 import { DateInputBindingBase } from "./date";
-declare type DateRangeReceiveMessageData = {
+type DateRangeReceiveMessageData = {
     label: string;
     min?: Date;
     max?: Date;

@@ -1,6 +1,6 @@
 import $ from "jquery";
-import { asArray } from "../../utils";
 import type { ErrorsMessageValue } from "../../shiny/shinyapp";
+import { asArray } from "../../utils";
 
 class OutputBinding {
   name!: string;
@@ -11,7 +11,7 @@ class OutputBinding {
     throw "Not implemented";
     scope;
   }
-  renderValue(el: HTMLElement, data: unknown): void {
+  renderValue(el: HTMLElement, data: unknown): Promise<void> | void {
     throw "Not implemented";
     el;
     data;
@@ -21,9 +21,9 @@ class OutputBinding {
     return el.getAttribute("data-input-id") || el.id;
   }
 
-  onValueChange(el: HTMLElement, data: unknown): void {
+  async onValueChange(el: HTMLElement, data: unknown): Promise<void> {
     this.clearError(el);
-    this.renderValue(el, data);
+    await this.renderValue(el, data);
   }
   onValueError(el: HTMLElement, err: ErrorsMessageValue): void {
     this.renderError(el, err);

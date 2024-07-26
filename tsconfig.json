@@ -1,12 +1,13 @@
 {
   "declaration": true,
   "compilerOptions": {
-    "target": "ES5",
+    "target": "es2020",
     "isolatedModules": true,
     "esModuleInterop": true,
     "declaration": true,
     "declarationDir": "./srcts/types",
     "emitDeclarationOnly": true,
+    "moduleResolution": "node",
     // Can not use `types: []` to disable injecting NodeJS types. More types are
     // needed than just the DOM's `window.setTimeout`
     // "types": [],

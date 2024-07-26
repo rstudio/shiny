@@ -1,6 +1,6 @@
-import type { Offset } from "./findbox";
 import type { Bounds } from "./createBrush";
-declare type PanelInit = {
+import type { Offset } from "./findbox";
+type PanelInit = {
     domain: {
         top: number;
         bottom: number;
@@ -24,7 +24,7 @@ declare type PanelInit = {
         [key: string]: number | string;
     };
 };
-declare type Panel = PanelInit & {
+type Panel = PanelInit & {
     scaleDataToImg: {
         (val: Bounds, clip?: boolean): Bounds;
     };

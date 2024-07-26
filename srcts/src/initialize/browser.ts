@@ -1,6 +1,6 @@
 import $ from "jquery";
 
-import { isIE, setIsQt, setIsIE, setIEVersion } from "../utils/browser";
+import { isIE, setIEVersion, setIsIE, setIsQt } from "../utils/browser";
 import { userAgent } from "../utils/userAgent";
 
 function getIEVersion() {

@@ -753,7 +753,7 @@
                 x = $handle.offset().left;
                 x += ($handle.width() / 2) - 1;
 
-                this.pointerClick("single", {preventDefault: function () {}, pageX: x});
+                this.pointerClick("single", {preventDefault: function () {}, stopPropagation: function () {}, pageX: x});
             }
         },
 

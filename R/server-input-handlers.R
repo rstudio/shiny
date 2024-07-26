@@ -1,5 +1,9 @@
-# Create a map for input handlers and register the defaults.
-inputHandlers <- Map$new()
+# Create a Map object for input handlers and register the defaults.
+# This is assigned in .onLoad time.
+inputHandlers <- NULL
+on_load({
+  inputHandlers <- Map$new()
+})
 
 #' Register an Input Handler
 #'
@@ -125,115 +129,117 @@ applyInputHandlers <- function(inputs, shinysession = getDefaultReactiveDomain()
   inputs
 }
 
+on_load({
+  # Takes a list-of-lists and returns a matrix. The lists
+  # must all be the same length. NULL is replaced by NA.
+  registerInputHandler("shiny.matrix", function(data, ...) {
+    if (length(data) == 0)
+      return(matrix(nrow=0, ncol=0))
 
-# Takes a list-of-lists and returns a matrix. The lists
-# must all be the same length. NULL is replaced by NA.
-registerInputHandler("shiny.matrix", function(data, ...) {
-  if (length(data) == 0)
-    return(matrix(nrow=0, ncol=0))
-
-  m <- matrix(unlist(lapply(data, function(x) {
-    sapply(x, function(y) {
-      ifelse(is.null(y), NA, y)
-    })
-  })), nrow = length(data[[1]]), ncol = length(data))
-  return(m)
-})
-
-
-registerInputHandler("shiny.number", function(val, ...){
-  ifelse(is.null(val), NA, val)
-})
-
-registerInputHandler("shiny.password", function(val, shinysession, name) {
-  # Mark passwords as not serializable
-  setSerializer(name, serializerUnserializable)
-  val
-})
-
-registerInputHandler("shiny.date", function(val, ...){
-  # First replace NULLs with NA, then convert to Date vector
-  datelist <- ifelse(lapply(val, is.null), NA, val)
-
-  res <- NULL
-  tryCatch({
-      res <- as.Date(unlist(datelist))
-    },
-    error = function(e) {
-      # It's possible for client to send a string like "99999-01-01", which
-      # as.Date can't handle.
-      warning(e$message)
-      res <<- as.Date(rep(NA, length(datelist)))
-    }
-  )
-
-  res
-})
-
-registerInputHandler("shiny.datetime", function(val, ...){
-  # First replace NULLs with NA, then convert to POSIXct vector
-  times <- lapply(val, function(x) {
-    if (is.null(x)) NA
-    else x
+    m <- matrix(unlist(lapply(data, function(x) {
+      sapply(x, function(y) {
+        ifelse(is.null(y), NA, y)
+      })
+    })), nrow = length(data[[1]]), ncol = length(data))
+    return(m)
   })
-  as.POSIXct(unlist(times), origin = "1970-01-01", tz = "UTC")
-})
-
-registerInputHandler("shiny.action", function(val, shinysession, name) {
-  # mark up the action button value with a special class so we can recognize it later
-  class(val) <- c("shinyActionButtonValue", class(val))
-  val
-})
-
-registerInputHandler("shiny.file", function(val, shinysession, name) {
-  # This function is only used when restoring a Shiny fileInput. When a file is
-  # uploaded the usual way, it takes a different code path and won't hit this
-  # function.
-  if (is.null(val))
-    return(NULL)
-
-  # The data will be a named list of lists; convert to a data frame.
-  val <- as.data.frame(lapply(val, unlist), stringsAsFactors = FALSE)
-
-  # `val$datapath` should be a filename without a path, for security reasons.
-  if (basename(val$datapath) != val$datapath) {
-    stop("Invalid '/' found in file input path.")
-  }
-
-  # Prepend the persistent dir
-  oldfile <- file.path(getCurrentRestoreContext()$dir, val$datapath)
-
-  # Copy the original file to a new temp dir, so that a restored session can't
-  # modify the original.
-  newdir <- file.path(tempdir(), createUniqueId(12))
-  dir.create(newdir)
-  val$datapath <- file.path(newdir, val$datapath)
-  file.copy(oldfile, val$datapath)
-
-  # Need to mark this input value with the correct serializer. When a file is
-  # uploaded the usual way (instead of being restored), this occurs in
-  # session$`@uploadEnd`.
-  setSerializer(name, serializerFileInput)
-
-  snapshotPreprocessInput(name, snapshotPreprocessorFileInput)
-
-  val
-})
 
 
-# to be used with !!!answer
-registerInputHandler("shiny.symbolList", function(val, ...) {
-  if (is.null(val)) {
-    list()
-  } else {
-    lapply(val, as.symbol)
-  }
-})
-# to be used with !!answer
-registerInputHandler("shiny.symbol", function(val, ...) {
-  if (is.null(val) || identical(val, "")) {
-    NULL
-  } else {
-    as.symbol(val)
-  }
+  registerInputHandler("shiny.number", function(val, ...){
+    ifelse(is.null(val), NA, val)
+  })
+
+  registerInputHandler("shiny.password", function(val, shinysession, name) {
+    # Mark passwords as not serializable
+    setSerializer(name, serializerUnserializable)
+    val
+  })
+
+  registerInputHandler("shiny.date", function(val, ...){
+    # First replace NULLs with NA, then convert to Date vector
+    datelist <- ifelse(lapply(val, is.null), NA, val)
+
+    res <- NULL
+    tryCatch({
+        res <- as.Date(unlist(datelist))
+      },
+      error = function(e) {
+        # It's possible for client to send a string like "99999-01-01", which
+        # as.Date can't handle.
+        warning(e$message)
+        res <<- as.Date(rep(NA, length(datelist)))
+      }
+    )
+
+    res
+  })
+
+  registerInputHandler("shiny.datetime", function(val, ...){
+    # First replace NULLs with NA, then convert to POSIXct vector
+    times <- lapply(val, function(x) {
+      if (is.null(x)) NA
+      else x
+    })
+    as.POSIXct(unlist(times), origin = "1970-01-01", tz = "UTC")
+  })
+
+  registerInputHandler("shiny.action", function(val, shinysession, name) {
+    # mark up the action button value with a special class so we can recognize it later
+    class(val) <- c("shinyActionButtonValue", class(val))
+    val
+  })
+
+  registerInputHandler("shiny.file", function(val, shinysession, name) {
+    # This function is only used when restoring a Shiny fileInput. When a file is
+    # uploaded the usual way, it takes a different code path and won't hit this
+    # function.
+    if (is.null(val))
+      return(NULL)
+
+    # The data will be a named list of lists; convert to a data frame.
+    val <- as.data.frame(lapply(val, unlist), stringsAsFactors = FALSE)
+
+    # `val$datapath` should be a filename without a path, for security reasons.
+    if (basename(val$datapath) != val$datapath) {
+      stop("Invalid '/' found in file input path.")
+    }
+
+    # Prepend the persistent dir
+    oldfile <- file.path(getCurrentRestoreContext()$dir, val$datapath)
+
+    # Copy the original file to a new temp dir, so that a restored session can't
+    # modify the original.
+    newdir <- file.path(tempdir(), createUniqueId(12))
+    dir.create(newdir)
+    val$datapath <- file.path(newdir, val$datapath)
+    file.copy(oldfile, val$datapath)
+
+    # Need to mark this input value with the correct serializer. When a file is
+    # uploaded the usual way (instead of being restored), this occurs in
+    # session$`@uploadEnd`.
+    setSerializer(name, serializerFileInput)
+
+    snapshotPreprocessInput(name, snapshotPreprocessorFileInput)
+
+    val
+  })
+
+
+  # to be used with !!!answer
+  registerInputHandler("shiny.symbolList", function(val, ...) {
+    if (is.null(val)) {
+      list()
+    } else {
+      lapply(val, as.symbol)
+    }
+  })
+  # to be used with !!answer
+  registerInputHandler("shiny.symbol", function(val, ...) {
+    if (is.null(val) || identical(val, "")) {
+      NULL
+    } else {
+      as.symbol(val)
+    }
+  })
+
 })

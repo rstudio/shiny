@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.8.1.9001</span>
       </span>
     </div>
 
@@ -44,18 +44,18 @@
   <div class="col-md-9 contents">
     <div class="page-header">
       <h1 data-toc-skip>Changelog <small></small></h1>
-      <small>Source: <a href="https://github.com/rstudio/shiny/blob/rc-v1.9.0/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/rstudio/shiny/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
     <div class="section level2">
-<h2 class="page-header" data-toc-text="1.9.0" id="shiny-190">shiny 1.9.0<a class="anchor" aria-label="anchor" href="#shiny-190"></a></h2>
+<h2 class="page-header" data-toc-text="development version" id="shiny-development-version">shiny (development version)<a class="anchor" aria-label="anchor" href="#shiny-development-version"></a></h2>
 <div class="section level3">
-<h3 id="new-busy-indication-feature-1-9-0">New busy indication feature<a class="anchor" aria-label="anchor" href="#new-busy-indication-feature-1-9-0"></a></h3>
+<h3 id="new-busy-indication-feature-development-version">New busy indication feature<a class="anchor" aria-label="anchor" href="#new-busy-indication-feature-development-version"></a></h3>
 <p>Shiny now includes busy indication by default, which more specifically means: 1. Calculating/recalculating outputs now have a spinner overlay. 2. When no outputs are calculating, but Shiny is busy calculating something (e.g., a download, side-effect, etc), a page-level pulsing banner is shown.</p>
 <p>If either 1 or 2 leads to undesirable behavior in your app, you can disable them entirely with <code>useBusyIndicators(spinners = FALSE, pulse = FALSE)</code>. In addition, various properties of the spinners and pulse can be customized with <code><a href="../reference/busyIndicatorOptions.html">busyIndicatorOptions()</a></code>. For more details, see <code><a href="../reference/busyIndicatorOptions.html">?busyIndicatorOptions</a></code>. (<a href="https://github.com/rstudio/shiny/issues/4040" class="external-link">#4040</a>, <a href="https://github.com/rstudio/shiny/issues/4104" class="external-link">#4104</a>)</p>
 </div>
 <div class="section level3">
-<h3 id="new-features-and-improvements-1-9-0">New features and improvements<a class="anchor" aria-label="anchor" href="#new-features-and-improvements-1-9-0"></a></h3>
+<h3 id="new-features-and-improvements-development-version">New features and improvements<a class="anchor" aria-label="anchor" href="#new-features-and-improvements-development-version"></a></h3>
 <ul><li><p>The client-side TypeScript code for Shiny has been refactored so that the <code>Shiny</code> object is now an instance of class <code>ShinyClass</code>. (<a href="https://github.com/rstudio/shiny/issues/4063" class="external-link">#4063</a>)</p></li>
 <li><p>In TypeScript, the <code>Shiny</code> object has a new property <code>initializedPromise</code>, which is a Promise-like object that can be <code>await</code>ed or chained with <code>.then()</code>. This Promise-like object corresponds to the <code>shiny:sessioninitialized</code> JavaScript event, but is easier to use because it can be used both before and after the events have occurred. (<a href="https://github.com/rstudio/shiny/issues/4063" class="external-link">#4063</a>)</p></li>
 <li><p>Output bindings now include the <code>.recalculating</code> CSS class when they are first bound, up until the first render. This makes it possible/easier to show progress indication when the output is calculating for the first time. (<a href="https://github.com/rstudio/shiny/issues/4039" class="external-link">#4039</a>)</p></li>
@@ -63,10 +63,11 @@
 <li><p>Added function <code><a href="../reference/reactlog.html">reactlogAddMark()</a></code> to programmatically add _mark_ed locations in the reactlog log without the requirement of keyboard bindings during an idle reactive moment. (<a href="https://github.com/rstudio/shiny/issues/4103" class="external-link">#4103</a>)</p></li>
 </ul></div>
 <div class="section level3">
-<h3 id="bug-fixes-1-9-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-9-0"></a></h3>
+<h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>
 <ul><li><p><code><a href="../reference/downloadButton.html">downloadButton()</a></code> and <code><a href="../reference/downloadButton.html">downloadLink()</a></code> are now disabled up until they are fully initialized. This prevents the user from clicking the button/link before the download is ready. (<a href="https://github.com/rstudio/shiny/issues/4041" class="external-link">#4041</a>)</p></li>
 <li><p>Output bindings that are removed, invalidated, then inserted again (while invalidated) now correctly include the <code>.recalculating</code> CSS class. (<a href="https://github.com/rstudio/shiny/issues/4039" class="external-link">#4039</a>)</p></li>
 <li><p>Fixed a recent issue with <code><a href="../reference/htmlOutput.html">uiOutput()</a></code> and <code><a href="../reference/conditionalPanel.html">conditionalPanel()</a></code> not properly lower opacity when recalculation (in a Bootstrap 5 context). (<a href="https://github.com/rstudio/shiny/issues/4027" class="external-link">#4027</a>)</p></li>
+<li><p>Image outputs that were scaled by CSS had certain regions that were unresponsive to hover/click/brush handlers. (<a href="https://github.com/rstudio/shiny/issues/3234" class="external-link">#3234</a>)</p></li>
 </ul></div>
 </div>
     <div class="section level2">

@@ -27,6 +27,7 @@ If either 1 or 2 leads to undesirable behavior in your app, you can disable them
 * Output bindings that are removed, invalidated, then inserted again (while invalidated) now correctly include the `.recalculating` CSS class. (#4039)
 
 * Fixed a recent issue with `uiOutput()` and `conditionalPanel()` not properly lower opacity when recalculation (in a Bootstrap 5 context). (#4027)
+* Image outputs that were scaled by CSS had certain regions that were unresponsive to hover/click/brush handlers. (#3234)
 
 # shiny 1.8.1.1
 

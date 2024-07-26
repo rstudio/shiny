@@ -2,11 +2,11 @@
 
 ## New busy indication feature
 
-Shiny now includes busy indication by default, which more specifically means:
-  1. Calculating/recalculating outputs now have a spinner overlay.
+Shiny now includes busy indicator options of spinners and a page-level pulse overlay. These features can be enabled by calling `useBusyIndicators()` and will be enabled by default in the next feature release of shiny. When enabled:
+  1. Calculating/recalculating outputs have a spinner overlay.
   2. When no outputs are calculating, but Shiny is busy calculating something (e.g., a download, side-effect, etc), a page-level pulsing banner is shown.
 
-If either 1 or 2 leads to undesirable behavior in your app, you can disable them entirely with `useBusyIndicators(spinners = FALSE, pulse = FALSE)`. In addition, various properties of the spinners and pulse can be customized with `busyIndicatorOptions()`. For more details, see `?busyIndicatorOptions`. (#4040, #4104)
+You can also selectively enable spinners or the pulse effect with `useBusyIndicators(spinners = FALSE, pulse = FALSE)`. In addition, various properties of the spinners and pulse can be customized with `busyIndicatorOptions()`. For more details, see `?busyIndicatorOptions`. (#4040, #4104)
 
 ## New features and improvements
 

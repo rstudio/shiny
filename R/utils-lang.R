@@ -53,8 +53,8 @@ formalsAndBody <- function(x) {
 
 #' @describeIn createRenderFunction convert a quosure to a function.
 #' @param q Quosure of the expression `x`. When capturing expressions to create
-#'   your quosure, it is recommended to use [`enquo0()`] to not unquote the
-#'   object too early. See [`enquo0()`] for more details.
+#'   your quosure, it is recommended to use [`rlang::enquo0()`] to not unquote
+#'   the object too early. See [`rlang::enquo0()`] for more details.
 #' @inheritParams installExprFunction
 #' @export
 quoToFunction <- function(

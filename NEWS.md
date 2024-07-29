@@ -1,5 +1,14 @@
 # shiny (development version)
 
+## New features and improvements
+
+## Changes
+
+* Busy indication is now enabled by default. If this happens to have an undesirable affect, disable busy indication by putting `useBusyIndicators(spinners = FALSE, pulse = FALSE)` somewhere in the UI definition. (#4040)
+
+## Bug fixes
+
+
 # shiny 1.9.0
 
 ## New busy indication feature

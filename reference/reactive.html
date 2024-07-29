@@ -73,7 +73,10 @@ reactive expression is a expression whose result will change over time.</p>
 
 
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>For <code>is.reactive()</code>, an object to test. For <code>reactive()</code>, an expression. When passing in a <code><a href="https://rlang.r-lib.org/reference/defusing-advanced.html" class="external-link">quo()</a></code>sure with <code>reactive()</code>, remember to use <code><a href="https://rlang.r-lib.org/reference/inject.html" class="external-link">rlang::inject()</a></code> to distinguish that you are passing in the content of your quosure, not the expression of the quosure.</p></dd>
+<dd><p>For <code>is.reactive()</code>, an object to test. For <code>reactive()</code>, an
+expression. When passing in a <code><a href="https://rlang.r-lib.org/reference/defusing-advanced.html" class="external-link">rlang::quo()</a></code>sure with <code>reactive()</code>,
+remember to use <code><a href="https://rlang.r-lib.org/reference/inject.html" class="external-link">rlang::inject()</a></code> to distinguish that you are passing in
+the content of your quosure, not the expression of the quosure.</p></dd>
 
 
 <dt id="arg-env">env<a class="anchor" aria-label="anchor" href="#arg-env"></a></dt>
@@ -145,7 +148,7 @@ more information about reactive expressions.</p>
 <span class="r-in"><span><span class="fu"><a href="isolate.html">isolate</a></span><span class="op">(</span><span class="fu">reactiveC</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">&lt;quosure&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> expr: <span style="color: #0000BB;">^values$A + 2</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> env:  <span style="color: #0000BB;">0x5648d7b9eae0</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> env:  <span style="color: #0000BB;">0x557aa17a3940</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Instead, the quosure should be `rlang::inject()`ed</span></span></span>
 <span class="r-in"><span><span class="va">reactiveD</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/inject.html" class="external-link">inject</a></span><span class="op">(</span><span class="fu">reactive</span><span class="op">(</span><span class="op">!</span><span class="op">!</span><span class="va">myquo</span><span class="op">)</span><span class="op">)</span></span></span>

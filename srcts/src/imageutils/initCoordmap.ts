@@ -162,8 +162,8 @@ function initCoordmap(
     const bounds = {
       top: 0,
       left: 0,
-      right: img.clientWidth - 1,
-      bottom: img.clientHeight - 1,
+      right: img.naturalWidth - 1,
+      bottom: img.naturalHeight - 1,
     };
 
     coordmap_.panels[0] = {
@@ -290,11 +290,16 @@ function initCoordmap(
 
     const matches = []; // Panels that match
     const dists = []; // Distance of offset to each matching panel
-    let b;
     let i;
 
     for (i = 0; i < coordmap.panels.length; i++) {
-      b = coordmap.panels[i].range;
+      const panelRange = coordmap.panels[i].range;
+      const b = {
+        top: panelRange.top * cssToImgRatio.y,
+        bottom: panelRange.bottom * cssToImgRatio.y,
+        left: panelRange.left * cssToImgRatio.x,
+        right: panelRange.right * cssToImgRatio.x,
+      };
 
       if (
         x <= b.right + expandImg.x &&
@@ -413,5 +418,5 @@ function initCoordmap(
   return coordmap;
 }
 
+export { findOrigin, initCoordmap };
 export type { Coordmap, CoordmapInit };
-export { initCoordmap, findOrigin };

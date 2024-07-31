@@ -293,13 +293,7 @@ function initCoordmap(
     let i;
 
     for (i = 0; i < coordmap.panels.length; i++) {
-      const panelRange = coordmap.panels[i].range;
-      const b = {
-        top: panelRange.top * cssToImgRatio.y,
-        bottom: panelRange.bottom * cssToImgRatio.y,
-        left: panelRange.left * cssToImgRatio.x,
-        right: panelRange.right * cssToImgRatio.x,
-      };
+      const b = coordmap.panels[i].range;
 
       if (
         x <= b.right + expandImg.x &&

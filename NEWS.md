@@ -1,4 +1,4 @@
-# shiny (development version)
+# shiny 1.9.1
 
 ## Bug fixes
 

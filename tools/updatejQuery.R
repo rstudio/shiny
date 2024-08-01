@@ -1,7 +1,7 @@
 library(magrittr)
 
-version <- "3.6.0"
-version_types <- "3.5.14"
+version <- "3.7.1"
+version_types <- "3.5.29"
 
 jq_cdn_download <- function(version) {
   Map(

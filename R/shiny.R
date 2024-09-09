@@ -1734,6 +1734,45 @@ ShinySession <- R6Class(
       if (length(matches) == 0)
         return(httpResponse(400, 'text/html', '<h1>Bad Request</h1>'))
 
+      if (matches[2] == 'startimportpollyprojectsfiles' && identical(req$REQUEST_METHOD, "POST")) {
+        fileInfos <- req$FILE_INFO
+        fileInfos <- lapply(fileInfos, function(fi) {
+          if (is.null(fi$type))
+            fi$type <- getContentType(fi$name)
+          fi
+        })
+
+        jobId <- private$fileUploadContext$createUploadOperation(fileInfos)
+
+        return(httpResponse(200, 'text/plain', jobId))
+      }
+
+      if (matches[2] == 'importpollyprojectsfile' && identical(req$REQUEST_METHOD, "POST")) {
+        
+        jobId <- req$JOB_ID
+        
+        job <- private$fileUploadContext$getUploadOperation(jobId)
+
+        if (!is.null(job)) {
+          job$fileBegin()
+        }
+
+        return(httpResponse(200, 'application/json', job$.files[nrow(job$.files),]))
+      }
+
+      if (matches[2] == 'endimportpollyprojectsfile' && identical(req$REQUEST_METHOD, "POST")) {
+        
+        jobId <- req$JOB_ID
+        
+        job <- private$fileUploadContext$getUploadOperation(jobId)
+
+        if (!is.null(job)) {
+          job$fileEnd()
+        }
+
+        return(httpResponse(200, 'text/plain', 'OK'))
+      }
+
       if (matches[2] == 'file') {
         savedFile <- self$files$get(URLdecode(matches[3]))
         if (is.null(savedFile))

@@ -208,7 +208,7 @@ sd_section("Utility functions",
     "onStop",
     "diskCache",
     "memoryCache",
-    "reexports"
+    "key_missing"
   )
 )
 sd_section("Plot interaction",

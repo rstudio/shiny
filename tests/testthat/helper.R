@@ -48,9 +48,3 @@ contents_identical <- function(a, b) {
 
   TRUE
 }
-
-
-# Don't print out stack traces (which go to stderr)
-suppress_stacktrace <- function(expr) {
-  capture.output(force(expr), type = "message")
-}

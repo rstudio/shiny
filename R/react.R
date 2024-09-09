@@ -31,13 +31,11 @@ Context <- R6Class(
     .flushCallbacks = list(),
     .domain = NULL,
     .pid = NULL,
-    .weak = NULL,
 
     initialize = function(
       domain, label='', type='other', prevId='',
       reactId = rLog$noReactId,
-      id = .getReactiveEnvironment()$nextId(), # For dummy context
-      weak = FALSE
+      id = .getReactiveEnvironment()$nextId() # For dummy context
     ) {
       id <<- id
       .label <<- label
@@ -45,7 +43,6 @@ Context <- R6Class(
       .pid <<- processId()
       .reactId <<- reactId
       .reactType <<- type
-      .weak <<- weak
       rLog$createContext(id, label, type, prevId, domain)
     },
     run = function(func) {
@@ -111,9 +108,6 @@ Context <- R6Class(
       lapply(.flushCallbacks, function(flushCallback) {
         flushCallback()
       })
-    },
-    isWeak = function() {
-      .weak
     }
   )
 )

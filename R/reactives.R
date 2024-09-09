@@ -24,11 +24,7 @@ Dependents <- R6Class(
           rLog$dependsOn(ctx$.reactId, .reactId, ctx$id, ctx$.domain)
         }
 
-        if (ctx$isWeak()) {
-          .dependents$set(ctx$id, rlang::new_weakref(ctx))
-        } else {
-          .dependents$set(ctx$id, ctx)
-        }
+        .dependents$set(ctx$id, ctx)
 
         ctx$onInvalidate(function() {
           rLog$dependsOnRemove(ctx$.reactId, .reactId, ctx$id, ctx$.domain)
@@ -50,13 +46,6 @@ Dependents <- R6Class(
       lapply(
         .dependents$values(sort = TRUE),
         function(ctx) {
-          if (rlang::is_weakref(ctx)) {
-            ctx <- rlang::wref_key(ctx)
-            if (is.null(ctx)) {
-              # Can get here if weakref target was GC'd
-              return()
-            }
-          }
           ctx$invalidate()
           NULL
         }
@@ -305,7 +294,6 @@ ReactiveValues <- R6Class(
     .label = character(0),
     .values = 'Map',
     .metadata = 'Map',
-    # A map of Dependents objects, one for each key
     .dependents = 'Map',
     # Dependents for the list of all names, including hidden
     .namesDeps = 'Dependents',
@@ -327,7 +315,7 @@ ReactiveValues <- R6Class(
       .values <<- Map$new()
       .metadata <<- Map$new()
       .dependents <<- Map$new()
-      .hasRetrieved <<- list(names = FALSE, asListAll = FALSE, asList = FALSE)
+      .hasRetrieved <<- list(names = FALSE, asListAll = FALSE, asList = FALSE, keys = list())
       .namesDeps <<- Dependents$new(reactId = rLog$namesIdStr(.reactId))
       .allValuesDeps <<- Dependents$new(reactId = rLog$asListAllIdStr(.reactId))
       .valuesDeps <<- Dependents$new(reactId = rLog$asListIdStr(.reactId))
@@ -338,18 +326,24 @@ ReactiveValues <- R6Class(
       # get value right away to use for logging
       keyValue <- .values$get(key)
 
-      if (!.dependents$containsKey(key)) {
-        # If we got here, this is the first time someone has tried to access
-        # this key.
-        rLog$defineKey(.reactId, keyValue, key, .label, getCurrentContext()$.domain)
-
-        reactKeyId <- rLog$keyIdStr(.reactId, key)
-        .dependents$set(key, Dependents$new(reactKeyId))
-      }
-
       # Register the "downstream" reactive which is accessing this value, so
       # that we know to invalidate them when this value changes.
-      .dependents$get(key)$register()
+      ctx <- getCurrentContext()
+      dep.key <- paste(key, ':', ctx$id, sep='')
+      if (!.dependents$containsKey(dep.key)) {
+        reactKeyId <- rLog$keyIdStr(.reactId, key)
+
+        if (!isTRUE(.hasRetrieved$keys[[key]])) {
+          rLog$defineKey(.reactId, keyValue, key, .label, ctx$.domain)
+          .hasRetrieved$keys[[key]] <<- TRUE
+        }
+        rLog$dependsOnKey(ctx$.reactId, .reactId, key, ctx$id, ctx$.domain)
+        .dependents$set(dep.key, ctx)
+        ctx$onInvalidate(function() {
+          rLog$dependsOnKeyRemove(ctx$.reactId, .reactId, key, ctx$id, ctx$.domain)
+          .dependents$remove(dep.key)
+        })
+      }
 
       if (isFrozen(key))
         reactiveStop()
@@ -399,9 +393,14 @@ ReactiveValues <- R6Class(
       .values$set(key, value)
 
       # key has been depended upon
-      if (.dependents$containsKey(key)) {
+      if (isTRUE(.hasRetrieved$keys[[key]])) {
         rLog$valueChangeKey(.reactId, key, value, domain)
-        .dependents$get(key)$invalidate()
+        keyReactId <- rLog$keyIdStr(.reactId, key)
+        rLog$invalidateStart(keyReactId, NULL, "other", domain)
+        on.exit(
+          rLog$invalidateEnd(keyReactId, NULL, "other", domain),
+          add = TRUE
+        )
       }
 
       # only invalidate if there are deps
@@ -425,6 +424,17 @@ ReactiveValues <- R6Class(
         }
       }
 
+      dep.keys <- .dependents$keys()
+      dep.keys <- grep(
+        paste('^\\Q', key, ':', '\\E', '\\d+$', sep=''), dep.keys, value = TRUE
+      )
+      lapply(
+        .dependents$mget(dep.keys),
+        function(ctx) {
+          ctx$invalidate()
+          NULL
+        }
+      )
       invisible()
     },
 
@@ -793,7 +803,6 @@ Observable <- R6Class(
     .visible = logical(0),
     .execCount = integer(0),
     .mostRecentCtxId = character(0),
-    .ctx = 'Context',
 
     initialize = function(func, label = deparse(substitute(func)),
                           domain = getDefaultReactiveDomain(),
@@ -823,7 +832,6 @@ Observable <- R6Class(
       .running <<- FALSE
       .execCount <<- 0L
       .mostRecentCtxId <<- ""
-      .ctx <<- NULL
       rLog$define(.reactId, .value, .label, type = "observable", .domain)
     },
     getValue = function() {
@@ -850,22 +858,12 @@ Observable <- R6Class(
     },
     .updateValue = function() {
       ctx <- Context$new(.domain, .label, type = 'observable',
-                         prevId = .mostRecentCtxId, reactId = .reactId,
-                         weak = TRUE)
+                         prevId = .mostRecentCtxId, reactId = .reactId)
       .mostRecentCtxId <<- ctx$id
-
-      # A Dependency object will have a weak reference to the context, which
-      # doesn't prevent it from being GC'd. However, as long as this
-      # Observable object is reachable and not invalidated, we need to make
-      # sure the context isn't GC'd. To do that we need a strong reference to
-      # the context.
-      .ctx <<- ctx
-
       ctx$onInvalidate(function() {
         .invalidated <<- TRUE
         .value <<- NULL # Value can be GC'd, it won't be read once invalidated
         .dependents$invalidate(log = FALSE)
-        .ctx <<- NULL   # No longer need to prevent the context from being GC'd.
       })
       .execCount <<- .execCount + 1L
 

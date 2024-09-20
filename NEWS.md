@@ -1,5 +1,11 @@
 # shiny (development version)
 
+# shiny 1.9.1
+
+## Bug fixes
+
+* Fixed a bug introduced in v1.9.0 where the boundaries of hover/click/brush regions on plots were being incorrectly scaled when browser zoom was used. (#4111)
+
 # shiny 1.9.0
 
 ## New busy indication feature
@@ -31,6 +37,7 @@ In addition, various properties of the spinners and pulse can be customized with
 * Output bindings that are removed, invalidated, then inserted again (while invalidated) now correctly include the `.recalculating` CSS class. (#4039)
 
 * Fixed a recent issue with `uiOutput()` and `conditionalPanel()` not properly lower opacity when recalculation (in a Bootstrap 5 context). (#4027)
+
 * Image outputs that were scaled by CSS had certain regions that were unresponsive to hover/click/brush handlers. (#3234)
 
 # shiny 1.8.1.1

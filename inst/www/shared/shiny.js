@@ -1,4 +1,4 @@
-/*! shiny 1.9.0.9000 | (c) 2012-2024 RStudio, PBC. | License: GPL-3 | file LICENSE */
+/*! shiny 1.9.1.9000 | (c) 2012-2024 RStudio, PBC. | License: GPL-3 | file LICENSE */
 "use strict";
 (function() {
   var __create = Object.create;
@@ -14583,13 +14583,7 @@
       var dists = [];
       var i5;
       for (i5 = 0; i5 < coordmap.panels.length; i5++) {
-        var panelRange = coordmap.panels[i5].range;
-        var b3 = {
-          top: panelRange.top * cssToImgRatio.y,
-          bottom: panelRange.bottom * cssToImgRatio.y,
-          left: panelRange.left * cssToImgRatio.x,
-          right: panelRange.right * cssToImgRatio.x
-        };
+        var b3 = coordmap.panels[i5].range;
         if (x2 <= b3.right + expandImg.x && x2 >= b3.left - expandImg.x && y4 <= b3.bottom + expandImg.y && y4 >= b3.top - expandImg.y) {
           matches.push(coordmap.panels[i5]);
           var xdist = 0;
@@ -25084,7 +25078,7 @@
       _defineProperty23(this, "initializeInputs", void 0);
       _defineProperty23(this, "initializedPromise", void 0);
       _defineProperty23(this, "oncustommessage", void 0);
-      this.version = "1.9.0.9000";
+      this.version = "1.9.1.9000";
       var _initInputBindings = initInputBindings(), inputBindings = _initInputBindings.inputBindings, fileInputBinding2 = _initInputBindings.fileInputBinding;
       var _initOutputBindings = initOutputBindings(), outputBindings = _initOutputBindings.outputBindings;
       setFileInputBinding(fileInputBinding2);

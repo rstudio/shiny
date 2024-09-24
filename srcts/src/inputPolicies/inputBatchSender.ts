@@ -1,5 +1,5 @@
-import type { InputPolicy, InputPolicyOpts } from "./inputPolicy";
 import type { ShinyApp } from "../shiny/shinyapp";
+import type { InputPolicy, InputPolicyOpts } from "./inputPolicy";
 
 // Schedules data to be sent to shinyapp at the next setTimeout(0).
 // Batches multiple input calls into one websocket message.

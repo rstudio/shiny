@@ -1,6 +1,6 @@
 /// <reference types="jquery" />
-import type { Offset } from "./findbox";
 import type { Bounds } from "./createBrush";
+import type { Offset } from "./findbox";
 import type { Panel, PanelInit } from "./initPanelScales";
 declare function findOrigin($el: JQuery<HTMLElement>): Offset;
 type OffsetCss = {
@@ -48,5 +48,5 @@ type Coordmap = {
     mouseCoordinateSender: (inputId: string, clip?: boolean, nullOutside?: boolean) => (e: JQuery.MouseDownEvent | JQuery.MouseMoveEvent | null) => void;
 };
 declare function initCoordmap($el: JQuery<HTMLElement>, coordmap_: CoordmapInit): Coordmap;
+export { findOrigin, initCoordmap };
 export type { Coordmap, CoordmapInit };
-export { initCoordmap, findOrigin };

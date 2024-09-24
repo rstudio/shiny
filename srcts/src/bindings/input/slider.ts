@@ -5,10 +5,10 @@ import type {
 import $ from "jquery";
 // import { NameValueHTMLElement } from ".";
 import {
-  formatDateUTC,
-  updateLabel,
   $escape,
+  formatDateUTC,
   hasDefinedProperty,
+  updateLabel,
 } from "../../utils";
 
 import type { TextHTMLElement } from "./text";
@@ -197,7 +197,16 @@ class SliderInputBinding extends TextInputBindingBase {
         msg.to = data.value[1];
       } else {
         if (Array.isArray(data.value)) {
-          throw "Slider only contains a single value and cannot be updated with an array";
+          const errorReason = [
+            "an empty array.",
+            "a single-value array.",
+            "an array with more than two values.",
+          ];
+          throw (
+            "Slider requires two values to update with an array, " +
+            "but message value was " +
+            errorReason[Math.min(data.value.length, 2)]
+          );
         }
         msg.from = data.value;
       }

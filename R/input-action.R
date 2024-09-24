@@ -7,6 +7,8 @@
 #' @param label The contents of the button or link--usually a text label, but
 #'   you could also use any other HTML, like an image.
 #' @param icon An optional [icon()] to appear on the button.
+#' @param disabled If `TRUE`, the button will not be clickable. Use
+#'   [updateActionButton()] to dynamically enable/disable the button.
 #' @param ... Named attributes to be applied to the button or link.
 #'
 #' @family input elements
@@ -49,7 +51,8 @@
 #'   * Event handlers (e.g., [observeEvent()], [eventReactive()]) won't execute on initial load.
 #'   * Input validation (e.g., [req()], [need()]) will fail on initial load.
 #' @export
-actionButton <- function(inputId, label, icon = NULL, width = NULL, ...) {
+actionButton <- function(inputId, label, icon = NULL, width = NULL,
+  disabled = FALSE, ...) {
 
   value <- restoreInput(id = inputId, default = NULL)
 
@@ -58,6 +61,7 @@ actionButton <- function(inputId, label, icon = NULL, width = NULL, ...) {
     type="button",
     class="btn btn-default action-button",
     `data-val` = value,
+    disabled = if (isTRUE(disabled)) NA else NULL,
     list(validateIcon(icon), label),
     ...
   )

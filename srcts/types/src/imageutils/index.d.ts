@@ -1,6 +1,6 @@
 import { createBrush } from "./createBrush";
 import { createClickInfo } from "./createClickInfo";
-import { createClickHandler, createHoverHandler, createBrushHandler } from "./createHandlers";
+import { createBrushHandler, createClickHandler, createHoverHandler } from "./createHandlers";
 import { disableDrag } from "./disableDrag";
 import { findBox } from "./findbox";
 import { initCoordmap } from "./initCoordmap";

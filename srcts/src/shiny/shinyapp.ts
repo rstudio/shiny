@@ -1,5 +1,19 @@
 import $ from "jquery";
+import type { InputBinding } from "../bindings";
+import type { OutputBindingAdapter } from "../bindings/outputAdapter";
+import { showErrorInClientConsole } from "../components/errorConsole";
+import type {
+  ShinyEventError,
+  ShinyEventMessage,
+  ShinyEventUpdateInput,
+  ShinyEventValue,
+} from "../events/shinyEvents";
+import type { UploadEndValue, UploadInitValue } from "../file/fileProcessor";
+import { resetBrush } from "../imageutils/resetBrush";
 import { $escape, hasOwnProperty, randomId, scopeExprToFunc } from "../utils";
+import { AsyncQueue } from "../utils/asyncQueue";
+import { isQt } from "../utils/browser";
+import { indirectEval } from "../utils/eval";
 import {
   getShinyCreateWebsocket,
   getShinyOnCustomMessage,
@@ -7,25 +21,14 @@ import {
   shinyForgetLastInputValue,
   shinyUnbindAll,
 } from "./initedMethods";
-import { isQt } from "../utils/browser";
-import { showNotification, removeNotification } from "./notifications";
-import { showModal, removeModal } from "./modal";
-import { renderContentAsync, renderHtmlAsync } from "./render";
-import type { HtmlDep } from "./render";
+import { removeModal, showModal } from "./modal";
+import { removeNotification, showNotification } from "./notifications";
 import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
-import { resetBrush } from "../imageutils/resetBrush";
-import type { OutputBindingAdapter } from "../bindings/outputAdapter";
-import type {
-  ShinyEventError,
-  ShinyEventMessage,
-  ShinyEventValue,
-  ShinyEventUpdateInput,
-} from "../events/shinyEvents";
-import type { InputBinding } from "../bindings";
-import { indirectEval } from "../utils/eval";
+import type { HtmlDep } from "./render";
+import { renderContentAsync, renderHtmlAsync } from "./render";
 import type { WherePosition } from "./singletons";
-import type { UploadInitValue, UploadEndValue } from "../file/fileProcessor";
-import { AsyncQueue } from "../utils/asyncQueue";
+
+import { OutputProgressReporter } from "./outputProgress";
 
 type ResponseValue = UploadEndValue | UploadInitValue;
 type Handler = (message: any) => Promise<void> | void;
@@ -106,6 +109,9 @@ function addCustomMessageHandler(type: string, handler: Handler): void {
 
 //// End message handler variables
 
+/**
+ * The ShinyApp class handles the communication with the Shiny Server.
+ */
 class ShinyApp {
   $socket: ShinyWebSocket | null = null;
 
@@ -129,6 +135,9 @@ class ShinyApp {
 
   // Output bindings
   $bindings: { [key: string]: OutputBindingAdapter } = {};
+
+  // Output progress states
+  $outputProgress = new OutputProgressReporter();
 
   // Cached values/errors
   $values: { [key: string]: any } = {};
@@ -237,6 +246,9 @@ class ShinyApp {
         socket.send(msg as string);
       }
 
+      // This launches the action queue loop, which just runs in the background,
+      // so we don't need to await it.
+      /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
       this.startActionQueueLoop();
     };
     socket.onmessage = (e) => {
@@ -244,7 +256,8 @@ class ShinyApp {
     };
     // Called when a successfully-opened websocket is closed, or when an
     // attempt to open a connection fails.
-    socket.onclose = () => {
+    socket.onclose = (e) => {
+      const restarting = e.code === 1012; // Uvicorn sets this code when autoreloading
       // These things are needed only if we've successfully opened the
       // websocket.
       if (hasOpened) {
@@ -257,7 +270,7 @@ class ShinyApp {
         this.$notifyDisconnected();
       }
 
-      this.onDisconnected(); // Must be run before this.$removeSocket()
+      this.onDisconnected(restarting); // Must be run before this.$removeSocket()
       this.$removeSocket();
     };
     return socket;
@@ -266,11 +279,12 @@ class ShinyApp {
   async startActionQueueLoop(): Promise<void> {
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      const action = await this.taskQueue.dequeue();
-
       try {
+        const action = await this.taskQueue.dequeue();
+
         await action();
       } catch (e) {
+        showErrorInClientConsole(e);
         console.error(e);
       }
     }
@@ -333,13 +347,12 @@ class ShinyApp {
     };
   })();
 
-  onDisconnected(): void {
+  onDisconnected(reloading = false): void {
     // Add gray-out overlay, if not already present
-    const $overlay = $("#shiny-disconnected-overlay");
-
-    if ($overlay.length === 0) {
+    if ($("#shiny-disconnected-overlay").length === 0) {
       $(document.body).append('<div id="shiny-disconnected-overlay"></div>');
     }
+    $("#shiny-disconnected-overlay").toggleClass("reloading", reloading);
 
     // To try a reconnect, both the app (this.$allowReconnect) and the
     // server (this.$socket.allowReconnect) must allow reconnections, or
@@ -353,6 +366,7 @@ class ShinyApp {
     ) {
       const delay = this.reconnectDelay.next();
 
+      /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
       showReconnectDialog(delay);
       this.$scheduleReconnect(delay);
     }
@@ -455,12 +469,10 @@ class ShinyApp {
   }
 
   $sendMsg(msg: MessageValue): void {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    if (!this.$socket!.readyState) {
-      this.$pendingMessages.push(msg);
+    if (this.$socket && this.$socket.readyState) {
+      this.$socket.send(msg);
     } else {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.$socket!.send(msg);
+      this.$pendingMessages.push(msg);
     }
   }
 
@@ -507,12 +519,15 @@ class ShinyApp {
     return value;
   }
 
-  bindOutput(id: string, binding: OutputBindingAdapter): OutputBindingAdapter {
-    if (!id) throw "Can't bind an element with no ID";
-    if (this.$bindings[id]) throw "Duplicate binding for ID " + id;
+  async bindOutput(
+    id: string,
+    binding: OutputBindingAdapter
+  ): Promise<OutputBindingAdapter> {
+    if (!id) throw new Error("Can't bind an element with no ID");
     this.$bindings[id] = binding;
 
-    if (this.$values[id] !== undefined) binding.onValueChange(this.$values[id]);
+    if (this.$values[id] !== undefined)
+      await binding.onValueChange(this.$values[id]);
     else if (this.$errors[id] !== undefined)
       binding.onValueError(this.$errors[id]);
 
@@ -649,6 +664,9 @@ class ShinyApp {
     $(document).trigger(evt);
     if (evt.isDefaultPrevented()) return;
 
+    // Before passing the message to handlers, use it to update output progress state
+    this.$outputProgress.updateStateFromMessage(evt.message);
+
     // Send msgObj.foo and msgObj.bar to appropriate handlers
     await this._sendMessagesToHandlers(
       evt.message,
@@ -680,16 +698,28 @@ class ShinyApp {
     }
   }
 
+  // Call showProgress() on any output bindings that have changed their
+  // recalculating status since the last call to takeChanges().
+  // Note that we only need to call this function when a "flush" (i.e. "values")
+  // message or a "progress" message is received since these are the only
+  // two types of messages that can change the recalculating status. For more,
+  // see the state machine diagram in outputProgress.ts.
+  private _updateProgress() {
+    const changed = this.$outputProgress.takeChanges();
+    for (const [name, recalculating] of changed.entries()) {
+      if (hasOwnProperty(this.$bindings, name)) {
+        this.$bindings[name].showProgress(recalculating);
+      }
+    }
+  }
+
   private _init() {
     // Dev note:
     // * Use arrow functions to allow the Types to propagate.
     // * However, `_sendMessagesToHandlers()` will adjust the `this` context to the same _`this`_.
 
     addMessageHandler("values", async (message: { [key: string]: any }) => {
-      for (const name in this.$bindings) {
-        if (hasOwnProperty(this.$bindings, name))
-          this.$bindings[name].showProgress(false);
-      }
+      this._updateProgress();
 
       for (const key in message) {
         if (hasOwnProperty(message, key)) {
@@ -702,15 +732,16 @@ class ShinyApp {
       "errors",
       (message: { [key: string]: ErrorsMessageValue }) => {
         for (const key in message) {
-          if (hasOwnProperty(message, key))
+          if (hasOwnProperty(message, key)) {
             this.receiveError(key, message[key]);
+          }
         }
       }
     );
 
     addMessageHandler(
       "inputMessages",
-      (message: Array<{ id: string; message: unknown }>) => {
+      async (message: Array<{ id: string; message: unknown }>) => {
         // inputMessages should be an array
         for (let i = 0; i < message.length; i++) {
           const $obj = $(".shiny-bound-input#" + $escape(message[i].id));
@@ -725,8 +756,16 @@ class ShinyApp {
             evt.message = message[i].message;
             evt.binding = inputBinding;
             $(el).trigger(evt);
-            if (!evt.isDefaultPrevented())
-              inputBinding.receiveMessage(el, evt.message);
+            if (!evt.isDefaultPrevented()) {
+              try {
+                await inputBinding.receiveMessage(el, evt.message);
+              } catch (error) {
+                console.error(
+                  "[shiny] Error in inputBinding.receiveMessage()",
+                  { error, binding: inputBinding, message: evt.message }
+                );
+              }
+            }
           }
         }
       }
@@ -811,15 +850,15 @@ class ShinyApp {
       }
     });
 
-    addMessageHandler("custom", (message: { [key: string]: unknown }) => {
+    addMessageHandler("custom", async (message: { [key: string]: unknown }) => {
       // For old-style custom messages - should deprecate and migrate to new
       // method
       const shinyOnCustomMessage = getShinyOnCustomMessage();
 
-      if (shinyOnCustomMessage) shinyOnCustomMessage(message);
+      if (shinyOnCustomMessage) await shinyOnCustomMessage(message);
 
       // Send messages.foo and messages.bar to appropriate handlers
-      this._sendMessagesToHandlers(
+      await this._sendMessagesToHandlers(
         message,
         customMessageHandlers,
         customMessageHandlerOrder
@@ -1385,7 +1424,10 @@ class ShinyApp {
 
   progressHandlers = {
     // Progress for a particular object
-    binding: function (this: ShinyApp, message: { id: string }): void {
+    binding: function (
+      this: ShinyApp,
+      message: { id: string; persistent: boolean }
+    ): void {
       const key = message.id;
       const binding = this.$bindings[key];
 
@@ -1396,8 +1438,9 @@ class ShinyApp {
           binding: binding,
           name: key,
         });
-        if (binding.showProgress) binding.showProgress(true);
       }
+
+      this._updateProgress();
     },
 
     // Open a page-level progress bar
@@ -1570,4 +1613,4 @@ class ShinyApp {
 }
 
 export { ShinyApp, addCustomMessageHandler };
-export type { Handler, ErrorsMessageValue };
+export type { Handler, ErrorsMessageValue, ShinyWebSocket };

@@ -1,6 +1,9 @@
-import type { EventPriority } from "./inputPolicy";
-import type { InputPolicy, InputPolicyOpts } from "./inputPolicy";
 import { hasDefinedProperty } from "../utils";
+import type {
+  EventPriority,
+  InputPolicy,
+  InputPolicyOpts,
+} from "./inputPolicy";
 
 class InputDeferDecorator implements InputPolicy {
   pendingInput: {

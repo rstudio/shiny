@@ -1,11 +1,11 @@
 import $ from "jquery";
 
-import { OutputBinding } from "./outputBinding";
 import { shinyUnbindAll } from "../../shiny/initedMethods";
+import type { ErrorsMessageValue } from "../../shiny/shinyapp";
 import { debounce } from "../../time";
 import { escapeHTML } from "../../utils";
 import { indirectEval } from "../../utils/eval";
-import type { ErrorsMessageValue } from "../../shiny/shinyapp";
+import { OutputBinding } from "./outputBinding";
 
 class DatatableOutputBinding extends OutputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {

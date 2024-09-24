@@ -1244,7 +1244,7 @@ test_that("debounce/throttle work properly (with priming)", {
   # This observer will be what changes rv$a.
   src <- observe({
     if (isolate(rv$a) == 0)
-      invalidateLater(120) # delay 20ms extra once to avoid threshold errors
+      invalidateLater(120) # delay 20ms extra once to avoid race condition
     else
       invalidateLater(100)
     rv$a <- isolate(rv$a) + 1
@@ -1326,7 +1326,7 @@ test_that("debounce/throttle work properly (without priming)", {
   # This observer will be what changes rv$a.
   src <- observe({
     if (isolate(rv$a) == 0)
-      invalidateLater(120) # delay 20ms extra once to avoid threshold errors
+      invalidateLater(120) # delay 20ms extra once to avoid race condition
     else
       invalidateLater(100)
     rv$a <- isolate(rv$a) + 1

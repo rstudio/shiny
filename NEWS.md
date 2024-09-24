@@ -1,5 +1,9 @@
 # shiny (development version)
 
+## Bug fixes
+
+* Partial fix for #3664: `dateInput` and `dateRangeInput` will not send spurious values to the server while typing until the user presses enter or clicks out of the field, except for `null` or `NA` when the field is completely empty.
+
 # shiny 1.9.1
 
 ## Bug fixes
@@ -124,8 +128,6 @@ In addition, various properties of the spinners and pulse can be customized with
 * `Map` objects are now initialized at load time instead of build time. This avoids potential problems that could arise from storing `fastmap` objects into the built Shiny package. (#3775)
 
 ## Bug fixes
-
-* Partial fix for #3664: `dateInput` and `dateRangeInput` will not send spurious values to the server while typing until the user presses enter or clicks out of the field, except for `null` or `NA` when the field is completely empty.
 
 * Fixed #3771: Sometimes the error `ion.rangeSlider.min.js: i.stopPropagation is not a function` would appear in the JavaScript console. (#3772)
 

@@ -161,9 +161,9 @@ class DateRangeInputBinding extends DateInputBindingBase {
     this._setMax($endinput[0], $endinput.data("max-date"));
   }
   subscribe(el: HTMLElement, callback: (x: boolean) => void): void {
-    // Don't update when in the middle of typing--this tends to send spurious
-    // values to the server based on unpredictable browser-dependant
-    // interpretation of incomplete date strings.
+    // Don't update when in the middle of typing; listening on keyup or input
+    // tends to send spurious values to the server, based on unpredictable
+    // browser-dependant interpretation of partially-typed date strings.
     $(el).on(
       "changeDate.dateRangeInputBinding change.dateRangeInputBinding",
       // event: Event

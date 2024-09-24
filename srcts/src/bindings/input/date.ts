@@ -43,14 +43,6 @@ class DateInputBindingBase extends InputBinding {
     // Don't update when in the middle of typing--this tends to send spurious
     // values to the server based on unpredictable browser-dependant
     // interpretation of incomplete date strings.
-    // $(el).on(
-    //   "keyup.dateInputBinding input.dateInputBinding",
-    //   // event: Event
-    //   function () {
-    //     // Use normal debouncing policy when typing
-    //     callback(true);
-    //   }
-    // );
     $(el).on(
       "changeDate.dateInputBinding change.dateInputBinding",
       // event: Event

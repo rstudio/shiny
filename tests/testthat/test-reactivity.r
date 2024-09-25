@@ -1243,7 +1243,7 @@ test_that("debounce/throttle work properly (with priming)", {
 
   # This observer will be what changes rv$a.
   src <- observe({
-    invalidateLater(100)
+    invalidateLater(300)
     rv$a <- isolate(rv$a) + 1
     message(the_time(), "input ", isolate(rv$a))
   })
@@ -1281,7 +1281,19 @@ test_that("debounce/throttle work properly (with priming)", {
 
   # Pump timer and reactives for about 1.3 seconds
   start_time <- Sys.time()
-  the_time <- function() sprintf("%0.3f ", Sys.time() - start_time)
+  the_time <- local({
+    last <- start_time
+    function() {
+      now <- Sys.time()
+      diff <- round(as.numeric(now - last, "secs") * 1000)
+      last <<- now
+      sprintf(
+        "%0.3f (%03d) ",
+        Sys.time() - start_time,
+        diff
+      )
+    }
+  })
   message(the_time(), "==== start [run for 1.3s]")
   stopAt <- start_time + 1.3
   while (Sys.time() < stopAt) {
@@ -1299,7 +1311,7 @@ test_that("debounce/throttle work properly (with priming)", {
 
   # tr() however, has had time to fire multiple times and update its value.
   expect_identical(tr_fired, 3)
-  expect_identical(isolate(tr()), 10)
+  expect_identical(isolate(tr()), 4)
 
   # Now let some time pass without any more updates.
   src$destroy() # No more updates

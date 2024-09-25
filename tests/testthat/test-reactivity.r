@@ -1245,7 +1245,6 @@ test_that("debounce/throttle work properly (with priming)", {
   src <- observe({
     invalidateLater(300)
     rv$a <- isolate(rv$a) + 1
-    message(the_time(), "input ", isolate(rv$a))
   })
   on.exit(src$destroy(), add = TRUE)
 
@@ -1259,14 +1258,12 @@ test_that("debounce/throttle work properly (with priming)", {
   dr_fired <- 0
   dr_monitor <- observeEvent(dr(), {
     dr_fired <<- dr_fired + 1
-    message(the_time(), "debounced ", dr(), " (fired: ", dr_fired, ")")
   })
   on.exit(dr_monitor$destroy(), add = TRUE)
 
   tr_fired <- 0
   tr_monitor <- observeEvent(tr(), {
     tr_fired <<- tr_fired + 1
-    message(the_time(), "throttled ", tr(), " (fired: ", tr_fired, ")")
   })
   on.exit(tr_monitor$destroy(), add = TRUE)
 
@@ -1280,28 +1277,12 @@ test_that("debounce/throttle work properly (with priming)", {
   }
 
   # Pump timer and reactives for about 1.3 seconds
-  start_time <- Sys.time()
-  the_time <- local({
-    last <- start_time
-    function() {
-      now <- Sys.time()
-      diff <- round(as.numeric(now - last, "secs") * 1000)
-      last <<- now
-      sprintf(
-        "%0.3f (%03d) ",
-        Sys.time() - start_time,
-        diff
-      )
-    }
-  })
-  message(the_time(), "==== start [run for 1.3s]")
-  stopAt <- start_time + 1.3
+  stopAt <- Sys.time() + 1.3
   while (Sys.time() < stopAt) {
     timerCallbacks$executeElapsed()
     flushReact()
     Sys.sleep(0.001)
   }
-  message(the_time(), "==== end [run for 1.3s]")
 
   # dr() should not have had time to fire, other than the initial run, since
   # there haven't been long enough gaps between invalidations.
@@ -1316,13 +1297,11 @@ test_that("debounce/throttle work properly (with priming)", {
   # Now let some time pass without any more updates.
   src$destroy() # No more updates
   stopAt <- Sys.time() + 1
-  message(the_time(), "==== start [settle for 1s]")
   while (Sys.time() < stopAt) {
     timerCallbacks$executeElapsed()
     flushReact()
     Sys.sleep(0.001)
   }
-  message(the_time(), "==== end [settle for 1s]")
 
   # dr should've fired, and we should have converged on the right answer.
   expect_identical(dr_fired, 2)

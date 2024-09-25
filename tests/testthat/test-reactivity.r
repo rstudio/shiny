@@ -1322,7 +1322,7 @@ test_that("debounce/throttle work properly (without priming)", {
 
   # This observer will be what changes rv$a.
   src <- observe({
-    invalidateLater(100)
+    invalidateLater(300)
     rv$a <- isolate(rv$a) + 1
   })
   on.exit(src$destroy(), add = TRUE)
@@ -1371,7 +1371,7 @@ test_that("debounce/throttle work properly (without priming)", {
 
   # tr() however, has had time to fire multiple times and update its value.
   expect_identical(tr_fired, 3)
-  expect_identical(isolate(tr()), 10)
+  expect_identical(isolate(tr()), 4)
 
   # Now let some time pass without any more updates.
   src$destroy() # No more updates

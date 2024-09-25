@@ -140,27 +140,20 @@ values and reactive expressions.</p>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> function(input, output, session) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   data &lt;- reactivePoll(1000, session,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     # This function returns the time that log_file was last modified</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     checkFunc = function() {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       if (file.exists(log_file))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         file.info(log_file)$mtime[1]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       else</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         ""</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     },</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     # This function returns the content of log_file</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     valueFunc = function() {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       read.csv(log_file)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   )</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   output$dataTable &lt;- renderTable({</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     data()</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   })</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> function (input, output, session) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     data &lt;- reactivePoll(1000, session, checkFunc = function() {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         if (file.exists(log_file)) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             file.info(log_file)$mtime[1]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         else ""</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     }, valueFunc = function() {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         read.csv(log_file)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     })</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     output$dataTable &lt;- renderTable({</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         data()</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     })</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x5617fb53f5e8&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x555c736ee410&gt;</span>
 </code></pre></div>
     </div>
   </div>
@@ -175,7 +168,7 @@ values and reactive expressions.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
       </footer></div>

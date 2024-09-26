@@ -1232,162 +1232,85 @@ test_that("event handling helpers take correct dependencies", {
 })
 
 
-test_that("debounce/throttle work properly (with priming)", {
-  do_priming <- TRUE
-  # Some of the CRAN test machines are heavily loaded and so the timing for
-  # these tests isn't reliable. https://github.com/rstudio/shiny/pull/2789
-  skip_on_cran()
+for (do_priming in c(TRUE, FALSE)) {
+  label <- if (do_priming) "with priming" else "without priming"
+  test_that(sprintf("debounce/throttle work properly (%s)", label), {
+    # Some of the CRAN test machines are heavily loaded and so the timing for
+    # these tests isn't reliable. https://github.com/rstudio/shiny/pull/2789
+    skip_on_cran()
 
-  # The changing of rv$a will be the (chatty) source of reactivity.
-  rv <- reactiveValues(a = 0)
+    # The changing of rv$a will be the (chatty) source of reactivity.
+    rv <- reactiveValues(a = 0)
 
-  # This observer will be what changes rv$a.
-  src <- observe({
-    invalidateLater(100)
-    rv$a <- isolate(rv$a) + 1
-  })
-  on.exit(src$destroy(), add = TRUE)
+    # This observer will be what changes rv$a.
+    src <- observe({
+      invalidateLater(300)
+      rv$a <- isolate(rv$a) + 1
+    })
+    on.exit(src$destroy(), add = TRUE)
 
-  # Make a debounced reactive to test.
-  dr <- debounce(reactive(rv$a), 500)
+    # Make a debounced reactive to test.
+    dr <- debounce(reactive(rv$a), 500)
 
-  # Make a throttled reactive to test.
-  tr <- throttle(reactive(rv$a), 500)
+    # Make a throttled reactive to test.
+    tr <- throttle(reactive(rv$a), 500)
 
-  # Keep track of how often dr/tr are fired
-  dr_fired <- 0
-  dr_monitor <- observeEvent(dr(), {
-    dr_fired <<- dr_fired + 1
-  })
-  on.exit(dr_monitor$destroy(), add = TRUE)
+    # Keep track of how often dr/tr are fired
+    dr_fired <- 0
+    dr_monitor <- observeEvent(dr(), {
+      dr_fired <<- dr_fired + 1
+    })
+    on.exit(dr_monitor$destroy(), add = TRUE)
 
-  tr_fired <- 0
-  tr_monitor <- observeEvent(tr(), {
-    tr_fired <<- tr_fired + 1
-  })
-  on.exit(tr_monitor$destroy(), add = TRUE)
+    tr_fired <- 0
+    tr_monitor <- observeEvent(tr(), {
+      tr_fired <<- tr_fired + 1
+    })
+    on.exit(tr_monitor$destroy(), add = TRUE)
 
-  # Starting values are both 0. Earlier I found that the tests behaved
-  # differently if I accessed the values of dr/tr before the first call to
-  # flushReact(). That bug was fixed, but to ensure that similar bugs don't
-  # appear undetected, we run this test with and without do_priming.
-  if (do_priming) {
+    # Starting values are both 0. Earlier I found that the tests behaved
+    # differently if I accessed the values of dr/tr before the first call to
+    # flushReact(). That bug was fixed, but to ensure that similar bugs don't
+    # appear undetected, we run this test with and without do_priming.
+    if (do_priming) {
+      expect_identical(isolate(dr()), 0)
+      expect_identical(isolate(tr()), 0)
+    }
+
+    # Pump timer and reactives for about 1.3 seconds
+    stopAt <- Sys.time() + 1.3
+    while (Sys.time() < stopAt) {
+      timerCallbacks$executeElapsed()
+      flushReact()
+      Sys.sleep(0.001)
+    }
+
+    # dr() should not have had time to fire, other than the initial run, since
+    # there haven't been long enough gaps between invalidations.
+    expect_identical(dr_fired, 1)
+    # The value of dr() should not have updated either.
     expect_identical(isolate(dr()), 0)
-    expect_identical(isolate(tr()), 0)
-  }
 
-  # Pump timer and reactives for about 1.3 seconds
-  stopAt <- Sys.time() + 1.3
-  while (Sys.time() < stopAt) {
-    timerCallbacks$executeElapsed()
-    flushReact()
-    Sys.sleep(0.001)
-  }
+    # tr() however, has had time to fire multiple times and update its value.
+    expect_identical(tr_fired, 3)
+    expect_identical(isolate(tr()), 4)
 
-  # dr() should not have had time to fire, other than the initial run, since
-  # there haven't been long enough gaps between invalidations.
-  expect_identical(dr_fired, 1)
-  # The value of dr() should not have updated either.
-  expect_identical(isolate(dr()), 0)
+    # Now let some time pass without any more updates.
+    src$destroy() # No more updates
+    stopAt <- Sys.time() + 1
+    while (Sys.time() < stopAt) {
+      timerCallbacks$executeElapsed()
+      flushReact()
+      Sys.sleep(0.001)
+    }
 
-  # tr() however, has had time to fire multiple times and update its value.
-  expect_identical(tr_fired, 3)
-  expect_identical(isolate(tr()), 10)
-
-  # Now let some time pass without any more updates.
-  src$destroy() # No more updates
-  stopAt <- Sys.time() + 1
-  while (Sys.time() < stopAt) {
-    timerCallbacks$executeElapsed()
-    flushReact()
-    Sys.sleep(0.001)
-  }
-
-  # dr should've fired, and we should have converged on the right answer.
-  expect_identical(dr_fired, 2)
-  isolate(expect_identical(rv$a, dr()))
-  expect_identical(tr_fired, 4)
-  isolate(expect_identical(rv$a, tr()))
-})
-
-# Identical to test block above, but with do_priming set to FALSE.
-test_that("debounce/throttle work properly (without priming)", {
-  do_priming <- FALSE
-  # Some of the CRAN test machines are heavily loaded and so the timing for
-  # these tests isn't reliable. https://github.com/rstudio/shiny/pull/2789
-  skip_on_cran()
-
-  # The changing of rv$a will be the (chatty) source of reactivity.
-  rv <- reactiveValues(a = 0)
-
-  # This observer will be what changes rv$a.
-  src <- observe({
-    invalidateLater(100)
-    rv$a <- isolate(rv$a) + 1
+    # dr should've fired, and we should have converged on the right answer.
+    expect_identical(dr_fired, 2)
+    isolate(expect_identical(rv$a, dr()))
+    expect_identical(tr_fired, 4)
+    isolate(expect_identical(rv$a, tr()))
   })
-  on.exit(src$destroy(), add = TRUE)
-
-  # Make a debounced reactive to test.
-  dr <- debounce(reactive(rv$a), 500)
-
-  # Make a throttled reactive to test.
-  tr <- throttle(reactive(rv$a), 500)
-
-  # Keep track of how often dr/tr are fired
-  dr_fired <- 0
-  dr_monitor <- observeEvent(dr(), {
-    dr_fired <<- dr_fired + 1
-  })
-  on.exit(dr_monitor$destroy(), add = TRUE)
-
-  tr_fired <- 0
-  tr_monitor <- observeEvent(tr(), {
-    tr_fired <<- tr_fired + 1
-  })
-  on.exit(tr_monitor$destroy(), add = TRUE)
-
-  # Starting values are both 0. Earlier I found that the tests behaved
-  # differently if I accessed the values of dr/tr before the first call to
-  # flushReact(). That bug was fixed, but to ensure that similar bugs don't
-  # appear undetected, we run this test with and without do_priming.
-  if (do_priming) {
-    expect_identical(isolate(dr()), 0)
-    expect_identical(isolate(tr()), 0)
-  }
-
-  # Pump timer and reactives for about 1.3 seconds
-  stopAt <- Sys.time() + 1.3
-  while (Sys.time() < stopAt) {
-    timerCallbacks$executeElapsed()
-    flushReact()
-    Sys.sleep(0.001)
-  }
-
-  # dr() should not have had time to fire, other than the initial run, since
-  # there haven't been long enough gaps between invalidations.
-  expect_identical(dr_fired, 1)
-  # The value of dr() should not have updated either.
-  expect_identical(isolate(dr()), 0)
-
-  # tr() however, has had time to fire multiple times and update its value.
-  expect_identical(tr_fired, 3)
-  expect_identical(isolate(tr()), 10)
-
-  # Now let some time pass without any more updates.
-  src$destroy() # No more updates
-  stopAt <- Sys.time() + 1
-  while (Sys.time() < stopAt) {
-    timerCallbacks$executeElapsed()
-    flushReact()
-    Sys.sleep(0.001)
-  }
-
-  # dr should've fired, and we should have converged on the right answer.
-  expect_identical(dr_fired, 2)
-  isolate(expect_identical(rv$a, dr()))
-  expect_identical(tr_fired, 4)
-  isolate(expect_identical(rv$a, tr()))
-})
+}
 
 test_that("reactive domain works across async handlers", {
   obj <- new.env()

@@ -100,7 +100,9 @@
   &.shiny-busy::after {
     @include shiny-page-busy;
   }
-  &.shiny-busy:has(.recalculating)::after {
+  // Hide the pulse if there are spinners on the page
+  // (Note: UI outputs don't get spinners)
+  &.shiny-busy:has(.recalculating:not(.shiny-html-output))::after {
     display: none;
   }
   &.shiny-busy:has(#shiny-disconnected-overlay)::after {

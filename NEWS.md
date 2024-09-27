@@ -1,5 +1,9 @@
 # shiny (development version)
 
+## New features and improvements
+
+* Small improvements to the default pulse busy indicator to better blend with any background. It's also now slightly smaller by default. (#4122)
+
 # shiny 1.9.1
 
 ## Bug fixes

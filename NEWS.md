@@ -4,13 +4,17 @@
 
 * Small improvements to the default pulse busy indicator to better blend with any background. It's also now slightly smaller by default. (#4122)
 
+## Bug fixes
+
+* Fixed a bug in `conditionalPanel()` that would cause the panel to repeatedly show/hide itself when the provided condition was not boolean. (@kamilzyla, #4127)
+
+* Fixed a bug with `input_slider()` when used as a range slider that made it impossible to change the slider value when both handles were at the maximum value. (#4131)
+
 # shiny 1.9.1
 
 ## Bug fixes
 
 * Fixed a bug introduced in v1.9.0 where the boundaries of hover/click/brush regions on plots were being incorrectly scaled when browser zoom was used. (#4111)
-
-* Fixed a bug in `conditionalPanel()` that would cause the panel to repeatedly show/hide itself when the provided condition was not boolean. (@kamilzyla, #4127)
 
 # shiny 1.9.0
 

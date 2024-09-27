@@ -44,9 +44,9 @@ div:where(.shiny-html-output) {
   /* uiOutput()/ conditionalPanel() are "pass-through" containers when they have children. */
   &:has(> *) {
     display: contents;
-      /* Pass along styles that no longer impact the pass-through container */
+    /* Pass along styles that no longer impact the pass-through container */
     &.recalculating > * {
-      opacity: 0.3;
+      opacity: var(--_shiny-fade-opacity);
     }
   }
 }

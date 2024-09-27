@@ -48,5 +48,5 @@ type Coordmap = {
     mouseCoordinateSender: (inputId: string, clip?: boolean, nullOutside?: boolean) => (e: JQuery.MouseDownEvent | JQuery.MouseMoveEvent | null) => void;
 };
 declare function initCoordmap($el: JQuery<HTMLElement>, coordmap_: CoordmapInit): Coordmap;
+export { findOrigin, initCoordmap };
 export type { Coordmap, CoordmapInit };
-export { initCoordmap, findOrigin };

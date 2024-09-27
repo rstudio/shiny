@@ -2,15 +2,53 @@
 
 ## New features and improvements
 
-* Added new functions, `useBusyIndicators()` and `busyIndicatorOptions()`, for enabling and customizing busy indication. Busy indicators provide a visual cue to users when the server is busy calculating outputs or otherwise serving requests to the client. When enabled, a spinner is shown on each calculating/recalculating output, and a pulsing banner is shown at the top of the page when the app is otherwise busy. (#4040)
+* Small improvements to the default pulse busy indicator to better blend with any background. It's also now slightly smaller by default. (#4122)
+
+## Bug fixes
+
+* Fixed a bug in `conditionalPanel()` that would cause the panel to repeatedly show/hide itself when the provided condition was not boolean. (@kamilzyla, #4127)
+
+* Fixed a bug with `input_slider()` when used as a range slider that made it impossible to change the slider value when both handles were at the maximum value. (#4131)
+
+# shiny 1.9.1
+
+## Bug fixes
+
+* Fixed a bug introduced in v1.9.0 where the boundaries of hover/click/brush regions on plots were being incorrectly scaled when browser zoom was used. (#4111)
+
+# shiny 1.9.0
+
+## New busy indication feature
+
+Add the new `useBusyIndicators()` function to any UI definition to:
+  1. Add a spinner overlay on calculating/recalculating outputs.
+  2. Show a page-level pulsing banner when Shiny is busy calculating something (e.g., a download, side-effect, etc), but no calculating/recalculating outputs are visible.
+
+In a future version of Shiny, busy indication will be enabled by default, so we encourage you to try it out now, provide feedback, and report any issues.
+
+In addition, various properties of the spinners and pulse can be customized with `busyIndicatorOptions()`. For more details, see `?busyIndicatorOptions`. (#4040, #4104)
+
+## New features and improvements
+
+* The client-side TypeScript code for Shiny has been refactored so that the `Shiny` object is now an instance of class `ShinyClass`. (#4063)
+
+* In TypeScript, the `Shiny` object has a new property `initializedPromise`, which is a Promise-like object that can be `await`ed or chained with `.then()`. This Promise-like object corresponds to the `shiny:sessioninitialized` JavaScript event, but is easier to use because it can be used both before and after the events have occurred. (#4063)
+
 * Output bindings now include the `.recalculating` CSS class when they are first bound, up until the first render. This makes it possible/easier to show progress indication when the output is calculating for the first time. (#4039)
+
 * A new `shiny.client_devmode` option controls client-side devmode features, in particular the client-side error console introduced in shiny 1.8.1, independently of the R-side features of `shiny::devmode()`. This usage is primarily intended for automatic use in Shinylive. (#4073)
+
+* Added function `reactlogAddMark()` to programmatically add _mark_ed locations in the reactlog log without the requirement of keyboard bindings during an idle reactive moment. (#4103)
 
 ## Bug fixes
 
 * `downloadButton()` and `downloadLink()` are now disabled up until they are fully initialized. This prevents the user from clicking the button/link before the download is ready. (#4041)
+
 * Output bindings that are removed, invalidated, then inserted again (while invalidated) now correctly include the `.recalculating` CSS class. (#4039)
+
 * Fixed a recent issue with `uiOutput()` and `conditionalPanel()` not properly lower opacity when recalculation (in a Bootstrap 5 context). (#4027)
+
+* Image outputs that were scaled by CSS had certain regions that were unresponsive to hover/click/brush handlers. (#3234)
 
 # shiny 1.8.1.1
 

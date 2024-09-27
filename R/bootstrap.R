@@ -172,9 +172,10 @@ setCurrentTheme <- function(theme) {
 
 #' Register a theme dependency
 #'
-#' This function registers a function that returns an [htmlDependency()] or list
-#' of such objects. If `session$setCurrentTheme()` is called, the function will
-#' be re-executed, and the resulting html dependency will be sent to the client.
+#' This function registers a function that returns an
+#' [htmltools::htmlDependency()] or list of such objects. If
+#' `session$setCurrentTheme()` is called, the function will be re-executed, and
+#' the resulting html dependency will be sent to the client.
 #'
 #' Note that `func` should **not** be an anonymous function, or a function which
 #' is defined within the calling function. This is so that,

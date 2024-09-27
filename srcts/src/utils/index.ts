@@ -148,7 +148,7 @@ function pixelRatio(): number {
 //
 // When the function is executed, it will evaluate that expression using
 // "with" on the argument value, and return the result.
-function scopeExprToFunc(expr: string): (scope: unknown) => boolean {
+function scopeExprToFunc(expr: string): (scope: unknown) => unknown {
   /*jshint evil: true */
   const exprEscaped = expr
     .replace(/[\\"']/g, "\\$&")
@@ -159,7 +159,7 @@ function scopeExprToFunc(expr: string): (scope: unknown) => boolean {
     // \b has a special meaning; need [\b] to match backspace char.
     .replace(/[\b]/g, "\\b");
 
-  let func: () => boolean;
+  let func: () => unknown;
 
   try {
     // @ts-expect-error; Do not know how to type this _dangerous_ situation
@@ -178,7 +178,7 @@ function scopeExprToFunc(expr: string): (scope: unknown) => boolean {
     throw e;
   }
 
-  return function (scope: unknown): boolean {
+  return function (scope: unknown): unknown {
     return func.call(scope);
   };
 }

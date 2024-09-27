@@ -109,6 +109,9 @@ function addCustomMessageHandler(type: string, handler: Handler): void {
 
 //// End message handler variables
 
+/**
+ * The ShinyApp class handles the communication with the Shiny Server.
+ */
 class ShinyApp {
   $socket: ShinyWebSocket | null = null;
 
@@ -611,7 +614,7 @@ class ShinyApp {
 
       const nsPrefix = el.attr("data-ns-prefix") as string;
       const nsScope = this._narrowScope(scope, nsPrefix);
-      const show = condFunc(nsScope);
+      const show = Boolean(condFunc(nsScope));
       const showing = el.css("display") !== "none";
 
       if (show !== showing) {
@@ -1610,4 +1613,4 @@ class ShinyApp {
 }
 
 export { ShinyApp, addCustomMessageHandler };
-export type { Handler, ErrorsMessageValue };
+export type { Handler, ErrorsMessageValue, ShinyWebSocket };

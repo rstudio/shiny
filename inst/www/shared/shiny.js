@@ -23917,7 +23917,7 @@
           }
           var nsPrefix = el.attr("data-ns-prefix");
           var nsScope = this._narrowScope(scope, nsPrefix);
-          var show3 = condFunc(nsScope);
+          var show3 = Boolean(condFunc(nsScope));
           var showing = el.css("display") !== "none";
           if (show3 !== showing) {
             if (show3) {

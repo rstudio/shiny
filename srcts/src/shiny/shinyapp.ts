@@ -614,7 +614,7 @@ class ShinyApp {
 
       const nsPrefix = el.attr("data-ns-prefix") as string;
       const nsScope = this._narrowScope(scope, nsPrefix);
-      const show = !!condFunc(nsScope);
+      const show = Boolean(condFunc(nsScope));
       const showing = el.css("display") !== "none";
 
       if (show !== showing) {

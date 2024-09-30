@@ -553,7 +553,7 @@ export class ShinyClientMessageEvent extends CustomEvent<ShinyClientMessage> {
 
 window.addEventListener("shiny:client-message", (ev: Event) => {
   if (!(ev instanceof CustomEvent)) {
-    return;
+    throw new Error("[shiny] shiny:client-message expected a CustomEvent");
   }
   const { headline, message } = ev.detail;
   if (!message) {

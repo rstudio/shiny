@@ -111,7 +111,7 @@ const bindingsRegistry = (() => {
         // Duplicates within a single binding type are an error.
         status = "error";
       } else {
-        // Duplicates across binding types are a warning.
+        // Same ID used for 1 input and 1 output results in a warning not error.
         status = "warning";
       }
     });
@@ -140,7 +140,7 @@ const bindingsRegistry = (() => {
         status: "warning",
         event: new ShinyClientMessageEvent({
           headline: "Shared input/output IDs found",
-          message: message,
+          message,
         }),
       };
     }

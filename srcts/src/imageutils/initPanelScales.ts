@@ -1,8 +1,8 @@
 // Map a value x from a domain to a range. If clip is true, clip it to the
 
-import type { Offset } from "./findbox";
 import { mapValues } from "../utils";
 import type { Bounds } from "./createBrush";
+import type { Offset } from "./findbox";
 
 // range.
 function mapLinear(

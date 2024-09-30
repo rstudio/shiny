@@ -126,3 +126,16 @@ test_that("message logger appears", {
   })
 
 })
+
+
+test_that("reactlog_version is as expected", {
+  suggests <- strsplit(packageDescription("shiny")$Suggests, ",")[[1]]
+  reactlog <- trimws(
+    grep("reactlog", suggests, value = TRUE)
+  )
+  expect_length(reactlog, 1)
+  expect_equal(
+    reactlog,
+    sprintf("reactlog (>= %s)", reactlog_min_version)
+  )
+})

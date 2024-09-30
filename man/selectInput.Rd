@@ -48,7 +48,7 @@ but when \code{size} is set, it will be a box instead.}
 
 \item{...}{Arguments passed to \code{selectInput()}.}
 
-\item{options}{A list of options. See the documentation of \pkg{selectize.js}
+\item{options}{A list of options. See the documentation of \pkg{selectize.js}(\url{https://selectize.dev/docs/usage})
 for possible options (character option values inside \code{\link[base:AsIs]{base::I()}} will
 be treated as literal JavaScript code; see \code{\link[=renderDataTable]{renderDataTable()}}
 for details).}
@@ -62,7 +62,7 @@ from a list of values.
 }
 \details{
 By default, \code{selectInput()} and \code{selectizeInput()} use the JavaScript library
-\pkg{selectize.js} (\url{https://github.com/selectize/selectize.js}) instead of
+\pkg{selectize.js} (\url{https://selectize.dev/}) instead of
 the basic select input element. To use the standard HTML select input
 element, use \code{selectInput()} with \code{selectize=FALSE}.
 

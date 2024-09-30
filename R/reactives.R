@@ -951,7 +951,10 @@ Observable <- R6Class(
 #' See the [Shiny tutorial](https://shiny.rstudio.com/tutorial/) for
 #' more information about reactive expressions.
 #'
-#' @param x For `is.reactive()`, an object to test. For `reactive()`, an expression. When passing in a [`quo()`]sure with `reactive()`, remember to use [`rlang::inject()`] to distinguish that you are passing in the content of your quosure, not the expression of the quosure.
+#' @param x For `is.reactive()`, an object to test. For `reactive()`, an
+#'   expression. When passing in a [`rlang::quo()`]sure with `reactive()`,
+#'   remember to use [`rlang::inject()`] to distinguish that you are passing in
+#'   the content of your quosure, not the expression of the quosure.
 #' @template param-env
 #' @templateVar x x
 #' @templateVar env env
@@ -1216,7 +1219,7 @@ Observer <- R6Class(
 
             printError(e)
             if (!is.null(.domain)) {
-              .domain$unhandledError(e)
+              .domain$unhandledError(e, close = TRUE)
             }
           },
           finally = .domain$decrementBusyCount
@@ -2187,8 +2190,8 @@ maskReactiveContext <- function(expr) {
 #' @param autoDestroy If `TRUE` (the default), the observer will be
 #'   automatically destroyed when its domain (if any) ends.
 #' @param ignoreNULL Whether the action should be triggered (or value
-#'   calculated, in the case of `eventReactive`) when the input is
-#'   `NULL`. See Details.
+#'   calculated, in the case of `eventReactive`) when the input event expression
+#'   is `NULL`. See Details.
 #' @param ignoreInit If `TRUE`, then, when this `observeEvent` is
 #'   first created/initialized, ignore the `handlerExpr` (the second
 #'   argument), whether it is otherwise supposed to run or not. The default is
@@ -2396,7 +2399,7 @@ isNullEvent <- function(value) {
 #' reactive recently (within the time window) invalidated. New `r`
 #' invalidations do not reset the time window. This means that if invalidations
 #' continually come from `r` within the time window, the throttled reactive
-#' will invalidate regularly, at a rate equal to or slower than than the time
+#' will invalidate regularly, at a rate equal to or slower than the time
 #' window.
 #'
 #' `ooo-oo-oo---- => o--o--o--o---`

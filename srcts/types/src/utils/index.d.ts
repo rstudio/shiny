@@ -1,5 +1,5 @@
 import type { MapValuesUnion, MapWithResult } from "./extraTypes";
-import { hasOwnProperty, hasDefinedProperty } from "./object";
+import { hasDefinedProperty, hasOwnProperty } from "./object";
 declare function escapeHTML(str: string): string;
 declare function randomId(): string;
 declare function strToBool(str: string): boolean | undefined;
@@ -11,7 +11,7 @@ declare function parseDate(dateString: string): Date;
 declare function formatDateUTC(x: Date): string;
 declare function makeResizeFilter(el: HTMLElement, func: (width: HTMLElement["offsetWidth"], height: HTMLElement["offsetHeight"]) => void): () => void;
 declare function pixelRatio(): number;
-declare function scopeExprToFunc(expr: string): (scope: unknown) => boolean;
+declare function scopeExprToFunc(expr: string): (scope: unknown) => unknown;
 declare function asArray<T>(value: T | T[] | null | undefined): T[];
 declare function mergeSort<Item>(list: Item[], sortfunc: (a: Item, b: Item) => boolean | number): Item[];
 declare function $escape(val: undefined): undefined;

@@ -119,6 +119,8 @@ updateCheckboxInput <- function(session = getDefaultReactiveDomain(), inputId, l
 #' Change the label or icon of an action button on the client
 #'
 #' @template update-input
+#' @param disabled If `TRUE`, the button will not be clickable; if `FALSE`, it
+#'   will be.
 #' @inheritParams actionButton
 #'
 #' @seealso [actionButton()]
@@ -148,13 +150,13 @@ updateCheckboxInput <- function(session = getDefaultReactiveDomain(), inputId, l
 #'       label = "New label",
 #'       icon = icon("calendar"))
 #'
-#'     # Leaves goButton2's label unchaged and
+#'     # Leaves goButton2's label unchanged and
 #'     # removes its icon
 #'     updateActionButton(session, "goButton2",
 #'       icon = character(0))
 #'
 #'     # Leaves goButton3's icon, if it exists,
-#'     # unchaged and changes its label
+#'     # unchanged and changes its label
 #'     updateActionButton(session, "goButton3",
 #'       label = "New label 3")
 #'
@@ -169,16 +171,18 @@ updateCheckboxInput <- function(session = getDefaultReactiveDomain(), inputId, l
 #' }
 #' @rdname updateActionButton
 #' @export
-updateActionButton <- function(session = getDefaultReactiveDomain(), inputId, label = NULL, icon = NULL) {
+updateActionButton <- function(session = getDefaultReactiveDomain(), inputId, label = NULL, icon = NULL, disabled = NULL) {
   validate_session_object(session)
 
   if (!is.null(icon)) icon <- as.character(validateIcon(icon))
-  message <- dropNulls(list(label=label, icon=icon))
+  message <- dropNulls(list(label=label, icon=icon, disabled=disabled))
   session$sendInputMessage(inputId, message)
 }
 #' @rdname updateActionButton
 #' @export
-updateActionLink <- updateActionButton
+updateActionLink <- function(session = getDefaultReactiveDomain(), inputId, label = NULL, icon = NULL) {
+  updateActionButton(session, inputId=inputId, label=label, icon=icon)
+}
 
 
 #' Change the value of a date input on the client
@@ -422,6 +426,23 @@ updateSliderInput <- function(session = getDefaultReactiveDomain(), inputId, lab
   min = NULL, max = NULL, step = NULL, timeFormat = NULL, timezone = NULL)
 {
   validate_session_object(session)
+
+  if (!is.null(value)) {
+    if (!is.null(min) && !is.null(max)) {
+      # Validate value/min/max together if all three are provided
+      tryCatch(
+        validate_slider_value(min, max, value, "updateSliderInput"),
+        error = function(err) warning(conditionMessage(err), call. = FALSE)
+      )
+    } else if (length(value) <  1 || length(value) > 2 || any(is.na(value))) {
+      # Otherwise ensure basic assumptions about value are met
+      warning(
+        "In updateSliderInput(): value must be a single value or a length-2 ",
+        "vector and cannot contain NA values.",
+        call. = FALSE
+      )
+    }
+  }
 
   # If no min/max/value is provided, we won't know the
   # type, and this will return an empty string

@@ -2,7 +2,11 @@ import $ from "jquery";
 import { hasDefinedProperty } from "../../utils";
 import { InputBinding } from "./inputBinding";
 
-type ActionButtonReceiveMessageData = { label?: string; icon?: string | [] };
+type ActionButtonReceiveMessageData = {
+  label?: string;
+  icon?: string | [];
+  disabled?: boolean;
+};
 
 class ActionButtonInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
@@ -38,34 +42,44 @@ class ActionButtonInputBinding extends InputBinding {
   receiveMessage(el: HTMLElement, data: ActionButtonReceiveMessageData): void {
     const $el = $(el);
 
-    // retrieve current label and icon
-    let label: string = $el.text();
-    let icon = "";
+    if (hasDefinedProperty(data, "label") || hasDefinedProperty(data, "icon")) {
+      // retrieve current label and icon
+      let label: string = $el.text();
+      let icon = "";
 
-    // to check (and store) the previous icon, we look for a $el child
-    // object that has an i tag, and some (any) class (this prevents
-    // italicized text - which has an i tag but, usually, no class -
-    // from being mistakenly selected)
-    if ($el.find("i[class]").length > 0) {
-      const iconHtml = $el.find("i[class]")[0];
+      // to check (and store) the previous icon, we look for a $el child
+      // object that has an i tag, and some (any) class (this prevents
+      // italicized text - which has an i tag but, usually, no class -
+      // from being mistakenly selected)
+      if ($el.find("i[class]").length > 0) {
+        const iconHtml = $el.find("i[class]")[0];
 
-      if (iconHtml === $el.children()[0]) {
-        // another check for robustness
-        icon = $(iconHtml).prop("outerHTML");
+        if (iconHtml === $el.children()[0]) {
+          // another check for robustness
+          icon = $(iconHtml).prop("outerHTML");
+        }
+      }
+
+      // update the requested properties
+      if (hasDefinedProperty(data, "label")) {
+        label = data.label;
+      }
+      if (hasDefinedProperty(data, "icon")) {
+        // `data.icon` can be an [] if user gave `character(0)`.
+        icon = Array.isArray(data.icon) ? "" : data.icon ?? "";
+      }
+
+      // produce new html
+      $el.html(icon + " " + label);
+    }
+
+    if (hasDefinedProperty(data, "disabled")) {
+      if (data.disabled) {
+        $el.attr("disabled", "");
+      } else {
+        $el.attr("disabled", null);
       }
     }
-
-    // update the requested properties
-    if (hasDefinedProperty(data, "label")) {
-      label = data.label;
-    }
-    if (hasDefinedProperty(data, "icon")) {
-      // `data.icon` can be an [] if user gave `character(0)`.
-      icon = Array.isArray(data.icon) ? "" : data.icon ?? "";
-    }
-
-    // produce new html
-    $el.html(icon + " " + label);
   }
 
   unsubscribe(el: HTMLElement): void {

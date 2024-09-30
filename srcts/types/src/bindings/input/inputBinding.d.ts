@@ -8,7 +8,7 @@ declare class InputBinding {
     getValue(el: HTMLElement): any;
     subscribe(el: HTMLElement, callback: (value: boolean) => void): void;
     unsubscribe(el: HTMLElement): void;
-    receiveMessage(el: HTMLElement, data: unknown): void;
+    receiveMessage(el: HTMLElement, data: unknown): Promise<void> | void;
     getState(el: HTMLElement): unknown;
     getRatePolicy(el: HTMLElement): {
         policy: RatePolicyModes;

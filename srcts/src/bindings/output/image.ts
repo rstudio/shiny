@@ -1,5 +1,4 @@
 import $ from "jquery";
-import { OutputBinding } from "./outputBinding";
 import {
   createBrushHandler,
   createClickHandler,
@@ -8,16 +7,17 @@ import {
   disableDrag,
   initCoordmap,
 } from "../../imageutils";
+import type { CoordmapInit } from "../../imageutils/initCoordmap";
+import type { ErrorsMessageValue } from "../../shiny/shinyapp";
 import {
-  strToBool,
   getComputedLinkColor,
   getStyle,
   hasOwnProperty,
+  strToBool,
 } from "../../utils";
-import { isIE, IEVersion } from "../../utils/browser";
-import type { CoordmapInit } from "../../imageutils/initCoordmap";
-import type { ErrorsMessageValue } from "../../shiny/shinyapp";
+import { IEVersion, isIE } from "../../utils/browser";
 import { ifUndefined } from "../../utils/object";
+import { OutputBinding } from "./outputBinding";
 
 class ImageOutputBinding extends OutputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {

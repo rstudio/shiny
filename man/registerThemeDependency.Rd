@@ -12,9 +12,10 @@ registerThemeDependency(func)
 of them.}
 }
 \description{
-This function registers a function that returns an \code{\link[=htmlDependency]{htmlDependency()}} or list
-of such objects. If \code{session$setCurrentTheme()} is called, the function will
-be re-executed, and the resulting html dependency will be sent to the client.
+This function registers a function that returns an
+\code{\link[htmltools:htmlDependency]{htmltools::htmlDependency()}} or list of such objects. If
+\code{session$setCurrentTheme()} is called, the function will be re-executed, and
+the resulting html dependency will be sent to the client.
 }
 \details{
 Note that \code{func} should \strong{not} be an anonymous function, or a function which

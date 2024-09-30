@@ -166,8 +166,8 @@ instead of the default 200 MB:
 }\if{html}{\out{</div>}}
 
 To use different settings for a session-scoped cache, you can set
-\code{self$cache} at the top of your server function. By default, it will create
-a 200 MB memory cache for each session, but you can replace it with
+\code{session$cache} at the top of your server function. By default, it will
+create a 200 MB memory cache for each session, but you can replace it with
 something different. To use the session-scoped cache, you must also call
 \code{bindCache()} with \code{cache="session"}. This will create a 100 MB cache for
 the session:
@@ -448,7 +448,7 @@ shinyApp(
       bindEvent(input$go)
       # The cached, eventified reactive takes a reactive dependency on
       # input$go, but doesn't use it for the cache key. It uses input$x and
-      # input$y for the cache key, but doesn't take a reactive depdency on
+      # input$y for the cache key, but doesn't take a reactive dependency on
       # them, because the reactive dependency is superseded by addEvent().
 
     output$txt <- renderText(r())

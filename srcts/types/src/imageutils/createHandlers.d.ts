@@ -1,5 +1,5 @@
 /// <reference types="jquery" />
-import type { BoundsCss, Bounds, BrushOpts } from "./createBrush";
+import type { Bounds, BoundsCss, BrushOpts } from "./createBrush";
 import type { Offset } from "./findbox";
 import type { Coordmap } from "./initCoordmap";
 import type { Panel } from "./initPanelScales";

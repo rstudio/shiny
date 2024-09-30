@@ -15,6 +15,11 @@ parser: '@typescript-eslint/parser'
 parserOptions:
   ecmaVersion: 2018
   sourceType: module
+  project:
+    - './tsconfig.json'
+ignorePatterns: # mirrors tsconfig.json's exclude
+    - '**/__tests__'
+    - '**/*.d.ts'
 plugins:
   - '@typescript-eslint'
   - prettier
@@ -30,10 +35,6 @@ rules:
 
   default-case:
     - error
-  indent:
-    - error
-    - 2
-    - SwitchCase: 1
   linebreak-style:
     - error
     - unix
@@ -70,6 +71,10 @@ rules:
 
   "@typescript-eslint/consistent-type-imports":
     - error
+
+  "@typescript-eslint/no-floating-promises":
+    - error
+
   "@typescript-eslint/naming-convention":
     - error
 

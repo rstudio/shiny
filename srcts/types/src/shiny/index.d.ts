@@ -1,23 +1,22 @@
 import { InputBinding, OutputBinding } from "../bindings";
+import type { BindingRegistry } from "../bindings/registry";
 import { resetBrush } from "../imageutils/resetBrush";
 import { setBrush } from "../imageutils/setBrush";
 import { $escape, compareVersion } from "../utils";
-import { showNotification, removeNotification } from "./notifications";
-import { showModal, removeModal } from "./modal";
-import { showReconnectDialog, hideReconnectDialog } from "./reconnectDialog";
-import { renderContentAsync, renderContent, renderDependenciesAsync, renderDependencies, renderHtmlAsync, renderHtml } from "./render";
-import type { shinyBindAll, shinyForgetLastInputValue, shinySetInputValue, shinyInitializeInputs, shinyUnbindAll } from "./initedMethods";
-import type { Handler, ShinyApp } from "./shinyapp";
-import { addCustomMessageHandler } from "./shinyapp";
-import { initInputBindings } from "../bindings/input";
-import { initOutputBindings } from "../bindings/output";
-interface Shiny {
+import { type InitStatusPromise } from "../utils/promise";
+import type { shinyBindAll, shinyForgetLastInputValue, shinyInitializeInputs, shinySetInputValue, shinyUnbindAll } from "./initedMethods";
+import { removeModal, showModal } from "./modal";
+import { removeNotification, showNotification } from "./notifications";
+import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
+import { renderContent, renderContentAsync, renderDependencies, renderDependenciesAsync, renderHtml, renderHtmlAsync } from "./render";
+import { addCustomMessageHandler, ShinyApp, type Handler } from "./shinyapp";
+declare class ShinyClass {
     version: string;
     $escape: typeof $escape;
     compareVersion: typeof compareVersion;
-    inputBindings: ReturnType<typeof initInputBindings>["inputBindings"];
+    inputBindings: BindingRegistry<InputBinding>;
     InputBinding: typeof InputBinding;
-    outputBindings: ReturnType<typeof initOutputBindings>["outputBindings"];
+    outputBindings: BindingRegistry<OutputBinding>;
     OutputBinding: typeof OutputBinding;
     resetBrush: typeof resetBrush;
     setBrush: typeof setBrush;
@@ -29,7 +28,6 @@ interface Shiny {
         show: typeof showModal;
         remove: typeof removeModal;
     };
-    createSocket?: () => WebSocket;
     showReconnectDialog: typeof showReconnectDialog;
     hideReconnectDialog: typeof hideReconnectDialog;
     renderDependenciesAsync: typeof renderDependenciesAsync;
@@ -38,9 +36,10 @@ interface Shiny {
     renderContent: typeof renderContent;
     renderHtmlAsync: typeof renderHtmlAsync;
     renderHtml: typeof renderHtml;
-    user: string;
-    progressHandlers?: ShinyApp["progressHandlers"];
     addCustomMessageHandler: typeof addCustomMessageHandler;
+    createSocket?: () => WebSocket;
+    user?: string;
+    progressHandlers?: ShinyApp["progressHandlers"];
     shinyapp?: ShinyApp;
     setInputValue?: typeof shinySetInputValue;
     onInputChange?: typeof shinySetInputValue;
@@ -48,9 +47,16 @@ interface Shiny {
     bindAll?: typeof shinyBindAll;
     unbindAll?: typeof shinyUnbindAll;
     initializeInputs?: typeof shinyInitializeInputs;
+    initializedPromise: InitStatusPromise<void>;
     oncustommessage?: Handler;
+    constructor();
+    /**
+     * Method to check if Shiny is running in development mode. By packaging as a
+     * method, we can we can avoid needing to look for the `__SHINY_DEV_MODE__`
+     * variable in the global scope.
+     * @returns `true` if Shiny is running in development mode, `false` otherwise.
+     */
+    inDevMode(): boolean;
+    initialize(): Promise<void>;
 }
-declare let windowShiny: Shiny;
-declare function setShiny(windowShiny_: Shiny): void;
-export { windowShiny, setShiny };
-export type { Shiny };
+export { ShinyClass };

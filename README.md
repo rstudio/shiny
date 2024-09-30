@@ -3,7 +3,7 @@
 <!-- badges: start -->
 [![CRAN](https://www.r-pkg.org/badges/version/shiny)](https://CRAN.R-project.org/package=shiny)
 [![R build status](https://github.com/rstudio/shiny/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/rstudio/shiny/actions)
-[![RStudio community](https://img.shields.io/badge/community-shiny-blue?style=social&logo=rstudio&logoColor=75AADB)](https://community.rstudio.com/new-topic?category=shiny&tags=shiny)
+[![RStudio community](https://img.shields.io/badge/community-shiny-blue?style=social&logo=rstudio&logoColor=75AADB)](https://forum.posit.co/new-topic?category=shiny&tags=shiny)
 
 <!-- badges: end -->
 
@@ -16,7 +16,7 @@ Easily build rich and productive interactive web apps in R &mdash; no HTML/CSS/J
 * A prebuilt set of highly sophisticated, customizable, and easy-to-use widgets (e.g., plots, tables, sliders, dropdowns, date pickers, and more).
 * An attractive default look based on [Bootstrap](https://getbootstrap.com/) which can also be easily customized with the [bslib](https://github.com/rstudio/bslib) package or avoided entirely with more direct R bindings to HTML/CSS/JavaScript.
 * Seamless integration with [R Markdown](https://shiny.rstudio.com/articles/interactive-docs.html), making it easy to embed numerous applications natively within a larger dynamic document.
-* Tools for improving and monitoring performance, including native support for [async programming](https://www.rstudio.com/blog/shiny-1-1-0/), [caching](https://talks.cpsievert.me/20201117), [load testing](https://rstudio.github.io/shinyloadtest/), and more.
+* Tools for improving and monitoring performance, including native support for [async programming](https://posit.co/blog/shiny-1-1-0/), [caching](https://talks.cpsievert.me/20201117), [load testing](https://rstudio.github.io/shinyloadtest/), and more.
 * [Modules](https://shiny.rstudio.com/articles/modules.html): a framework for reducing code duplication and complexity.
 * An ability to [bookmark application state](https://shiny.rstudio.com/articles/bookmarking-state.html) and/or [generate code to reproduce output(s)](https://github.com/rstudio/shinymeta).
 * A rich ecosystem of extension packages for more [custom widgets](http://www.htmlwidgets.org/), [input validation](https://github.com/rstudio/shinyvalidate), [unit testing](https://github.com/rstudio/shinytest), and more.
@@ -45,9 +45,13 @@ For more examples and inspiration, check out the [Shiny User Gallery](https://sh
 
 For help with learning fundamental Shiny programming concepts, check out the [Mastering Shiny](https://mastering-shiny.org/) book and the [Shiny Tutorial](https://shiny.rstudio.com/tutorial/). The former is currently more up-to-date with modern Shiny features, whereas the latter takes a deeper, more visual, dive into fundamental concepts.
 
+## Join the conversation
+
+If you want to chat about Shiny, meet other developers, or help us decide what to work on next, [join us on Discord](https://discord.com/invite/yMGCamUMnS).
+
 ## Getting Help
 
-To ask a question about Shiny, please use the [RStudio Community website](https://community.rstudio.com/new-topic?category=shiny&tags=shiny).
+To ask a question about Shiny, please use the [RStudio Community website](https://forum.posit.co/new-topic?category=shiny&tags=shiny).
 
 For bug reports, please use the [issue tracker](https://github.com/rstudio/shiny/issues) and also keep in mind that by [writing a good bug report](https://github.com/rstudio/shiny/wiki/Writing-Good-Bug-Reports), you're more likely to get help with your problem.
 

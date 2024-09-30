@@ -1,5 +1,5 @@
 import $ from "jquery";
-import { $escape, updateLabel, hasDefinedProperty } from "../../utils";
+import { $escape, hasDefinedProperty, updateLabel } from "../../utils";
 
 import { InputBinding } from "./inputBinding";
 
@@ -29,7 +29,8 @@ class TextInputBindingBase extends InputBinding {
     // id that ends in '-selectized'. The .not() selector below
     // is to prevent textInputBinding from accidentally picking up
     // this hidden element as a shiny input (#2396)
-
+    //
+    // Inputs also now have .shiny-input-text class
     return $inputs.not('input[type="text"][id$="-selectized"]');
   }
 
@@ -121,5 +122,4 @@ class TextInputBinding extends TextInputBindingBase {
 }
 
 export { TextInputBinding, TextInputBindingBase };
-
 export type { TextHTMLElement, TextReceiveMessageData };

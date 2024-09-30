@@ -1,6 +1,6 @@
 import $ from "jquery";
-import type { InputPolicy, InputPolicyOpts } from "./inputPolicy";
 import type { ShinyEventInputChanged } from "../events/shinyEvents";
+import type { InputPolicy, InputPolicyOpts } from "./inputPolicy";
 import { splitInputNameType } from "./splitInputNameType";
 
 class InputEventDecorator implements InputPolicy {

@@ -20,6 +20,8 @@
 
 * Fixed a bug with `sliderInput()` when used as a range slider that made it impossible to change the slider value when both handles were at the maximum value. (#4131)
 
+* `dateInput` and `dateRangeInput` no longer send immediate updates to the server when the user is typing a date input. Instead, it waits until the user presses Enter or clicks out of the field to send the update, avoiding spurious and incorrect date values. Note that an update is still sent immediately when the field is cleared. (#3664)
+
 * Overhauled brush code so that brush handlers (as well as click/hover handlers) persist when a plot is redrawn, and consistently move any drawn brushes to the correct location if the plot is resized. This fixes an issue where a plot that's redrawn in response to a brush would circumvent the debouncer and sometimes update twice each time the brush was moved--or worse, constantly re-update itself as the brush was being dragged. This also fixes a frustrating-to-replicate bug where the rectangle drawn on the plot could become duplicated and desynced from the coordinates sent to the server with a series of rapid user inputs. (#2344, #1642)
 
 # shiny 1.9.1

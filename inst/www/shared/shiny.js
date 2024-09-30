@@ -8238,12 +8238,6 @@
       key: "subscribe",
       value: function subscribe(el, callback) {
         (0, import_jquery8.default)(el).on(
-          "keyup.dateInputBinding input.dateInputBinding",
-          function() {
-            callback(true);
-          }
-        );
-        (0, import_jquery8.default)(el).on(
           "changeDate.dateInputBinding change.dateInputBinding",
           function() {
             callback(false);
@@ -8686,12 +8680,6 @@
     }, {
       key: "subscribe",
       value: function subscribe(el, callback) {
-        (0, import_jquery9.default)(el).on(
-          "keyup.dateRangeInputBinding input.dateRangeInputBinding",
-          function() {
-            callback(true);
-          }
-        );
         (0, import_jquery9.default)(el).on(
           "changeDate.dateRangeInputBinding change.dateRangeInputBinding",
           function() {

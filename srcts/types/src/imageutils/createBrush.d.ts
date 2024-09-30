@@ -37,13 +37,12 @@ type BrushOpts = {
     brushResetOnNew?: boolean;
 };
 type Brush = {
+    updateCoordmap: (newCoordmap: Coordmap) => void;
     reset: () => void;
-    hasOldBrush: () => boolean;
-    importOldBrush: () => void;
     isInsideBrush: (offsetCss: Offset) => boolean;
     isInResizeArea: (offsetCss: Offset) => boolean;
     whichResizeSides: (offsetCss: Offset) => ImageState["resizeSides"];
-    onResize: () => void;
+    onImgResize: () => void;
     boundsCss: {
         (boxCss: BoundsCss): void;
         (): BoundsCss;
@@ -53,6 +52,7 @@ type Brush = {
         (): BoundsData;
     };
     getPanel: () => ImageState["panel"];
+    setPanelIdx: (idx: number) => void;
     down: {
         (): ImageState["down"];
         (offsetCss: Offset): void;

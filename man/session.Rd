@@ -113,9 +113,15 @@ such as RStudio Connect and Shiny Server.
 The \code{user}'s relevant group information. Useful for determining what
 privileges the user should or shouldn't have.
 }
+\item{setBrush(brushId, coords, panel, outputId)}{
+Sets the coordinates of a brush. This should generally be called
+through the friendlier \code{\link[=updateBrushCoords]{updateBrushCoords()}} wrapper; see the
+documentation of that function for details on the parameters.
+}
 \item{resetBrush(brushId)}{
-Resets/clears the brush with the given \code{brushId}, if it exists on
-any \code{imageOutput} or \code{plotOutput} in the app.
+Resets/clears all brushes with the given \code{brushId}, if they exists on
+any \code{imageOutput} or \code{plotOutput} in the app. This can now be called
+through the friendlier \code{\link[=resetBrush]{resetBrush()}} wrapper.
 }
 \item{sendCustomMessage(type, message)}{
 Sends a custom message to the web page. \code{type} must be a

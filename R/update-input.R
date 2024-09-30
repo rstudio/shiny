@@ -860,3 +860,78 @@ selectizeJSON <- function(data, req) {
   res <- toJSON(columnToRowData(data))
   httpResponse(200, 'application/json', enc2utf8(res))
 }
+
+#' Change the region selected by a brush on the client
+#'
+#' Sends a message to the client to set the region selected by a particular
+#' plot/image brush to the specified coordinates.
+#'
+#' Sets the brush with the given `brushId`, if it exists on an output with
+#' the given `outputId` (or, if none is specified, any `imageOutput` or
+#' `plotOutput` in the app). The `coords` should be a
+#' list with `xmin`, `xmax`, `ymin`, `ymax` single-element numerics that
+#' specify the desired brush position (in the scale of the plot). `panel` should
+#' be a single-element integer that defines the panel that should be brushed
+#' for multi-faceted plots.
+#'
+#' If the direction of the brush was set to "x" in `brushOpts()`, then `ymin`
+#' and `ymax` will be ignored, but must still be supplied, and vice versa.
+#'
+#' `outputId` need not be provided if the `brushId` is unique. However, if
+#' multiple plot or image outputs have brushes with the same id, this must
+#' be provided to specify which one should be brushed (since no more than one
+#' may have an active brush at one time).
+#'
+#' Since brushes are not standard bound inputs, the update message does not
+#' go onto the input message queue and may be sent immediately.
+#'
+#' @param session The `session` object passed to function given to
+#'   `shinyServer`. Default is `getDefaultReactiveDomain()`.
+#' @param brushId The id of a brush given to `plotOutput` or `imageOutput`.
+#' @param coords A list containing `xmin`, `xmax`, `ymin`, `ymax` numerics.
+#' @param panel The numeric index of the panel to brush. Indices start from 0,
+#'   which is the default, and the only valid value for single-panel plots.
+#' @param outputId The id of the `plotOutput` or `imageOutput` that contains
+#'   the brush to update. Can be NULL (default) if the brushId is unique.
+#'
+#' @seealso [brushOpts()]
+#'
+#' @export
+updateBrushCoords <- function(session = getDefaultReactiveDomain(), brushId, coords, panel = 0, outputId = NULL) {
+  validate_session_object(session)
+  if (!all(c("xmin", "xmax", "ymin", "ymax") %in% names(coords))){
+    stop("coords must have xmin, xmax, ymin and ymax fields")
+  }
+  if (!is.numeric(coords$xmin) ||
+      !is.numeric(coords$xmax) ||
+      !is.numeric(coords$ymin) ||
+      !is.numeric(coords$ymax)) {
+    stop("all coordinates must be numeric")
+  }
+  if (!is.numeric(panel)) {
+    stop("panel must be numeric")
+  }
+
+  session$setBrush(brushId, coords, panel, outputId)
+}
+
+#' Resets/clears a brush (or brushes) on the client
+#'
+#' Sends a message to the client to reset all brushes with the given id.
+#'
+#' Multiple brushes from different plot or image outputs may share the
+#' same id, but only one may have an active selection at a time. This
+#' function will reset whichever one is active (if any).
+#'
+#' Since brushes are not standard bound inputs, the reset message does not
+#' go onto the input message queue and may be sent immediately.
+#'
+#' @param session The `session` object passed to function given to
+#'   `shinyServer`. Default is `getDefaultReactiveDomain()`.
+#' @param brushId The id of a brush given to `plotOutput` or `imageOutput`.
+#'
+#' @export
+resetBrush <- function(session = getDefaultReactiveDomain(), brushId) {
+  validate_session_object(session)
+  session$resetBrush(brushId)
+}

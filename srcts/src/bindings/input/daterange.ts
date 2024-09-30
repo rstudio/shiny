@@ -169,7 +169,7 @@ class DateRangeInputBinding extends DateInputBindingBase {
       // event: Event
       function () {
         // Send immediately when clicked
-        // Or after typing, when enter pressed or focus lost
+        // Or if typing, when enter pressed or focus lost
         callback(false);
       }
     );

@@ -19002,8 +19002,8 @@
   customElements.define("shiny-error-message", ShinyErrorMessage);
   function showMessageInClientConsole(_ref) {
     var _ref$headline = _ref.headline, headline = _ref$headline === void 0 ? "" : _ref$headline, message = _ref.message;
+    console.warn("[shiny] ".concat(headline).concat(headline ? " - " : "").concat(message));
     if (!Shiny.inDevMode()) {
-      console.warn("[shiny] ".concat(headline).concat(headline ? " - " : "").concat(message));
       return;
     }
     var errorConsoleContainer = document.querySelector("shiny-error-console");
@@ -19049,7 +19049,7 @@
   }(/* @__PURE__ */ _wrapNativeSuper3(CustomEvent));
   window.addEventListener("shiny:client-message", function(ev) {
     if (!(ev instanceof CustomEvent)) {
-      return;
+      throw new Error("[shiny] shiny:client-message expected a CustomEvent");
     }
     var _ev$detail = ev.detail, headline = _ev$detail.headline, message = _ev$detail.message;
     if (!message) {

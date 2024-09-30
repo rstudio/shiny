@@ -64,15 +64,15 @@
     --shiny-pulse-background,
     linear-gradient(
       120deg,
-      var(--bs-body-bg, #fff),
+      transparent,
       var(--bs-indigo, #4b00c1),
       var(--bs-purple, #74149c),
       var(--bs-pink, #bf007f),
-      var(--bs-body-bg, #fff)
+      transparent
     )
   );
-  --_shiny-pulse-height: var(--shiny-pulse-height, 5px);
-  --_shiny-pulse-speed: var(--shiny-pulse-speed, 1.85s);
+  --_shiny-pulse-height: var(--shiny-pulse-height, 3px);
+  --_shiny-pulse-speed: var(--shiny-pulse-speed, 1.2s);
 
   /* Color, sizing, & positioning */
   position: fixed;
@@ -85,6 +85,7 @@
   /* Animation */
   animation-name: busy-page-pulse;
   animation-duration: var(--_shiny-pulse-speed);
+  animation-direction: alternate;
   animation-iteration-count: infinite;
   animation-timing-function: ease-in-out;
 
@@ -99,7 +100,9 @@
   &.shiny-busy::after {
     @include shiny-page-busy;
   }
-  &.shiny-busy:has(.recalculating)::after {
+  // Hide the pulse if there are spinners on the page
+  // (Note: UI outputs don't get spinners)
+  &.shiny-busy:has(.recalculating:not(.shiny-html-output))::after {
     display: none;
   }
   &.shiny-busy:has(#shiny-disconnected-overlay)::after {
@@ -130,17 +133,23 @@
 /* Keyframes for the pulsing banner */
 @keyframes busy-page-pulse {
   0% {
-    left: -75%;
-    width: 75%;
+    left: -14%;
+    right: 97%;
   }
-  50% {
-    left: 100%;
-    width: 75%;
+
+  45% {
+    left: 0%;
+    right: 14%;
   }
-  /* Go back */
-  100% {
-    left: -75%;
-    width: 75%;
+
+  55% {
+    left: 14%;
+    right: 0%;
+  }
+
+  to {
+    left: 97%;
+    right: -14%;
   }
 }
 

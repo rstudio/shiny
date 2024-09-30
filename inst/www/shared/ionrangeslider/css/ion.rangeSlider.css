@@ -235,6 +235,10 @@
   z-index: 2;
 }
 
+.irs--shiny .irs-handle.type_last {
+  z-index: 3;
+}
+
 .irs--shiny .irs-handle.state_hover, .irs--shiny .irs-handle:hover {
   background: #fff;
 }

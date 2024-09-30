@@ -499,8 +499,9 @@ function showMessageInClientConsole({
   headline = "",
   message,
 }: ShinyClientMessage): void {
+  console.warn(`[shiny] ${headline}${headline ? " - " : ""}${message}`);
+
   if (!Shiny.inDevMode()) {
-    console.warn(`[shiny] ${headline}${headline ? " - " : ""}${message}`);
     return;
   }
 

@@ -1,5 +1,11 @@
 # shiny (development version)
 
+## Breaking changes
+
+* Duplicated IDs (used more than once for an input or output) now throw an error in the browser, which appears as a message in Shiny's Client Console when `devmode()` is enabled or as a message in the browser console if not. (#4101)
+
+   Prior to Shiny v1.8.1, duplicated output IDs (but not duplicated input IDs) threw an error on app startup. After v1.8.1 neither resulted in an error, but a message would be shown in the Client Console when `devmode()` was enabled. The change in this version restores the previous behavior and extends it to input IDs as well.
+
 ## New features and improvements
 
 * Small improvements to the default pulse busy indicator to better blend with any background. It's also now slightly smaller by default. (#4122)
@@ -13,6 +19,8 @@
 * Fixed a bug with `sliderInput()` when used as a range slider that made it impossible to change the slider value when both handles were at the maximum value. (#4131)
 
 * `dateInput` and `dateRangeInput` no longer send immediate updates to the server when the user is typing a date input. Instead, it waits until the user presses Enter or clicks out of the field to send the update, avoiding spurious and incorrect date values. Note that an update is still sent immediately when the field is cleared. (#3664)
+
+* Shared input and output IDs -- e.g. using `"debug"` for both a `textInput()` and `verbatimTextOutput()` -- now results in a console warning message, but not an error, that is also shown in the Client Console when `devmode()` is enabled. (#4101)
 
 # shiny 1.9.1
 

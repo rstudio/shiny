@@ -490,16 +490,32 @@ export class ShinyErrorMessage extends LitElement {
 
 customElements.define("shiny-error-message", ShinyErrorMessage);
 
-type ShinyClientMessage = {
-  headline?: string;
+export type ShinyClientMessage = {
   message: string;
+  headline?: string;
+  status?: "error" | "info" | "warning";
 };
 
-function showMessageInClientConsole({
+function showShinyClientMessage({
   headline = "",
   message,
+  status = "warning",
 }: ShinyClientMessage): void {
-  console.warn(`[shiny] ${headline}${headline ? " - " : ""}${message}`);
+  const consoleMessage = `[shiny] ${headline}${
+    headline ? " - " : ""
+  }${message}`;
+
+  switch (status) {
+    case "error":
+      console.error(consoleMessage);
+      break;
+    case "warning":
+      console.warn(consoleMessage);
+      break;
+    default:
+      console.log(consoleMessage);
+      break;
+  }
 
   if (!Shiny.inDevMode()) {
     return;
@@ -542,7 +558,7 @@ export function showErrorInClientConsole(e: unknown): void {
     errorMsg = "Unknown error";
   }
 
-  showMessageInClientConsole({ headline, message: errorMsg });
+  showShinyClientMessage({ headline, message: errorMsg, status: "error" });
 }
 
 export class ShinyClientMessageEvent extends CustomEvent<ShinyClientMessage> {
@@ -555,9 +571,11 @@ window.addEventListener("shiny:client-message", (ev: Event) => {
   if (!(ev instanceof CustomEvent)) {
     throw new Error("[shiny] shiny:client-message expected a CustomEvent");
   }
-  const { headline, message } = ev.detail;
+  const { headline, message, status } = ev.detail;
   if (!message) {
-    return;
+    throw new Error(
+      "[shiny] shiny:client-message expected a `message` property in `event.detail`."
+    );
   }
-  showMessageInClientConsole({ headline, message });
+  showShinyClientMessage({ headline, message, status });
 });

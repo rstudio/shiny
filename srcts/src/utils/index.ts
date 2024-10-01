@@ -149,7 +149,8 @@ function getBoundingClientSizeBeforeZoom(el: HTMLElement): {
   height: number;
 } {
   const rect = el.getBoundingClientRect();
-  const zoom = el.currentCSSZoom || 1;
+  // Cast to any because currentCSSZoom isn't in the type def of HTMLElement
+  const zoom = (el as any).currentCSSZoom || 1;
   return {
     width: rect.width / zoom,
     height: rect.height / zoom,

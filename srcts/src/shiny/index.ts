@@ -21,6 +21,7 @@ import { debounce, Debouncer } from "../time";
 import {
   $escape,
   compareVersion,
+  getBoundingClientSizeBeforeZoom,
   getComputedLinkColor,
   getStyle,
   hasDefinedProperty,
@@ -289,7 +290,7 @@ class ShinyClass {
     $(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(
       function () {
         const id = getIdFromEl(this),
-          rect = this.getBoundingClientRect();
+          rect = getBoundingClientSizeBeforeZoom(this);
 
         if (rect.width !== 0 || rect.height !== 0) {
           initialValues[".clientdata_output_" + id + "_width"] = rect.width;
@@ -425,7 +426,7 @@ class ShinyClass {
       $(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(
         function () {
           const id = getIdFromEl(this),
-            rect = this.getBoundingClientRect();
+            rect = getBoundingClientSizeBeforeZoom(this);
 
           if (rect.width !== 0 || rect.height !== 0) {
             inputs.setInput(".clientdata_output_" + id + "_width", rect.width);

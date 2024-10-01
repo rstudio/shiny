@@ -144,6 +144,18 @@ function pixelRatio(): number {
   }
 }
 
+function getBoundingClientSizeBeforeZoom(el: HTMLElement): {
+  width: number;
+  height: number;
+} {
+  const rect = el.getBoundingClientRect();
+  const zoom = el.currentCSSZoom || 1;
+  return {
+    width: rect.width / zoom,
+    height: rect.height / zoom,
+  };
+}
+
 // Takes a string expression and returns a function that takes an argument.
 //
 // When the function is executed, it will evaluate that expression using
@@ -398,6 +410,7 @@ export {
   formatDateUTC,
   makeResizeFilter,
   pixelRatio,
+  getBoundingClientSizeBeforeZoom,
   scopeExprToFunc,
   asArray,
   mergeSort,

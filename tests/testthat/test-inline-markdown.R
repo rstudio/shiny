@@ -11,19 +11,16 @@ test_that("HTML has correct attributes", {
 })
 
 test_that("Github extensions are on by default", {
-  skip_if_not_installed("commonmark", "1.9.3")
   html <- markdown("a ~~paragraph~~ with a link: https://example.com")
   expect_equal(html, HTML("<p>a <del>paragraph</del> with a link: <a href=\"https://example.com\">https://example.com</a></p>\n"))
 })
 
 test_that("Github extensions can be disabled", {
-  skip_if_not_installed("commonmark", "1.9.3")
   html <- markdown("a ~~paragraph~~", extensions = FALSE)
   expect_equal(html, HTML("<p>a ~~paragraph~~</p>\n"))
 })
 
 test_that("Additional options are respected", {
-  skip_if_not_installed("commonmark", "1.9.3")
   html <- markdown("a ~~paragraph~~", extensions = FALSE, sourcepos = TRUE)
   expect_equal(html, HTML("<p data-sourcepos=\"1:1-1:15\">a ~~paragraph~~</p>\n"))
 })

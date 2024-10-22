@@ -25132,7 +25132,7 @@
       value: function() {
         var _initialize = _asyncToGenerator14(/* @__PURE__ */ _regeneratorRuntime14().mark(function _callee3() {
           var _this2 = this;
-          var shinyapp, inputBatchSender, inputsNoResend, inputsEvent, inputsRate, inputsDefer, target, inputs, inputBindings, outputBindings, shinyBindCtx, initializeInputs, getIdFromEl, initialValues, getComputedBgColor, getComputedFont, maybeAddThemeObserver, doSendTheme, doSendImageSize, isHidden, lastKnownVisibleOutputs, doSendOutputHiddenState, sendOutputHiddenStateDebouncer, sendOutputHiddenState, filterEventsByNamespace, bs3classes, singletonText, dependencyText;
+          var shinyapp, inputBatchSender, inputsNoResend, inputsEvent, inputsRate, inputsDefer, target, inputs, inputBindings, outputBindings, shinyBindCtx, initializeInputs, getIdFromEl, initialValues, getComputedBgColor, getComputedFont, maybeAddThemeObserver, doSendTheme, doSendImageSize, isHidden, lastKnownVisibleOutputs, doSendOutputHiddenState, sendOutputHiddenStateDebouncer, sendOutputHiddenState, filterEventsByNamespace, bs3classes, observer, singletonText, dependencyText;
           return _regeneratorRuntime14().wrap(function _callee3$(_context3) {
             while (1)
               switch (_context3.prev = _context3.next) {
@@ -25236,15 +25236,15 @@
                     var observerCallback = new Debouncer(null, function() {
                       return doSendTheme(el);
                     }, 100);
-                    var observer = new MutationObserver(function() {
+                    var observer2 = new MutationObserver(function() {
                       return observerCallback.normalCall();
                     });
                     var config = {
                       attributes: true,
                       attributeFilter: ["style", "class"]
                     };
-                    observer.observe(el, config);
-                    $el.data("shiny-theme-observer", observer);
+                    observer2.observe(el, config);
+                    $el.data("shiny-theme-observer", observer2);
                   };
                   getComputedFont = function _getComputedFont(el) {
                     var fontFamily = getStyle(el, "font-family");
@@ -25420,6 +25420,10 @@
                   initialValues[".clientdata_url_hostname"] = window.location.hostname;
                   initialValues[".clientdata_url_port"] = window.location.port;
                   initialValues[".clientdata_url_pathname"] = window.location.pathname;
+                  initialValues[".clientdata_window_width"] = window.innerWidth;
+                  initialValues[".clientdata_window_height"] = window.innerHeight;
+                  initialValues[".clientdata_scroll_width"] = document.documentElement.scrollWidth;
+                  initialValues[".clientdata_scroll_height"] = document.documentElement.scrollHeight;
                   initialValues[".clientdata_url_search"] = window.location.search;
                   (0, import_jquery39.default)(window).on("pushstate", function(e4) {
                     inputs.setInput(".clientdata_url_search", window.location.search);
@@ -25430,6 +25434,21 @@
                     inputs.setInput(".clientdata_url_search", window.location.search);
                     return;
                     e4;
+                  });
+                  (0, import_jquery39.default)(window).on("resize", function() {
+                    inputs.setInput(".clientdata_window_width", window.innerWidth);
+                    inputs.setInput(".clientdata_window_height", window.innerHeight);
+                    inputs.setInput(".clientdata_scroll_width", document.documentElement.scrollWidth);
+                    inputs.setInput(".clientdata_scroll_height", document.documentElement.scrollHeight);
+                  });
+                  observer = new MutationObserver(function() {
+                    inputs.setInput(".clientdata_scroll_width", document.documentElement.scrollWidth);
+                    inputs.setInput(".clientdata_scroll_height", document.documentElement.scrollHeight);
+                  });
+                  observer.observe(document.documentElement, {
+                    childList: true,
+                    subtree: true,
+                    attributes: true
                   });
                   initialValues[".clientdata_url_hash_initial"] = window.location.hash;
                   initialValues[".clientdata_url_hash"] = window.location.hash;
@@ -25455,7 +25474,7 @@
                   (0, import_jquery39.default)(document).one("shiny:sessioninitialized", function() {
                     _this2.initializedPromise.resolve();
                   });
-                case 69:
+                case 76:
                 case "end":
                   return _context3.stop();
               }

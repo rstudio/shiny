@@ -1,5 +1,19 @@
 # shiny (development version)
 
+## New features and improvements
+
+* Small improvements to the default pulse busy indicator to better blend with any background. It's also now slightly smaller by default. (#4122)
+
+* When spinners and the pulse busy indicators are enabled, Shiny now shows the pulse indicator when dynamic UI elements are recalculating if no other spinners are present in the app. (#4137)
+
+## Bug fixes
+
+* Fixed a bug in `conditionalPanel()` that would cause the panel to repeatedly show/hide itself when the provided condition was not boolean. (@kamilzyla, #4127)
+
+* Fixed a bug with `sliderInput()` when used as a range slider that made it impossible to change the slider value when both handles were at the maximum value. (#4131)
+
+* `dateInput` and `dateRangeInput` no longer send immediate updates to the server when the user is typing a date input. Instead, it waits until the user presses Enter or clicks out of the field to send the update, avoiding spurious and incorrect date values. Note that an update is still sent immediately when the field is cleared. (#3664)
+
 # shiny 1.9.1
 
 ## Bug fixes

@@ -8062,12 +8062,6 @@
       key: "subscribe",
       value: function subscribe(el, callback) {
         (0, import_jquery8.default)(el).on(
-          "keyup.dateInputBinding input.dateInputBinding",
-          function() {
-            callback(true);
-          }
-        );
-        (0, import_jquery8.default)(el).on(
           "changeDate.dateInputBinding change.dateInputBinding",
           function() {
             callback(false);
@@ -8510,12 +8504,6 @@
     }, {
       key: "subscribe",
       value: function subscribe(el, callback) {
-        (0, import_jquery9.default)(el).on(
-          "keyup.dateRangeInputBinding input.dateRangeInputBinding",
-          function() {
-            callback(true);
-          }
-        );
         (0, import_jquery9.default)(el).on(
           "changeDate.dateRangeInputBinding change.dateRangeInputBinding",
           function() {
@@ -23917,7 +23905,7 @@
           }
           var nsPrefix = el.attr("data-ns-prefix");
           var nsScope = this._narrowScope(scope, nsPrefix);
-          var show3 = condFunc(nsScope);
+          var show3 = Boolean(condFunc(nsScope));
           var showing = el.css("display") !== "none";
           if (show3 !== showing) {
             if (show3) {

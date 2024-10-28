@@ -14,6 +14,8 @@
 
 * `dateInput` and `dateRangeInput` no longer send immediate updates to the server when the user is typing a date input. Instead, it waits until the user presses Enter or clicks out of the field to send the update, avoiding spurious and incorrect date values. Note that an update is still sent immediately when the field is cleared. (#3664)
 
+* Fixed a bug in `onBookmark` hook that caused elements to not be excluded from URL bookmarking. (#3762)
+
 # shiny 1.9.1
 
 ## Bug fixes

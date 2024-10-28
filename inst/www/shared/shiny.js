@@ -6411,7 +6411,7 @@
   defineWellKnownSymbol2("iterator");
 
   // srcts/src/shiny/index.ts
-  var import_es_array_iterator52 = __toESM(require_es_array_iterator());
+  var import_es_array_iterator53 = __toESM(require_es_array_iterator());
 
   // node_modules/core-js/modules/es.string.iterator.js
   var charAt = require_string_multibyte().charAt;
@@ -22015,6 +22015,90 @@
     remove2("reconnect");
   }
 
+  // srcts/src/shiny/sendWindowSize.ts
+  var import_es_array_iterator49 = __toESM(require_es_array_iterator());
+  function _typeof49(obj) {
+    "@babel/helpers - typeof";
+    return _typeof49 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
+      return typeof obj2;
+    } : function(obj2) {
+      return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
+    }, _typeof49(obj);
+  }
+  function _classCallCheck41(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties41(target, props) {
+    for (var i5 = 0; i5 < props.length; i5++) {
+      var descriptor = props[i5];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor)
+        descriptor.writable = true;
+      Object.defineProperty(target, _toPropertyKey43(descriptor.key), descriptor);
+    }
+  }
+  function _createClass41(Constructor, protoProps, staticProps) {
+    if (protoProps)
+      _defineProperties41(Constructor.prototype, protoProps);
+    if (staticProps)
+      _defineProperties41(Constructor, staticProps);
+    Object.defineProperty(Constructor, "prototype", { writable: false });
+    return Constructor;
+  }
+  function _defineProperty20(obj, key, value) {
+    key = _toPropertyKey43(key);
+    if (key in obj) {
+      Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
+    } else {
+      obj[key] = value;
+    }
+    return obj;
+  }
+  function _toPropertyKey43(arg) {
+    var key = _toPrimitive43(arg, "string");
+    return _typeof49(key) === "symbol" ? key : String(key);
+  }
+  function _toPrimitive43(input, hint) {
+    if (_typeof49(input) !== "object" || input === null)
+      return input;
+    var prim = input[Symbol.toPrimitive];
+    if (prim !== void 0) {
+      var res = prim.call(input, hint || "default");
+      if (_typeof49(res) !== "object")
+        return res;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return (hint === "string" ? String : Number)(input);
+  }
+  var SendWindowSize = /* @__PURE__ */ function() {
+    function SendWindowSize2() {
+      _classCallCheck41(this, SendWindowSize2);
+      _defineProperty20(this, "regular", void 0);
+      _defineProperty20(this, "transitioned", void 0);
+    }
+    _createClass41(SendWindowSize2, [{
+      key: "setWindowSizeSend",
+      value: function setWindowSizeSend(inputBatchSender, doSendWindowSize) {
+        var sendWindowSizeDebouncer = new Debouncer(null, doSendWindowSize, 0);
+        this.regular = function() {
+          sendWindowSizeDebouncer.normalCall();
+        };
+        inputBatchSender.lastChanceCallback.push(function() {
+          if (sendWindowSizeDebouncer.isPending()) {
+            sendWindowSizeDebouncer.immediateCall();
+          }
+        });
+        this.transitioned = debounce(200, this.regular);
+        return sendWindowSizeDebouncer;
+      }
+    }]);
+    return SendWindowSize2;
+  }();
+  var sendWindowSizeFns = new SendWindowSize();
+
   // srcts/src/shiny/shinyapp.ts
   var import_es_regexp_exec16 = __toESM(require_es_regexp_exec());
   var import_es_json_stringify4 = __toESM(require_es_json_stringify());
@@ -22073,18 +22157,18 @@
   require_es_data_view_constructor();
 
   // srcts/src/shiny/shinyapp.ts
-  var import_es_array_iterator51 = __toESM(require_es_array_iterator());
+  var import_es_array_iterator52 = __toESM(require_es_array_iterator());
   var import_jquery38 = __toESM(require_jquery());
 
   // srcts/src/utils/asyncQueue.ts
-  var import_es_array_iterator49 = __toESM(require_es_array_iterator());
-  function _typeof49(obj) {
+  var import_es_array_iterator50 = __toESM(require_es_array_iterator());
+  function _typeof50(obj) {
     "@babel/helpers - typeof";
-    return _typeof49 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
+    return _typeof50 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
       return typeof obj2;
     } : function(obj2) {
       return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-    }, _typeof49(obj);
+    }, _typeof50(obj);
   }
   function _regeneratorRuntime12() {
     "use strict";
@@ -22142,7 +22226,7 @@
         var record = tryCatch(generator[method], generator, arg);
         if ("throw" !== record.type) {
           var result = record.arg, value = result.value;
-          return value && "object" == _typeof49(value) && hasOwn5.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function(value2) {
+          return value && "object" == _typeof50(value) && hasOwn5.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function(value2) {
             invoke("next", value2, resolve, reject);
           }, function(err) {
             invoke("throw", err, resolve, reject);
@@ -22383,31 +22467,31 @@
       });
     };
   }
-  function _classCallCheck41(instance, Constructor) {
+  function _classCallCheck42(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties41(target, props) {
+  function _defineProperties42(target, props) {
     for (var i5 = 0; i5 < props.length; i5++) {
       var descriptor = props[i5];
       descriptor.enumerable = descriptor.enumerable || false;
       descriptor.configurable = true;
       if ("value" in descriptor)
         descriptor.writable = true;
-      Object.defineProperty(target, _toPropertyKey43(descriptor.key), descriptor);
+      Object.defineProperty(target, _toPropertyKey44(descriptor.key), descriptor);
     }
   }
-  function _createClass41(Constructor, protoProps, staticProps) {
+  function _createClass42(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties41(Constructor.prototype, protoProps);
+      _defineProperties42(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties41(Constructor, staticProps);
+      _defineProperties42(Constructor, staticProps);
     Object.defineProperty(Constructor, "prototype", { writable: false });
     return Constructor;
   }
-  function _defineProperty20(obj, key, value) {
-    key = _toPropertyKey43(key);
+  function _defineProperty21(obj, key, value) {
+    key = _toPropertyKey44(key);
     if (key in obj) {
       Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
     } else {
@@ -22415,17 +22499,17 @@
     }
     return obj;
   }
-  function _toPropertyKey43(arg) {
-    var key = _toPrimitive43(arg, "string");
-    return _typeof49(key) === "symbol" ? key : String(key);
+  function _toPropertyKey44(arg) {
+    var key = _toPrimitive44(arg, "string");
+    return _typeof50(key) === "symbol" ? key : String(key);
   }
-  function _toPrimitive43(input, hint) {
-    if (_typeof49(input) !== "object" || input === null)
+  function _toPrimitive44(input, hint) {
+    if (_typeof50(input) !== "object" || input === null)
       return input;
     var prim = input[Symbol.toPrimitive];
     if (prim !== void 0) {
       var res = prim.call(input, hint || "default");
-      if (_typeof49(res) !== "object")
+      if (_typeof50(res) !== "object")
         return res;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
@@ -22433,11 +22517,11 @@
   }
   var AsyncQueue = /* @__PURE__ */ function() {
     function AsyncQueue2() {
-      _classCallCheck41(this, AsyncQueue2);
-      _defineProperty20(this, "$promises", []);
-      _defineProperty20(this, "$resolvers", []);
+      _classCallCheck42(this, AsyncQueue2);
+      _defineProperty21(this, "$promises", []);
+      _defineProperty21(this, "$resolvers", []);
     }
-    _createClass41(AsyncQueue2, [{
+    _createClass42(AsyncQueue2, [{
       key: "_add",
       value: function _add() {
         var _this = this;
@@ -22498,7 +22582,7 @@
   }();
 
   // srcts/src/shiny/outputProgress.ts
-  var import_es_array_iterator50 = __toESM(require_es_array_iterator());
+  var import_es_array_iterator51 = __toESM(require_es_array_iterator());
 
   // node_modules/core-js/modules/es.array.includes.js
   var $83 = require_export();
@@ -22538,13 +22622,13 @@
 
   // srcts/src/shiny/outputProgress.ts
   var import_es_regexp_exec15 = __toESM(require_es_regexp_exec());
-  function _typeof50(obj) {
+  function _typeof51(obj) {
     "@babel/helpers - typeof";
-    return _typeof50 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
+    return _typeof51 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
       return typeof obj2;
     } : function(obj2) {
       return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-    }, _typeof50(obj);
+    }, _typeof51(obj);
   }
   function _slicedToArray5(arr, i5) {
     return _arrayWithHoles5(arr) || _iterableToArrayLimit5(arr, i5) || _unsupportedIterableToArray6(arr, i5) || _nonIterableRest5();
@@ -22641,26 +22725,26 @@
       arr2[i5] = arr[i5];
     return arr2;
   }
-  function _classCallCheck42(instance, Constructor) {
+  function _classCallCheck43(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties42(target, props) {
+  function _defineProperties43(target, props) {
     for (var i5 = 0; i5 < props.length; i5++) {
       var descriptor = props[i5];
       descriptor.enumerable = descriptor.enumerable || false;
       descriptor.configurable = true;
       if ("value" in descriptor)
         descriptor.writable = true;
-      Object.defineProperty(target, _toPropertyKey44(descriptor.key), descriptor);
+      Object.defineProperty(target, _toPropertyKey45(descriptor.key), descriptor);
     }
   }
-  function _createClass42(Constructor, protoProps, staticProps) {
+  function _createClass43(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties42(Constructor.prototype, protoProps);
+      _defineProperties43(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties42(Constructor, staticProps);
+      _defineProperties43(Constructor, staticProps);
     Object.defineProperty(Constructor, "prototype", { writable: false });
     return Constructor;
   }
@@ -22673,8 +22757,8 @@
       throw new TypeError("Cannot initialize the same private elements twice on an object");
     }
   }
-  function _defineProperty21(obj, key, value) {
-    key = _toPropertyKey44(key);
+  function _defineProperty22(obj, key, value) {
+    key = _toPropertyKey45(key);
     if (key in obj) {
       Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
     } else {
@@ -22682,17 +22766,17 @@
     }
     return obj;
   }
-  function _toPropertyKey44(arg) {
-    var key = _toPrimitive44(arg, "string");
-    return _typeof50(key) === "symbol" ? key : String(key);
+  function _toPropertyKey45(arg) {
+    var key = _toPrimitive45(arg, "string");
+    return _typeof51(key) === "symbol" ? key : String(key);
   }
-  function _toPrimitive44(input, hint) {
-    if (_typeof50(input) !== "object" || input === null)
+  function _toPrimitive45(input, hint) {
+    if (_typeof51(input) !== "object" || input === null)
       return input;
     var prim = input[Symbol.toPrimitive];
     if (prim !== void 0) {
       var res = prim.call(input, hint || "default");
-      if (_typeof50(res) !== "object")
+      if (_typeof51(res) !== "object")
         return res;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
@@ -22723,17 +22807,17 @@
   var _setState = /* @__PURE__ */ new WeakSet();
   var OutputProgressReporter = /* @__PURE__ */ function() {
     function OutputProgressReporter2() {
-      _classCallCheck42(this, OutputProgressReporter2);
+      _classCallCheck43(this, OutputProgressReporter2);
       _classPrivateMethodInitSpec(this, _setState);
       _classPrivateMethodInitSpec(this, _getState);
       _classPrivateMethodInitSpec(this, _updateStateFromValueOrError);
       _classPrivateMethodInitSpec(this, _updateStateFromProgress);
       _classPrivateMethodInitSpec(this, _updateStateFromFlush);
       _classPrivateMethodInitSpec(this, _updateStateFromRecalculating);
-      _defineProperty21(this, "outputStates", /* @__PURE__ */ new Map());
-      _defineProperty21(this, "changedOutputs", /* @__PURE__ */ new Map());
+      _defineProperty22(this, "outputStates", /* @__PURE__ */ new Map());
+      _defineProperty22(this, "changedOutputs", /* @__PURE__ */ new Map());
     }
-    _createClass42(OutputProgressReporter2, [{
+    _createClass43(OutputProgressReporter2, [{
       key: "takeChanges",
       value: function takeChanges() {
         var result = this.changedOutputs;
@@ -22878,13 +22962,13 @@
   }
 
   // srcts/src/shiny/shinyapp.ts
-  function _typeof51(obj) {
+  function _typeof52(obj) {
     "@babel/helpers - typeof";
-    return _typeof51 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
+    return _typeof52 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
       return typeof obj2;
     } : function(obj2) {
       return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-    }, _typeof51(obj);
+    }, _typeof52(obj);
   }
   function _slicedToArray6(arr, i5) {
     return _arrayWithHoles6(arr) || _iterableToArrayLimit6(arr, i5) || _unsupportedIterableToArray7(arr, i5) || _nonIterableRest6();
@@ -23037,7 +23121,7 @@
         var record = tryCatch(generator[method], generator, arg);
         if ("throw" !== record.type) {
           var result = record.arg, value = result.value;
-          return value && "object" == _typeof51(value) && hasOwn5.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function(value2) {
+          return value && "object" == _typeof52(value) && hasOwn5.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function(value2) {
             invoke("next", value2, resolve, reject);
           }, function(err) {
             invoke("throw", err, resolve, reject);
@@ -23278,31 +23362,31 @@
       });
     };
   }
-  function _classCallCheck43(instance, Constructor) {
+  function _classCallCheck44(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties43(target, props) {
+  function _defineProperties44(target, props) {
     for (var i5 = 0; i5 < props.length; i5++) {
       var descriptor = props[i5];
       descriptor.enumerable = descriptor.enumerable || false;
       descriptor.configurable = true;
       if ("value" in descriptor)
         descriptor.writable = true;
-      Object.defineProperty(target, _toPropertyKey45(descriptor.key), descriptor);
+      Object.defineProperty(target, _toPropertyKey46(descriptor.key), descriptor);
     }
   }
-  function _createClass43(Constructor, protoProps, staticProps) {
+  function _createClass44(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties43(Constructor.prototype, protoProps);
+      _defineProperties44(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties43(Constructor, staticProps);
+      _defineProperties44(Constructor, staticProps);
     Object.defineProperty(Constructor, "prototype", { writable: false });
     return Constructor;
   }
-  function _defineProperty22(obj, key, value) {
-    key = _toPropertyKey45(key);
+  function _defineProperty23(obj, key, value) {
+    key = _toPropertyKey46(key);
     if (key in obj) {
       Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
     } else {
@@ -23310,17 +23394,17 @@
     }
     return obj;
   }
-  function _toPropertyKey45(arg) {
-    var key = _toPrimitive45(arg, "string");
-    return _typeof51(key) === "symbol" ? key : String(key);
+  function _toPropertyKey46(arg) {
+    var key = _toPrimitive46(arg, "string");
+    return _typeof52(key) === "symbol" ? key : String(key);
   }
-  function _toPrimitive45(input, hint) {
-    if (_typeof51(input) !== "object" || input === null)
+  function _toPrimitive46(input, hint) {
+    if (_typeof52(input) !== "object" || input === null)
       return input;
     var prim = input[Symbol.toPrimitive];
     if (prim !== void 0) {
       var res = prim.call(input, hint || "default");
-      if (_typeof51(res) !== "object")
+      if (_typeof52(res) !== "object")
         return res;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
@@ -23362,23 +23446,23 @@
   }
   var ShinyApp = /* @__PURE__ */ function() {
     function ShinyApp2() {
-      _classCallCheck43(this, ShinyApp2);
-      _defineProperty22(this, "$socket", null);
-      _defineProperty22(this, "taskQueue", new AsyncQueue());
-      _defineProperty22(this, "config", null);
-      _defineProperty22(this, "$inputValues", {});
-      _defineProperty22(this, "$initialInput", null);
-      _defineProperty22(this, "$bindings", {});
-      _defineProperty22(this, "$outputProgress", new OutputProgressReporter());
-      _defineProperty22(this, "$values", {});
-      _defineProperty22(this, "$errors", {});
-      _defineProperty22(this, "$conditionals", {});
-      _defineProperty22(this, "$pendingMessages", []);
-      _defineProperty22(this, "$activeRequests", {});
-      _defineProperty22(this, "$nextRequestId", 0);
-      _defineProperty22(this, "$allowReconnect", false);
-      _defineProperty22(this, "scheduledReconnect", void 0);
-      _defineProperty22(this, "reconnectDelay", function() {
+      _classCallCheck44(this, ShinyApp2);
+      _defineProperty23(this, "$socket", null);
+      _defineProperty23(this, "taskQueue", new AsyncQueue());
+      _defineProperty23(this, "config", null);
+      _defineProperty23(this, "$inputValues", {});
+      _defineProperty23(this, "$initialInput", null);
+      _defineProperty23(this, "$bindings", {});
+      _defineProperty23(this, "$outputProgress", new OutputProgressReporter());
+      _defineProperty23(this, "$values", {});
+      _defineProperty23(this, "$errors", {});
+      _defineProperty23(this, "$conditionals", {});
+      _defineProperty23(this, "$pendingMessages", []);
+      _defineProperty23(this, "$activeRequests", {});
+      _defineProperty23(this, "$nextRequestId", 0);
+      _defineProperty23(this, "$allowReconnect", false);
+      _defineProperty23(this, "scheduledReconnect", void 0);
+      _defineProperty23(this, "reconnectDelay", function() {
         var attempts = 0;
         var delays = [1500, 1500, 2500, 2500, 5500, 5500, 10500];
         return {
@@ -23395,7 +23479,7 @@
           }
         };
       }());
-      _defineProperty22(this, "progressHandlers", {
+      _defineProperty23(this, "progressHandlers", {
         binding: function binding(message) {
           var key = message.id;
           var binding2 = this.$bindings[key];
@@ -23506,7 +23590,7 @@
       });
       this._init();
     }
-    _createClass43(ShinyApp2, [{
+    _createClass44(ShinyApp2, [{
       key: "connect",
       value: function connect(initialInput) {
         if (this.$socket)
@@ -23861,7 +23945,7 @@
         return Object.keys(scopeComponent).filter(function(k2) {
           return k2.indexOf(nsPrefix) === 0;
         }).map(function(k2) {
-          return _defineProperty22({}, k2.substring(nsPrefix.length), scopeComponent[k2]);
+          return _defineProperty23({}, k2.substring(nsPrefix.length), scopeComponent[k2]);
         }).reduce(function(obj, pair) {
           return import_jquery38.default.extend(obj, pair);
         }, {});
@@ -24678,13 +24762,13 @@
   }();
 
   // srcts/src/shiny/index.ts
-  function _typeof52(obj) {
+  function _typeof53(obj) {
     "@babel/helpers - typeof";
-    return _typeof52 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
+    return _typeof53 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
       return typeof obj2;
     } : function(obj2) {
       return obj2 && "function" == typeof Symbol && obj2.constructor === Symbol && obj2 !== Symbol.prototype ? "symbol" : typeof obj2;
-    }, _typeof52(obj);
+    }, _typeof53(obj);
   }
   function _regeneratorRuntime14() {
     "use strict";
@@ -24742,7 +24826,7 @@
         var record = tryCatch(generator[method], generator, arg);
         if ("throw" !== record.type) {
           var result = record.arg, value = result.value;
-          return value && "object" == _typeof52(value) && hasOwn5.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function(value2) {
+          return value && "object" == _typeof53(value) && hasOwn5.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function(value2) {
             invoke("next", value2, resolve, reject);
           }, function(err) {
             invoke("throw", err, resolve, reject);
@@ -24983,31 +25067,31 @@
       });
     };
   }
-  function _classCallCheck44(instance, Constructor) {
+  function _classCallCheck45(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  function _defineProperties44(target, props) {
+  function _defineProperties45(target, props) {
     for (var i5 = 0; i5 < props.length; i5++) {
       var descriptor = props[i5];
       descriptor.enumerable = descriptor.enumerable || false;
       descriptor.configurable = true;
       if ("value" in descriptor)
         descriptor.writable = true;
-      Object.defineProperty(target, _toPropertyKey46(descriptor.key), descriptor);
+      Object.defineProperty(target, _toPropertyKey47(descriptor.key), descriptor);
     }
   }
-  function _createClass44(Constructor, protoProps, staticProps) {
+  function _createClass45(Constructor, protoProps, staticProps) {
     if (protoProps)
-      _defineProperties44(Constructor.prototype, protoProps);
+      _defineProperties45(Constructor.prototype, protoProps);
     if (staticProps)
-      _defineProperties44(Constructor, staticProps);
+      _defineProperties45(Constructor, staticProps);
     Object.defineProperty(Constructor, "prototype", { writable: false });
     return Constructor;
   }
-  function _defineProperty23(obj, key, value) {
-    key = _toPropertyKey46(key);
+  function _defineProperty24(obj, key, value) {
+    key = _toPropertyKey47(key);
     if (key in obj) {
       Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });
     } else {
@@ -25015,17 +25099,17 @@
     }
     return obj;
   }
-  function _toPropertyKey46(arg) {
-    var key = _toPrimitive46(arg, "string");
-    return _typeof52(key) === "symbol" ? key : String(key);
+  function _toPropertyKey47(arg) {
+    var key = _toPrimitive47(arg, "string");
+    return _typeof53(key) === "symbol" ? key : String(key);
   }
-  function _toPrimitive46(input, hint) {
-    if (_typeof52(input) !== "object" || input === null)
+  function _toPrimitive47(input, hint) {
+    if (_typeof53(input) !== "object" || input === null)
       return input;
     var prim = input[Symbol.toPrimitive];
     if (prim !== void 0) {
       var res = prim.call(input, hint || "default");
-      if (_typeof52(res) !== "object")
+      if (_typeof53(res) !== "object")
         return res;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
@@ -25034,38 +25118,38 @@
   var ShinyClass = /* @__PURE__ */ function() {
     function ShinyClass2() {
       var _this = this;
-      _classCallCheck44(this, ShinyClass2);
-      _defineProperty23(this, "version", void 0);
-      _defineProperty23(this, "$escape", void 0);
-      _defineProperty23(this, "compareVersion", void 0);
-      _defineProperty23(this, "inputBindings", void 0);
-      _defineProperty23(this, "InputBinding", void 0);
-      _defineProperty23(this, "outputBindings", void 0);
-      _defineProperty23(this, "OutputBinding", void 0);
-      _defineProperty23(this, "resetBrush", void 0);
-      _defineProperty23(this, "notifications", void 0);
-      _defineProperty23(this, "modal", void 0);
-      _defineProperty23(this, "showReconnectDialog", void 0);
-      _defineProperty23(this, "hideReconnectDialog", void 0);
-      _defineProperty23(this, "renderDependenciesAsync", void 0);
-      _defineProperty23(this, "renderDependencies", void 0);
-      _defineProperty23(this, "renderContentAsync", void 0);
-      _defineProperty23(this, "renderContent", void 0);
-      _defineProperty23(this, "renderHtmlAsync", void 0);
-      _defineProperty23(this, "renderHtml", void 0);
-      _defineProperty23(this, "addCustomMessageHandler", void 0);
-      _defineProperty23(this, "createSocket", void 0);
-      _defineProperty23(this, "user", void 0);
-      _defineProperty23(this, "progressHandlers", void 0);
-      _defineProperty23(this, "shinyapp", void 0);
-      _defineProperty23(this, "setInputValue", void 0);
-      _defineProperty23(this, "onInputChange", void 0);
-      _defineProperty23(this, "forgetLastInputValue", void 0);
-      _defineProperty23(this, "bindAll", void 0);
-      _defineProperty23(this, "unbindAll", void 0);
-      _defineProperty23(this, "initializeInputs", void 0);
-      _defineProperty23(this, "initializedPromise", void 0);
-      _defineProperty23(this, "oncustommessage", void 0);
+      _classCallCheck45(this, ShinyClass2);
+      _defineProperty24(this, "version", void 0);
+      _defineProperty24(this, "$escape", void 0);
+      _defineProperty24(this, "compareVersion", void 0);
+      _defineProperty24(this, "inputBindings", void 0);
+      _defineProperty24(this, "InputBinding", void 0);
+      _defineProperty24(this, "outputBindings", void 0);
+      _defineProperty24(this, "OutputBinding", void 0);
+      _defineProperty24(this, "resetBrush", void 0);
+      _defineProperty24(this, "notifications", void 0);
+      _defineProperty24(this, "modal", void 0);
+      _defineProperty24(this, "showReconnectDialog", void 0);
+      _defineProperty24(this, "hideReconnectDialog", void 0);
+      _defineProperty24(this, "renderDependenciesAsync", void 0);
+      _defineProperty24(this, "renderDependencies", void 0);
+      _defineProperty24(this, "renderContentAsync", void 0);
+      _defineProperty24(this, "renderContent", void 0);
+      _defineProperty24(this, "renderHtmlAsync", void 0);
+      _defineProperty24(this, "renderHtml", void 0);
+      _defineProperty24(this, "addCustomMessageHandler", void 0);
+      _defineProperty24(this, "createSocket", void 0);
+      _defineProperty24(this, "user", void 0);
+      _defineProperty24(this, "progressHandlers", void 0);
+      _defineProperty24(this, "shinyapp", void 0);
+      _defineProperty24(this, "setInputValue", void 0);
+      _defineProperty24(this, "onInputChange", void 0);
+      _defineProperty24(this, "forgetLastInputValue", void 0);
+      _defineProperty24(this, "bindAll", void 0);
+      _defineProperty24(this, "unbindAll", void 0);
+      _defineProperty24(this, "initializeInputs", void 0);
+      _defineProperty24(this, "initializedPromise", void 0);
+      _defineProperty24(this, "oncustommessage", void 0);
       this.version = "1.9.1.9000";
       var _initInputBindings = initInputBindings(), inputBindings = _initInputBindings.inputBindings, fileInputBinding2 = _initInputBindings.fileInputBinding;
       var _initOutputBindings = initOutputBindings(), outputBindings = _initOutputBindings.outputBindings;
@@ -25120,7 +25204,7 @@
         })), 1);
       });
     }
-    _createClass44(ShinyClass2, [{
+    _createClass45(ShinyClass2, [{
       key: "inDevMode",
       value: function inDevMode() {
         if ("__SHINY_DEV_MODE__" in window)
@@ -25132,11 +25216,17 @@
       value: function() {
         var _initialize = _asyncToGenerator14(/* @__PURE__ */ _regeneratorRuntime14().mark(function _callee3() {
           var _this2 = this;
-          var shinyapp, inputBatchSender, inputsNoResend, inputsEvent, inputsRate, inputsDefer, target, inputs, inputBindings, outputBindings, shinyBindCtx, initializeInputs, getIdFromEl, initialValues, getComputedBgColor, getComputedFont, maybeAddThemeObserver, doSendTheme, doSendImageSize, isHidden, lastKnownVisibleOutputs, doSendOutputHiddenState, sendOutputHiddenStateDebouncer, sendOutputHiddenState, filterEventsByNamespace, bs3classes, observer, singletonText, dependencyText;
+          var shinyapp, inputBatchSender, inputsNoResend, inputsEvent, inputsRate, inputsDefer, target, inputs, inputBindings, outputBindings, shinyBindCtx, initializeInputs, getIdFromEl, initialValues, getComputedBgColor, getComputedFont, maybeAddThemeObserver, doSendTheme, doSendImageSize, isHidden, lastKnownVisibleOutputs, doSendOutputHiddenState, sendOutputHiddenStateDebouncer, sendOutputHiddenState, filterEventsByNamespace, bs3classes, doSendWindowSize, singletonText, dependencyText;
           return _regeneratorRuntime14().wrap(function _callee3$(_context3) {
             while (1)
               switch (_context3.prev = _context3.next) {
                 case 0:
+                  doSendWindowSize = function _doSendWindowSize() {
+                    inputs.setInput(".clientdata_window_width", window.innerWidth);
+                    inputs.setInput(".clientdata_window_height", window.innerHeight);
+                    inputs.setInput(".clientdata_scroll_width", document.documentElement.scrollWidth);
+                    inputs.setInput(".clientdata_scroll_height", document.documentElement.scrollHeight);
+                  };
                   filterEventsByNamespace = function _filterEventsByNamesp(namespace, handler) {
                     for (var _len = arguments.length, args = new Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
                       args[_key - 2] = arguments[_key];
@@ -25236,15 +25326,15 @@
                     var observerCallback = new Debouncer(null, function() {
                       return doSendTheme(el);
                     }, 100);
-                    var observer2 = new MutationObserver(function() {
+                    var observer = new MutationObserver(function() {
                       return observerCallback.normalCall();
                     });
                     var config = {
                       attributes: true,
                       attributeFilter: ["style", "class"]
                     };
-                    observer2.observe(el, config);
-                    $el.data("shiny-theme-observer", observer2);
+                    observer.observe(el, config);
+                    $el.data("shiny-theme-observer", observer);
                   };
                   getComputedFont = function _getComputedFont(el) {
                     var fontFamily = getStyle(el, "font-family");
@@ -25364,9 +25454,9 @@
                   this.initializeInputs = initializeInputs;
                   initializeInputs(document.documentElement);
                   _context3.t0 = mapValues;
-                  _context3.next = 34;
+                  _context3.next = 35;
                   return _bindAll(shinyBindCtx(), document.documentElement);
-                case 34:
+                case 35:
                   _context3.t1 = _context3.sent;
                   _context3.t2 = function(x2) {
                     return x2.value;
@@ -25412,6 +25502,9 @@
                   });
                   (0, import_jquery39.default)(document.body).on("shown.sendImageSize", "*", sendImageSizeFns.regular);
                   (0, import_jquery39.default)(document.body).on("shown.sendOutputHiddenState hidden.sendOutputHiddenState", "*", sendOutputHiddenState);
+                  sendWindowSizeFns.setWindowSizeSend(inputBatchSender, doSendWindowSize);
+                  sendWindowSizeFns.regular();
+                  window.addEventListener("resize", sendWindowSizeFns.transitioned);
                   initialValues[".clientdata_pixelratio"] = pixelRatio();
                   (0, import_jquery39.default)(window).resize(function() {
                     inputs.setInput(".clientdata_pixelratio", pixelRatio());
@@ -25420,10 +25513,9 @@
                   initialValues[".clientdata_url_hostname"] = window.location.hostname;
                   initialValues[".clientdata_url_port"] = window.location.port;
                   initialValues[".clientdata_url_pathname"] = window.location.pathname;
-                  initialValues[".clientdata_window_width"] = window.innerWidth;
-                  initialValues[".clientdata_window_height"] = window.innerHeight;
-                  initialValues[".clientdata_scroll_width"] = document.documentElement.scrollWidth;
-                  initialValues[".clientdata_scroll_height"] = document.documentElement.scrollHeight;
+                  initialValues[".clientdata_user_agent"] = navigator.userAgent;
+                  initialValues[".clientdata_is_mobile"] = /Mobi|Android/i.test(navigator.userAgent);
+                  initialValues[".clientdata_is_desktop"] = !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
                   initialValues[".clientdata_url_search"] = window.location.search;
                   (0, import_jquery39.default)(window).on("pushstate", function(e4) {
                     inputs.setInput(".clientdata_url_search", window.location.search);
@@ -25434,21 +25526,6 @@
                     inputs.setInput(".clientdata_url_search", window.location.search);
                     return;
                     e4;
-                  });
-                  (0, import_jquery39.default)(window).on("resize", function() {
-                    inputs.setInput(".clientdata_window_width", window.innerWidth);
-                    inputs.setInput(".clientdata_window_height", window.innerHeight);
-                    inputs.setInput(".clientdata_scroll_width", document.documentElement.scrollWidth);
-                    inputs.setInput(".clientdata_scroll_height", document.documentElement.scrollHeight);
-                  });
-                  observer = new MutationObserver(function() {
-                    inputs.setInput(".clientdata_scroll_width", document.documentElement.scrollWidth);
-                    inputs.setInput(".clientdata_scroll_height", document.documentElement.scrollHeight);
-                  });
-                  observer.observe(document.documentElement, {
-                    childList: true,
-                    subtree: true,
-                    attributes: true
                   });
                   initialValues[".clientdata_url_hash_initial"] = window.location.hash;
                   initialValues[".clientdata_url_hash"] = window.location.hash;

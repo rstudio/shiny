@@ -51,6 +51,7 @@ import {
   renderHtmlAsync,
 } from "./render";
 import { sendImageSizeFns } from "./sendImageSize";
+import { sendWindowSizeFns } from "./sendWindowSize";
 import { addCustomMessageHandler, ShinyApp, type Handler } from "./shinyapp";
 import { registerNames as singletonsRegisterNames } from "./singletons";
 
@@ -606,6 +607,24 @@ class ShinyClass {
       sendOutputHiddenState
     );
 
+    function doSendWindowSize() {
+      inputs.setInput(".clientdata_window_width", window.innerWidth);
+      inputs.setInput(".clientdata_window_height", window.innerHeight);
+      inputs.setInput(
+        ".clientdata_scroll_width",
+        document.documentElement.scrollWidth
+      );
+      inputs.setInput(
+        ".clientdata_scroll_height",
+        document.documentElement.scrollHeight
+      );
+    }
+
+    sendWindowSizeFns.setWindowSizeSend(inputBatchSender, doSendWindowSize);
+    sendWindowSizeFns.regular(); // Initial send
+
+    window.addEventListener("resize", sendWindowSizeFns.transitioned);
+
     // Send initial pixel ratio, and update it if it changes
     initialValues[".clientdata_pixelratio"] = pixelRatio();
     $(window).resize(function () {
@@ -618,13 +637,20 @@ class ShinyClass {
     initialValues[".clientdata_url_port"] = window.location.port;
     initialValues[".clientdata_url_pathname"] = window.location.pathname;
 
-    // Send initial viewport size and scroll size
-    initialValues[".clientdata_window_width"] = window.innerWidth;
-    initialValues[".clientdata_window_height"] = window.innerHeight;
-    initialValues[".clientdata_scroll_width"] =
-      document.documentElement.scrollWidth;
-    initialValues[".clientdata_scroll_height"] =
-      document.documentElement.scrollHeight;
+    // Send useragent
+    initialValues[".clientdata_user_agent"] = navigator.userAgent;
+
+    // Send whether the client is mobile
+    initialValues[".clientdata_is_mobile"] = /Mobi|Android/i.test(
+      navigator.userAgent
+    );
+
+    // Send whether the client is desktop
+    initialValues[".clientdata_is_desktop"] =
+      !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      );
+
     // Send initial URL search (query string) and update it if it changes
     initialValues[".clientdata_url_search"] = window.location.search;
 
@@ -638,38 +664,6 @@ class ShinyClass {
       inputs.setInput(".clientdata_url_search", window.location.search);
       return;
       e;
-    });
-
-    // Update viewport size and scroll size if the window is resized
-    $(window).on("resize", function () {
-      inputs.setInput(".clientdata_window_width", window.innerWidth);
-      inputs.setInput(".clientdata_window_height", window.innerHeight);
-      inputs.setInput(
-        ".clientdata_scroll_width",
-        document.documentElement.scrollWidth
-      );
-      inputs.setInput(
-        ".clientdata_scroll_height",
-        document.documentElement.scrollHeight
-      );
-    });
-
-    // set up a MutationObserver to continuously update the scroll dimensions whenever the DOM changes
-    const observer = new MutationObserver(function () {
-      inputs.setInput(
-        ".clientdata_scroll_width",
-        document.documentElement.scrollWidth
-      );
-      inputs.setInput(
-        ".clientdata_scroll_height",
-        document.documentElement.scrollHeight
-      );
-    });
-
-    observer.observe(document.documentElement, {
-      childList: true,
-      subtree: true,
-      attributes: true,
     });
 
     // This is only the initial value of the hash. The hash can change, but

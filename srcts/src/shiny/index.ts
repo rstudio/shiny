@@ -51,7 +51,6 @@ import {
   renderHtmlAsync,
 } from "./render";
 import { sendImageSizeFns } from "./sendImageSize";
-import { sendWindowSizeFns } from "./sendWindowSize";
 import { addCustomMessageHandler, ShinyApp, type Handler } from "./shinyapp";
 import { registerNames as singletonsRegisterNames } from "./singletons";
 
@@ -620,10 +619,10 @@ class ShinyClass {
       );
     }
 
-    sendWindowSizeFns.setWindowSizeSend(inputBatchSender, doSendWindowSize);
-    sendWindowSizeFns.regular(); // Initial send
+    sendImageSizeFns.setImageSend(inputBatchSender, doSendWindowSize);
+    sendImageSizeFns.regular(); // Initial send
 
-    window.addEventListener("resize", sendWindowSizeFns.transitioned);
+    window.addEventListener("resize", sendImageSizeFns.transitioned);
 
     // Send initial pixel ratio, and update it if it changes
     initialValues[".clientdata_pixelratio"] = pixelRatio();

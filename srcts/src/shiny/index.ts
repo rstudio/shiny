@@ -606,24 +606,6 @@ class ShinyClass {
       sendOutputHiddenState
     );
 
-    function doSendWindowSize() {
-      inputs.setInput(".clientdata_window_width", window.innerWidth);
-      inputs.setInput(".clientdata_window_height", window.innerHeight);
-      inputs.setInput(
-        ".clientdata_scroll_width",
-        document.documentElement.scrollWidth
-      );
-      inputs.setInput(
-        ".clientdata_scroll_height",
-        document.documentElement.scrollHeight
-      );
-    }
-
-    sendImageSizeFns.setImageSend(inputBatchSender, doSendWindowSize);
-    sendImageSizeFns.regular(); // Initial send
-
-    window.addEventListener("resize", sendImageSizeFns.transitioned);
-
     // Send initial pixel ratio, and update it if it changes
     initialValues[".clientdata_pixelratio"] = pixelRatio();
     $(window).resize(function () {
@@ -635,20 +617,6 @@ class ShinyClass {
     initialValues[".clientdata_url_hostname"] = window.location.hostname;
     initialValues[".clientdata_url_port"] = window.location.port;
     initialValues[".clientdata_url_pathname"] = window.location.pathname;
-
-    // Send useragent
-    initialValues[".clientdata_user_agent"] = navigator.userAgent;
-
-    // Send whether the client is mobile
-    initialValues[".clientdata_is_mobile"] = /Mobi|Android/i.test(
-      navigator.userAgent
-    );
-
-    // Send whether the client is desktop
-    initialValues[".clientdata_is_desktop"] =
-      !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent
-      );
 
     // Send initial URL search (query string) and update it if it changes
     initialValues[".clientdata_url_search"] = window.location.search;
@@ -677,6 +645,40 @@ class ShinyClass {
       return;
       e;
     });
+
+    initialValues[".clientdata_window_width"] = window.innerWidth;
+    initialValues[".clientdata_window_height"] = window.innerHeight;
+    initialValues[".clientdata_scroll_width"] =
+      document.documentElement.scrollWidth;
+    initialValues[".clientdata_scroll_height"] =
+      document.documentElement.scrollHeight;
+
+    // Follow the same pattern as sendOutputHiddenState() to debounce
+    // window size updates.
+    function doSendWindowSize() {
+      inputs.setInput(".clientdata_window_width", window.innerWidth);
+      inputs.setInput(".clientdata_window_height", window.innerHeight);
+      inputs.setInput(
+        ".clientdata_scroll_width",
+        document.documentElement.scrollWidth
+      );
+      inputs.setInput(
+        ".clientdata_scroll_height",
+        document.documentElement.scrollHeight
+      );
+    }
+    const sendWindowSizeDebouncer = new Debouncer(null, doSendWindowSize, 0);
+
+    function sendWindowSizeState() {
+      sendWindowSizeDebouncer.normalCall();
+    }
+
+    inputBatchSender.lastChanceCallback.push(function () {
+      if (sendWindowSizeDebouncer.isPending())
+        sendWindowSizeDebouncer.immediateCall();
+    });
+
+    $(window).resize(sendWindowSizeState);
 
     // The server needs to know what singletons were rendered as part of
     // the page loading

@@ -25132,14 +25132,11 @@
       value: function() {
         var _initialize = _asyncToGenerator14(/* @__PURE__ */ _regeneratorRuntime14().mark(function _callee3() {
           var _this2 = this;
-          var shinyapp, inputBatchSender, inputsNoResend, inputsEvent, inputsRate, inputsDefer, target, inputs, inputBindings, outputBindings, shinyBindCtx, initializeInputs, getIdFromEl, initialValues, getComputedBgColor, getComputedFont, maybeAddThemeObserver, doSendTheme, doSendImageSize, isHidden, lastKnownVisibleOutputs, doSendOutputHiddenState, sendOutputHiddenStateDebouncer, sendOutputHiddenState, filterEventsByNamespace, bs3classes, doSendWindowSize, sendWindowSizeDebouncer, sendWindowSizeState, singletonText, dependencyText;
+          var shinyapp, inputBatchSender, inputsNoResend, inputsEvent, inputsRate, inputsDefer, target, inputs, inputBindings, outputBindings, shinyBindCtx, initializeInputs, getIdFromEl, initialValues, getComputedBgColor, getComputedFont, maybeAddThemeObserver, doSendTheme, doSendImageSize, isHidden, lastKnownVisibleOutputs, doSendOutputHiddenState, sendOutputHiddenStateDebouncer, sendOutputHiddenState, filterEventsByNamespace, bs3classes, doSendWindowSize, singletonText, dependencyText;
           return _regeneratorRuntime14().wrap(function _callee3$(_context3) {
             while (1)
               switch (_context3.prev = _context3.next) {
                 case 0:
-                  sendWindowSizeState = function _sendWindowSizeState() {
-                    sendWindowSizeDebouncer.normalCall();
-                  };
                   doSendWindowSize = function _doSendWindowSize() {
                     inputs.setInput(".clientdata_window_width", window.innerWidth);
                     inputs.setInput(".clientdata_window_height", window.innerHeight);
@@ -25373,9 +25370,9 @@
                   this.initializeInputs = initializeInputs;
                   initializeInputs(document.documentElement);
                   _context3.t0 = mapValues;
-                  _context3.next = 36;
+                  _context3.next = 35;
                   return _bindAll(shinyBindCtx(), document.documentElement);
-                case 36:
+                case 35:
                   _context3.t1 = _context3.sent;
                   _context3.t2 = function(x2) {
                     return x2.value;
@@ -25451,12 +25448,7 @@
                   initialValues[".clientdata_window_height"] = window.innerHeight;
                   initialValues[".clientdata_scroll_width"] = document.documentElement.scrollWidth;
                   initialValues[".clientdata_scroll_height"] = document.documentElement.scrollHeight;
-                  sendWindowSizeDebouncer = new Debouncer(null, doSendWindowSize, 0);
-                  inputBatchSender.lastChanceCallback.push(function() {
-                    if (sendWindowSizeDebouncer.isPending())
-                      sendWindowSizeDebouncer.immediateCall();
-                  });
-                  (0, import_jquery39.default)(window).resize(sendWindowSizeState);
+                  (0, import_jquery39.default)(window).resize(debounce(500, doSendWindowSize));
                   singletonText = initialValues[".clientdata_singletons"] = (0, import_jquery39.default)('script[type="application/shiny-singletons"]').text();
                   registerNames(singletonText.split(/,/));
                   dependencyText = (0, import_jquery39.default)('script[type="application/html-dependencies"]').text();
@@ -25474,7 +25466,7 @@
                   (0, import_jquery39.default)(document).one("shiny:sessioninitialized", function() {
                     _this2.initializedPromise.resolve();
                   });
-                case 78:
+                case 75:
                 case "end":
                   return _context3.stop();
               }

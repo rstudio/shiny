@@ -6,6 +6,8 @@
 
 * When spinners and the pulse busy indicators are enabled, Shiny now shows the pulse indicator when dynamic UI elements are recalculating if no other spinners are present in the app. (#4137)
 
+* Capture and send client window size and scroll dimensions to the server which can be accessed via `session$clientData`. (#4147)
+
 ## Bug fixes
 
 * Fixed a bug in `conditionalPanel()` that would cause the panel to repeatedly show/hide itself when the provided condition was not boolean. (@kamilzyla, #4127)

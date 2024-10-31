@@ -667,19 +667,8 @@ class ShinyClass {
         document.documentElement.scrollHeight
       );
     }
-    const sendWindowSizeDebouncer = new Debouncer(null, doSendWindowSize, 0);
 
-    function sendWindowSizeState() {
-      sendWindowSizeDebouncer.normalCall();
-    }
-
-    inputBatchSender.lastChanceCallback.push(function () {
-      if (sendWindowSizeDebouncer.isPending())
-        sendWindowSizeDebouncer.immediateCall();
-    });
-
-    $(window).resize(sendWindowSizeState);
-
+    $(window).resize(debounce(500, doSendWindowSize));
     // The server needs to know what singletons were rendered as part of
     // the page loading
     const singletonText = (initialValues[".clientdata_singletons"] = $(

@@ -653,8 +653,6 @@ class ShinyClass {
     initialValues[".clientdata_scroll_height"] =
       document.documentElement.scrollHeight;
 
-    // Follow the same pattern as sendOutputHiddenState() to debounce
-    // window size updates.
     function doSendWindowSize() {
       inputs.setInput(".clientdata_window_width", window.innerWidth);
       inputs.setInput(".clientdata_window_height", window.innerHeight);

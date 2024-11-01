@@ -216,7 +216,7 @@ the session:</p>
 <p>If you want to use a cache that is shared across multiple R processes, you
 can use a <code><a href="https://cachem.r-lib.org/reference/cache_disk.html" class="external-link">cachem::cache_disk()</a></code>. You can create a application-level shared
 cache by putting this at the top of your app.R, server.R, or global.R:</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">shinyOptions</span>(<span class="at">cache =</span> cachem<span class="sc">::</span><span class="fu">cache_disk</span>(<span class="fu">file.path</span>(<span class="fu">dirname</span>(<span class="fu">tempdir</span>()), <span class="st">"myapp-cache"</span>))</span></code></pre><p></p></div>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">shinyOptions</span>(<span class="at">cache =</span> cachem<span class="sc">::</span><span class="fu">cache_disk</span>(<span class="fu">file.path</span>(<span class="fu">dirname</span>(<span class="fu">tempdir</span>()), <span class="st">"myapp-cache"</span>)))</span></code></pre><p></p></div>
 <p>This will create a subdirectory in your system temp directory named
 <code>myapp-cache</code> (replace <code>myapp-cache</code> with a unique name of
 your choosing). On most platforms, this directory will be removed when

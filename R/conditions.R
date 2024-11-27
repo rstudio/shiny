@@ -148,7 +148,7 @@ createStackTracePromiseDomain <- function() {
         # Fulfill time
         if (deepStacksEnabled()) {
           origDeepStack <- .globals$deepStack
-          .globals$deepStack <- c(currentDeepStack, list(currentStack))
+          .globals$deepStack <- tail(c(currentDeepStack, list(currentStack)), deepStackLimit())
           on.exit(.globals$deepStack <- origDeepStack, add = TRUE)
         }
 
@@ -171,7 +171,7 @@ createStackTracePromiseDomain <- function() {
         # Fulfill time
         if (deepStacksEnabled()) {
           origDeepStack <- .globals$deepStack
-          .globals$deepStack <- c(currentDeepStack, list(currentStack))
+          .globals$deepStack <- tail(c(currentDeepStack, list(currentStack)), deepStackLimit())
           on.exit(.globals$deepStack <- origDeepStack, add = TRUE)
         }
 
@@ -191,7 +191,22 @@ createStackTracePromiseDomain <- function() {
 }
 
 deepStacksEnabled <- function() {
-  getOption("shiny.deepstacktrace", TRUE)
+  deepStackLimit() > 0L
+}
+
+deepStackLimit <- function() {
+  opt <- getOption("shiny.deepstacktrace", 8L)
+  if (!is.numeric(opt) && !is.logical(opt)) {
+    opt <- FALSE
+  }
+
+  if (isFALSE(opt)) {
+    0L
+  } else if (isTRUE(opt)) {
+    Inf
+  } else {
+    as.integer(opt)
+  }
 }
 
 doCaptureStack <- function(e) {

@@ -130,6 +130,63 @@ captureStackTraces <- function(expr) {
 #' @include globals.R
 .globals$deepStack <- NULL
 
+# (Warning, this is pretty crazy)
+#
+# appendWithLimit lets us append an element to a list, but if the list starts to
+# exceed a limit, it will start eliding elements from the middle of the list.
+# At the point of elision, it will insert a placeholder integer that indicates
+# how many elements were elided.
+#
+# This is useful for storing deep stack traces, where we don't want to overwhelm
+# the user with a huge number of stack traces, but both the head and tail may
+# contain important information.
+#
+# Example:
+# lst <- list("a", "b", "c", "d")
+#
+# appendWithLimit(lst, "e", limit = 4)
+# # Result: list("a", 1L, "c", "d", "e")
+#
+# appendWithLimit(lst, "e", limit = 4, keep_head = 2L)
+# # Result: list("a", "b", 1L, "d", "e")
+appendWithLimit <- function(lst, x, limit, keep_head = 1L) {
+  # Sanity check that the parameters make sense
+  stopifnot(keep_head > 0)
+  stopifnot(limit > keep_head)
+  stopifnot(!is.null(x))
+  stopifnot(is.null(lst) || is.list(lst))
+
+  elide_count_index <- which(vapply(lst, is.integer, logical(1)))
+  elide_count <- sum(as.integer(lst[elide_count_index]))
+
+  # Sanity check -- shouldn't have more than one elide placeholder
+  stopifnot(length(elide_count_index) <= 1L)
+  if (length(elide_count_index) == 1L) {
+    # For a given list, keep_head must remain constant between calls to
+    # appendWithLimit; that is, the elide count, if one exists, must be exactly
+    # where we expect it to be
+    stopifnot(elide_count_index == keep_head + 1L)
+  }
+
+  element_count <- length(lst) - length(elide_count_index)
+  if (element_count < limit) {
+    # No need to elide anything, just append and return
+    c(lst, list(x))
+  } else {
+    # The list may or may not already contain an elide count. If it does, we
+    # need to increment it. If it doesn't, we need to add one.
+
+    # Keep the first `keep_head` elements...
+    prefix <- lst[1:keep_head]
+    # ...and just enough of the last elements to leave room for the new one
+    suffix <- tail(lst, limit - keep_head - 1L)
+    # Calculate the new elide count
+    new_elide_count <- (element_count - limit + 1L) + elide_count
+    # Construct the final list
+    c(prefix, list(as.integer(new_elide_count)), suffix, list(x))
+  }
+}
+
 createStackTracePromiseDomain <- function() {
   # These are actually stateless, we wouldn't have to create a new one each time
   # if we didn't want to. They're pretty cheap though.
@@ -148,7 +205,7 @@ createStackTracePromiseDomain <- function() {
         # Fulfill time
         if (deepStacksEnabled()) {
           origDeepStack <- .globals$deepStack
-          .globals$deepStack <- tail(c(currentDeepStack, list(currentStack)), deepStackLimit())
+          .globals$deepStack <- appendWithLimit(currentDeepStack, currentStack, deepStackLimit())
           on.exit(.globals$deepStack <- origDeepStack, add = TRUE)
         }
 
@@ -171,7 +228,7 @@ createStackTracePromiseDomain <- function() {
         # Fulfill time
         if (deepStacksEnabled()) {
           origDeepStack <- .globals$deepStack
-          .globals$deepStack <- tail(c(currentDeepStack, list(currentStack)), deepStackLimit())
+          .globals$deepStack <- appendWithLimit(currentDeepStack, currentStack, deepStackLimit())
           on.exit(.globals$deepStack <- origDeepStack, add = TRUE)
         }
 
@@ -296,86 +353,89 @@ printStackTrace <- function(cond,
   full = get_devmode_option("shiny.fullstacktrace", FALSE),
   offset = getOption("shiny.stacktraceoffset", TRUE)) {
 
-  should_drop <- !full
-  should_strip <- !full
-  should_prune <- !full
-
-  stackTraceCalls <- c(
+  stackTraces <- c(
     attr(cond, "deep.stack.trace", exact = TRUE),
     list(attr(cond, "stack.trace", exact = TRUE))
   )
 
-  stackTraceParents <- lapply(stackTraceCalls, attr, which = "parents", exact = TRUE)
-  stackTraceCallNames <- lapply(stackTraceCalls, getCallNames)
-  stackTraceCalls <- lapply(stackTraceCalls, offsetSrcrefs, offset = offset)
-
-  # Use dropTrivialFrames logic to remove trailing bits (.handleSimpleError, h)
-  if (should_drop) {
-    # toKeep is a list of logical vectors, of which elements (stack frames) to keep
-    toKeep <- lapply(stackTraceCallNames, dropTrivialFrames)
-    # We apply the list of logical vector indices to each data structure
-    stackTraceCalls <- mapply(stackTraceCalls, FUN = `[`, toKeep, SIMPLIFY = FALSE)
-    stackTraceCallNames <- mapply(stackTraceCallNames, FUN = `[`, toKeep, SIMPLIFY = FALSE)
-    stackTraceParents <- mapply(stackTraceParents, FUN = `[`, toKeep, SIMPLIFY = FALSE)
-  }
-
-  delayedAssign("all_true", {
-    # List of logical vectors that are all TRUE, the same shape as
-    # stackTraceCallNames. Delay the evaluation so we don't create it unless
-    # we need it, but if we need it twice then we don't pay to create it twice.
-    lapply(stackTraceCallNames, function(st) {
-      rep_len(TRUE, length(st))
-    })
-  })
-
-  # stripStackTraces and lapply(stackTraceParents, pruneStackTrace) return lists
-  # of logical vectors. Use mapply(FUN = `&`) to boolean-and each pair of the
-  # logical vectors.
-  toShow <- mapply(
-    if (should_strip) stripStackTraces(stackTraceCallNames) else all_true,
-    if (should_prune) lapply(stackTraceParents, pruneStackTrace) else all_true,
-    FUN = `&`,
+  dfs <- mapply(
+    seq_along(stackTraces),
+    rev(stackTraces),
+    FUN = function(i, trace) {
+      if (is.integer(trace)) {
+        noun <- if (trace > 1L) "traces" else "trace"
+        message("[ reached getOption(\"shiny.deepstacktrace\") -- omitted ", trace, " more stack ", noun, " ]")
+      } else {
+        if (i != 1) {
+          message("From earlier call:")
+        }
+        printOneStackTrace(
+          stackTrace = trace,
+          full = full,
+          offset = offset
+        )
+      }
+    },
     SIMPLIFY = FALSE
   )
 
-  dfs <- mapply(seq_along(stackTraceCalls), rev(stackTraceCalls), rev(stackTraceCallNames), rev(toShow), FUN = function(i, calls, nms, index) {
-    st <- data.frame(
-      num = rev(which(index)),
-      call = rev(nms[index]),
-      loc = rev(getLocs(calls[index])),
-      category = rev(getCallCategories(calls[index])),
-      stringsAsFactors = FALSE
-    )
-
-    if (i != 1) {
-      message("From earlier call:")
-    }
-
-    if (nrow(st) == 0) {
-      message("  [No stack trace available]")
-    } else {
-      width <- floor(log10(max(st$num))) + 1
-      formatted <- paste0(
-        "  ",
-        formatC(st$num, width = width),
-        ": ",
-        mapply(paste0(st$call, st$loc), st$category, FUN = function(name, category) {
-          if (category == "pkg")
-            crayon::silver(name)
-          else if (category == "user")
-            crayon::blue$bold(name)
-          else
-            crayon::white(name)
-        }),
-        "\n"
-      )
-      cat(file = stderr(), formatted, sep = "")
-    }
-
-    st
-  }, SIMPLIFY = FALSE)
-
   invisible()
+}
+
+printOneStackTrace <- function(stackTrace, full, offset) {
+  calls <- offsetSrcrefs(stackTrace, offset = offset)
+  callNames <- getCallNames(stackTrace)
+  parents <- attr(stackTrace, "parents", exact = TRUE)
+
+  should_drop <- !full
+  should_strip <- !full
+  should_prune <- !full
+
+  if (should_drop) {
+    toKeep <- dropTrivialFrames(callNames)
+    calls <- calls[toKeep]
+    callNames <- callNames[toKeep]
+    parents <- parents[toKeep]
+  }
+
+  toShow <- if (should_strip || should_prune) {
+    strip <- if (should_strip) stripStackTraces(list(callNames))[[1]] else rep(TRUE, length(callNames))
+    prune <- if (should_prune) pruneStackTrace(parents) else rep(TRUE, length(callNames))
+    strip & prune
+  } else {
+    rep(TRUE, length(callNames))
+  }
+
+  st <- data.frame(
+    num = rev(which(toShow)),
+    call = rev(callNames[toShow]),
+    loc = rev(getLocs(calls[toShow])),
+    category = rev(getCallCategories(calls[toShow])),
+    stringsAsFactors = FALSE
+  )
+
+  if (nrow(st) == 0) {
+    message("  [No stack trace available]")
+  } else {
+    width <- floor(log10(max(st$num))) + 1
+    formatted <- paste0(
+      "  ",
+      formatC(st$num, width = width),
+      ": ",
+      mapply(paste0(st$call, st$loc), st$category, FUN = function(name, category) {
+        if (category == "pkg")
+          crayon::silver(name)
+        else if (category == "user")
+          crayon::blue$bold(name)
+        else
+          crayon::white(name)
+      }),
+      "\n"
+    )
+    cat(file = stderr(), formatted, sep = "")
+  }
+
+  invisible(st)
 }
 
 stripStackTraces <- function(stackTraces, values = FALSE) {

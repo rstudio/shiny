@@ -646,6 +646,27 @@ class ShinyClass {
       e;
     });
 
+    initialValues[".clientdata_window_width"] = window.innerWidth;
+    initialValues[".clientdata_window_height"] = window.innerHeight;
+    initialValues[".clientdata_scroll_width"] =
+      document.documentElement.scrollWidth;
+    initialValues[".clientdata_scroll_height"] =
+      document.documentElement.scrollHeight;
+
+    function doSendWindowSize() {
+      inputs.setInput(".clientdata_window_width", window.innerWidth);
+      inputs.setInput(".clientdata_window_height", window.innerHeight);
+      inputs.setInput(
+        ".clientdata_scroll_width",
+        document.documentElement.scrollWidth
+      );
+      inputs.setInput(
+        ".clientdata_scroll_height",
+        document.documentElement.scrollHeight
+      );
+    }
+
+    $(window).resize(debounce(500, doSendWindowSize));
     // The server needs to know what singletons were rendered as part of
     // the page loading
     const singletonText = (initialValues[".clientdata_singletons"] = $(

@@ -98,14 +98,15 @@ extractStackTrace <- function(calls,
     num = index,
     call = getCallNames(calls),
     loc = getLocs(calls),
-    category = getCallCategories(calls),
+    # category = getCallCategories(calls),
     stringsAsFactors = FALSE
   )
 }
 
 cleanLocs <- function(locs) {
   locs[!grepl("test-stacks\\.R", locs, perl = TRUE)] <- ""
-  sub("^.*#", "", locs)
+  # sub("^.*#", "", locs)
+  locs
 }
 
 dumpTests <- function(df) {

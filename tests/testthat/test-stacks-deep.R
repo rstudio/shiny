@@ -155,10 +155,16 @@ test_that("deep stack culling", {
   expect_s3_class(dserr, "error", exact = FALSE)
   stacktrace <- formatError(dserr)
   expect_snapshot(stacktrace)
+  # Ensure that A__, I__, and J__ are present in the traces
   expect_length(which(grepl("A__", stacktrace)), 1L)
   expect_length(which(grepl("I__", stacktrace)), 1L)
   expect_length(which(grepl("J__", stacktrace)), 1L)
+
+  # Ensure the message appears
   expect_length(which(grepl("omitted 7 more stack traces", stacktrace)), 1L)
+
+  # Ensure that B__ through H__ are not present in the traces; these are the
+  # calls that were omitted
   expect_false(any(grepl("B__", stacktrace)))
   expect_false(any(grepl("C__", stacktrace)))
   expect_false(any(grepl("D__", stacktrace)))

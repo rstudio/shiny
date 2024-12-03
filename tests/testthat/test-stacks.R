@@ -98,14 +98,15 @@ extractStackTrace <- function(calls,
     num = index,
     call = getCallNames(calls),
     loc = getLocs(calls),
-    category = getCallCategories(calls),
+    # category = getCallCategories(calls),
     stringsAsFactors = FALSE
   )
 }
 
 cleanLocs <- function(locs) {
   locs[!grepl("test-stacks\\.R", locs, perl = TRUE)] <- ""
-  sub("^.*#", "", locs)
+  # sub("^.*#", "", locs)
+  locs
 }
 
 dumpTests <- function(df) {
@@ -129,46 +130,12 @@ test_that("integration tests", {
   df <- causeError(full = FALSE)
   # dumpTests(df)
 
-  expect_equal(df$num, c(56L, 55L, 54L, 38L, 37L, 36L, 35L, 34L, 33L))
-  expect_equal(df$call, c("A", "B", "<reactive:C>", "C", "renderTable",
-    "func", "force", "withVisible", "withCallingHandlers"))
-  expect_equal(nzchar(df$loc), c(TRUE, TRUE, TRUE, FALSE, TRUE,
-    FALSE, FALSE, FALSE, FALSE))
+  expect_snapshot(df)
 
   df <- causeError(full = TRUE)
-  # dumpTests(df)
 
-  expect_equal(df$num, c(59L, 58L, 57L, 56L, 55L, 54L, 53L,
-    52L, 51L, 50L, 49L, 48L, 47L, 46L, 45L, 44L, 43L, 42L, 41L,
-    40L, 39L, 38L, 37L, 36L, 35L, 34L, 33L, 32L, 31L, 30L, 29L,
-    28L, 27L, 26L, 25L, 24L, 23L, 22L, 21L, 20L, 19L, 18L, 17L,
-    16L, 15L, 14L, 13L, 12L, 11L, 10L, 9L, 8L, 7L, 6L, 5L, 4L,
-    3L, 2L, 1L))
-  expect_equal(df$call, c("h", ".handleSimpleError", "stop",
-    "A", "B", "<reactive:C>", "..stacktraceon..", ".func", "withVisible",
-    "withCallingHandlers", "contextFunc", "env$runWith", "force",
-    "domain$wrapSync", "promises::with_promise_domain",
-    "withReactiveDomain", "domain$wrapSync", "promises::with_promise_domain",
-    "ctx$run", "self$.updateValue", "..stacktraceoff..", "C",
-    "renderTable", "func", "force", "withVisible", "withCallingHandlers",
-    "domain$wrapSync", "promises::with_promise_domain",
-    "captureStackTraces", "doTryCatch", "tryCatchOne", "tryCatchList",
-    "tryCatch", "do", "hybrid_chain", "renderFunc", "renderTable({     C() }, server = FALSE)",
-    "..stacktraceon..", "contextFunc", "env$runWith", "force",
-    "domain$wrapSync", "promises::with_promise_domain",
-    "withReactiveDomain", "domain$wrapSync", "promises::with_promise_domain",
-    "ctx$run", "..stacktraceoff..", "isolate", "withCallingHandlers",
-    "domain$wrapSync", "promises::with_promise_domain",
-    "captureStackTraces", "doTryCatch", "tryCatchOne", "tryCatchList",
-    "tryCatch", "try"))
-  expect_equal(nzchar(df$loc), c(FALSE, FALSE, FALSE, TRUE,
-    TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
-    FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
-    TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
-    FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE,
-    FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
-    FALSE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE,
-    FALSE))
+  expect_snapshot(df)
+  # dumpTests(df)
 })
 
 test_that("shiny.error", {

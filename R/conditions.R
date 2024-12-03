@@ -258,7 +258,7 @@ deepStackLimit <- function() {
   }
   stopifnot(length(opt) == 1L)
 
-  if (isFALSE(opt)) {
+  if (rlang::is_false(opt)) {
     0L
   } else if (isTRUE(opt)) {
     Inf

@@ -256,6 +256,7 @@ deepStackLimit <- function() {
   if (!is.numeric(opt) && !is.logical(opt)) {
     opt <- FALSE
   }
+  stopifnot(length(opt) == 1L)
 
   if (isFALSE(opt)) {
     0L

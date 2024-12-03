@@ -204,3 +204,29 @@ test_that("appendWithLimit edge cases", {
     list("a", "b", 1L, "d", "e", "f")
   )
 })
+
+test_that("unlimited deep stacks can be opted into", {
+  recursive_promise <- function(n) {
+    if (n <= 0) {
+      stop("boom")
+    }
+
+    p <- promises::promise_resolve(TRUE)
+    promises::then(p, ~{
+      recursive_promise(n - 1)
+    })
+  }
+
+  op <- options(shiny.deepstacktrace = TRUE)
+  on.exit(options(op), add = TRUE, after = FALSE)
+
+  uerr <- NULL
+  captureStackTraces(recursive_promise(100)) %...!% (function(err) {
+    uerr <<- err
+  })
+
+  wait_for_it()
+
+  expect_s3_class(uerr, "error", exact = FALSE)
+  expect_identical(length(attr(uerr, "deep.stack.trace", exact = TRUE)), 100L)
+})

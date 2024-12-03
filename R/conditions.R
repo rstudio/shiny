@@ -399,13 +399,14 @@ printOneStackTrace <- function(stackTrace, full, offset) {
     parents <- parents[toKeep]
   }
 
-  toShow <- if (should_strip || should_prune) {
-    strip <- if (should_strip) stripStackTraces(list(callNames))[[1]] else rep(TRUE, length(callNames))
-    prune <- if (should_prune) pruneStackTrace(parents) else rep(TRUE, length(callNames))
-    strip & prune
-  } else {
-    rep(TRUE, length(callNames))
+  toShow <- rep(TRUE, length(callNames))
+  if (should_prune) {
+    toShow <- toShow & pruneStackTrace(parents)
   }
+  if (should_strip) {
+    toShow <- toShow & stripStackTraces(list(callNames))[[1]]
+  }
+
 
   st <- data.frame(
     num = rev(which(toShow)),

@@ -33,7 +33,7 @@ formatError <- function(err, full = FALSE, offset = TRUE, cleanPaths = TRUE) {
   # are just too inconsistent across different ways of invoking testthat--not
   # relative vs. absolute paths, but whether the file/line number is included at
   # all!
-  str <- sub("\\[(?!test-stacks-deep.R)[^[]+#XXX\\]", "", str, perl = TRUE)
+  str <- sub(" \\[(?!test-stacks-deep.R)[^[]+#XXX\\]", "", str, perl = TRUE)
   # The frame numbers vary too much between different ways of invoking testthat
   # ("Run Tests" editor toolbar button and "Test" Build tab button in RStudio,
   # devtools::test(), etc.) so we blank them out.

@@ -163,8 +163,9 @@ test_that("deep stack culling", {
   wait_for_it()
 
   expect_s3_class(dserr, "error", exact = FALSE)
-  stacktrace <- formatError(dserr)
-  expect_snapshot(cat(sep="\n", stacktrace))
+  expect_snapshot(cat(sep="\n", stacktrace <- formatError(dserr)))
+  # Ensure we dropTrivialTestFrames only when snapshotting
+  expect_false(length(stacktrace) == length(formatError(dserr)))
   # Ensure that A__, I__, and J__ are present in the traces
   expect_length(which(grepl("A__", stacktrace)), 1L)
   expect_length(which(grepl("I__", stacktrace)), 1L)

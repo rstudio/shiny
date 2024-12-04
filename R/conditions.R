@@ -429,7 +429,13 @@ printOneStackTrace <- function(stackTrace, stripResult, full, offset) {
     toShow <- toShow & stripResult
   }
 
-  # If we're running in testthat, hide the parts of
+  # If we're running in testthat, hide the parts of the stack trace that can
+  # vary based on how testthat was launched. It's critical that this is not
+  # happen at the same time as dropTrivialFrames, which happens before
+  # pruneStackTrace; because dropTrivialTestFrames removes calls from the top
+  # (or bottom? whichever is the oldest?) of the stack, it breaks `parents`
+  # which is based on absolute indices of calls. dropTrivialFrames gets away
+  # with this because it only removes calls from the opposide side of the stack.
   toShow <- toShow & dropTrivialTestFrames(callNames)
 
   st <- data.frame(
@@ -560,7 +566,7 @@ dropTrivialFrames <- function(callnames) {
 }
 
 dropTrivialTestFrames <- function(callnames) {
-  if (!identical(Sys.getenv("TESTTHAT"), "true")) {
+  if (!identical(Sys.getenv("TESTTHAT_IS_SNAPSHOT"), "true")) {
     return(rep_len(TRUE, length(callnames)))
   }
 

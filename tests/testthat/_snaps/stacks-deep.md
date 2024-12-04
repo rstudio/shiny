@@ -366,7 +366,7 @@
 # deep stack culling
 
     Code
-      cat(sep = "\n", stacktrace)
+      cat(sep = "\n", stacktrace <- formatError(dserr))
     Output
       Error in onFulfilled: boom
           : stop

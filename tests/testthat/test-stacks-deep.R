@@ -260,4 +260,6 @@ test_that("stack trace stripping works", {
 
   expect_s3_class(strperr, "error", exact = FALSE)
   expect_snapshot(cat(sep="\n", formatError(strperr)))
+  # Just make sure there's at least one full=TRUE case being exercised
+  expect_snapshot(cat(sep="\n", formatError(strperr, full = TRUE)))
 })

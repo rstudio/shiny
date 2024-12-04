@@ -395,6 +395,8 @@ printStackTrace <- function(cond,
           offset = offset
         )
       }
+      # No mapply return value--we're just printing
+      NULL
     },
     SIMPLIFY = FALSE
   )

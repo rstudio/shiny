@@ -7,14 +7,14 @@
           : stop
           : onFinally [test-stacks-deep.R#XXX]
           : onFulfilled
-          : callback [conditions.R#XXX]
+          : callback 
           : <Anonymous>
           : onFulfilled
           : handleFulfill
           : <Anonymous>
           : execCallbacks
           : later::run_now
-          : wait_for_it [mock-session.R#XXX]
+          : wait_for_it 
           : eval [test-stacks-deep.R#XXX]
           : eval
           : test_code
@@ -36,14 +36,14 @@
           : promise$finally
           : finally
           : onRejected [test-stacks-deep.R#XXX]
-          : callback [conditions.R#XXX]
+          : callback 
           : <Anonymous>
           : onRejected
           : handleReject
           : <Anonymous>
           : execCallbacks
           : later::run_now
-          : wait_for_it [mock-session.R#XXX]
+          : wait_for_it 
           : eval [test-stacks-deep.R#XXX]
           : eval
           : test_code
@@ -66,14 +66,14 @@
           : catch
           : %...!%
           : onFulfilled [test-stacks-deep.R#XXX]
-          : callback [conditions.R#XXX]
+          : callback 
           : <Anonymous>
           : onFulfilled
           : handleFulfill
           : <Anonymous>
           : execCallbacks
           : later::run_now
-          : wait_for_it [mock-session.R#XXX]
+          : wait_for_it 
           : eval [test-stacks-deep.R#XXX]
           : eval
           : test_code
@@ -119,7 +119,7 @@
           : onFinally [test-stacks-deep.R#XXX]
           : onFulfilled
           : withCallingHandlers
-          : callback [conditions.R#XXX]
+          : callback 
           : force
           : reenter_promise_domain
           : <Anonymous>
@@ -137,7 +137,7 @@
           : <Anonymous>
           : execCallbacks
           : later::run_now
-          : wait_for_it [mock-session.R#XXX]
+          : wait_for_it 
           : eval [test-stacks-deep.R#XXX]
           : eval
           : withCallingHandlers
@@ -187,7 +187,7 @@
           : finally
           : onRejected [test-stacks-deep.R#XXX]
           : withCallingHandlers
-          : callback [conditions.R#XXX]
+          : callback 
           : force
           : reenter_promise_domain
           : <Anonymous>
@@ -205,7 +205,7 @@
           : <Anonymous>
           : execCallbacks
           : later::run_now
-          : wait_for_it [mock-session.R#XXX]
+          : wait_for_it 
           : eval [test-stacks-deep.R#XXX]
           : eval
           : withCallingHandlers
@@ -256,7 +256,7 @@
           : %...!%
           : onFulfilled [test-stacks-deep.R#XXX]
           : withCallingHandlers
-          : callback [conditions.R#XXX]
+          : callback 
           : force
           : reenter_promise_domain
           : <Anonymous>
@@ -274,7 +274,7 @@
           : <Anonymous>
           : execCallbacks
           : later::run_now
-          : wait_for_it [mock-session.R#XXX]
+          : wait_for_it 
           : eval [test-stacks-deep.R#XXX]
           : eval
           : withCallingHandlers
@@ -323,9 +323,9 @@
           : then
           : %...>%
           : withCallingHandlers [test-stacks-deep.R#XXX]
-          : domain$wrapSync [conditions.R#XXX]
+          : domain$wrapSync 
           : promises::with_promise_domain
-          : captureStackTraces [conditions.R#XXX]
+          : captureStackTraces 
           : as.promise
           : catch
           : %...!%
@@ -371,14 +371,14 @@
       Error in onFulfilled: boom
           : stop
           : onFulfilled [test-stacks-deep.R#XXX]
-          : callback [conditions.R#XXX]
+          : callback 
           : <Anonymous>
           : onFulfilled
           : handleFulfill
           : <Anonymous>
           : execCallbacks
           : later::run_now
-          : wait_for_it [mock-session.R#XXX]
+          : wait_for_it 
           : eval [test-stacks-deep.R#XXX]
           : eval
           : test_code
@@ -401,14 +401,14 @@
           : %...>%
           : J__ [test-stacks-deep.R#XXX]
           : onFulfilled
-          : callback [conditions.R#XXX]
+          : callback 
           : <Anonymous>
           : onFulfilled
           : handleFulfill
           : <Anonymous>
           : execCallbacks
           : later::run_now
-          : wait_for_it [mock-session.R#XXX]
+          : wait_for_it 
           : eval [test-stacks-deep.R#XXX]
           : eval
           : test_code
@@ -431,14 +431,14 @@
           : %...>%
           : I__ [test-stacks-deep.R#XXX]
           : onFulfilled
-          : callback [conditions.R#XXX]
+          : callback 
           : <Anonymous>
           : onFulfilled
           : handleFulfill
           : <Anonymous>
           : execCallbacks
           : later::run_now
-          : wait_for_it [mock-session.R#XXX]
+          : wait_for_it 
           : eval [test-stacks-deep.R#XXX]
           : eval
           : test_code
@@ -482,14 +482,14 @@
       Error in onFulfilled: boom
           : stop
           : onFulfilled [test-stacks-deep.R#XXX]
-          : callback [conditions.R#XXX]
+          : callback 
           : <Anonymous>
           : onFulfilled
           : handleFulfill
           : <Anonymous>
           : execCallbacks
           : later::run_now
-          : wait_for_it [mock-session.R#XXX]
+          : wait_for_it 
       From earlier call:
           : domain$wrapOnFulfilled
           : promiseDomain$onThen
@@ -503,14 +503,14 @@
         [No stack trace available]
       From earlier call:
           : onFulfilled [test-stacks-deep.R#XXX]
-          : callback [conditions.R#XXX]
+          : callback 
           : <Anonymous>
           : onFulfilled
           : handleFulfill
           : <Anonymous>
           : execCallbacks
           : later::run_now
-          : wait_for_it [mock-session.R#XXX]
+          : wait_for_it 
       From earlier call:
           : domain$wrapOnFulfilled
           : promiseDomain$onThen
@@ -521,14 +521,14 @@
           : %...>%
           : B__ [test-stacks-deep.R#XXX]
           : onFulfilled
-          : callback [conditions.R#XXX]
+          : callback 
           : <Anonymous>
           : onFulfilled
           : handleFulfill
           : <Anonymous>
           : execCallbacks
           : later::run_now
-          : wait_for_it [mock-session.R#XXX]
+          : wait_for_it 
       From earlier call:
           : domain$wrapOnFulfilled
           : promiseDomain$onThen

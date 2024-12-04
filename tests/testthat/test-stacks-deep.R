@@ -187,12 +187,12 @@ test_that("deep stack culling", {
 test_that("appendWithLimit edge cases", {
   # Can't have a limit of 0
   expect_error(appendWithLimit(list("a", "b", "c", "d", "e"), "f", 0), "limit")
-  # Can't have a keep_head of 0
-  expect_error(appendWithLimit(list("a", "b", "c", "d", "e"), "f", 5, 0), "keep_head")
-  # Can't have keep_head >= limit
-  expect_error(appendWithLimit(list("a", "b", "c", "d", "e"), "f", 5, 5), "keep_head")
-  # Can't change keep_head
-  expect_error(appendWithLimit(list("a", 1L, "c", "d", "e"), "f", 5, 2), "keep_head")
+  # Can't have a retain_first_n of 0
+  expect_error(appendWithLimit(list("a", "b", "c", "d", "e"), "f", 5, 0), "retain_first_n")
+  # Can't have retain_first_n >= limit
+  expect_error(appendWithLimit(list("a", "b", "c", "d", "e"), "f", 5, 5), "retain_first_n")
+  # Can't change retain_first_n
+  expect_error(appendWithLimit(list("a", 1L, "c", "d", "e"), "f", 5, 2), "retain_first_n")
 
   # Fits
   expect_identical(

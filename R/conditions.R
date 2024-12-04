@@ -147,12 +147,12 @@ captureStackTraces <- function(expr) {
 # appendWithLimit(lst, "e", limit = 4)
 # # Result: list("a", 1L, "c", "d", "e")
 #
-# appendWithLimit(lst, "e", limit = 4, keep_head = 2L)
+# appendWithLimit(lst, "e", limit = 4, retain_first_n = 2L)
 # # Result: list("a", "b", 1L, "d", "e")
-appendWithLimit <- function(lst, x, limit, keep_head = 1L) {
+appendWithLimit <- function(lst, x, limit, retain_first_n = 1L) {
   # Sanity check that the parameters make sense
-  stopifnot(keep_head > 0)
-  stopifnot(limit > keep_head)
+  stopifnot(retain_first_n > 0)
+  stopifnot(limit > retain_first_n)
   stopifnot(!is.null(x))
   stopifnot(is.null(lst) || is.list(lst))
 
@@ -162,10 +162,10 @@ appendWithLimit <- function(lst, x, limit, keep_head = 1L) {
   # Sanity check -- shouldn't have more than one elide placeholder
   stopifnot(length(elide_count_index) <= 1L)
   if (length(elide_count_index) == 1L) {
-    # For a given list, keep_head must remain constant between calls to
+    # For a given list, retain_first_n must remain constant between calls to
     # appendWithLimit; that is, the elide count, if one exists, must be exactly
     # where we expect it to be
-    stopifnot(elide_count_index == keep_head + 1L)
+    stopifnot(elide_count_index == retain_first_n + 1L)
   }
 
   element_count <- length(lst) - length(elide_count_index)
@@ -176,10 +176,10 @@ appendWithLimit <- function(lst, x, limit, keep_head = 1L) {
     # The list may or may not already contain an elide count. If it does, we
     # need to increment it. If it doesn't, we need to add one.
 
-    # Keep the first `keep_head` elements...
-    prefix <- utils::head(lst, keep_head)
+    # Keep the first `retain_first_n` elements...
+    prefix <- utils::head(lst, retain_first_n)
     # ...and just enough of the last elements to leave room for the new one
-    suffix <- utils::tail(lst, limit - keep_head - 1L)
+    suffix <- utils::tail(lst, limit - retain_first_n - 1L)
     # Calculate the new elide count
     new_elide_count <- (element_count - limit + 1L) + elide_count
     # Construct the final list

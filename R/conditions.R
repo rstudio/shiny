@@ -177,9 +177,9 @@ appendWithLimit <- function(lst, x, limit, keep_head = 1L) {
     # need to increment it. If it doesn't, we need to add one.
 
     # Keep the first `keep_head` elements...
-    prefix <- head(lst, keep_head)
+    prefix <- utils::head(lst, keep_head)
     # ...and just enough of the last elements to leave room for the new one
-    suffix <- tail(lst, limit - keep_head - 1L)
+    suffix <- utils::tail(lst, limit - keep_head - 1L)
     # Calculate the new elide count
     new_elide_count <- (element_count - limit + 1L) + elide_count
     # Construct the final list
@@ -407,6 +407,8 @@ printOneStackTrace <- function(stackTrace, full, offset) {
     toShow <- toShow & stripStackTraces(list(callNames))[[1]]
   }
 
+  # If we're running in testthat, hide the parts of
+  toShow <- toShow & dropTrivialTestFrames(callNames)
 
   st <- data.frame(
     num = rev(which(toShow)),
@@ -532,6 +534,33 @@ dropTrivialFrames <- function(callnames) {
   c(
     rep_len(TRUE, length(callnames) - toRemove),
     rep_len(FALSE, toRemove)
+  )
+}
+
+dropTrivialTestFrames <- function(callnames) {
+  if (!identical(Sys.getenv("TESTTHAT"), "true")) {
+    return(rep_len(TRUE, length(callnames)))
+  }
+
+  hideable <- callnames %in% c(
+    "test",
+    "devtools::test",
+    "test_check",
+    "testthat::test_check",
+    "test_dir",
+    "testthat::test_dir",
+    "test_file",
+    "testthat::test_file",
+    "test_local",
+    "testthat::test_local"
+  )
+
+  firstGoodCall <- min(which(!hideable))
+  toRemove <- firstGoodCall - 1L
+
+  c(
+    rep_len(FALSE, toRemove),
+    rep_len(TRUE, length(callnames) - toRemove)
   )
 }
 

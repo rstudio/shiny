@@ -28,7 +28,12 @@ formatError <- function(err, full = FALSE, offset = TRUE, cleanPaths = TRUE) {
   #
   # This is to make the snapshot tests more stable across different machines and
   # ignores benign code movement within a file.
-  sub("\\[(.*/)?(.+?\\.R)#\\d+\\]", "[\\2#XXX]", str, perl = TRUE)
+  str <- sub("\\[(.*/)?(.+?\\.R)#\\d+\\]", "[\\2#XXX]", str, perl = TRUE)
+  # The frame numbers vary too much between different ways of invoking testthat
+  # ("Run Tests" editor toolbar button and "Test" Build tab button in RStudio,
+  # devtools::test(), etc.) so we blank them out.
+  str <- sub("^[ \\d]+:", "    :", str, perl = TRUE)
+  str
 }
 
 

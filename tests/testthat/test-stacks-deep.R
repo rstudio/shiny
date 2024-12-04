@@ -104,8 +104,8 @@ test_that("deep stack capturing", {
   wait_for_it()
 
   expect_s3_class(err, "error", exact = FALSE)
-  expect_snapshot(formatError(err))
-  expect_snapshot(formatError(err, full = TRUE))
+  expect_snapshot(cat(sep="\n", formatError(err)))
+  expect_snapshot(cat(sep="\n", formatError(err, full = TRUE)))
 })
 
 test_that("deep stack capturing within reactives", {
@@ -159,7 +159,7 @@ test_that("deep stack culling", {
 
   expect_s3_class(dserr, "error", exact = FALSE)
   stacktrace <- formatError(dserr)
-  expect_snapshot(stacktrace)
+  expect_snapshot(cat(sep="\n", stacktrace))
   # Ensure that A__, I__, and J__ are present in the traces
   expect_length(which(grepl("A__", stacktrace)), 1L)
   expect_length(which(grepl("I__", stacktrace)), 1L)

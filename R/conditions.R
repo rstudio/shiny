@@ -376,7 +376,7 @@ printStackTrace <- function(cond,
     }
   }))
 
-  dfs <- mapply(
+  mapply(
     seq_along(stackTraces),
     rev(stackTraces),
     rev(stripResults),

@@ -359,10 +359,28 @@ printStackTrace <- function(cond,
     list(attr(cond, "stack.trace", exact = TRUE))
   )
 
+  # Stripping of stack traces is the one step where the different stack traces
+  # interact.
+  stripResults <- stripStackTraces(lapply(stackTraces, function(trace) {
+    if (is.integer(trace)) {
+      # This is where deep stacks were elided.
+      # jcheng 2024-12-03: For the purposes of stack trace stripping, it's not
+      # ideal that we're eliding entire stacks before we get here--this actually
+      # potentially screws up our scoring (i.e., an unbalanced ..stacktraceon..
+      # or ..stacktraceoff.. was elided). If this surfaces as an actual problem,
+      # we could maybe maintain a cumulative score of the stacks as we elide
+      # them.
+      character(0)
+    } else {
+      getCallNames(trace)
+    }
+  }))
+
   dfs <- mapply(
     seq_along(stackTraces),
     rev(stackTraces),
-    FUN = function(i, trace) {
+    rev(stripResults),
+    FUN = function(i, trace, stripResult) {
       if (is.integer(trace)) {
         noun <- if (trace > 1L) "traces" else "trace"
         message("[ reached getOption(\"shiny.deepstacktrace\") -- omitted ", trace, " more stack ", noun, " ]")
@@ -372,6 +390,7 @@ printStackTrace <- function(cond,
         }
         printOneStackTrace(
           stackTrace = trace,
+          stripResult = stripResult,
           full = full,
           offset = offset
         )
@@ -383,7 +402,7 @@ printStackTrace <- function(cond,
   invisible()
 }
 
-printOneStackTrace <- function(stackTrace, full, offset) {
+printOneStackTrace <- function(stackTrace, stripResult, full, offset) {
   calls <- offsetSrcrefs(stackTrace, offset = offset)
   callNames <- getCallNames(stackTrace)
   parents <- attr(stackTrace, "parents", exact = TRUE)
@@ -397,6 +416,7 @@ printOneStackTrace <- function(stackTrace, full, offset) {
     calls <- calls[toKeep]
     callNames <- callNames[toKeep]
     parents <- parents[toKeep]
+    stripResult <- stripResult[toKeep]
   }
 
   toShow <- rep(TRUE, length(callNames))
@@ -404,7 +424,7 @@ printOneStackTrace <- function(stackTrace, full, offset) {
     toShow <- toShow & pruneStackTrace(parents)
   }
   if (should_strip) {
-    toShow <- toShow & stripStackTraces(list(callNames))[[1]]
+    toShow <- toShow & stripResult
   }
 
   # If we're running in testthat, hide the parts of

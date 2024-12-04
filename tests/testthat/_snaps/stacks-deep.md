@@ -474,3 +474,80 @@
           : test_files_serial
           : test_files
 
+# stack trace stripping works
+
+    Code
+      cat(sep = "\n", formatError(strperr))
+    Output
+      Error in onFulfilled: boom
+          : stop
+          : onFulfilled [test-stacks-deep.R#XXX]
+          : callback [conditions.R#XXX]
+          : <Anonymous>
+          : onFulfilled
+          : handleFulfill
+          : <Anonymous>
+          : execCallbacks
+          : later::run_now
+          : wait_for_it [mock-session.R#XXX]
+      From earlier call:
+          : domain$wrapOnFulfilled
+          : promiseDomain$onThen
+          : action
+          : promise
+          : promise$then
+          : then
+          : %...>%
+          : E__ [test-stacks-deep.R#XXX]
+      From earlier call:
+        [No stack trace available]
+      From earlier call:
+          : onFulfilled [test-stacks-deep.R#XXX]
+          : callback [conditions.R#XXX]
+          : <Anonymous>
+          : onFulfilled
+          : handleFulfill
+          : <Anonymous>
+          : execCallbacks
+          : later::run_now
+          : wait_for_it [mock-session.R#XXX]
+      From earlier call:
+          : domain$wrapOnFulfilled
+          : promiseDomain$onThen
+          : action
+          : promise
+          : promise$then
+          : then
+          : %...>%
+          : B__ [test-stacks-deep.R#XXX]
+          : onFulfilled
+          : callback [conditions.R#XXX]
+          : <Anonymous>
+          : onFulfilled
+          : handleFulfill
+          : <Anonymous>
+          : execCallbacks
+          : later::run_now
+          : wait_for_it [mock-session.R#XXX]
+      From earlier call:
+          : domain$wrapOnFulfilled
+          : promiseDomain$onThen
+          : action
+          : promise
+          : promise$then
+          : then
+          : %...>%
+          : A__ [test-stacks-deep.R#XXX]
+          : eval [test-stacks-deep.R#XXX]
+          : eval
+          : test_code
+          : test_that
+          : eval [test-stacks-deep.R#XXX]
+          : eval
+          : test_code
+          : source_file
+          : FUN
+          : lapply
+          : test_files_serial
+          : test_files
+

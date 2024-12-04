@@ -235,3 +235,23 @@ test_that("unlimited deep stacks can be opted into", {
   expect_s3_class(uerr, "error", exact = FALSE)
   expect_identical(length(attr(uerr, "deep.stack.trace", exact = TRUE)), 100L)
 })
+
+test_that("stack trace stripping works", {
+  A__ <- function() promise_resolve(TRUE) %...>% B__()
+  B__ <- function(x) promise_resolve(TRUE) %...>% { ..stacktraceoff..(C__()) }
+  C__ <- function(x) promise_resolve(TRUE) %...>% D__()
+  D__ <- function(x) promise_resolve(TRUE) %...>% { ..stacktraceon..(E__()) }
+  E__ <- function(x) promise_resolve(TRUE) %...>% { stop("boom") }
+
+  strperr <- NULL
+  captureStackTraces(A__()) %...!% (function(err) {
+    strperr <<- err
+  })
+
+  ..stacktracefloor..(
+    wait_for_it()
+  )
+
+  expect_s3_class(strperr, "error", exact = FALSE)
+  expect_snapshot(cat(sep="\n", formatError(strperr)))
+})

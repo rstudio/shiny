@@ -177,7 +177,7 @@ appendWithLimit <- function(lst, x, limit, keep_head = 1L) {
     # need to increment it. If it doesn't, we need to add one.
 
     # Keep the first `keep_head` elements...
-    prefix <- lst[1:keep_head]
+    prefix <- head(lst, keep_head)
     # ...and just enough of the last elements to leave room for the new one
     suffix <- tail(lst, limit - keep_head - 1L)
     # Calculate the new elide count

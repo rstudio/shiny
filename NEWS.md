@@ -1,11 +1,5 @@
 # shiny (development version)
 
-## Breaking changes
-
-* Duplicated IDs (used more than once for an input or output) now throw an error in the browser, which appears as a message in Shiny's Client Console when `devmode()` is enabled or as a message in the browser console if not. (#4101)
-
-   Prior to Shiny v1.8.1, duplicated output IDs (but not duplicated input IDs) threw an error on app startup. After v1.8.1 neither resulted in an error, but a message would be shown in the Client Console when `devmode()` was enabled. The change in this version restores the previous behavior and extends it to input IDs as well.
-
 ## New features and improvements
 
 * Small improvements to the default pulse busy indicator to better blend with any background. It's also now slightly smaller by default. (#4122)
@@ -24,7 +18,7 @@
 
 * Fixed a bug with stack trace capturing that caused reactives with very long async promise chains (hundreds/thousands of steps) to become extremely slow. Chains this long are unlikely to be written by hand, but {coro} async generators and {elmer} async streaming were easily creating problematically long chains. (#4155)
 
-* Shared input and output IDs -- e.g. using `"debug"` for both a `textInput()` and `verbatimTextOutput()` -- now results in a console warning message, but not an error, that is also shown in the Client Console when `devmode()` is enabled. (#4101)
+* Duplicate input and output IDs -- e.g. using `"debug"` for two inputs or two outputs -- or shared IDs -- e.g. using `"debug"` as the `inputID` for an input and an output -- now result in a console warning message, but not an error. When `devmode()` is enabled, an informative message is shown in the Shiny Client Console. We recommend all Shiny devs enable `devmode()` when developing Shiny apps locally. (#4101)
 
 # shiny 1.9.1
 

@@ -404,7 +404,7 @@ printOneStackTrace <- function(stackTrace, stripResult, full, offset) {
   # pruneStackTrace; because dropTrivialTestFrames removes calls from the top
   # (or bottom? whichever is the oldest?) of the stack, it breaks `parents`
   # which is based on absolute indices of calls. dropTrivialFrames gets away
-  # with this because it only removes calls from the opposide side of the stack.
+  # with this because it only removes calls from the opposite side of the stack.
   toShow <- toShow & dropTrivialTestFrames(callNames)
 
   st <- data.frame(

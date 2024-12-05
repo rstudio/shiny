@@ -20618,6 +20618,7 @@
     function checkValidity() {
       var duplicateIds = /* @__PURE__ */ new Map();
       var status = "ok";
+      var problems = /* @__PURE__ */ new Set();
       bindings.forEach(function(idTypes, id) {
         var counts = {
           input: 0,
@@ -20630,12 +20631,15 @@
           return;
         }
         duplicateIds.set(id, counts);
-        if (status === "error")
-          return;
-        if (counts.input > 1 || counts.output > 1) {
-          status = "error";
-        } else {
-          status = "warning";
+        status = "warning";
+        if (counts.input > 1) {
+          problems.add("input");
+        }
+        if (counts.output > 1) {
+          problems.add("output");
+        }
+        if (counts.input >= 1 && counts.output >= 1) {
+          problems.add("shared");
         }
       });
       if (duplicateIds.size === 0)
@@ -20649,12 +20653,24 @@
         }).join(" and ");
         return '- "'.concat(id, '": ').concat(messages);
       }).join("\n");
-      var message = "The following ".concat(duplicateIds.size === 1 ? "ID was" : "IDs were", " repeated across input and output bindings:\n").concat(duplicateIdMsg);
+      var txtVerb = "Duplicate";
+      var txtNoun = "input/output";
+      if (problems.has("input") && problems.has("output")) {
+      } else if (problems.has("input")) {
+        txtNoun = "input";
+      } else if (problems.has("output")) {
+        txtNoun = "output";
+      } else if (problems.has("shared")) {
+        txtVerb = "Shared";
+      }
+      var txtIdsWere = duplicateIds.size == 1 ? "ID was" : "IDs were";
+      var headline = "".concat(txtVerb, " ").concat(txtNoun, " ").concat(txtIdsWere, " found");
+      var message = "The following ".concat(txtIdsWere, " used for more than one ").concat(problems.has("shared") ? "input/output" : txtNoun, ":\n").concat(duplicateIdMsg);
       if (status === "warning") {
         return {
           status: "warning",
           event: new ShinyClientMessageEvent({
-            headline: "Shared input/output IDs found",
+            headline: headline,
             message: message
           })
         };
@@ -20662,7 +20678,7 @@
       return {
         status: "error",
         error: new ShinyClientError({
-          headline: "Duplicate input/output IDs found",
+          headline: headline,
           message: message
         })
       };

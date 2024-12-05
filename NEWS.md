@@ -6,7 +6,7 @@
 
 * When spinners and the pulse busy indicators are enabled, Shiny now shows the pulse indicator when dynamic UI elements are recalculating if no other spinners are present in the app. (#4137)
 
-* The number of deep stack traces (stack traces that are tracked across steps in an async promise chain) Shiny will collect is no longer unbounded. The default is now 8, but can be adjusted by setting the `shiny.deepstacktrace` option, for example `options(shiny.deepstacktrace=12L)` to set the limit to 12. You can also set this option to `FALSE` to disable deep stack trace collection (for performance reasons) or `TRUE` to collect deep stack traces with no limit. (#4156)
+* Improve collection of deep stack traces (stack traces that are tracked across steps in an async promise chain) with `coro` async generators such as `elmer` chat streams. Previously, Shiny treated each iteration of an async generator as a distinct deep stack, leading to pathologically long stack traces; now, Shiny only keeps/prints unique deep stack trace, discarding duplicates. (#4156)
 
 ## Bug fixes
 

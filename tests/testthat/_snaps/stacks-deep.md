@@ -363,7 +363,7 @@
           : test_files_serial
           : test_files
 
-# deep stack culling
+# deep stacks long chain
 
     Code
       cat(sep = "\n", stacktrace <- formatError(dserr))
@@ -451,7 +451,216 @@
           : lapply
           : test_files_serial
           : test_files
-      [ reached getOption("shiny.deepstacktrace") -- omitted 7 more stack traces ]
+      From earlier call:
+          : domain$wrapOnFulfilled
+          : promiseDomain$onThen
+          : action
+          : promise
+          : promise$then
+          : then
+          : %...>%
+          : H__ [test-stacks-deep.R#XXX]
+          : onFulfilled
+          : callback
+          : <Anonymous>
+          : onFulfilled
+          : handleFulfill
+          : <Anonymous>
+          : execCallbacks
+          : later::run_now
+          : wait_for_it
+          : eval [test-stacks-deep.R#XXX]
+          : eval
+          : test_code
+          : test_that
+          : eval [test-stacks-deep.R#XXX]
+          : eval
+          : test_code
+          : source_file
+          : FUN
+          : lapply
+          : test_files_serial
+          : test_files
+      From earlier call:
+          : domain$wrapOnFulfilled
+          : promiseDomain$onThen
+          : action
+          : promise
+          : promise$then
+          : then
+          : %...>%
+          : G__ [test-stacks-deep.R#XXX]
+          : onFulfilled
+          : callback
+          : <Anonymous>
+          : onFulfilled
+          : handleFulfill
+          : <Anonymous>
+          : execCallbacks
+          : later::run_now
+          : wait_for_it
+          : eval [test-stacks-deep.R#XXX]
+          : eval
+          : test_code
+          : test_that
+          : eval [test-stacks-deep.R#XXX]
+          : eval
+          : test_code
+          : source_file
+          : FUN
+          : lapply
+          : test_files_serial
+          : test_files
+      From earlier call:
+          : domain$wrapOnFulfilled
+          : promiseDomain$onThen
+          : action
+          : promise
+          : promise$then
+          : then
+          : %...>%
+          : F__ [test-stacks-deep.R#XXX]
+          : onFulfilled
+          : callback
+          : <Anonymous>
+          : onFulfilled
+          : handleFulfill
+          : <Anonymous>
+          : execCallbacks
+          : later::run_now
+          : wait_for_it
+          : eval [test-stacks-deep.R#XXX]
+          : eval
+          : test_code
+          : test_that
+          : eval [test-stacks-deep.R#XXX]
+          : eval
+          : test_code
+          : source_file
+          : FUN
+          : lapply
+          : test_files_serial
+          : test_files
+      From earlier call:
+          : domain$wrapOnFulfilled
+          : promiseDomain$onThen
+          : action
+          : promise
+          : promise$then
+          : then
+          : %...>%
+          : E__ [test-stacks-deep.R#XXX]
+          : onFulfilled
+          : callback
+          : <Anonymous>
+          : onFulfilled
+          : handleFulfill
+          : <Anonymous>
+          : execCallbacks
+          : later::run_now
+          : wait_for_it
+          : eval [test-stacks-deep.R#XXX]
+          : eval
+          : test_code
+          : test_that
+          : eval [test-stacks-deep.R#XXX]
+          : eval
+          : test_code
+          : source_file
+          : FUN
+          : lapply
+          : test_files_serial
+          : test_files
+      From earlier call:
+          : domain$wrapOnFulfilled
+          : promiseDomain$onThen
+          : action
+          : promise
+          : promise$then
+          : then
+          : %...>%
+          : D__ [test-stacks-deep.R#XXX]
+          : onFulfilled
+          : callback
+          : <Anonymous>
+          : onFulfilled
+          : handleFulfill
+          : <Anonymous>
+          : execCallbacks
+          : later::run_now
+          : wait_for_it
+          : eval [test-stacks-deep.R#XXX]
+          : eval
+          : test_code
+          : test_that
+          : eval [test-stacks-deep.R#XXX]
+          : eval
+          : test_code
+          : source_file
+          : FUN
+          : lapply
+          : test_files_serial
+          : test_files
+      From earlier call:
+          : domain$wrapOnFulfilled
+          : promiseDomain$onThen
+          : action
+          : promise
+          : promise$then
+          : then
+          : %...>%
+          : C__ [test-stacks-deep.R#XXX]
+          : onFulfilled
+          : callback
+          : <Anonymous>
+          : onFulfilled
+          : handleFulfill
+          : <Anonymous>
+          : execCallbacks
+          : later::run_now
+          : wait_for_it
+          : eval [test-stacks-deep.R#XXX]
+          : eval
+          : test_code
+          : test_that
+          : eval [test-stacks-deep.R#XXX]
+          : eval
+          : test_code
+          : source_file
+          : FUN
+          : lapply
+          : test_files_serial
+          : test_files
+      From earlier call:
+          : domain$wrapOnFulfilled
+          : promiseDomain$onThen
+          : action
+          : promise
+          : promise$then
+          : then
+          : %...>%
+          : B__ [test-stacks-deep.R#XXX]
+          : onFulfilled
+          : callback
+          : <Anonymous>
+          : onFulfilled
+          : handleFulfill
+          : <Anonymous>
+          : execCallbacks
+          : later::run_now
+          : wait_for_it
+          : eval [test-stacks-deep.R#XXX]
+          : eval
+          : test_code
+          : test_that
+          : eval [test-stacks-deep.R#XXX]
+          : eval
+          : test_code
+          : source_file
+          : FUN
+          : lapply
+          : test_files_serial
+          : test_files
       From earlier call:
           : domain$wrapOnFulfilled
           : promiseDomain$onThen

@@ -130,60 +130,37 @@ captureStackTraces <- function(expr) {
 #' @include globals.R
 .globals$deepStack <- NULL
 
-# (Warning, this is pretty crazy)
-#
-# appendWithLimit lets us append an element to a list, but if the list starts to
-# exceed a limit, it will start eliding elements from the middle of the list.
-# At the point of elision, it will insert a placeholder integer that indicates
-# how many elements were elided.
-#
-# This is useful for storing deep stack traces, where we don't want to overwhelm
-# the user with a huge number of stack traces, but both the head and tail may
-# contain important information.
-#
-# Example:
-# lst <- list("a", "b", "c", "d")
-#
-# appendWithLimit(lst, "e", limit = 4)
-# # Result: list("a", 1L, "c", "d", "e")
-#
-# appendWithLimit(lst, "e", limit = 4, retain_first_n = 2L)
-# # Result: list("a", "b", 1L, "d", "e")
-appendWithLimit <- function(lst, x, limit, retain_first_n = 1L) {
-  # Sanity check that the parameters make sense
-  stopifnot(retain_first_n > 0)
-  stopifnot(limit > retain_first_n)
-  stopifnot(!is.null(x))
-  stopifnot(is.null(lst) || is.list(lst))
-
-  elide_count_index <- which(vapply(lst, is.integer, logical(1)))
-  elide_count <- sum(as.integer(lst[elide_count_index]))
-
-  # Sanity check -- shouldn't have more than one elide placeholder
-  stopifnot(length(elide_count_index) <= 1L)
-  if (length(elide_count_index) == 1L) {
-    # For a given list, retain_first_n must remain constant between calls to
-    # appendWithLimit; that is, the elide count, if one exists, must be exactly
-    # where we expect it to be
-    stopifnot(elide_count_index == retain_first_n + 1L)
+getCallStackDigest <- function(callStack, warn = FALSE) {
+  dg <- attr(callStack, "digest", exact = TRUE)
+  if (!is.null(dg)) {
+    return(dg)
   }
 
-  element_count <- length(lst) - length(elide_count_index)
-  if (element_count < limit) {
-    # No need to elide anything, just append and return
-    c(lst, list(x))
-  } else {
-    # The list may or may not already contain an elide count. If it does, we
-    # need to increment it. If it doesn't, we need to add one.
+  if (isTRUE(warn)) {
+    warning("Call stack doesn't have a cached digest; expensively computing one now")
+  }
 
-    # Keep the first `retain_first_n` elements...
-    prefix <- utils::head(lst, retain_first_n)
-    # ...and just enough of the last elements to leave room for the new one
-    suffix <- utils::tail(lst, limit - retain_first_n - 1L)
-    # Calculate the new elide count
-    new_elide_count <- (element_count - limit + 1L) + elide_count
-    # Construct the final list
-    c(prefix, list(as.integer(new_elide_count)), suffix, list(x))
+  digest::digest(getCallNames(callStack), algo = "md5")
+}
+
+saveCallStackDigest <- function(callStack) {
+  attr(callStack, "digest") <- getCallStackDigest(callStack, warn = FALSE)
+  callStack
+}
+
+# Appends a call stack to a list of call stacks, but only if it's not already
+# in the list. The list is deduplicated by digest; ideally the digests on the
+# list are cached before calling this function (you will get a warning if not).
+appendCallStackWithDedupe <- function(lst, x) {
+  digests <- vapply(lst, getCallStackDigest, character(1), warn = TRUE)
+  xdigest <- getCallStackDigest(x, warn = FALSE)
+  stopifnot(all(nzchar(digests)))
+  stopifnot(length(xdigest) == 1)
+  stopifnot(nzchar(xdigest))
+  if (xdigest %in% digests) {
+    return(lst)
+  } else {
+    return(c(lst, list(x)))
   }
 }
 
@@ -199,13 +176,14 @@ createStackTracePromiseDomain <- function() {
         currentStack <- sys.calls()
         currentParents <- sys.parents()
         attr(currentStack, "parents") <- currentParents
+        currentStack <- saveCallStackDigest(currentStack)
         currentDeepStack <- .globals$deepStack
       }
       function(...) {
         # Fulfill time
         if (deepStacksEnabled()) {
           origDeepStack <- .globals$deepStack
-          .globals$deepStack <- appendWithLimit(currentDeepStack, currentStack, deepStackLimit())
+          .globals$deepStack <- appendCallStackWithDedupe(currentDeepStack, currentStack)
           on.exit(.globals$deepStack <- origDeepStack, add = TRUE)
         }
 
@@ -222,13 +200,14 @@ createStackTracePromiseDomain <- function() {
         currentStack <- sys.calls()
         currentParents <- sys.parents()
         attr(currentStack, "parents") <- currentParents
+        currentStack <- saveCallStackDigest(currentStack)
         currentDeepStack <- .globals$deepStack
       }
       function(...) {
         # Fulfill time
         if (deepStacksEnabled()) {
           origDeepStack <- .globals$deepStack
-          .globals$deepStack <- appendWithLimit(currentDeepStack, currentStack, deepStackLimit())
+          .globals$deepStack <- appendCallStackWithDedupe(currentDeepStack, currentStack)
           on.exit(.globals$deepStack <- origDeepStack, add = TRUE)
         }
 
@@ -248,23 +227,7 @@ createStackTracePromiseDomain <- function() {
 }
 
 deepStacksEnabled <- function() {
-  deepStackLimit() > 0L
-}
-
-deepStackLimit <- function() {
-  opt <- getOption("shiny.deepstacktrace", 8L)
-  if (!is.numeric(opt) && !is.logical(opt)) {
-    opt <- FALSE
-  }
-  stopifnot(length(opt) == 1L)
-
-  if (rlang::is_false(opt)) {
-    0L
-  } else if (isTRUE(opt)) {
-    Inf
-  } else {
-    as.integer(opt)
-  }
+  getOption("shiny.deepstacktrace", TRUE)
 }
 
 doCaptureStack <- function(e) {
@@ -272,6 +235,7 @@ doCaptureStack <- function(e) {
     calls <- sys.calls()
     parents <- sys.parents()
     attr(calls, "parents") <- parents
+    calls <- saveCallStackDigest(calls)
     attr(e, "stack.trace") <- calls
   }
   if (deepStacksEnabled()) {

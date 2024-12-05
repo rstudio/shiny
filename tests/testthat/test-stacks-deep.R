@@ -132,7 +132,7 @@ test_that("deep stack capturing within reactives", {
   expect_length(attr(rerr, "deep.stack.trace"), 2)
 })
 
-test_that("deep stack culling", {
+test_that("deep stacks long chain", {
   op <- options(shiny.deepstacktrace = 3L)
   on.exit(options(op), add = TRUE, after = FALSE)
 
@@ -166,57 +166,13 @@ test_that("deep stack culling", {
   expect_snapshot(cat(sep="\n", stacktrace <- formatError(dserr)))
   # Ensure we dropTrivialTestFrames only when snapshotting
   expect_false(length(stacktrace) == length(formatError(dserr)))
-  # Ensure that A__, I__, and J__ are present in the traces
-  expect_length(which(grepl("A__", stacktrace)), 1L)
-  expect_length(which(grepl("I__", stacktrace)), 1L)
-  expect_length(which(grepl("J__", stacktrace)), 1L)
-
-  # Ensure the message appears
-  expect_length(which(grepl("omitted 7 more stack traces", stacktrace)), 1L)
-
-  # Ensure that B__ through H__ are not present in the traces; these are the
-  # calls that were omitted
-  expect_false(any(grepl("B__", stacktrace)))
-  expect_false(any(grepl("C__", stacktrace)))
-  expect_false(any(grepl("D__", stacktrace)))
-  expect_false(any(grepl("E__", stacktrace)))
-  expect_false(any(grepl("F__", stacktrace)))
-  expect_false(any(grepl("G__", stacktrace)))
-  expect_false(any(grepl("H__", stacktrace)))
+  # Ensure that A__ through J__ are present in the traces
+  for (letter in LETTERS[1:10]) {
+    expect_length(which(grepl(paste0(letter, "__"), stacktrace)), 1L)
+  }
 })
 
-test_that("appendWithLimit edge cases", {
-  # Can't have a limit of 0
-  expect_error(appendWithLimit(list("a", "b", "c", "d", "e"), "f", 0), "limit")
-  # Can't have a retain_first_n of 0
-  expect_error(appendWithLimit(list("a", "b", "c", "d", "e"), "f", 5, 0), "retain_first_n")
-  # Can't have retain_first_n >= limit
-  expect_error(appendWithLimit(list("a", "b", "c", "d", "e"), "f", 5, 5), "retain_first_n")
-  # Can't change retain_first_n
-  expect_error(appendWithLimit(list("a", 1L, "c", "d", "e"), "f", 5, 2), "retain_first_n")
-
-  # Fits
-  expect_identical(
-    appendWithLimit(list("a", "b", "c", "d", "e"), "f", 6),
-    list("a", "b", "c", "d", "e", "f")
-  )
-  # Elide 1
-  expect_identical(
-    appendWithLimit(list("a", "b", "c", "d", "e"), "f", 5),
-    list("a", 1L, "c", "d", "e", "f")
-  )
-  # Elide from already elided list
-  expect_identical(
-    appendWithLimit(list("a", 1L, "c", "d", "e", "f"), "g", 5),
-    list("a", 2L, "d", "e", "f", "g")
-  )
-  expect_identical(
-    appendWithLimit(list("a", "b", "c", "d", "e"), "f", 5, 2),
-    list("a", "b", 1L, "d", "e", "f")
-  )
-})
-
-test_that("unlimited deep stacks can be opted into", {
+test_that("Deep stack deduplication", {
   recursive_promise <- function(n) {
     if (n <= 0) {
       stop("boom")
@@ -239,7 +195,9 @@ test_that("unlimited deep stacks can be opted into", {
   wait_for_it()
 
   expect_s3_class(uerr, "error", exact = FALSE)
-  expect_identical(length(attr(uerr, "deep.stack.trace", exact = TRUE)), 100L)
+  # Even though we traveled through 100 promises recursively, we only retained
+  # the unique ones
+  expect_identical(length(attr(uerr, "deep.stack.trace", exact = TRUE)), 2L)
 })
 
 test_that("stack trace stripping works", {

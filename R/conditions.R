@@ -137,7 +137,11 @@ getCallStackDigest <- function(callStack, warn = FALSE) {
   }
 
   if (isTRUE(warn)) {
-    warning("Call stack doesn't have a cached digest; expensively computing one now")
+    rlang::warn(
+      "Call stack doesn't have a cached digest; expensively computing one now",
+      .frequency = "once",
+      .frequency_id = "deepstack-uncached-digest-warning"
+    )
   }
 
   rlang::hash(getCallNames(callStack))

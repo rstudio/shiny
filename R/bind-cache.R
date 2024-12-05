@@ -177,7 +177,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'   cache by putting this at the top of your app.R, server.R, or global.R:
 #'
 #'   ```
-#'   shinyOptions(cache = cachem::cache_disk(file.path(dirname(tempdir()), "myapp-cache"))
+#'   shinyOptions(cache = cachem::cache_disk(file.path(dirname(tempdir()), "myapp-cache")))
 #'   ```
 #'
 #'   This will create a subdirectory in your system temp directory named

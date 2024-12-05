@@ -53,10 +53,12 @@ Context <- R6Class(
 
       promises::with_promise_domain(reactivePromiseDomain(), {
         withReactiveDomain(.domain, {
-          env <- .getReactiveEnvironment()
-          rLog$enter(.reactId, id, .reactType, .domain)
-          on.exit(rLog$exit(.reactId, id, .reactType, .domain), add = TRUE)
-          env$runWith(self, func)
+          captureStackTraces({
+            env <- .getReactiveEnvironment()
+            rLog$enter(.reactId, id, .reactType, .domain)
+            on.exit(rLog$exit(.reactId, id, .reactType, .domain), add = TRUE)
+            env$runWith(self, func)
+          })
         })
       })
     },
@@ -223,9 +225,7 @@ wrapForContext <- function(func, ctx) {
 
   function(...) {
     .getReactiveEnvironment()$runWith(ctx, function() {
-      captureStackTraces(
-        func(...)
-      )
+      func(...)
     })
   }
 }

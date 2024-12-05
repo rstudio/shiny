@@ -140,7 +140,7 @@ getCallStackDigest <- function(callStack, warn = FALSE) {
     warning("Call stack doesn't have a cached digest; expensively computing one now")
   }
 
-  digest::digest(getCallNames(callStack), algo = "md5")
+  rlang::hash(getCallNames(callStack))
 }
 
 saveCallStackDigest <- function(callStack) {

@@ -217,7 +217,40 @@ test_that("stack trace stripping works", {
   )
 
   expect_s3_class(strperr, "error", exact = FALSE)
-  expect_snapshot(cat(sep="\n", formatError(strperr)))
-  # Just make sure there's at least one full=TRUE case being exercised
-  expect_snapshot(cat(sep="\n", formatError(strperr, full = TRUE)))
+
+  str <- formatError(strperr)
+  expect_length(which(grepl("A__", str)), 1L)
+  expect_length(which(grepl("B__", str)), 1L)
+  expect_length(which(grepl("C__", str)), 0L)
+  expect_length(which(grepl("D__", str)), 0L)
+  expect_length(which(grepl("E__", str)), 1L)
+
+  str_full <- formatError(strperr, full = TRUE)
+  expect_length(which(grepl("A__", str_full)), 1L)
+  expect_length(which(grepl("B__", str_full)), 1L)
+  expect_length(which(grepl("C__", str_full)), 1L)
+  expect_length(which(grepl("D__", str_full)), 1L)
+  expect_length(which(grepl("E__", str_full)), 1L)
+})
+
+test_that("coro async generator deep stack count is low", {
+  gen <- coro::async_generator(function() {
+    for (i in 1:50) {
+      await(coro::async_sleep(0.001))
+      yield(i)
+    }
+    stop("boom")
+  })
+
+  cgerr <- NULL
+  captureStackTraces(
+    coro::async_collect(gen()) %...!% (function(err) {
+      cgerr <<- err
+    })
+  )
+
+  wait_for_it()
+
+  expect_s3_class(cgerr, "error", exact = FALSE)
+  expect_length(attr(cgerr, "deep.stack.trace"), 2L)
 })

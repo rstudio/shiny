@@ -76,8 +76,8 @@ const bindingsRegistry = (() => {
    * accessibility and other reasons. However, in practice our bindings still
    * work as long as inputs the IDs within a binding type don't overlap.
    *
-   * @returns ShinyClientError if current ID bindings are invalid, otherwise
-   * returns an ok status.
+   * @returns ShinyClientMessageEvent if current ID bindings are invalid,
+   * otherwise returns an ok status.
    */
   function checkValidity():
     | {
@@ -92,6 +92,7 @@ const bindingsRegistry = (() => {
     type BindingCounts = { [T in BindingTypes]: number };
     const duplicateIds = new Map<string, BindingCounts>();
     let status = "ok";
+    const problems: Set<string> = new Set();
 
     // count duplicate IDs of each binding type
     bindings.forEach((idTypes, id) => {
@@ -106,13 +107,21 @@ const bindingsRegistry = (() => {
       // reported to the user.
       duplicateIds.set(id, counts);
 
-      if (status === "error") return;
-      if (counts.input > 1 || counts.output > 1) {
-        // Duplicates within a single binding type are an error.
-        status = "error";
-      } else {
-        // Same ID used for 1 input and 1 output results in a warning not error.
-        status = "warning";
+      // Duplicated IDs are now always a warning. Before the ShinyClient console
+      // was added duplicate output IDs were errors in "production" mode. After
+      // the Shiny Client console was introduced, duplicate IDs were no longer
+      // production errors but *would* break apps in dev mode. Now, in v1.10+,
+      // duplicate IDs are always warnings in all modes for consistency.
+      status = "warning";
+
+      if (counts.input > 1) {
+        problems.add("input");
+      }
+      if (counts.output > 1) {
+        problems.add("output");
+      }
+      if (counts.input >= 1 && counts.output >= 1) {
+        problems.add("shared");
       }
     });
 
@@ -131,26 +140,34 @@ const bindingsRegistry = (() => {
       })
       .join("\n");
 
-    const message = `The following ${
-      duplicateIds.size === 1 ? "ID was" : "IDs were"
-    } repeated across input and output bindings:\n${duplicateIdMsg}`;
+    let txtVerb = "Duplicate";
+    let txtNoun = "input/output";
+    if (problems.has("input") && problems.has("output")) {
+      // base case
+    } else if (problems.has("input")) {
+      txtNoun = "input";
+    } else if (problems.has("output")) {
+      txtNoun = "output";
+    } else if (problems.has("shared")) {
+      txtVerb = "Shared";
+    }
+
+    const txtIdsWere = duplicateIds.size == 1 ? "ID was" : "IDs were";
+    const headline = `${txtVerb} ${txtNoun} ${txtIdsWere} found`;
+    const message = `The following ${txtIdsWere} used for more than one ${
+      problems.has("shared") ? "input/output" : txtNoun
+    }:\n${duplicateIdMsg}`;
 
     if (status === "warning") {
       return {
         status: "warning",
-        event: new ShinyClientMessageEvent({
-          headline: "Shared input/output IDs found",
-          message,
-        }),
+        event: new ShinyClientMessageEvent({ headline, message }),
       };
     }
 
     return {
       status: "error",
-      error: new ShinyClientError({
-        headline: "Duplicate input/output IDs found",
-        message,
-      }),
+      error: new ShinyClientError({ headline, message }),
     };
   }
 

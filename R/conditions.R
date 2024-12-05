@@ -324,22 +324,10 @@ printStackTrace <- function(cond,
   )
 
   # Stripping of stack traces is the one step where the different stack traces
-  # interact.
+  # interact. So we need to do this in one go, instead of individually within
+  # printOneStackTrace.
   if (!full) {
-    stripResults <- stripStackTraces(lapply(stackTraces, function(trace) {
-      if (is.integer(trace)) {
-        # This is where deep stacks were elided.
-        # jcheng 2024-12-03: For the purposes of stack trace stripping, it's not
-        # ideal that we're eliding entire stacks before we get here--this actually
-        # potentially screws up our scoring (i.e., an unbalanced ..stacktraceon..
-        # or ..stacktraceoff.. was elided). If this surfaces as an actual problem,
-        # we could maybe maintain a cumulative score of the stacks as we elide
-        # them.
-        character(0)
-      } else {
-        getCallNames(trace)
-      }
-    }))
+    stripResults <- stripStackTraces(lapply(stackTraces, getCallNames))
   } else {
     # If full is TRUE, we don't want to strip anything
     stripResults <- rep_len(list(TRUE), length(stackTraces))

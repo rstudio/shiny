@@ -20615,7 +20615,7 @@
   }
   var bindingsRegistry = function() {
     var bindings = /* @__PURE__ */ new Map();
-    function checkValidity() {
+    function checkValidity(scope) {
       var duplicateIds = /* @__PURE__ */ new Map();
       var problems = /* @__PURE__ */ new Set();
       bindings.forEach(function(idTypes, id) {
@@ -20641,9 +20641,7 @@
         }
       });
       if (duplicateIds.size === 0)
-        return {
-          status: "ok"
-        };
+        return;
       var duplicateIdMsg = Array.from(duplicateIds.entries()).map(function(_ref) {
         var _ref2 = _slicedToArray4(_ref, 2), id = _ref2[0], counts = _ref2[1];
         var messages = [pluralize(counts.input, "input"), pluralize(counts.output, "output")].filter(function(msg) {
@@ -20664,13 +20662,12 @@
       var txtIdsWere = duplicateIds.size == 1 ? "ID was" : "IDs were";
       var headline = "".concat(txtVerb, " ").concat(txtNoun, " ").concat(txtIdsWere, " found");
       var message = "The following ".concat(txtIdsWere, " used for more than one ").concat(problems.has("shared") ? "input/output" : txtNoun, ":\n").concat(duplicateIdMsg);
-      return {
-        status: "warning",
-        event: new ShinyClientMessageEvent({
-          headline: headline,
-          message: message
-        })
-      };
+      var event = new ShinyClientMessageEvent({
+        headline: headline,
+        message: message
+      });
+      var scopeElement = scope instanceof HTMLElement ? scope : scope.get(0);
+      (scopeElement || window).dispatchEvent(event);
     }
     function addBinding(id, bindingType) {
       var existingBinding = bindings.get(id);
@@ -20903,7 +20900,7 @@
   }
   function _bindAll2() {
     _bindAll2 = _asyncToGenerator8(/* @__PURE__ */ _regeneratorRuntime8().mark(function _callee2(shinyCtx, scope) {
-      var currentInputs, bindingValidity, scopeElement;
+      var currentInputs;
       return _regeneratorRuntime8().wrap(function _callee2$(_context2) {
         while (1)
           switch (_context2.prev = _context2.next) {
@@ -20912,24 +20909,9 @@
               return bindOutputs(shinyCtx, scope);
             case 2:
               currentInputs = bindInputs(shinyCtx, scope);
-              bindingValidity = bindingsRegistry.checkValidity();
-              if (!(bindingValidity.status === "warning")) {
-                _context2.next = 9;
-                break;
-              }
-              scopeElement = scope instanceof HTMLElement ? scope : scope.get(0);
-              (scopeElement || window).dispatchEvent(bindingValidity.event);
-              _context2.next = 11;
-              break;
-            case 9:
-              if (!(bindingValidity.status === "error")) {
-                _context2.next = 11;
-                break;
-              }
-              throw bindingValidity.error;
-            case 11:
+              bindingsRegistry.checkValidity(scope);
               return _context2.abrupt("return", currentInputs);
-            case 12:
+            case 5:
             case "end":
               return _context2.stop();
           }

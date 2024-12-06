@@ -131,7 +131,7 @@ captureStackTraces <- function(expr) {
 .globals$deepStack <- NULL
 
 getCallStackDigest <- function(callStack, warn = FALSE) {
-  dg <- attr(callStack, "digest", exact = TRUE)
+  dg <- attr(callStack, "shiny.stack.digest", exact = TRUE)
   if (!is.null(dg)) {
     return(dg)
   }
@@ -148,7 +148,7 @@ getCallStackDigest <- function(callStack, warn = FALSE) {
 }
 
 saveCallStackDigest <- function(callStack) {
-  attr(callStack, "digest") <- getCallStackDigest(callStack, warn = FALSE)
+  attr(callStack, "shiny.stack.digest") <- getCallStackDigest(callStack, warn = FALSE)
   callStack
 }
 

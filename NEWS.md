@@ -22,6 +22,8 @@
 
 * Fixed a bug with stack trace capturing that caused reactives with very long async promise chains (hundreds/thousands of steps) to become extremely slow. Chains this long are unlikely to be written by hand, but {coro} async generators and {elmer} async streaming were easily creating problematically long chains. (#4155)
 
+* Updating the choices of a `selectizeInput()` via `updateSelectizeInput()` with `server = TRUE` no longer retains the selected choice as a deselected option if the current value is not part of the new choices. (@dvg-p4 #4142)
+
 # shiny 1.9.1
 
 ## Bug fixes

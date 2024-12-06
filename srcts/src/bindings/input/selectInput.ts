@@ -186,7 +186,7 @@ class SelectInputBinding extends InputBinding {
             callback(res);
             if (!loaded) {
               if (hasDefinedProperty(data, "value")) {
-                selectize.setValue(data.value);
+                selectize.setValue(data.value as any);
               } else if (settings.maxItems === 1) {
                 // first item selected by default only for single-select
                 selectize.setValue(res[0].value);

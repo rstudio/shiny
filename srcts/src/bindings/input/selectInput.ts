@@ -142,10 +142,11 @@ class SelectInputBinding extends InputBinding {
         };
       };
 
-      // Calling selectize.clear() first works around https://github.com/selectize/selectize.js/issues/2146:
-      // As of selectize.js >= v0.13.1, .clearOptions() clears the selection, but does NOT remove the
-      // previously-selected options. So unless we do a manual .clear() first, the current selection(s)
-      // will remain as (deselected) options. See #3966
+      // Calling selectize.clear() first works around https://github.com/selectize/selectize.js/issues/2146
+      // As of selectize.js >= v0.13.1, .clearOptions() clears the selection,
+      // but does NOT remove the previously-selected options. So unless we call
+      // .clear() first, the current selection(s) will remain as (deselected)
+      // options. See #3966 #4142
       selectize.clear();
       selectize.clearOptions();
       let loaded = false;

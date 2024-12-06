@@ -4551,18 +4551,6 @@
     }
   });
 
-  // node_modules/core-js/internals/define-built-ins.js
-  var require_define_built_ins = __commonJS({
-    "node_modules/core-js/internals/define-built-ins.js": function(exports, module) {
-      var defineBuiltIn6 = require_define_built_in();
-      module.exports = function(target, src, options) {
-        for (var key in src)
-          defineBuiltIn6(target, key, src[key], options);
-        return target;
-      };
-    }
-  });
-
   // node_modules/core-js/internals/collection.js
   var require_collection = __commonJS({
     "node_modules/core-js/internals/collection.js": function(exports, module) {
@@ -4663,6 +4651,221 @@
           common.setStrong(Constructor, CONSTRUCTOR_NAME, IS_MAP);
         return Constructor;
       };
+    }
+  });
+
+  // node_modules/core-js/internals/define-built-ins.js
+  var require_define_built_ins = __commonJS({
+    "node_modules/core-js/internals/define-built-ins.js": function(exports, module) {
+      var defineBuiltIn6 = require_define_built_in();
+      module.exports = function(target, src, options) {
+        for (var key in src)
+          defineBuiltIn6(target, key, src[key], options);
+        return target;
+      };
+    }
+  });
+
+  // node_modules/core-js/internals/collection-strong.js
+  var require_collection_strong = __commonJS({
+    "node_modules/core-js/internals/collection-strong.js": function(exports, module) {
+      "use strict";
+      var create3 = require_object_create();
+      var defineBuiltInAccessor4 = require_define_built_in_accessor();
+      var defineBuiltIns = require_define_built_ins();
+      var bind2 = require_function_bind_context();
+      var anInstance = require_an_instance();
+      var isNullOrUndefined5 = require_is_null_or_undefined();
+      var iterate2 = require_iterate();
+      var defineIterator2 = require_iterator_define();
+      var createIterResultObject2 = require_create_iter_result_object();
+      var setSpecies3 = require_set_species();
+      var DESCRIPTORS10 = require_descriptors();
+      var fastKey = require_internal_metadata().fastKey;
+      var InternalStateModule2 = require_internal_state();
+      var setInternalState2 = InternalStateModule2.set;
+      var internalStateGetterFor = InternalStateModule2.getterFor;
+      module.exports = {
+        getConstructor: function(wrapper, CONSTRUCTOR_NAME, IS_MAP, ADDER) {
+          var Constructor = wrapper(function(that, iterable) {
+            anInstance(that, Prototype);
+            setInternalState2(that, {
+              type: CONSTRUCTOR_NAME,
+              index: create3(null),
+              first: void 0,
+              last: void 0,
+              size: 0
+            });
+            if (!DESCRIPTORS10)
+              that.size = 0;
+            if (!isNullOrUndefined5(iterable))
+              iterate2(iterable, that[ADDER], { that: that, AS_ENTRIES: IS_MAP });
+          });
+          var Prototype = Constructor.prototype;
+          var getInternalState3 = internalStateGetterFor(CONSTRUCTOR_NAME);
+          var define = function(that, key, value) {
+            var state = getInternalState3(that);
+            var entry = getEntry(that, key);
+            var previous, index;
+            if (entry) {
+              entry.value = value;
+            } else {
+              state.last = entry = {
+                index: index = fastKey(key, true),
+                key: key,
+                value: value,
+                previous: previous = state.last,
+                next: void 0,
+                removed: false
+              };
+              if (!state.first)
+                state.first = entry;
+              if (previous)
+                previous.next = entry;
+              if (DESCRIPTORS10)
+                state.size++;
+              else
+                that.size++;
+              if (index !== "F")
+                state.index[index] = entry;
+            }
+            return that;
+          };
+          var getEntry = function(that, key) {
+            var state = getInternalState3(that);
+            var index = fastKey(key);
+            var entry;
+            if (index !== "F")
+              return state.index[index];
+            for (entry = state.first; entry; entry = entry.next) {
+              if (entry.key == key)
+                return entry;
+            }
+          };
+          defineBuiltIns(Prototype, {
+            clear: function clear() {
+              var that = this;
+              var state = getInternalState3(that);
+              var data = state.index;
+              var entry = state.first;
+              while (entry) {
+                entry.removed = true;
+                if (entry.previous)
+                  entry.previous = entry.previous.next = void 0;
+                delete data[entry.index];
+                entry = entry.next;
+              }
+              state.first = state.last = void 0;
+              if (DESCRIPTORS10)
+                state.size = 0;
+              else
+                that.size = 0;
+            },
+            "delete": function(key) {
+              var that = this;
+              var state = getInternalState3(that);
+              var entry = getEntry(that, key);
+              if (entry) {
+                var next2 = entry.next;
+                var prev = entry.previous;
+                delete state.index[entry.index];
+                entry.removed = true;
+                if (prev)
+                  prev.next = next2;
+                if (next2)
+                  next2.previous = prev;
+                if (state.first == entry)
+                  state.first = next2;
+                if (state.last == entry)
+                  state.last = prev;
+                if (DESCRIPTORS10)
+                  state.size--;
+                else
+                  that.size--;
+              }
+              return !!entry;
+            },
+            forEach: function forEach3(callbackfn) {
+              var state = getInternalState3(this);
+              var boundFunction = bind2(callbackfn, arguments.length > 1 ? arguments[1] : void 0);
+              var entry;
+              while (entry = entry ? entry.next : state.first) {
+                boundFunction(entry.value, entry.key, this);
+                while (entry && entry.removed)
+                  entry = entry.previous;
+              }
+            },
+            has: function has(key) {
+              return !!getEntry(this, key);
+            }
+          });
+          defineBuiltIns(Prototype, IS_MAP ? {
+            get: function get3(key) {
+              var entry = getEntry(this, key);
+              return entry && entry.value;
+            },
+            set: function set(key, value) {
+              return define(this, key === 0 ? 0 : key, value);
+            }
+          } : {
+            add: function add(value) {
+              return define(this, value = value === 0 ? 0 : value, value);
+            }
+          });
+          if (DESCRIPTORS10)
+            defineBuiltInAccessor4(Prototype, "size", {
+              configurable: true,
+              get: function() {
+                return getInternalState3(this).size;
+              }
+            });
+          return Constructor;
+        },
+        setStrong: function(Constructor, CONSTRUCTOR_NAME, IS_MAP) {
+          var ITERATOR_NAME = CONSTRUCTOR_NAME + " Iterator";
+          var getInternalCollectionState = internalStateGetterFor(CONSTRUCTOR_NAME);
+          var getInternalIteratorState = internalStateGetterFor(ITERATOR_NAME);
+          defineIterator2(Constructor, CONSTRUCTOR_NAME, function(iterated, kind) {
+            setInternalState2(this, {
+              type: ITERATOR_NAME,
+              target: iterated,
+              state: getInternalCollectionState(iterated),
+              kind: kind,
+              last: void 0
+            });
+          }, function() {
+            var state = getInternalIteratorState(this);
+            var kind = state.kind;
+            var entry = state.last;
+            while (entry && entry.removed)
+              entry = entry.previous;
+            if (!state.target || !(state.last = entry = entry ? entry.next : state.state.first)) {
+              state.target = void 0;
+              return createIterResultObject2(void 0, true);
+            }
+            if (kind == "keys")
+              return createIterResultObject2(entry.key, false);
+            if (kind == "values")
+              return createIterResultObject2(entry.value, false);
+            return createIterResultObject2([entry.key, entry.value], false);
+          }, IS_MAP ? "entries" : "values", !IS_MAP, true);
+          setSpecies3(CONSTRUCTOR_NAME);
+        }
+      };
+    }
+  });
+
+  // node_modules/core-js/modules/es.map.constructor.js
+  var require_es_map_constructor = __commonJS({
+    "node_modules/core-js/modules/es.map.constructor.js": function() {
+      "use strict";
+      var collection = require_collection();
+      var collectionStrong = require_collection_strong();
+      collection("Map", function(init2) {
+        return function Map2() {
+          return init2(this, arguments.length ? arguments[0] : void 0);
+        };
+      }, collectionStrong);
     }
   });
 
@@ -4900,209 +5103,6 @@
       var nativeDelete;
       var nativeHas;
       var nativeGet;
-    }
-  });
-
-  // node_modules/core-js/internals/collection-strong.js
-  var require_collection_strong = __commonJS({
-    "node_modules/core-js/internals/collection-strong.js": function(exports, module) {
-      "use strict";
-      var create3 = require_object_create();
-      var defineBuiltInAccessor4 = require_define_built_in_accessor();
-      var defineBuiltIns = require_define_built_ins();
-      var bind2 = require_function_bind_context();
-      var anInstance = require_an_instance();
-      var isNullOrUndefined5 = require_is_null_or_undefined();
-      var iterate2 = require_iterate();
-      var defineIterator2 = require_iterator_define();
-      var createIterResultObject2 = require_create_iter_result_object();
-      var setSpecies3 = require_set_species();
-      var DESCRIPTORS10 = require_descriptors();
-      var fastKey = require_internal_metadata().fastKey;
-      var InternalStateModule2 = require_internal_state();
-      var setInternalState2 = InternalStateModule2.set;
-      var internalStateGetterFor = InternalStateModule2.getterFor;
-      module.exports = {
-        getConstructor: function(wrapper, CONSTRUCTOR_NAME, IS_MAP, ADDER) {
-          var Constructor = wrapper(function(that, iterable) {
-            anInstance(that, Prototype);
-            setInternalState2(that, {
-              type: CONSTRUCTOR_NAME,
-              index: create3(null),
-              first: void 0,
-              last: void 0,
-              size: 0
-            });
-            if (!DESCRIPTORS10)
-              that.size = 0;
-            if (!isNullOrUndefined5(iterable))
-              iterate2(iterable, that[ADDER], { that: that, AS_ENTRIES: IS_MAP });
-          });
-          var Prototype = Constructor.prototype;
-          var getInternalState3 = internalStateGetterFor(CONSTRUCTOR_NAME);
-          var define = function(that, key, value) {
-            var state = getInternalState3(that);
-            var entry = getEntry(that, key);
-            var previous, index;
-            if (entry) {
-              entry.value = value;
-            } else {
-              state.last = entry = {
-                index: index = fastKey(key, true),
-                key: key,
-                value: value,
-                previous: previous = state.last,
-                next: void 0,
-                removed: false
-              };
-              if (!state.first)
-                state.first = entry;
-              if (previous)
-                previous.next = entry;
-              if (DESCRIPTORS10)
-                state.size++;
-              else
-                that.size++;
-              if (index !== "F")
-                state.index[index] = entry;
-            }
-            return that;
-          };
-          var getEntry = function(that, key) {
-            var state = getInternalState3(that);
-            var index = fastKey(key);
-            var entry;
-            if (index !== "F")
-              return state.index[index];
-            for (entry = state.first; entry; entry = entry.next) {
-              if (entry.key == key)
-                return entry;
-            }
-          };
-          defineBuiltIns(Prototype, {
-            clear: function clear() {
-              var that = this;
-              var state = getInternalState3(that);
-              var data = state.index;
-              var entry = state.first;
-              while (entry) {
-                entry.removed = true;
-                if (entry.previous)
-                  entry.previous = entry.previous.next = void 0;
-                delete data[entry.index];
-                entry = entry.next;
-              }
-              state.first = state.last = void 0;
-              if (DESCRIPTORS10)
-                state.size = 0;
-              else
-                that.size = 0;
-            },
-            "delete": function(key) {
-              var that = this;
-              var state = getInternalState3(that);
-              var entry = getEntry(that, key);
-              if (entry) {
-                var next2 = entry.next;
-                var prev = entry.previous;
-                delete state.index[entry.index];
-                entry.removed = true;
-                if (prev)
-                  prev.next = next2;
-                if (next2)
-                  next2.previous = prev;
-                if (state.first == entry)
-                  state.first = next2;
-                if (state.last == entry)
-                  state.last = prev;
-                if (DESCRIPTORS10)
-                  state.size--;
-                else
-                  that.size--;
-              }
-              return !!entry;
-            },
-            forEach: function forEach3(callbackfn) {
-              var state = getInternalState3(this);
-              var boundFunction = bind2(callbackfn, arguments.length > 1 ? arguments[1] : void 0);
-              var entry;
-              while (entry = entry ? entry.next : state.first) {
-                boundFunction(entry.value, entry.key, this);
-                while (entry && entry.removed)
-                  entry = entry.previous;
-              }
-            },
-            has: function has(key) {
-              return !!getEntry(this, key);
-            }
-          });
-          defineBuiltIns(Prototype, IS_MAP ? {
-            get: function get3(key) {
-              var entry = getEntry(this, key);
-              return entry && entry.value;
-            },
-            set: function set(key, value) {
-              return define(this, key === 0 ? 0 : key, value);
-            }
-          } : {
-            add: function add(value) {
-              return define(this, value = value === 0 ? 0 : value, value);
-            }
-          });
-          if (DESCRIPTORS10)
-            defineBuiltInAccessor4(Prototype, "size", {
-              configurable: true,
-              get: function() {
-                return getInternalState3(this).size;
-              }
-            });
-          return Constructor;
-        },
-        setStrong: function(Constructor, CONSTRUCTOR_NAME, IS_MAP) {
-          var ITERATOR_NAME = CONSTRUCTOR_NAME + " Iterator";
-          var getInternalCollectionState = internalStateGetterFor(CONSTRUCTOR_NAME);
-          var getInternalIteratorState = internalStateGetterFor(ITERATOR_NAME);
-          defineIterator2(Constructor, CONSTRUCTOR_NAME, function(iterated, kind) {
-            setInternalState2(this, {
-              type: ITERATOR_NAME,
-              target: iterated,
-              state: getInternalCollectionState(iterated),
-              kind: kind,
-              last: void 0
-            });
-          }, function() {
-            var state = getInternalIteratorState(this);
-            var kind = state.kind;
-            var entry = state.last;
-            while (entry && entry.removed)
-              entry = entry.previous;
-            if (!state.target || !(state.last = entry = entry ? entry.next : state.state.first)) {
-              state.target = void 0;
-              return createIterResultObject2(void 0, true);
-            }
-            if (kind == "keys")
-              return createIterResultObject2(entry.key, false);
-            if (kind == "values")
-              return createIterResultObject2(entry.value, false);
-            return createIterResultObject2([entry.key, entry.value], false);
-          }, IS_MAP ? "entries" : "values", !IS_MAP, true);
-          setSpecies3(CONSTRUCTOR_NAME);
-        }
-      };
-    }
-  });
-
-  // node_modules/core-js/modules/es.map.constructor.js
-  var require_es_map_constructor = __commonJS({
-    "node_modules/core-js/modules/es.map.constructor.js": function() {
-      "use strict";
-      var collection = require_collection();
-      var collectionStrong = require_collection_strong();
-      collection("Map", function(init2) {
-        return function Map2() {
-          return init2(this, arguments.length ? arguments[0] : void 0);
-        };
-      }, collectionStrong);
     }
   });
 
@@ -15815,6 +15815,9 @@
   // srcts/src/components/errorConsole.ts
   var import_es_array_iterator36 = __toESM(require_es_array_iterator());
 
+  // node_modules/core-js/modules/es.map.js
+  require_es_map_constructor();
+
   // node_modules/@lit/reactive-element/reactive-element.js
   var import_es_regexp_exec10 = __toESM(require_es_regexp_exec(), 1);
 
@@ -15849,9 +15852,6 @@
 
   // node_modules/core-js/modules/es.weak-map.js
   require_es_weak_map_constructor();
-
-  // node_modules/core-js/modules/es.map.js
-  require_es_map_constructor();
 
   // node_modules/core-js/modules/es.set.js
   require_es_set_constructor();
@@ -16587,7 +16587,7 @@
   }
   function _wrapNativeSuper(Class) {
     var _cache = typeof Map === "function" ? /* @__PURE__ */ new Map() : void 0;
-    _wrapNativeSuper = function _wrapNativeSuper3(Class2) {
+    _wrapNativeSuper = function _wrapNativeSuper4(Class2) {
       if (Class2 === null || !_isNativeFunction(Class2))
         return Class2;
       if (typeof Class2 !== "function") {
@@ -16610,7 +16610,7 @@
     if (_isNativeReflectConstruct21()) {
       _construct = Reflect.construct.bind();
     } else {
-      _construct = function _construct3(Parent2, args2, Class2) {
+      _construct = function _construct4(Parent2, args2, Class2) {
         var a3 = [null];
         a3.push.apply(a3, args2);
         var Constructor = Function.bind.apply(Parent2, a3);
@@ -18333,7 +18333,7 @@
   }
   function _wrapNativeSuper2(Class) {
     var _cache = typeof Map === "function" ? /* @__PURE__ */ new Map() : void 0;
-    _wrapNativeSuper2 = function _wrapNativeSuper3(Class2) {
+    _wrapNativeSuper2 = function _wrapNativeSuper4(Class2) {
       if (Class2 === null || !_isNativeFunction2(Class2))
         return Class2;
       if (typeof Class2 !== "function") {
@@ -18356,7 +18356,7 @@
     if (_isNativeReflectConstruct24()) {
       _construct2 = Reflect.construct.bind();
     } else {
-      _construct2 = function _construct3(Parent2, args2, Class2) {
+      _construct2 = function _construct4(Parent2, args2, Class2) {
         var a3 = [null];
         a3.push.apply(a3, args2);
         var Constructor = Function.bind.apply(Parent2, a3);
@@ -18454,6 +18454,46 @@
   var _templateObject3;
   var _templateObject4;
   var _templateObject5;
+  function _wrapNativeSuper3(Class) {
+    var _cache = typeof Map === "function" ? /* @__PURE__ */ new Map() : void 0;
+    _wrapNativeSuper3 = function _wrapNativeSuper4(Class2) {
+      if (Class2 === null || !_isNativeFunction3(Class2))
+        return Class2;
+      if (typeof Class2 !== "function") {
+        throw new TypeError("Super expression must either be null or a function");
+      }
+      if (typeof _cache !== "undefined") {
+        if (_cache.has(Class2))
+          return _cache.get(Class2);
+        _cache.set(Class2, Wrapper);
+      }
+      function Wrapper() {
+        return _construct3(Class2, arguments, _getPrototypeOf25(this).constructor);
+      }
+      Wrapper.prototype = Object.create(Class2.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } });
+      return _setPrototypeOf25(Wrapper, Class2);
+    };
+    return _wrapNativeSuper3(Class);
+  }
+  function _construct3(Parent, args, Class) {
+    if (_isNativeReflectConstruct25()) {
+      _construct3 = Reflect.construct.bind();
+    } else {
+      _construct3 = function _construct4(Parent2, args2, Class2) {
+        var a3 = [null];
+        a3.push.apply(a3, args2);
+        var Constructor = Function.bind.apply(Parent2, a3);
+        var instance = new Constructor();
+        if (Class2)
+          _setPrototypeOf25(instance, Class2.prototype);
+        return instance;
+      };
+    }
+    return _construct3.apply(null, arguments);
+  }
+  function _isNativeFunction3(fn) {
+    return Function.toString.call(fn).indexOf("[native code]") !== -1;
+  }
   function _regeneratorRuntime6() {
     "use strict";
     _regeneratorRuntime6 = function _regeneratorRuntime15() {
@@ -18956,12 +18996,36 @@
     headline: {},
     message: {}
   });
-  _defineProperty11(ShinyErrorMessage, "styles", [i(_templateObject5 || (_templateObject5 = _taggedTemplateLiteral(['\n      :host {\n        color: var(--red-11);\n        display: block;\n        font-size: var(--font-md);\n\n        position: relative;\n        --icon-size: var(--font-lg)\n\n        /* Reset box sizing */\n        box-sizing: border-box;\n      }\n\n      .container {\n        display: flex;\n        gap: var(--space-2);\n      }\n\n      .contents {\n        width: 40ch;\n        display: flex;\n        flex-direction: column;\n        gap: var(--space-1);\n        padding-block-start: 0;\n        padding-block-end: var(--space-3);\n        overflow: auto;\n      }\n\n      :host(:last-of-type) .contents {\n\n        padding-block-end: var(--space-1);\n      }\n\n      .contents > h3 {\n        font-size: 1em;\n        font-weight: 500;\n        color: var(--red-12);\n      }\n\n      .contents > * {\n        margin-block: 0;\n      }\n\n      .error-message {\n        font-family: "Courier New", Courier, monospace;\n      }\n\n      .decoration-container {\n        flex-shrink: 0;\n        position: relative;\n\n        --line-w: 2px;\n        --dot-size: 11px;\n      }\n\n      :host(:hover) .decoration-container {\n        --scale: 1.25;\n      }\n\n      .vertical-line {\n        margin-inline: auto;\n        width: var(--line-w);\n        height: 100%;\n\n        background-color: var(--red-10);\n      }\n\n      :host(:first-of-type) .vertical-line {\n        height: calc(100% - var(--dot-size));\n        margin-top: var(--dot-size);\n      }\n\n      .dot {\n        position: absolute;\n        width: var(--dot-size);\n        height: var(--dot-size);\n        top: calc(-1px +  var(--dot-size) / 2);\n        left: calc(50% - var(--dot-size) / 2);\n        border-radius: 100%;\n        transform: scale(var(--scale, 1));\n\n        color: var(--red-6);\n        background-color: var(--red-10);\n      }\n\n      .actions {\n        transform: scaleX(0);\n        transition: transform calc(var(--animation-speed) / 2) ease-in-out;\n        display: flex;\n        justify-content: center;\n        flex-direction: column;\n      }\n\n      /* Delay transition on mouseout so the buttons don\'t jump away if the user\n      overshoots them with their mouse */\n      :host(:not(:hover)) .actions {\n        transition-delay: 0.15s;\n      }\n\n      :host(:hover) .actions {\n        transform: scaleX(1);\n      }\n\n      ', "\n\n      .copy-button {\n        padding: 0;\n        width: var(--space-8);\n        height: var(--space-8);\n        position: relative;\n        --pad: var(--space-2);\n      }\n\n      .copy-button-inner {\n        position: relative;\n        width: 100%;\n        height: 100%;\n        border-radius: inherit;\n        transition: transform 0.5s;\n        transform-style: preserve-3d;\n      }\n\n      /* Animate flipping to the other side when the .copy-success class is\n      added to the host */\n      :host(.copy-success) .copy-button-inner {\n        transform: rotateY(180deg);\n      }\n\n      /* Position the front and back side */\n      .copy-button .front,\n      .copy-button .back {\n        --side: calc(100% - 2 * var(--pad));\n        position: absolute;\n        inset: var(--pad);\n        height: var(--side);\n        width: var(--side);\n        -webkit-backface-visibility: hidden; /* Safari */\n        backface-visibility: hidden;\n      }\n\n      .copy-button:hover .copy-button-inner {\n        background-color: var(--gray-2);\n      }\n\n      /* Style the back side */\n      .copy-button .back {\n        --pad: var(--space-1);\n        color: var(--green-8);\n        transform: rotateY(180deg);\n      }\n    "])), buttonStyles)]);
+  _defineProperty11(ShinyErrorMessage, "styles", [i(_templateObject5 || (_templateObject5 = _taggedTemplateLiteral(['\n      :host {\n        color: var(--red-11);\n        display: block;\n        font-size: var(--font-md);\n\n        position: relative;\n        --icon-size: var(--font-lg)\n\n        /* Reset box sizing */\n        box-sizing: border-box;\n      }\n\n      .container {\n        display: flex;\n        gap: var(--space-2);\n      }\n\n      .contents {\n        width: 40ch;\n        display: flex;\n        flex-direction: column;\n        gap: var(--space-1);\n        padding-block-start: 0;\n        padding-block-end: var(--space-3);\n        overflow: auto;\n      }\n\n      :host(:last-of-type) .contents {\n\n        padding-block-end: var(--space-1);\n      }\n\n      .contents > h3 {\n        font-size: 1em;\n        font-weight: 500;\n        color: var(--red-12);\n      }\n\n      .contents > * {\n        margin-block: 0;\n      }\n\n      .error-message {\n        font-family: "Courier New", Courier, monospace;\n        white-space: pre-wrap;\n      }\n\n      .decoration-container {\n        flex-shrink: 0;\n        position: relative;\n\n        --line-w: 2px;\n        --dot-size: 11px;\n      }\n\n      :host(:hover) .decoration-container {\n        --scale: 1.25;\n      }\n\n      .vertical-line {\n        margin-inline: auto;\n        width: var(--line-w);\n        height: 100%;\n\n        background-color: var(--red-10);\n      }\n\n      :host(:first-of-type) .vertical-line {\n        height: calc(100% - var(--dot-size));\n        margin-top: var(--dot-size);\n      }\n\n      .dot {\n        position: absolute;\n        width: var(--dot-size);\n        height: var(--dot-size);\n        top: calc(-1px +  var(--dot-size) / 2);\n        left: calc(50% - var(--dot-size) / 2);\n        border-radius: 100%;\n        transform: scale(var(--scale, 1));\n\n        color: var(--red-6);\n        background-color: var(--red-10);\n      }\n\n      .actions {\n        transform: scaleX(0);\n        transition: transform calc(var(--animation-speed) / 2) ease-in-out;\n        display: flex;\n        justify-content: center;\n        flex-direction: column;\n      }\n\n      /* Delay transition on mouseout so the buttons don\'t jump away if the user\n      overshoots them with their mouse */\n      :host(:not(:hover)) .actions {\n        transition-delay: 0.15s;\n      }\n\n      :host(:hover) .actions {\n        transform: scaleX(1);\n      }\n\n      ', "\n\n      .copy-button {\n        padding: 0;\n        width: var(--space-8);\n        height: var(--space-8);\n        position: relative;\n        --pad: var(--space-2);\n      }\n\n      .copy-button-inner {\n        position: relative;\n        width: 100%;\n        height: 100%;\n        border-radius: inherit;\n        transition: transform 0.5s;\n        transform-style: preserve-3d;\n      }\n\n      /* Animate flipping to the other side when the .copy-success class is\n      added to the host */\n      :host(.copy-success) .copy-button-inner {\n        transform: rotateY(180deg);\n      }\n\n      /* Position the front and back side */\n      .copy-button .front,\n      .copy-button .back {\n        --side: calc(100% - 2 * var(--pad));\n        position: absolute;\n        inset: var(--pad);\n        height: var(--side);\n        width: var(--side);\n        -webkit-backface-visibility: hidden; /* Safari */\n        backface-visibility: hidden;\n      }\n\n      .copy-button:hover .copy-button-inner {\n        background-color: var(--gray-2);\n      }\n\n      /* Style the back side */\n      .copy-button .back {\n        --pad: var(--space-1);\n        color: var(--green-8);\n        transform: rotateY(180deg);\n      }\n    "])), buttonStyles)]);
   customElements.define("shiny-error-message", ShinyErrorMessage);
-  function showErrorInClientConsole(e4) {
+  function showShinyClientMessage(_ref) {
+    var _ref$headline = _ref.headline, headline = _ref$headline === void 0 ? "" : _ref$headline, message = _ref.message, _ref$status = _ref.status, status = _ref$status === void 0 ? "warning" : _ref$status;
+    var consoleMessage = "[shiny] ".concat(headline).concat(headline ? " - " : "").concat(message);
+    switch (status) {
+      case "error":
+        console.error(consoleMessage);
+        break;
+      case "warning":
+        console.warn(consoleMessage);
+        break;
+      default:
+        console.log(consoleMessage);
+        break;
+    }
     if (!Shiny.inDevMode()) {
       return;
     }
+    var errorConsoleContainer = document.querySelector("shiny-error-console");
+    if (!errorConsoleContainer) {
+      errorConsoleContainer = document.createElement("shiny-error-console");
+      document.body.appendChild(errorConsoleContainer);
+    }
+    var errorConsole = document.createElement("shiny-error-message");
+    errorConsole.setAttribute("headline", headline);
+    errorConsole.setAttribute("message", message);
+    errorConsoleContainer.appendChild(errorConsole);
+  }
+  function showErrorInClientConsole(e4) {
     var errorMsg = null;
     var headline = "Error on client while running Shiny app";
     if (typeof e4 === "string") {
@@ -18974,16 +19038,39 @@
     } else {
       errorMsg = "Unknown error";
     }
-    var errorConsoleContainer = document.querySelector("shiny-error-console");
-    if (!errorConsoleContainer) {
-      errorConsoleContainer = document.createElement("shiny-error-console");
-      document.body.appendChild(errorConsoleContainer);
-    }
-    var errorConsole = document.createElement("shiny-error-message");
-    errorConsole.setAttribute("headline", headline || "");
-    errorConsole.setAttribute("message", errorMsg);
-    errorConsoleContainer.appendChild(errorConsole);
+    showShinyClientMessage({
+      headline: headline,
+      message: errorMsg,
+      status: "error"
+    });
   }
+  var ShinyClientMessageEvent = /* @__PURE__ */ function(_CustomEvent) {
+    _inherits25(ShinyClientMessageEvent2, _CustomEvent);
+    var _super3 = _createSuper25(ShinyClientMessageEvent2);
+    function ShinyClientMessageEvent2(detail) {
+      _classCallCheck33(this, ShinyClientMessageEvent2);
+      return _super3.call(this, "shiny:client-message", {
+        detail: detail,
+        bubbles: true,
+        cancelable: true
+      });
+    }
+    return _createClass33(ShinyClientMessageEvent2);
+  }(/* @__PURE__ */ _wrapNativeSuper3(CustomEvent));
+  window.addEventListener("shiny:client-message", function(ev) {
+    if (!(ev instanceof CustomEvent)) {
+      throw new Error("[shiny] shiny:client-message expected a CustomEvent");
+    }
+    var _ev$detail = ev.detail, headline = _ev$detail.headline, message = _ev$detail.message, status = _ev$detail.status;
+    if (!message) {
+      throw new Error("[shiny] shiny:client-message expected a `message` property in `event.detail`.");
+    }
+    showShinyClientMessage({
+      headline: headline,
+      message: message,
+      status: status
+    });
+  });
 
   // srcts/src/imageutils/resetBrush.ts
   function resetBrush(brushId) {
@@ -20526,8 +20613,9 @@
   }
   var bindingsRegistry = function() {
     var bindings = /* @__PURE__ */ new Map();
-    function checkValidity() {
+    function checkValidity(scope) {
       var duplicateIds = /* @__PURE__ */ new Map();
+      var problems = /* @__PURE__ */ new Set();
       bindings.forEach(function(idTypes, id) {
         var counts = {
           input: 0,
@@ -20536,17 +20624,22 @@
         idTypes.forEach(function(type) {
           return counts[type] += 1;
         });
-        if (counts.input === 1 && counts.output === 1 && !Shiny.inDevMode()) {
+        if (counts.input + counts.output < 2) {
           return;
         }
-        if (counts.input + counts.output > 1) {
-          duplicateIds.set(id, counts);
+        duplicateIds.set(id, counts);
+        if (counts.input > 1) {
+          problems.add("input");
+        }
+        if (counts.output > 1) {
+          problems.add("output");
+        }
+        if (counts.input >= 1 && counts.output >= 1) {
+          problems.add("shared");
         }
       });
       if (duplicateIds.size === 0)
-        return {
-          status: "ok"
-        };
+        return;
       var duplicateIdMsg = Array.from(duplicateIds.entries()).map(function(_ref) {
         var _ref2 = _slicedToArray4(_ref, 2), id = _ref2[0], counts = _ref2[1];
         var messages = [pluralize(counts.input, "input"), pluralize(counts.output, "output")].filter(function(msg) {
@@ -20554,13 +20647,25 @@
         }).join(" and ");
         return '- "'.concat(id, '": ').concat(messages);
       }).join("\n");
-      return {
-        status: "error",
-        error: new ShinyClientError({
-          headline: "Duplicate input/output IDs found",
-          message: "The following ".concat(duplicateIds.size === 1 ? "ID was" : "IDs were", " repeated:\n").concat(duplicateIdMsg)
-        })
-      };
+      var txtVerb = "Duplicate";
+      var txtNoun = "input/output";
+      if (problems.has("input") && problems.has("output")) {
+      } else if (problems.has("input")) {
+        txtNoun = "input";
+      } else if (problems.has("output")) {
+        txtNoun = "output";
+      } else if (problems.has("shared")) {
+        txtVerb = "Shared";
+      }
+      var txtIdsWere = duplicateIds.size == 1 ? "ID was" : "IDs were";
+      var headline = "".concat(txtVerb, " ").concat(txtNoun, " ").concat(txtIdsWere, " found");
+      var message = "The following ".concat(txtIdsWere, " used for more than one ").concat(problems.has("shared") ? "input/output" : txtNoun, ":\n").concat(duplicateIdMsg);
+      var event = new ShinyClientMessageEvent({
+        headline: headline,
+        message: message
+      });
+      var scopeElement = scope instanceof HTMLElement ? scope : scope.get(0);
+      (scopeElement || window).dispatchEvent(event);
     }
     function addBinding(id, bindingType) {
       var existingBinding = bindings.get(id);
@@ -20793,7 +20898,7 @@
   }
   function _bindAll2() {
     _bindAll2 = _asyncToGenerator8(/* @__PURE__ */ _regeneratorRuntime8().mark(function _callee2(shinyCtx, scope) {
-      var currentInputs, bindingValidity;
+      var currentInputs;
       return _regeneratorRuntime8().wrap(function _callee2$(_context2) {
         while (1)
           switch (_context2.prev = _context2.next) {
@@ -20802,21 +20907,9 @@
               return bindOutputs(shinyCtx, scope);
             case 2:
               currentInputs = bindInputs(shinyCtx, scope);
-              bindingValidity = bindingsRegistry.checkValidity();
-              if (!(bindingValidity.status === "error")) {
-                _context2.next = 10;
-                break;
-              }
-              if (!Shiny.inDevMode()) {
-                _context2.next = 9;
-                break;
-              }
-              throw bindingValidity.error;
-            case 9:
-              console.warn("[shiny] " + bindingValidity.error.message);
-            case 10:
+              bindingsRegistry.checkValidity(scope);
               return _context2.abrupt("return", currentInputs);
-            case 11:
+            case 5:
             case "end":
               return _context2.stop();
           }

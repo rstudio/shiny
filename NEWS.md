@@ -8,6 +8,8 @@
 
 * Improve collection of deep stack traces (stack traces that are tracked across steps in an async promise chain) with `coro` async generators such as `elmer` chat streams. Previously, Shiny treated each iteration of an async generator as a distinct deep stack, leading to pathologically long stack traces; now, Shiny only keeps/prints unique deep stack trace, discarding duplicates. (#4156)
 
+* Added an example to the `ExtendedTask` documentation. (@daattali #4087)
+
 ## Bug fixes
 
 * Fixed a bug in `conditionalPanel()` that would cause the panel to repeatedly show/hide itself when the provided condition was not boolean. (@kamilzyla, #4127)

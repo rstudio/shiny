@@ -83,7 +83,7 @@ Imports:
     R6 (>= 2.0),
     sourcetools,
     later (>= 1.0.0),
-    promises (>= 1.1.0),
+    promises (>= 1.3.2),
     tools,
     crayon,
     rlang (>= 0.4.10),
@@ -95,6 +95,7 @@ Imports:
     cachem (>= 1.1.0),
     lifecycle (>= 0.2.0)
 Suggests:
+    coro (>= 1.1.0),
     datasets,
     DT,
     Cairo (>= 1.5-5),

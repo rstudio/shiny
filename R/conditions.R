@@ -130,6 +130,44 @@ captureStackTraces <- function(expr) {
 #' @include globals.R
 .globals$deepStack <- NULL
 
+getCallStackDigest <- function(callStack, warn = FALSE) {
+  dg <- attr(callStack, "shiny.stack.digest", exact = TRUE)
+  if (!is.null(dg)) {
+    return(dg)
+  }
+
+  if (isTRUE(warn)) {
+    rlang::warn(
+      "Call stack doesn't have a cached digest; expensively computing one now",
+      .frequency = "once",
+      .frequency_id = "deepstack-uncached-digest-warning"
+    )
+  }
+
+  rlang::hash(getCallNames(callStack))
+}
+
+saveCallStackDigest <- function(callStack) {
+  attr(callStack, "shiny.stack.digest") <- getCallStackDigest(callStack, warn = FALSE)
+  callStack
+}
+
+# Appends a call stack to a list of call stacks, but only if it's not already
+# in the list. The list is deduplicated by digest; ideally the digests on the
+# list are cached before calling this function (you will get a warning if not).
+appendCallStackWithDedupe <- function(lst, x) {
+  digests <- vapply(lst, getCallStackDigest, character(1), warn = TRUE)
+  xdigest <- getCallStackDigest(x, warn = TRUE)
+  stopifnot(all(nzchar(digests)))
+  stopifnot(length(xdigest) == 1)
+  stopifnot(nzchar(xdigest))
+  if (xdigest %in% digests) {
+    return(lst)
+  } else {
+    return(c(lst, list(x)))
+  }
+}
+
 createStackTracePromiseDomain <- function() {
   # These are actually stateless, we wouldn't have to create a new one each time
   # if we didn't want to. They're pretty cheap though.
@@ -142,13 +180,14 @@ createStackTracePromiseDomain <- function() {
         currentStack <- sys.calls()
         currentParents <- sys.parents()
         attr(currentStack, "parents") <- currentParents
+        currentStack <- saveCallStackDigest(currentStack)
         currentDeepStack <- .globals$deepStack
       }
       function(...) {
         # Fulfill time
         if (deepStacksEnabled()) {
           origDeepStack <- .globals$deepStack
-          .globals$deepStack <- c(currentDeepStack, list(currentStack))
+          .globals$deepStack <- appendCallStackWithDedupe(currentDeepStack, currentStack)
           on.exit(.globals$deepStack <- origDeepStack, add = TRUE)
         }
 
@@ -165,13 +204,14 @@ createStackTracePromiseDomain <- function() {
         currentStack <- sys.calls()
         currentParents <- sys.parents()
         attr(currentStack, "parents") <- currentParents
+        currentStack <- saveCallStackDigest(currentStack)
         currentDeepStack <- .globals$deepStack
       }
       function(...) {
         # Fulfill time
         if (deepStacksEnabled()) {
           origDeepStack <- .globals$deepStack
-          .globals$deepStack <- c(currentDeepStack, list(currentStack))
+          .globals$deepStack <- appendCallStackWithDedupe(currentDeepStack, currentStack)
           on.exit(.globals$deepStack <- origDeepStack, add = TRUE)
         }
 
@@ -199,6 +239,7 @@ doCaptureStack <- function(e) {
     calls <- sys.calls()
     parents <- sys.parents()
     attr(calls, "parents") <- parents
+    calls <- saveCallStackDigest(calls)
     attr(e, "stack.trace") <- calls
   }
   if (deepStacksEnabled()) {
@@ -281,86 +322,113 @@ printStackTrace <- function(cond,
   full = get_devmode_option("shiny.fullstacktrace", FALSE),
   offset = getOption("shiny.stacktraceoffset", TRUE)) {
 
-  should_drop <- !full
-  should_strip <- !full
-  should_prune <- !full
-
-  stackTraceCalls <- c(
+  stackTraces <- c(
     attr(cond, "deep.stack.trace", exact = TRUE),
     list(attr(cond, "stack.trace", exact = TRUE))
   )
 
-  stackTraceParents <- lapply(stackTraceCalls, attr, which = "parents", exact = TRUE)
-  stackTraceCallNames <- lapply(stackTraceCalls, getCallNames)
-  stackTraceCalls <- lapply(stackTraceCalls, offsetSrcrefs, offset = offset)
-
-  # Use dropTrivialFrames logic to remove trailing bits (.handleSimpleError, h)
-  if (should_drop) {
-    # toKeep is a list of logical vectors, of which elements (stack frames) to keep
-    toKeep <- lapply(stackTraceCallNames, dropTrivialFrames)
-    # We apply the list of logical vector indices to each data structure
-    stackTraceCalls <- mapply(stackTraceCalls, FUN = `[`, toKeep, SIMPLIFY = FALSE)
-    stackTraceCallNames <- mapply(stackTraceCallNames, FUN = `[`, toKeep, SIMPLIFY = FALSE)
-    stackTraceParents <- mapply(stackTraceParents, FUN = `[`, toKeep, SIMPLIFY = FALSE)
+  # Stripping of stack traces is the one step where the different stack traces
+  # interact. So we need to do this in one go, instead of individually within
+  # printOneStackTrace.
+  if (!full) {
+    stripResults <- stripStackTraces(lapply(stackTraces, getCallNames))
+  } else {
+    # If full is TRUE, we don't want to strip anything
+    stripResults <- rep_len(list(TRUE), length(stackTraces))
   }
 
-  delayedAssign("all_true", {
-    # List of logical vectors that are all TRUE, the same shape as
-    # stackTraceCallNames. Delay the evaluation so we don't create it unless
-    # we need it, but if we need it twice then we don't pay to create it twice.
-    lapply(stackTraceCallNames, function(st) {
-      rep_len(TRUE, length(st))
-    })
-  })
-
-  # stripStackTraces and lapply(stackTraceParents, pruneStackTrace) return lists
-  # of logical vectors. Use mapply(FUN = `&`) to boolean-and each pair of the
-  # logical vectors.
-  toShow <- mapply(
-    if (should_strip) stripStackTraces(stackTraceCallNames) else all_true,
-    if (should_prune) lapply(stackTraceParents, pruneStackTrace) else all_true,
-    FUN = `&`,
+  mapply(
+    seq_along(stackTraces),
+    rev(stackTraces),
+    rev(stripResults),
+    FUN = function(i, trace, stripResult) {
+      if (is.integer(trace)) {
+        noun <- if (trace > 1L) "traces" else "trace"
+        message("[ reached getOption(\"shiny.deepstacktrace\") -- omitted ", trace, " more stack ", noun, " ]")
+      } else {
+        if (i != 1) {
+          message("From earlier call:")
+        }
+        printOneStackTrace(
+          stackTrace = trace,
+          stripResult = stripResult,
+          full = full,
+          offset = offset
+        )
+      }
+      # No mapply return value--we're just printing
+      NULL
+    },
     SIMPLIFY = FALSE
   )
 
-  dfs <- mapply(seq_along(stackTraceCalls), rev(stackTraceCalls), rev(stackTraceCallNames), rev(toShow), FUN = function(i, calls, nms, index) {
-    st <- data.frame(
-      num = rev(which(index)),
-      call = rev(nms[index]),
-      loc = rev(getLocs(calls[index])),
-      category = rev(getCallCategories(calls[index])),
-      stringsAsFactors = FALSE
-    )
-
-    if (i != 1) {
-      message("From earlier call:")
-    }
-
-    if (nrow(st) == 0) {
-      message("  [No stack trace available]")
-    } else {
-      width <- floor(log10(max(st$num))) + 1
-      formatted <- paste0(
-        "  ",
-        formatC(st$num, width = width),
-        ": ",
-        mapply(paste0(st$call, st$loc), st$category, FUN = function(name, category) {
-          if (category == "pkg")
-            crayon::silver(name)
-          else if (category == "user")
-            crayon::blue$bold(name)
-          else
-            crayon::white(name)
-        }),
-        "\n"
-      )
-      cat(file = stderr(), formatted, sep = "")
-    }
-
-    st
-  }, SIMPLIFY = FALSE)
-
   invisible()
+}
+
+printOneStackTrace <- function(stackTrace, stripResult, full, offset) {
+  calls <- offsetSrcrefs(stackTrace, offset = offset)
+  callNames <- getCallNames(stackTrace)
+  parents <- attr(stackTrace, "parents", exact = TRUE)
+
+  should_drop <- !full
+  should_strip <- !full
+  should_prune <- !full
+
+  if (should_drop) {
+    toKeep <- dropTrivialFrames(callNames)
+    calls <- calls[toKeep]
+    callNames <- callNames[toKeep]
+    parents <- parents[toKeep]
+    stripResult <- stripResult[toKeep]
+  }
+
+  toShow <- rep(TRUE, length(callNames))
+  if (should_prune) {
+    toShow <- toShow & pruneStackTrace(parents)
+  }
+  if (should_strip) {
+    toShow <- toShow & stripResult
+  }
+
+  # If we're running in testthat, hide the parts of the stack trace that can
+  # vary based on how testthat was launched. It's critical that this is not
+  # happen at the same time as dropTrivialFrames, which happens before
+  # pruneStackTrace; because dropTrivialTestFrames removes calls from the top
+  # (or bottom? whichever is the oldest?) of the stack, it breaks `parents`
+  # which is based on absolute indices of calls. dropTrivialFrames gets away
+  # with this because it only removes calls from the opposite side of the stack.
+  toShow <- toShow & dropTrivialTestFrames(callNames)
+
+  st <- data.frame(
+    num = rev(which(toShow)),
+    call = rev(callNames[toShow]),
+    loc = rev(getLocs(calls[toShow])),
+    category = rev(getCallCategories(calls[toShow])),
+    stringsAsFactors = FALSE
+  )
+
+  if (nrow(st) == 0) {
+    message("  [No stack trace available]")
+  } else {
+    width <- floor(log10(max(st$num))) + 1
+    formatted <- paste0(
+      "  ",
+      formatC(st$num, width = width),
+      ": ",
+      mapply(paste0(st$call, st$loc), st$category, FUN = function(name, category) {
+        if (category == "pkg")
+          crayon::silver(name)
+        else if (category == "user")
+          crayon::blue$bold(name)
+        else
+          crayon::white(name)
+      }),
+      "\n"
+    )
+    cat(file = stderr(), formatted, sep = "")
+  }
+
+  invisible(st)
 }
 
 stripStackTraces <- function(stackTraces, values = FALSE) {
@@ -455,6 +523,33 @@ dropTrivialFrames <- function(callnames) {
   c(
     rep_len(TRUE, length(callnames) - toRemove),
     rep_len(FALSE, toRemove)
+  )
+}
+
+dropTrivialTestFrames <- function(callnames) {
+  if (!identical(Sys.getenv("TESTTHAT_IS_SNAPSHOT"), "true")) {
+    return(rep_len(TRUE, length(callnames)))
+  }
+
+  hideable <- callnames %in% c(
+    "test",
+    "devtools::test",
+    "test_check",
+    "testthat::test_check",
+    "test_dir",
+    "testthat::test_dir",
+    "test_file",
+    "testthat::test_file",
+    "test_local",
+    "testthat::test_local"
+  )
+
+  firstGoodCall <- min(which(!hideable))
+  toRemove <- firstGoodCall - 1L
+
+  c(
+    rep_len(FALSE, toRemove),
+    rep_len(TRUE, length(callnames) - toRemove)
   )
 }
 

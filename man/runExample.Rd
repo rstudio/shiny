@@ -33,7 +33,9 @@ interactive sessions only.}
 to the \code{shiny.host} option, if set, or \code{"127.0.0.1"} if not.}
 
 \item{display.mode}{The mode in which to display the example. Defaults to
-\code{showcase}, but may be set to \code{normal} to see the example without
+\code{"auto"}, which uses the value of \code{DisplayMode} in the example's
+\code{DESCRIPTION} file. Set to \code{"showcase"} to show the app code and
+description with the running app, or \code{"normal"} to see the example without
 code or commentary.}
 
 \item{package}{The package in which to find the example (defaults to

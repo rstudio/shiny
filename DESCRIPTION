@@ -95,6 +95,7 @@ Imports:
     cachem (>= 1.1.0),
     lifecycle (>= 0.2.0)
 Suggests:
+    coro (>= 1.1.0),
     datasets,
     DT,
     Cairo (>= 1.5-5),

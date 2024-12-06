@@ -91,7 +91,6 @@ const bindingsRegistry = (() => {
     | { status: "ok" } {
     type BindingCounts = { [T in BindingTypes]: number };
     const duplicateIds = new Map<string, BindingCounts>();
-    let status = "ok";
     const problems: Set<string> = new Set();
 
     // count duplicate IDs of each binding type
@@ -107,13 +106,6 @@ const bindingsRegistry = (() => {
       // reported to the user.
       duplicateIds.set(id, counts);
 
-      // Duplicated IDs are now always a warning. Before the ShinyClient console
-      // was added duplicate output IDs were errors in "production" mode. After
-      // the Shiny Client console was introduced, duplicate IDs were no longer
-      // production errors but *would* break apps in dev mode. Now, in v1.10+,
-      // duplicate IDs are always warnings in all modes for consistency.
-      status = "warning";
-
       if (counts.input > 1) {
         problems.add("input");
       }
@@ -126,6 +118,11 @@ const bindingsRegistry = (() => {
     });
 
     if (duplicateIds.size === 0) return { status: "ok" };
+    // Duplicated IDs are now always a warning. Before the ShinyClient console
+    // was added duplicate output IDs were errors in "production" mode. After
+    // the Shiny Client console was introduced, duplicate IDs were no longer
+    // production errors but *would* break apps in dev mode. Now, in v1.10+,
+    // duplicate IDs are always warnings in all modes for consistency.
 
     const duplicateIdMsg = Array.from(duplicateIds.entries())
       .map(([id, counts]) => {
@@ -158,16 +155,9 @@ const bindingsRegistry = (() => {
       problems.has("shared") ? "input/output" : txtNoun
     }:\n${duplicateIdMsg}`;
 
-    if (status === "warning") {
-      return {
-        status: "warning",
-        event: new ShinyClientMessageEvent({ headline, message }),
-      };
-    }
-
     return {
-      status: "error",
-      error: new ShinyClientError({ headline, message }),
+      status: "warning",
+      event: new ShinyClientMessageEvent({ headline, message }),
     };
   }
 

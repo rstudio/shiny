@@ -8,7 +8,6 @@ import type {
   InputRateDecorator,
   InputValidateDecorator,
 } from "../inputPolicies";
-import type { ShinyClientError } from "./error";
 import { shinyAppBindOutput, shinyAppUnbindOutput } from "./initedMethods";
 import { sendImageSizeFns } from "./sendImageSize";
 
@@ -79,16 +78,7 @@ const bindingsRegistry = (() => {
    * @returns ShinyClientMessageEvent if current ID bindings are invalid,
    * otherwise returns an ok status.
    */
-  function checkValidity():
-    | {
-        status: "error";
-        error: ShinyClientError;
-      }
-    | {
-        status: "warning";
-        event: ShinyClientMessageEvent;
-      }
-    | { status: "ok" } {
+  function checkValidity(scope: BindScope): void {
     type BindingCounts = { [T in BindingTypes]: number };
     const duplicateIds = new Map<string, BindingCounts>();
     const problems: Set<string> = new Set();
@@ -117,7 +107,7 @@ const bindingsRegistry = (() => {
       }
     });
 
-    if (duplicateIds.size === 0) return { status: "ok" };
+    if (duplicateIds.size === 0) return;
     // Duplicated IDs are now always a warning. Before the ShinyClient console
     // was added duplicate output IDs were errors in "production" mode. After
     // the Shiny Client console was introduced, duplicate IDs were no longer
@@ -155,10 +145,9 @@ const bindingsRegistry = (() => {
       problems.has("shared") ? "input/output" : txtNoun
     }:\n${duplicateIdMsg}`;
 
-    return {
-      status: "warning",
-      event: new ShinyClientMessageEvent({ headline, message }),
-    };
+    const event = new ShinyClientMessageEvent({ headline, message });
+    const scopeElement = scope instanceof HTMLElement ? scope : scope.get(0);
+    (scopeElement || window).dispatchEvent(event);
   }
 
   /**
@@ -453,13 +442,7 @@ async function _bindAll(
   // complete error message that contains everything they will need to fix. If
   // we threw as we saw collisions then the user would fix the first collision,
   // re-run, and then see the next collision, etc.
-  const bindingValidity = bindingsRegistry.checkValidity();
-  if (bindingValidity.status === "warning") {
-    const scopeElement = scope instanceof HTMLElement ? scope : scope.get(0);
-    (scopeElement || window).dispatchEvent(bindingValidity.event);
-  } else if (bindingValidity.status === "error") {
-    throw bindingValidity.error;
-  }
+  bindingsRegistry.checkValidity(scope);
 
   return currentInputs;
 }

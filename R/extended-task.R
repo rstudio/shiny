@@ -41,40 +41,49 @@
 #'   is, a function that quickly returns a promise) and allows even that very
 #'   session to immediately unblock and carry on with other user interactions.
 #'
-#' @examplesIf rlang::is_interactive()
+#' @examplesIf rlang::is_interactive() && rlang::is_installed("future")
 #'
 #' library(shiny)
 #' library(bslib)
 #' library(future)
 #' plan(multisession)
 #'
-#' ui <- page_sidebar(
-#'   sidebar = sidebar(
-#'     input_task_button("recalc", "Recalculate")
+#' ui <- page_fluid(
+#'   titlePanel("Extended Task Demo"),
+#'   p(
+#'     'Click the button below to perform a "calculation"',
+#'     "that takes a while to perform."
 #'   ),
-#'   textOutput("outval")
+#'   input_task_button("recalculate", "Recalculate"),
+#'   p(textOutput("result"))
 #' )
 #'
 #' server <- function(input, output) {
 #'   rand_task <- ExtendedTask$new(function() {
-#'     future({
-#'       # Slow operation goes here
-#'       Sys.sleep(2)
-#'       runif(1)
-#'     }, seed = TRUE)
+#'     future(
+#'       {
+#'         # Slow operation goes here
+#'         Sys.sleep(2)
+#'         sample(1:100, 1)
+#'       },
+#'       seed = TRUE
+#'     )
 #'   })
 #'
 #'   # Make button state reflect task.
 #'   # If using R >=4.1, you can do this instead:
-#'   # rand_task <- ExtendedTask$new(...) |> bind_task_button("recalc")
-#'   bind_task_button(rand_task, "recalc")
+#'   # rand_task <- ExtendedTask$new(...) |> bind_task_button("recalculate")
+#'   bind_task_button(rand_task, "recalculate")
 #'
-#'   observeEvent(input$recalc, {
+#'   observeEvent(input$recalculate, {
+#'     # Invoke the extended in an observer
 #'     rand_task$invoke()
 #'   })
 #'
-#'   output$outval <- renderText({
-#'     rand_task$result()
+#'   output$result <- renderText({
+#'     # React to updated results when the task completes
+#'     number <- rand_task$result()
+#'     paste0("Your number is ", number, ".")
 #'   })
 #' }
 #'

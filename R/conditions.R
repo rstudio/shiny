@@ -156,31 +156,16 @@ saveCallStackDigest <- function(callStack) {
 # in the list. The list is deduplicated by digest; ideally the digests on the
 # list are cached before calling this function (you will get a warning if not).
 appendCallStackWithDedupe <- function(lst, x) {
-  tryCatch({
-    digests <- vapply(lst, getCallStackDigest, character(1), warn = TRUE)
-    xdigest <- getCallStackDigest(x, warn = FALSE)
-    stopifnot(all(nzchar(digests)))
-    stopifnot(length(xdigest) == 1)
-    stopifnot(nzchar(xdigest))
-    if (xdigest %in% digests) {
-      return(lst)
-    } else {
-      return(c(lst, list(x)))
-    }
-  }, error = function(e) {
-    # Hopefully will never hit this. I'm only putting this in to be suuuper
-    # conservative about not letting our new deep stack trace dedupe logic crash
-    # the Shiny app.
-    if (in_devmode()) {
-      printError(e, full = TRUE)
-    }
-    rlang::warn(
-      "Failed to deduplicate deep stack traces; appending anyway",
-      .frequency = "once",
-      .frequency_id = "deepstack-deduplication-warning"
-    )
+  digests <- vapply(lst, getCallStackDigest, character(1), warn = TRUE)
+  xdigest <- getCallStackDigest(x, warn = TRUE)
+  stopifnot(all(nzchar(digests)))
+  stopifnot(length(xdigest) == 1)
+  stopifnot(nzchar(xdigest))
+  if (xdigest %in% digests) {
+    return(lst)
+  } else {
     return(c(lst, list(x)))
-  })
+  }
 }
 
 createStackTracePromiseDomain <- function() {

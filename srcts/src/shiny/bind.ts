@@ -8,7 +8,7 @@ import type {
   InputRateDecorator,
   InputValidateDecorator,
 } from "../inputPolicies";
-import { ShinyClientError } from "./error";
+import type { ShinyClientError } from "./error";
 import { shinyAppBindOutput, shinyAppUnbindOutput } from "./initedMethods";
 import { sendImageSizeFns } from "./sendImageSize";
 

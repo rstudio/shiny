@@ -20617,7 +20617,6 @@
     var bindings = /* @__PURE__ */ new Map();
     function checkValidity() {
       var duplicateIds = /* @__PURE__ */ new Map();
-      var status = "ok";
       var problems = /* @__PURE__ */ new Set();
       bindings.forEach(function(idTypes, id) {
         var counts = {
@@ -20631,7 +20630,6 @@
           return;
         }
         duplicateIds.set(id, counts);
-        status = "warning";
         if (counts.input > 1) {
           problems.add("input");
         }
@@ -20666,18 +20664,9 @@
       var txtIdsWere = duplicateIds.size == 1 ? "ID was" : "IDs were";
       var headline = "".concat(txtVerb, " ").concat(txtNoun, " ").concat(txtIdsWere, " found");
       var message = "The following ".concat(txtIdsWere, " used for more than one ").concat(problems.has("shared") ? "input/output" : txtNoun, ":\n").concat(duplicateIdMsg);
-      if (status === "warning") {
-        return {
-          status: "warning",
-          event: new ShinyClientMessageEvent({
-            headline: headline,
-            message: message
-          })
-        };
-      }
       return {
-        status: "error",
-        error: new ShinyClientError({
+        status: "warning",
+        event: new ShinyClientMessageEvent({
           headline: headline,
           message: message
         })

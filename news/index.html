@@ -54,6 +54,7 @@
 <ul><li><p>Small improvements to the default pulse busy indicator to better blend with any background. It’s also now slightly smaller by default. (<a href="https://github.com/rstudio/shiny/issues/4122" class="external-link">#4122</a>)</p></li>
 <li><p>When spinners and the pulse busy indicators are enabled, Shiny now shows the pulse indicator when dynamic UI elements are recalculating if no other spinners are present in the app. (<a href="https://github.com/rstudio/shiny/issues/4137" class="external-link">#4137</a>)</p></li>
 <li><p>Improve collection of deep stack traces (stack traces that are tracked across steps in an async promise chain) with <code>coro</code> async generators such as <code>elmer</code> chat streams. Previously, Shiny treated each iteration of an async generator as a distinct deep stack, leading to pathologically long stack traces; now, Shiny only keeps/prints unique deep stack trace, discarding duplicates. (<a href="https://github.com/rstudio/shiny/issues/4156" class="external-link">#4156</a>)</p></li>
+<li><p>Added an example to the <code>ExtendedTask</code> documentation. (<a href="https://github.com/daattali" class="external-link">@daattali</a> <a href="https://github.com/rstudio/shiny/issues/4087" class="external-link">#4087</a>)</p></li>
 </ul></div>
 <div class="section level3">
 <h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>

@@ -150,6 +150,7 @@ function getBoundingClientSizeBeforeZoom(el: HTMLElement): {
 } {
   const rect = el.getBoundingClientRect();
   // Cast to any because currentCSSZoom isn't in the type def of HTMLElement
+  // TODO: typescript >= 5.5.2 added this property to the type definition
   const zoom = (el as any).currentCSSZoom || 1;
   return {
     width: rect.width / zoom,

@@ -6873,6 +6873,14 @@
       return 1;
     }
   }
+  function getBoundingClientSizeBeforeZoom(el) {
+    var rect = el.getBoundingClientRect();
+    var zoom = el.currentCSSZoom || 1;
+    return {
+      width: rect.width / zoom,
+      height: rect.height / zoom
+    };
+  }
   function scopeExprToFunc(expr) {
     var exprEscaped = expr.replace(/[\\"']/g, "\\$&").replace(/\u0000/g, "\\0").replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/[\b]/g, "\\b");
     var func;
@@ -25282,7 +25290,7 @@
                   };
                   doSendImageSize = function _doSendImageSize() {
                     (0, import_jquery39.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(function() {
-                      var id = getIdFromEl(this), rect = this.getBoundingClientRect();
+                      var id = getIdFromEl(this), rect = getBoundingClientSizeBeforeZoom(this);
                       if (rect.width !== 0 || rect.height !== 0) {
                         inputs.setInput(".clientdata_output_" + id + "_width", rect.width);
                         inputs.setInput(".clientdata_output_" + id + "_height", rect.height);
@@ -25464,7 +25472,7 @@
                   };
                   initialValues = (0, _context3.t0)(_context3.t1, _context3.t2);
                   (0, import_jquery39.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(function() {
-                    var id = getIdFromEl(this), rect = this.getBoundingClientRect();
+                    var id = getIdFromEl(this), rect = getBoundingClientSizeBeforeZoom(this);
                     if (rect.width !== 0 || rect.height !== 0) {
                       initialValues[".clientdata_output_" + id + "_width"] = rect.width;
                       initialValues[".clientdata_output_" + id + "_height"] = rect.height;

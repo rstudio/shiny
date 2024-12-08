@@ -144,6 +144,20 @@ function pixelRatio(): number {
   }
 }
 
+function getBoundingClientSizeBeforeZoom(el: HTMLElement): {
+  width: number;
+  height: number;
+} {
+  const rect = el.getBoundingClientRect();
+  // Cast to any because currentCSSZoom isn't in the type def of HTMLElement
+  // TODO: typescript >= 5.5.2 added this property to the type definition
+  const zoom = (el as any).currentCSSZoom || 1;
+  return {
+    width: rect.width / zoom,
+    height: rect.height / zoom,
+  };
+}
+
 // Takes a string expression and returns a function that takes an argument.
 //
 // When the function is executed, it will evaluate that expression using
@@ -398,6 +412,7 @@ export {
   formatDateUTC,
   makeResizeFilter,
   pixelRatio,
+  getBoundingClientSizeBeforeZoom,
   scopeExprToFunc,
   asArray,
   mergeSort,

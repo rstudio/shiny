@@ -26,6 +26,8 @@
 
 * Updating the choices of a `selectizeInput()` via `updateSelectizeInput()` with `server = TRUE` no longer retains the selected choice as a deselected option if the current value is not part of the new choices. (@dvg-p4 #4142)
 
+* Fixed a bug where stack traces from `observeEvent` were being stripped of stack frames too aggressively.
+
 # shiny 1.9.1
 
 ## Bug fixes

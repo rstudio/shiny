@@ -846,13 +846,13 @@
 <p>Shiny can now display notifications on the client browser by using the <code><a href="../reference/showNotification.html">showNotification()</a></code> function. Use <a href="https://gallery.shinyapps.io/116-notifications/" class="external-link">this demo app</a> to play around with the notification API. Here’s a screenshot of a very simple notification (shown when the button is clicked):</p>
 <p align="center">
 <img src="http://shiny.rstudio.com/images/notification.png" alt="notification" width="50%"></p>
-<p><a href="https://shiny.rstudio.com/articles/notifications.html" class="external-link">Here</a>’s our article about it, and the <a href="https://shiny.rstudio.com/reference/shiny/latest/showNotification.html" class="external-link">reference documentation</a>.</p>
+<p><a href="https://shiny.rstudio.com/articles/notifications.html" class="external-link">Here</a>’s our article about it, and the <a href="https://shiny.posit.co/r/reference/shiny/latest/shownotification.html" class="external-link">reference documentation</a>.</p>
 </div>
 <div class="section level3">
 <h3 id="progress-indicators-0-14">Progress indicators<a class="anchor" aria-label="anchor" href="#progress-indicators-0-14"></a></h3>
 <p>If your Shiny app contains computations that take a long time to complete, a progress bar can improve the user experience by communicating how far along the computation is, and how much is left. Progress bars were added in Shiny 0.10.2. In Shiny 0.14, they were changed to use the notifications system, which gives them a different look.</p>
 <p><strong><em>Important note</em>:</strong> &gt; If you were already using progress bars and had customized them with your own CSS, you can add the <code>style = "old"</code> argument to your <code><a href="../reference/withProgress.html">withProgress()</a></code> call (or <code>Progress$new()</code>). This will result in the same appearance as before. You can also call <code>shinyOptions(progress.style = "old")</code> in your app’s server function to make all progress indicators use the old styling.</p>
-<p>To see new progress bars in action, see <a href="https://gallery.shinyapps.io/085-progress/" class="external-link">this app</a> in the gallery. You can also learn more about this in <a href="https://shiny.rstudio.com/articles/progress.html" class="external-link">our article</a> and in the reference documentation (either for the easier <a href="https://shiny.rstudio.com/reference/shiny/latest/withProgress.html" class="external-link"><code>withProgress</code> functional API</a> or the more complicated, but more powerful, <a href="https://shiny.rstudio.com/reference/shiny/latest/Progress.html" class="external-link"><code>Progress</code> object-oriented API</a>.</p>
+<p>To see new progress bars in action, see <a href="https://gallery.shinyapps.io/085-progress/" class="external-link">this app</a> in the gallery. You can also learn more about this in <a href="https://shiny.rstudio.com/articles/progress.html" class="external-link">our article</a> and in the reference documentation (either for the easier <a href="https://shiny.posit.co/r/reference/shiny/latest/withprogress.html" class="external-link"><code>withProgress</code> functional API</a> or the more complicated, but more powerful, <a href="https://shiny.posit.co/r/reference/shiny/latest/progress.html" class="external-link"><code>Progress</code> object-oriented API</a>.</p>
 </div>
 <div class="section level3">
 <h3 id="reconnection-0-14">Reconnection<a class="anchor" aria-label="anchor" href="#reconnection-0-14"></a></h3>
@@ -863,7 +863,7 @@
 <p>Shiny has now built-in support for displaying modal dialogs like the one below (<a href="https://gallery.shinyapps.io/114-modal-dialog/" class="external-link">live app here</a>):</p>
 <p align="center">
 <img src="http://shiny.rstudio.com/images/modal-dialog.png" alt="modal-dialog" width="50%"></p>
-<p>To learn more about this, read <a href="https://shiny.rstudio.com/articles/modal-dialogs.html" class="external-link">our article</a> and the <a href="https://shiny.rstudio.com/reference/shiny/latest/modalDialog.html" class="external-link">reference documentation</a>.</p>
+<p>To learn more about this, read <a href="https://shiny.rstudio.com/articles/modal-dialogs.html" class="external-link">our article</a> and the <a href="https://shiny.posit.co/r/reference/shiny/latest/modaldialog.html" class="external-link">reference documentation</a>.</p>
 </div>
 <div class="section level3">
 <h3 id="insertui-and-removeui-0-14">
@@ -871,7 +871,7 @@
 <a class="anchor" aria-label="anchor" href="#insertui-and-removeui-0-14"></a></h3>
 <p>Sometimes in a Shiny app, arbitrary HTML UI may need to be created on-the-fly in response to user input. The existing <code>uiOutput</code> and <code>renderUI</code> functions let you continue using reactive logic to call UI functions and make the results appear in a predetermined place in the UI. The <code>insertUI</code> and <code>removeUI</code> functions, which are used in the server code, allow you to use imperative logic to add and remove arbitrary chunks of HTML (all independent from one another), as many times as you want, whenever you want, wherever you want. This option may be more convenient when you want to, for example, add a new model to your app each time the user selects a different option (and leave previous models unchanged, rather than substitute the previous one for the latest one).</p>
 <p>See <a href="https://gallery.shinyapps.io/111-insert-ui/" class="external-link">this simple demo app</a> of how one could use <code>insertUI</code> and <code>removeUI</code> to insert and remove text elements using a queue. Also see <a href="https://gallery.shinyapps.io/insertUI/" class="external-link">this other app</a> that demonstrates how to insert and remove a few common Shiny input objects. Finally, <a href="https://gallery.shinyapps.io/insertUI-modules/" class="external-link">this app</a> shows how to dynamically insert modules using <code>insertUI</code>.</p>
-<p>For more, read <a href="https://shiny.rstudio.com/articles/dynamic-ui.html" class="external-link">our article</a> about dynamic UI generation and the reference documentation about <a href="https://shiny.rstudio.com/reference/shiny/latest/insertUI.html" class="external-link"><code>insertUI</code></a> and <a href="https://shiny.rstudio.com/reference/shiny/latest/insertUI.html" class="external-link"><code>removeUI</code></a>.</p>
+<p>For more, read <a href="https://shiny.rstudio.com/articles/dynamic-ui.html" class="external-link">our article</a> about dynamic UI generation and the reference documentation about <a href="https://shiny.posit.co/r/reference/shiny/latest/insertui.html" class="external-link"><code>insertUI</code></a> and <a href="https://shiny.posit.co/r/reference/shiny/latest/insertui.html" class="external-link"><code>removeUI</code></a>.</p>
 </div>
 <div class="section level3">
 <h3 id="documentation-for-connecting-to-an-external-database-0-14">Documentation for connecting to an external database<a class="anchor" aria-label="anchor" href="#documentation-for-connecting-to-an-external-database-0-14"></a></h3>
@@ -899,7 +899,7 @@
 </p>
 <p><img src="http://shiny.rstudio.com/images/render-table.png" alt="render-table" width="75%"></p>
 
-<p>For more, read our <a href="https://shiny.rstudio.com/articles/render-table.html" class="external-link">short article</a> about this update, experiment with all the new features in this <a href="https://gallery.shinyapps.io/109-render-table/" class="external-link">demo app</a>, or check out the <a href="https://shiny.rstudio.com/reference/shiny/latest/renderTable.html" class="external-link">reference documentation</a>.</p>
+<p>For more, read our <a href="https://shiny.rstudio.com/articles/render-table.html" class="external-link">short article</a> about this update, experiment with all the new features in this <a href="https://gallery.shinyapps.io/109-render-table/" class="external-link">demo app</a>, or check out the <a href="https://shiny.posit.co/r/reference/shiny/latest/rendertable.html" class="external-link">reference documentation</a>.</p>
 </li>
 </ul></div>
 <div class="section level3">

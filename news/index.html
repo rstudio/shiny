@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.9.1.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.10.0</span>
       </span>
     </div>
 
@@ -44,20 +44,20 @@
   <div class="col-md-9 contents">
     <div class="page-header">
       <h1 data-toc-skip>Changelog <small></small></h1>
-      <small>Source: <a href="https://github.com/rstudio/shiny/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/rstudio/shiny/blob/rc-v1.10.0/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
     <div class="section level2">
-<h2 class="page-header" data-toc-text="development version" id="shiny-development-version">shiny (development version)<a class="anchor" aria-label="anchor" href="#shiny-development-version"></a></h2>
+<h2 class="page-header" data-toc-text="1.10.0" id="shiny-1100">shiny 1.10.0<a class="anchor" aria-label="anchor" href="#shiny-1100"></a></h2>
 <div class="section level3">
-<h3 id="new-features-and-improvements-development-version">New features and improvements<a class="anchor" aria-label="anchor" href="#new-features-and-improvements-development-version"></a></h3>
+<h3 id="new-features-and-improvements-1-10-0">New features and improvements<a class="anchor" aria-label="anchor" href="#new-features-and-improvements-1-10-0"></a></h3>
 <ul><li><p>Small improvements to the default pulse busy indicator to better blend with any background. It’s also now slightly smaller by default. (<a href="https://github.com/rstudio/shiny/issues/4122" class="external-link">#4122</a>)</p></li>
 <li><p>When spinners and the pulse busy indicators are enabled, Shiny now shows the pulse indicator when dynamic UI elements are recalculating if no other spinners are present in the app. (<a href="https://github.com/rstudio/shiny/issues/4137" class="external-link">#4137</a>)</p></li>
 <li><p>Improve collection of deep stack traces (stack traces that are tracked across steps in an async promise chain) with <code>coro</code> async generators such as <code>elmer</code> chat streams. Previously, Shiny treated each iteration of an async generator as a distinct deep stack, leading to pathologically long stack traces; now, Shiny only keeps/prints unique deep stack trace, discarding duplicates. (<a href="https://github.com/rstudio/shiny/issues/4156" class="external-link">#4156</a>)</p></li>
 <li><p>Added an example to the <code>ExtendedTask</code> documentation. (<a href="https://github.com/daattali" class="external-link">@daattali</a> <a href="https://github.com/rstudio/shiny/issues/4087" class="external-link">#4087</a>)</p></li>
 </ul></div>
 <div class="section level3">
-<h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>
+<h3 id="bug-fixes-1-10-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-10-0"></a></h3>
 <ul><li><p>Fixed a bug in <code><a href="../reference/conditionalPanel.html">conditionalPanel()</a></code> that would cause the panel to repeatedly show/hide itself when the provided condition was not boolean. (<a href="https://github.com/kamilzyla" class="external-link">@kamilzyla</a>, <a href="https://github.com/rstudio/shiny/issues/4127" class="external-link">#4127</a>)</p></li>
 <li><p>Fixed a bug with <code><a href="../reference/sliderInput.html">sliderInput()</a></code> when used as a range slider that made it impossible to change the slider value when both handles were at the maximum value. (<a href="https://github.com/rstudio/shiny/issues/4131" class="external-link">#4131</a>)</p></li>
 <li><p><code>dateInput</code> and <code>dateRangeInput</code> no longer send immediate updates to the server when the user is typing a date input. Instead, it waits until the user presses Enter or clicks out of the field to send the update, avoiding spurious and incorrect date values. Note that an update is still sent immediately when the field is cleared. (<a href="https://github.com/rstudio/shiny/issues/3664" class="external-link">#3664</a>)</p></li>

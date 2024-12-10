@@ -2304,7 +2304,7 @@ observeEvent <- function(eventExpr, handlerExpr,
     priority = priority,
     domain = domain,
     autoDestroy = TRUE,
-    ..stacktraceon = FALSE # TODO: Does this go in the bindEvent?
+    ..stacktraceon = TRUE
   ))
 
   o <- inject(bindEvent(

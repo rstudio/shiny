@@ -206,6 +206,57 @@ test_that("validation error logging", {
   captureErrorLog(validate("boom"))
   expect_null(caught)
 
+  caught <- NULL
   captureErrorLog(stop("boom"))
   expect_true(!is.null(caught))
+})
+
+test_that("observeEvent is not overly stripped (#4162)", {
+  caught <- NULL
+  ..stacktraceoff..(
+    ..stacktracefloor..({
+      observeEvent(1, {
+        tryCatch(
+          captureStackTraces(stop("boom")),
+          error = function(cond) {
+            caught <<- cond
+          }
+        )
+      })
+      flushReact()
+    })
+  )
+  st_str <- capture.output(printStackTrace(caught), type = "message")
+  expect_true(any(grepl("observeEvent\\(1\\)", st_str)))
+
+  # Now same thing, but deep stack trace version
+
+  A__ <- function() {
+    promises::then(promises::promise_resolve(TRUE), ~{
+      stop("boom")
+    })
+  }
+
+  B__ <- function() {
+    promises::then(promises::promise_resolve(TRUE), ~{
+      A__()
+    })
+  }
+
+  caught <- NULL
+  ..stacktraceoff..(
+    ..stacktracefloor..({
+      observeEvent(1, {
+        captureStackTraces(promises::catch(B__(), ~{
+          caught <<- .
+        }))
+      })
+      flushReact()
+      wait_for_it()
+    })
+  )
+  st_str <- capture.output(printStackTrace(caught), type = "message")
+  # cat(st_str, sep = "\n")
+  expect_true(any(grepl("A__", st_str)))
+  expect_true(any(grepl("B__", st_str)))
 })

@@ -1,4 +1,4 @@
-/*! shiny 1.9.1.9000 | (c) 2012-2024 RStudio, PBC. | License: GPL-3 | file LICENSE */
+/*! shiny 1.10.0 | (c) 2012-2024 RStudio, PBC. | License: GPL-3 | file LICENSE */
 "use strict";
 (function() {
   var __create = Object.create;
@@ -25165,7 +25165,7 @@
       _defineProperty23(this, "initializeInputs", void 0);
       _defineProperty23(this, "initializedPromise", void 0);
       _defineProperty23(this, "oncustommessage", void 0);
-      this.version = "1.9.1.9000";
+      this.version = "1.10.0";
       var _initInputBindings = initInputBindings(), inputBindings = _initInputBindings.inputBindings, fileInputBinding2 = _initInputBindings.fileInputBinding;
       var _initOutputBindings = initOutputBindings(), outputBindings = _initOutputBindings.outputBindings;
       setFileInputBinding(fileInputBinding2);

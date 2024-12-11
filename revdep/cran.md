@@ -1,36 +1,39 @@
 ## revdepcheck results
 
-We checked 1221 reverse dependencies (1208 from CRAN + 13 from Bioconductor), comparing R CMD check results across CRAN and dev versions of this package.
+We checked 1278 reverse dependencies (1277 from CRAN + 1 from Bioconductor), comparing R CMD check results across CRAN and dev versions of this package.
 
  * We saw 2 new problems
- * We failed to check 16 packages
+ * We failed to check 19 packages
 
 Issues with CRAN packages are summarised below.
 
 ### New problems
 (This reports the first line of each new failure)
 
-* EgoCor
-  checking running R code from vignettes ... ERROR
+* HH
+  checking installed package size ... NOTE
 
-* mxfda
+* PopED
   checking installed package size ... NOTE
 
 ### Failed to check
 
-* animalEKF       (NA)
-* AovBay          (NA)
-* chipPCR         (NA)
-* ctsem           (NA)
-* diveR           (NA)
-* DynNom          (NA)
-* loon.shiny      (NA)
-* robmedExtra     (NA)
-* RQuantLib       (NA)
-* rstanarm        (NA)
-* SensMap         (NA)
-* Seurat          (NA)
-* shinyTempSignal (NA)
-* Signac          (NA)
-* statsr          (NA)
-* tidyvpc         (NA)
+* animalEKF          (NA)
+* AovBay             (NA)
+* Certara.VPCResults (NA)
+* chipPCR            (NA)
+* ctsem              (NA)
+* dartR.sim          (NA)
+* diveR              (NA)
+* gap                (NA)
+* jsmodule           (NA)
+* loon.shiny         (NA)
+* robmedExtra        (NA)
+* rstanarm           (NA)
+* SensMap            (NA)
+* Seurat             (NA)
+* shinyTempSignal    (NA)
+* Signac             (NA)
+* statsr             (NA)
+* TestAnaAPP         (NA)
+* tidyvpc            (NA)

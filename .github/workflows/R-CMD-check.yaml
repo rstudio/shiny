@@ -21,3 +21,5 @@ jobs:
       node-version: "14.x"
   R-CMD-check:
     uses: rstudio/shiny-workflows/.github/workflows/R-CMD-check.yaml@v1
+    with:
+      cache-version: "2.1"

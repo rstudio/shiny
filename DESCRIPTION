@@ -99,7 +99,7 @@ Suggests:
     datasets,
     DT,
     Cairo (>= 1.5-5),
-    testthat (>= 3.0.0),
+    testthat (>= 3.2.1),
     knitr (>= 1.6),
     markdown,
     rmarkdown,

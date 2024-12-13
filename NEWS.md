@@ -2,9 +2,9 @@
 
 ## New features and improvements
 
-* Small improvements to the default pulse busy indicator to better blend with any background. It's also now slightly smaller by default. (#4122)
-
-* When spinners and the pulse busy indicators are enabled, Shiny now shows the pulse indicator when dynamic UI elements are recalculating if no other spinners are present in the app. (#4137)
+* When busy indicators are enabled (i.e., `useBusyIndicators()` is in the UI), Shiny now:
+    * Shows the pulse indicator when dynamic UI elements are recalculating and no other spinners are visible in the app. (#4137)
+    * Makes the pulse indicator slightly smaller by default and improves its appearance to better blend with any background. (#4122)
 
 * Improve collection of deep stack traces (stack traces that are tracked across steps in an async promise chain) with `{coro}` async generators such as `{elmer}` chat streams. Previously, Shiny treated each iteration of an async generator as a distinct deep stack, leading to pathologically long stack traces; now, Shiny only keeps/prints unique deep stack trace, discarding duplicates. (#4156)
 
@@ -26,7 +26,7 @@
 
 * Updating the choices of a `selectizeInput()` via `updateSelectizeInput()` with `server = TRUE` no longer retains the selected choice as a deselected option if the current value is not part of the new choices. (@dvg-p4 #4142)
 
-* Fixed a bug where stack traces from `observeEvent()` were being stripped of stack frames too aggressively.
+* Fixed a bug where stack traces from `observeEvent()` were being stripped of stack frames too aggressively. (#4163)
 
 # shiny 1.9.1
 

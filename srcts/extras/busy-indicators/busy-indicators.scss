@@ -46,6 +46,23 @@
     }
 
     /*
+      When htmlwidget errors are rendered, an inline `visibility:hidden` is put on the
+      html-widget-output, and the error is put in a sibling element that overlays
+      the output container (this way, the height of the output container doesn't change).
+      Work around this by making the output container itself visible and making 
+      the children (except the spinner) invisible.
+    */
+    &.html-widget-output:has( + .shiny-output-error) {
+      visibility: inherit !important;
+      > * {
+        visibility: hidden;
+      }
+      ::after {
+        visibility: visible;
+      }
+    }
+
+    /*
       Disable spinner on uiOutput() mainly because (for other reasons) it has
       `display:contents`, which breaks the ::after positioning.
       Note that, even if we could position it, we'd probably want to disable it

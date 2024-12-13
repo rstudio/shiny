@@ -70,7 +70,7 @@
       Note that, even if we could position it, we'd probably want to disable it
       if it has recalculating children.
     */
-    &.shiny-html-output::after {
+    &.shiny-html-output:not(.shiny-table-output)::after {
       display: none;
     }
   }
@@ -122,6 +122,9 @@
   // Hide the pulse if there are spinners on the page
   // (Note: UI outputs don't get spinners)
   &.shiny-busy:has(.recalculating:not(.shiny-html-output))::after {
+    display: none;
+  }
+  &.shiny-busy:has(.recalculating.shiny-table-output)::after {
     display: none;
   }
   &.shiny-busy:has(#shiny-disconnected-overlay)::after {

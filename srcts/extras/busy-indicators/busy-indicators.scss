@@ -48,13 +48,14 @@
     }
 
     /*
-      When htmlwidget errors are rendered, an inline `visibility:hidden` is put on the
-      html-widget-output, and the error is put in a sibling element that overlays
-      the output container (this way, the height of the output container doesn't change).
-      Work around this by making the output container itself visible and making 
-      the children (except the spinner) invisible.
+      When htmlwidget errors are rendered, an inline `visibility:hidden` is put
+      on the html-widget-output, and the error message (if any) is put in a
+      sibling element that overlays the output container (this way, the height
+      of the output container doesn't change). Work around this by making the
+      output container itself visible and making the children (except the
+      spinner) invisible.
     */
-    &.html-widget-output:has( + .shiny-output-error) {
+    &.html-widget-output {
       visibility: inherit !important;
       > * {
         visibility: hidden;

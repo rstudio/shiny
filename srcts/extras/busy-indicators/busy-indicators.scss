@@ -7,6 +7,8 @@
 
   .recalculating {
 
+    min-height: var(--shiny-spinner-size, 32px);
+
     &::after {
       position: absolute;
       content: "";

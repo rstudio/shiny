@@ -2,9 +2,12 @@
 
 ## New features and improvements
 
-* Small improvements to the default pulse busy indicator to better blend with any background. It's also now slightly smaller by default. (#4122)
-
-* When spinners and the pulse busy indicators are enabled, Shiny now shows the pulse indicator when dynamic UI elements are recalculating if no other spinners are present in the app. (#4137)
+* When busy indicators are enabled (i.e., `useBusyIndicators()`), Shiny now:
+    * Shows a spinner on recalculating htmlwidgets that have previously rendered an error (including `req()` and `validate()`). (#4172)
+    * Shows a spinner on `tableOutput()`. (#4172)
+    * Places a minimum height on recalculating outputs so that the spinner is always visible. (#4172)
+    * Shows the pulse indicator when dynamic UI elements are recalculating if no other spinners are present in the app. (#4137)
+    * The pulse indicator now blends in better with any background color. It's also slightly smaller by default. (#4122)
 
 * Improve collection of deep stack traces (stack traces that are tracked across steps in an async promise chain) with `coro` async generators such as `elmer` chat streams. Previously, Shiny treated each iteration of an async generator as a distinct deep stack, leading to pathologically long stack traces; now, Shiny only keeps/prints unique deep stack trace, discarding duplicates. (#4156)
 

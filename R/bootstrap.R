@@ -1113,7 +1113,7 @@ plotOutput <- function(outputId, width = "100%", height="400px",
 #' @rdname renderTable
 #' @export
 tableOutput <- function(outputId) {
-  div(id = outputId, class="shiny-html-output")
+  div(id = outputId, class="shiny-html-output shiny-table-output")
 }
 
 dataTableDependency <- list(

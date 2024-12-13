@@ -7,6 +7,8 @@
 
   .recalculating {
 
+    min-height: var(--shiny-spinner-size, 32px);
+
     &::after {
       position: absolute;
       content: "";
@@ -46,12 +48,30 @@
     }
 
     /*
+      When htmlwidget errors are rendered, an inline `visibility:hidden` is put
+      on the html-widget-output, and the error message (if any) is put in a
+      sibling element that overlays the output container (this way, the height
+      of the output container doesn't change). Work around this by making the
+      output container itself visible and making the children (except the
+      spinner) invisible.
+    */
+    &.html-widget-output {
+      visibility: inherit !important;
+      > * {
+        visibility: hidden;
+      }
+      ::after {
+        visibility: visible;
+      }
+    }
+
+    /*
       Disable spinner on uiOutput() mainly because (for other reasons) it has
       `display:contents`, which breaks the ::after positioning.
       Note that, even if we could position it, we'd probably want to disable it
       if it has recalculating children.
     */
-    &.shiny-html-output::after {
+    &.shiny-html-output:not(.shiny-table-output)::after {
       display: none;
     }
   }
@@ -103,6 +123,9 @@
   // Hide the pulse if there are spinners on the page
   // (Note: UI outputs don't get spinners)
   &.shiny-busy:has(.recalculating:not(.shiny-html-output))::after {
+    display: none;
+  }
+  &.shiny-busy:has(.recalculating.shiny-table-output)::after {
     display: none;
   }
   &.shiny-busy:has(#shiny-disconnected-overlay)::after {

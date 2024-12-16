@@ -48,7 +48,7 @@ test_that("busyIndicatorOptions()", {
 
 
 test_that("Can provide svg file for busyIndicatorOptions(spinner_type)", {
-  skip_if(.Platform$OS.type == "windows")
+  skip_on_os("windows")
 
   tmpsvg <- tempfile(fileext = ".svg")
   writeLines("<svg></svg>", tmpsvg)

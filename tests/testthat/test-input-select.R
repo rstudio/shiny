@@ -1,10 +1,10 @@
 test_that("performance warning works", {
   pattern <- "consider using server-side selectize"
 
-  expect_warning(selectInput("x", "x", as.character(1:999)), NA)
-  expect_warning(selectInput("x", "x", as.character(1:999), selectize = TRUE), NA)
-  expect_warning(selectInput("x", "x", as.character(1:999), selectize = FALSE), NA)
-  expect_warning(selectizeInput("x", "x", as.character(1:999)), NA)
+  expect_no_warning(selectInput("x", "x", as.character(1:999)))
+  expect_no_warning(selectInput("x", "x", as.character(1:999), selectize = TRUE))
+  expect_no_warning(selectInput("x", "x", as.character(1:999), selectize = FALSE))
+  expect_no_warning(selectizeInput("x", "x", as.character(1:999)))
 
   expect_warning(selectInput("x", "x", as.character(1:1000)), pattern)
   expect_warning(selectInput("x", "x", as.character(1:1000), selectize = TRUE), pattern)
@@ -17,9 +17,9 @@ test_that("performance warning works", {
 
   session <- MockShinySession$new()
 
-  expect_warning(updateSelectInput(session, "x", choices = as.character(1:999)), NA)
-  expect_warning(updateSelectizeInput(session, "x", choices = as.character(1:999)), NA)
-  expect_warning(updateSelectizeInput(session, "x", choices = as.character(1:999), server = FALSE), NA)
+  expect_no_warning(updateSelectInput(session, "x", choices = as.character(1:999)))
+  expect_no_warning(updateSelectizeInput(session, "x", choices = as.character(1:999)))
+  expect_no_warning(updateSelectizeInput(session, "x", choices = as.character(1:999), server = FALSE))
 
   expect_warning(updateSelectInput(session, "x", choices = as.character(1:1000)), pattern)
   expect_warning(updateSelectizeInput(session, "x", choices = as.character(1:1000)), pattern)
@@ -28,9 +28,9 @@ test_that("performance warning works", {
   expect_warning(updateSelectizeInput(session, "x", choices = as.character(1:2000)), pattern)
   expect_warning(updateSelectizeInput(session, "x", choices = as.character(1:2000), server = FALSE), pattern)
 
-  expect_warning(updateSelectizeInput(session, "x", choices = as.character(1:999), server = TRUE), NA)
-  expect_warning(updateSelectizeInput(session, "x", choices = as.character(1:1000), server = TRUE), NA)
-  expect_warning(updateSelectizeInput(session, "x", choices = as.character(1:2000), server = TRUE), NA)
+  expect_no_warning(updateSelectizeInput(session, "x", choices = as.character(1:999), server = TRUE))
+  expect_no_warning(updateSelectizeInput(session, "x", choices = as.character(1:1000), server = TRUE))
+  expect_no_warning(updateSelectizeInput(session, "x", choices = as.character(1:2000), server = TRUE))
 })
 
 
@@ -55,9 +55,9 @@ test_that("selectInput options are properly escaped", {
   ))
 
   si_str <- as.character(si)
-  expect_true(any(grepl("<option value=\"&quot;\">", si_str, fixed = TRUE)))
-  expect_true(any(grepl("<option value=\"&#39;\">", si_str, fixed = TRUE)))
-  expect_true(any(grepl("<optgroup label=\"&quot;Separators&quot;\">", si_str, fixed = TRUE)))
+  expect_match(si_str, "<option value=\"&quot;\">", fixed = TRUE, all = FALSE)
+  expect_match(si_str, "<option value=\"&#39;\">", fixed = TRUE, all = FALSE)
+  expect_match(si_str, "<optgroup label=\"&quot;Separators&quot;\">", fixed = TRUE, all = FALSE)
 })
 
 
@@ -75,10 +75,10 @@ test_that("selectInputUI has a select at an expected location", {
         )
         # if this getter is changed, varSelectInput getter needs to be changed
         selectHtml <- selectInputVal$children[[2]]$children[[1]]
-        expect_true(inherits(selectHtml, "shiny.tag"))
+        expect_s3_class(selectHtml, "shiny.tag")
         expect_equal(selectHtml$name, "select")
         if (!is.null(selectHtml$attribs$class)) {
-          expect_false(grepl(selectHtml$attribs$class, "symbol"))
+          expect_no_match(selectHtml$attribs$class, "symbol")
         }
 
         varSelectInputVal <- varSelectInput(
@@ -91,9 +91,9 @@ test_that("selectInputUI has a select at an expected location", {
         )
         # if this getter is changed, varSelectInput getter needs to be changed
         varSelectHtml <- varSelectInputVal$children[[2]]$children[[1]]
-        expect_true(inherits(varSelectHtml, "shiny.tag"))
+        expect_s3_class(varSelectHtml, "shiny.tag")
         expect_equal(varSelectHtml$name, "select")
-        expect_true(grepl("symbol", varSelectHtml$attribs$class, fixed = TRUE))
+        expect_match(varSelectHtml$attribs$class, "symbol", fixed = TRUE)
       }
     }
   }

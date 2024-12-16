@@ -85,7 +85,7 @@ Imports:
     later (>= 1.0.0),
     promises (>= 1.3.2),
     tools,
-    crayon,
+    cli,
     rlang (>= 0.4.10),
     fastmap (>= 1.1.1),
     withr,
@@ -210,7 +210,6 @@ Collate:
 RoxygenNote: 7.3.2
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RdMacros: lifecycle
 Config/testthat/edition: 3
 Config/Needs/check:
   shinytest2

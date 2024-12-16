@@ -158,8 +158,7 @@ print.shiny_runtests <- function(x, ..., reporter = "summary") {
 
 
   if (any(x$pass)) {
-    # TODO in future... use clisymbols::symbol$tick and crayon green
-    cat("* Success\n")
+    cli::cat_bullet("Success", bullet = "tick", bullet_col = "green")
     mapply(
       x$file,
       x$pass,
@@ -171,9 +170,8 @@ print.shiny_runtests <- function(x, ..., reporter = "summary") {
       }
     )
   }
-  if (any(!x$pass)) {
-    # TODO in future... use clisymbols::symbol$cross and crayon red
-    cat("* Failure\n")
+  if (!all(x$pass)) {
+    cli::cat_bullet("Failure", bullet = "cross", bullet_col = "red")
     mapply(
       x$file,
       x$pass,

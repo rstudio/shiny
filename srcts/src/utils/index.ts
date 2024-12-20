@@ -75,6 +75,30 @@ function roundSignif(x: number, digits = 1): number {
   return parseFloat(x.toPrecision(digits));
 }
 
+function roundDigits(x: number, digits = 0): number {
+  try {
+    // Using a try-catch instad of checking the parameter against
+    // the standard (0-20) allows us to take advantage of browsers that
+    // support a broader range of values (e.g. Chrome supports 0-100)
+    return parseFloat(x.toFixed(digits));
+  } catch (e) {
+    try {
+      const oom = Math.floor(Math.log10(Math.abs(x)));
+      const precision = oom + digits + 1;
+
+      if (precision < 1) {
+        return 0;
+      }
+      return parseFloat(x.toPrecision(precision));
+    } catch (e) {
+      // If precision requested is more than is actually possible in the
+      // floating-point standard, just return the number unchanged.
+      // (I've only ever hit this code path in weird cases like range 0 plots.)
+      return x;
+    }
+  }
+}
+
 // Take a string with format "YYYY-MM-DD" and return a Date object.
 // IE8 and QTWebKit don't support YYYY-MM-DD, but they support YYYY/MM/DD
 function parseDate(dateString: string): Date {
@@ -408,6 +432,7 @@ export {
   getStyle,
   padZeros,
   roundSignif,
+  roundDigits,
   parseDate,
   formatDateUTC,
   makeResizeFilter,

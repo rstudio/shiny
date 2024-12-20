@@ -70,6 +70,8 @@ reference:
       - updateTextAreaInput
       - updateQueryString
       - getQueryString
+      - resetBrush
+      - updateBrushCoords
   - title: UI Outputs
     desc: Functions for creating user interface elements that, in conjunction with rendering functions, display different kinds of output from your application.
     contents:

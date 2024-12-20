@@ -3,6 +3,7 @@ import { imageOutputBinding } from "../bindings/output/image";
 import type { InputRatePolicy } from "../inputPolicies";
 import { shinySetInputValue } from "../shiny/initedMethods";
 import { Debouncer, Throttler } from "../time";
+import { mapValues, roundDigits, roundSignif } from "../utils";
 import type { Bounds, BoundsCss, BrushOpts } from "./createBrush";
 import { createBrush } from "./createBrush";
 import type { Offset } from "./findbox";
@@ -21,7 +22,9 @@ type CreateHandler = {
   mouseout?: (e: JQuery.MouseOutEvent) => void;
   mousedown?: (e: JQuery.MouseDownEvent) => void;
   onResetImg: () => void;
-  onResize: ((e: JQuery.ResizeEvent) => void) | null;
+  onResize: ((e: JQuery.ResizeEvent) => void) | null; // Only used for brushes on cached plots
+  // TODO maybe also used if image size changes without window changing?
+  updateCoordmap?: (newMap: Coordmap) => void;
 };
 
 type BrushInfo = {
@@ -55,7 +58,7 @@ function createClickHandler(
   clip: Clip,
   coordmap: Coordmap
 ): CreateHandler {
-  const clickInfoSender = coordmap.mouseCoordinateSender(inputId, clip);
+  let clickInfoSender = coordmap.mouseCoordinateSender(inputId, clip);
 
   // Send initial (null) value on creation.
   clickInfoSender(null);
@@ -67,7 +70,11 @@ function createClickHandler(
       clickInfoSender(e);
     },
     onResetImg: function () {
+      // TODO: consider making this a no-op or adding an option, see #2153
       clickInfoSender(null);
+    },
+    updateCoordmap: function (newMap) {
+      clickInfoSender = newMap.mouseCoordinateSender(inputId, clip);
     },
     onResize: null,
   };
@@ -81,20 +88,30 @@ function createHoverHandler(
   nullOutside: NullOutside,
   coordmap: Coordmap
 ): CreateHandler {
-  const sendHoverInfo = coordmap.mouseCoordinateSender(
-    inputId,
-    clip,
-    nullOutside
-  );
+  let hoverInfoSender: InputRatePolicy<
+    (e: JQuery.MouseDownEvent | JQuery.MouseMoveEvent | null) => void
+  >;
 
-  let hoverInfoSender: InputRatePolicy<typeof sendHoverInfo>;
+  function updateHoverInfoSender(newCoordmap: Coordmap) {
+    const sendHoverInfo = newCoordmap.mouseCoordinateSender(
+      inputId,
+      clip,
+      nullOutside
+    );
 
-  if (delayType === "throttle")
-    hoverInfoSender = new Throttler(null, sendHoverInfo, delay);
-  else hoverInfoSender = new Debouncer(null, sendHoverInfo, delay);
+    // TODO: should we support Invoker as an option? (i.e. spam the server
+    // with every mousemove) Or is it better not to?
+    if (delayType === "throttle")
+      hoverInfoSender = new Throttler(null, sendHoverInfo, delay);
+    else hoverInfoSender = new Debouncer(null, sendHoverInfo, delay);
+  }
+
+  // Initialize the sender with the starting coordmap
+  updateHoverInfoSender(coordmap);
 
   // Send initial (null) value on creation.
-  hoverInfoSender.immediateCall(null);
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  hoverInfoSender!.immediateCall(null);
 
   // What to do when mouse exits the image
   let mouseout: () => void;
@@ -114,8 +131,10 @@ function createHoverHandler(
     },
     mouseout: mouseout,
     onResetImg: function () {
+      // TODO: consider making this a no-op or adding an option, see #2153
       hoverInfoSender.immediateCall(null);
     },
+    updateCoordmap: updateHoverInfoSender,
     onResize: null,
   };
 }
@@ -126,15 +145,28 @@ function createBrushHandler(
   inputId: InputId,
   $el: JQuery<HTMLElement>,
   opts: BrushOpts,
-  coordmap: Coordmap,
+  initCoordmap: Coordmap,
   outputId: BrushInfo["outputId"]
 ): CreateHandler {
   // Parameter: expand the area in which a brush can be started, by this
   // many pixels in all directions. (This should probably be a brush option)
   const expandPixels = 20;
 
+  let coordmap = initCoordmap;
+
   // Represents the state of the brush
   const brush = createBrush($el, opts, coordmap, expandPixels);
+
+  // This is called by the image binding when the image is redrawn for any reason.
+  function updateCoordmap(newCoordmap: Coordmap) {
+    coordmap = newCoordmap;
+    brush.updateCoordmap(coordmap);
+    // Made sure to send new coords if the new map changed the pixel scale or
+    // clipped us off the side, and we were the most recent brush with our id
+    if ($el.data("mostRecentBrush")) {
+      brushInfoSender.normalCall(); // Don't jump the queue--see #1642
+    }
+  }
 
   // Brush IDs can span multiple image/plot outputs. When an output is brushed,
   // if a brush with the same ID is active on a different image/plot, it must
@@ -151,8 +183,33 @@ function createBrushHandler(
     // need to clear our brush (if any).
     if (coords.brushId === inputId && coords.outputId !== outputId) {
       $el.data("mostRecentBrush", false);
+      // Remove mousemove and mouseup handlers if necessary
+      if (brush.isBrushing() || brush.isDragging() || brush.isResizing()) {
+        $(document).off("mousemove.image_brush").off("mouseup.image_brush");
+      }
       brush.reset();
     }
+  });
+
+  // Listen for the event generated by the `setBrush()` function
+  $el.on("shiny-internal:setBrush.image_output", function (e, data) {
+    if (data.brushId !== inputId) return; // ignore if message wasn't for us
+    // Check outputId only if provided
+    if (data.outputId && data.outputId !== outputId) return;
+
+    // Cancel any current manual brushing by removing listeners
+    if (brush.isBrushing() || brush.isDragging() || brush.isResizing()) {
+      $(document).off("mousemove.image_brush").off("mouseup.image_brush");
+    }
+
+    brush.setPanelIdx(data.panelIdx);
+    // boundData will now check for a valid panel and reset if invalid
+    brush.boundsData(data.imgCoords);
+    brushInfoSender.immediateCall();
+    // This is a race condition if multiple plots share the same brushId
+    // and outputId isn't specified; documentation should warn about that.
+    // I think that's acceptable, since there's no way for a brush to know
+    // if it's unique.
   });
 
   // Set cursor to one of 7 styles. We need to set the cursor on the whole
@@ -178,7 +235,16 @@ function createBrushHandler(
   }
 
   function sendBrushInfo() {
-    const coords: BrushInfo = brush.boundsData();
+    // Round to 13 significant digits *here* to prevent FP-rounding-induced
+    // resends of almost-but-not-quite-exactly-the-same data.
+    // This fixes #1634, #1642, #2197, and #2344 more reliably.
+    // Values are still sporadic near zero, because 1.23456789e-20
+    // and 1.98765432e-20 both get reported with all their "significant"
+    // digits and cause a resend--this issue is fixed with the further
+    // rounding below.
+    const coords: BrushInfo = mapValues(brush.boundsData(), (val) =>
+      roundSignif(val, 13)
+    ) as Bounds;
 
     // We're in a new or reset state
     if (isNaN(coords.xmin)) {
@@ -196,11 +262,34 @@ function createBrushHandler(
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const panel = brush.getPanel()!;
 
+    // Round values near zero more agressively to fix the problem mentioned above
+    // Specifically, round values to the same absolute precision achieved by
+    // rounding the range of values to 13 digits.
+    const dataDomainX = Math.abs(panel.domain.right - panel.domain.left);
+    const xDigits = 13 - Math.floor(Math.log10(dataDomainX));
+    const dataDomainY = Math.abs(panel.domain.top - panel.domain.bottom);
+    const yDigits = 13 - Math.floor(Math.log10(dataDomainY));
+
+    coords.xmin = roundDigits(coords.xmin, xDigits);
+    coords.xmax = roundDigits(coords.xmax, xDigits);
+    coords.ymin = roundDigits(coords.ymin, yDigits);
+    coords.ymax = roundDigits(coords.ymax, yDigits);
+
     // Add the panel (facet) variables, if present
     $.extend(coords, panel.panel_vars);
 
+    // Round *here* to prevent FP-rounding-induced
+    // resends of almost-but-not-quite-exactly-the-same data.
+    // Rounding more aggressively, to an eigth of a pixel, since less than
+    // that is not meaningful at reasonable zoom levels (≤ 8X) and the
+    // power of two makes the actual floating-point value a round number
+    // in binary.
     // eslint-disable-next-line camelcase
-    coords.coords_css = brush.boundsCss();
+    coords.coords_css = mapValues(
+      brush.boundsCss(),
+      (val) => Math.round(val * 8) / 8
+    ) as Bounds;
+
     // eslint-disable-next-line camelcase
     coords.coords_img = coordmap.scaleCssToImg(coords.coords_css);
 
@@ -233,6 +322,8 @@ function createBrushHandler(
     | Debouncer<typeof sendBrushInfo>
     | Throttler<typeof sendBrushInfo>;
 
+  // TODO: should we support Invoker as an option? (i.e. spam the server
+  // with every mousemove) Or is it better not to
   if (opts.brushDelayType === "throttle") {
     brushInfoSender = new Throttler(null, sendBrushInfo, opts.brushDelay);
   } else {
@@ -240,9 +331,7 @@ function createBrushHandler(
   }
 
   // Send initial (null) value on creation.
-  if (!brush.hasOldBrush()) {
-    brushInfoSender.immediateCall();
-  }
+  brushInfoSender.immediateCall();
 
   function mousedown(e: JQuery.MouseDownEvent) {
     // This can happen when mousedown inside the graphic, then mouseup
@@ -251,6 +340,9 @@ function createBrushHandler(
     if (brush.isBrushing() || brush.isDragging() || brush.isResizing()) return;
 
     // Listen for left mouse button only
+    // TODO: should we change this to `event.button !== 0`?
+    // e.which is technically deprecated, and every modern browser
+    // (including IE9+, but not IE8) supports e.button (the actual standard)
     if (e.which !== 1) return;
 
     // In general, brush uses css pixels, and coordmap uses img pixels.
@@ -265,9 +357,7 @@ function createBrushHandler(
     brush.down(offsetCss);
 
     if (brush.isInResizeArea(offsetCss)) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error; TODO-barret; Remove the variable? it is not used
-      brush.startResizing(offsetCss);
+      brush.startResizing();
 
       // Attach the move and up handlers to the window so that they respond
       // even when the mouse is moved outside of the image.
@@ -275,8 +365,7 @@ function createBrushHandler(
         .on("mousemove.image_brush", mousemoveResizing)
         .on("mouseup.image_brush", mouseupResizing);
     } else if (brush.isInsideBrush(offsetCss)) {
-      // @ts-expect-error; TODO-barret this variable is not respected
-      brush.startDragging(offsetCss);
+      brush.startDragging();
       setCursorStyle("grabbing");
 
       // Attach the move and up handlers to the window so that they respond
@@ -285,10 +374,7 @@ function createBrushHandler(
         .on("mousemove.image_brush", mousemoveDragging)
         .on("mouseup.image_brush", mouseupDragging);
     } else {
-      const panel = coordmap.getPanelCss(offsetCss, expandPixels);
-
-      // @ts-expect-error; TODO-barret start brushing does not take any args; Either change the function to ignore, or do not send to function;
-      brush.startBrushing(panel.clipImg(coordmap.scaleCssToImg(offsetCss)));
+      brush.startBrushing();
 
       // Attach the move and up handlers to the window so that they respond
       // even when the mouse is moved outside of the image.
@@ -363,10 +449,10 @@ function createBrushHandler(
       return;
     }
 
-    // Send info immediately on mouseup, but only if needed. If we don't
-    // do the pending check, we might send the same data twice (with
-    // with difference nonce).
-    if (brushInfoSender.isPending()) brushInfoSender.immediateCall();
+    // Send info immediately on mouseup, since shinySetInputValue will already
+    // filter out any duplicate sends and we want the brush to be responsive
+    // when the user completes their action.
+    brushInfoSender.immediateCall();
   }
 
   function mouseupDragging(e: JQuery.MouseUpEvent) {
@@ -380,7 +466,8 @@ function createBrushHandler(
     brush.stopDragging();
     setCursorStyle("grabbable");
 
-    if (brushInfoSender.isPending()) brushInfoSender.immediateCall();
+    // if (brushInfoSender.isPending()) brushInfoSender.immediateCall();
+    brushInfoSender.immediateCall();
   }
 
   function mouseupResizing(e: JQuery.MouseUpEvent) {
@@ -392,42 +479,38 @@ function createBrushHandler(
     brush.up(coordmap.mouseOffsetCss(e));
     brush.stopResizing();
 
-    if (brushInfoSender.isPending()) brushInfoSender.immediateCall();
+    // if (brushInfoSender.isPending()) brushInfoSender.immediateCall();
+    brushInfoSender.immediateCall();
   }
 
   // Brush maintenance: When an image is re-rendered, the brush must either
-  // be removed (if brushResetOnNew) or imported (if !brushResetOnNew). The
+  // be removed (if brushResetOnNew) or resized (if !brushResetOnNew). The
   // "mostRecentBrush" bit is to ensure that when multiple outputs share the
   // same brush ID, inactive brushes don't send null values up to the server.
+  // If opts.brushResetOnNew is false, then updateCoordmap() above will take care
+  // of all necessary resizing.
 
   // This should be called when the img (not the el) is reset
   function onResetImg() {
-    if (opts.brushResetOnNew) {
+    // Reset the brush only if the reset_on_new option is TRUE,
+    // or if we are in an error state
+    if (opts.brushResetOnNew || $el.data("errorState")) {
+      // Remove mousemove and mouseup handlers if necessary
+      if (brush.isBrushing() || brush.isDragging() || brush.isResizing()) {
+        $(document).off("mousemove.image_brush").off("mouseup.image_brush");
+      }
+      brush.reset();
       if ($el.data("mostRecentBrush")) {
-        brush.reset();
         brushInfoSender.immediateCall();
       }
     }
   }
 
-  if (!opts.brushResetOnNew) {
-    if ($el.data("mostRecentBrush")) {
-      // Importing an old brush must happen after the image data has loaded
-      // and the <img> DOM element has the updated size. If importOldBrush()
-      // is called before this happens, then the css-img coordinate mappings
-      // will give the wrong result, and the brush will have the wrong
-      // position.
-      //
-      // jcheng 09/26/2018: This used to happen in img.onLoad, but recently
-      // we moved to all brush initialization moving to img.onLoad so this
-      // logic can be executed inline.
-      brush.importOldBrush();
-      brushInfoSender.immediateCall();
-    }
-  }
-
+  // This lets the brush know to resize if the image is resized without being
+  // redrawn. This is only possible for cached plots, so this function is only
+  // triggered in image.ts if the plot is a cached plot.
   function onResize() {
-    brush.onResize();
+    brush.onImgResize();
     brushInfoSender.immediateCall();
   }
 
@@ -435,6 +518,7 @@ function createBrushHandler(
     mousedown: mousedown,
     mousemove: mousemove,
     onResetImg: onResetImg,
+    updateCoordmap: updateCoordmap,
     onResize: onResize,
   };
 }

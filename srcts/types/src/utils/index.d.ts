@@ -6,6 +6,7 @@ declare function strToBool(str: string): boolean | undefined;
 declare function getStyle(el: Element, styleProp: string): string | undefined;
 declare function padZeros(n: number, digits: number): string;
 declare function roundSignif(x: number, digits?: number): number;
+declare function roundDigits(x: number, digits?: number): number;
 declare function parseDate(dateString: string): Date;
 declare function formatDateUTC(x: Date): string;
 declare function makeResizeFilter(el: HTMLElement, func: (width: HTMLElement["offsetWidth"], height: HTMLElement["offsetHeight"]) => void): () => void;
@@ -30,4 +31,4 @@ declare function updateLabel(labelTxt: string | undefined, labelNode: JQuery<HTM
 declare function getComputedLinkColor(el: HTMLElement): string;
 declare function isBS3(): boolean;
 declare function toLowerCase<T extends string>(str: T): Lowercase<T>;
-export { escapeHTML, randomId, strToBool, getStyle, padZeros, roundSignif, parseDate, formatDateUTC, makeResizeFilter, pixelRatio, getBoundingClientSizeBeforeZoom, scopeExprToFunc, asArray, mergeSort, $escape, mapValues, isnan, _equal, equal, compareVersion, updateLabel, getComputedLinkColor, hasOwnProperty, hasDefinedProperty, isBS3, toLowerCase, };
+export { escapeHTML, randomId, strToBool, getStyle, padZeros, roundSignif, roundDigits, parseDate, formatDateUTC, makeResizeFilter, pixelRatio, getBoundingClientSizeBeforeZoom, scopeExprToFunc, asArray, mergeSort, $escape, mapValues, isnan, _equal, equal, compareVersion, updateLabel, getComputedLinkColor, hasOwnProperty, hasDefinedProperty, isBS3, toLowerCase, };

@@ -6,6 +6,7 @@ import { initOutputBindings } from "../bindings/output";
 import type { BindingRegistry } from "../bindings/registry";
 import { showErrorInClientConsole } from "../components/errorConsole";
 import { resetBrush } from "../imageutils/resetBrush";
+import { setBrush } from "../imageutils/setBrush";
 import type { InputPolicy } from "../inputPolicies";
 import {
   InputBatchSender,
@@ -66,6 +67,7 @@ class ShinyClass {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   OutputBinding: typeof OutputBinding;
   resetBrush: typeof resetBrush;
+  setBrush: typeof setBrush;
   notifications: {
     show: typeof showNotification;
     remove: typeof removeNotification;
@@ -117,6 +119,7 @@ class ShinyClass {
     this.outputBindings = outputBindings;
     this.OutputBinding = OutputBinding;
     this.resetBrush = resetBrush;
+    this.setBrush = setBrush;
     this.notifications = {
       show: showNotification,
       remove: removeNotification,

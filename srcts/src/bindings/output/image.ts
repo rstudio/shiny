@@ -148,10 +148,6 @@ class ImageOutputBinding extends OutputBinding {
       };
     }
 
-    // Remove event handlers that were added in previous runs of this function.
-    $el.off(".image_output");
-    $img.off(".image_output");
-
     // When the image loads, initialize all the interaction handlers. When the
     // value of src is set, the browser may not load the image immediately,
     // even if it's a data URL. If we try to initialize this stuff
@@ -179,76 +175,109 @@ class ImageOutputBinding extends OutputBinding {
       // ----------------------------------------------------------
       // Register the various event handlers
       // ----------------------------------------------------------
+      // New strategy: Keep the old handlers around when the image reloads,
+      // simply updating them with a new coordmap. This is accomplished by
+      // storing a reference to their updateCoordmap functions in $el.data,
+      // and calling it with the new coordmap when the image reloads.
+      // This solves #1642
       if (opts.clickId) {
         disableDrag($el, $img);
 
-        const clickHandler = createClickHandler(
-          opts.clickId,
-          opts.clickClip,
-          optsCoordmap
-        );
+        // Check to see if a click handler already exists
+        if ($el.data("clickHandler")) {
+          // If so, update the old handler with the new coordmap
+          $el.data("clickHandler").updateCoordmap(optsCoordmap);
+        } else {
+          // If not, this is the first load, create a new handler
+          const clickHandler = createClickHandler(
+            opts.clickId,
+            opts.clickClip,
+            optsCoordmap
+          );
 
-        $el.on("mousedown2.image_output", clickHandler.mousedown);
+          $el.on("mousedown2.image_output", clickHandler.mousedown);
 
-        $el.on("resize.image_output", clickHandler.onResize);
+          // $el.on("resize.image_output", clickHandler.onResize); // currently unused
 
-        // When img is reset, do housekeeping: clear $el's mouse listener and
-        // call the handler's onResetImg callback.
-        $img.on("reset.image_output", clickHandler.onResetImg);
+          // When img is reset, do housekeeping: update $el's mouse listener
+          // with the new coordmap and call the handler's onResetImg callback.
+          // These should listen on $el rather than $img so they can persist even
+          // after an error.
+          $el.on("reset.image_output", clickHandler.onResetImg);
+          $el.data("clickHandler", clickHandler);
+        }
       }
 
       if (opts.dblclickId) {
         disableDrag($el, $img);
 
-        // We'll use the clickHandler's mousedown function, but register it to
-        // our custom 'dblclick2' event.
-        const dblclickHandler = createClickHandler(
-          opts.dblclickId,
-          opts.clickClip,
-          optsCoordmap
-        );
+        // Check to see if a double-click handler already exists
+        if ($el.data("dblclickHandler")) {
+          // If so, update the old handler with the new coordmap
+          $el.data("dblclickHandler").updateCoordmap(optsCoordmap);
+        } else {
+          // We'll use the clickHandler's mousedown function, but register it to
+          // our custom 'dblclick2' event.
+          const dblclickHandler = createClickHandler(
+            opts.dblclickId,
+            opts.clickClip,
+            optsCoordmap
+          );
 
-        $el.on("dblclick2.image_output", dblclickHandler.mousedown);
+          $el.on("dblclick2.image_output", dblclickHandler.mousedown);
 
-        $el.on("resize.image_output", dblclickHandler.onResize);
-        $img.on("reset.image_output", dblclickHandler.onResetImg);
+          // $el.on("resize.image_output", dblclickHandler.onResize); // currently unused
+          $el.on("reset.image_output", dblclickHandler.onResetImg);
+          $el.data("dblclickHandler", dblclickHandler);
+        }
       }
 
       if (opts.hoverId) {
         disableDrag($el, $img);
 
-        const hoverHandler = createHoverHandler(
-          opts.hoverId,
-          opts.hoverDelay,
-          opts.hoverDelayType,
-          opts.hoverClip,
-          opts.hoverNullOutside,
-          optsCoordmap
-        );
+        if ($el.data("hoverHandler")) {
+          $el.data("hoverHandler").updateCoordmap(optsCoordmap);
+        } else {
+          const hoverHandler = createHoverHandler(
+            opts.hoverId,
+            opts.hoverDelay,
+            opts.hoverDelayType,
+            opts.hoverClip,
+            opts.hoverNullOutside,
+            optsCoordmap
+          );
 
-        $el.on("mousemove.image_output", hoverHandler.mousemove);
-        $el.on("mouseout.image_output", hoverHandler.mouseout);
+          $el.on("mousemove.image_output", hoverHandler.mousemove);
+          $el.on("mouseout.image_output", hoverHandler.mouseout);
 
-        $el.on("resize.image_output", hoverHandler.onResize);
-        $img.on("reset.image_output", hoverHandler.onResetImg);
+          // $el.on("resize.image_output", hoverHandler.onResize); // currently unused
+          $el.on("reset.image_output", hoverHandler.onResetImg);
+          $el.data("hoverHandler", hoverHandler);
+        }
       }
 
       if (opts.brushId) {
         disableDrag($el, $img);
 
-        const brushHandler = createBrushHandler(
-          opts.brushId,
-          $el,
-          opts,
-          optsCoordmap,
-          outputId
-        );
+        if ($el.data("brushHandler")) {
+          $el.data("brushHandler").updateCoordmap(optsCoordmap);
+        } else {
+          const brushHandler = createBrushHandler(
+            opts.brushId,
+            $el,
+            opts,
+            optsCoordmap,
+            outputId
+          );
 
-        $el.on("mousedown.image_output", brushHandler.mousedown);
-        $el.on("mousemove.image_output", brushHandler.mousemove);
+          $el.on("mousedown.image_output", brushHandler.mousedown);
+          $el.on("mousemove.image_output", brushHandler.mousemove);
 
-        $el.on("resize.image_output", brushHandler.onResize);
-        $img.on("reset.image_output", brushHandler.onResetImg);
+          // resize handler is used for cached plots!
+          $el.on("resize.image_output", brushHandler.onResize);
+          $el.on("reset.image_output", brushHandler.onResetImg);
+          $el.data("brushHandler", brushHandler);
+        }
       }
 
       if (opts.clickId || opts.dblclickId || opts.hoverId || opts.brushId) {
@@ -261,6 +290,7 @@ class ImageOutputBinding extends OutputBinding {
   }
 
   renderError(el: HTMLElement, err: ErrorsMessageValue): void {
+    $(el).data("errorState", true);
     $(el).find("img").trigger("reset");
     OutputBinding.prototype.renderError.call(this, el, err);
   }
@@ -278,16 +308,26 @@ class ImageOutputBinding extends OutputBinding {
       })
       .remove();
 
+    $(el).data("errorState", false);
     // TODO-barret does this work?: `super.clearError(el)`
     OutputBinding.prototype.clearError.call(this, el);
   }
 
+  // For non-cached plots, this is useless, since it will always be followed by
+  // a reload. However, cached plots need this code path to update brushes
+  // visually when a small, reload-less resize occurs.
   resize(
     el: HTMLElement,
     width: number | string,
     height: number | string
   ): void {
-    $(el).find("img").trigger("resize");
+    const img = $(el).find("img");
+
+    // Only trigger resize handlers if this is a cached plot--resizes of
+    // non-cached plots are always immediately followed by reloads
+    if (img.hasClass("shiny-scalable")) {
+      img.trigger("resize");
+    }
     return;
     width;
     height;

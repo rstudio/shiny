@@ -1,5 +1,9 @@
 # shiny 1.10.0
 
+### Breaking changes
+
+* Closed #2866: `session$resetBrush()` now properly namespaces the brush ID automatically within a module. This breaks previous workarounds, which will now result in a doubly-namespaced brush ID. This function has also been supplemented with the slightly more user-friendly `shiny::resetBrush()`; see details below.
+
 ## New features and improvements
 
 * When busy indicators are enabled (i.e., `useBusyIndicators()` is in the UI), Shiny now:
@@ -9,6 +13,10 @@
 * Improve collection of deep stack traces (stack traces that are tracked across steps in an async promise chain) with `{coro}` async generators such as `{elmer}` chat streams. Previously, Shiny treated each iteration of an async generator as a distinct deep stack, leading to pathologically long stack traces; now, Shiny only keeps/prints unique deep stack trace, discarding duplicates. (#4156)
 
 * Added an example to the `ExtendedTask` documentation. (@daattali #4087)
+
+* Added `resetBrush()` function for a slightly more user-friendly alternative to `session$resetBrush()` with syntax similar to the `update*()` functions.
+
+* Added `updateBrushCoords()` function to programatically update the area brushed on a plot, similar to other `update*()` functions. Tested primarily with `ggplot2`, but may work with reduced functionality with base graphics and images. See `help(updateBrushCoords, shiny)` for more details. (#1456)
 
 ## Bug fixes
 
@@ -27,6 +35,8 @@
 * Updating the choices of a `selectizeInput()` via `updateSelectizeInput()` with `server = TRUE` no longer retains the selected choice as a deselected option if the current value is not part of the new choices. (@dvg-p4 #4142)
 
 * Fixed a bug where stack traces from `observeEvent()` were being stripped of stack frames too aggressively. (#4163)
+
+* Overhauled brush code so that brush handlers (as well as click/hover handlers) persist when a plot is redrawn, and consistently move any drawn brushes to the correct location if the plot is resized. This fixes an issue where a plot that's redrawn in response to a brush would circumvent the debouncer and sometimes update twice each time the brush was moved--or worse, constantly re-update itself as the brush was being dragged. This also fixes a frustrating-to-replicate bug where the rectangle drawn on the plot could become duplicated and desynced from the coordinates sent to the server with a series of rapid user inputs. (#2344, #1642)
 
 # shiny 1.9.1
 

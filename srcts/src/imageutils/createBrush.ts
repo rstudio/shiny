@@ -1,5 +1,5 @@
 import $ from "jquery";
-import { equal, isnan, mapValues, roundSignif } from "../utils";
+import { equal, isnan } from "../utils";
 import type { Coordmap } from "./initCoordmap";
 import { findOrigin } from "./initCoordmap";
 import type { Panel } from "./initPanelScales";
@@ -56,17 +56,20 @@ type BrushOpts = {
 };
 
 type Brush = {
+  updateCoordmap: (newCoordmap: Coordmap) => void;
   reset: () => void;
 
-  hasOldBrush: () => boolean;
-  importOldBrush: () => void;
   isInsideBrush: (offsetCss: Offset) => boolean;
   isInResizeArea: (offsetCss: Offset) => boolean;
   whichResizeSides: (offsetCss: Offset) => ImageState["resizeSides"];
 
-  // A callback when the wrapper div or img is resized.
-  onResize: () => void;
+  // A callback when the wrapper div or img is resized. Only called if the
+  // brush is on a cached plot.
+  onImgResize: () => void;
 
+  // These functions will get or set the bounds of the brush based on CSS or
+  // data coordinates, respectively. The setter versions will visually update
+  // the div as required to match.
   boundsCss: {
     (boxCss: BoundsCss): void;
     (): BoundsCss;
@@ -77,6 +80,8 @@ type Brush = {
   };
 
   getPanel: () => ImageState["panel"];
+
+  setPanelIdx: (idx: number) => void;
 
   down: {
     (): ImageState["down"];
@@ -120,8 +125,8 @@ function createBrush(
   const state = {} as ImageState;
 
   // Aliases for conciseness
-  const cssToImg = coordmap.scaleCssToImg;
-  const imgToCss = coordmap.scaleImgToCss;
+  let cssToImg = coordmap.scaleCssToImg;
+  let imgToCss = coordmap.scaleImgToCss;
 
   reset();
 
@@ -171,67 +176,73 @@ function createBrush(
       ymax: NaN,
     };
 
-    if ($div) $div.remove();
+    if ($div) {
+      $div.remove();
+      $div = null; // let's not have a floating variable hanging around
+    }
   }
 
-  function hasOldBrush(): boolean {
-    const oldDiv = $el.find("#" + el.id + "_brush");
-    return oldDiv.length > 0;
-  }
+  // When provided a new coordmap from a redrawn image, reposition the brush
+  // to keep the same coordinates in the data space.
+  function updateCoordmap(newCoordmap: Coordmap) {
+    coordmap = newCoordmap;
+    cssToImg = coordmap.scaleCssToImg;
+    imgToCss = coordmap.scaleImgToCss;
 
-  // If there's an existing brush div, use that div to set the new brush's
-  // settings, provided that the x, y, and panel variables have the same names,
-  // and there's a panel with matching panel variable values.
-  function importOldBrush(): void {
-    const oldDiv = $el.find("#" + el.id + "_brush");
+    const oldBoundsData = boundsData();
+    const oldPanel = state.panel;
 
-    if (oldDiv.length === 0) return;
+    // TODO are all of these checks necessary?
+    if (!oldBoundsData || !oldPanel) {
+      reset();
+      return;
+    }
 
-    const oldBoundsData = oldDiv.data("bounds-data");
-    const oldPanel = oldDiv.data("panel");
+    // Check to see if we have valid boundsData
+    if (Object.values(oldBoundsData).some(isnan)) {
+      reset();
+      return;
+    }
 
-    if (!oldBoundsData || !oldPanel) return;
+    let foundPanel = false;
 
-    // Find a panel that has matching vars; if none found, we can't restore.
-    // The oldPanel and new panel must match on their mapping vars, and the
-    // values.
+    // TODO: Could store panel index and just use panel with same index
+    // Would be faster/simpler, but could be buggy if server updates us with
+    // an entirely different set of panels
     for (let i = 0; i < coordmap.panels.length; i++) {
+      // Look through the coordmap for a panel whose mapping and panel_vars
+      // match our previous panel
       const curPanel = coordmap.panels[i];
 
       if (
         equal(oldPanel.mapping, curPanel.mapping) &&
         equal(oldPanel.panel_vars, curPanel.panel_vars)
       ) {
-        // We've found a matching panel
+        // We've found a matching panel--save it and set the boundsData
         state.panel = coordmap.panels[i];
+        boundsData(oldBoundsData); // This will recalculate the CSS coords
+        foundPanel = true;
         break;
       }
     }
-
-    // If we didn't find a matching panel, remove the old div and return
-    if (state.panel === null) {
-      oldDiv.remove();
-      return;
+    if (!foundPanel) {
+      reset();
     }
-
-    $div = oldDiv;
-
-    boundsData(oldBoundsData);
-    updateDiv();
   }
 
   // This will reposition the brush div when the image is resized, maintaining
   // the same data coordinates. Note that the "resize" here refers to the
   // wrapper div/img being resized; elsewhere, "resize" refers to the brush
-  // div being resized.
-  function onResize() {
+  // div being resized. This is only necessary (and only called) for cached
+  // plots; all other plots are reloaded whenever they're resized, and the
+  // brush repositioning is handled by updateCoordmap().
+  function onImgResize() {
     const boundsDataVal = boundsData();
 
     // Check to see if we have valid boundsData
     if (Object.values(boundsDataVal).some(isnan)) return;
 
     boundsData(boundsDataVal);
-    updateDiv();
   }
 
   // Return true if the offset is inside min/max coords
@@ -295,7 +306,7 @@ function createBrush(
   // panel. This will fit the box bounds into the panel, so we don't brush
   // outside of it. This knows whether we're brushing in the x, y, or xy
   // directions, and sets bounds accordingly. If no box is passed in, just
-  // return current bounds.
+  // return current bounds. For new bounds, creates or updates the div.
   function boundsCss(): ImageState["boundsCss"];
   function boundsCss(boxCss: BoundsCss): void;
   function boundsCss(boxCss?: BoundsCss) {
@@ -303,12 +314,16 @@ function createBrush(
       return { ...state.boundsCss };
     }
 
+    // Give up and reset if the panel is null
+    if (!state.panel) {
+      reset();
+      return;
+    }
+    const panel = state.panel;
+    const panelBoundsImg = panel.range;
+
     let minCss: Offset = { x: boxCss.xmin, y: boxCss.ymin };
     let maxCss: Offset = { x: boxCss.xmax, y: boxCss.ymax };
-
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const panel = state.panel!;
-    const panelBoundsImg = panel.range;
 
     if (opts.brushClip) {
       minCss = imgToCss(panel.clipImg(cssToImg(minCss)));
@@ -334,25 +349,18 @@ function createBrush(
     };
 
     // Positions in data space
-    const minData = panel.scaleImgToData(cssToImg(minCss));
-    const maxData = panel.scaleImgToData(cssToImg(maxCss));
+    const minData = panel.scaleImgToData(cssToImg(minCss), opts.brushClip);
+    const maxData = panel.scaleImgToData(cssToImg(maxCss), opts.brushClip);
+
     // For reversed scales, the min and max can be reversed, so use findBox
     // to ensure correct order.
-
     state.boundsData = findBox(minData, maxData);
-    // Round to 14 significant digits to avoid spurious changes in FP values
-    // (#1634).
-    state.boundsData = mapValues(state.boundsData, (val) =>
-      roundSignif(val, 14)
-    );
 
-    // We also need to attach the data bounds and panel as data attributes, so
-    // that if the image is re-sent, we can grab the data bounds to create a new
-    // brush. This should be fast because it doesn't actually modify the DOM.
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    $div!.data("bounds-data", state.boundsData);
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    $div!.data("panel", state.panel);
+    if (!$div) {
+      addDiv();
+    }
+    updateDiv();
+
     return undefined;
   }
 
@@ -364,12 +372,21 @@ function createBrush(
       return { ...state.boundsData };
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    let boxCss = imgToCss(state.panel!.scaleDataToImg(boxData));
-    // Round to 13 significant digits to avoid spurious changes in FP values
-    // (#2197).
+    // Give up and reset if the panel is null
+    if (!state.panel) {
+      reset();
+      return;
+    }
 
-    boxCss = mapValues(boxCss, (val) => roundSignif(val, 13));
+    // Converting to CSS coordinates (and then eventually back to data
+    // coordinates) is a bit roundabout, but the checks for clipping and brush
+    // direction are done in the CSS coordinate space. This introduces slight
+    // floating-point rounding errors, which are smoothed over by rounding
+    // data and CSS coordinates in createHandlers.ts before sending them off to
+    // the server.
+    const boxCss = imgToCss(
+      state.panel.scaleDataToImg(boxData, opts.brushClip)
+    );
 
     // The scaling function can reverse the direction of the axes, so we need to
     // find the min and max again.
@@ -386,21 +403,24 @@ function createBrush(
     return state.panel;
   }
 
+  function setPanelIdx(idx: number) {
+    state.panel = coordmap.panels[idx];
+  }
+
   // Add a new div representing the brush.
   function addDiv() {
-    /* eslint-disable @typescript-eslint/naming-convention */
-    if ($div) $div.remove();
-
-    // Start hidden; we'll show it when movement occurs
+    // Don't bother starting hidden, this only is added when we want to
+    // draw it now.
     $div = $(document.createElement("div"))
       .attr("id", el.id + "_brush")
       .css({
+        //eslint-disable-next-line @typescript-eslint/naming-convention
         "background-color": opts.brushFill,
         opacity: opts.brushOpacity,
+        //eslint-disable-next-line @typescript-eslint/naming-convention
         "pointer-events": "none",
         position: "absolute",
-      })
-      .hide();
+      });
 
     const borderStyle = "1px solid " + opts.brushStroke;
 
@@ -410,24 +430,22 @@ function createBrush(
       });
     } else if (opts.brushDirection === "x") {
       $div.css({
+        //eslint-disable-next-line @typescript-eslint/naming-convention
         "border-left": borderStyle,
+        //eslint-disable-next-line @typescript-eslint/naming-convention
         "border-right": borderStyle,
       });
     } else if (opts.brushDirection === "y") {
       $div.css({
+        //eslint-disable-next-line @typescript-eslint/naming-convention
         "border-top": borderStyle,
+        //eslint-disable-next-line @typescript-eslint/naming-convention
         "border-bottom": borderStyle,
       });
     }
 
     $el.append($div);
-    $div
-      .offset(
-        // @ts-expect-error; This is a jQuery Typing issue
-        { x: 0, y: 0 }
-      )
-      .width(0)
-      .outerHeight(0);
+    $div.offset({ top: 0, left: 0 }).width(0).outerHeight(0);
   }
 
   // Update the brush div to reflect the current brush bounds.
@@ -471,18 +489,15 @@ function createBrush(
 
   function startBrushing() {
     state.brushing = true;
-    addDiv();
+    if ($div) {
+      $div.remove(); // Remove previous div
+      $div = null;
+    }
     state.panel = coordmap.getPanelCss(state.down, expandPixels);
-
-    boundsCss(findBox(state.down, state.down));
-    updateDiv();
   }
 
   function brushTo(offsetCss: Offset) {
     boundsCss(findBox(state.down, offsetCss));
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    $div!.show();
-    updateDiv();
   }
 
   function stopBrushing() {
@@ -545,7 +560,6 @@ function createBrush(
     }
 
     boundsCss(newBoundsCss);
-    updateDiv();
   }
 
   function stopDragging() {
@@ -613,7 +627,6 @@ function createBrush(
     }
 
     boundsCss(imgToCss(bImg));
-    updateDiv();
   }
 
   function stopResizing() {
@@ -621,19 +634,20 @@ function createBrush(
   }
 
   return {
+    updateCoordmap: updateCoordmap,
     reset: reset,
 
-    hasOldBrush,
-    importOldBrush: importOldBrush,
     isInsideBrush: isInsideBrush,
     isInResizeArea: isInResizeArea,
     whichResizeSides: whichResizeSides,
 
-    onResize: onResize, // A callback when the wrapper div or img is resized.
+    // Only used for cached plots
+    onImgResize: onImgResize,
 
     boundsCss: boundsCss,
     boundsData: boundsData,
     getPanel: getPanel,
+    setPanelIdx: setPanelIdx,
 
     down: down,
     up: up,

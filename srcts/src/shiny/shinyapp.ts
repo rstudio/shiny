@@ -10,6 +10,7 @@ import type {
 } from "../events/shinyEvents";
 import type { UploadEndValue, UploadInitValue } from "../file/fileProcessor";
 import { resetBrush } from "../imageutils/resetBrush";
+import { setBrush } from "../imageutils/setBrush";
 import { $escape, hasOwnProperty, randomId, scopeExprToFunc } from "../utils";
 import { AsyncQueue } from "../utils/asyncQueue";
 import { isQt } from "../utils/browser";
@@ -1416,6 +1417,23 @@ class ShinyApp {
       "resetBrush",
       (message: { brushId: Parameters<typeof resetBrush>[0] }) => {
         resetBrush(message.brushId);
+      }
+    );
+
+    addMessageHandler(
+      "setBrush",
+      (message: {
+        brushId: Parameters<typeof setBrush>[0];
+        coords: Parameters<typeof setBrush>[1];
+        panel: Parameters<typeof setBrush>[2];
+        outputId: Parameters<typeof setBrush>[3];
+      }) => {
+        setBrush(
+          message.brushId,
+          message.coords,
+          message.panel,
+          message.outputId
+        );
       }
     );
   }

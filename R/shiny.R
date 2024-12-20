@@ -2047,7 +2047,7 @@ ShinySession <- R6Class(
         tmpdata <- tempfile(fileext = ext)
         return(Context$new(getDefaultReactiveDomain(), '[download]')$run(function() {
           promises::with_promise_domain(reactivePromiseDomain(), {
-            promises::with_promise_domain(createStackTracePromiseDomain(), {
+            captureStackTraces({
               self$incrementBusyCount()
               hybrid_chain(
                 # ..stacktraceon matches with the top-level ..stacktraceoff..

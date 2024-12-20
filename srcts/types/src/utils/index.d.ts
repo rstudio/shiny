@@ -11,6 +11,10 @@ declare function parseDate(dateString: string): Date;
 declare function formatDateUTC(x: Date): string;
 declare function makeResizeFilter(el: HTMLElement, func: (width: HTMLElement["offsetWidth"], height: HTMLElement["offsetHeight"]) => void): () => void;
 declare function pixelRatio(): number;
+declare function getBoundingClientSizeBeforeZoom(el: HTMLElement): {
+    width: number;
+    height: number;
+};
 declare function scopeExprToFunc(expr: string): (scope: unknown) => unknown;
 declare function asArray<T>(value: T | T[] | null | undefined): T[];
 declare function mergeSort<Item>(list: Item[], sortfunc: (a: Item, b: Item) => boolean | number): Item[];
@@ -27,4 +31,4 @@ declare function updateLabel(labelTxt: string | undefined, labelNode: JQuery<HTM
 declare function getComputedLinkColor(el: HTMLElement): string;
 declare function isBS3(): boolean;
 declare function toLowerCase<T extends string>(str: T): Lowercase<T>;
-export { escapeHTML, randomId, strToBool, getStyle, padZeros, roundSignif, roundDigits, parseDate, formatDateUTC, makeResizeFilter, pixelRatio, scopeExprToFunc, asArray, mergeSort, $escape, mapValues, isnan, _equal, equal, compareVersion, updateLabel, getComputedLinkColor, hasOwnProperty, hasDefinedProperty, isBS3, toLowerCase, };
+export { escapeHTML, randomId, strToBool, getStyle, padZeros, roundSignif, roundDigits, parseDate, formatDateUTC, makeResizeFilter, pixelRatio, getBoundingClientSizeBeforeZoom, scopeExprToFunc, asArray, mergeSort, $escape, mapValues, isnan, _equal, equal, compareVersion, updateLabel, getComputedLinkColor, hasOwnProperty, hasDefinedProperty, isBS3, toLowerCase, };

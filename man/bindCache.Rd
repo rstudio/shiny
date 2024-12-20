@@ -182,7 +182,7 @@ If you want to use a cache that is shared across multiple R processes, you
 can use a \code{\link[cachem:cache_disk]{cachem::cache_disk()}}. You can create a application-level shared
 cache by putting this at the top of your app.R, server.R, or global.R:
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{shinyOptions(cache = cachem::cache_disk(file.path(dirname(tempdir()), "myapp-cache"))
+\if{html}{\out{<div class="sourceCode">}}\preformatted{shinyOptions(cache = cachem::cache_disk(file.path(dirname(tempdir()), "myapp-cache")))
 }\if{html}{\out{</div>}}
 
 This will create a subdirectory in your system temp directory named

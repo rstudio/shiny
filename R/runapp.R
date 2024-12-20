@@ -445,7 +445,9 @@ stopApp <- function(returnValue = invisible()) {
 #' @param host The IPv4 address that the application should listen on. Defaults
 #'   to the `shiny.host` option, if set, or `"127.0.0.1"` if not.
 #' @param display.mode The mode in which to display the example. Defaults to
-#'   `showcase`, but may be set to `normal` to see the example without
+#'   `"auto"`, which uses the value of `DisplayMode` in the example's
+#'   `DESCRIPTION` file. Set to `"showcase"` to show the app code and
+#'   description with the running app, or `"normal"` to see the example without
 #'   code or commentary.
 #' @param package The package in which to find the example (defaults to
 #'   `"shiny"`).

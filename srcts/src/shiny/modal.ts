@@ -3,6 +3,8 @@ import { shinyUnbindAll } from "./initedMethods";
 import type { HtmlDep } from "./render";
 import { renderContentAsync, renderDependenciesAsync } from "./render";
 
+const modalsInTransition = new WeakSet<HTMLElement>();
+
 // Show a modal dialog. This is meant to handle two types of cases: one is
 // that the content is a Bootstrap modal dialog, and the other is that the
 // content is non-Bootstrap. Bootstrap modals require some special handling,
@@ -43,6 +45,20 @@ async function show({
         $modal.remove();
       }
     });
+
+    // We track modals that are currently transitioning so that we can correctly
+    // schedule their removal when the transition ends. This works around the
+    // fact that, in Bootstrap, `$el.modal('hide')` doesn't work when called on
+    // a modal that hasn't reached the "shown" state.
+    $modal.on("show.bs.modal", function (e) {
+      if (e.target === $("#shiny-modal")[0]) {
+        modalsInTransition.add(e.target);
+      }
+    });
+
+    $modal.on("shown.bs.modal", function (e) {
+      modalsInTransition.delete(e.target);
+    });
   }
 
   $modal.on("keydown.shinymodal", function (e) {
@@ -72,7 +88,14 @@ function remove(): void {
   // trigger the hidden.bs.modal callback that we set in show(), which unbinds
   // and removes the element.
   if ($modal.find(".modal").length > 0) {
-    $modal.find(".modal").modal("hide");
+    const $bsModal = $modal.find(".modal");
+    if (modalsInTransition.has($bsModal[0])) {
+      // If the modal is transitioning, we need to schedule the hide event to
+      // happen once the modal is fully revealed.
+      $bsModal.on("shown.bs.modal", () => $bsModal.modal("hide"));
+    } else {
+      $bsModal.modal("hide");
+    }
   } else {
     // If not a Bootstrap modal dialog, simply unbind and remove it.
     shinyUnbindAll($modal);

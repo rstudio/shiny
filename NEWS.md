@@ -1,3 +1,9 @@
+# shiny (development version)
+
+## Bug fixes
+
+* Fixed a bug with modals where calling `removeModal()` too quickly after `showModal()` would fail to remove the modal if the remove modal message was received while the modal was in the process of being revealed. (#4173)
+
 # shiny 1.10.0
 
 ## New features and improvements

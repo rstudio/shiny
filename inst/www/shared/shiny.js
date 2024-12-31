@@ -5269,6 +5269,20 @@
     }
   });
 
+  // node_modules/core-js/modules/es.weak-set.constructor.js
+  var require_es_weak_set_constructor = __commonJS({
+    "node_modules/core-js/modules/es.weak-set.constructor.js": function() {
+      "use strict";
+      var collection = require_collection();
+      var collectionWeak = require_collection_weak();
+      collection("WeakSet", function(init2) {
+        return function WeakSet2() {
+          return init2(this, arguments.length ? arguments[0] : void 0);
+        };
+      }, collectionWeak);
+    }
+  });
+
   // node_modules/core-js/internals/array-buffer-basic-detection.js
   var require_array_buffer_basic_detection = __commonJS({
     "node_modules/core-js/internals/array-buffer-basic-detection.js": function(exports, module) {
@@ -5656,20 +5670,6 @@
       $88({ global: true, constructor: true, forced: !NATIVE_ARRAY_BUFFER }, {
         DataView: ArrayBufferModule2.DataView
       });
-    }
-  });
-
-  // node_modules/core-js/modules/es.weak-set.constructor.js
-  var require_es_weak_set_constructor = __commonJS({
-    "node_modules/core-js/modules/es.weak-set.constructor.js": function() {
-      "use strict";
-      var collection = require_collection();
-      var collectionWeak = require_collection_weak();
-      collection("WeakSet", function(init2) {
-        return function WeakSet2() {
-          return init2(this, arguments.length ? arguments[0] : void 0);
-        };
-      }, collectionWeak);
     }
   });
 
@@ -20960,6 +20960,11 @@
 
   // srcts/src/shiny/modal.ts
   var import_es_array_iterator46 = __toESM(require_es_array_iterator());
+
+  // node_modules/core-js/modules/es.weak-set.js
+  require_es_weak_set_constructor();
+
+  // srcts/src/shiny/modal.ts
   var import_jquery35 = __toESM(require_jquery());
   function _typeof46(obj) {
     "@babel/helpers - typeof";
@@ -21266,6 +21271,7 @@
       });
     };
   }
+  var modalsInTransition = /* @__PURE__ */ new WeakSet();
   function show() {
     return _show.apply(this, arguments);
   }
@@ -21290,6 +21296,14 @@
                     shinyUnbindAll($modal);
                     $modal.remove();
                   }
+                });
+                $modal.on("show.bs.modal", function(e4) {
+                  if (e4.target === (0, import_jquery35.default)("#shiny-modal")[0]) {
+                    modalsInTransition.add(e4.target);
+                  }
+                });
+                $modal.on("shown.bs.modal", function(e4) {
+                  modalsInTransition.delete(e4.target);
                 });
               }
               $modal.on("keydown.shinymodal", function(e4) {
@@ -21316,7 +21330,14 @@
     var $modal = (0, import_jquery35.default)("#shiny-modal-wrapper");
     $modal.off("keydown.shinymodal");
     if ($modal.find(".modal").length > 0) {
-      $modal.find(".modal").modal("hide");
+      var $bsModal = $modal.find(".modal");
+      if (modalsInTransition.has($bsModal[0])) {
+        $bsModal.on("shown.bs.modal", function() {
+          return $bsModal.modal("hide");
+        });
+      } else {
+        $bsModal.modal("hide");
+      }
     } else {
       shinyUnbindAll($modal);
       $modal.remove();
@@ -22631,9 +22652,6 @@
       );
     }
   });
-
-  // node_modules/core-js/modules/es.weak-set.js
-  require_es_weak_set_constructor();
 
   // srcts/src/shiny/outputProgress.ts
   var import_es_regexp_exec15 = __toESM(require_es_regexp_exec());

@@ -20604,6 +20604,9 @@
     if (Array.isArray(arr))
       return arr;
   }
+  function isJQuery(value) {
+    return Object.prototype.hasOwnProperty.call(value, "jquery") && typeof value.jquery === "string";
+  }
   function valueChangeCallback(inputs, binding, el, allowDeferred) {
     var id = binding.getId(el);
     if (id) {
@@ -20622,6 +20625,9 @@
   var bindingsRegistry = function() {
     var bindings = /* @__PURE__ */ new Map();
     function checkValidity(scope) {
+      if (scope instanceof Text) {
+        scope = scope.parentElement || document.documentElement;
+      }
       var duplicateIds = /* @__PURE__ */ new Map();
       var problems = /* @__PURE__ */ new Set();
       bindings.forEach(function(idTypes, id) {
@@ -20672,7 +20678,7 @@
         headline: headline,
         message: message
       });
-      var scopeElement = scope instanceof HTMLElement ? scope : scope.get(0);
+      var scopeElement = isJQuery(scope) ? scope.get(0) : scope;
       (scopeElement || window).dispatchEvent(event);
     }
     function addBinding(id, bindingType) {

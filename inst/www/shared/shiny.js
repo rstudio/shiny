@@ -4869,6 +4869,20 @@
     }
   });
 
+  // node_modules/core-js/modules/es.set.constructor.js
+  var require_es_set_constructor = __commonJS({
+    "node_modules/core-js/modules/es.set.constructor.js": function() {
+      "use strict";
+      var collection = require_collection();
+      var collectionStrong = require_collection_strong();
+      collection("Set", function(init2) {
+        return function Set2() {
+          return init2(this, arguments.length ? arguments[0] : void 0);
+        };
+      }, collectionStrong);
+    }
+  });
+
   // node_modules/core-js/internals/collection-weak.js
   var require_collection_weak = __commonJS({
     "node_modules/core-js/internals/collection-weak.js": function(exports, module) {
@@ -5103,20 +5117,6 @@
       var nativeDelete;
       var nativeHas;
       var nativeGet;
-    }
-  });
-
-  // node_modules/core-js/modules/es.set.constructor.js
-  var require_es_set_constructor = __commonJS({
-    "node_modules/core-js/modules/es.set.constructor.js": function() {
-      "use strict";
-      var collection = require_collection();
-      var collectionStrong = require_collection_strong();
-      collection("Set", function(init2) {
-        return function Set2() {
-          return init2(this, arguments.length ? arguments[0] : void 0);
-        };
-      }, collectionStrong);
     }
   });
 
@@ -15820,11 +15820,14 @@
     }
   });
 
+  // node_modules/core-js/modules/es.map.js
+  require_es_map_constructor();
+
   // srcts/src/components/errorConsole.ts
   var import_es_array_iterator36 = __toESM(require_es_array_iterator());
 
-  // node_modules/core-js/modules/es.map.js
-  require_es_map_constructor();
+  // node_modules/core-js/modules/es.set.js
+  require_es_set_constructor();
 
   // node_modules/@lit/reactive-element/reactive-element.js
   var import_es_regexp_exec10 = __toESM(require_es_regexp_exec(), 1);
@@ -15860,9 +15863,6 @@
 
   // node_modules/core-js/modules/es.weak-map.js
   require_es_weak_map_constructor();
-
-  // node_modules/core-js/modules/es.set.js
-  require_es_set_constructor();
 
   // node_modules/core-js/modules/es.array.flat.js
   var $69 = require_export();
@@ -18942,9 +18942,27 @@
         });
       }
     }, {
+      key: "dedupeConsoleMessages",
+      value: function dedupeConsoleMessages(e4) {
+        var slot = e4.target;
+        var nodes = slot.assignedNodes();
+        var uniqueMessages = /* @__PURE__ */ new Set();
+        var nodeKey = function nodeKey2(node) {
+          var headline = node.getAttribute("headline") || "";
+          var message = node.getAttribute("message") || "";
+          return "".concat(headline, "::").concat(message);
+        };
+        nodes.forEach(function(node) {
+          if (node instanceof HTMLElement && node.tagName.toLowerCase() === "shiny-error-message") {
+            var key = nodeKey(node);
+            uniqueMessages.has(key) ? node.remove() : uniqueMessages.add(key);
+          }
+        });
+      }
+    }, {
       key: "render",
       value: function render() {
-        return x(_templateObject2 || (_templateObject2 = _taggedTemplateLiteral([' <div class="header">\n        <span class="title"> Shiny Client Errors </span>\n        <button\n          class="close-button"\n          @click=', '\n          title="Dismiss all console messages and close console"\n        >\n          <svg\n            xmlns="http://www.w3.org/2000/svg"\n            fill="none"\n            viewBox="0 0 24 24"\n            stroke-width="1.5"\n            height="1em"\n            width="1em"\n            stroke="currentColor"\n            class="close-icon"\n          >\n            <path\n              stroke-linecap="round"\n              stroke-linejoin="round"\n              d="M6 18L18 6M6 6l12 12"\n            />\n          </svg>\n          Dismiss all\n        </button>\n        <button class="toggle-button" @click=', '>\n          <svg\n            xmlns="http://www.w3.org/2000/svg"\n            fill="none"\n            viewBox="0 0 24 24"\n            stroke-width="1.5"\n            height="1em"\n            width="1em"\n            stroke="currentColor"\n            class="toggle-icon"\n          >\n            <path\n              class="collapse"\n              stroke-linecap="round"\n              stroke-linejoin="round"\n              d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"\n            />\n          </svg>\n        </button>\n      </div>\n      <slot class="content"></slot>'])), this.handleDismissAll, this.toggleCollapsed);
+        return x(_templateObject2 || (_templateObject2 = _taggedTemplateLiteral([' <div class="header">\n        <span class="title"> Shiny Client Errors </span>\n        <button\n          class="close-button"\n          @click=', '\n          title="Dismiss all console messages and close console"\n        >\n          <svg\n            xmlns="http://www.w3.org/2000/svg"\n            fill="none"\n            viewBox="0 0 24 24"\n            stroke-width="1.5"\n            height="1em"\n            width="1em"\n            stroke="currentColor"\n            class="close-icon"\n          >\n            <path\n              stroke-linecap="round"\n              stroke-linejoin="round"\n              d="M6 18L18 6M6 6l12 12"\n            />\n          </svg>\n          Dismiss all\n        </button>\n        <button class="toggle-button" @click=', '>\n          <svg\n            xmlns="http://www.w3.org/2000/svg"\n            fill="none"\n            viewBox="0 0 24 24"\n            stroke-width="1.5"\n            height="1em"\n            width="1em"\n            stroke="currentColor"\n            class="toggle-icon"\n          >\n            <path\n              class="collapse"\n              stroke-linecap="round"\n              stroke-linejoin="round"\n              d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"\n            />\n          </svg>\n        </button>\n      </div>\n      <slot class="content" @slotchange=', "></slot>"])), this.handleDismissAll, this.toggleCollapsed, this.dedupeConsoleMessages);
       }
     }]);
     return ShinyErrorConsole2;

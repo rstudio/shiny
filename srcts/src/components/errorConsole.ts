@@ -200,6 +200,30 @@ class ShinyErrorConsole extends LitElement {
     });
   }
 
+  private dedupeConsoleMessages(e: Event): void {
+    const slot = e.target as HTMLSlotElement;
+    const nodes = slot.assignedNodes();
+
+    const uniqueMessages = new Set();
+
+    const nodeKey = (node: Element) => {
+      const headline = node.getAttribute("headline") || "";
+      const message = node.getAttribute("message") || "";
+      return `${headline}::${message}`;
+    };
+
+    // Keep only one copy of each unique message
+    nodes.forEach((node) => {
+      if (
+        node instanceof HTMLElement &&
+        node.tagName.toLowerCase() === "shiny-error-message"
+      ) {
+        const key = nodeKey(node);
+        uniqueMessages.has(key) ? node.remove() : uniqueMessages.add(key);
+      }
+    });
+  }
+
   render() {
     return html` <div class="header">
         <span class="title"> Shiny Client Errors </span>
@@ -246,7 +270,7 @@ class ShinyErrorConsole extends LitElement {
           </svg>
         </button>
       </div>
-      <slot class="content"></slot>`;
+      <slot class="content" @slotchange=${this.dedupeConsoleMessages}></slot>`;
   }
 }
 

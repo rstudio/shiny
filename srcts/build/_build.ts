@@ -7,8 +7,8 @@ import type {
 } from "esbuild";
 import { build as esbuildBuild } from "esbuild";
 
-import process from "process";
 import { basename } from "path";
+import process from "process";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore; Type definitions are not found. This occurs when `strict: true` in tsconfig.json
@@ -25,7 +25,7 @@ const shinyDesc = readcontrol.readSync("./DESCRIPTION") as ShinyDesc;
 
 const bannerTxt = [
   `/*! ${shinyDesc.package} ${shinyDesc.version}`,
-  `(c) 2012-${new Date().getFullYear()} RStudio, PBC.`,
+  `(c) 2012-${new Date().getFullYear()} Posit Software, PBC.`,
   `License: ${shinyDesc.license} */`,
 ].join(" | ");
 const banner = {

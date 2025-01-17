@@ -1,7 +1,7 @@
 Package: shiny
 Type: Package
 Title: Web Application Framework for R
-Version: 1.9.1.9000
+Version: 1.10.0.9000
 Authors@R: c(
     person("Winston", "Chang", role = c("aut", "cre"), email = "winston@posit.co", comment = c(ORCID = "0000-0002-1576-2126")),
     person("Joe", "Cheng", role = "aut", email = "joe@posit.co"),

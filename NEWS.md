@@ -1,5 +1,9 @@
 # shiny (development version)
 
+## New features and improvements
+
+* Shiny now uses `{cli}` instead of `{crayon}` for rich log messages. (@olivroy #4170)
+
 ## Bug fixes
 
 * Fixed a bug with modals where calling `removeModal()` too quickly after `showModal()` would fail to remove the modal if the remove modal message was received while the modal was in the process of being revealed. (#4173)

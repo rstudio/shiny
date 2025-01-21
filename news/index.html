@@ -50,6 +50,10 @@
     <div class="section level2">
 <h2 class="page-header" data-toc-text="development version" id="shiny-development-version">shiny (development version)<a class="anchor" aria-label="anchor" href="#shiny-development-version"></a></h2>
 <div class="section level3">
+<h3 id="new-features-and-improvements-development-version">New features and improvements<a class="anchor" aria-label="anchor" href="#new-features-and-improvements-development-version"></a></h3>
+<ul><li>Shiny now uses <a href="https://cli.r-lib.org" class="external-link">cli</a> instead of <a href="https://r-lib.github.io/crayon/" class="external-link">crayon</a> for rich log messages. (<a href="https://github.com/olivroy" class="external-link">@olivroy</a> <a href="https://github.com/rstudio/shiny/issues/4170" class="external-link">#4170</a>)</li>
+</ul></div>
+<div class="section level3">
 <h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>
 <ul><li>Fixed a bug with modals where calling <code><a href="../reference/showModal.html">removeModal()</a></code> too quickly after <code><a href="../reference/showModal.html">showModal()</a></code> would fail to remove the modal if the remove modal message was received while the modal was in the process of being revealed. (<a href="https://github.com/rstudio/shiny/issues/4173" class="external-link">#4173</a>)</li>
 </ul></div>

@@ -4869,20 +4869,6 @@
     }
   });
 
-  // node_modules/core-js/modules/es.set.constructor.js
-  var require_es_set_constructor = __commonJS({
-    "node_modules/core-js/modules/es.set.constructor.js": function() {
-      "use strict";
-      var collection = require_collection();
-      var collectionStrong = require_collection_strong();
-      collection("Set", function(init2) {
-        return function Set2() {
-          return init2(this, arguments.length ? arguments[0] : void 0);
-        };
-      }, collectionStrong);
-    }
-  });
-
   // node_modules/core-js/internals/collection-weak.js
   var require_collection_weak = __commonJS({
     "node_modules/core-js/internals/collection-weak.js": function(exports, module) {
@@ -5117,6 +5103,20 @@
       var nativeDelete;
       var nativeHas;
       var nativeGet;
+    }
+  });
+
+  // node_modules/core-js/modules/es.set.constructor.js
+  var require_es_set_constructor = __commonJS({
+    "node_modules/core-js/modules/es.set.constructor.js": function() {
+      "use strict";
+      var collection = require_collection();
+      var collectionStrong = require_collection_strong();
+      collection("Set", function(init2) {
+        return function Set2() {
+          return init2(this, arguments.length ? arguments[0] : void 0);
+        };
+      }, collectionStrong);
     }
   });
 
@@ -5840,7 +5840,7 @@
   }
 
   // srcts/src/shiny/index.ts
-  var import_es_regexp_exec17 = __toESM(require_es_regexp_exec());
+  var import_es_regexp_exec18 = __toESM(require_es_regexp_exec());
 
   // node_modules/core-js/modules/es.string.match.js
   var call2 = require_function_call();
@@ -15820,14 +15820,12 @@
     }
   });
 
-  // node_modules/core-js/modules/es.map.js
-  require_es_map_constructor();
-
   // srcts/src/components/errorConsole.ts
+  var import_es_regexp_exec12 = __toESM(require_es_regexp_exec());
   var import_es_array_iterator36 = __toESM(require_es_array_iterator());
 
-  // node_modules/core-js/modules/es.set.js
-  require_es_set_constructor();
+  // node_modules/core-js/modules/es.map.js
+  require_es_map_constructor();
 
   // node_modules/@lit/reactive-element/reactive-element.js
   var import_es_regexp_exec10 = __toESM(require_es_regexp_exec(), 1);
@@ -15863,6 +15861,9 @@
 
   // node_modules/core-js/modules/es.weak-map.js
   require_es_weak_map_constructor();
+
+  // node_modules/core-js/modules/es.set.js
+  require_es_set_constructor();
 
   // node_modules/core-js/modules/es.array.flat.js
   var $69 = require_export();
@@ -18799,6 +18800,65 @@
       });
     };
   }
+  function _createForOfIteratorHelper5(o4, allowArrayLike) {
+    var it = typeof Symbol !== "undefined" && o4[Symbol.iterator] || o4["@@iterator"];
+    if (!it) {
+      if (Array.isArray(o4) || (it = _unsupportedIterableToArray5(o4)) || allowArrayLike && o4 && typeof o4.length === "number") {
+        if (it)
+          o4 = it;
+        var i5 = 0;
+        var F = function F2() {
+        };
+        return { s: F, n: function n4() {
+          if (i5 >= o4.length)
+            return { done: true };
+          return { done: false, value: o4[i5++] };
+        }, e: function e4(_e) {
+          throw _e;
+        }, f: F };
+      }
+      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+    var normalCompletion = true, didErr = false, err;
+    return { s: function s4() {
+      it = it.call(o4);
+    }, n: function n4() {
+      var step = it.next();
+      normalCompletion = step.done;
+      return step;
+    }, e: function e4(_e2) {
+      didErr = true;
+      err = _e2;
+    }, f: function f4() {
+      try {
+        if (!normalCompletion && it.return != null)
+          it.return();
+      } finally {
+        if (didErr)
+          throw err;
+      }
+    } };
+  }
+  function _unsupportedIterableToArray5(o4, minLen) {
+    if (!o4)
+      return;
+    if (typeof o4 === "string")
+      return _arrayLikeToArray5(o4, minLen);
+    var n4 = Object.prototype.toString.call(o4).slice(8, -1);
+    if (n4 === "Object" && o4.constructor)
+      n4 = o4.constructor.name;
+    if (n4 === "Map" || n4 === "Set")
+      return Array.from(o4);
+    if (n4 === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n4))
+      return _arrayLikeToArray5(o4, minLen);
+  }
+  function _arrayLikeToArray5(arr, len) {
+    if (len == null || len > arr.length)
+      len = arr.length;
+    for (var i5 = 0, arr2 = new Array(len); i5 < len; i5++)
+      arr2[i5] = arr[i5];
+    return arr2;
+  }
   function _classCallCheck33(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
@@ -18942,27 +19002,53 @@
         });
       }
     }, {
-      key: "dedupeConsoleMessages",
-      value: function dedupeConsoleMessages(e4) {
-        var slot = e4.target;
-        var nodes = slot.assignedNodes();
-        var uniqueMessages = /* @__PURE__ */ new Set();
-        var nodeKey = function nodeKey2(node) {
-          var headline = node.getAttribute("headline") || "";
-          var message = node.getAttribute("message") || "";
-          return "".concat(headline, "::").concat(message);
-        };
-        nodes.forEach(function(node) {
-          if (node instanceof HTMLElement && node.tagName.toLowerCase() === "shiny-error-message") {
-            var key = nodeKey(node);
-            uniqueMessages.has(key) ? node.remove() : uniqueMessages.add(key);
-          }
-        });
-      }
-    }, {
       key: "render",
       value: function render() {
-        return x(_templateObject2 || (_templateObject2 = _taggedTemplateLiteral([' <div class="header">\n        <span class="title"> Shiny Client Errors </span>\n        <button\n          class="close-button"\n          @click=', '\n          title="Dismiss all console messages and close console"\n        >\n          <svg\n            xmlns="http://www.w3.org/2000/svg"\n            fill="none"\n            viewBox="0 0 24 24"\n            stroke-width="1.5"\n            height="1em"\n            width="1em"\n            stroke="currentColor"\n            class="close-icon"\n          >\n            <path\n              stroke-linecap="round"\n              stroke-linejoin="round"\n              d="M6 18L18 6M6 6l12 12"\n            />\n          </svg>\n          Dismiss all\n        </button>\n        <button class="toggle-button" @click=', '>\n          <svg\n            xmlns="http://www.w3.org/2000/svg"\n            fill="none"\n            viewBox="0 0 24 24"\n            stroke-width="1.5"\n            height="1em"\n            width="1em"\n            stroke="currentColor"\n            class="toggle-icon"\n          >\n            <path\n              class="collapse"\n              stroke-linecap="round"\n              stroke-linejoin="round"\n              d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"\n            />\n          </svg>\n        </button>\n      </div>\n      <slot class="content" @slotchange=', "></slot>"])), this.handleDismissAll, this.toggleCollapsed, this.dedupeConsoleMessages);
+        return x(_templateObject2 || (_templateObject2 = _taggedTemplateLiteral([' <div class="header">\n        <span class="title"> Shiny Client Errors </span>\n        <button\n          class="close-button"\n          @click=', '\n          title="Dismiss all console messages and close console"\n        >\n          <svg\n            xmlns="http://www.w3.org/2000/svg"\n            fill="none"\n            viewBox="0 0 24 24"\n            stroke-width="1.5"\n            height="1em"\n            width="1em"\n            stroke="currentColor"\n            class="close-icon"\n          >\n            <path\n              stroke-linecap="round"\n              stroke-linejoin="round"\n              d="M6 18L18 6M6 6l12 12"\n            />\n          </svg>\n          Dismiss all\n        </button>\n        <button class="toggle-button" @click=', '>\n          <svg\n            xmlns="http://www.w3.org/2000/svg"\n            fill="none"\n            viewBox="0 0 24 24"\n            stroke-width="1.5"\n            height="1em"\n            width="1em"\n            stroke="currentColor"\n            class="toggle-icon"\n          >\n            <path\n              class="collapse"\n              stroke-linecap="round"\n              stroke-linejoin="round"\n              d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"\n            />\n          </svg>\n        </button>\n      </div>\n      <slot class="content"></slot>'])), this.handleDismissAll, this.toggleCollapsed);
+      }
+    }], [{
+      key: "renderClientMessage",
+      value: function renderClientMessage(_ref) {
+        var headline = _ref.headline, message = _ref.message;
+        var msg = document.createElement("shiny-error-message");
+        msg.setAttribute("headline", headline || "");
+        msg.setAttribute("message", message);
+        return msg;
+      }
+    }, {
+      key: "appendConsoleMessage",
+      value: function appendConsoleMessage(element, _ref2) {
+        var _element$shadowRoot;
+        var headline = _ref2.headline, message = _ref2.message;
+        var content = (_element$shadowRoot = element.shadowRoot) === null || _element$shadowRoot === void 0 ? void 0 : _element$shadowRoot.querySelector("slot.content");
+        if (content) {
+          var nodeKey = function nodeKey2(node2) {
+            var headline2 = node2.getAttribute("headline") || "";
+            var message2 = node2.getAttribute("message") || "";
+            return "".concat(headline2, "::").concat(message2);
+          };
+          var newKey = "".concat(headline, "::").concat(message);
+          var _iterator = _createForOfIteratorHelper5(content.assignedElements()), _step;
+          try {
+            for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+              var node = _step.value;
+              if (node.tagName.toLowerCase() === "shiny-error-message") {
+                if (nodeKey(node) === newKey) {
+                  return;
+                }
+              }
+            }
+          } catch (err) {
+            _iterator.e(err);
+          } finally {
+            _iterator.f();
+          }
+        }
+        element.appendChild(this.renderClientMessage({
+          headline: headline,
+          message: message
+        }));
+        return;
       }
     }]);
     return ShinyErrorConsole2;
@@ -19024,8 +19110,8 @@
   });
   _defineProperty11(ShinyErrorMessage, "styles", [i(_templateObject5 || (_templateObject5 = _taggedTemplateLiteral(['\n      :host {\n        color: var(--red-11);\n        display: block;\n        font-size: var(--font-md);\n\n        position: relative;\n        --icon-size: var(--font-lg)\n\n        /* Reset box sizing */\n        box-sizing: border-box;\n      }\n\n      .container {\n        display: flex;\n        gap: var(--space-2);\n      }\n\n      .contents {\n        width: 40ch;\n        display: flex;\n        flex-direction: column;\n        gap: var(--space-1);\n        padding-block-start: 0;\n        padding-block-end: var(--space-3);\n        overflow: auto;\n      }\n\n      :host(:last-of-type) .contents {\n\n        padding-block-end: var(--space-1);\n      }\n\n      .contents > h3 {\n        font-size: 1em;\n        font-weight: 500;\n        color: var(--red-12);\n      }\n\n      .contents > * {\n        margin-block: 0;\n      }\n\n      .error-message {\n        font-family: "Courier New", Courier, monospace;\n        white-space: pre-wrap;\n      }\n\n      .decoration-container {\n        flex-shrink: 0;\n        position: relative;\n\n        --line-w: 2px;\n        --dot-size: 11px;\n      }\n\n      :host(:hover) .decoration-container {\n        --scale: 1.25;\n      }\n\n      .vertical-line {\n        margin-inline: auto;\n        width: var(--line-w);\n        height: 100%;\n\n        background-color: var(--red-10);\n      }\n\n      :host(:first-of-type) .vertical-line {\n        height: calc(100% - var(--dot-size));\n        margin-top: var(--dot-size);\n      }\n\n      .dot {\n        position: absolute;\n        width: var(--dot-size);\n        height: var(--dot-size);\n        top: calc(-1px +  var(--dot-size) / 2);\n        left: calc(50% - var(--dot-size) / 2);\n        border-radius: 100%;\n        transform: scale(var(--scale, 1));\n\n        color: var(--red-6);\n        background-color: var(--red-10);\n      }\n\n      .actions {\n        transform: scaleX(0);\n        transition: transform calc(var(--animation-speed) / 2) ease-in-out;\n        display: flex;\n        justify-content: center;\n        flex-direction: column;\n      }\n\n      /* Delay transition on mouseout so the buttons don\'t jump away if the user\n      overshoots them with their mouse */\n      :host(:not(:hover)) .actions {\n        transition-delay: 0.15s;\n      }\n\n      :host(:hover) .actions {\n        transform: scaleX(1);\n      }\n\n      ', "\n\n      .copy-button {\n        padding: 0;\n        width: var(--space-8);\n        height: var(--space-8);\n        position: relative;\n        --pad: var(--space-2);\n      }\n\n      .copy-button-inner {\n        position: relative;\n        width: 100%;\n        height: 100%;\n        border-radius: inherit;\n        transition: transform 0.5s;\n        transform-style: preserve-3d;\n      }\n\n      /* Animate flipping to the other side when the .copy-success class is\n      added to the host */\n      :host(.copy-success) .copy-button-inner {\n        transform: rotateY(180deg);\n      }\n\n      /* Position the front and back side */\n      .copy-button .front,\n      .copy-button .back {\n        --side: calc(100% - 2 * var(--pad));\n        position: absolute;\n        inset: var(--pad);\n        height: var(--side);\n        width: var(--side);\n        -webkit-backface-visibility: hidden; /* Safari */\n        backface-visibility: hidden;\n      }\n\n      .copy-button:hover .copy-button-inner {\n        background-color: var(--gray-2);\n      }\n\n      /* Style the back side */\n      .copy-button .back {\n        --pad: var(--space-1);\n        color: var(--green-8);\n        transform: rotateY(180deg);\n      }\n    "])), buttonStyles)]);
   customElements.define("shiny-error-message", ShinyErrorMessage);
-  function showShinyClientMessage(_ref) {
-    var _ref$headline = _ref.headline, headline = _ref$headline === void 0 ? "" : _ref$headline, message = _ref.message, _ref$status = _ref.status, status = _ref$status === void 0 ? "warning" : _ref$status;
+  function showShinyClientMessage(_ref3) {
+    var _ref3$headline = _ref3.headline, headline = _ref3$headline === void 0 ? "" : _ref3$headline, message = _ref3.message, _ref3$status = _ref3.status, status = _ref3$status === void 0 ? "warning" : _ref3$status;
     var consoleMessage = "[shiny] ".concat(headline).concat(headline ? " - " : "").concat(message);
     switch (status) {
       case "error":
@@ -19041,15 +19127,15 @@
     if (!Shiny.inDevMode()) {
       return;
     }
-    var errorConsoleContainer = document.querySelector("shiny-error-console");
-    if (!errorConsoleContainer) {
-      errorConsoleContainer = document.createElement("shiny-error-console");
-      document.body.appendChild(errorConsoleContainer);
+    var sec = document.querySelector("shiny-error-console");
+    if (!sec) {
+      sec = document.createElement("shiny-error-console");
+      document.body.appendChild(sec);
     }
-    var errorConsole = document.createElement("shiny-error-message");
-    errorConsole.setAttribute("headline", headline);
-    errorConsole.setAttribute("message", message);
-    errorConsoleContainer.appendChild(errorConsole);
+    ShinyErrorConsole.appendConsoleMessage(sec, {
+      headline: headline,
+      message: message
+    });
   }
   function showErrorInClientConsole(e4) {
     var errorMsg = null;
@@ -19215,7 +19301,7 @@
   }();
 
   // srcts/src/inputPolicies/inputDeferDecorator.ts
-  var import_es_regexp_exec12 = __toESM(require_es_regexp_exec());
+  var import_es_regexp_exec13 = __toESM(require_es_regexp_exec());
   var import_es_array_iterator38 = __toESM(require_es_array_iterator());
   function _typeof38(obj) {
     "@babel/helpers - typeof";
@@ -19845,7 +19931,7 @@
 
   // srcts/src/shiny/bind.ts
   var import_es_array_iterator45 = __toESM(require_es_array_iterator());
-  var import_es_regexp_exec13 = __toESM(require_es_regexp_exec());
+  var import_es_regexp_exec14 = __toESM(require_es_regexp_exec());
   var import_jquery34 = __toESM(require_jquery());
 
   // srcts/src/bindings/outputAdapter.ts
@@ -20567,25 +20653,25 @@
     };
   }
   function _slicedToArray4(arr, i5) {
-    return _arrayWithHoles4(arr) || _iterableToArrayLimit4(arr, i5) || _unsupportedIterableToArray5(arr, i5) || _nonIterableRest4();
+    return _arrayWithHoles4(arr) || _iterableToArrayLimit4(arr, i5) || _unsupportedIterableToArray6(arr, i5) || _nonIterableRest4();
   }
   function _nonIterableRest4() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray5(o4, minLen) {
+  function _unsupportedIterableToArray6(o4, minLen) {
     if (!o4)
       return;
     if (typeof o4 === "string")
-      return _arrayLikeToArray5(o4, minLen);
+      return _arrayLikeToArray6(o4, minLen);
     var n4 = Object.prototype.toString.call(o4).slice(8, -1);
     if (n4 === "Object" && o4.constructor)
       n4 = o4.constructor.name;
     if (n4 === "Map" || n4 === "Set")
       return Array.from(o4);
     if (n4 === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n4))
-      return _arrayLikeToArray5(o4, minLen);
+      return _arrayLikeToArray6(o4, minLen);
   }
-  function _arrayLikeToArray5(arr, len) {
+  function _arrayLikeToArray6(arr, len) {
     if (len == null || len > arr.length)
       len = arr.length;
     for (var i5 = 0, arr2 = new Array(len); i5 < len; i5++)
@@ -21346,7 +21432,7 @@
   }
 
   // srcts/src/shiny/notifications.ts
-  var import_es_regexp_exec14 = __toESM(require_es_regexp_exec());
+  var import_es_regexp_exec15 = __toESM(require_es_regexp_exec());
   var import_es_array_iterator47 = __toESM(require_es_array_iterator());
   var import_jquery36 = __toESM(require_jquery());
   function _typeof47(obj) {
@@ -22137,7 +22223,7 @@
   }
 
   // srcts/src/shiny/shinyapp.ts
-  var import_es_regexp_exec16 = __toESM(require_es_regexp_exec());
+  var import_es_regexp_exec17 = __toESM(require_es_regexp_exec());
   var import_es_json_stringify4 = __toESM(require_es_json_stringify());
 
   // node_modules/core-js/modules/es.array-buffer.constructor.js
@@ -22658,7 +22744,7 @@
   require_es_weak_set_constructor();
 
   // srcts/src/shiny/outputProgress.ts
-  var import_es_regexp_exec15 = __toESM(require_es_regexp_exec());
+  var import_es_regexp_exec16 = __toESM(require_es_regexp_exec());
   function _typeof50(obj) {
     "@babel/helpers - typeof";
     return _typeof50 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj2) {
@@ -22668,7 +22754,7 @@
     }, _typeof50(obj);
   }
   function _slicedToArray5(arr, i5) {
-    return _arrayWithHoles5(arr) || _iterableToArrayLimit5(arr, i5) || _unsupportedIterableToArray6(arr, i5) || _nonIterableRest5();
+    return _arrayWithHoles5(arr) || _iterableToArrayLimit5(arr, i5) || _unsupportedIterableToArray7(arr, i5) || _nonIterableRest5();
   }
   function _nonIterableRest5() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
@@ -22703,10 +22789,10 @@
     if (Array.isArray(arr))
       return arr;
   }
-  function _createForOfIteratorHelper5(o4, allowArrayLike) {
+  function _createForOfIteratorHelper6(o4, allowArrayLike) {
     var it = typeof Symbol !== "undefined" && o4[Symbol.iterator] || o4["@@iterator"];
     if (!it) {
-      if (Array.isArray(o4) || (it = _unsupportedIterableToArray6(o4)) || allowArrayLike && o4 && typeof o4.length === "number") {
+      if (Array.isArray(o4) || (it = _unsupportedIterableToArray7(o4)) || allowArrayLike && o4 && typeof o4.length === "number") {
         if (it)
           o4 = it;
         var i5 = 0;
@@ -22742,20 +22828,20 @@
       }
     } };
   }
-  function _unsupportedIterableToArray6(o4, minLen) {
+  function _unsupportedIterableToArray7(o4, minLen) {
     if (!o4)
       return;
     if (typeof o4 === "string")
-      return _arrayLikeToArray6(o4, minLen);
+      return _arrayLikeToArray7(o4, minLen);
     var n4 = Object.prototype.toString.call(o4).slice(8, -1);
     if (n4 === "Object" && o4.constructor)
       n4 = o4.constructor.name;
     if (n4 === "Map" || n4 === "Set")
       return Array.from(o4);
     if (n4 === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n4))
-      return _arrayLikeToArray6(o4, minLen);
+      return _arrayLikeToArray7(o4, minLen);
   }
-  function _arrayLikeToArray6(arr, len) {
+  function _arrayLikeToArray7(arr, len) {
     if (len == null || len > arr.length)
       len = arr.length;
     for (var i5 = 0, arr2 = new Array(len); i5 < len; i5++)
@@ -22914,7 +23000,7 @@
     for (var _name in message.errors) {
       _classPrivateMethodGet(this, _updateStateFromValueOrError, _updateStateFromValueOrError2).call(this, _name, OutputStates.Error);
     }
-    var _iterator = _createForOfIteratorHelper5(this.outputStates), _step;
+    var _iterator = _createForOfIteratorHelper6(this.outputStates), _step;
     try {
       for (_iterator.s(); !(_step = _iterator.n()).done; ) {
         var _step$value = _slicedToArray5(_step.value, 2), _name2 = _step$value[0], state = _step$value[1];
@@ -23008,7 +23094,7 @@
     }, _typeof51(obj);
   }
   function _slicedToArray6(arr, i5) {
-    return _arrayWithHoles6(arr) || _iterableToArrayLimit6(arr, i5) || _unsupportedIterableToArray7(arr, i5) || _nonIterableRest6();
+    return _arrayWithHoles6(arr) || _iterableToArrayLimit6(arr, i5) || _unsupportedIterableToArray8(arr, i5) || _nonIterableRest6();
   }
   function _nonIterableRest6() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
@@ -23043,10 +23129,10 @@
     if (Array.isArray(arr))
       return arr;
   }
-  function _createForOfIteratorHelper6(o4, allowArrayLike) {
+  function _createForOfIteratorHelper7(o4, allowArrayLike) {
     var it = typeof Symbol !== "undefined" && o4[Symbol.iterator] || o4["@@iterator"];
     if (!it) {
-      if (Array.isArray(o4) || (it = _unsupportedIterableToArray7(o4)) || allowArrayLike && o4 && typeof o4.length === "number") {
+      if (Array.isArray(o4) || (it = _unsupportedIterableToArray8(o4)) || allowArrayLike && o4 && typeof o4.length === "number") {
         if (it)
           o4 = it;
         var i5 = 0;
@@ -23082,20 +23168,20 @@
       }
     } };
   }
-  function _unsupportedIterableToArray7(o4, minLen) {
+  function _unsupportedIterableToArray8(o4, minLen) {
     if (!o4)
       return;
     if (typeof o4 === "string")
-      return _arrayLikeToArray7(o4, minLen);
+      return _arrayLikeToArray8(o4, minLen);
     var n4 = Object.prototype.toString.call(o4).slice(8, -1);
     if (n4 === "Object" && o4.constructor)
       n4 = o4.constructor.name;
     if (n4 === "Map" || n4 === "Set")
       return Array.from(o4);
     if (n4 === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n4))
-      return _arrayLikeToArray7(o4, minLen);
+      return _arrayLikeToArray8(o4, minLen);
   }
-  function _arrayLikeToArray7(arr, len) {
+  function _arrayLikeToArray8(arr, len) {
     if (len == null || len > arr.length)
       len = arr.length;
     for (var i5 = 0, arr2 = new Array(len); i5 < len; i5++)
@@ -24131,7 +24217,7 @@
       key: "_updateProgress",
       value: function _updateProgress() {
         var changed = this.$outputProgress.takeChanges();
-        var _iterator = _createForOfIteratorHelper6(changed.entries()), _step;
+        var _iterator = _createForOfIteratorHelper7(changed.entries()), _step;
         try {
           for (_iterator.s(); !(_step = _iterator.n()).done; ) {
             var _step$value = _slicedToArray6(_step.value, 2), name = _step$value[0], recalculating = _step$value[1];
@@ -24455,7 +24541,7 @@
                     _context14.next = 26;
                     break;
                   case 7:
-                    _iterator2 = _createForOfIteratorHelper6(targets);
+                    _iterator2 = _createForOfIteratorHelper7(targets);
                     _context14.prev = 8;
                     _iterator2.s();
                   case 10:
@@ -24655,7 +24741,7 @@
                       "beforeend"
                     );
                   case 24:
-                    _iterator3 = _createForOfIteratorHelper6($divTag.get());
+                    _iterator3 = _createForOfIteratorHelper7($divTag.get());
                     _context15.prev = 25;
                     _iterator3.s();
                   case 27:

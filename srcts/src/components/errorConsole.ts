@@ -200,28 +200,41 @@ class ShinyErrorConsole extends LitElement {
     });
   }
 
-  private dedupeConsoleMessages(e: Event): void {
-    const slot = e.target as HTMLSlotElement;
-    const nodes = slot.assignedNodes();
+  static renderClientMessage({ headline, message }: ShinyClientMessage) {
+    const msg = document.createElement("shiny-error-message");
+    msg.setAttribute("headline", headline || "");
+    msg.setAttribute("message", message);
+    return msg;
+  }
 
-    const uniqueMessages = new Set();
+  static appendConsoleMessage(
+    element: ShinyErrorConsole,
+    { headline, message }: ShinyClientMessage
+  ) {
+    const content =
+      element.shadowRoot?.querySelector<HTMLSlotElement>("slot.content");
 
-    const nodeKey = (node: Element) => {
-      const headline = node.getAttribute("headline") || "";
-      const message = node.getAttribute("message") || "";
-      return `${headline}::${message}`;
-    };
+    if (content) {
+      const nodeKey = (node: Element) => {
+        const headline = node.getAttribute("headline") || "";
+        const message = node.getAttribute("message") || "";
+        return `${headline}::${message}`;
+      };
+      const newKey = `${headline}::${message}`;
 
-    // Keep only one copy of each unique message
-    nodes.forEach((node) => {
-      if (
-        node instanceof HTMLElement &&
-        node.tagName.toLowerCase() === "shiny-error-message"
-      ) {
-        const key = nodeKey(node);
-        uniqueMessages.has(key) ? node.remove() : uniqueMessages.add(key);
+      for (const node of content.assignedElements()) {
+        if (node.tagName.toLowerCase() === "shiny-error-message") {
+          if (nodeKey(node) === newKey) {
+            // Do nothing, this message is already in the console
+            // TODO: Increase count of message here
+            return;
+          }
+        }
       }
-    });
+    }
+
+    element.appendChild(this.renderClientMessage({ headline, message }));
+    return;
   }
 
   render() {
@@ -270,7 +283,7 @@ class ShinyErrorConsole extends LitElement {
           </svg>
         </button>
       </div>
-      <slot class="content" @slotchange=${this.dedupeConsoleMessages}></slot>`;
+      <slot class="content"></slot>`;
   }
 }
 
@@ -547,17 +560,13 @@ function showShinyClientMessage({
 
   // Check to see if an Error Console Container element already exists. If it
   // doesn't we need to add it before putting an error on the screen
-  let errorConsoleContainer = document.querySelector("shiny-error-console");
-  if (!errorConsoleContainer) {
-    errorConsoleContainer = document.createElement("shiny-error-console");
-    document.body.appendChild(errorConsoleContainer);
+  let sec = document.querySelector<ShinyErrorConsole>("shiny-error-console");
+  if (!sec) {
+    sec = document.createElement("shiny-error-console") as ShinyErrorConsole;
+    document.body.appendChild(sec);
   }
 
-  const errorConsole = document.createElement("shiny-error-message");
-  errorConsole.setAttribute("headline", headline);
-  errorConsole.setAttribute("message", message);
-
-  errorConsoleContainer.appendChild(errorConsole);
+  ShinyErrorConsole.appendConsoleMessage(sec, { headline, message });
 }
 
 /**

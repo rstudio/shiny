@@ -12,7 +12,6 @@ import { shinyAppBindOutput, shinyAppUnbindOutput } from "./initedMethods";
 import { sendImageSizeFns } from "./sendImageSize";
 
 type BindScope = HTMLElement | JQuery<HTMLElement>;
-type BindAllScope = HTMLElement | JQuery<HTMLElement> | Text;
 
 /**
  * Type guard to check if a value is a jQuery object containing HTMLElements
@@ -91,9 +90,9 @@ const bindingsRegistry = (() => {
    * @returns ShinyClientMessageEvent if current ID bindings are invalid,
    * otherwise returns an ok status.
    */
-  function checkValidity(scope: BindAllScope): void {
-    if (scope instanceof Text) {
-      scope = scope.parentElement || document.documentElement;
+  function checkValidity(scope: BindScope): void {
+    if (!isJQuery(scope) && !(scope instanceof HTMLElement)) {
+      return;
     }
 
     type BindingCounts = { [T in BindingTypes]: number };

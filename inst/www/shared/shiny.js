@@ -20625,8 +20625,8 @@
   var bindingsRegistry = function() {
     var bindings = /* @__PURE__ */ new Map();
     function checkValidity(scope) {
-      if (scope instanceof Text) {
-        scope = scope.parentElement || document.documentElement;
+      if (!isJQuery(scope) && !(scope instanceof HTMLElement)) {
+        return;
       }
       var duplicateIds = /* @__PURE__ */ new Map();
       var problems = /* @__PURE__ */ new Set();

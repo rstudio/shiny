@@ -1053,6 +1053,12 @@ class ShinyApp {
         const $tabContent = getTabContent($tabset);
         let tabsetId = $parentTabset.attr("data-tabsetid");
 
+        // TODO: Only render tab content HTML once
+        // The following lines turn the content/nav control HTML into DOM nodes,
+        // but we don't insert these directly, instead we take the HTML from
+        // these nodes and pass it through `renderContentAsync()`. This means
+        // the inserted HTML may not perfectly match the message HTML, esp. if
+        // the content uses web components that alter their HTML when loaded.
         const $divTag = $(message.divTag.html);
         const $liTag = $(message.liTag.html);
         const $aTag = $liTag.find("> a");
@@ -1166,12 +1172,14 @@ class ShinyApp {
           // Must not use jQuery for appending el to the doc, we don't want any
           // scripts to run (since they will run when renderContent takes a crack).
           $tabContent[0].appendChild(el);
-          // If `el` itself is a script tag, this approach won't work (the script
-          // won't be run), since we're only sending innerHTML through renderContent
-          // and not the whole tag. That's fine in this case because we control the
-          // R code that generates this HTML, and we know that the element is not
-          // a script tag.
-          await renderContentAsync(el, el.innerHTML || el.textContent);
+          if (el.nodeType === Node.ELEMENT_NODE) {
+            // If `el` itself is a script tag, this approach won't work (the script
+            // won't be run), since we're only sending innerHTML through renderContent
+            // and not the whole tag. That's fine in this case because we control the
+            // R code that generates this HTML, and we know that the element is not
+            // a script tag.
+            await renderContentAsync(el, el.innerHTML || el.textContent);
+          }
         }
 
         if (message.select) {

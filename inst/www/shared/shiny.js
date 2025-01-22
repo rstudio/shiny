@@ -24648,36 +24648,40 @@
                     _iterator3.s();
                   case 27:
                     if ((_step3 = _iterator3.n()).done) {
-                      _context15.next = 34;
+                      _context15.next = 35;
                       break;
                     }
                     el = _step3.value;
                     $tabContent[0].appendChild(el);
-                    _context15.next = 32;
+                    if (!(el.nodeType === Node.ELEMENT_NODE)) {
+                      _context15.next = 33;
+                      break;
+                    }
+                    _context15.next = 33;
                     return renderContentAsync(el, el.innerHTML || el.textContent);
-                  case 32:
+                  case 33:
                     _context15.next = 27;
                     break;
-                  case 34:
-                    _context15.next = 39;
+                  case 35:
+                    _context15.next = 40;
                     break;
-                  case 36:
-                    _context15.prev = 36;
+                  case 37:
+                    _context15.prev = 37;
                     _context15.t0 = _context15["catch"](25);
                     _iterator3.e(_context15.t0);
-                  case 39:
-                    _context15.prev = 39;
+                  case 40:
+                    _context15.prev = 40;
                     _iterator3.f();
-                    return _context15.finish(39);
-                  case 42:
+                    return _context15.finish(40);
+                  case 43:
                     if (message.select) {
                       $liTag.find("a").tab("show");
                     }
-                  case 43:
+                  case 44:
                   case "end":
                     return _context15.stop();
                 }
-            }, _callee15, null, [[25, 36, 39, 42]]);
+            }, _callee15, null, [[25, 37, 40, 43]]);
           }));
           return function(_x17) {
             return _ref10.apply(this, arguments);

@@ -207,12 +207,9 @@ class ShinyErrorConsole extends LitElement {
     return msg;
   }
 
-  static appendConsoleMessage(
-    element: ShinyErrorConsole,
-    { headline, message }: ShinyClientMessage
-  ) {
+  appendConsoleMessage({ headline, message }: ShinyClientMessage) {
     const content =
-      element.shadowRoot?.querySelector<HTMLSlotElement>("slot.content");
+      this.shadowRoot?.querySelector<HTMLSlotElement>("slot.content");
 
     if (content) {
       const nodeKey = (node: Element) => {
@@ -233,7 +230,9 @@ class ShinyErrorConsole extends LitElement {
       }
     }
 
-    element.appendChild(this.renderClientMessage({ headline, message }));
+    this.appendChild(
+      ShinyErrorConsole.renderClientMessage({ headline, message })
+    );
     return;
   }
 
@@ -566,7 +565,7 @@ function showShinyClientMessage({
     document.body.appendChild(sec);
   }
 
-  ShinyErrorConsole.appendConsoleMessage(sec, { headline, message });
+  sec.appendConsoleMessage({ headline, message });
 }
 
 /**

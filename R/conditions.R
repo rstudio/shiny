@@ -417,11 +417,11 @@ printOneStackTrace <- function(stackTrace, stripResult, full, offset) {
       ": ",
       mapply(paste0(st$call, st$loc), st$category, FUN = function(name, category) {
         if (category == "pkg")
-          crayon::silver(name)
+          cli::col_silver(name)
         else if (category == "user")
-          crayon::blue$bold(name)
+          cli::style_bold(cli::col_blue(name))
         else
-          crayon::white(name)
+          cli::col_white(name)
       }),
       "\n"
     )

@@ -4,7 +4,7 @@ test_that("Private randomness works at startup", {
     rm(".Random.seed", envir = .GlobalEnv)
   .globals$ownSeed <- NULL
   # Just make sure this doesn't blow up
-  expect_error(createUniqueId(4), NA)
+  expect_no_error(createUniqueId(4))
 })
 
 test_that("Setting process-wide seed doesn't affect private randomness", {

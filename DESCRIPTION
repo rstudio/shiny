@@ -85,7 +85,7 @@ Imports:
     later (>= 1.0.0),
     promises (>= 1.3.2),
     tools,
-    crayon,
+    cli,
     rlang (>= 0.4.10),
     fastmap (>= 1.1.1),
     withr,
@@ -99,7 +99,7 @@ Suggests:
     datasets,
     DT,
     Cairo (>= 1.5-5),
-    testthat (>= 3.0.0),
+    testthat (>= 3.2.1),
     knitr (>= 1.6),
     markdown,
     rmarkdown,
@@ -210,7 +210,6 @@ Collate:
 RoxygenNote: 7.3.2
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RdMacros: lifecycle
 Config/testthat/edition: 3
 Config/Needs/check:
   shinytest2

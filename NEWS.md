@@ -1,5 +1,14 @@
 # shiny (development version)
 
+## New features and improvements
+
+* When busy indicators are enabled (i.e., `useBusyIndicators()`), Shiny now:
+    * Shows a spinner on recalculating htmlwidgets that have previously rendered an error (including `req()` and `validate()`). (#4172)
+    * Shows a spinner on `tableOutput()`. (#4172)
+    * Places a minimum height on recalculating outputs so that the spinner is always visible. (#4172)
+
+* Shiny now uses `{cli}` instead of `{crayon}` for rich log messages. (@olivroy #4170)
+
 ## Bug fixes
 
 * Fixed a bug with modals where calling `removeModal()` too quickly after `showModal()` would fail to remove the modal if the remove modal message was received while the modal was in the process of being revealed. (#4173)

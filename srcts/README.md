@@ -150,12 +150,6 @@ All config files are located in the root folder to avoid opening two separate VS
   * Used by `prettier` to know how to adjust code when a file is saved in VSCode or within `eslint`'s linting process.
 * `yarnrc.yml`
   * Notifies `yarn` to use `yarn` v2, install `./node_modules` folder for `esbuild`, and any CLI plugins.
-* `babel.config.json`
-  * Used within `babel` transpilation of TypeScript -> JavaScript -> polyfilled JavaScript.
-  * Noteable options set:
-    * `"useBuiltIns": "usage"` - `core-js` polyfills are only added as they are _used_.
-    * `"corejs": "3.9"` - This number should match the installed `core-js` number.
-    * `"ignore":["node_modules/core-js"]` - The `core-js` library is directly ignored to [avoid being processed by `babel`](https://github.com/zloirock/core-js/issues/743#issuecomment-571983318).
 * `jest.config.js`
   * Used to configure [`jest` testing](https://jestjs.io/)
 * `package.json`
@@ -168,7 +162,7 @@ All config files are located in the root folder to avoid opening two separate VS
 * `tsconfig.json` -
   * TypeScript config file
   * Notable options set:
-    * `target: ES5` - Compile to es5, so babel has an easier job.
+    * `target: es2020` - Compile to es2020.
     * `preserveConstEnums: false` - Do no preserve enum values into the final code. (If true, produces bloat / unused code)
     * `isolatedModules: true` & `esModuleInterop: true` - Requested by `esbuild`. This [allows for `esbuild`](https://esbuild.github.io/content-types/#typescript) to safely compile the files in parallel
 

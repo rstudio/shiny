@@ -69,7 +69,7 @@ renderPage <- function(ui, showcase=0, testMode=FALSE) {
       )
   }
 
-  if (in_devmode()) {
+  if (in_devmode() || in_client_devmode()) {
     # If we're in dev mode, add a simple script to the head that injects a
     # global variable for the client to use to detect dev mode.
     shiny_deps[[length(shiny_deps) + 1]] <-
@@ -135,6 +135,14 @@ shinyDependencies <- function() {
   )
 }
 
+shinyDependencySass <- function(bs_version) {
+  bootstrap_scss <- paste0("shiny.bootstrap", bs_version, ".scss")
+
+  scss_home <- system_file("www/shared/shiny_scss", package = "shiny")
+  scss_files <- file.path(scss_home, c(bootstrap_scss, "shiny.scss"))
+  lapply(scss_files, sass::sass_file)
+}
+
 shinyDependencyCSS <- function(theme) {
   version <- get_package_version("shiny")
 
@@ -150,14 +158,9 @@ shinyDependencyCSS <- function(theme) {
   }
 
   bs_version <- bslib::theme_version(theme)
-  bootstrap_scss <- paste0("shiny.bootstrap", bs_version, ".scss")
-
-  scss_home <- system_file("www/shared/shiny_scss", package = "shiny")
-  scss_files <- file.path(scss_home, c(bootstrap_scss, "shiny.scss"))
-  scss_files <- lapply(scss_files, sass::sass_file)
 
   bslib::bs_dependency(
-    input = scss_files,
+    input = shinyDependencySass(bs_version),
     theme = theme,
     name = "shiny-sass",
     version = version,

@@ -11,6 +11,8 @@ busyIndicatorOptions(
   spinner_size = NULL,
   spinner_delay = NULL,
   spinner_selector = NULL,
+  fade_opacity = NULL,
+  fade_selector = NULL,
   pulse_background = NULL,
   pulse_height = NULL,
   pulse_speed = NULL
@@ -45,6 +47,13 @@ if the computation finishes quickly.}
 scoping the spinner customization. The default (\code{NULL}) will apply the
 spinner customization to the parent element of the spinner.}
 
+\item{fade_opacity}{The opacity (a number between 0 and 1) for recalculating
+output. Set to 1 to "disable" the fade.}
+
+\item{fade_selector}{A character string containing a CSS selector for
+scoping the spinner customization. The default (\code{NULL}) will apply the
+spinner customization to the parent element of the spinner.}
+
 \item{pulse_background}{A CSS background definition for the pulse. The
 default uses a
 \href{https://developer.mozilla.org/en-US/docs/Web/CSS/gradient/linear-gradient}{linear-gradient}
@@ -57,11 +66,21 @@ CSS size.}
 time.}
 }
 \description{
-When busy indicators are enabled (see \code{\link[=useBusyIndicators]{useBusyIndicators()}}), a spinner is
-shown on each calculating/recalculating output, and a pulsing banner is shown
-at the top of the page when the app is otherwise busy. This function allows
-you to customize the appearance of those busy indicators. To apply the
-customization, include the result of this function inside the app's UI.
+Shiny automatically includes busy indicators, which more specifically means:
+\enumerate{
+\item Calculating/recalculating outputs have a spinner overlay.
+\item Outputs fade out/in when recalculating.
+\item When no outputs are calculating/recalculating, but Shiny is busy
+doing something else (e.g., a download, side-effect, etc), a page-level
+pulsing banner is shown.
+}
+
+This function allows you to customize the appearance of these busy indicators
+by including the result of this function inside the app's UI. Note that,
+unless \code{spinner_selector} (or \code{fade_selector}) is specified, the spinner/fade
+customization applies to the parent element. If the customization should
+instead apply to the entire page, set \code{spinner_selector = 'html'} and
+\code{fade_selector = 'html'}.
 }
 \examples{
 \dontshow{if (rlang::is_interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
@@ -113,5 +132,5 @@ shinyApp(ui, server)
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[=useBusyIndicators]{useBusyIndicators()}} for enabling/disabling busy indicators.
+\code{\link[=useBusyIndicators]{useBusyIndicators()}} to disable/enable busy indicators.
 }

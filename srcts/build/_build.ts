@@ -21,7 +21,7 @@ const shinyDesc = readcontrol.readSync("./DESCRIPTION") as ShinyDesc;
 
 const bannerTxt = [
   `/*! ${shinyDesc.package} ${shinyDesc.version}`,
-  `(c) 2012-${new Date().getFullYear()} Posit, PBC.`,
+  `(c) 2012-${new Date().getFullYear()} Posit Software, PBC.`,
   `License: ${shinyDesc.license} */`,
 ].join(" | ");
 const banner = {

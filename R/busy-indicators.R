@@ -19,6 +19,8 @@
 #'   output.
 #' @param pulse Whether to show a pulsing banner at the top of the page when the
 #'   app is busy.
+#' @param fade Whether to fade recalculating outputs. A value of `FALSE` is
+#'   equivalent to `busyIndicatorOptions(fade_opacity=1)`.
 #'
 #' @export
 #' @seealso [busyIndicatorOptions()] for customizing the appearance of the busy
@@ -48,7 +50,7 @@
 #' }
 #'
 #' shinyApp(ui, server)
-useBusyIndicators <- function(..., spinners = TRUE, pulse = TRUE) {
+useBusyIndicators <- function(..., spinners = TRUE, pulse = TRUE, fade = TRUE) {
 
   rlang::check_dots_empty()
 
@@ -62,20 +64,33 @@ useBusyIndicators <- function(..., spinners = TRUE, pulse = TRUE) {
     }
   })
 
-  js <- HTML(paste(js, collapse = "\n"))
-
   # TODO: it'd be nice if htmltools had something like a page_attrs() that allowed us
   # to do this without needing to inject JS into the head.
-  tags$script(js)
+  res <- tags$script(HTML(paste(js, collapse = "\n")))
+
+  if (!fade) {
+    res <- tagList(res, fadeOptions(opacity = 1))
+  }
+
+  res
 }
 
 #' Customize busy indicator options
 #'
-#' When busy indicators are enabled (see [useBusyIndicators()]), a spinner is
-#' shown on each calculating/recalculating output, and a pulsing banner is shown
-#' at the top of the page when the app is otherwise busy. This function allows
-#' you to customize the appearance of those busy indicators. To apply the
-#' customization, include the result of this function inside the app's UI.
+#' @description
+#' Shiny automatically includes busy indicators, which more specifically means:
+#'   1. Calculating/recalculating outputs have a spinner overlay.
+#'   2. Outputs fade out/in when recalculating.
+#'   3. When no outputs are calculating/recalculating, but Shiny is busy
+#'     doing something else (e.g., a download, side-effect, etc), a page-level
+#'     pulsing banner is shown.
+#'
+#' This function allows you to customize the appearance of these busy indicators
+#' by including the result of this function inside the app's UI. Note that,
+#' unless `spinner_selector` (or `fade_selector`) is specified, the spinner/fade
+#' customization applies to the parent element. If the customization should
+#' instead apply to the entire page, set `spinner_selector = 'html'` and
+#' `fade_selector = 'html'`.
 #'
 #' @param ... Currently ignored.
 #' @param spinner_type The type of spinner. Pre-bundled types include:
@@ -97,6 +112,11 @@ useBusyIndicators <- function(..., spinners = TRUE, pulse = TRUE) {
 #' @param spinner_selector A character string containing a CSS selector for
 #'   scoping the spinner customization. The default (`NULL`) will apply the
 #'   spinner customization to the parent element of the spinner.
+#' @param fade_opacity The opacity (a number between 0 and 1) for recalculating
+#'   output. Set to 1 to "disable" the fade.
+#' @param fade_selector A character string containing a CSS selector for
+#'   scoping the spinner customization. The default (`NULL`) will apply the
+#'   spinner customization to the parent element of the spinner.
 #' @param pulse_background A CSS background definition for the pulse. The
 #'   default uses a
 #'   [linear-gradient](https://developer.mozilla.org/en-US/docs/Web/CSS/gradient/linear-gradient)
@@ -107,7 +127,7 @@ useBusyIndicators <- function(..., spinners = TRUE, pulse = TRUE) {
 #'   time.
 #'
 #' @export
-#' @seealso [useBusyIndicators()] for enabling/disabling busy indicators.
+#' @seealso [useBusyIndicators()] to disable/enable busy indicators.
 #' @examplesIf rlang::is_interactive()
 #'
 #' library(bslib)
@@ -162,6 +182,8 @@ busyIndicatorOptions <- function(
   spinner_size = NULL,
   spinner_delay = NULL,
   spinner_selector = NULL,
+  fade_opacity = NULL,
+  fade_selector = NULL,
   pulse_background = NULL,
   pulse_height = NULL,
   pulse_speed = NULL
@@ -177,6 +199,7 @@ busyIndicatorOptions <- function(
       delay = spinner_delay,
       selector = spinner_selector
     ),
+    fadeOptions(opacity = fade_opacity, selector = fade_selector),
     pulseOptions(
       background = pulse_background,
       height = pulse_height,
@@ -224,6 +247,26 @@ spinnerOptions <- function(type = NULL, color = NULL, size = NULL, delay = NULL,
   tags$style(css, id = id)
 }
 
+fadeOptions <- function(opacity = NULL, selector = NULL) {
+  if (is.null(opacity) && is.null(selector)) {
+    return(NULL)
+  }
+
+  css_vars <- htmltools::css(
+    "--shiny-fade-opacity" = opacity
+  )
+
+  id <- NULL
+  if (is.null(selector)) {
+    id <- paste0("fade-options-", p_randomInt(100, 1000000))
+    selector <- sprintf(":has(> #%s)", id)
+  }
+
+  css <- HTML(paste0(selector, " {", css_vars, "}"))
+
+  tags$style(css, id = id)
+}
+
 pulseOptions <- function(background = NULL, height = NULL, speed = NULL) {
   if (is.null(background) && is.null(height) && is.null(speed))  {
     return(NULL)
@@ -244,6 +287,8 @@ busyIndicatorDependency <- function() {
     version = get_package_version("shiny"),
     src = "www/shared/busy-indicators",
     package = "shiny",
-    stylesheet = "busy-indicators.css"
+    stylesheet = "busy-indicators.css",
+    # TODO-future: In next release make spinners and pulse opt-out
+    # head = as.character(useBusyIndicators())
   )
 }

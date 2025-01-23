@@ -7,6 +7,8 @@
 
   .recalculating {
 
+    min-height: var(--shiny-spinner-size, 32px);
+
     &::after {
       position: absolute;
       content: "";
@@ -29,6 +31,7 @@
       animation-delay: var(--_shiny-spinner-delay);
       animation-name: fade-in;
       animation-duration: 250ms;
+      animation-fill-mode: forwards;
     }
 
     /*
@@ -36,10 +39,30 @@
       the spinner. Undo that, but still apply (smaller) opacity to immediate children
       that aren't recalculating.
     */
-    opacity: 1;
+    &:has(> *), &:empty {
+      opacity: 1;
+    }
     > *:not(.recalculating) {
-      opacity: 0.2;
+      opacity: var(--_shiny-fade-opacity);
       transition: opacity 250ms ease var(--shiny-spinner-delay, 1s);
+    }
+
+    /*
+      When htmlwidget errors are rendered, an inline `visibility:hidden` is put
+      on the html-widget-output, and the error message (if any) is put in a
+      sibling element that overlays the output container (this way, the height
+      of the output container doesn't change). Work around this by making the
+      output container itself visible and making the children (except the
+      spinner) invisible.
+    */
+    &.html-widget-output {
+      visibility: inherit !important;
+      > * {
+        visibility: hidden;
+      }
+      ::after {
+        visibility: visible;
+      }
     }
 
     /*
@@ -48,7 +71,7 @@
       Note that, even if we could position it, we'd probably want to disable it
       if it has recalculating children.
     */
-    &.shiny-html-output::after {
+    &.shiny-html-output:not(.shiny-table-output)::after {
       display: none;
     }
   }
@@ -61,15 +84,15 @@
     --shiny-pulse-background,
     linear-gradient(
       120deg,
-      var(--bs-body-bg, #fff),
+      transparent,
       var(--bs-indigo, #4b00c1),
       var(--bs-purple, #74149c),
       var(--bs-pink, #bf007f),
-      var(--bs-body-bg, #fff)
+      transparent
     )
   );
-  --_shiny-pulse-height: var(--shiny-pulse-height, 5px);
-  --_shiny-pulse-speed: var(--shiny-pulse-speed, 1.85s);
+  --_shiny-pulse-height: var(--shiny-pulse-height, 3px);
+  --_shiny-pulse-speed: var(--shiny-pulse-speed, 1.2s);
 
   /* Color, sizing, & positioning */
   position: fixed;
@@ -82,6 +105,7 @@
   /* Animation */
   animation-name: busy-page-pulse;
   animation-duration: var(--_shiny-pulse-speed);
+  animation-direction: alternate;
   animation-iteration-count: infinite;
   animation-timing-function: ease-in-out;
 
@@ -96,7 +120,12 @@
   &.shiny-busy::after {
     @include shiny-page-busy;
   }
-  &.shiny-busy:has(.recalculating)::after {
+  // Hide the pulse if there are spinners on the page
+  // (Note: UI outputs don't get spinners)
+  &.shiny-busy:has(.recalculating:not(.shiny-html-output))::after {
+    display: none;
+  }
+  &.shiny-busy:has(.recalculating.shiny-table-output)::after {
     display: none;
   }
   &.shiny-busy:has(#shiny-disconnected-overlay)::after {
@@ -127,16 +156,31 @@
 /* Keyframes for the pulsing banner */
 @keyframes busy-page-pulse {
   0% {
-    left: -75%;
-    width: 75%;
+    left: -14%;
+    right: 97%;
   }
-  50% {
-    left: 100%;
-    width: 75%;
+
+  45% {
+    left: 0%;
+    right: 14%;
   }
-  /* Go back */
-  100% {
-    left: -75%;
-    width: 75%;
+
+  55% {
+    left: 14%;
+    right: 0%;
   }
+
+  to {
+    left: 97%;
+    right: -14%;
+  }
+}
+
+
+// Effectively disable the spinner when it's wrapped in shinycssloader::withSpinner()
+// since that's a sign our spinner isn't needed.
+// The reason this sets size to 0px instead of display:none is so, if someone
+// really wants to show the spinner, they can override this with a custom size.
+.shiny-spinner-output-container {
+  --shiny-spinner-size: 0px;
 }

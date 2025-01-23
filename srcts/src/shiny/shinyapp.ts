@@ -1056,9 +1056,9 @@ class ShinyApp {
 
         // Create a virtual element where we'll temporarily hold the rendered
         // nav controls so we can rewrite some attributes and choose where to
-        // insert the new controls. (We bindAll() at the end.)
+        // insert the new controls.
         const $fragLi = $("<div>");
-        await renderContentAsync($fragLi, message.liTag, "afterBegin", false);
+        await renderContentAsync($fragLi, message.liTag, "afterBegin");
 
         const $liTag = $($fragLi).find("> li");
         const $aTag = $liTag.find("> a");
@@ -1159,9 +1159,8 @@ class ShinyApp {
         //
         // garrick 2025-01-23: Keeping in mind the above, the `shiny-insert-tab`
         // method was re-written to avoid adding the nav controls (liTag) and
-        // the nav panel contents (divTag) twice. With the new approach, we use
-        // renderContentAsync() to add both sections of content to the DOM only
-        // once, but we delay binding until all of the elements are in place.
+        // the nav panel contents (divTag) twice. Now, we use
+        // renderContentAsync() to add both sections to the DOM only once.
 
         await renderContentAsync($tabContent[0], message.divTag, "beforeEnd");
 
@@ -1169,8 +1168,6 @@ class ShinyApp {
           // We're inserting one nav_panel() and need to fixup the content ID
           $tabContent.find('[id="tab-tsid-id"]').attr("id", fixupDivId);
         }
-
-        await shinyBindAll($parentTabset);
 
         if (message.select) {
           $liTag.find("a").tab("show");

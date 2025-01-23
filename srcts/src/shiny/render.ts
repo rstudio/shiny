@@ -38,7 +38,8 @@ import { renderHtml as singletonsRenderHtml } from "./singletons";
 async function renderContentAsync(
   el: BindScope,
   content: string | { html: string; deps?: HtmlDep[] } | null,
-  where: WherePosition = "replace"
+  where: WherePosition = "replace",
+  doBindAll = true
 ): Promise<void> {
   if (where === "replace") {
     shinyUnbindAll(el);
@@ -62,7 +63,7 @@ async function renderContentAsync(
 
   if (where === "replace") {
     shinyInitializeInputs(el);
-    await shinyBindAll(el);
+    if (doBindAll) await shinyBindAll(el);
   } else {
     const $parent = $(el).parent();
 
@@ -75,7 +76,7 @@ async function renderContentAsync(
       }
     }
     shinyInitializeInputs(scope);
-    await shinyBindAll(scope);
+    if (doBindAll) await shinyBindAll(scope);
   }
 }
 

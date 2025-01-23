@@ -19,10 +19,7 @@ type BindScope = HTMLElement | JQuery<HTMLElement>;
  * @returns A type predicate indicating if the value is a jQuery<HTMLElement>
  */
 function isJQuery<T = HTMLElement>(value: unknown): value is JQuery<T> {
-  return (
-    Object.prototype.hasOwnProperty.call(value, "jquery") &&
-    typeof (value as any).jquery === "string"
-  );
+  return typeof (value as any).jquery === "string";
 }
 
 // todo make sure allowDeferred can NOT be supplied and still work

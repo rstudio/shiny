@@ -20604,6 +20604,9 @@
     if (Array.isArray(arr))
       return arr;
   }
+  function isJQuery(value) {
+    return typeof value.jquery === "string";
+  }
   function valueChangeCallback(inputs, binding, el, allowDeferred) {
     var id = binding.getId(el);
     if (id) {
@@ -20622,6 +20625,9 @@
   var bindingsRegistry = function() {
     var bindings = /* @__PURE__ */ new Map();
     function checkValidity(scope) {
+      if (!isJQuery(scope) && !(scope instanceof HTMLElement)) {
+        return;
+      }
       var duplicateIds = /* @__PURE__ */ new Map();
       var problems = /* @__PURE__ */ new Set();
       bindings.forEach(function(idTypes, id) {
@@ -20672,7 +20678,7 @@
         headline: headline,
         message: message
       });
-      var scopeElement = scope instanceof HTMLElement ? scope : scope.get(0);
+      var scopeElement = isJQuery(scope) ? scope.get(0) : scope;
       (scopeElement || window).dispatchEvent(event);
     }
     function addBinding(id, bindingType) {
@@ -24534,7 +24540,7 @@
         }
         addMessageHandler("shiny-insert-tab", /* @__PURE__ */ function() {
           var _ref10 = _asyncToGenerator13(/* @__PURE__ */ _regeneratorRuntime13().mark(function _callee15(message) {
-            var $parentTabset, $tabset, $tabContent, tabsetId, $divTag, $liTag, $aTag, $targetLiTag, targetInfo, dropdown, index, tabId, _iterator3, _step3, el, getTabIndex, getDropdown;
+            var $parentTabset, $tabset, $tabContent, tabsetId, $fragLi, $liTag, $aTag, $targetLiTag, targetInfo, dropdown, fixupDivId, index, tabId, getTabIndex, getDropdown;
             return _regeneratorRuntime13().wrap(function _callee15$(_context15) {
               while (1)
                 switch (_context15.prev = _context15.next) {
@@ -24579,8 +24585,11 @@
                     $tabset = $parentTabset;
                     $tabContent = getTabContent($tabset);
                     tabsetId = $parentTabset.attr("data-tabsetid");
-                    $divTag = (0, import_jquery38.default)(message.divTag.html);
-                    $liTag = (0, import_jquery38.default)(message.liTag.html);
+                    $fragLi = (0, import_jquery38.default)("<div>");
+                    _context15.next = 9;
+                    return renderContentAsync($fragLi, message.liTag, "afterBegin");
+                  case 9:
+                    $liTag = (0, import_jquery38.default)($fragLi).find("> li");
                     $aTag = $liTag.find("> a");
                     $targetLiTag = null;
                     if (message.target !== null) {
@@ -24589,24 +24598,25 @@
                     }
                     dropdown = getDropdown();
                     if (!(dropdown !== null)) {
-                      _context15.next = 18;
+                      _context15.next = 20;
                       break;
                     }
                     if (!($aTag.attr("data-toggle") === "dropdown")) {
-                      _context15.next = 15;
+                      _context15.next = 17;
                       break;
                     }
                     throw "Cannot insert a navbarMenu inside another one";
-                  case 15:
+                  case 17:
                     $tabset = dropdown.$tabset;
                     tabsetId = dropdown.id;
                     $liTag.removeClass("nav-item").find(".nav-link").removeClass("nav-link").addClass("dropdown-item");
-                  case 18:
+                  case 20:
+                    fixupDivId = "";
                     if ($aTag.attr("data-toggle") === "tab") {
                       index = getTabIndex($tabset, tabsetId);
                       tabId = "tab-" + tabsetId + "-" + index;
                       $liTag.find("> a").attr("href", "#" + tabId);
-                      $divTag.attr("id", tabId);
+                      fixupDivId = tabId;
                     }
                     if (message.position === "before") {
                       if ($targetLiTag) {
@@ -24621,57 +24631,20 @@
                         $tabset.append($liTag);
                       }
                     }
-                    _context15.next = 22;
-                    return renderContentAsync($liTag[0], {
-                      html: $liTag.html(),
-                      deps: message.liTag.deps
-                    });
-                  case 22:
-                    _context15.next = 24;
-                    return renderContentAsync(
-                      $tabContent[0],
-                      {
-                        html: "",
-                        deps: message.divTag.deps
-                      },
-                      "beforeend"
-                    );
-                  case 24:
-                    _iterator3 = _createForOfIteratorHelper6($divTag.get());
-                    _context15.prev = 25;
-                    _iterator3.s();
-                  case 27:
-                    if ((_step3 = _iterator3.n()).done) {
-                      _context15.next = 34;
-                      break;
+                    _context15.next = 25;
+                    return renderContentAsync($tabContent[0], message.divTag, "beforeEnd");
+                  case 25:
+                    if (fixupDivId) {
+                      $tabContent.find('[id="tab-tsid-id"]').attr("id", fixupDivId);
                     }
-                    el = _step3.value;
-                    $tabContent[0].appendChild(el);
-                    _context15.next = 32;
-                    return renderContentAsync(el, el.innerHTML || el.textContent);
-                  case 32:
-                    _context15.next = 27;
-                    break;
-                  case 34:
-                    _context15.next = 39;
-                    break;
-                  case 36:
-                    _context15.prev = 36;
-                    _context15.t0 = _context15["catch"](25);
-                    _iterator3.e(_context15.t0);
-                  case 39:
-                    _context15.prev = 39;
-                    _iterator3.f();
-                    return _context15.finish(39);
-                  case 42:
                     if (message.select) {
                       $liTag.find("a").tab("show");
                     }
-                  case 43:
+                  case 27:
                   case "end":
                     return _context15.stop();
                 }
-            }, _callee15, null, [[25, 36, 39, 42]]);
+            }, _callee15);
           }));
           return function(_x17) {
             return _ref10.apply(this, arguments);

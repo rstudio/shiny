@@ -1129,6 +1129,7 @@ class ShinyApp {
             $tabset.append($liTag);
           }
         }
+        await shinyBindAll($targetLiTag?.parent() || $tabset);
 
         // jcheng 2017-07-28: This next part might look a little insane versus the
         // more obvious `$tabContent.append($divTag);`, but there's a method to the

@@ -24540,6 +24540,7 @@
         }
         addMessageHandler("shiny-insert-tab", /* @__PURE__ */ function() {
           var _ref10 = _asyncToGenerator13(/* @__PURE__ */ _regeneratorRuntime13().mark(function _callee15(message) {
+            var _$targetLiTag;
             var $parentTabset, $tabset, $tabContent, tabsetId, $fragLi, $liTag, $aTag, $targetLiTag, targetInfo, dropdown, fixupDivId, index, tabId, getTabIndex, getDropdown;
             return _regeneratorRuntime13().wrap(function _callee15$(_context15) {
               while (1)
@@ -24632,15 +24633,18 @@
                       }
                     }
                     _context15.next = 25;
-                    return renderContentAsync($tabContent[0], message.divTag, "beforeEnd");
+                    return shinyBindAll(((_$targetLiTag = $targetLiTag) === null || _$targetLiTag === void 0 ? void 0 : _$targetLiTag.parent()) || $tabset);
                   case 25:
+                    _context15.next = 27;
+                    return renderContentAsync($tabContent[0], message.divTag, "beforeEnd");
+                  case 27:
                     if (fixupDivId) {
                       $tabContent.find('[id="tab-tsid-id"]').attr("id", fixupDivId);
                     }
                     if (message.select) {
                       $liTag.find("a").tab("show");
                     }
-                  case 27:
+                  case 29:
                   case "end":
                     return _context15.stop();
                 }

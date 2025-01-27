@@ -62,6 +62,7 @@
 <h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>
 <ul><li><p>Fixed a bug with modals where calling <code><a href="../reference/showModal.html">removeModal()</a></code> too quickly after <code><a href="../reference/showModal.html">showModal()</a></code> would fail to remove the modal if the remove modal message was received while the modal was in the process of being revealed. (<a href="https://github.com/rstudio/shiny/issues/4173" class="external-link">#4173</a>)</p></li>
 <li><p>The Shiny Client Console (enabled with <code><a href="../reference/devmode.html">shiny::devmode()</a></code>) no longer displays duplicate warning or error message. (<a href="https://github.com/rstudio/shiny/issues/4177" class="external-link">#4177</a>)</p></li>
+<li><p>Updated the JavaScript used when inserting a tab to avoid rendering dynamic UI elements twice when adding the new tab via <code><a href="../reference/insertTab.html">insertTab()</a></code> or <code><a href="https://rstudio.github.io/bslib/reference/nav_select.html" class="external-link">bslib::nav_insert()</a></code>. (<a href="https://github.com/rstudio/shiny/issues/4179" class="external-link">#4179</a>)</p></li>
 </ul></div>
 </div>
     <div class="section level2">

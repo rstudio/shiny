@@ -13,6 +13,8 @@
 
 * Fixed a bug with modals where calling `removeModal()` too quickly after `showModal()` would fail to remove the modal if the remove modal message was received while the modal was in the process of being revealed. (#4173)
 
+* The Shiny Client Console (enabled with `shiny::devmode()`) no longer displays duplicate warning or error message. (#4177)
+
 # shiny 1.10.0
 
 ## New features and improvements

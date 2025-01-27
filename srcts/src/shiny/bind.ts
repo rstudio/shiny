@@ -13,6 +13,15 @@ import { sendImageSizeFns } from "./sendImageSize";
 
 type BindScope = HTMLElement | JQuery<HTMLElement>;
 
+/**
+ * Type guard to check if a value is a jQuery object containing HTMLElements
+ * @param value The value to check
+ * @returns A type predicate indicating if the value is a jQuery<HTMLElement>
+ */
+function isJQuery<T = HTMLElement>(value: unknown): value is JQuery<T> {
+  return typeof (value as any).jquery === "string";
+}
+
 // todo make sure allowDeferred can NOT be supplied and still work
 function valueChangeCallback(
   inputs: InputValidateDecorator,
@@ -79,6 +88,10 @@ const bindingsRegistry = (() => {
    * otherwise returns an ok status.
    */
   function checkValidity(scope: BindScope): void {
+    if (!isJQuery(scope) && !(scope instanceof HTMLElement)) {
+      return;
+    }
+
     type BindingCounts = { [T in BindingTypes]: number };
     const duplicateIds = new Map<string, BindingCounts>();
     const problems: Set<string> = new Set();
@@ -146,7 +159,7 @@ const bindingsRegistry = (() => {
     }:\n${duplicateIdMsg}`;
 
     const event = new ShinyClientMessageEvent({ headline, message });
-    const scopeElement = scope instanceof HTMLElement ? scope : scope.get(0);
+    const scopeElement = isJQuery(scope) ? scope.get(0) : scope;
     (scopeElement || window).dispatchEvent(event);
   }
 

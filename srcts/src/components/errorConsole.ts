@@ -200,7 +200,7 @@ class ShinyErrorConsole extends LitElement {
     });
   }
 
-  static renderClientMessage({ headline, message }: ShinyClientMessage) {
+  static createClientMessageElement({ headline, message }: ShinyClientMessage) {
     const msg = document.createElement("shiny-error-message");
     msg.setAttribute("headline", headline || "");
     msg.setAttribute("message", message);
@@ -231,7 +231,7 @@ class ShinyErrorConsole extends LitElement {
     }
 
     this.appendChild(
-      ShinyErrorConsole.renderClientMessage({ headline, message })
+      ShinyErrorConsole.createClientMessageElement({ headline, message })
     );
     return;
   }

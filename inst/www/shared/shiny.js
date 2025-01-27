@@ -19030,7 +19030,7 @@
             _iterator.f();
           }
         }
-        this.appendChild(ShinyErrorConsole2.renderClientMessage({
+        this.appendChild(ShinyErrorConsole2.createClientMessageElement({
           headline: headline,
           message: message
         }));
@@ -19042,8 +19042,8 @@
         return x(_templateObject2 || (_templateObject2 = _taggedTemplateLiteral([' <div class="header">\n        <span class="title"> Shiny Client Errors </span>\n        <button\n          class="close-button"\n          @click=', '\n          title="Dismiss all console messages and close console"\n        >\n          <svg\n            xmlns="http://www.w3.org/2000/svg"\n            fill="none"\n            viewBox="0 0 24 24"\n            stroke-width="1.5"\n            height="1em"\n            width="1em"\n            stroke="currentColor"\n            class="close-icon"\n          >\n            <path\n              stroke-linecap="round"\n              stroke-linejoin="round"\n              d="M6 18L18 6M6 6l12 12"\n            />\n          </svg>\n          Dismiss all\n        </button>\n        <button class="toggle-button" @click=', '>\n          <svg\n            xmlns="http://www.w3.org/2000/svg"\n            fill="none"\n            viewBox="0 0 24 24"\n            stroke-width="1.5"\n            height="1em"\n            width="1em"\n            stroke="currentColor"\n            class="toggle-icon"\n          >\n            <path\n              class="collapse"\n              stroke-linecap="round"\n              stroke-linejoin="round"\n              d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"\n            />\n          </svg>\n        </button>\n      </div>\n      <slot class="content"></slot>'])), this.handleDismissAll, this.toggleCollapsed);
       }
     }], [{
-      key: "renderClientMessage",
-      value: function renderClientMessage(_ref2) {
+      key: "createClientMessageElement",
+      value: function createClientMessageElement(_ref2) {
         var headline = _ref2.headline, message = _ref2.message;
         var msg = document.createElement("shiny-error-message");
         msg.setAttribute("headline", headline || "");

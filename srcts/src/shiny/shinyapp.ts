@@ -1174,14 +1174,14 @@ class ShinyApp {
           $liTag.find("a").tab("show");
         }
         /* Barbara -- August 2017
-  Note: until now, the number of tabs in a tabsetPanel (or navbarPage
-  or navlistPanel) was always fixed. So, an easy way to give an id to
-  a tab was simply incrementing a counter. (Just like it was easy to
-  give a random 4-digit number to identify the tabsetPanel). Now that
-  we're introducing dynamic tabs, we must retrieve these numbers and
-  fix the dummy id given to the tab in the R side -- there, we always
-  set the tab id (counter dummy) to "id" and the tabset id to "tsid")
-  */
+         * Note: until now, the number of tabs in a tabsetPanel (or navbarPage
+         * or navlistPanel) was always fixed. So, an easy way to give an id to
+         * a tab was simply incrementing a counter. (Just like it was easy to
+         * give a random 4-digit number to identify the tabsetPanel). Now that
+         * we're introducing dynamic tabs, we must retrieve these numbers and
+         * fix the dummy id given to the tab in the R side -- there, we always
+         * set the tab id (counter dummy) to "id" and the tabset id to "tsid")
+         */
         function getTabIndex(
           $tabset: JQuery<HTMLElement>,
           tabsetId: string | undefined

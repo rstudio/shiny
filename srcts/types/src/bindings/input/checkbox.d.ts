@@ -18,4 +18,4 @@ declare class CheckboxInputBinding extends InputBinding {
     receiveMessage(el: CheckedHTMLElement, data: CheckboxReceiveMessageData): void;
 }
 export { CheckboxInputBinding };
-export type { CheckedHTMLElement, CheckboxReceiveMessageData };
+export type { CheckboxReceiveMessageData, CheckedHTMLElement };

@@ -4,4 +4,4 @@ type InitOutputBindings = {
     outputBindings: BindingRegistry<OutputBinding>;
 };
 declare function initOutputBindings(): InitOutputBindings;
-export { OutputBinding, initOutputBindings };
+export { initOutputBindings, OutputBinding };

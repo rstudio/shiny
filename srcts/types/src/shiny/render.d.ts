@@ -51,5 +51,5 @@ type HtmlDep = {
     head?: string;
 };
 declare function registerDependency(name: string, version: HtmlDepVersion): void;
-export { renderContentAsync, renderContent, renderHtmlAsync, renderHtml, renderDependenciesAsync, renderDependencies, registerDependency, };
+export { registerDependency, renderContent, renderContentAsync, renderDependencies, renderDependenciesAsync, renderHtml, renderHtmlAsync, };
 export type { HtmlDep };

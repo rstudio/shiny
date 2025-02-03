@@ -30,4 +30,4 @@ declare function updateLabel(labelTxt: string | undefined, labelNode: JQuery<HTM
 declare function getComputedLinkColor(el: HTMLElement): string;
 declare function isBS3(): boolean;
 declare function toLowerCase<T extends string>(str: T): Lowercase<T>;
-export { escapeHTML, randomId, strToBool, getStyle, padZeros, roundSignif, parseDate, formatDateUTC, makeResizeFilter, pixelRatio, getBoundingClientSizeBeforeZoom, scopeExprToFunc, asArray, mergeSort, $escape, mapValues, isnan, _equal, equal, compareVersion, updateLabel, getComputedLinkColor, hasOwnProperty, hasDefinedProperty, isBS3, toLowerCase, };
+export { $escape, _equal, asArray, compareVersion, equal, escapeHTML, formatDateUTC, getBoundingClientSizeBeforeZoom, getComputedLinkColor, getStyle, hasDefinedProperty, hasOwnProperty, isBS3, isnan, makeResizeFilter, mapValues, mergeSort, padZeros, parseDate, pixelRatio, randomId, roundSignif, scopeExprToFunc, strToBool, toLowerCase, updateLabel, };

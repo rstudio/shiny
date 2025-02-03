@@ -1,4 +1,3 @@
-/// <reference types="bootstrap-datepicker" />
 import { InputBinding } from "./inputBinding";
 declare global {
     interface JQuery {

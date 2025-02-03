@@ -6,4 +6,4 @@ import { findBox } from "./findbox";
 import { initCoordmap } from "./initCoordmap";
 import { initPanelScales } from "./initPanelScales";
 import { shiftToRange } from "./shiftToRange";
-export { disableDrag, initPanelScales, initCoordmap, findBox, shiftToRange, createClickInfo, createClickHandler, createHoverHandler, createBrushHandler, createBrush, };
+export { createBrush, createBrushHandler, createClickHandler, createClickInfo, createHoverHandler, disableDrag, findBox, initCoordmap, initPanelScales, shiftToRange, };

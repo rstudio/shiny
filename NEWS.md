@@ -9,7 +9,7 @@
 
 * Shiny now uses `{cli}` instead of `{crayon}` for rich log messages. (@olivroy #4170)
 
-* Shiny's Typescript assets are now compiled to ES2020 instead of ES5. (#4066)
+* Shiny's Typescript assets are now compiled to ES2021 instead of ES5. (#4066)
 
 ## Bug fixes
 

@@ -162,7 +162,7 @@ All config files are located in the root folder to avoid opening two separate VS
 * `tsconfig.json` -
   * TypeScript config file
   * Notable options set:
-    * `target: es2020` - Compile to es2020.
+    * `target: ES2021` - Compile to es2021.
     * `preserveConstEnums: false` - Do no preserve enum values into the final code. (If true, produces bloat / unused code)
     * `isolatedModules: true` & `esModuleInterop: true` - Requested by `esbuild`. This [allows for `esbuild`](https://esbuild.github.io/content-types/#typescript) to safely compile the files in parallel
 

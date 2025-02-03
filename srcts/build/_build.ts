@@ -75,7 +75,7 @@ async function build(
   return esbuildBuild({
     incremental: incremental,
     watch: watch,
-    target: "es2020",
+    target: "es2021",
     preserveSymlinks: true,
     ...opts,
   }).then((x) => {

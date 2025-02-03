@@ -4209,10 +4209,10 @@
   } };
   var f = (t3, s4) => !i2(t3, s4);
   var y = { attribute: true, type: String, converter: u, reflect: false, hasChanged: f };
-  Symbol.metadata ?? (Symbol.metadata = Symbol("metadata")), a.litPropertyMetadata ?? (a.litPropertyMetadata = /* @__PURE__ */ new WeakMap());
+  Symbol.metadata ??= Symbol("metadata"), a.litPropertyMetadata ??= /* @__PURE__ */ new WeakMap();
   var b = class extends HTMLElement {
     static addInitializer(t3) {
-      this._$Ei(), (this.l ?? (this.l = [])).push(t3);
+      this._$Ei(), (this.l ??= []).push(t3);
     }
     static get observedAttributes() {
       return this.finalize(), this._$Eh && [...this._$Eh.keys()];
@@ -4288,7 +4288,7 @@
       this._$Eg = new Promise((t3) => this.enableUpdating = t3), this._$AL = /* @__PURE__ */ new Map(), this._$E_(), this.requestUpdate(), this.constructor.l?.forEach((t3) => t3(this));
     }
     addController(t3) {
-      (this._$ES ?? (this._$ES = [])).push(t3), void 0 !== this.renderRoot && this.isConnected && t3.hostConnected?.();
+      (this._$ES ??= []).push(t3), void 0 !== this.renderRoot && this.isConnected && t3.hostConnected?.();
     }
     removeController(t3) {
       this._$ES?.splice(this._$ES.indexOf(t3) >>> 0, 1);
@@ -4304,7 +4304,7 @@
       return S(t3, this.constructor.elementStyles), t3;
     }
     connectedCallback() {
-      this.renderRoot ?? (this.renderRoot = this.createRenderRoot()), this.enableUpdating(true), this._$ES?.forEach((t3) => t3.hostConnected?.());
+      this.renderRoot ??= this.createRenderRoot(), this.enableUpdating(true), this._$ES?.forEach((t3) => t3.hostConnected?.());
     }
     enableUpdating(t3) {
     }
@@ -4330,14 +4330,14 @@
     }
     requestUpdate(t3, s4, i4, e4 = false, r5) {
       if (void 0 !== t3) {
-        if (i4 ?? (i4 = this.constructor.getPropertyOptions(t3)), !(i4.hasChanged ?? f)(e4 ? r5 : this[t3], s4))
+        if (i4 ??= this.constructor.getPropertyOptions(t3), !(i4.hasChanged ?? f)(e4 ? r5 : this[t3], s4))
           return;
         this.C(t3, s4, i4);
       }
       false === this.isUpdatePending && (this._$Eg = this._$EP());
     }
     C(t3, s4, i4) {
-      this._$AL.has(t3) || this._$AL.set(t3, s4), true === i4.reflect && this._$Em !== t3 && (this._$Ej ?? (this._$Ej = /* @__PURE__ */ new Set())).add(t3);
+      this._$AL.has(t3) || this._$AL.set(t3, s4), true === i4.reflect && this._$Em !== t3 && (this._$Ej ??= /* @__PURE__ */ new Set()).add(t3);
     }
     async _$EP() {
       this.isUpdatePending = true;
@@ -4393,14 +4393,14 @@
       return true;
     }
     update(t3) {
-      this._$Ej && (this._$Ej = this._$Ej.forEach((t4) => this._$EO(t4, this[t4]))), this._$ET();
+      this._$Ej &&= this._$Ej.forEach((t4) => this._$EO(t4, this[t4])), this._$ET();
     }
     updated(t3) {
     }
     firstUpdated(t3) {
     }
   };
-  b.elementStyles = [], b.shadowRootOptions = { mode: "open" }, b[d("elementProperties")] = /* @__PURE__ */ new Map(), b[d("finalized")] = /* @__PURE__ */ new Map(), p?.({ ReactiveElement: b }), (a.reactiveElementVersions ?? (a.reactiveElementVersions = [])).push("2.0.0");
+  b.elementStyles = [], b.shadowRootOptions = { mode: "open" }, b[d("elementProperties")] = /* @__PURE__ */ new Map(), b[d("finalized")] = /* @__PURE__ */ new Map(), p?.({ ReactiveElement: b }), (a.reactiveElementVersions ??= []).push("2.0.0");
 
   // node_modules/lit-html/lit-html.js
   var t2 = globalThis;
@@ -4498,7 +4498,7 @@
       return i4;
     let h3 = void 0 !== e4 ? s4._$Co?.[e4] : s4._$Cl;
     const o4 = c3(i4) ? void 0 : i4._$litDirective$;
-    return h3?.constructor !== o4 && (h3?._$AO?.(false), void 0 === o4 ? h3 = void 0 : (h3 = new o4(t3), h3._$AT(t3, s4, e4)), void 0 !== e4 ? (s4._$Co ?? (s4._$Co = []))[e4] = h3 : s4._$Cl = h3), void 0 !== h3 && (i4 = N(t3, h3._$AS(t3, i4.values), h3, e4)), i4;
+    return h3?.constructor !== o4 && (h3?._$AO?.(false), void 0 === o4 ? h3 = void 0 : (h3 = new o4(t3), h3._$AT(t3, s4, e4)), void 0 !== e4 ? (s4._$Co ??= [])[e4] = h3 : s4._$Cl = h3), void 0 !== h3 && (i4 = N(t3, h3._$AS(t3, i4.values), h3, e4)), i4;
   }
   var S2 = class {
     constructor(t3, i4) {
@@ -4609,7 +4609,7 @@
         const e5 = t3;
         let n4, r5;
         for (t3 = h3[0], n4 = 0; n4 < h3.length - 1; n4++)
-          r5 = N(this, e5[s4 + n4], i4, n4), r5 === w && (r5 = this._$AH[n4]), o4 || (o4 = !c3(r5) || r5 !== this._$AH[n4]), r5 === T ? t3 = T : t3 !== T && (t3 += (r5 ?? "") + h3[n4 + 1]), this._$AH[n4] = r5;
+          r5 = N(this, e5[s4 + n4], i4, n4), r5 === w && (r5 = this._$AH[n4]), o4 ||= !c3(r5) || r5 !== this._$AH[n4], r5 === T ? t3 = T : t3 !== T && (t3 += (r5 ?? "") + h3[n4 + 1]), this._$AH[n4] = r5;
       }
       o4 && !e4 && this.j(t3);
     }
@@ -4659,7 +4659,7 @@
     }
   };
   var Z = t2.litHtmlPolyfillSupport;
-  Z?.(V, M), (t2.litHtmlVersions ?? (t2.litHtmlVersions = [])).push("3.0.0");
+  Z?.(V, M), (t2.litHtmlVersions ??= []).push("3.0.0");
   var j = (t3, i4, s4) => {
     const e4 = s4?.renderBefore ?? i4;
     let h3 = e4._$litPart$;
@@ -4676,9 +4676,8 @@
       super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
     }
     createRenderRoot() {
-      var _a;
       const t3 = super.createRenderRoot();
-      return (_a = this.renderOptions).renderBefore ?? (_a.renderBefore = t3.firstChild), t3;
+      return this.renderOptions.renderBefore ??= t3.firstChild, t3;
     }
     update(t3) {
       const i4 = this.render();
@@ -4697,7 +4696,7 @@
   s3._$litElement$ = true, s3["finalized", "finalized"] = true, globalThis.litElementHydrateSupport?.({ LitElement: s3 });
   var r4 = globalThis.litElementPolyfillSupport;
   r4?.({ LitElement: s3 });
-  (globalThis.litElementVersions ?? (globalThis.litElementVersions = [])).push("4.0.0");
+  (globalThis.litElementVersions ??= []).push("4.0.0");
 
   // srcts/src/shiny/error.ts
   var ShinyClientError = class extends Error {

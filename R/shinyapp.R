@@ -317,36 +317,25 @@ initAutoReloadMonitor <- function(dir) {
   )
 
   lastValue <- NULL
-  check_file_times <- function() {
-    files <- sort_c(
-      list.files(
-        dir,
-        pattern = filePattern,
-        recursive = TRUE,
-        ignore.case = TRUE
-      )
+  check_for_update <- function(paths) {
+    paths <- grep(
+      filePattern,
+      paths,
+      ignore.case = TRUE,
+      value = TRUE
     )
 
-    # We still have to check file times to know that files we care about have changed
-    times <- file.info(files)$mtime
-    names(times) <- files
-
-    if (is.null(lastValue)) {
-      lastValue <<- times
+    if (length(paths) == 0) {
       return()
     }
 
-    if (identical(lastValue, times)) {
-      return()
-    }
+    max_mtime <- max(file.info(paths)$mtime, na.rm = TRUE)
 
     autoReloadCallbacks$invoke()
-    cachedAutoReloadLastChanged(max(0, max(times, na.rm = TRUE)))
+    cachedAutoReloadLastChanged(max(0, max_mtime))
   }
 
-  watcher <- watcher::watcher(dir, check_file_times, latency = 0.25)
-
-  check_file_times()
+  watcher <- watcher::watcher(dir, check_for_update, latency = 0.25)
   watcher$start()
   onStop(watcher$stop)
 

@@ -16,7 +16,7 @@ declare class TextInputBindingBase extends InputBinding {
     getState(el: TextHTMLElement): unknown;
     getRatePolicy(el: HTMLElement): {
         policy: "debounce";
-        delay: 250;
+        delay: number;
     };
 }
 declare class TextInputBinding extends TextInputBindingBase {

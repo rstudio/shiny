@@ -50,20 +50,32 @@ class TextInputBindingBase extends InputBinding {
   }
 
   subscribe(el: TextHTMLElement, callback: (x: boolean) => void): void {
-    $(el).on(
-      "keyup.textInputBinding input.textInputBinding",
-      // event: Event
-      function () {
-        callback(true);
-      }
-    );
-    $(el).on(
+    const $el = $(el);
+    const updateOn = $el.data("update-on") || "input";
+
+    if (updateOn === "input") {
+      $el.on(
+        "keyup.textInputBinding input.textInputBinding",
+        // event: Event
+        function () {
+          callback(true);
+        }
+      );
+    }
+
+    $el.on(
       "change.textInputBinding",
       // event: Event
       function () {
         callback(false);
       }
     );
+
+    if (updateOn === "blur") {
+      $el.on("blur.textInputBinding", function () {
+        callback(false);
+      });
+    }
   }
   unsubscribe(el: TextHTMLElement): void {
     $(el).off(".textInputBinding");
@@ -80,12 +92,16 @@ class TextInputBindingBase extends InputBinding {
     el;
   }
 
-  getRatePolicy(el: HTMLElement): { policy: "debounce"; delay: 250 } {
+  getRatePolicy(el: HTMLElement): { policy: "debounce"; delay: number } {
+    let delay = $(el).data("debounce");
+    if (delay === undefined) {
+      // Don't use falsy check because value could be 0.
+      delay = 250;
+    }
     return {
       policy: "debounce",
-      delay: 250,
+      delay: delay,
     };
-    el;
   }
 }
 

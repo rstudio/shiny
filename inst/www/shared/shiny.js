@@ -4725,7 +4725,7 @@
     display: block;
   }
 `;
-  var ShinyErrorConsole = class extends s3 {
+  var _ShinyErrorConsole = class extends s3 {
     toggleCollapsed() {
       this.classList.toggle("collapsed");
       this.querySelector(".toggle-button")?.blur();
@@ -4735,6 +4735,34 @@
       this.addEventListener("animationend", () => {
         this.remove();
       });
+    }
+    static createClientMessageElement({ headline, message }) {
+      const msg = document.createElement("shiny-error-message");
+      msg.setAttribute("headline", headline || "");
+      msg.setAttribute("message", message);
+      return msg;
+    }
+    appendConsoleMessage({ headline, message }) {
+      const content = this.shadowRoot?.querySelector("slot.content");
+      if (content) {
+        const nodeKey = (node) => {
+          const headline2 = node.getAttribute("headline") || "";
+          const message2 = node.getAttribute("message") || "";
+          return `${headline2}::${message2}`;
+        };
+        const newKey = `${headline}::${message}`;
+        for (const node of content.assignedElements()) {
+          if (node.tagName.toLowerCase() === "shiny-error-message") {
+            if (nodeKey(node) === newKey) {
+              return;
+            }
+          }
+        }
+      }
+      this.appendChild(
+        _ShinyErrorConsole.createClientMessageElement({ headline, message })
+      );
+      return;
     }
     render() {
       return x` <div class="header">
@@ -4785,6 +4813,7 @@
       <slot class="content"></slot>`;
     }
   };
+  var ShinyErrorConsole = _ShinyErrorConsole;
   ShinyErrorConsole.styles = [
     i`
       :host {
@@ -5200,15 +5229,12 @@
     if (!Shiny.inDevMode()) {
       return;
     }
-    let errorConsoleContainer = document.querySelector("shiny-error-console");
-    if (!errorConsoleContainer) {
-      errorConsoleContainer = document.createElement("shiny-error-console");
-      document.body.appendChild(errorConsoleContainer);
+    let sec = document.querySelector("shiny-error-console");
+    if (!sec) {
+      sec = document.createElement("shiny-error-console");
+      document.body.appendChild(sec);
     }
-    const errorConsole = document.createElement("shiny-error-message");
-    errorConsole.setAttribute("headline", headline);
-    errorConsole.setAttribute("message", message);
-    errorConsoleContainer.appendChild(errorConsole);
+    sec.appendConsoleMessage({ headline, message });
   }
   function showErrorInClientConsole(e4) {
     let errorMsg = null;
@@ -5515,6 +5541,9 @@
   };
 
   // srcts/src/shiny/bind.ts
+  function isJQuery(value) {
+    return typeof value.jquery === "string";
+  }
   function valueChangeCallback(inputs, binding, el, allowDeferred) {
     let id = binding.getId(el);
     if (id) {
@@ -5533,6 +5562,9 @@
   var bindingsRegistry = (() => {
     const bindings = /* @__PURE__ */ new Map();
     function checkValidity(scope) {
+      if (!isJQuery(scope) && !(scope instanceof HTMLElement)) {
+        return;
+      }
       const duplicateIds = /* @__PURE__ */ new Map();
       const problems = /* @__PURE__ */ new Set();
       bindings.forEach((idTypes, id) => {
@@ -5576,7 +5608,7 @@
       const message = `The following ${txtIdsWere} used for more than one ${problems.has("shared") ? "input/output" : txtNoun}:
 ${duplicateIdMsg}`;
       const event = new ShinyClientMessageEvent({ headline, message });
-      const scopeElement = scope instanceof HTMLElement ? scope : scope.get(0);
+      const scopeElement = isJQuery(scope) ? scope.get(0) : scope;
       (scopeElement || window).dispatchEvent(event);
     }
     function addBinding(id, bindingType) {
@@ -6888,8 +6920,9 @@ ${duplicateIdMsg}`;
           let $tabset = $parentTabset;
           const $tabContent = getTabContent($tabset);
           let tabsetId = $parentTabset.attr("data-tabsetid");
-          const $divTag = (0, import_jquery38.default)(message.divTag.html);
-          const $liTag = (0, import_jquery38.default)(message.liTag.html);
+          const $fragLi = (0, import_jquery38.default)("<div>");
+          await renderContentAsync($fragLi, message.liTag, "afterBegin");
+          const $liTag = (0, import_jquery38.default)($fragLi).find("> li");
           const $aTag = $liTag.find("> a");
           let $targetLiTag = null;
           if (message.target !== null) {
@@ -6908,11 +6941,12 @@ ${duplicateIdMsg}`;
             tabsetId = dropdown.id;
             $liTag.removeClass("nav-item").find(".nav-link").removeClass("nav-link").addClass("dropdown-item");
           }
+          let fixupDivId = "";
           if ($aTag.attr("data-toggle") === "tab") {
             const index = getTabIndex($tabset, tabsetId);
             const tabId = "tab-" + tabsetId + "-" + index;
             $liTag.find("> a").attr("href", "#" + tabId);
-            $divTag.attr("id", tabId);
+            fixupDivId = tabId;
           }
           if (message.position === "before") {
             if ($targetLiTag) {
@@ -6927,18 +6961,10 @@ ${duplicateIdMsg}`;
               $tabset.append($liTag);
             }
           }
-          await renderContentAsync($liTag[0], {
-            html: $liTag.html(),
-            deps: message.liTag.deps
-          });
-          await renderContentAsync(
-            $tabContent[0],
-            { html: "", deps: message.divTag.deps },
-            "beforeend"
-          );
-          for (const el of $divTag.get()) {
-            $tabContent[0].appendChild(el);
-            await renderContentAsync(el, el.innerHTML || el.textContent);
+          await shinyBindAll($targetLiTag?.parent() || $tabset);
+          await renderContentAsync($tabContent[0], message.divTag, "beforeEnd");
+          if (fixupDivId) {
+            $tabContent.find('[id="tab-tsid-id"]').attr("id", fixupDivId);
           }
           if (message.select) {
             $liTag.find("a").tab("show");

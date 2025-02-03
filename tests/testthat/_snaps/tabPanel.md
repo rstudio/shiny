@@ -183,7 +183,7 @@
       nav_page
     Output
       <body class="bslib-page-navbar">
-        <nav class="navbar navbar-default navbar-static-top" role="navigation">
+        <nav class="navbar navbar-default navbar-static-top" role="navigation" data-bs-theme="light">
           <div class="container-fluid">
             <div class="navbar-header">
               <span class="navbar-brand">Title</span>
@@ -227,7 +227,7 @@
       bslib_tags(x)
     Output
       <body class="bslib-page-navbar">
-        <nav class="navbar navbar-default navbar-static-top" role="navigation">
+        <nav class="navbar navbar-default navbar-static-top" role="navigation" data-bs-theme="light">
           <div class="container-fluid">
             <div class="navbar-header">
               <span class="navbar-brand">Title</span>

@@ -1453,18 +1453,27 @@
       value;
     }
     subscribe(el, callback) {
-      (0, import_jquery13.default)(el).on(
-        "keyup.textInputBinding input.textInputBinding",
-        function() {
-          callback(true);
-        }
-      );
-      (0, import_jquery13.default)(el).on(
+      const $el = (0, import_jquery13.default)(el);
+      const updateOn = $el.data("update-on") || "input";
+      if (updateOn === "input") {
+        $el.on(
+          "keyup.textInputBinding input.textInputBinding",
+          function() {
+            callback(true);
+          }
+        );
+      }
+      $el.on(
         "change.textInputBinding",
         function() {
           callback(false);
         }
       );
+      if (updateOn === "blur") {
+        $el.on("blur.textInputBinding", function() {
+          callback(false);
+        });
+      }
     }
     unsubscribe(el) {
       (0, import_jquery13.default)(el).off(".textInputBinding");
@@ -1479,11 +1488,14 @@
       el;
     }
     getRatePolicy(el) {
+      let delay = (0, import_jquery13.default)(el).data("debounce");
+      if (delay === void 0) {
+        delay = 250;
+      }
       return {
         policy: "debounce",
-        delay: 250
+        delay
       };
-      el;
     }
   };
   var TextInputBinding = class extends TextInputBindingBase {

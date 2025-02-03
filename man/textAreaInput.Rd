@@ -13,7 +13,9 @@ textAreaInput(
   cols = NULL,
   rows = NULL,
   placeholder = NULL,
-  resize = NULL
+  resize = NULL,
+  ...,
+  updateOn = c("input", "blur")
 )
 }
 \arguments{
@@ -46,6 +48,11 @@ option.}
 \item{resize}{Which directions the textarea box can be resized. Can be one of
 \code{"both"}, \code{"none"}, \code{"vertical"}, and \code{"horizontal"}. The default, \code{NULL},
 will use the client browser's default setting for resizing textareas.}
+
+\item{updateOn}{A character vector specifying when the input should be
+updated. Options are \code{"input"} (default) and \code{"blur"}. If \code{"blur"}, then
+the input value will be updated when the text input loses focus, or when
+Enter is pressed.}
 }
 \value{
 A textarea input control that can be added to a UI definition.

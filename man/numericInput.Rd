@@ -11,7 +11,9 @@ numericInput(
   min = NA,
   max = NA,
   step = NA,
-  width = NULL
+  width = NULL,
+  ...,
+  updateOn = c("input", "blur")
 )
 }
 \arguments{
@@ -29,6 +31,11 @@ numericInput(
 
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
 see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
+
+\item{updateOn}{A character vector specifying when the input should be
+updated. Options are \code{"input"} (default) and \code{"blur"}. If \code{"blur"}, then
+the input value will be updated when the text input loses focus, or when
+Enter is pressed.}
 }
 \value{
 A numeric input control that can be added to a UI definition.

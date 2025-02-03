@@ -10,6 +10,10 @@
 #' @param placeholder A character string giving the user a hint as to what can
 #'   be entered into the control. Internet Explorer 8 and 9 do not support this
 #'   option.
+#' @param updateOn A character vector specifying when the input should be
+#'   updated. Options are `"input"` (default) and `"blur"`. If `"blur"`, then
+#'   the input value will be updated when the text input loses focus, or when
+#'   Enter is pressed.
 #' @return A text input control that can be added to a UI definition.
 #'
 #' @family input elements
@@ -35,7 +39,9 @@
 #'
 #' @export
 textInput <- function(inputId, label, value = "", width = NULL,
-  placeholder = NULL) {
+  placeholder = NULL, ..., updateOn = c("input", "blur")) {
+
+  updateOn <- match.arg(updateOn)
 
   value <- restoreInput(id = inputId, default = value)
 
@@ -43,6 +49,6 @@ textInput <- function(inputId, label, value = "", width = NULL,
     style = css(width = validateCssUnit(width)),
     shinyInputLabel(inputId, label),
     tags$input(id = inputId, type="text", class="shiny-input-text form-control", value=value,
-      placeholder = placeholder)
+      placeholder = placeholder, `data-update-on` = updateOn)
   )
 }

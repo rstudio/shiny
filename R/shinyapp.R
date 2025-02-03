@@ -304,7 +304,6 @@ initAutoReloadMonitor <- function(dir) {
     times <- file.info(files)$mtime
     names(times) <- files
 
-    
     if (is.null(lastValue)) {
       # First run
       lastValue <<- times

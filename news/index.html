@@ -51,12 +51,14 @@
 <h2 class="page-header" data-toc-text="development version" id="shiny-development-version">shiny (development version)<a class="anchor" aria-label="anchor" href="#shiny-development-version"></a></h2>
 <div class="section level3">
 <h3 id="new-features-and-improvements-development-version">New features and improvements<a class="anchor" aria-label="anchor" href="#new-features-and-improvements-development-version"></a></h3>
-<ul><li>When busy indicators are enabled (i.e., <code><a href="../reference/useBusyIndicators.html">useBusyIndicators()</a></code>), Shiny now:
+<ul><li>
+<p>When busy indicators are enabled (i.e., <code><a href="../reference/useBusyIndicators.html">useBusyIndicators()</a></code>), Shiny now:</p>
 <ul><li>Shows a spinner on recalculating htmlwidgets that have previously rendered an error (including <code><a href="../reference/req.html">req()</a></code> and <code><a href="../reference/validate.html">validate()</a></code>). (<a href="https://github.com/rstudio/shiny/issues/4172" class="external-link">#4172</a>)</li>
 <li>Shows a spinner on <code><a href="../reference/renderTable.html">tableOutput()</a></code>. (<a href="https://github.com/rstudio/shiny/issues/4172" class="external-link">#4172</a>)</li>
 <li>Places a minimum height on recalculating outputs so that the spinner is always visible. (<a href="https://github.com/rstudio/shiny/issues/4172" class="external-link">#4172</a>)</li>
 </ul></li>
-<li>Shiny now uses <a href="https://cli.r-lib.org" class="external-link">cli</a> instead of <a href="https://r-lib.github.io/crayon/" class="external-link">crayon</a> for rich log messages. (<a href="https://github.com/olivroy" class="external-link">@olivroy</a> <a href="https://github.com/rstudio/shiny/issues/4170" class="external-link">#4170</a>)</li>
+<li><p>Shiny now uses <a href="https://cli.r-lib.org" class="external-link">cli</a> instead of <a href="https://r-lib.github.io/crayon/" class="external-link">crayon</a> for rich log messages. (<a href="https://github.com/olivroy" class="external-link">@olivroy</a> <a href="https://github.com/rstudio/shiny/issues/4170" class="external-link">#4170</a>)</p></li>
+<li><p>Shiny’s Typescript assets are now compiled to ES2021 instead of ES5. (<a href="https://github.com/rstudio/shiny/issues/4066" class="external-link">#4066</a>)</p></li>
 </ul></div>
 <div class="section level3">
 <h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>

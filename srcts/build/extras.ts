@@ -1,6 +1,6 @@
 // This build script must be executed from the root repo directory via
 // ```
-// yarn build
+// npm run build
 // ```
 
 // - TypeScript -----------------------------------------------------------
@@ -24,18 +24,22 @@ build({
 // - Sass -----------------------------------------------------------
 
 import autoprefixer from "autoprefixer";
-import sassPlugin from "esbuild-plugin-sass";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore; Type definitions are not found. This occurs when `strict: true` in tsconfig.json
-import postCssPlugin from "@deanc/esbuild-plugin-postcss";
+import { sassPlugin } from "esbuild-sass-plugin";
+import postcss from "postcss";
+import postcssPresetEnv from "postcss-preset-env";
 
 const sassOpts = {
   minify: true,
   banner: banner,
   plugins: [
-    sassPlugin(),
-    postCssPlugin({
-      plugins: [autoprefixer],
+    sassPlugin({
+      async transform(source, resolveDir) {
+        const { css } = await postcss([
+          autoprefixer,
+          postcssPresetEnv({ stage: 0 }),
+        ]).process(source, { from: undefined });
+        return css;
+      },
     }),
   ],
 };

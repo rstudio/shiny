@@ -1,7 +1,5 @@
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import { css, html, LitElement } from "lit";
-import { Shiny } from "..";
+import { Shiny } from "../initialize";
 import { ShinyClientError } from "../shiny/error";
 
 const buttonStyles = css`
@@ -57,16 +55,16 @@ class ShinyErrorConsole extends LitElement {
 
         --shadow-color: 220 3% 15%;
         --shadow-strength: 1%;
-        --shadow-3: 0 -1px 3px 0 hsl(var(--shadow-color) /
-                calc(var(--shadow-strength) + 2%)),
-          0 1px 2px -5px hsl(var(--shadow-color) /
-                calc(var(--shadow-strength) + 2%)),
-          0 2px 5px -5px hsl(var(--shadow-color) /
-                calc(var(--shadow-strength) + 4%)),
-          0 4px 12px -5px hsl(var(--shadow-color) /
-                calc(var(--shadow-strength) + 5%)),
-          0 12px 15px -5px hsl(var(--shadow-color) /
-                calc(var(--shadow-strength) + 7%));
+        --shadow-3: 0 -1px 3px 0
+            hsl(var(--shadow-color) / calc(var(--shadow-strength) + 2%)),
+          0 1px 2px -5px
+            hsl(var(--shadow-color) / calc(var(--shadow-strength) + 2%)),
+          0 2px 5px -5px
+            hsl(var(--shadow-color) / calc(var(--shadow-strength) + 4%)),
+          0 4px 12px -5px
+            hsl(var(--shadow-color) / calc(var(--shadow-strength) + 5%)),
+          0 12px 15px -5px
+            hsl(var(--shadow-color) / calc(var(--shadow-strength) + 7%));
 
         --ring-shadow: 0 0 0 1px var(--gray-2);
 
@@ -231,7 +229,7 @@ class ShinyErrorConsole extends LitElement {
     }
 
     this.appendChild(
-      ShinyErrorConsole.createClientMessageElement({ headline, message })
+      ShinyErrorConsole.createClientMessageElement({ headline, message }),
     );
     return;
   }
@@ -305,10 +303,8 @@ export class ShinyErrorMessage extends LitElement {
         font-size: var(--font-md);
 
         position: relative;
-        --icon-size: var(--font-lg)
-
-        /* Reset box sizing */
-        box-sizing: border-box;
+        --icon-size: var(--font-lg) /* Reset box sizing */
+          box-sizing: border-box;
       }
 
       .container {
@@ -327,7 +323,6 @@ export class ShinyErrorMessage extends LitElement {
       }
 
       :host(:last-of-type) .contents {
-
         padding-block-end: var(--space-1);
       }
 
@@ -375,7 +370,7 @@ export class ShinyErrorMessage extends LitElement {
         position: absolute;
         width: var(--dot-size);
         height: var(--dot-size);
-        top: calc(-1px +  var(--dot-size) / 2);
+        top: calc(-1px + var(--dot-size) / 2);
         left: calc(50% - var(--dot-size) / 2);
         border-radius: 100%;
         transform: scale(var(--scale, 1));
@@ -606,7 +601,7 @@ window.addEventListener("shiny:client-message", (ev: Event) => {
   const { headline, message, status } = ev.detail;
   if (!message) {
     throw new Error(
-      "[shiny] shiny:client-message expected a `message` property in `event.detail`."
+      "[shiny] shiny:client-message expected a `message` property in `event.detail`.",
     );
   }
   showShinyClientMessage({ headline, message, status });

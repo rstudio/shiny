@@ -65,7 +65,7 @@ class BootstrapTabInputBinding extends InputBinding {
       // event: Event
       function () {
         callback(false);
-      }
+      },
     );
   }
   unsubscribe(el: HTMLElement): void {

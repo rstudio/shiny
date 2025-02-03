@@ -20,7 +20,7 @@ class ActionButtonInputBinding extends InputBinding {
   }
   getType(el: HTMLElement): string {
     return "shiny.action";
-    el;
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
   subscribe(el: HTMLElement, callback: (x: boolean) => void): void {
     $(el).on(
@@ -33,7 +33,7 @@ class ActionButtonInputBinding extends InputBinding {
         $el.data("val", val + 1);
 
         callback(false);
-      }
+      },
     );
   }
   getState(el: HTMLElement): { value: number } {
@@ -62,11 +62,11 @@ class ActionButtonInputBinding extends InputBinding {
 
       // update the requested properties
       if (hasDefinedProperty(data, "label")) {
-        label = data.label;
+        label = data.label!;
       }
       if (hasDefinedProperty(data, "icon")) {
         // `data.icon` can be an [] if user gave `character(0)`.
-        icon = Array.isArray(data.icon) ? "" : data.icon ?? "";
+        icon = Array.isArray(data.icon) ? "" : (data.icon ?? "");
       }
 
       // produce new html

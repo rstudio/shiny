@@ -12,14 +12,14 @@ import { initPanelScales } from "./initPanelScales";
 import { shiftToRange } from "./shiftToRange";
 
 export {
-  disableDrag,
-  initPanelScales,
-  initCoordmap,
-  findBox,
-  shiftToRange,
-  createClickInfo,
-  createClickHandler,
-  createHoverHandler,
-  createBrushHandler,
   createBrush,
+  createBrushHandler,
+  createClickHandler,
+  createClickInfo,
+  createHoverHandler,
+  disableDrag,
+  findBox,
+  initCoordmap,
+  initPanelScales,
+  shiftToRange,
 };

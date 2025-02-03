@@ -30,7 +30,7 @@ import {
 } from "../utils";
 import { createInitStatus, type InitStatusPromise } from "../utils/promise";
 import type { BindInputsCtx, BindScope } from "./bind";
-import { bindAll, unbindAll, _bindAll } from "./bind";
+import { _bindAll, bindAll, unbindAll } from "./bind";
 import type {
   shinyBindAll,
   shinyForgetLastInputValue,
@@ -197,7 +197,7 @@ class ShinyClass {
     this.setInputValue = this.onInputChange = function (
       name: string,
       value: unknown,
-      opts: Partial<InputPolicyOpts> = {}
+      opts: Partial<InputPolicyOpts> = {},
     ): void {
       const newOpts = addDefaultInputOpts(opts);
 
@@ -282,7 +282,7 @@ class ShinyClass {
     // GC'd.
     const initialValues = mapValues(
       await _bindAll(shinyBindCtx(), document.documentElement),
-      (x) => x.value
+      (x) => x.value,
     );
 
     // The server needs to know the size of each image and plot output element,
@@ -296,11 +296,11 @@ class ShinyClass {
           initialValues[".clientdata_output_" + id + "_width"] = rect.width;
           initialValues[".clientdata_output_" + id + "_height"] = rect.height;
         }
-      }
+      },
     );
 
     function getComputedBgColor(
-      el: HTMLElement | null
+      el: HTMLElement | null,
     ): string | null | undefined {
       if (!el) {
         // Top of document, can't recurse further
@@ -311,7 +311,7 @@ class ShinyClass {
 
       if (!bgColor) return bgColor;
       const m = bgColor.match(
-        /^rgba\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*\)$/
+        /^rgba\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*\)$/,
       );
 
       if (bgColor === "transparent" || (m && parseFloat(m[4]) === 0)) {
@@ -349,14 +349,14 @@ class ShinyClass {
           getComputedBgColor(el);
         initialValues[".clientdata_output_" + id + "_fg"] = getStyle(
           el,
-          "color"
+          "color",
         );
         initialValues[".clientdata_output_" + id + "_accent"] =
           getComputedLinkColor(el);
         initialValues[".clientdata_output_" + id + "_font"] =
           getComputedFont(el);
         maybeAddThemeObserver(el);
-      }
+      },
     );
 
     // Resend computed styles if *an output element's* class or style attribute changes.
@@ -389,7 +389,7 @@ class ShinyClass {
 
       const observerCallback = new Debouncer(null, () => doSendTheme(el), 100);
       const observer = new MutationObserver(() =>
-        observerCallback.normalCall()
+        observerCallback.normalCall(),
       );
       const config = { attributes: true, attributeFilter: ["style", "class"] };
 
@@ -406,19 +406,19 @@ class ShinyClass {
 
       inputs.setInput(
         ".clientdata_output_" + id + "_bg",
-        getComputedBgColor(el)
+        getComputedBgColor(el),
       );
       inputs.setInput(
         ".clientdata_output_" + id + "_fg",
-        getStyle(el, "color")
+        getStyle(el, "color"),
       );
       inputs.setInput(
         ".clientdata_output_" + id + "_accent",
-        getComputedLinkColor(el)
+        getComputedLinkColor(el),
       );
       inputs.setInput(
         ".clientdata_output_" + id + "_font",
-        getComputedFont(el)
+        getComputedFont(el),
       );
     }
 
@@ -432,16 +432,16 @@ class ShinyClass {
             inputs.setInput(".clientdata_output_" + id + "_width", rect.width);
             inputs.setInput(
               ".clientdata_output_" + id + "_height",
-              rect.height
+              rect.height,
             );
           }
-        }
+        },
       );
 
       $(".shiny-image-output, .shiny-plot-output, .shiny-report-theme").each(
         function () {
           doSendTheme(this);
-        }
+        },
       );
 
       $(".shiny-bound-output").each(function () {
@@ -528,7 +528,7 @@ class ShinyClass {
     const sendOutputHiddenStateDebouncer = new Debouncer(
       null,
       doSendOutputHiddenState,
-      0
+      0,
     );
 
     function sendOutputHiddenState() {
@@ -584,7 +584,7 @@ class ShinyClass {
       $(document.body).on(
         "shown.bs." + classname + ".sendImageSize",
         "*",
-        filterEventsByNamespace("bs", sendImageSizeFns.regular)
+        filterEventsByNamespace("bs", sendImageSizeFns.regular),
       );
       $(document.body).on(
         "shown.bs." +
@@ -594,7 +594,7 @@ class ShinyClass {
           classname +
           ".sendOutputHiddenState",
         "*",
-        filterEventsByNamespace("bs", sendOutputHiddenState)
+        filterEventsByNamespace("bs", sendOutputHiddenState),
       );
     });
 
@@ -604,7 +604,7 @@ class ShinyClass {
     $(document.body).on(
       "shown.sendOutputHiddenState hidden.sendOutputHiddenState",
       "*",
-      sendOutputHiddenState
+      sendOutputHiddenState,
     );
 
     // Send initial pixel ratio, and update it if it changes
@@ -625,13 +625,13 @@ class ShinyClass {
     $(window).on("pushstate", function (e) {
       inputs.setInput(".clientdata_url_search", window.location.search);
       return;
-      e;
+      e; // eslint-disable-line @typescript-eslint/no-unused-expressions
     });
 
     $(window).on("popstate", function (e) {
       inputs.setInput(".clientdata_url_search", window.location.search);
       return;
-      e;
+      e; // eslint-disable-line @typescript-eslint/no-unused-expressions
     });
 
     // This is only the initial value of the hash. The hash can change, but
@@ -644,19 +644,19 @@ class ShinyClass {
     $(window).on("hashchange", function (e) {
       inputs.setInput(".clientdata_url_hash", window.location.hash);
       return;
-      e;
+      e; // eslint-disable-line @typescript-eslint/no-unused-expressions
     });
 
     // The server needs to know what singletons were rendered as part of
     // the page loading
     const singletonText = (initialValues[".clientdata_singletons"] = $(
-      'script[type="application/shiny-singletons"]'
+      'script[type="application/shiny-singletons"]',
     ).text());
 
     singletonsRegisterNames(singletonText.split(/,/));
 
     const dependencyText = $(
-      'script[type="application/html-dependencies"]'
+      'script[type="application/html-dependencies"]',
     ).text();
 
     $.each(dependencyText.split(/;/), function (i, depStr) {

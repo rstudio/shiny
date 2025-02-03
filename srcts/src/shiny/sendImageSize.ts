@@ -9,7 +9,7 @@ class SendImageSize {
 
   setImageSend(
     inputBatchSender: InputBatchSender,
-    doSendImageSize: () => void
+    doSendImageSize: () => void,
   ): Debouncer<typeof doSendImageSize> {
     const sendImageSizeDebouncer = new Debouncer(null, doSendImageSize, 0);
 

@@ -30,7 +30,7 @@ function getLabelNode(el: SelectHTMLElement): JQuery<HTMLElement> {
     .find('label[for="' + escapedId + '"]');
 }
 // Return true if it's a selectize input, false if it's a regular select input.
-// eslint-disable-next-line camelcase
+
 function isSelectize(el: HTMLElement): boolean {
   const config = $(el)
     .parent()
@@ -85,7 +85,7 @@ class SelectInputBinding extends InputBinding {
   } {
     // Store options in an array of objects, each with with value and label
     const options: Array<{ value: string; label: string }> = new Array(
-      el.length
+      el.length,
     );
 
     for (let i = 0; i < el.length; i++) {
@@ -104,7 +104,7 @@ class SelectInputBinding extends InputBinding {
   }
   receiveMessage(
     el: SelectHTMLElement,
-    data: SelectInputReceiveMessageData
+    data: SelectInputReceiveMessageData,
   ): void {
     const $el = $(el);
 
@@ -116,7 +116,7 @@ class SelectInputBinding extends InputBinding {
       // selectize will restore the original select
       selectize?.destroy();
       // Clear existing options and add each new one
-      $el.empty().append(data.options);
+      $el.empty().append(data.options!);
       this._selectize(el);
     }
 
@@ -125,7 +125,7 @@ class SelectInputBinding extends InputBinding {
       $el
         .parent()
         .find('script[data-for="' + $escape(el.id) + '"]')
-        .replaceWith(data.config);
+        .replaceWith(data.config!);
       this._selectize(el, true);
     }
 
@@ -154,7 +154,6 @@ class SelectInputBinding extends InputBinding {
       selectize.settings.load = function (query: string, callback: CallbackFn) {
         const settings = selectize.settings;
 
-        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         $.ajax({
           url: data.url,
           data: {
@@ -202,6 +201,7 @@ class SelectInputBinding extends InputBinding {
         selectize.settings.load.apply(selectize, ["", callback]);
       });
     } else if (hasDefinedProperty(data, "value")) {
+      // @ts-expect-error; data.value is currently a never type
       this.setValue(el, data.value);
     }
 
@@ -221,7 +221,7 @@ class SelectInputBinding extends InputBinding {
           return;
         }
         callback(false);
-      }
+      },
     );
   }
   unsubscribe(el: HTMLElement): void {
@@ -232,7 +232,7 @@ class SelectInputBinding extends InputBinding {
   }
   protected _selectize(
     el: SelectHTMLElement,
-    update = false
+    update = false,
   ): SelectizeInfo | undefined {
     // Apps like 008-html do not have the selectize js library
     // Safe-guard against missing the selectize js library
@@ -256,7 +256,7 @@ class SelectInputBinding extends InputBinding {
         valueField: "value",
         searchField: ["label"],
       },
-      JSON.parse(config.html())
+      JSON.parse(config.html()),
     );
 
     // selectize created from selectInput()
@@ -271,7 +271,7 @@ class SelectInputBinding extends InputBinding {
                 $("<option/>", {
                   value: value,
                   selected: true,
-                })
+                }),
               )
               .trigger("change");
         },

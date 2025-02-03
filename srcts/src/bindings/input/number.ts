@@ -25,7 +25,7 @@ class NumberInputBinding extends TextInputBindingBase {
   }
 
   getValue(
-    el: NumberHTMLElement
+    el: NumberHTMLElement,
   ): string[] | number | string | null | undefined {
     const numberVal = $(el).val();
 
@@ -49,7 +49,7 @@ class NumberInputBinding extends TextInputBindingBase {
   }
   getType(el: NumberHTMLElement): string {
     return "shiny.number";
-    el;
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
   receiveMessage(el: NumberHTMLElement, data: NumberReceiveMessageData): void {
     // Setting values to `""` will remove the attribute value from the DOM element.

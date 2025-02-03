@@ -23,7 +23,7 @@ function getLabelNode(el: HTMLElement): JQuery<HTMLElement> {
 class TextInputBindingBase extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     const $inputs = $(scope).find(
-      'input[type="text"], input[type="search"], input[type="url"], input[type="email"]'
+      'input[type="text"], input[type="search"], input[type="url"], input[type="email"]',
     );
     // selectize.js 0.12.4 inserts a hidden text input with an
     // id that ends in '-selectized'. The .not() selector below
@@ -41,12 +41,12 @@ class TextInputBindingBase extends InputBinding {
 
   getValue(el: TextHTMLElement): unknown {
     throw "not implemented";
-    el;
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
   setValue(el: TextHTMLElement, value: unknown): void {
     throw "not implemented";
-    el;
-    value;
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
+    value; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
 
   subscribe(el: TextHTMLElement, callback: (x: boolean) => void): void {
@@ -55,14 +55,14 @@ class TextInputBindingBase extends InputBinding {
       // event: Event
       function () {
         callback(true);
-      }
+      },
     );
     $(el).on(
       "change.textInputBinding",
       // event: Event
       function () {
         callback(false);
-      }
+      },
     );
   }
   unsubscribe(el: TextHTMLElement): void {
@@ -71,13 +71,13 @@ class TextInputBindingBase extends InputBinding {
 
   receiveMessage(el: TextHTMLElement, data: unknown): void {
     throw "not implemented";
-    el;
-    data;
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
+    data; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
 
   getState(el: TextHTMLElement): unknown {
     throw "not implemented";
-    el;
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
 
   getRatePolicy(el: HTMLElement): { policy: "debounce"; delay: 250 } {
@@ -85,7 +85,7 @@ class TextInputBindingBase extends InputBinding {
       policy: "debounce",
       delay: 250,
     };
-    el;
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
 }
 
@@ -110,12 +110,14 @@ class TextInputBinding extends TextInputBindingBase {
     };
   }
   receiveMessage(el: TextHTMLElement, data: TextReceiveMessageData): void {
-    if (hasDefinedProperty(data, "value")) this.setValue(el, data.value);
+    if (hasDefinedProperty(data, "value")) this.setValue(el, data.value!);
 
     updateLabel(data.label, getLabelNode(el));
 
-    if (hasDefinedProperty(data, "placeholder"))
+    if (hasDefinedProperty(data, "placeholder")) {
+      // @ts-expect-error; data.value is currently a never type
       el.placeholder = data.placeholder;
+    }
 
     $(el).trigger("change");
   }

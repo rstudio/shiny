@@ -115,20 +115,20 @@ class DateRangeInputBinding extends DateInputBindingBase {
     updateLabel(data.label, getLabelNode(el));
 
     if (hasDefinedProperty(data, "min")) {
-      this._setMin($startinput[0], data.min);
-      this._setMin($endinput[0], data.min);
+      this._setMin($startinput[0], data.min!);
+      this._setMin($endinput[0], data.min!);
     }
 
     if (hasDefinedProperty(data, "max")) {
-      this._setMax($startinput[0], data.max);
-      this._setMax($endinput[0], data.max);
+      this._setMax($startinput[0], data.max!);
+      this._setMax($endinput[0], data.max!);
     }
 
     // Must set value only after min and max have been set. If new value is
     // outside the bounds of the previous min/max, then the result will be a
     // blank input.
     if (hasDefinedProperty(data, "value")) {
-      this.setValue(el, data.value);
+      this.setValue(el, data.value!);
     }
 
     $el.trigger("change");
@@ -171,7 +171,7 @@ class DateRangeInputBinding extends DateInputBindingBase {
         // Send immediately when clicked
         // Or if typing, when enter pressed or focus lost
         callback(false);
-      }
+      },
     );
   }
   unsubscribe(el: HTMLElement): void {

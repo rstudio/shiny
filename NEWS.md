@@ -11,6 +11,11 @@
 
 * Shiny's Typescript assets are now compiled to ES2021 instead of ES5. (#4066)
 
+* When `textInput()` is called with `updateOn="blur"`, the input value will update only when the text input loses focus, or when the user presses Enter, instead of updating as the user types. (#4183)
+
+* The debounce delay for `textInput()` can be controlled with the new `debounce` parameter. (#4183)
+
+
 ## Bug fixes
 
 * Fixed a bug with modals where calling `removeModal()` too quickly after `showModal()` would fail to remove the modal if the remove modal message was received while the modal was in the process of being revealed. (#4173)

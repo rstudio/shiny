@@ -290,8 +290,10 @@ initAutoReloadMonitor <- function(dir) {
     return(function(){})
   }
 
-  filePattern <- getOption("shiny.autoreload.pattern",
-    ".*\\.(r|html?|js|css|png|jpe?g|gif)$")
+  filePattern <- getOption(
+    "shiny.autoreload.pattern",
+    ".*\\.(r|html?|js|css|png|jpe?g|gif)$"
+  )
 
   lastValue <- NULL
   observeLabel <- paste0("File Auto-Reload - '", basename(dir), "'")
@@ -302,6 +304,7 @@ initAutoReloadMonitor <- function(dir) {
     times <- file.info(files)$mtime
     names(times) <- files
 
+    
     if (is.null(lastValue)) {
       # First run
       lastValue <<- times
@@ -309,6 +312,7 @@ initAutoReloadMonitor <- function(dir) {
       # We've changed!
       lastValue <<- times
       autoReloadCallbacks$invoke()
+      cachedAutoReloadLastChanged(max(0, max(times, na.rm = TRUE)))
     }
 
     invalidateLater(getOption("shiny.autoreload.interval", 500))

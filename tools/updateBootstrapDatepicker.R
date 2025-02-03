@@ -105,10 +105,10 @@ writeLines(
 withr::with_dir(
   rprojroot::find_package_root_file(),
   {
-    exit_code <- system(paste0("yarn add --dev bootstrap-datepicker@", version))
-    if (exit_code != 0) stop("yarn could not install bootstrap-datepicker")
+    exit_code <- system(paste0("npm install --save-dev bootstrap-datepicker@", version))
+    if (exit_code != 0) stop("npm could not install bootstrap-datepicker")
 
-    exit_code <- system(paste0("yarn add @types/bootstrap-datepicker@", types_version))
-    if (exit_code != 0) stop("yarn could not install @types/bootstrap-datepicker")
+    exit_code <- system(paste0("npm install --save-dev @types/bootstrap-datepicker@", types_version))
+    if (exit_code != 0) stop("npm could not install @types/bootstrap-datepicker")
   }
 )

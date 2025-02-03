@@ -7,10 +7,19 @@
 
 version <- "0.9.2"
 ref <- paste0("v", version)
-destdir <- rprojroot::find_package_root_file("inst", "www", "shared", "strftime")
+destdir <- rprojroot::find_package_root_file(
+  "inst",
+  "www",
+  "shared",
+  "strftime"
+)
 
 download.file(
-  paste0("https://raw.githubusercontent.com/samsonjs/strftime/", ref, "/strftime-min.js"),
+  paste0(
+    "https://raw.githubusercontent.com/samsonjs/strftime/",
+    ref,
+    "/strftime-min.js"
+  ),
   destfile = file.path(destdir, "strftime-min.js")
 )
 

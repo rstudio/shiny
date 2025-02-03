@@ -1,6 +1,6 @@
 // This build script must be executed from the root repo directory via
 // ```
-// yarn build
+// npm run build
 // ```
 
 import type { BuildOptions } from "esbuild";

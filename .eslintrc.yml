@@ -13,7 +13,7 @@ globals:
   SharedArrayBuffer: readonly
 parser: '@typescript-eslint/parser'
 parserOptions:
-  ecmaVersion: 2018
+  ecmaVersion: 2021
   sourceType: module
   project:
     - './tsconfig.json'
@@ -26,12 +26,9 @@ plugins:
   - jest-dom
   - unicorn
 rules:
-  "@typescript-eslint/explicit-function-return-type":
-    - off
-  "@typescript-eslint/no-explicit-any":
-    - off
-  "@typescript-eslint/explicit-module-boundary-types":
-    - error
+  "@typescript-eslint/explicit-function-return-type": "off"
+  "@typescript-eslint/no-explicit-any": "off"
+  "@typescript-eslint/explicit-module-boundary-types": "error"
 
   default-case:
     - error
@@ -69,11 +66,9 @@ rules:
   "@typescript-eslint/sort-type-union-intersection-members":
     - error
 
-  "@typescript-eslint/consistent-type-imports":
-    - error
+  "@typescript-eslint/consistent-type-imports": "error"
 
-  "@typescript-eslint/no-floating-promises":
-    - error
+  "@typescript-eslint/no-floating-promises": "error"
 
   "@typescript-eslint/naming-convention":
     - error

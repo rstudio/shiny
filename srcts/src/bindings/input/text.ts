@@ -92,16 +92,12 @@ class TextInputBindingBase extends InputBinding {
     el;
   }
 
-  getRatePolicy(el: HTMLElement): { policy: "debounce"; delay: number } {
-    let delay = $(el).data("debounce");
-    if (delay === undefined) {
-      // Don't use falsy check because value could be 0.
-      delay = 250;
-    }
+  getRatePolicy(el: HTMLElement): { policy: "debounce"; delay: 250 } {
     return {
       policy: "debounce",
-      delay: delay,
+      delay: 250,
     };
+    el;
   }
 }
 

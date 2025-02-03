@@ -14,7 +14,6 @@
 #'   updated. Options are `"input"` (default) and `"blur"`. If `"blur"`, then
 #'   the input value will be updated when the text input loses focus, or when
 #'   Enter is pressed.
-#' @param debounce The debouncing delay in milliseconds when 'input' is used.
 #' @return A text input control that can be added to a UI definition.
 #'
 #' @family input elements
@@ -40,7 +39,7 @@
 #'
 #' @export
 textInput <- function(inputId, label, value = "", width = NULL,
-  placeholder = NULL, updateOn = c("input", "blur"), debounce = 250) {
+  placeholder = NULL, updateOn = c("input", "blur")) {
 
   updateOn <- match.arg(updateOn)
 
@@ -50,6 +49,6 @@ textInput <- function(inputId, label, value = "", width = NULL,
     style = css(width = validateCssUnit(width)),
     shinyInputLabel(inputId, label),
     tags$input(id = inputId, type="text", class="shiny-input-text form-control", value=value,
-      placeholder = placeholder, `data-update-on` = updateOn, `data-debounce` = debounce)
+      placeholder = placeholder, `data-update-on` = updateOn)
   )
 }

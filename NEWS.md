@@ -13,8 +13,6 @@
 
 * When `textInput()` is called with `updateOn="blur"`, the input value will update only when the text input loses focus, or when the user presses Enter, instead of updating as the user types. (#4183)
 
-* The debounce delay for `textInput()` can be controlled with the new `debounce` parameter. (#4183)
-
 
 ## Bug fixes
 

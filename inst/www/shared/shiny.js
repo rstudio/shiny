@@ -1488,14 +1488,11 @@
       el;
     }
     getRatePolicy(el) {
-      let delay = (0, import_jquery13.default)(el).data("debounce");
-      if (delay === void 0) {
-        delay = 250;
-      }
       return {
         policy: "debounce",
-        delay
+        delay: 250
       };
+      el;
     }
   };
   var TextInputBinding = class extends TextInputBindingBase {

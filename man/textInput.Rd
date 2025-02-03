@@ -10,6 +10,7 @@ textInput(
   value = "",
   width = NULL,
   placeholder = NULL,
+  ...,
   updateOn = c("input", "blur")
 )
 }

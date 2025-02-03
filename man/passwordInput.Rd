@@ -4,7 +4,15 @@
 \alias{passwordInput}
 \title{Create a password input control}
 \usage{
-passwordInput(inputId, label, value = "", width = NULL, placeholder = NULL)
+passwordInput(
+  inputId,
+  label,
+  value = "",
+  width = NULL,
+  placeholder = NULL,
+  ...,
+  updateOn = c("input", "blur")
+)
 }
 \arguments{
 \item{inputId}{The \code{input} slot that will be used to access the value.}
@@ -19,6 +27,11 @@ see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
 \item{placeholder}{A character string giving the user a hint as to what can
 be entered into the control. Internet Explorer 8 and 9 do not support this
 option.}
+
+\item{updateOn}{A character vector specifying when the input should be
+updated. Options are \code{"input"} (default) and \code{"blur"}. If \code{"blur"}, then
+the input value will be updated when the text input loses focus, or when
+Enter is pressed.}
 }
 \value{
 A text input control that can be added to a UI definition.

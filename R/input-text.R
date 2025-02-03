@@ -39,7 +39,7 @@
 #'
 #' @export
 textInput <- function(inputId, label, value = "", width = NULL,
-  placeholder = NULL, updateOn = c("input", "blur")) {
+  placeholder = NULL, ..., updateOn = c("input", "blur")) {
 
   updateOn <- match.arg(updateOn)
 

@@ -770,22 +770,34 @@ formatNoSci <- function(x) {
   format(x, scientific = FALSE, digits = 15)
 }
 
+cachedAutoReloadLastChanged <- local({
+  last_update <- 0
+  function(value = NULL) {
+    if (!is.null(value) && !is.na(value) && length(value)) {
+      last_update <<- value
+      return(invisible(value))
+    }
+    last_update
+  }
+})
+
 # Returns a function that calls the given func and caches the result for
 # subsequent calls, unless the given file's mtime changes.
 cachedFuncWithFile <- function(dir, file, func, case.sensitive = FALSE) {
-  dir <- normalizePath(dir, mustWork=TRUE)
+  dir <- normalizePath(dir, mustWork = TRUE)
   mtime <- NA
   value <- NULL
+  mtime_autoreload <- 0
   function(...) {
-    fname <- if (case.sensitive)
-      file.path(dir, file)
-    else
+    fname <- if (case.sensitive) file.path(dir, file) else
       file.path.ci(dir, file)
 
     now <- file.info(fname)$mtime
-    if (!identical(mtime, now)) {
+    autoreload <- mtime_autoreload < cachedAutoReloadLastChanged()
+    if (autoreload || !identical(mtime, now)) {
       value <<- func(fname, ...)
       mtime <<- now
+      mtime_autoreload <- cachedAutoReloadLastChanged()
     }
     value
   }

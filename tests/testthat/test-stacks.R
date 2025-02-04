@@ -240,7 +240,7 @@ test_that("observeEvent is not overly stripped (#4162)", {
     })
   )
   st_str <- capture.output(printStackTrace(caught), type = "message")
-  expect_true(any(grepl("observeEvent\\(1\\)", st_str)))
+  expect_match(st_str, "observeEvent\\(1\\)", all = FALSE)
 
   # Now same thing, but deep stack trace version
 
@@ -270,6 +270,6 @@ test_that("observeEvent is not overly stripped (#4162)", {
   )
   st_str <- capture.output(printStackTrace(caught), type = "message")
   # cat(st_str, sep = "\n")
-  expect_true(any(grepl("A__", st_str)))
-  expect_true(any(grepl("B__", st_str)))
+  expect_match(st_str, "A__", all = FALSE)
+  expect_match(st_str, "B__", all = FALSE)
 })

@@ -14,10 +14,6 @@ import process from "process";
 // @ts-ignore; Type definitions are not found. This occurs when `strict: true` in tsconfig.json
 import readcontrol from "readcontrol";
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore; Type definitions are not found. This occurs when `strict: true` in tsconfig.json
-import babelPlugin from "esbuild-plugin-babel";
-
 const outDir = "./inst/www/shared/";
 
 type ShinyDesc = { version: string; package: string; license: string };
@@ -79,7 +75,7 @@ async function build(
   return esbuildBuild({
     incremental: incremental,
     watch: watch,
-    target: "es5",
+    target: "es2021",
     preserveSymlinks: true,
     ...opts,
   }).then((x) => {
@@ -88,4 +84,4 @@ async function build(
   });
 }
 
-export { outDir, build, shinyDesc, banner, babelPlugin };
+export { outDir, build, shinyDesc, banner };

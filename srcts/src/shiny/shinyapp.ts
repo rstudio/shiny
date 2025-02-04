@@ -18,6 +18,7 @@ import {
   getShinyCreateWebsocket,
   getShinyOnCustomMessage,
   setShinyUser,
+  shinyBindAll,
   shinyForgetLastInputValue,
   shinyUnbindAll,
 } from "./initedMethods";
@@ -1053,8 +1054,13 @@ class ShinyApp {
         const $tabContent = getTabContent($tabset);
         let tabsetId = $parentTabset.attr("data-tabsetid");
 
-        const $divTag = $(message.divTag.html);
-        const $liTag = $(message.liTag.html);
+        // Create a virtual element where we'll temporarily hold the rendered
+        // nav controls so we can rewrite some attributes and choose where to
+        // insert the new controls.
+        const $fragLi = $("<div>");
+        await renderContentAsync($fragLi, message.liTag, "afterBegin");
+
+        const $liTag = $($fragLi).find("> li");
         const $aTag = $liTag.find("> a");
 
         // Unless the item is being prepended/appended, the target tab
@@ -1097,13 +1103,16 @@ class ShinyApp {
         // text items (which function as dividers and headers inside
         // navbarMenus) and whole navbarMenus (since those get
         // constructed from scratch on the R side and therefore
-        // there are no ids that need matching)
+        // there are no ids that need matching). In other words, we're
+        // guaranteed to be inserting only one `nav_panel()`.
+        let fixupDivId = "";
         if ($aTag.attr("data-toggle") === "tab") {
           const index = getTabIndex($tabset, tabsetId);
           const tabId = "tab-" + tabsetId + "-" + index;
 
           $liTag.find("> a").attr("href", "#" + tabId);
-          $divTag.attr("id", tabId);
+          // We'll fixup the div ID after we insert it
+          fixupDivId = tabId;
         }
 
         // actually insert the item into the right place
@@ -1120,11 +1129,8 @@ class ShinyApp {
             $tabset.append($liTag);
           }
         }
+        await shinyBindAll($targetLiTag?.parent() || $tabset);
 
-        await renderContentAsync($liTag[0], {
-          html: $liTag.html(),
-          deps: message.liTag.deps,
-        });
         // jcheng 2017-07-28: This next part might look a little insane versus the
         // more obvious `$tabContent.append($divTag);`, but there's a method to the
         // madness.
@@ -1152,40 +1158,30 @@ class ShinyApp {
         // In theory the same problem exists for $liTag but since that content is
         // much less likely to include arbitrary scripts, we're skipping it.
         //
-        // This code could be nicer if we didn't use renderContent, but rather the
-        // lower-level functions that renderContent uses. Like if we pre-process
-        // the value of message.divTag.html for singletons, we could do that, then
-        // render dependencies, then do $tabContent.append($divTag).
-        await renderContentAsync(
-          $tabContent[0],
-          { html: "", deps: message.divTag.deps },
-          // @ts-expect-error; TODO-barret; There is no usage of beforeend
-          "beforeend"
-        );
-        for (const el of $divTag.get()) {
-          // Must not use jQuery for appending el to the doc, we don't want any
-          // scripts to run (since they will run when renderContent takes a crack).
-          $tabContent[0].appendChild(el);
-          // If `el` itself is a script tag, this approach won't work (the script
-          // won't be run), since we're only sending innerHTML through renderContent
-          // and not the whole tag. That's fine in this case because we control the
-          // R code that generates this HTML, and we know that the element is not
-          // a script tag.
-          await renderContentAsync(el, el.innerHTML || el.textContent);
+        // garrick 2025-01-23: Keeping in mind the above, the `shiny-insert-tab`
+        // method was re-written to avoid adding the nav controls (liTag) and
+        // the nav panel contents (divTag) twice. Now, we use
+        // renderContentAsync() to add both sections to the DOM only once.
+
+        await renderContentAsync($tabContent[0], message.divTag, "beforeEnd");
+
+        if (fixupDivId) {
+          // We're inserting one nav_panel() and need to fixup the content ID
+          $tabContent.find('[id="tab-tsid-id"]').attr("id", fixupDivId);
         }
 
         if (message.select) {
           $liTag.find("a").tab("show");
         }
         /* Barbara -- August 2017
-  Note: until now, the number of tabs in a tabsetPanel (or navbarPage
-  or navlistPanel) was always fixed. So, an easy way to give an id to
-  a tab was simply incrementing a counter. (Just like it was easy to
-  give a random 4-digit number to identify the tabsetPanel). Now that
-  we're introducing dynamic tabs, we must retrieve these numbers and
-  fix the dummy id given to the tab in the R side -- there, we always
-  set the tab id (counter dummy) to "id" and the tabset id to "tsid")
-  */
+         * Note: until now, the number of tabs in a tabsetPanel (or navbarPage
+         * or navlistPanel) was always fixed. So, an easy way to give an id to
+         * a tab was simply incrementing a counter. (Just like it was easy to
+         * give a random 4-digit number to identify the tabsetPanel). Now that
+         * we're introducing dynamic tabs, we must retrieve these numbers and
+         * fix the dummy id given to the tab in the R side -- there, we always
+         * set the tab id (counter dummy) to "id" and the tabset id to "tsid")
+         */
         function getTabIndex(
           $tabset: JQuery<HTMLElement>,
           tabsetId: string | undefined

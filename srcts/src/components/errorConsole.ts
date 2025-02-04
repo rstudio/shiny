@@ -200,6 +200,42 @@ class ShinyErrorConsole extends LitElement {
     });
   }
 
+  static createClientMessageElement({ headline, message }: ShinyClientMessage) {
+    const msg = document.createElement("shiny-error-message");
+    msg.setAttribute("headline", headline || "");
+    msg.setAttribute("message", message);
+    return msg;
+  }
+
+  appendConsoleMessage({ headline, message }: ShinyClientMessage) {
+    const content =
+      this.shadowRoot?.querySelector<HTMLSlotElement>("slot.content");
+
+    if (content) {
+      const nodeKey = (node: Element) => {
+        const headline = node.getAttribute("headline") || "";
+        const message = node.getAttribute("message") || "";
+        return `${headline}::${message}`;
+      };
+      const newKey = `${headline}::${message}`;
+
+      for (const node of content.assignedElements()) {
+        if (node.tagName.toLowerCase() === "shiny-error-message") {
+          if (nodeKey(node) === newKey) {
+            // Do nothing, this message is already in the console
+            // TODO: Increase count of message here
+            return;
+          }
+        }
+      }
+    }
+
+    this.appendChild(
+      ShinyErrorConsole.createClientMessageElement({ headline, message })
+    );
+    return;
+  }
+
   render() {
     return html` <div class="header">
         <span class="title"> Shiny Client Errors </span>
@@ -523,17 +559,13 @@ function showShinyClientMessage({
 
   // Check to see if an Error Console Container element already exists. If it
   // doesn't we need to add it before putting an error on the screen
-  let errorConsoleContainer = document.querySelector("shiny-error-console");
-  if (!errorConsoleContainer) {
-    errorConsoleContainer = document.createElement("shiny-error-console");
-    document.body.appendChild(errorConsoleContainer);
+  let sec = document.querySelector<ShinyErrorConsole>("shiny-error-console");
+  if (!sec) {
+    sec = document.createElement("shiny-error-console") as ShinyErrorConsole;
+    document.body.appendChild(sec);
   }
 
-  const errorConsole = document.createElement("shiny-error-message");
-  errorConsole.setAttribute("headline", headline);
-  errorConsole.setAttribute("message", message);
-
-  errorConsoleContainer.appendChild(errorConsole);
+  sec.appendConsoleMessage({ headline, message });
 }
 
 /**

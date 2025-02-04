@@ -11,6 +11,8 @@
 
 * Shiny's Typescript assets are now compiled to ES2021 instead of ES5. (#4066)
 
+* Shiny better truncates stack traces when errors occur (@olivroy #4186).
+
 ## Bug fixes
 
 * Fixed a bug with modals where calling `removeModal()` too quickly after `showModal()` would fail to remove the modal if the remove modal message was received while the modal was in the process of being revealed. (#4173)

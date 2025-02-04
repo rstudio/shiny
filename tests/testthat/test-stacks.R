@@ -1,6 +1,6 @@
-causeError <- function(full) {
+causeError <- function(full, f = stop) {
   A <- function() {
-    stop("foo")
+    f("foo")
   }
 
   B <- function() {
@@ -63,7 +63,7 @@ extractStackTrace <- function(calls,
     # the calls--they don't add any helpful information. But only remove
     # the last *contiguous* block of them, and then, only if they are the
     # last thing in the calls list.
-    hideable <- callnames %in% c("stop", ".handleSimpleError", "h")
+    hideable <- callnames %in% c("stop", ".handleSimpleError", "h", "base$wrapOnFulfilled", "signal_abort", "handlers[[1L]]", "signalCondition", "abort", "rlang::abort", "cli::cli_abort", "cli_abort", "f")
     # What's the last that *didn't* match stop/.handleSimpleError/h?
     lastGoodCall <- max(which(!hideable))
     toRemove <- length(calls) - lastGoodCall
@@ -122,20 +122,33 @@ test_that("integration tests", {
   # If promises changes its internals, it can break this test on CRAN. Because
   # CRAN package releases are generally not synchronized (that is, promises and
   # shiny can't be updated at the same time, unless there is manual intervention
-  # from CRAN maintaineres), these specific test expectations make it impossible
+  # from CRAN maintainers), these specific test expectations make it impossible
   # to release a version of promises that will not break this test and cause
   # problems on CRAN.
   skip_on_cran()
 
-  df <- causeError(full = FALSE)
+  df <- causeError(full = FALSE, f = stop)
   # dumpTests(df)
 
   expect_snapshot(df)
 
-  df <- causeError(full = TRUE)
+  df <- causeError(full = TRUE, f = stop)
 
   expect_snapshot(df)
   # dumpTests(df)
+
+  # Error with cli
+  df <- causeError(full = FALSE, f = cli::cli_abort)
+  # dumpTests(df)
+
+  expect_snapshot(df)
+
+  df <- causeError(full = TRUE, f = cli::cli_abort)
+
+  expect_snapshot(df)
+  # dumpTests(df)
+
+
 })
 
 test_that("shiny.error", {

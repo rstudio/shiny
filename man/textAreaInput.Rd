@@ -15,6 +15,7 @@ textAreaInput(
   placeholder = NULL,
   resize = NULL,
   ...,
+  autoresize = FALSE,
   updateOn = c("change", "blur")
 )
 }
@@ -51,6 +52,9 @@ will use the client browser's default setting for resizing textareas.}
 
 \item{...}{Ignored, included to require named arguments and for future
 feature expansion.}
+
+\item{autoresize}{If \code{TRUE}, the textarea will automatically resize to fit
+the input text.}
 
 \item{updateOn}{A character vector specifying when the input should be
 updated. Options are \code{"change"} (default) and \code{"blur"}. Use \code{"change"} to
@@ -104,6 +108,7 @@ Other input elements:
 \code{\link{sliderInput}()},
 \code{\link{submitButton}()},
 \code{\link{textInput}()},
+\code{\link{textSubmitInput}()},
 \code{\link{varSelectInput}()}
 }
 \concept{input elements}

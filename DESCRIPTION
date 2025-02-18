@@ -161,6 +161,7 @@ Collate:
     'input-submit.R'
     'input-text.R'
     'input-textarea.R'
+    'input-textsubmit.R'
     'input-utils.R'
     'insert-tab.R'
     'insert-ui.R'

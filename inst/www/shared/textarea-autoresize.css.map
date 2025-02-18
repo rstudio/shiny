@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../srcts/extras/textarea-autoresize.css"],
+  "sourcesContent": [".textarea-autoresize textarea.form-control {\n  padding: 5px 8px;\n  resize: none;\n  overflow-y: hidden;\n  height: auto;\n}\n"],
+  "mappings": ";AAAA,2DAEE,YACA,kBACA",
+  "names": []
+}

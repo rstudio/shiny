@@ -1,3 +1,4 @@
+import type { EventPriority } from "../../inputPolicies/inputPolicy";
 import type { RatePolicyModes } from "../../inputPolicies/inputRateDecorator";
 import type { BindScope } from "../../shiny/bind";
 
@@ -26,10 +27,16 @@ class InputBinding {
     el; // unused var
   }
 
-  // The callback method takes one argument, whose value is boolean. If true,
-  // allow deferred (debounce or throttle) sending depending on the value of
-  // getRatePolicy. If false, send value immediately. Default behavior is `false`
-  subscribe(el: HTMLElement, callback: (value: boolean) => void): void {
+  // Historically, the callback value could only be boolean. In this case:
+  //   * false: send value immediately (i.e., priority = "immediate")
+  //   * true: send value later (i.e., priority = "deferred")
+  //     * The input rate policy is also consulted on whether to debounce or throttle
+  // In recent versions, the value can also be "event", meaning that the
+  // value should be sent regardless of whether it has changed.
+  subscribe(
+    el: HTMLElement,
+    callback: (value: EventPriority | boolean) => void
+  ): void {
     // empty
     el; // unused var
     callback; // unused var

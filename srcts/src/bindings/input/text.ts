@@ -1,6 +1,7 @@
 import $ from "jquery";
 import { $escape, hasDefinedProperty, updateLabel } from "../../utils";
 
+import type { EventPriority } from "../../inputPolicies/inputPolicy";
 import { InputBinding } from "./inputBinding";
 
 // interface TextHTMLElement extends NameValueHTMLElement {
@@ -49,7 +50,10 @@ class TextInputBindingBase extends InputBinding {
     value;
   }
 
-  subscribe(el: TextHTMLElement, callback: (x: boolean) => void): void {
+  subscribe(
+    el: TextHTMLElement,
+    callback: (x: EventPriority | boolean) => void
+  ): void {
     const $el = $(el);
     const updateOn = $el.data("update-on") || "change";
 

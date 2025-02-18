@@ -8,6 +8,7 @@ import type {
   InputRateDecorator,
   InputValidateDecorator,
 } from "../inputPolicies";
+import type { InputPolicyOpts } from "../inputPolicies/inputPolicy";
 import { shinyAppBindOutput, shinyAppUnbindOutput } from "./initedMethods";
 import { sendImageSizeFns } from "./sendImageSize";
 
@@ -27,7 +28,7 @@ function valueChangeCallback(
   inputs: InputValidateDecorator,
   binding: InputBinding,
   el: HTMLElement,
-  allowDeferred: boolean
+  priority: InputPolicyOpts["priority"]
 ) {
   let id = binding.getId(el);
 
@@ -37,17 +38,7 @@ function valueChangeCallback(
 
     if (type) id = id + ":" + type;
 
-    const opts: {
-      priority: "deferred" | "immediate";
-      binding: typeof binding;
-      el: typeof el;
-    } = {
-      priority: allowDeferred ? "deferred" : "immediate",
-      binding: binding,
-      el: el,
-    };
-
-    inputs.setInput(id, value, opts);
+    inputs.setInput(id, value, { priority, binding, el });
   }
 }
 
@@ -272,8 +263,17 @@ function bindInputs(
         const thisBinding = binding;
         const thisEl = el;
 
-        return function (allowDeferred: boolean) {
-          valueChangeCallback(inputs, thisBinding, thisEl, allowDeferred);
+        // Historically speaking, this callback has only accepted a boolean value,
+        // but in recent versions it can also accept a input priority.
+        return function (priority: InputPolicyOpts["priority"] | boolean) {
+          const normalizedPriority =
+            typeof priority !== "boolean"
+              ? priority
+              : priority
+              ? "deferred"
+              : "immediate";
+
+          valueChangeCallback(inputs, thisBinding, thisEl, normalizedPriority);
         };
       })();
 

@@ -16,6 +16,7 @@ import { SliderInputBinding } from "./slider";
 import { BootstrapTabInputBinding } from "./tabinput";
 import { TextInputBinding } from "./text";
 import { TextareaInputBinding } from "./textarea";
+import { TextSubmitInputBinding } from "./textsubmit";
 
 // TODO-barret make this an init method
 function initInputBindings(): {
@@ -26,6 +27,7 @@ function initInputBindings(): {
 
   inputBindings.register(new TextInputBinding(), "shiny.textInput");
   inputBindings.register(new TextareaInputBinding(), "shiny.textareaInput");
+  inputBindings.register(new TextSubmitInputBinding(), "shiny.textSubmitInput");
   inputBindings.register(new PasswordInputBinding(), "shiny.passwordInput");
   inputBindings.register(new NumberInputBinding(), "shiny.numberInput");
   inputBindings.register(new CheckboxInputBinding(), "shiny.checkboxInput");

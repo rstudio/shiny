@@ -13,6 +13,9 @@ $shiny-input-panel-border:          $border-width solid var(--#{$prefix}border-c
 $shiny-input-panel-border-radius:   $border-radius !default;
 $shiny-text-output-border-radius:   $border-radius !default;
 
+$shiny-input-text-submit-border:        $border-width solid var(--#{$prefix}border-color, #{$border-color}) !default;
+$shiny-input-text-submit-border-radius: $border-radius !default;
+
 $notification-color:                var(--#{$prefix}emphasis-color, #{$body-emphasis-color}) !default;
 $notification-bg-color:             var(--#{$prefix}body-bg, #{$body-bg}) !default;
 $notification-border:               $border-width solid var(--#{$prefix}border-color, #{$border-color}) !default;

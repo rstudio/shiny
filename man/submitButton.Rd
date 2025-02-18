@@ -78,6 +78,7 @@ Other input elements:
 \code{\link{sliderInput}()},
 \code{\link{textAreaInput}()},
 \code{\link{textInput}()},
+\code{\link{textSubmitInput}()},
 \code{\link{varSelectInput}()}
 }
 \concept{input elements}

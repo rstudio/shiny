@@ -1,3 +1,4 @@
+import type { EventPriority } from "../../inputPolicies/inputPolicy";
 import { InputBinding } from "./inputBinding";
 type TextHTMLElement = HTMLInputElement;
 type TextReceiveMessageData = {
@@ -10,7 +11,7 @@ declare class TextInputBindingBase extends InputBinding {
     getId(el: TextHTMLElement): string;
     getValue(el: TextHTMLElement): unknown;
     setValue(el: TextHTMLElement, value: unknown): void;
-    subscribe(el: TextHTMLElement, callback: (x: boolean) => void): void;
+    subscribe(el: TextHTMLElement, callback: (x: EventPriority | boolean) => void): void;
     unsubscribe(el: TextHTMLElement): void;
     receiveMessage(el: TextHTMLElement, data: unknown): void;
     getState(el: TextHTMLElement): unknown;

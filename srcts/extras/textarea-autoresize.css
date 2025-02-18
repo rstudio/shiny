@@ -1,0 +1,6 @@
+.textarea-autoresize textarea.form-control {
+  padding: 5px 8px;
+  resize: none;
+  overflow-y: hidden;
+  height: auto;
+}

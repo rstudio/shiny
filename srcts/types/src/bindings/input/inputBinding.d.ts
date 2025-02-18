@@ -1,3 +1,4 @@
+import type { EventPriority } from "../../inputPolicies/inputPolicy";
 import type { RatePolicyModes } from "../../inputPolicies/inputRateDecorator";
 import type { BindScope } from "../../shiny/bind";
 declare class InputBinding {
@@ -6,7 +7,7 @@ declare class InputBinding {
     getId(el: HTMLElement): string;
     getType(el: HTMLElement): string | null;
     getValue(el: HTMLElement): any;
-    subscribe(el: HTMLElement, callback: (value: boolean) => void): void;
+    subscribe(el: HTMLElement, callback: (value: EventPriority | boolean) => void): void;
     unsubscribe(el: HTMLElement): void;
     receiveMessage(el: HTMLElement, data: unknown): Promise<void> | void;
     getState(el: HTMLElement): unknown;

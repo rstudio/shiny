@@ -17,6 +17,7 @@ build({
     "srcts/extras/shiny-autoreload.ts",
     "srcts/extras/shiny-showcase.ts",
     "srcts/extras/shiny-testmode.ts",
+    "srcts/extras/textarea-autoresize.ts",
   ],
   outdir: outDir,
 });
@@ -60,4 +61,9 @@ build({
   plugins: [sassPlugin()],
   bundle: false,
   metafile: true,
+});
+build({
+  ...sassOpts,
+  entryPoints: ["srcts/extras/textarea-autoresize.css"],
+  outfile: outDir + "textarea-autoresize.css",
 });

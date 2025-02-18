@@ -80,6 +80,49 @@ updateTextInput <- function(session = getDefaultReactiveDomain(), inputId, label
 updateTextAreaInput <- updateTextInput
 
 
+#' Change the value of a text submit input on the client
+#'
+#' @template update-input
+#' @inheritParams textSubmitInput
+#'
+#' @seealso [textSubmitInput()]
+#'
+#' @examples
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
+#'
+#'   ui <- fluidPage(
+#'    sliderInput("controller", "Controller", 0, 20, 10),
+#'    textSubmitInput("inText", "Input text"),
+#'    textSubmitInput("inText2", "Input text 2")
+#'   )
+#'
+#'   server <- function(input, output, session) {
+#'    observe({
+#'      # We'll use the input$controller variable multiple times, so save it as x
+#'      # for convenience.
+#'      x <- input$controller
+#'
+#'      # This will change the value of input$inText, based on x
+#'      updateTextSubmitInput(session, "inText", value = paste("New text", x))
+#'
+#'      # Can also set the label, this time for input$inText2
+#'      updateTextSubmitInput(
+#'        session, "inText2",
+#'        label = paste("New label", x),
+#'        value = paste("New text", x)
+#'       )
+#'     })
+#'   }
+#'
+#'   shinyApp(ui, server)
+#' }
+#'
+#' @export
+updateTextSubmitInput <- updateTextInput
+
+# TODO: updateTextSubmitInput() should probably be more sophisticated and allow for submit/focus?
+
 #' Change the value of a checkbox input on the client
 #'
 #' @template update-input

@@ -61,7 +61,7 @@ class NumberInputBinding extends TextInputBindingBase {
 
     updateLabel(data.label, getLabelNode(el));
 
-    $(el).trigger("change");
+    $(el).trigger("change", { fromServer: true });
   }
 
   getState(el: NumberHTMLElement): {

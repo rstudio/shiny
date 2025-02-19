@@ -61,21 +61,27 @@ class TextInputBindingBase extends InputBinding {
           callback(true);
         }
       );
+    } else if (updateOn === "blur") {
+      $el.on("blur.textInputBinding", function () {
+        callback(false);
+      });
     }
 
     $el.on(
       "change.textInputBinding",
       // event: Event
-      function () {
+      function (
+        event: JQuery.Event,
+        data: { fromServer: boolean } | undefined
+      ) {
+        if (updateOn === "blur") {
+          // When updating on blue, we only update on server-initiated changes
+          if (!data) return;
+          if (!data.fromServer) return;
+        }
         callback(false);
       }
     );
-
-    if (updateOn === "blur") {
-      $el.on("blur.textInputBinding", function () {
-        callback(false);
-      });
-    }
   }
   unsubscribe(el: TextHTMLElement): void {
     $(el).off(".textInputBinding");
@@ -129,7 +135,7 @@ class TextInputBinding extends TextInputBindingBase {
     if (hasDefinedProperty(data, "placeholder"))
       el.placeholder = data.placeholder;
 
-    $(el).trigger("change");
+    $(el).trigger("change", { fromServer: true });
   }
 }
 

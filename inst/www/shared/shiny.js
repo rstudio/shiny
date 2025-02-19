@@ -1462,18 +1462,23 @@
             callback(true);
           }
         );
-      }
-      $el.on(
-        "change.textInputBinding",
-        function() {
-          callback(false);
-        }
-      );
-      if (updateOn === "blur") {
+      } else if (updateOn === "blur") {
         $el.on("blur.textInputBinding", function() {
           callback(false);
         });
       }
+      $el.on(
+        "change.textInputBinding",
+        function(event, data) {
+          if (updateOn === "blur") {
+            if (!data)
+              return;
+            if (!data.fromServer)
+              return;
+          }
+          callback(false);
+        }
+      );
     }
     unsubscribe(el) {
       (0, import_jquery13.default)(el).off(".textInputBinding");
@@ -1515,7 +1520,7 @@
       updateLabel(data.label, getLabelNode3(el));
       if (hasDefinedProperty(data, "placeholder"))
         el.placeholder = data.placeholder;
-      (0, import_jquery13.default)(el).trigger("change");
+      (0, import_jquery13.default)(el).trigger("change", { fromServer: true });
     }
   };
 
@@ -1556,7 +1561,7 @@
       if (hasDefinedProperty(data, "step"))
         el.step = data.step ?? "";
       updateLabel(data.label, getLabelNode4(el));
-      (0, import_jquery14.default)(el).trigger("change");
+      (0, import_jquery14.default)(el).trigger("change", { fromServer: true });
     }
     getState(el) {
       return {

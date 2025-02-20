@@ -71,14 +71,8 @@
 #'   runApp(app)
 #' }
 #' @export
-shinyApp <- function(
-  ui,
-  server,
-  onStart = NULL,
-  options = list(),
-  uiPattern = "/",
-  enableBookmarking = NULL
-) {
+shinyApp <- function(ui, server, onStart=NULL, options=list(),
+                     uiPattern="/", enableBookmarking=NULL) {
   if (!is.function(server)) {
     stop("`server` must be a function", call. = FALSE)
   }
@@ -117,7 +111,7 @@ shinyApp <- function(
 #' @param appDir Path to directory that contains a Shiny app (i.e. a server.R
 #'   file and either ui.R or www/index.html)
 #' @export
-shinyAppDir <- function(appDir, options = list()) {
+shinyAppDir <- function(appDir, options=list()) {
   if (!utils::file_test('-d', appDir)) {
     rlang::abort(
       paste0("No Shiny application exists at the path \"", appDir, "\""),
@@ -144,7 +138,7 @@ shinyAppDir <- function(appDir, options = list()) {
 #' @rdname shinyApp
 #' @param appFile Path to a .R file containing a Shiny application
 #' @export
-shinyAppFile <- function(appFile, options = list()) {
+shinyAppFile <- function(appFile, options=list()) {
   appFile <- normalizePath(appFile, mustWork = TRUE)
   appDir <- dirname(appFile)
 
@@ -154,7 +148,7 @@ shinyAppFile <- function(appFile, options = list()) {
 # This reads in an app dir in the case that there's a server.R (and ui.R/www)
 # present, and returns a shiny.appobj.
 # appDir must be a normalized (absolute) path, not a relative one
-shinyAppDir_serverR <- function(appDir, options = list()) {
+shinyAppDir_serverR <- function(appDir, options=list()) {
   # Most of the complexity here comes from needing to hot-reload if the .R files
   # change on disk, or are created, or are removed.
 
@@ -171,10 +165,7 @@ shinyAppDir_serverR <- function(appDir, options = list()) {
   # uiHandlerSource is a function that returns an HTTP handler for serving up
   # ui.R as a webpage. The "cachedFuncWithFile" call makes sure that the closure
   # we're creating here only gets executed when ui.R's contents change.
-  uiHandlerSource <- cachedFuncWithFile(
-    appDir,
-    "ui.R",
-    case.sensitive = FALSE,
+  uiHandlerSource <- cachedFuncWithFile(appDir, "ui.R", case.sensitive = FALSE,
     function(uiR) {
       if (file.exists(uiR)) {
         # If ui.R contains a call to shinyUI (which sets .globals$ui), use that.
@@ -197,19 +188,14 @@ shinyAppDir_serverR <- function(appDir, options = list()) {
 
   wwwDir <- file.path.ci(appDir, "www")
   if (dirExists(wwwDir)) {
-    staticPaths <- list(
-      "/" = staticPath(wwwDir, indexhtml = FALSE, fallthrough = TRUE)
-    )
+    staticPaths <- list("/" = staticPath(wwwDir, indexhtml = FALSE, fallthrough = TRUE))
   } else {
     staticPaths <- list()
   }
 
   fallbackWWWDir <- system_file("www-dir", package = "shiny")
 
-  serverSource <- cachedFuncWithFile(
-    appDir,
-    "server.R",
-    case.sensitive = FALSE,
+  serverSource <- cachedFuncWithFile(appDir, "server.R", case.sensitive = FALSE,
     function(serverR) {
       # If server.R contains a call to shinyServer (which sets .globals$server),
       # use that. If not, then take the last expression that's returned from
@@ -234,10 +220,8 @@ shinyAppDir_serverR <- function(appDir, options = list()) {
       # This is what we normally expect; run the server function
       return(serverFunction)
     } else {
-      stop(
-        "server.R returned an object of unexpected type: ",
-        typeof(serverFunction)
-      )
+      stop("server.R returned an object of unexpected type: ",
+        typeof(serverFunction))
     }
   }
 
@@ -250,8 +234,8 @@ shinyAppDir_serverR <- function(appDir, options = list()) {
     setwd(appDir)
     # TODO: we should support hot reloading on global.R and R/*.R changes.
     if (getOption("shiny.autoload.r", TRUE)) {
-      loadSupport(appDir, renv = sharedEnv, globalrenv = globalenv())
-    } else {
+      loadSupport(appDir, renv=sharedEnv, globalrenv=globalenv())
+    }  else {
       if (file.exists(file.path.ci(appDir, "global.R")))
         sourceUTF8(file.path.ci(appDir, "global.R"))
     }
@@ -303,14 +287,9 @@ shinyAppDir_serverR <- function(appDir, options = list()) {
 # The return value is a function that halts monitoring when called.
 initAutoReloadMonitor <- function(dir) {
   if (!get_devmode_option("shiny.autoreload", FALSE)) {
-    return(function() {
-    })
+    return(function(){})
   }
 
-  filePattern <- getOption(
-    "shiny.autoreload.pattern",
-    ".*\\.(r|html?|js|css|png|jpe?g|gif)$"
-  )
   filePattern <- getOption(
     "shiny.autoreload.pattern",
     ".*\\.(r|html?|js|css|png|jpe?g|gif)$"
@@ -367,47 +346,34 @@ initAutoReloadMonitor <- function(dir) {
 #' @param globalrenv The environment in which `global.R` should be evaluated. If
 #'   `NULL`, `global.R` will not be evaluated at all.
 #' @export
-loadSupport <- function(
-  appDir = NULL,
-  renv = new.env(parent = globalenv()),
-  globalrenv = globalenv()
-) {
+loadSupport <- function(appDir=NULL, renv=new.env(parent=globalenv()), globalrenv=globalenv()){
   require(shiny)
 
   if (is.null(appDir)) {
     appDir <- findEnclosingApp(".")
   }
 
-  if (!is.null(globalrenv)) {
+  if (!is.null(globalrenv)){
     # Evaluate global.R, if it exists.
     globalPath <- file.path.ci(appDir, "global.R")
-    if (file.exists(globalPath)) {
+    if (file.exists(globalPath)){
       withr::with_dir(appDir, {
-        sourceUTF8(basename(globalPath), envir = globalrenv)
+        sourceUTF8(basename(globalPath), envir=globalrenv)
       })
     }
   }
 
+
   helpersDir <- file.path(appDir, "R")
 
-  disabled <- list.files(
-    helpersDir,
-    pattern = "^_disable_autoload\\.r$",
-    recursive = FALSE,
-    ignore.case = TRUE
-  )
+  disabled <- list.files(helpersDir, pattern="^_disable_autoload\\.r$", recursive=FALSE, ignore.case=TRUE)
   if (length(disabled) > 0) {
     return(invisible(renv))
   }
 
   warn_if_app_dir_is_package(appDir)
 
-  helpers <- list.files(
-    helpersDir,
-    pattern = "\\.[rR]$",
-    recursive = FALSE,
-    full.names = TRUE
-  )
+  helpers <- list.files(helpersDir, pattern="\\.[rR]$", recursive=FALSE, full.names=TRUE)
   # Ensure files in R/ are sorted according to the 'C' locale before sourcing.
   # This convention is based on the default for packages. For details, see:
   # https://cran.r-project.org/doc/manuals/r-release/R-exts.html#The-DESCRIPTION-file
@@ -415,7 +381,7 @@ loadSupport <- function(
   helpers <- normalizePath(helpers)
 
   withr::with_dir(appDir, {
-    lapply(helpers, sourceUTF8, envir = renv)
+    lapply(helpers, sourceUTF8, envir=renv)
   })
 
   invisible(renv)
@@ -430,7 +396,7 @@ warn_if_app_dir_is_package <- function(appDir) {
 
     has_desc_pkg <-
       file.exists(descFile) &&
-        identical(as.character(read.dcf(descFile, fields = "Type")), "Package")
+      identical(as.character(read.dcf(descFile, fields = "Type")), "Package")
   }
 
   if (has_namespace || has_desc_pkg) {
@@ -445,16 +411,14 @@ warn_if_app_dir_is_package <- function(appDir) {
 # This reads in an app dir for a single-file application (e.g. app.R), and
 # returns a shiny.appobj.
 # appDir must be a normalized (absolute) path, not a relative one
-shinyAppDir_appR <- function(fileName, appDir, options = list()) {
+shinyAppDir_appR <- function(fileName, appDir, options=list())
+{
   fullpath <- file.path.ci(appDir, fileName)
 
   # This sources app.R and caches the content. When appObj() is called but
   # app.R hasn't changed, it won't re-source the file. But if called and
   # app.R has changed, it'll re-source the file and return the result.
-  appObj <- cachedFuncWithFile(
-    appDir,
-    fileName,
-    case.sensitive = FALSE,
+  appObj <- cachedFuncWithFile(appDir, fileName, case.sensitive = FALSE,
     function(appR) {
       wasDir <- setwd(appDir)
       on.exit(setwd(wasDir))
@@ -465,7 +429,7 @@ shinyAppDir_appR <- function(fileName, appDir, options = list()) {
         # Create a child env which contains all the helpers and will be the shared parent
         # of the ui.R and server.R load.
         sharedEnv <- new.env(parent = globalenv())
-        loadSupport(appDir, renv = sharedEnv, globalrenv = NULL)
+        loadSupport(appDir, renv=sharedEnv, globalrenv=NULL)
       } else {
         sharedEnv <- globalenv()
       }
@@ -500,9 +464,7 @@ shinyAppDir_appR <- function(fileName, appDir, options = list()) {
     #
     # The call to staticPath normalizes the path, so that if the working dir
     # later changes, it will continue to point to the right place.
-    staticPaths <- list(
-      "/" = staticPath(wwwDir, indexhtml = FALSE, fallthrough = TRUE)
-    )
+    staticPaths <- list("/" = staticPath(wwwDir, indexhtml = FALSE, fallthrough = TRUE))
   } else {
     staticPaths <- list()
   }
@@ -555,6 +517,7 @@ shinyAppDir_appR <- function(fileName, appDir, options = list()) {
   )
 }
 
+
 #' Shiny App object
 #'
 #' Internal methods for the `shiny.appobj` S3 class.
@@ -585,7 +548,9 @@ as.shiny.appobj.list <- function(x) {
 #' @rdname shiny.appobj
 #' @export
 as.shiny.appobj.character <- function(x) {
-  if (identical(tolower(tools::file_ext(x)), "r")) shinyAppFile(x) else
+  if (identical(tolower(tools::file_ext(x)), "r"))
+    shinyAppFile(x)
+  else
     shinyAppDir(x)
 }
 
@@ -639,10 +604,8 @@ as.tags.shiny.appobj <- function(x, ...) {
 # and let the client load them when convenient. (See the initIframes function in
 # init_shiny.js.)
 deferredIFrame <- function(path, width, height) {
-  tags$iframe(
-    "data-deferred-src" = path,
-    width = width,
-    height = height,
+  tags$iframe("data-deferred-src" = path,
+    width = width, height = height,
     class = "shiny-frame shiny-frame-deferred"
   )
 }

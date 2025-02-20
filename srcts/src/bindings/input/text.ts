@@ -51,9 +51,9 @@ class TextInputBindingBase extends InputBinding {
 
   subscribe(el: TextHTMLElement, callback: (x: boolean) => void): void {
     const $el = $(el);
-    const updateOn = $el.data("update-on") || "input";
+    const updateOn = $el.data("update-on") || "change";
 
-    if (updateOn === "input") {
+    if (updateOn === "change") {
       $el.on(
         "keyup.textInputBinding input.textInputBinding",
         // event: Event

@@ -11,7 +11,7 @@ passwordInput(
   width = NULL,
   placeholder = NULL,
   ...,
-  updateOn = c("input", "blur")
+  updateOn = c("change", "blur")
 )
 }
 \arguments{
@@ -29,9 +29,10 @@ be entered into the control. Internet Explorer 8 and 9 do not support this
 option.}
 
 \item{updateOn}{A character vector specifying when the input should be
-updated. Options are \code{"input"} (default) and \code{"blur"}. If \code{"blur"}, then
-the input value will be updated when the text input loses focus, or when
-Enter is pressed.}
+updated. Options are \code{"change"} (default) and \code{"blur"}. Use \code{"change"} to
+update the input immediately whenever the value changes. Use \code{"blur"}to
+delay the input update until the input loses focus (the user moves away
+from the input), or when Enter is pressed.}
 }
 \value{
 A text input control that can be added to a UI definition.

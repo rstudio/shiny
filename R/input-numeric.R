@@ -30,7 +30,7 @@
 #'
 #' @export
 numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA,
-  width = NULL, ..., updateOn = c("input", "blur")) {
+  width = NULL, ..., updateOn = c("change", "blur")) {
   updateOn <- match.arg(updateOn)
 
   value <- restoreInput(id = inputId, default = value)

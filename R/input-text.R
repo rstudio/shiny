@@ -11,9 +11,10 @@
 #'   be entered into the control. Internet Explorer 8 and 9 do not support this
 #'   option.
 #' @param updateOn A character vector specifying when the input should be
-#'   updated. Options are `"input"` (default) and `"blur"`. If `"blur"`, then
-#'   the input value will be updated when the text input loses focus, or when
-#'   Enter is pressed.
+#'   updated. Options are `"change"` (default) and `"blur"`. Use `"change"` to
+#'   update the input immediately whenever the value changes. Use `"blur"`to
+#'   delay the input update until the input loses focus (the user moves away
+#'   from the input), or when Enter is pressed.
 #' @return A text input control that can be added to a UI definition.
 #'
 #' @family input elements
@@ -39,7 +40,7 @@
 #'
 #' @export
 textInput <- function(inputId, label, value = "", width = NULL,
-  placeholder = NULL, ..., updateOn = c("input", "blur")) {
+  placeholder = NULL, ..., updateOn = c("change", "blur")) {
 
   updateOn <- match.arg(updateOn)
 

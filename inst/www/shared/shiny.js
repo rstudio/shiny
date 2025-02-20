@@ -1454,8 +1454,8 @@
     }
     subscribe(el, callback) {
       const $el = (0, import_jquery13.default)(el);
-      const updateOn = $el.data("update-on") || "input";
-      if (updateOn === "input") {
+      const updateOn = $el.data("update-on") || "change";
+      if (updateOn === "change") {
         $el.on(
           "keyup.textInputBinding input.textInputBinding",
           function() {

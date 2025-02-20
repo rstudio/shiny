@@ -43,7 +43,7 @@
 #' @export
 textAreaInput <- function(inputId, label, value = "", width = NULL, height = NULL,
   cols = NULL, rows = NULL, placeholder = NULL, resize = NULL, ...,
-  updateOn = c("input", "blur")) {
+  updateOn = c("change", "blur")) {
 
   value <- restoreInput(id = inputId, default = value)
 

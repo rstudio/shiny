@@ -31,7 +31,7 @@
 #' }
 #' @export
 passwordInput <- function(inputId, label, value = "", width = NULL,
-                          placeholder = NULL, ..., updateOn = c("input", "blur")) {
+                          placeholder = NULL, ..., updateOn = c("change", "blur")) {
   updateOn <- match.arg(updateOn)
 
   div(class = "form-group shiny-input-container",

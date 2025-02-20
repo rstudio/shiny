@@ -49,6 +49,9 @@ option.}
 \code{"both"}, \code{"none"}, \code{"vertical"}, and \code{"horizontal"}. The default, \code{NULL},
 will use the client browser's default setting for resizing textareas.}
 
+\item{...}{Ignored, included to require named arguments and for future
+feature expansion.}
+
 \item{updateOn}{A character vector specifying when the input should be
 updated. Options are \code{"change"} (default) and \code{"blur"}. Use \code{"change"} to
 update the input immediately whenever the value changes. Use \code{"blur"}to

@@ -10,6 +10,8 @@
 #' @param placeholder A character string giving the user a hint as to what can
 #'   be entered into the control. Internet Explorer 8 and 9 do not support this
 #'   option.
+#' @param ... Ignored, included to require named arguments and for future
+#'   feature expansion.
 #' @param updateOn A character vector specifying when the input should be
 #'   updated. Options are `"change"` (default) and `"blur"`. Use `"change"` to
 #'   update the input immediately whenever the value changes. Use `"blur"`to
@@ -42,6 +44,7 @@
 #' @export
 textInput <- function(inputId, label, value = "", width = NULL,
   placeholder = NULL, ..., updateOn = c("change", "blur")) {
+  rlang::check_dots_empty()
 
   updateOn <- match.arg(updateOn)
 

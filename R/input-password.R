@@ -32,6 +32,7 @@
 #' @export
 passwordInput <- function(inputId, label, value = "", width = NULL,
                           placeholder = NULL, ..., updateOn = c("change", "blur")) {
+  rlang::check_dots_empty()
   updateOn <- match.arg(updateOn)
 
   div(class = "form-group shiny-input-container",

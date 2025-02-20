@@ -28,6 +28,9 @@ see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
 be entered into the control. Internet Explorer 8 and 9 do not support this
 option.}
 
+\item{...}{Ignored, included to require named arguments and for future
+feature expansion.}
+
 \item{updateOn}{A character vector specifying when the input should be
 updated. Options are \code{"change"} (default) and \code{"blur"}. Use \code{"change"} to
 update the input immediately whenever the value changes. Use \code{"blur"}to

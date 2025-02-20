@@ -45,6 +45,7 @@ textAreaInput <- function(inputId, label, value = "", width = NULL, height = NUL
   cols = NULL, rows = NULL, placeholder = NULL, resize = NULL, ...,
   updateOn = c("change", "blur")) {
   rlang::check_dots_empty()
+  updateOn <- rlang::arg_match(updateOn)
 
   value <- restoreInput(id = inputId, default = value)
 

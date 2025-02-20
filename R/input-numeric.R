@@ -32,7 +32,7 @@
 numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA,
   width = NULL, ..., updateOn = c("change", "blur")) {
   rlang::check_dots_empty()
-  updateOn <- match.arg(updateOn)
+  updateOn <- rlang::arg_match(updateOn)
 
   value <- restoreInput(id = inputId, default = value)
 

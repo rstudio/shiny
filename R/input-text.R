@@ -43,10 +43,10 @@
 #'
 #' @export
 textInput <- function(inputId, label, value = "", width = NULL,
-  placeholder = NULL, ..., updateOn = c("change", "blur")) {
+  placeholder = NULL, ..., updateOn = c("change", "blur")) {    
+  
   rlang::check_dots_empty()
-
-  updateOn <- match.arg(updateOn)
+  updateOn <- rlang::arg_match(updateOn)
 
   value <- restoreInput(id = inputId, default = value)
 

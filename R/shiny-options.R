@@ -65,16 +65,19 @@ getShinyOption <- function(name, default = NULL) {
 #'   changes are detected, all connected Shiny sessions are reloaded. This
 #'   allows for fast feedback loops when tweaking Shiny UI.
 #'
-#'   Since monitoring for changes is expensive (we simply poll for last
-#'   modified times), this feature is intended only for development.
+#'   Monitoring for changes is no longer expensive, thanks to the \pkg{watcher}
+#'   package, but this feature is still intended only for development.
 #'
 #'   You can customize the file patterns Shiny will monitor by setting the
 #'   shiny.autoreload.pattern option. For example, to monitor only ui.R:
 #'   `options(shiny.autoreload.pattern = glob2rx("ui.R"))`
 #'
-#'   The default polling interval is 500 milliseconds. You can change this
-#'   by setting e.g. `options(shiny.autoreload.interval = 2000)` (every
-#'   two seconds).}
+#'   With \pkg{watcher}, Shiny no longer polls watched files for changes;
+#'   instead Shiny is notified whenever any files change. Files changes are
+#'   batched into groups of changes within a period of latency that can be
+#'   customized by setting e.g. `options(shiny.autoreload.interval = 2000)`.
+#'   This value is passed to the `latency`` argument of [watcher::watch()] (as
+#'   seconds). The default value is 250ms.}
 #' \item{shiny.deprecation.messages (defaults to `TRUE`)}{This controls whether messages for
 #'   deprecated functions in Shiny will be printed. See
 #'   [shinyDeprecated()] for more information.}

@@ -314,7 +314,11 @@ initAutoReloadMonitor <- function(dir) {
     autoReloadCallbacks$invoke()
   }
 
-  watcher <- watcher::watcher(dir, check_for_update, latency = 0.25)
+  # [garrick, 2025-02-20] Shiny <= v1.10.0 used `invalidateLater()` with an
+  # autoreload.interval in ms. {watcher} instead uses a latency parameter in
+  # seconds, which serves a similar purpose and that I'm keeping for backcompat.
+  latency <- getOption("shiny.autoreload.interval", 250) / 1000
+  watcher <- watcher::watcher(dir, check_for_update, latency = latency)
   watcher$start()
   onStop(watcher$stop)
 

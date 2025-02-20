@@ -1476,18 +1476,12 @@
           callback(false);
         });
       }
-      $el.on(
-        "change.textInputBinding",
-        function(event, data) {
-          if (updateOn === "blur") {
-            if (!data)
-              return;
-            if (!data.fromServer)
-              return;
-          }
-          callback(false);
+      $el.on("change.textInputBinding", function() {
+        if (updateOn === "blur" && $el.is(":focus")) {
+          return;
         }
-      );
+        callback(false);
+      });
     }
     unsubscribe(el) {
       (0, import_jquery13.default)(el).off(".textInputBinding");
@@ -1529,7 +1523,7 @@
       updateLabel(data.label, getLabelNode3(el));
       if (hasDefinedProperty(data, "placeholder"))
         el.placeholder = data.placeholder;
-      (0, import_jquery13.default)(el).trigger("change", { fromServer: true });
+      (0, import_jquery13.default)(el).trigger("change");
     }
   };
 
@@ -1570,7 +1564,7 @@
       if (hasDefinedProperty(data, "step"))
         el.step = data.step ?? "";
       updateLabel(data.label, getLabelNode4(el));
-      (0, import_jquery14.default)(el).trigger("change", { fromServer: true });
+      (0, import_jquery14.default)(el).trigger("change");
     }
     getState(el) {
       return {

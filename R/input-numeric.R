@@ -29,24 +29,36 @@
 #' A numeric vector of length 1.
 #'
 #' @export
-numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA,
-  width = NULL, ..., updateOn = c("change", "blur")) {
+numericInput <- function(
+  inputId,
+  label,
+  value,
+  min = NA,
+  max = NA,
+  step = NA,
+  width = NULL,
+  ...,
+  updateOn = c("change", "blur")
+) {
   rlang::check_dots_empty()
   updateOn <- rlang::arg_match(updateOn)
 
   value <- restoreInput(id = inputId, default = value)
 
   # build input tag
-  inputTag <- tags$input(id = inputId, type = "number", class="shiny-input-number form-control",
-                         value = formatNoSci(value), `data-update-on` = updateOn)
-  if (!is.na(min))
-    inputTag$attribs$min = min
-  if (!is.na(max))
-    inputTag$attribs$max = max
-  if (!is.na(step))
-    inputTag$attribs$step = step
+  inputTag <- tags$input(
+    id = inputId,
+    type = "number",
+    class = "shiny-input-number form-control",
+    value = formatNoSci(value),
+    `data-update-on` = updateOn
+  )
+  if (!is.na(min)) inputTag$attribs$min = min
+  if (!is.na(max)) inputTag$attribs$max = max
+  if (!is.na(step)) inputTag$attribs$step = step
 
-  div(class = "form-group shiny-input-container",
+  div(
+    class = "form-group shiny-input-container",
     style = css(width = validateCssUnit(width)),
     shinyInputLabel(inputId, label),
     inputTag

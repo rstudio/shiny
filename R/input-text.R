@@ -42,18 +42,31 @@
 #' unless `value` is provided.
 #'
 #' @export
-textInput <- function(inputId, label, value = "", width = NULL,
-  placeholder = NULL, ..., updateOn = c("change", "blur")) {    
-  
+textInput <- function(
+  inputId,
+  label,
+  value = "",
+  width = NULL,
+  placeholder = NULL,
+  ...,
+  updateOn = c("change", "blur")
+) {
   rlang::check_dots_empty()
   updateOn <- rlang::arg_match(updateOn)
 
   value <- restoreInput(id = inputId, default = value)
 
-  div(class = "form-group shiny-input-container",
+  div(
+    class = "form-group shiny-input-container",
     style = css(width = validateCssUnit(width)),
     shinyInputLabel(inputId, label),
-    tags$input(id = inputId, type="text", class="shiny-input-text form-control", value=value,
-      placeholder = placeholder, `data-update-on` = updateOn)
+    tags$input(
+      id = inputId,
+      type = "text",
+      class = "shiny-input-text form-control",
+      value = value,
+      placeholder = placeholder,
+      `data-update-on` = updateOn
+    )
   )
 }

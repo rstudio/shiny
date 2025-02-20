@@ -30,15 +30,29 @@
 #' shinyApp(ui, server)
 #' }
 #' @export
-passwordInput <- function(inputId, label, value = "", width = NULL,
-                          placeholder = NULL, ..., updateOn = c("change", "blur")) {
+passwordInput <- function(
+  inputId,
+  label,
+  value = "",
+  width = NULL,
+  placeholder = NULL,
+  ...,
+  updateOn = c("change", "blur")
+) {
   rlang::check_dots_empty()
   updateOn <- rlang::arg_match(updateOn)
 
-  div(class = "form-group shiny-input-container",
+  div(
+    class = "form-group shiny-input-container",
     style = css(width = validateCssUnit(width)),
     shinyInputLabel(inputId, label),
-    tags$input(id = inputId, type="password", class="shiny-input-password form-control", value=value,
-               placeholder = placeholder, `data-update-on` = updateOn)
+    tags$input(
+      id = inputId,
+      type = "password",
+      class = "shiny-input-password form-control",
+      value = value,
+      placeholder = placeholder,
+      `data-update-on` = updateOn
+    )
   )
 }

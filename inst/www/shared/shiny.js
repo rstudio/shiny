@@ -1466,6 +1466,15 @@
         $el.on("blur.textInputBinding", function() {
           callback(false);
         });
+        $el.on("keydown.textInputBinding", function(event) {
+          if (event.key !== "Enter")
+            return;
+          if ($el.is("textarea")) {
+            if (!(event.ctrlKey || event.metaKey))
+              return;
+          }
+          callback(false);
+        });
       }
       $el.on(
         "change.textInputBinding",

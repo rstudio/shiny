@@ -65,6 +65,13 @@ class TextInputBindingBase extends InputBinding {
       $el.on("blur.textInputBinding", function () {
         callback(false);
       });
+      $el.on("keydown.textInputBinding", function (event: JQuery.Event) {
+        if (event.key !== "Enter") return;
+        if ($el.is("textarea")) {
+          if (!(event.ctrlKey || event.metaKey)) return;
+        }
+        callback(false);
+      });
     }
 
     $el.on(
@@ -75,7 +82,7 @@ class TextInputBindingBase extends InputBinding {
         data: { fromServer: boolean } | undefined
       ) {
         if (updateOn === "blur") {
-          // When updating on blue, we only update on server-initiated changes
+          // When updating on blur, we only update on server-initiated changes
           if (!data) return;
           if (!data.fromServer) return;
         }

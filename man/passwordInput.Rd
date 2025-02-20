@@ -36,7 +36,7 @@ updated. Options are \code{"change"} (default) and \code{"blur"}. Use \code{"cha
 update the input immediately whenever the value changes. Use \code{"blur"}to
 delay the input update until the input loses focus (the user moves away
 from the input), or when Enter is pressed (or Cmd/Ctrl + Enter for
-\code{\link[=inputTextArea]{inputTextArea()}}).}
+\code{\link[=textAreaInput]{textAreaInput()}}).}
 }
 \value{
 A text input control that can be added to a UI definition.

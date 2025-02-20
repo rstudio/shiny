@@ -310,8 +310,8 @@ initAutoReloadMonitor <- function(dir) {
 
     max_mtime <- max(file.info(paths)$mtime, na.rm = TRUE)
 
+    cachedAutoReloadMostRecentChange(max(0, max_mtime))
     autoReloadCallbacks$invoke()
-    cachedAutoReloadLastChanged(max(0, max_mtime))
   }
 
   watcher <- watcher::watcher(dir, check_for_update, latency = 0.25)

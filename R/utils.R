@@ -770,11 +770,22 @@ formatNoSci <- function(x) {
   format(x, scientific = FALSE, digits = 15)
 }
 
-cachedAutoReloadLastChanged <- local({
+
+# This function when called without arguments returns the mtime of the most
+# recently changed file watched by the autoreload process. When given `value`, a
+# (possibly) vector of file modification times, it stores the max time seen so
+# far. This value is used by `cachedFuncWithFile()` when autoreload is enabled
+# to reload app/ui/server files when watched supporting files are changed.
+cachedAutoReloadMostRecentChange <- local({
   last_update <- 0
+
+  max_updated <- function(value) {
+    max(suppressWarnings(max(value, last_update, na.rm = TRUE)), 0)
+  }
+
   function(value = NULL) {
     if (!is.null(value) && !is.na(value) && length(value)) {
-      last_update <<- value
+      last_update <<- max_updated(value)
       return(invisible(value))
     }
     last_update
@@ -785,19 +796,21 @@ cachedAutoReloadLastChanged <- local({
 # subsequent calls, unless the given file's mtime changes.
 cachedFuncWithFile <- function(dir, file, func, case.sensitive = FALSE) {
   dir <- normalizePath(dir, mustWork = TRUE)
-  mtime <- NA
+
   value <- NULL
-  mtime_autoreload <- 0
+  last_mtime_file <- NA
+  last_mtime_autoreload <- 0
+
   function(...) {
     fname <- if (case.sensitive) file.path(dir, file) else
       file.path.ci(dir, file)
 
     now <- file.info(fname)$mtime
-    autoreload <- mtime_autoreload < cachedAutoReloadLastChanged()
-    if (autoreload || !identical(mtime, now)) {
+    autoreload <- last_mtime_autoreload < cachedAutoReloadMostRecentChange()
+    if (autoreload || !identical(last_mtime_file, now)) {
       value <<- func(fname, ...)
-      mtime <<- now
-      mtime_autoreload <- cachedAutoReloadLastChanged()
+      last_mtime_file <<- now
+      last_mtime_autoreload <<- cachedAutoReloadMostRecentChange()
     }
     value
   }

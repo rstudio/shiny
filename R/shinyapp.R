@@ -310,8 +310,8 @@ initAutoReloadMonitor <- function(dir) {
     } else if (!identical(lastValue, times)) {
       # We've changed!
       lastValue <<- times
+      cachedAutoReloadMostRecentChange(times)
       autoReloadCallbacks$invoke()
-      cachedAutoReloadLastChanged(max(0, max(times, na.rm = TRUE)))
     }
 
     invalidateLater(getOption("shiny.autoreload.interval", 500))

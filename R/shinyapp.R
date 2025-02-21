@@ -308,9 +308,7 @@ initAutoReloadMonitor <- function(dir) {
       return()
     }
 
-    max_mtime <- max(file.info(paths)$mtime, na.rm = TRUE)
-
-    cachedAutoReloadMostRecentChange(max(0, max_mtime))
+    cachedAutoReloadLastChanged$set()
     autoReloadCallbacks$invoke()
   }
 

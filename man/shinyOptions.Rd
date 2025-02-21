@@ -48,15 +48,20 @@ Monitoring for changes is no longer expensive, thanks to the \pkg{watcher}
 package, but this feature is still intended only for development.
 
 You can customize the file patterns Shiny will monitor by setting the
-shiny.autoreload.pattern option. For example, to monitor only ui.R:
-\code{options(shiny.autoreload.pattern = glob2rx("ui.R"))}
+shiny.autoreload.pattern option. For example, to monitor only \code{ui.R}:
+\code{options(shiny.autoreload.pattern = glob2rx("ui.R"))}.
 
-Shiny no longer polls watched files for changes. Instead, using
-\pkg{watcher}, Shiny is notified of file changes as they occur. These
-changes are batched together within a customizable latency period. You can
-adjust this period by setting \code{options(shiny.autoreload.interval = 2000)}
-(in milliseconds). This value converted to seconds and passed to the
-\code{latency} argument of \code{\link[watcher:watch]{watcher::watch()}}. The default latency is 250ms.}
+Note that because \code{global.R} is often used for app startup code, changes in
+\code{global.R} are not applied when using the \code{ui.R} with \code{server.R} app file
+pattern.
+
+As mentioned above, Shiny no longer polls watched files for changes.
+Instead, using \pkg{watcher}, Shiny is notified of file changes as they
+occur. These changes are batched together within a customizable latency
+period. You can adjust this period by setting
+\code{options(shiny.autoreload.interval = 2000)} (in milliseconds). This value
+converted to seconds and passed to the \code{latency} argument of
+\code{\link[watcher:watcher]{watcher::watcher()}}. The default latency is 250ms.}
 \item{shiny.deprecation.messages (defaults to \code{TRUE})}{This controls whether messages for
 deprecated functions in Shiny will be printed. See
 \code{\link[=shinyDeprecated]{shinyDeprecated()}} for more information.}

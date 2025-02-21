@@ -69,15 +69,20 @@ getShinyOption <- function(name, default = NULL) {
 #'   package, but this feature is still intended only for development.
 #'
 #'   You can customize the file patterns Shiny will monitor by setting the
-#'   shiny.autoreload.pattern option. For example, to monitor only ui.R:
-#'   `options(shiny.autoreload.pattern = glob2rx("ui.R"))`
+#'   shiny.autoreload.pattern option. For example, to monitor only `ui.R`:
+#'   `options(shiny.autoreload.pattern = glob2rx("ui.R"))`. 
+#' 
+#'   Note that because `global.R` is often used for app startup code, changes in
+#'   `global.R` are not applied when using the `ui.R` with `server.R` app file
+#'   pattern.
 #'
-#'   Shiny no longer polls watched files for changes. Instead, using
-#'   \pkg{watcher}, Shiny is notified of file changes as they occur. These
-#'   changes are batched together within a customizable latency period. You can
-#'   adjust this period by setting `options(shiny.autoreload.interval = 2000)`
-#'   (in milliseconds). This value converted to seconds and passed to the
-#'   `latency` argument of [watcher::watch()]. The default latency is 250ms.}
+#'   As mentioned above, Shiny no longer polls watched files for changes.
+#'   Instead, using \pkg{watcher}, Shiny is notified of file changes as they
+#'   occur. These changes are batched together within a customizable latency
+#'   period. You can adjust this period by setting
+#'   `options(shiny.autoreload.interval = 2000)` (in milliseconds). This value
+#'   converted to seconds and passed to the `latency` argument of
+#'   [watcher::watcher()]. The default latency is 250ms.}
 #' \item{shiny.deprecation.messages (defaults to `TRUE`)}{This controls whether messages for
 #'   deprecated functions in Shiny will be printed. See
 #'   [shinyDeprecated()] for more information.}

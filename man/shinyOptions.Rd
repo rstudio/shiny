@@ -51,11 +51,84 @@ You can customize the file patterns Shiny will monitor by setting the
 shiny.autoreload.pattern option. For example, to monitor only ui.R:
 \code{options(shiny.autoreload.pattern = glob2rx("ui.R"))}
 
-With \pkg{watcher}, Shiny no longer polls watched files for changes;
-instead Shiny is notified whenever any files change. Files changes are
-batched into groups of changes within a period of latency that can be
-customized by setting e.g. \code{options(shiny.autoreload.interval = 2000)}.
-This value is passed to the \verb{latency`` argument of [watcher::watch()] (as seconds). The default value is 250ms.\} \\item\{shiny.deprecation.messages (defaults to }TRUE\verb{)\}\{This controls whether messages for deprecated functions in Shiny will be printed. See [shinyDeprecated()] for more information.\} \\item\{shiny.error (defaults to }NULL\verb{)\}\{This can be a function which is called when an error occurs. For example, }options(shiny.error=recover)\verb{will result a the debugger prompt when an error occurs.\} \\item\{shiny.fullstacktrace (defaults to}FALSE\verb{)\}\{Controls whether "pretty" (}FALSE\verb{) or full stack traces (}TRUE\verb{) are dumped to the console when errors occur during Shiny app execution. Pretty stack traces attempt to only show user-supplied code, but this pruning can't always be done 100\% correctly.\} \\item\{shiny.host (defaults to }"127.0.0.1"\verb{)\}\{The IP address that Shiny should listen on. See [runApp()] for more information.\} \\item\{shiny.jquery.version (defaults to }3\verb{)\}\{The major version of jQuery to use. Currently only values of }3\code{or}1\verb{are supported. If}1\verb{, then jQuery 1.12.4 is used. If }3\verb{, then jQuery }r version_jquery\verb{is used.\} \\item\{shiny.json.digits (defaults to}I(16)\verb{)\}\{Max number of digits to use when converting numbers to JSON format to send to the client web browser. Use [I()] to specify significant digits. Use }NA\verb{for max precision.\} \\item\{shiny.launch.browser (defaults to}interactive()\verb{)\}\{A boolean which controls the default behavior when an app is run. See [runApp()] for more information.\} \\item\{shiny.mathjax.url (defaults to }"https://mathjax.rstudio.com/latest/MathJax.js"\verb{)\}\{ The URL that should be used to load MathJax, via [withMathJax()].\} \\item\{shiny.mathjax.config (defaults to }"config=TeX-AMS-MML_HTMLorMML"\verb{)\}\{The querystring used to load MathJax, via [withMathJax()].\} \\item\{shiny.maxRequestSize (defaults to 5MB)\}\{This is a number which specifies the maximum web request size, which serves as a size limit for file uploads.\} \\item\{shiny.minified (defaults to }TRUE\verb{)\}\{By default Whether or not to include Shiny's JavaScript as a minified (}shiny.min.js\verb{) or un-minified (}shiny.js\verb{) file. The un-minified version is larger, but can be helpful for development and debugging.\} \\item\{shiny.port (defaults to a random open port)\}\{A port number that Shiny will listen on. See [runApp()] for more information.\} \\item\{shiny.reactlog (defaults to }FALSE\verb{)\}\{If }TRUE\verb{, enable logging of reactive events, which can be viewed later with the [reactlogShow()] function. This incurs a substantial performance penalty and should not be used in production.\} \\item\{shiny.sanitize.errors (defaults to }FALSE\verb{)\}\{If }TRUE\verb{, then normal errors (i.e. errors not wrapped in }safeError\verb{) won't show up in the app; a simple generic error message is printed instead (the error and stack trace printed to the console remain unchanged). If you want to sanitize errors in general, but you DO want a particular error }e\verb{to get displayed to the user, then set this option to}TRUE\verb{and use}stop(safeError(e))\verb{for errors you want the user to see.\} \\item\{shiny.stacktraceoffset (defaults to}TRUE\verb{)\}\{If }TRUE\verb{, then Shiny's printed stack traces will display srcrefs one line above their usual location. This is an arguably more intuitive arrangement for casual R users, as the name of a function appears next to the srcref where it is defined, rather than where it is currently being called from.\} \\item\{shiny.suppressMissingContextError (defaults to }FALSE\verb{)\}\{Normally, invoking a reactive outside of a reactive context (or [isolate()]) results in an error. If this is }TRUE\verb{, don't error in these cases. This should only be used for debugging or demonstrations of reactivity at the console.\} \\item\{shiny.testmode (defaults to }FALSE\verb{)\}\{If }TRUE\verb{, then various features for testing Shiny applications are enabled.\} \\item\{shiny.snapshotsortc (defaults to }FALSE\verb{)\}\{If }TRUE\verb{, test snapshot keys for \pkg{shinytest} will be sorted consistently using the C locale.  Snapshots retrieved by \pkg{shinytest2} will always sort using the C locale.\} \\item\{shiny.trace (defaults to }FALSE\verb{)\}\{Print messages sent between the R server and the web browser client to the R console. This is useful for debugging. Possible values are }"send"\verb{(only print messages sent to the client),}"recv"\verb{(only print messages received by the server),}TRUE\verb{(print all messages), or}FALSE\verb{(default; don't print any of these messages).\} \\item\{shiny.autoload.r (defaults to}TRUE\verb{)\}\{If }TRUE\verb{, then the R/ of a shiny app will automatically be sourced.\} \\item\{shiny.useragg (defaults to }TRUE\verb{)\}\{Set to }FALSE\verb{to prevent PNG rendering via the ragg package. See [plotPNG()] for more information.\} \\item\{shiny.usecairo (defaults to}TRUE\verb{)\}\{Set to }FALSE\verb{to prevent PNG rendering via the Cairo package. See [plotPNG()] for more information.\} \\item\{shiny.devmode (defaults to}NULL\verb{)\}\{Option to enable Shiny Developer Mode. When set, different default }getOption(key)` values will be returned. See \code{\link[=devmode]{devmode()}} for more details.}
+Shiny no longer polls watched files for changes. Instead, using
+\pkg{watcher}, Shiny is notified of file changes as they occur. These
+changes are batched together within a customizable latency period. You can
+adjust this period by setting \code{options(shiny.autoreload.interval = 2000)}
+(in milliseconds). This value converted to seconds and passed to the
+\code{latency} argument of \code{\link[watcher:watch]{watcher::watch()}}. The default latency is 250ms.}
+\item{shiny.deprecation.messages (defaults to \code{TRUE})}{This controls whether messages for
+deprecated functions in Shiny will be printed. See
+\code{\link[=shinyDeprecated]{shinyDeprecated()}} for more information.}
+\item{shiny.error (defaults to \code{NULL})}{This can be a function which is called when an error
+occurs. For example, \code{options(shiny.error=recover)} will result a
+the debugger prompt when an error occurs.}
+\item{shiny.fullstacktrace (defaults to \code{FALSE})}{Controls whether "pretty" (\code{FALSE}) or full
+stack traces (\code{TRUE}) are dumped to the console when errors occur during Shiny app execution.
+Pretty stack traces attempt to only show user-supplied code, but this pruning can't always
+be done 100\% correctly.}
+\item{shiny.host (defaults to \code{"127.0.0.1"})}{The IP address that Shiny should listen on. See
+\code{\link[=runApp]{runApp()}} for more information.}
+\item{shiny.jquery.version (defaults to \code{3})}{The major version of jQuery to use.
+Currently only values of \code{3} or \code{1} are supported. If \code{1}, then jQuery 1.12.4 is used. If \code{3},
+then jQuery 3.6.0 is used.}
+\item{shiny.json.digits (defaults to \code{I(16)})}{Max number of digits to use when converting
+numbers to JSON format to send to the client web browser. Use \code{\link[=I]{I()}} to specify significant digits.
+Use \code{NA} for max precision.}
+\item{shiny.launch.browser (defaults to \code{interactive()})}{A boolean which controls the default behavior
+when an app is run. See \code{\link[=runApp]{runApp()}} for more information.}
+\item{shiny.mathjax.url (defaults to \code{"https://mathjax.rstudio.com/latest/MathJax.js"})}{
+The URL that should be used to load MathJax, via \code{\link[=withMathJax]{withMathJax()}}.}
+\item{shiny.mathjax.config (defaults to \code{"config=TeX-AMS-MML_HTMLorMML"})}{The querystring
+used to load MathJax, via \code{\link[=withMathJax]{withMathJax()}}.}
+\item{shiny.maxRequestSize (defaults to 5MB)}{This is a number which specifies the maximum
+web request size, which serves as a size limit for file uploads.}
+\item{shiny.minified (defaults to \code{TRUE})}{By default
+Whether or not to include Shiny's JavaScript as a minified (\code{shiny.min.js})
+or un-minified (\code{shiny.js}) file. The un-minified version is larger,
+but can be helpful for development and debugging.}
+\item{shiny.port (defaults to a random open port)}{A port number that Shiny will listen on. See
+\code{\link[=runApp]{runApp()}} for more information.}
+\item{shiny.reactlog (defaults to \code{FALSE})}{If \code{TRUE}, enable logging of reactive events,
+which can be viewed later with the \code{\link[=reactlogShow]{reactlogShow()}} function.
+This incurs a substantial performance penalty and should not be used in
+production.}
+\item{shiny.sanitize.errors (defaults to \code{FALSE})}{If \code{TRUE}, then normal errors (i.e.
+errors not wrapped in \code{safeError}) won't show up in the app; a simple
+generic error message is printed instead (the error and stack trace printed
+to the console remain unchanged). If you want to sanitize errors in general, but you DO want a
+particular error \code{e} to get displayed to the user, then set this option
+to \code{TRUE} and use \code{stop(safeError(e))} for errors you want the
+user to see.}
+\item{shiny.stacktraceoffset (defaults to \code{TRUE})}{If \code{TRUE}, then Shiny's printed stack
+traces will display srcrefs one line above their usual location. This is
+an arguably more intuitive arrangement for casual R users, as the name
+of a function appears next to the srcref where it is defined, rather than
+where it is currently being called from.}
+\item{shiny.suppressMissingContextError (defaults to \code{FALSE})}{Normally, invoking a reactive
+outside of a reactive context (or \code{\link[=isolate]{isolate()}}) results in
+an error. If this is \code{TRUE}, don't error in these cases. This
+should only be used for debugging or demonstrations of reactivity at the
+console.}
+\item{shiny.testmode (defaults to \code{FALSE})}{If \code{TRUE}, then various features for testing Shiny
+applications are enabled.}
+\item{shiny.snapshotsortc (defaults to \code{FALSE})}{If \code{TRUE}, test snapshot keys
+for \pkg{shinytest} will be sorted consistently using the C locale.  Snapshots
+retrieved by \pkg{shinytest2} will always sort using the C locale.}
+\item{shiny.trace (defaults to \code{FALSE})}{Print messages sent between the R server and the web
+browser client to the R console. This is useful for debugging. Possible
+values are \code{"send"} (only print messages sent to the client),
+\code{"recv"} (only print messages received by the server), \code{TRUE}
+(print all messages), or \code{FALSE} (default; don't print any of these
+messages).}
+\item{shiny.autoload.r (defaults to \code{TRUE})}{If \code{TRUE}, then the R/
+of a shiny app will automatically be sourced.}
+\item{shiny.useragg (defaults to \code{TRUE})}{Set to \code{FALSE} to prevent PNG rendering via the
+ragg package. See \code{\link[=plotPNG]{plotPNG()}} for more information.}
+\item{shiny.usecairo (defaults to \code{TRUE})}{Set to \code{FALSE} to prevent PNG rendering via the
+Cairo package. See \code{\link[=plotPNG]{plotPNG()}} for more information.}
+\item{shiny.devmode (defaults to \code{NULL})}{Option to enable Shiny Developer Mode. When set,
+different default \code{getOption(key)} values will be returned. See \code{\link[=devmode]{devmode()}} for more details.}
 }
 }
 

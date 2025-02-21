@@ -72,12 +72,12 @@ getShinyOption <- function(name, default = NULL) {
 #'   shiny.autoreload.pattern option. For example, to monitor only ui.R:
 #'   `options(shiny.autoreload.pattern = glob2rx("ui.R"))`
 #'
-#'   With \pkg{watcher}, Shiny no longer polls watched files for changes;
-#'   instead Shiny is notified whenever any files change. Files changes are
-#'   batched into groups of changes within a period of latency that can be
-#'   customized by setting e.g. `options(shiny.autoreload.interval = 2000)`.
-#'   This value is passed to the `latency`` argument of [watcher::watch()] (as
-#'   seconds). The default value is 250ms.}
+#'   Shiny no longer polls watched files for changes. Instead, using
+#'   \pkg{watcher}, Shiny is notified of file changes as they occur. These
+#'   changes are batched together within a customizable latency period. You can
+#'   adjust this period by setting `options(shiny.autoreload.interval = 2000)`
+#'   (in milliseconds). This value converted to seconds and passed to the
+#'   `latency` argument of [watcher::watch()]. The default latency is 250ms.}
 #' \item{shiny.deprecation.messages (defaults to `TRUE`)}{This controls whether messages for
 #'   deprecated functions in Shiny will be printed. See
 #'   [shinyDeprecated()] for more information.}

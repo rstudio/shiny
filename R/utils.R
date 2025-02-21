@@ -770,26 +770,21 @@ formatNoSci <- function(x) {
   format(x, scientific = FALSE, digits = 15)
 }
 
-
-# This function when called without arguments returns the mtime of the most
-# recently changed file watched by the autoreload process. When given `value`, a
-# (possibly) vector of file modification times, it stores the max time seen so
-# far. This value is used by `cachedFuncWithFile()` when autoreload is enabled
-# to reload app/ui/server files when watched supporting files are changed.
-cachedAutoReloadMostRecentChange <- local({
+# A simple getter/setting to track the last time the auto-reload process
+# updated. This value is used by `cachedFuncWithFile()` when auto-reload is
+# enabled to reload app/ui/server files when watched supporting files change.
+cachedAutoReloadLastChanged <- local({
   last_update <- 0
 
-  max_updated <- function(value) {
-    max(suppressWarnings(max(value, last_update, na.rm = TRUE)), 0)
-  }
-
-  function(value = NULL) {
-    if (!is.null(value) && !is.na(value) && length(value)) {
-      last_update <<- max_updated(value)
-      return(invisible(value))
+  list(
+    set = function() {
+      last_update <<- as.integer(Sys.time())
+      invisible(last_update)
+    },
+    get = function() {
+      last_update
     }
-    last_update
-  }
+  )
 })
 
 # Returns a function that calls the given func and caches the result for
@@ -799,18 +794,18 @@ cachedFuncWithFile <- function(dir, file, func, case.sensitive = FALSE) {
 
   value <- NULL
   last_mtime_file <- NA
-  last_mtime_autoreload <- 0
+  last_autoreload <- 0
 
   function(...) {
     fname <- if (case.sensitive) file.path(dir, file) else
       file.path.ci(dir, file)
 
     now <- file.info(fname)$mtime
-    autoreload <- last_mtime_autoreload < cachedAutoReloadMostRecentChange()
+    autoreload <- last_autoreload < cachedAutoReloadLastChanged$get()
     if (autoreload || !identical(last_mtime_file, now)) {
       value <<- func(fname, ...)
       last_mtime_file <<- now
-      last_mtime_autoreload <<- cachedAutoReloadMostRecentChange()
+      last_autoreload <<- cachedAutoReloadLastChanged$get()
     }
     value
   }

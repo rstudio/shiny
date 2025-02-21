@@ -296,30 +296,31 @@ initAutoReloadMonitor <- function(dir) {
   )
 
   lastValue <- NULL
-  observeLabel <- paste0("File Auto-Reload - '", basename(dir), "'")
-  obs <- observe(label = observeLabel, {
-    files <- sort_c(
-      list.files(dir, pattern = filePattern, recursive = TRUE, ignore.case = TRUE)
+  check_for_update <- function(paths) {
+    paths <- grep(
+      filePattern,
+      paths,
+      ignore.case = TRUE,
+      value = TRUE
     )
-    times <- file.info(files)$mtime
-    names(times) <- files
 
-    if (is.null(lastValue)) {
-      # First run
-      lastValue <<- times
-    } else if (!identical(lastValue, times)) {
-      # We've changed!
-      lastValue <<- times
-      cachedAutoReloadMostRecentChange(times)
-      autoReloadCallbacks$invoke()
+    if (length(paths) == 0) {
+      return()
     }
 
-    invalidateLater(getOption("shiny.autoreload.interval", 500))
-  })
+    cachedAutoReloadLastChanged$set()
+    autoReloadCallbacks$invoke()
+  }
 
-  onStop(obs$destroy)
+  # [garrick, 2025-02-20] Shiny <= v1.10.0 used `invalidateLater()` with an
+  # autoreload.interval in ms. {watcher} instead uses a latency parameter in
+  # seconds, which serves a similar purpose and that I'm keeping for backcompat.
+  latency <- getOption("shiny.autoreload.interval", 250) / 1000
+  watcher <- watcher::watcher(dir, check_for_update, latency = latency)
+  watcher$start()
+  onStop(watcher$stop)
 
-  obs$destroy
+  watcher
 }
 
 #' Load an app's supporting R files

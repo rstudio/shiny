@@ -62,7 +62,9 @@
 <span>  cols <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  rows <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  placeholder <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  resize <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  resize <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  updateOn <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"change"</span>, <span class="st">"blur"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -116,6 +118,20 @@ option.</p></dd>
 <dd><p>Which directions the textarea box can be resized. Can be one of
 <code>"both"</code>, <code>"none"</code>, <code>"vertical"</code>, and <code>"horizontal"</code>. The default, <code>NULL</code>,
 will use the client browser's default setting for resizing textareas.</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Ignored, included to require named arguments and for future
+feature expansion.</p></dd>
+
+
+<dt id="arg-updateon">updateOn<a class="anchor" aria-label="anchor" href="#arg-updateon"></a></dt>
+<dd><p>A character vector specifying when the input should be
+updated. Options are <code>"change"</code> (default) and <code>"blur"</code>. Use <code>"change"</code> to
+update the input immediately whenever the value changes. Use <code>"blur"</code>to
+delay the input update until the input loses focus (the user moves away
+from the input), or when Enter is pressed (or Cmd/Ctrl + Enter for
+<code>textAreaInput()</code>).</p></dd>
 
 </dl></div>
     <div id="value">

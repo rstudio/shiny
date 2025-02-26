@@ -60,7 +60,9 @@
 <span>  min <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>  max <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>  step <span class="op">=</span> <span class="cn">NA</span>,</span>
-<span>  width <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  width <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  updateOn <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"change"</span>, <span class="st">"blur"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -95,6 +97,20 @@
 <dt id="arg-width">width<a class="anchor" aria-label="anchor" href="#arg-width"></a></dt>
 <dd><p>The width of the input, e.g. <code>'400px'</code>, or <code>'100%'</code>;
 see <code><a href="https://rstudio.github.io/htmltools/reference/validateCssUnit.html" class="external-link">validateCssUnit()</a></code>.</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Ignored, included to require named arguments and for future
+feature expansion.</p></dd>
+
+
+<dt id="arg-updateon">updateOn<a class="anchor" aria-label="anchor" href="#arg-updateon"></a></dt>
+<dd><p>A character vector specifying when the input should be
+updated. Options are <code>"change"</code> (default) and <code>"blur"</code>. Use <code>"change"</code> to
+update the input immediately whenever the value changes. Use <code>"blur"</code>to
+delay the input update until the input loses focus (the user moves away
+from the input), or when Enter is pressed (or Cmd/Ctrl + Enter for
+<code><a href="textAreaInput.html">textAreaInput()</a></code>).</p></dd>
 
 </dl></div>
     <div id="value">

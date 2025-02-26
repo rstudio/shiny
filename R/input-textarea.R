@@ -41,8 +41,21 @@
 #' unless `value` is provided.
 #'
 #' @export
-textAreaInput <- function(inputId, label, value = "", width = NULL, height = NULL,
-  cols = NULL, rows = NULL, placeholder = NULL, resize = NULL) {
+textAreaInput <- function(
+  inputId,
+  label,
+  value = "",
+  width = NULL,
+  height = NULL,
+  cols = NULL,
+  rows = NULL,
+  placeholder = NULL,
+  resize = NULL,
+  ...,
+  updateOn = c("change", "blur")
+) {
+  rlang::check_dots_empty()
+  updateOn <- rlang::arg_match(updateOn)
 
   value <- restoreInput(id = inputId, default = value)
 
@@ -57,7 +70,8 @@ textAreaInput <- function(inputId, label, value = "", width = NULL, height = NUL
     resize = resize
   )
 
-  div(class = "form-group shiny-input-container",
+  div(
+    class = "form-group shiny-input-container",
     shinyInputLabel(inputId, label),
     style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
     tags$textarea(
@@ -67,6 +81,7 @@ textAreaInput <- function(inputId, label, value = "", width = NULL, height = NUL
       style = style,
       rows = rows,
       cols = cols,
+      `data-update-on` = updateOn,
       value
     )
   )

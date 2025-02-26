@@ -50,21 +50,38 @@ class TextInputBindingBase extends InputBinding {
   }
 
   subscribe(el: TextHTMLElement, callback: (x: boolean) => void): void {
-    $(el).on(
-      "keyup.textInputBinding input.textInputBinding",
-      // event: Event
-      function () {
-        callback(true);
-      }
-    );
-    $(el).on(
-      "change.textInputBinding",
-      // event: Event
-      function () {
+    const $el = $(el);
+    const updateOn = $el.data("update-on") || "change";
+
+    if (updateOn === "change") {
+      $el.on(
+        "keyup.textInputBinding input.textInputBinding",
+        // event: Event
+        function () {
+          callback(true);
+        }
+      );
+    } else if (updateOn === "blur") {
+      $el.on("blur.textInputBinding", function () {
         callback(false);
+      });
+      $el.on("keydown.textInputBinding", function (event: JQuery.Event) {
+        if (event.key !== "Enter") return;
+        if ($el.is("textarea")) {
+          if (!(event.ctrlKey || event.metaKey)) return;
+        }
+        callback(false);
+      });
+    }
+
+    $el.on("change.textInputBinding", function () {
+      if (updateOn === "blur" && $el.is(":focus")) {
+        return;
       }
-    );
+      callback(false);
+    });
   }
+
   unsubscribe(el: TextHTMLElement): void {
     $(el).off(".textInputBinding");
   }

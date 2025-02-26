@@ -1453,18 +1453,35 @@
       value;
     }
     subscribe(el, callback) {
-      (0, import_jquery13.default)(el).on(
-        "keyup.textInputBinding input.textInputBinding",
-        function() {
-          callback(true);
-        }
-      );
-      (0, import_jquery13.default)(el).on(
-        "change.textInputBinding",
-        function() {
+      const $el = (0, import_jquery13.default)(el);
+      const updateOn = $el.data("update-on") || "change";
+      if (updateOn === "change") {
+        $el.on(
+          "keyup.textInputBinding input.textInputBinding",
+          function() {
+            callback(true);
+          }
+        );
+      } else if (updateOn === "blur") {
+        $el.on("blur.textInputBinding", function() {
           callback(false);
+        });
+        $el.on("keydown.textInputBinding", function(event) {
+          if (event.key !== "Enter")
+            return;
+          if ($el.is("textarea")) {
+            if (!(event.ctrlKey || event.metaKey))
+              return;
+          }
+          callback(false);
+        });
+      }
+      $el.on("change.textInputBinding", function() {
+        if (updateOn === "blur" && $el.is(":focus")) {
+          return;
         }
-      );
+        callback(false);
+      });
     }
     unsubscribe(el) {
       (0, import_jquery13.default)(el).off(".textInputBinding");

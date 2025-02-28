@@ -51,10 +51,6 @@ You can customize the file patterns Shiny will monitor by setting the
 shiny.autoreload.pattern option. For example, to monitor only \code{ui.R}:
 \code{options(shiny.autoreload.pattern = glob2rx("ui.R"))}.
 
-Note that because \code{global.R} is often used for app startup code, changes in
-\code{global.R} are not applied when using the \code{ui.R} with \code{server.R} app file
-pattern.
-
 As mentioned above, Shiny no longer polls watched files for changes.
 Instead, using \pkg{watcher}, Shiny is notified of file changes as they
 occur. These changes are batched together within a customizable latency

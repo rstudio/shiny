@@ -71,10 +71,6 @@ getShinyOption <- function(name, default = NULL) {
 #'   You can customize the file patterns Shiny will monitor by setting the
 #'   shiny.autoreload.pattern option. For example, to monitor only `ui.R`:
 #'   `options(shiny.autoreload.pattern = glob2rx("ui.R"))`. 
-#' 
-#'   Note that because `global.R` is often used for app startup code, changes in
-#'   `global.R` are not applied when using the `ui.R` with `server.R` app file
-#'   pattern.
 #'
 #'   As mentioned above, Shiny no longer polls watched files for changes.
 #'   Instead, using \pkg{watcher}, Shiny is notified of file changes as they

@@ -162,11 +162,27 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
     sharedEnv <- globalenv()
   }
 
+  autoload_support <- local({
+    autoload_last_loaded <- -1
+    function() {
+      # To enable hot-reloading of support files, this function is called
+      # whenever the UI or Server func source is updated. To avoid loading
+      # support files 2x, we follow the last cache update trigger timestamp.
+      if (!getOption("shiny.autoload.r", TRUE)) return()
+      if (autoload_last_loaded == cachedAutoReloadLastChanged$get()) return()
+
+      loadSupport(appDir, renv = sharedEnv, globalrenv = globalenv())
+
+      autoload_last_loaded <<- cachedAutoReloadLastChanged$get()
+    }
+  })
+
   # uiHandlerSource is a function that returns an HTTP handler for serving up
   # ui.R as a webpage. The "cachedFuncWithFile" call makes sure that the closure
   # we're creating here only gets executed when ui.R's contents change.
   uiHandlerSource <- cachedFuncWithFile(appDir, "ui.R", case.sensitive = FALSE,
     function(uiR) {
+      autoload_support()
       if (file.exists(uiR)) {
         # If ui.R contains a call to shinyUI (which sets .globals$ui), use that.
         # If not, then take the last expression that's returned from ui.R.
@@ -197,6 +213,7 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
 
   serverSource <- cachedFuncWithFile(appDir, "server.R", case.sensitive = FALSE,
     function(serverR) {
+      autoload_support()
       # If server.R contains a call to shinyServer (which sets .globals$server),
       # use that. If not, then take the last expression that's returned from
       # server.R.
@@ -232,10 +249,9 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
   onStart <- function() {
     oldwd <<- getwd()
     setwd(appDir)
-    # TODO: we should support hot reloading on global.R and R/*.R changes.
     if (getOption("shiny.autoload.r", TRUE)) {
-      loadSupport(appDir, renv=sharedEnv, globalrenv=globalenv())
-    }  else {
+      autoload_support()
+    } else {
       if (file.exists(file.path.ci(appDir, "global.R")))
         sourceUTF8(file.path.ci(appDir, "global.R"))
     }

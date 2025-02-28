@@ -162,18 +162,20 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
     sharedEnv <- globalenv()
   }
 
+  # To enable hot-reloading of support files, this function is called
+  # whenever the UI or Server func source is updated. To avoid loading
+  # support files 2x, we follow the last cache update trigger timestamp.
   autoload_support <- local({
     autoload_last_loaded <- -1
     function() {
-      # To enable hot-reloading of support files, this function is called
-      # whenever the UI or Server func source is updated. To avoid loading
-      # support files 2x, we follow the last cache update trigger timestamp.
-      if (!getOption("shiny.autoload.r", TRUE)) return()
-      if (autoload_last_loaded == cachedAutoReloadLastChanged$get()) return()
+      if (!isTRUE(getOption("shiny.autoload.r", TRUE))) return()
+      
+      last_cache_trigger <- cachedAutoReloadLastChanged$get()
+      if (identical(autoload_last_loaded, last_cache_trigger)) return()
 
       loadSupport(appDir, renv = sharedEnv, globalrenv = globalenv())
 
-      autoload_last_loaded <<- cachedAutoReloadLastChanged$get()
+      autoload_last_loaded <<- last_cache_trigger
     }
   })
 

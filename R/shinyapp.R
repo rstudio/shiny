@@ -441,8 +441,6 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
       wasDir <- setwd(appDir)
       on.exit(setwd(wasDir))
 
-      # TODO: we should support hot reloading on R/*.R changes.
-      # In an upcoming version of shiny, this option will go away.
       if (getOption("shiny.autoload.r", TRUE)) {
         # Create a child env which contains all the helpers and will be the shared parent
         # of the ui.R and server.R load.

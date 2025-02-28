@@ -809,6 +809,13 @@ renderUI <- function(expr, env = parent.frame(), quoted = FALSE,
 #'
 #' shinyApp(ui, server)
 #' }
+#'
+#' @seealso
+#' * The download handler, like other outputs, is suspended (disabled) by
+#'   default for download buttons and links that are hidden. Use 
+#'   [outputOptions()] to control this behavior, e.g. to set 
+#'   `suspendWhenHidden = FALSE` if the download is initiated by 
+#'   programmatically clicking on the download button using JavaScript.
 #' @export
 downloadHandler <- function(filename, content, contentType=NULL, outputArgs=list()) {
   renderFunc <- function(shinysession, name, ...) {

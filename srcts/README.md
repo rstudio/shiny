@@ -1,14 +1,22 @@
 # Using Shiny TypeScript Definitions
 
-When developing TypeScript projects that use `window.Shiny`, we recommend installing the Shiny TypeScript definitions to your package. To install the latest stable definitions, call
+When developing TypeScript projects that use `window.Shiny`, we recommend installing the Shiny TypeScript definitions to your package. To install the latest stable definitions, run one of the following (depending on if you're using `npm` or `yarn`):
 
 ```bash
-yarn add https://github.com/rstudio/shiny\#v1.7.0
+npm install https://github.com/rstudio/shiny\#v1.10.0 --save-dev
+# or
+yarn add https://github.com/rstudio/shiny\#v1.10.0 --dev
 ```
 
-, matching the GitHub tag to your current the Shiny CRAN release (ex: `v1.7.0`).  If you are asked to select a version of `@types/jquery`, please select the closest matching version.
+, matching the GitHub tag to your current the Shiny CRAN release (ex: `v1.10.0`).  If you are asked to select a version of `@types/jquery`, please select the closest matching version.
 
-This will provide a global type definition of `Shiny`, let your IDE know that `window.Shiny` is of type `Shiny`, and declare a globally available variable `Shiny` within your project. You **should not** need to import anything. Similar to `jQuery`, it should _Just Work_<sup>TM</sup>.
+This will provide a global type definition of `window.Shiny`. In your code, you can access the Shiny object via `window.Shiny` or just `Shiny`. However, note that if you are using TypeScript, it will be OK with `window.Shiny` but it will flag uses of `Shiny` (without the `window.` prefix), because TypeScript won't know that it's a global variable. We consider it better practice to use `window.Shiny` instead of `Shiny`, but if you want TypeScript to know that `Shiny` is available as a global variable, you can add the following to a TypeScript file in your code base.
+
+```ts
+ declare global {
+  const Shiny: ShinyClass;
+}
+```
 
 When loading your compiled file, it should be loaded after `shiny.js` is loaded. If you are using an `htmlDependency()` to add your code to the page, your script will automatically be loaded after has been loaded.
 
@@ -186,7 +194,7 @@ Both JavaScript files will produce a sourcemap (`**.js.map`) that the browser wi
 
 ### Exported types
 
-`./extras/globalShiny.ts` contains global declarations to define `window.Shiny`, a globally available `Shiny` variable, and a globally available `Shiny` type. This file is in a parallel folder to `./src` to avoid `Shiny` from being globally accessable within the source code. However, this file is the default type definition when the Type definitions are installed by external developers.
+`./extras/globalShiny.ts` contains global declarations to define `window.Shiny`, a globally available `Shiny` variable, and a globally available `ShinyClass` type. This file is in a parallel folder to `./src` to avoid `Shiny` from being globally accessable within the source code. However, this file is the default type definition when the Type definitions are installed by external developers.
 
 ### GitHub Actions
 

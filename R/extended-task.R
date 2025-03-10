@@ -194,6 +194,23 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
         # default case (initial, cancelled)
         req(FALSE)
       )
+    },
+    #' @description
+    #' Attempts to cancel the current `ExtendedTask` invocation. Only supported
+    #' for tasks created using \CRANpkg{mirai}.
+    #'
+    #' Returns one of the following values:
+    #'
+    #' * `TRUE`: A cancellation request was successfully sent for this
+    #'   `ExtendedTask`.
+    #' * `FALSE`: The `ExtendedTask` has already completed or was previously
+    #'   cancelled.
+    cancel = function() {
+      if (inherits(private$task, c("mirai", "mirai_map"))) {
+        mirai::stop_mirai(private$task)
+      } else {
+        warning("Only mirai ExtendedTasks support cancellation", immediate. = TRUE)
+      }
     }
   ),
   private = list(
@@ -203,6 +220,7 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
     rv_value = NULL,
     rv_error = NULL,
     invocation_queue = NULL,
+    task = NULL,
 
     do_invoke = function(args) {
       private$rv_status("running")
@@ -216,6 +234,7 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
           # call to invoke() always returns immediately?
           result <- do.call(private$func, args)
           p <- promises::as.promise(result)
+          private$task <- result
         })
       }, error = function(e) {
         private$on_error(e)

@@ -102,6 +102,7 @@ shinyApp(ui, server)
 \item \href{#method-ExtendedTask-invoke}{\code{ExtendedTask$invoke()}}
 \item \href{#method-ExtendedTask-status}{\code{ExtendedTask$status()}}
 \item \href{#method-ExtendedTask-result}{\code{ExtendedTask$result()}}
+\item \href{#method-ExtendedTask-cancel}{\code{ExtendedTask$cancel()}}
 }
 }
 \if{html}{\out{<hr>}}
@@ -212,6 +213,25 @@ Note that the \code{result()} method is generally not meant to be used with
 invalidation will be ignored.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{ExtendedTask$result()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ExtendedTask-cancel"></a>}}
+\if{latex}{\out{\hypertarget{method-ExtendedTask-cancel}{}}}
+\subsection{Method \code{cancel()}}{
+Attempts to cancel the current \code{ExtendedTask} invocation. Only supported
+for tasks created using \CRANpkg{mirai}.
+
+Returns one of the following values:
+\itemize{
+\item \code{TRUE}: A cancellation request was successfully sent for this
+\code{ExtendedTask}.
+\item \code{FALSE}: The \code{ExtendedTask} has already completed or was previously
+cancelled.
+}
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ExtendedTask$cancel()}\if{html}{\out{</div>}}
 }
 
 }

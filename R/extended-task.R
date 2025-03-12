@@ -41,12 +41,13 @@
 #'   is, a function that quickly returns a promise) and allows even that very
 #'   session to immediately unblock and carry on with other user interactions.
 #'
-#' @examplesIf rlang::is_interactive() && rlang::is_installed("future")
-#'
+#' @examplesIf rlang::is_interactive() && rlang::is_installed("mirai")
 #' library(shiny)
 #' library(bslib)
-#' library(future)
-#' plan(multisession)
+#' library(mirai)
+#'
+#' daemons(1)
+#' onStop(function() daemons(0))
 #'
 #' ui <- page_fluid(
 #'   titlePanel("Extended Task Demo"),
@@ -55,18 +56,18 @@
 #'     "that takes a while to perform."
 #'   ),
 #'   input_task_button("recalculate", "Recalculate"),
+#'   actionButton("cancel", "Cancel"),
 #'   p(textOutput("result"))
 #' )
 #'
 #' server <- function(input, output) {
 #'   rand_task <- ExtendedTask$new(function() {
-#'     future(
+#'     mirai(
 #'       {
 #'         # Slow operation goes here
 #'         Sys.sleep(2)
 #'         sample(1:100, 1)
-#'       },
-#'       seed = TRUE
+#'       }
 #'     )
 #'   })
 #'
@@ -76,8 +77,21 @@
 #'   bind_task_button(rand_task, "recalculate")
 #'
 #'   observeEvent(input$recalculate, {
-#'     # Invoke the extended in an observer
+#'     # Invoke the task in an observer.
 #'     rand_task$invoke()
+#'   })
+#'
+#'   observeEvent(input$cancel, {
+#'     # For cancelling the task if required.
+#'     rand_task$cancel()
+#'   })
+#'
+#'   observe({
+#'     # Disable cancel button when task is not running.
+#'     updateActionButton(
+#'       inputId = "cancel",
+#'       disabled = rand_task$status() != "running"
+#'     )
 #'   })
 #'
 #'   output$result <- renderText({
@@ -194,6 +208,23 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
         # default case (initial, cancelled)
         req(FALSE)
       )
+    },
+    #' @description
+    #' Attempts to cancel the current `ExtendedTask` invocation. Only supported
+    #' for tasks created using \CRANpkg{mirai}.
+    #'
+    #' Returns one of the following values:
+    #'
+    #' * `TRUE`: A cancellation request was successfully sent for this
+    #'   `ExtendedTask`.
+    #' * `FALSE`: The `ExtendedTask` has already completed or was previously
+    #'   cancelled.
+    cancel = function() {
+      if (inherits(private$task, c("mirai", "mirai_map"))) {
+        mirai::stop_mirai(private$task)
+      } else {
+        warning("Only mirai ExtendedTasks support cancellation", immediate. = TRUE)
+      }
     }
   ),
   private = list(
@@ -203,6 +234,7 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
     rv_value = NULL,
     rv_error = NULL,
     invocation_queue = NULL,
+    task = NULL,
 
     do_invoke = function(args) {
       private$rv_status("running")
@@ -216,6 +248,7 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
           # call to invoke() always returns immediately?
           result <- do.call(private$func, args)
           p <- promises::as.promise(result)
+          private$task <- result
         })
       }, error = function(e) {
         private$on_error(e)

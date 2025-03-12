@@ -46,12 +46,13 @@ session to immediately unblock and carry on with other user interactions.
 }
 
 \examples{
-\dontshow{if (rlang::is_interactive() && rlang::is_installed("future")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
-
+\dontshow{if (rlang::is_interactive() && rlang::is_installed("mirai")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(shiny)
 library(bslib)
-library(future)
-plan(multisession)
+library(mirai)
+
+daemons(1)
+onStop(function() daemons(0))
 
 ui <- page_fluid(
   titlePanel("Extended Task Demo"),
@@ -60,18 +61,18 @@ ui <- page_fluid(
     "that takes a while to perform."
   ),
   input_task_button("recalculate", "Recalculate"),
+  actionButton("cancel", "Cancel"),
   p(textOutput("result"))
 )
 
 server <- function(input, output) {
   rand_task <- ExtendedTask$new(function() {
-    future(
+    mirai(
       {
         # Slow operation goes here
         Sys.sleep(2)
         sample(1:100, 1)
-      },
-      seed = TRUE
+      }
     )
   })
 
@@ -81,8 +82,21 @@ server <- function(input, output) {
   bind_task_button(rand_task, "recalculate")
 
   observeEvent(input$recalculate, {
-    # Invoke the extended in an observer
+    # Invoke the task in an observer.
     rand_task$invoke()
+  })
+
+  observeEvent(input$cancel, {
+    # For cancelling the task if required.
+    rand_task$cancel()
+  })
+
+  observe({
+    # Disable cancel button when task is not running.
+    updateActionButton(
+      inputId = "cancel",
+      disabled = rand_task$status() != "running"
+    )
   })
 
   output$result <- renderText({
@@ -102,6 +116,7 @@ shinyApp(ui, server)
 \item \href{#method-ExtendedTask-invoke}{\code{ExtendedTask$invoke()}}
 \item \href{#method-ExtendedTask-status}{\code{ExtendedTask$status()}}
 \item \href{#method-ExtendedTask-result}{\code{ExtendedTask$result()}}
+\item \href{#method-ExtendedTask-cancel}{\code{ExtendedTask$cancel()}}
 }
 }
 \if{html}{\out{<hr>}}
@@ -212,6 +227,25 @@ Note that the \code{result()} method is generally not meant to be used with
 invalidation will be ignored.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{ExtendedTask$result()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ExtendedTask-cancel"></a>}}
+\if{latex}{\out{\hypertarget{method-ExtendedTask-cancel}{}}}
+\subsection{Method \code{cancel()}}{
+Attempts to cancel the current \code{ExtendedTask} invocation. Only supported
+for tasks created using \CRANpkg{mirai}.
+
+Returns one of the following values:
+\itemize{
+\item \code{TRUE}: A cancellation request was successfully sent for this
+\code{ExtendedTask}.
+\item \code{FALSE}: The \code{ExtendedTask} has already completed or was previously
+cancelled.
+}
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ExtendedTask$cancel()}\if{html}{\out{</div>}}
 }
 
 }

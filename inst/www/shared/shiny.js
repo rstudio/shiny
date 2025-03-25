@@ -5558,7 +5558,7 @@
 
   // srcts/src/shiny/bind.ts
   function isJQuery(value) {
-    return typeof value.jquery === "string";
+    return Boolean(value && value.jquery);
   }
   function valueChangeCallback(inputs, binding, el, allowDeferred) {
     let id = binding.getId(el);

@@ -19,7 +19,7 @@ type BindScope = HTMLElement | JQuery<HTMLElement>;
  * @returns A type predicate indicating if the value is a jQuery<HTMLElement>
  */
 function isJQuery<T = HTMLElement>(value: unknown): value is JQuery<T> {
-  return typeof (value as any).jquery === "string";
+  return Boolean(value && (value as any).jquery);
 }
 
 // todo make sure allowDeferred can NOT be supplied and still work

@@ -770,22 +770,45 @@ formatNoSci <- function(x) {
   format(x, scientific = FALSE, digits = 15)
 }
 
+# A simple getter/setting to track the last time the auto-reload process
+# updated. This value is used by `cachedFuncWithFile()` when auto-reload is
+# enabled to reload app/ui/server files when watched supporting files change.
+cachedAutoReloadLastChanged <- local({
+  last_update <- 0
+
+  list(
+    set = function() {
+      last_update <<- as.integer(Sys.time())
+      invisible(last_update)
+    },
+    get = function() {
+      last_update
+    }
+  )
+})
+
 # Returns a function that calls the given func and caches the result for
 # subsequent calls, unless the given file's mtime changes.
 cachedFuncWithFile <- function(dir, file, func, case.sensitive = FALSE) {
-  dir <- normalizePath(dir, mustWork=TRUE)
-  mtime <- NA
+  dir <- normalizePath(dir, mustWork = TRUE)
+
   value <- NULL
+  last_mtime_file <- NA
+  last_autoreload <- 0
+
   function(...) {
-    fname <- if (case.sensitive)
-      file.path(dir, file)
-    else
+    fname <- if (case.sensitive) { 
+      file.path(dir, file) 
+    } else {
       file.path.ci(dir, file)
+    }
 
     now <- file.info(fname)$mtime
-    if (!identical(mtime, now)) {
+    autoreload <- last_autoreload < cachedAutoReloadLastChanged$get()
+    if (autoreload || !identical(last_mtime_file, now)) {
       value <<- func(fname, ...)
-      mtime <<- now
+      last_mtime_file <<- now
+      last_autoreload <<- cachedAutoReloadLastChanged$get()
     }
     value
   }

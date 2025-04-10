@@ -1,4 +1,4 @@
-version <- "1.13.2"
+version <- "1.14.1"
 version_types <- "1.12.16"
 
 jqui_folder <- rprojroot::find_package_root_file("inst", "www", "shared", "jqueryui")

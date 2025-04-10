@@ -21,6 +21,10 @@
 
 * Updated the JavaScript used when inserting a tab to avoid rendering dynamic UI elements twice when adding the new tab via `insertTab()` or `bslib::nav_insert()`. (#4179)
 
+## Library updates
+
+* Updated to jQuery-UI to 1.14.1. (#4175)
+
 # shiny 1.10.0
 
 ## New features and improvements

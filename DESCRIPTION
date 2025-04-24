@@ -111,7 +111,8 @@ Suggests:
     dygraphs,
     ragg,
     showtext,
-    sass
+    sass,
+    watcher 
 URL: https://shiny.posit.co/,
     https://github.com/rstudio/shiny
 BugReports: https://github.com/rstudio/shiny/issues

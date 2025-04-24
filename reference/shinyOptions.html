@@ -109,14 +109,18 @@ app directory will be continually monitored for changes to files that
 have the extensions: r, htm, html, js, css, png, jpg, jpeg, gif. If any
 changes are detected, all connected Shiny sessions are reloaded. This
 allows for fast feedback loops when tweaking Shiny UI.</p>
-<p>Since monitoring for changes is expensive (we simply poll for last
-modified times), this feature is intended only for development.</p>
+<p>Monitoring for changes is no longer expensive, thanks to the <span class="pkg">watcher</span>
+package, but this feature is still intended only for development.</p>
 <p>You can customize the file patterns Shiny will monitor by setting the
-shiny.autoreload.pattern option. For example, to monitor only ui.R:
-<code>options(shiny.autoreload.pattern = glob2rx("ui.R"))</code></p>
-<p>The default polling interval is 500 milliseconds. You can change this
-by setting e.g. <code>options(shiny.autoreload.interval = 2000)</code> (every
-two seconds).</p></dd>
+shiny.autoreload.pattern option. For example, to monitor only <code>ui.R</code>:
+<code>options(shiny.autoreload.pattern = glob2rx("ui.R"))</code>.</p>
+<p>As mentioned above, Shiny no longer polls watched files for changes.
+Instead, using <span class="pkg">watcher</span>, Shiny is notified of file changes as they
+occur. These changes are batched together within a customizable latency
+period. You can adjust this period by setting
+<code>options(shiny.autoreload.interval = 2000)</code> (in milliseconds). This value
+converted to seconds and passed to the <code>latency</code> argument of
+<code><a href="https://watcher.r-lib.org/reference/watcher.html" class="external-link">watcher::watcher()</a></code>. The default latency is 250ms.</p></dd>
 
 <dt>shiny.deprecation.messages (defaults to <code>TRUE</code>)</dt>
 <dd><p>This controls whether messages for

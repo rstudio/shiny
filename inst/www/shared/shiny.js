@@ -7273,10 +7273,10 @@ ${duplicateIdMsg}`;
       const inputsRate = new InputRateDecorator(inputsEvent);
       const inputsDefer = new InputDeferDecorator(inputsEvent);
       let target;
-      if ((0, import_jquery40.default)('input[type="submit"], button[type="submit"]').length > 0) {
+      if (document.querySelector(".submit-button")) {
         target = inputsDefer;
-        (0, import_jquery40.default)('input[type="submit"], button[type="submit"]').each(function() {
-          (0, import_jquery40.default)(this).click(function(event) {
+        document.querySelectorAll(".submit-button").forEach(function(x2) {
+          x2.addEventListener("click", function(event) {
             event.preventDefault();
             inputsDefer.submit();
           });

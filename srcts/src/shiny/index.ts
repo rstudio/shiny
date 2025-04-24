@@ -177,12 +177,12 @@ class ShinyClass {
 
     let target: InputPolicy;
 
-    if ($('input[type="submit"], button[type="submit"]').length > 0) {
+    if (document.querySelector(".submit-button")) {
       // If there is a submit button on the page, use defer decorator
       target = inputsDefer;
 
-      $('input[type="submit"], button[type="submit"]').each(function () {
-        $(this).click(function (event) {
+      document.querySelectorAll(".submit-button").forEach(function (x) {
+        x.addEventListener("click", function (event) {
           event.preventDefault();
           inputsDefer.submit();
         });

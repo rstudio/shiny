@@ -57,7 +57,7 @@ submitButton <- function(text = "Apply Changes", icon = NULL, width = NULL) {
   div(
     tags$button(
       type="submit",
-      class="btn btn-primary",
+      class="btn btn-primary submit-button",
       style = css(width = validateCssUnit(width)),
       list(icon, text)
     )

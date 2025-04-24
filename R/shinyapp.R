@@ -340,7 +340,7 @@ initAutoReloadMonitor <- function(dir) {
     onStop(watcher$stop)
   } else {
     # Fall back to legacy observer behavior
-    if (!isFALSE(getOption("shiny.autoreload.legacy_warning", TRUE))) {
+    if (!is_false(getOption("shiny.autoreload.legacy_warning", TRUE))) {
       cli::cli_warn(
         c(
           "Using legacy autoreload file watching. Please install {.pkg watcher} for a more performant autoreload file watcher.",

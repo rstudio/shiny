@@ -165,7 +165,7 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
   # To enable hot-reloading of support files, this function is called
   # whenever the UI or Server func source is updated. To avoid loading
   # support files 2x, we follow the last cache update trigger timestamp.
-  autoload_support <- local({
+  autoload_r_support_if_needed <- local({
     autoload_last_loaded <- -1
     function() {
       if (!isTRUE(getOption("shiny.autoload.r", TRUE))) return()
@@ -184,7 +184,7 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
   # we're creating here only gets executed when ui.R's contents change.
   uiHandlerSource <- cachedFuncWithFile(appDir, "ui.R", case.sensitive = FALSE,
     function(uiR) {
-      autoload_support()
+      autoload_r_support_if_needed()
       if (file.exists(uiR)) {
         # If ui.R contains a call to shinyUI (which sets .globals$ui), use that.
         # If not, then take the last expression that's returned from ui.R.
@@ -215,7 +215,7 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
 
   serverSource <- cachedFuncWithFile(appDir, "server.R", case.sensitive = FALSE,
     function(serverR) {
-      autoload_support()
+      autoload_r_support_if_needed()
       # If server.R contains a call to shinyServer (which sets .globals$server),
       # use that. If not, then take the last expression that's returned from
       # server.R.
@@ -252,7 +252,7 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
     oldwd <<- getwd()
     setwd(appDir)
     if (getOption("shiny.autoload.r", TRUE)) {
-      autoload_support()
+      autoload_r_support_if_needed()
     } else {
       if (file.exists(file.path.ci(appDir, "global.R")))
         sourceUTF8(file.path.ci(appDir, "global.R"))

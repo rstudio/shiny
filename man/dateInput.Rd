@@ -145,7 +145,6 @@ Other input elements:
 \code{\link{submitButton}()},
 \code{\link{textAreaInput}()},
 \code{\link{textInput}()},
-\code{\link{textSubmitInput}()},
 \code{\link{varSelectInput}()}
 }
 \concept{input elements}

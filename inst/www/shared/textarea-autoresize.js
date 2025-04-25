@@ -1,3 +1,0 @@
-/*! shiny 1.10.0.9000 | (c) 2012-2025 Posit Software, PBC. | License: GPL-3 | file LICENSE */
-"use strict";(()=>{function l(e,r,s){document.addEventListener(e,t=>{let i=t;i.target.matches(r)&&s(i.target)})}var n=null;function c(e){n===null&&(n=new IntersectionObserver((r,s)=>{r.forEach(t=>{!t.isIntersecting||(n.unobserve(t.target),a(t.target))})})),n.observe(e)}function a(e){e.scrollHeight>0?(e.style.height="auto",e.style.height=e.scrollHeight+"px"):c(e)}l("input","textarea.textarea-autoresize",e=>{a(e)});function o(){if(document.readyState==="loading"){setTimeout(o,10);return}document.querySelectorAll("textarea.textarea-autoresize").forEach(a)}o();})();
-//# sourceMappingURL=textarea-autoresize.js.map

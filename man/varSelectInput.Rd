@@ -141,7 +141,6 @@ Other input elements:
 \code{\link{sliderInput}()},
 \code{\link{submitButton}()},
 \code{\link{textAreaInput}()},
-\code{\link{textInput}()},
-\code{\link{textSubmitInput}()}
+\code{\link{textInput}()}
 }
 \concept{input elements}

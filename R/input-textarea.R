@@ -91,18 +91,6 @@ textAreaInput <- function(
       cols = cols,
       `data-update-on` = updateOn,
       value
-    ),
-    if (autoresize) autoresizeDeps(),
-  )
-}
-
-autoresizeDeps <- function() {
-  htmlDependency(
-    "shiny-textarea-autoresize",
-    version = "0.1.0",
-    package = "shiny",
-    src = "www/shared",
-    script = "textarea-autoresize.js",
-    stylesheet = "textarea-autoresize.css"
+    )
   )
 }

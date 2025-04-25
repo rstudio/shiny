@@ -6,7 +6,7 @@
 
 * `textAreaInput()` gains a `autoresize` option, which automatically resizes the text area to fit its content. (#4210)
 
-* The `callback` argument of Shiny.js' `InputBinding.subscribe()` method gains support for a value of `"event"`. This makes it possible for an input binding to use event priority when updating the value (i.e., send immediately and always resend, even if the value hasn't changed).
+* The `callback` argument of Shiny.js' `InputBinding.subscribe()` method gains support for a value of `"event"`. This makes it possible for an input binding to use event priority when updating the value (i.e., send immediately and always resend, even if the value hasn't changed). (#4211)
 
 ## Changes
 

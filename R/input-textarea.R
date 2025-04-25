@@ -16,6 +16,8 @@
 #' @param resize Which directions the textarea box can be resized. Can be one of
 #'   `"both"`, `"none"`, `"vertical"`, and `"horizontal"`. The default, `NULL`,
 #'   will use the client browser's default setting for resizing textareas.
+#' @param autoresize If `TRUE`, the textarea will automatically resize to fit
+#'   the input text.
 #' @return A textarea input control that can be added to a UI definition.
 #'
 #' @family input elements
@@ -52,6 +54,7 @@ textAreaInput <- function(
   placeholder = NULL,
   resize = NULL,
   ...,
+  autoresize = FALSE,
   updateOn = c("change", "blur")
 ) {
   rlang::check_dots_empty()
@@ -63,22 +66,27 @@ textAreaInput <- function(
     resize <- match.arg(resize, c("both", "none", "vertical", "horizontal"))
   }
 
-  style <- css(
-    # The width is specified on the parent div.
-    width = if (!is.null(width)) "100%",
-    height = validateCssUnit(height),
-    resize = resize
-  )
+  classes <- c("shiny-input-textarea", "form-control")
+  if (autoresize) {
+    classes <- c(classes, "textarea-autoresize")
+    if (is.null(rows)) {
+      rows <- 1
+    }
+  }
 
   div(
     class = "form-group shiny-input-container",
+    style = css(width = validateCssUnit(width)),
     shinyInputLabel(inputId, label),
-    style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
     tags$textarea(
       id = inputId,
-      class = "shiny-input-textarea form-control",
+      class = classes,
       placeholder = placeholder,
-      style = style,
+      style = css(
+        width = if (!is.null(width)) "100%",
+        height = validateCssUnit(height),
+        resize = resize
+      ),
       rows = rows,
       cols = cols,
       `data-update-on` = updateOn,

@@ -2196,6 +2196,55 @@
       return (0, import_jquery20.default)(scope).find("textarea");
     }
   };
+  function onDelegatedEvent(eventName, selector, callback) {
+    document.addEventListener(eventName, (e4) => {
+      const e22 = e4;
+      if (e22.target.matches(selector)) {
+        callback(e22.target);
+      }
+    });
+  }
+  var textAreaIntersectionObserver = null;
+  function callUpdateHeightWhenTargetIsVisible(target) {
+    if (textAreaIntersectionObserver === null) {
+      textAreaIntersectionObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) {
+            return;
+          }
+          textAreaIntersectionObserver?.unobserve(entry.target);
+          updateHeight(entry.target);
+        });
+      });
+    }
+    textAreaIntersectionObserver.observe(target);
+  }
+  function updateHeight(target) {
+    if (target.scrollHeight > 0) {
+      target.style.height = "auto";
+      target.style.height = target.scrollHeight + "px";
+    } else {
+      callUpdateHeightWhenTargetIsVisible(target);
+    }
+  }
+  onDelegatedEvent(
+    "input",
+    "textarea.textarea-autoresize",
+    (target) => {
+      updateHeight(target);
+    }
+  );
+  function updateOnLoad() {
+    if (document.readyState === "loading") {
+      setTimeout(updateOnLoad, 10);
+      return;
+    }
+    const textAreas = document.querySelectorAll(
+      "textarea.textarea-autoresize"
+    );
+    textAreas.forEach(updateHeight);
+  }
+  updateOnLoad();
 
   // srcts/src/bindings/input/index.ts
   function initInputBindings() {

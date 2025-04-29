@@ -66,7 +66,7 @@ textAreaInput <- function(
     resize <- match.arg(resize, c("both", "none", "vertical", "horizontal"))
   }
 
-  classes <- c("shiny-input-textarea", "form-control")
+  classes <- "form-control"
   if (autoresize) {
     classes <- c(classes, "textarea-autoresize")
     if (is.null(rows)) {
@@ -75,7 +75,7 @@ textAreaInput <- function(
   }
 
   div(
-    class = "form-group shiny-input-container",
+    class = "shiny-input-textarea form-group shiny-input-container",
     style = css(width = validateCssUnit(width)),
     shinyInputLabel(inputId, label),
     tags$textarea(

@@ -26,10 +26,19 @@
     if (!member.has(obj))
       throw TypeError("Cannot " + msg);
   };
+  var __privateGet = (obj, member, getter) => {
+    __accessCheck(obj, member, "read from private field");
+    return getter ? getter.call(obj) : member.get(obj);
+  };
   var __privateAdd = (obj, member, value) => {
     if (member.has(obj))
       throw TypeError("Cannot add the same private member more than once");
     member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
+  };
+  var __privateSet = (obj, member, value, setter) => {
+    __accessCheck(obj, member, "write to private field");
+    setter ? setter.call(obj, value) : member.set(obj, value);
+    return value;
   };
   var __privateMethod = (obj, member, method) => {
     __accessCheck(obj, member, "access private method");
@@ -2191,11 +2200,50 @@
 
   // srcts/src/bindings/input/textarea.ts
   var import_jquery20 = __toESM(require_jquery());
+  var intersectObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        updateHeight(entry.target);
+      }
+    });
+  });
+  var _inputHandler;
   var TextareaInputBinding = class extends TextInputBinding {
+    constructor() {
+      super(...arguments);
+      __privateAdd(this, _inputHandler, null);
+    }
     find(scope) {
       return (0, import_jquery20.default)(scope).find("textarea");
     }
+    initialize(el) {
+      super.initialize(el);
+      updateHeight(el);
+    }
+    subscribe(el, callback) {
+      super.subscribe(el, callback);
+      __privateSet(this, _inputHandler, (e4) => updateHeight(e4.target));
+      el.addEventListener("input", __privateGet(this, _inputHandler));
+      intersectObserver.observe(el);
+    }
+    unsubscribe(el) {
+      super.unsubscribe(el);
+      if (__privateGet(this, _inputHandler))
+        el.removeEventListener("input", __privateGet(this, _inputHandler));
+      intersectObserver.unobserve(el);
+    }
   };
+  _inputHandler = new WeakMap();
+  function updateHeight(el) {
+    if (!el.classList.contains("textarea-autoresize")) {
+      return;
+    }
+    if (el.scrollHeight == 0) {
+      return;
+    }
+    el.style.height = "auto";
+    el.style.height = el.scrollHeight + "px";
+  }
 
   // srcts/src/bindings/input/index.ts
   function initInputBindings() {

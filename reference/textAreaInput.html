@@ -64,6 +64,7 @@
 <span>  placeholder <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  resize <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span>,</span>
+<span>  autoresize <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  updateOn <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"change"</span>, <span class="st">"blur"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -123,6 +124,11 @@ will use the client browser's default setting for resizing textareas.</p></dd>
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Ignored, included to require named arguments and for future
 feature expansion.</p></dd>
+
+
+<dt id="arg-autoresize">autoresize<a class="anchor" aria-label="anchor" href="#arg-autoresize"></a></dt>
+<dd><p>If <code>TRUE</code>, the textarea will automatically resize to fit
+the input text.</p></dd>
 
 
 <dt id="arg-updateon">updateOn<a class="anchor" aria-label="anchor" href="#arg-updateon"></a></dt>
@@ -195,7 +201,7 @@ unless <code>value</code> is provided.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
 </div>
 
       </footer></div>

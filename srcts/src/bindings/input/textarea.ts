@@ -2,7 +2,7 @@ import $ from "jquery";
 
 import { TextInputBinding } from "./text";
 
-// When a textarea becomes visible, update the textarea height
+// When a textarea becomes visible, update the height
 const intersectObserver = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
     if (entry.isIntersecting) {
@@ -11,7 +11,7 @@ const intersectObserver = new IntersectionObserver((entries) => {
   });
 });
 
-export class TextareaInputBinding extends TextInputBinding {
+class TextareaInputBinding extends TextInputBinding {
   #inputHandler: EventListener | null = null;
 
   find(scope: HTMLElement): JQuery<HTMLElement> {
@@ -50,3 +50,5 @@ function updateHeight(el: HTMLInputElement) {
   el.style.height = "auto";
   el.style.height = el.scrollHeight + "px";
 }
+
+export { TextareaInputBinding };

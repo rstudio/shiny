@@ -130,11 +130,11 @@ as the page loads; the function you provide to
 \code{sendCustomMessage} is called on the server.
 }
 \item{sendBinaryMessage(type, message)}{
-Similar to \code{sendCustomMessage}, but the message must be a raw vector
-and the registration method on the client is
-\code{Shiny.addBinaryMessageHandler(type, function(message){...})}. The
-message argument on the client will be a
-\href{https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DataView}{DataView}.
+Similar to sendCustomMessage, but the message must be a raw vector.
+The registration method on the client is the same as for other custom messages:
+\code{Shiny.addCustomMessageHandler(type, function(message){...})}. The
+message argument on the client will be an
+\href{https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer}{ArrayBuffer}.
 }
 \item{sendInputMessage(inputId, message)}{
 Sends a message to an input on the session's client web page; if the input

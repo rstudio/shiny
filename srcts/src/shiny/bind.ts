@@ -264,7 +264,11 @@ function bindInputs(
         const thisEl = el;
 
         // Historically speaking, this callback has only accepted a boolean value,
-        // but in recent versions it can also accept a input priority.
+        // but in recent versions it can also accept an input priority.
+        // The `priority` parameter can be:
+        // - A boolean: `true` maps to "deferred", and `false` maps to "immediate".
+        // - A string or other value representing a specific priority mode, which is passed through as-is.
+        // This conversion ensures backward compatibility while supporting new priority modes.
         return function (priority: InputPolicyOpts["priority"] | boolean) {
           const normalizedPriority =
             typeof priority !== "boolean"

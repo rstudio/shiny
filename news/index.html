@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.10.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.10.0.9001</span>
       </span>
     </div>
 
@@ -53,6 +53,10 @@
 <h3 id="new-features-development-version">New features<a class="anchor" aria-label="anchor" href="#new-features-development-version"></a></h3>
 <ul><li><p><code><a href="../reference/textInput.html">textInput()</a></code>, <code><a href="../reference/textAreaInput.html">textAreaInput()</a></code>, <code><a href="../reference/numericInput.html">numericInput()</a></code> and <code><a href="../reference/passwordInput.html">passwordInput()</a></code> all gain an <code>updateOn</code> option. <code>updateOn = "change"</code> is the default and previous behavior, where the input value updates immediately whenever the value changes. With <code>updateOn = "blur"</code>, the input value will update only when the text input loses focus or when the user presses Enter (or Cmd/Ctrl + Enter for <code><a href="../reference/textAreaInput.html">textAreaInput()</a></code>). (<a href="https://github.com/rstudio/shiny/issues/4183" class="external-link">#4183</a>)</p></li>
 <li><p><code><a href="../reference/textAreaInput.html">textAreaInput()</a></code> gains a <code>autoresize</code> option, which automatically resizes the text area to fit its content. (<a href="https://github.com/rstudio/shiny/issues/4210" class="external-link">#4210</a>)</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="changes-development-version">Changes<a class="anchor" aria-label="anchor" href="#changes-development-version"></a></h3>
+<ul><li>Shiny no longer suspends input changes when <em>any</em> <code>&lt;input type="submit"&gt;</code> or <code>&lt;button type="submit"&gt;</code> is on the page. Instead, it now only suspends when a <code><a href="../reference/submitButton.html">submitButton()</a></code> is present. If you have reason for creating a submit button from custom HTML, add a CSS class of <code>shiny-submit-button</code> to the button. (<a href="https://github.com/rstudio/shiny/issues/4209" class="external-link">#4209</a>)</li>
 </ul></div>
 <div class="section level3">
 <h3 id="improvements-development-version">Improvements<a class="anchor" aria-label="anchor" href="#improvements-development-version"></a></h3>

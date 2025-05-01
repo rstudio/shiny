@@ -1,4 +1,4 @@
-/*! shiny 1.10.0.9000 | (c) 2012-2025 Posit Software, PBC. | License: GPL-3 | file LICENSE */
+/*! shiny 1.10.0.9001 | (c) 2012-2025 Posit Software, PBC. | License: GPL-3 | file LICENSE */
 "use strict";
 (() => {
   var __create = Object.create;
@@ -7185,7 +7185,7 @@ ${duplicateIdMsg}`;
   // srcts/src/shiny/index.ts
   var ShinyClass = class {
     constructor() {
-      this.version = "1.10.0.9000";
+      this.version = "1.10.0.9001";
       const { inputBindings, fileInputBinding: fileInputBinding2 } = initInputBindings();
       const { outputBindings } = initOutputBindings();
       setFileInputBinding(fileInputBinding2);
@@ -7238,10 +7238,10 @@ ${duplicateIdMsg}`;
       const inputsRate = new InputRateDecorator(inputsEvent);
       const inputsDefer = new InputDeferDecorator(inputsEvent);
       let target;
-      if ((0, import_jquery39.default)('input[type="submit"], button[type="submit"]').length > 0) {
+      if (document.querySelector(".shiny-submit-button")) {
         target = inputsDefer;
-        (0, import_jquery39.default)('input[type="submit"], button[type="submit"]').each(function() {
-          (0, import_jquery39.default)(this).click(function(event) {
+        document.querySelectorAll(".shiny-submit-button").forEach(function(x2) {
+          x2.addEventListener("click", function(event) {
             event.preventDefault();
             inputsDefer.submit();
           });

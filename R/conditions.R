@@ -75,7 +75,9 @@ getCallNames <- function(calls) {
   })
 }
 
-# Do less to speed things up, just need to keep call stack unique for hashing
+# A stripped down version of getCallNames() that intentionally avoids deparsing expressions.
+# Instead, it leaves expressions to be directly `rlang::hash()` (for de-duplication), which
+# is much faster than deparsing then hashing.
 getCallNamesForHash <- function(calls) {
   lapply(calls, function(call) {
     name <- call[[1L]]

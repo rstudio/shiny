@@ -384,6 +384,14 @@ html.autoreload-enabled #shiny-disconnected-overlay.reloading {
   width: 100%;
 }
 
+/* Styling for textAreaInput(autoresize=TRUE) */
+textarea.textarea-autoresize.form-control {
+  padding: 5px 8px;
+  resize: none;
+  overflow-y: hidden;
+  height: auto;
+}
+
 
 #shiny-notification-panel {
   position: fixed;

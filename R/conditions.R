@@ -75,6 +75,18 @@ getCallNames <- function(calls) {
   })
 }
 
+# A stripped down version of getCallNames() that intentionally avoids deparsing expressions.
+# Instead, it leaves expressions to be directly `rlang::hash()` (for de-duplication), which
+# is much faster than deparsing then hashing.
+getCallNamesForHash <- function(calls) {
+  lapply(calls, function(call) {
+    name <- call[[1L]]
+    if (is.function(name)) return("<Anonymous>")
+    if (typeof(name) == "promise") return("<Promise>")
+    name
+  })
+}
+
 getLocs <- function(calls) {
   vapply(calls, function(call) {
     srcref <- attr(call, "srcref", exact = TRUE)
@@ -144,7 +156,7 @@ getCallStackDigest <- function(callStack, warn = FALSE) {
     )
   }
 
-  rlang::hash(getCallNames(callStack))
+  rlang::hash(getCallNamesForHash(callStack))
 }
 
 saveCallStackDigest <- function(callStack) {

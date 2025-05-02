@@ -108,6 +108,7 @@ Suggests:
     magrittr,
     yaml,
     future,
+    mirai,
     dygraphs,
     ragg,
     showtext,

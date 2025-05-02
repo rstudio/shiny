@@ -75,6 +75,16 @@ getCallNames <- function(calls) {
   })
 }
 
+# Do less to speed things up, just need to keep call stack unique for hashing
+getCallNamesForHash <- function(calls) {
+  lapply(calls, function(call) {
+    name <- call[[1L]]
+    if (is.function(name)) return("<Anonymous>")
+    if (typeof(name) == "promise") return("<Promise>")
+    name
+  })
+}
+
 getLocs <- function(calls) {
   vapply(calls, function(call) {
     srcref <- attr(call, "srcref", exact = TRUE)
@@ -144,7 +154,7 @@ getCallStackDigest <- function(callStack, warn = FALSE) {
     )
   }
 
-  rlang::hash(getCallNames(callStack))
+  rlang::hash(getCallNamesForHash(callStack))
 }
 
 saveCallStackDigest <- function(callStack) {

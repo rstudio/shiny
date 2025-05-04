@@ -36,3 +36,4 @@
 ^\.browserslistrc$
 ^\.eslintrc\.yml$
 ^\.yarnrc\.yml$
+^_dev$

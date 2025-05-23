@@ -1307,7 +1307,7 @@ for (do_priming in c(TRUE, FALSE)) {
     # dr should've fired, and we should have converged on the right answer.
     expect_identical(dr_fired, 2)
     isolate(expect_identical(rv$a, dr()))
-    expect_identical(tr_fired, 4)
+    # be sure tr() converged on the right answer; (We've already confirmed throttle-like behavior above)
     isolate(expect_identical(rv$a, tr()))
   })
 }

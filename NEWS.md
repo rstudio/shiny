@@ -25,6 +25,8 @@
 
 ## Bug fixes
 
+* examples-shiny/08_html/index.html now points to 'shiny.min.css' instead of the removed 'shiny.css', eliminating a 404 in DevTools. (#4220)
+
 * Fixed a bug with modals where calling `removeModal()` too quickly after `showModal()` would fail to remove the modal if the remove modal message was received while the modal was in the process of being revealed. (#4173)
 
 * The Shiny Client Console (enabled with `shiny::devmode()`) no longer displays duplicate warning or error message. (#4177)

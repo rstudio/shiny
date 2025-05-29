@@ -210,36 +210,26 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
       private$rv_value(NULL)
       private$rv_error(NULL)
 
-      p <- NULL
-      tryCatch(
-        {
-          maskReactiveContext({
+      p <- promises::promise_resolve(
+        maskReactiveContext(do.call(private$func, args))
+      )
 
-            p <- promises::promise_resolve(do.call(private$func, args))
-          })
+      p <- promises::then(
+        p,
+        onFulfilled = function(value, .visible) {
+          private$on_success(list(value = value, visible = .visible))
         },
-        error = function(e) {
-          private$on_error(e, call = call)
+        onRejected = function(error) {
+          private$on_error(error, call = call)
         }
       )
 
-      promises::finally(
-        promises::then(p,
-          onFulfilled = function(value, .visible) {
-            private$on_success(list(value=value, visible=.visible))
-          },
-          onRejected = function(error) {
-            private$on_error(error, call = call)
-          }
-        ),
-        onFinally = function() {
-          if (private$invocation_queue$size() > 0) {
-            next_call <- private$invocation_queue$remove()
-            private$do_invoke(next_call$args, next_call$call)
-          }
+      promises::finally(p, onFinally = function() {
+        if (private$invocation_queue$size() > 0) {
+          next_call <- private$invocation_queue$remove()
+          private$do_invoke(next_call$args, next_call$call)
         }
-      )
-
+      })
 
       invisible(NULL)
     },

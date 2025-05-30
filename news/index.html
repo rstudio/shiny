@@ -69,12 +69,14 @@
 </ul></li>
 <li><p>Shiny now uses <a href="https://cli.r-lib.org" class="external-link">cli</a> instead of <a href="https://r-lib.github.io/crayon/" class="external-link">crayon</a> for rich log messages. (<a href="https://github.com/olivroy" class="external-link">@olivroy</a> <a href="https://github.com/rstudio/shiny/issues/4170" class="external-link">#4170</a>)</p></li>
 <li><p>Shiny’s Typescript assets are now compiled to ES2021 instead of ES5. (<a href="https://github.com/rstudio/shiny/issues/4066" class="external-link">#4066</a>)</p></li>
+<li><p><code>ExtendedTask</code> now catches synchronous values and errors and returns them via <code>$result()</code>. Previously, the extended task function was required to always return a promise. This change makes it easier to use <code>ExtendedTask</code> with a function that may return early or do some synchronous work before returning a promise. (<a href="https://github.com/rstudio/shiny/issues/4225" class="external-link">#4225</a>)</p></li>
 </ul></div>
 <div class="section level3">
 <h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>
 <ul><li><p>Fixed a bug with modals where calling <code><a href="../reference/showModal.html">removeModal()</a></code> too quickly after <code><a href="../reference/showModal.html">showModal()</a></code> would fail to remove the modal if the remove modal message was received while the modal was in the process of being revealed. (<a href="https://github.com/rstudio/shiny/issues/4173" class="external-link">#4173</a>)</p></li>
 <li><p>The Shiny Client Console (enabled with <code><a href="../reference/devmode.html">shiny::devmode()</a></code>) no longer displays duplicate warning or error message. (<a href="https://github.com/rstudio/shiny/issues/4177" class="external-link">#4177</a>)</p></li>
 <li><p>Updated the JavaScript used when inserting a tab to avoid rendering dynamic UI elements twice when adding the new tab via <code><a href="../reference/insertTab.html">insertTab()</a></code> or <code><a href="https://rstudio.github.io/bslib/reference/nav_select.html" class="external-link">bslib::nav_insert()</a></code>. (<a href="https://github.com/rstudio/shiny/issues/4179" class="external-link">#4179</a>)</p></li>
+<li><p>Fixed an issue with <code>ExtendedTask</code> where synchronous errors would cause an error that would stop the current session. (<a href="https://github.com/rstudio/shiny/issues/4225" class="external-link">#4225</a>)</p></li>
 </ul></div>
 </div>
     <div class="section level2">
@@ -1464,7 +1466,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
       </footer></div>

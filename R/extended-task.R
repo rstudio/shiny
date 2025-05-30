@@ -130,14 +130,15 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
     #'   arguments.
     invoke = function(...) {
       args <- rlang::dots_list(..., .ignore_empty = "none")
+      call <- rlang::caller_call(n = 0)
 
       if (
         isolate(private$rv_status()) == "running" ||
           private$invocation_queue$size() > 0
       ) {
-        private$invocation_queue$add(args)
+        private$invocation_queue$add(list(args = args, call = call))
       } else {
-        private$do_invoke(args)
+        private$do_invoke(args, call = call)
       }
       invisible(NULL)
     },
@@ -204,44 +205,41 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
     rv_error = NULL,
     invocation_queue = NULL,
 
-    do_invoke = function(args) {
+    do_invoke = function(args, call = NULL) {
       private$rv_status("running")
       private$rv_value(NULL)
       private$rv_error(NULL)
 
-      p <- NULL
-      tryCatch({
-        maskReactiveContext({
-          # TODO: Bounce the do.call off of a promise_resolve(), so that the
-          # call to invoke() always returns immediately?
-          result <- do.call(private$func, args)
-          p <- promises::as.promise(result)
-        })
-      }, error = function(e) {
-        private$on_error(e)
-      })
+      p <- promises::promise_resolve(
+        maskReactiveContext(do.call(private$func, args))
+      )
 
-      promises::finally(
-        promises::then(p,
-          onFulfilled = function(value, .visible) {
-            private$on_success(list(value=value, visible=.visible))
-          },
-          onRejected = function(error) {
-            private$on_error(error)
-          }
-        ),
-        onFinally = function() {
-          if (private$invocation_queue$size() > 0) {
-            private$do_invoke(private$invocation_queue$remove())
-          }
+      p <- promises::then(
+        p,
+        onFulfilled = function(value, .visible) {
+          private$on_success(list(value = value, visible = .visible))
+        },
+        onRejected = function(error) {
+          private$on_error(error, call = call)
         }
       )
 
+      promises::finally(p, onFinally = function() {
+        if (private$invocation_queue$size() > 0) {
+          next_call <- private$invocation_queue$remove()
+          private$do_invoke(next_call$args, next_call$call)
+        }
+      })
 
       invisible(NULL)
     },
 
-    on_error = function(err) {
+    on_error = function(err, call = NULL) {
+      cli::cli_warn(
+        "ERROR: An error occurred when invoking the ExtendedTask.",
+        parent = err,
+        call = call
+      )
       private$rv_status("error")
       private$rv_error(err)
     },

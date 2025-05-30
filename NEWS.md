@@ -23,6 +23,8 @@
 
 * Shiny's Typescript assets are now compiled to ES2021 instead of ES5. (#4066)
 
+* `ExtendedTask` now catches synchronous values and errors and returns them via `$result()`. Previously, the extended task function was required to always return a promise. This change makes it easier to use `ExtendedTask` with a function that may return early or do some synchronous work before returning a promise. (#4225)
+
 ## Bug fixes
 
 * Fixed a bug with modals where calling `removeModal()` too quickly after `showModal()` would fail to remove the modal if the remove modal message was received while the modal was in the process of being revealed. (#4173)
@@ -30,6 +32,8 @@
 * The Shiny Client Console (enabled with `shiny::devmode()`) no longer displays duplicate warning or error message. (#4177)
 
 * Updated the JavaScript used when inserting a tab to avoid rendering dynamic UI elements twice when adding the new tab via `insertTab()` or `bslib::nav_insert()`. (#4179)
+
+* Fixed an issue with `ExtendedTask` where synchronous errors would cause an error that would stop the current session. (#4225)
 
 # shiny 1.10.0
 

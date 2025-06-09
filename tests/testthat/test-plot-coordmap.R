@@ -6,7 +6,7 @@ sortList <- function(x) {
 }
 
 # This will create print.ggplot in the current environment
-print.ggplot <- custom_print.ggplot
+print.ggplot <- `print.ggplot2::ggplot` <- custom_print.ggplot
 
 
 test_that("ggplot coordmap", {

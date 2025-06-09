@@ -70,6 +70,7 @@
 <li><p>Shiny now uses <a href="https://cli.r-lib.org" class="external-link">cli</a> instead of <a href="https://r-lib.github.io/crayon/" class="external-link">crayon</a> for rich log messages. (<a href="https://github.com/olivroy" class="external-link">@olivroy</a> <a href="https://github.com/rstudio/shiny/issues/4170" class="external-link">#4170</a>)</p></li>
 <li><p>Shiny’s Typescript assets are now compiled to ES2021 instead of ES5. (<a href="https://github.com/rstudio/shiny/issues/4066" class="external-link">#4066</a>)</p></li>
 <li><p><code>ExtendedTask</code> now catches synchronous values and errors and returns them via <code>$result()</code>. Previously, the extended task function was required to always return a promise. This change makes it easier to use <code>ExtendedTask</code> with a function that may return early or do some synchronous work before returning a promise. (<a href="https://github.com/rstudio/shiny/issues/4225" class="external-link">#4225</a>)</p></li>
+<li><p>Updated a test for compatibility with ggplot2 4.0.0. (<a href="https://github.com/rstudio/shiny/issues/4226" class="external-link">#4226</a>)</p></li>
 </ul></div>
 <div class="section level3">
 <h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>

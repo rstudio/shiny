@@ -6,6 +6,8 @@ sortList <- function(x) {
 }
 
 # This will create print.ggplot in the current environment
+# print.ggplot is for ggplot2 < 4.0.0
+# print.ggplot2::ggplot is for ggplot2 >= 4.0.0
 print.ggplot <- `print.ggplot2::ggplot` <- custom_print.ggplot
 
 

@@ -25,7 +25,7 @@
 
 * `ExtendedTask` now catches synchronous values and errors and returns them via `$result()`. Previously, the extended task function was required to always return a promise. This change makes it easier to use `ExtendedTask` with a function that may return early or do some synchronous work before returning a promise. (#4225)
 
-* Updated a test for compatibility with ggplot2 4.0.0. (#4226)
+* `renderPlot()` was updated to accomodate changes in ggplot2 v4.0.0. (#4226)
 
 ## Bug fixes
 

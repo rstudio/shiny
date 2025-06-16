@@ -125,17 +125,17 @@ use <code>reactiveVal</code>. See the Examples section for an illustration.</p>
 <span class="r-in"><span>  <span class="va">value</span> <span class="op">&lt;-</span> <span class="fu">reactiveVal</span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>       <span class="co"># rv &lt;- reactiveValues(value = 0)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">minus</span>, <span class="op">{</span></span></span>
-<span class="r-in"><span>    <span class="va">newValue</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://future.futureverse.org/reference/value.html" class="external-link">value</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">1</span>     <span class="co"># newValue &lt;- rv$value - 1</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://future.futureverse.org/reference/value.html" class="external-link">value</a></span><span class="op">(</span><span class="va">newValue</span><span class="op">)</span>             <span class="co"># rv$value &lt;- newValue</span></span></span>
+<span class="r-in"><span>    <span class="va">newValue</span> <span class="op">&lt;-</span> <span class="fu">value</span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">1</span>     <span class="co"># newValue &lt;- rv$value - 1</span></span></span>
+<span class="r-in"><span>    <span class="fu">value</span><span class="op">(</span><span class="va">newValue</span><span class="op">)</span>             <span class="co"># rv$value &lt;- newValue</span></span></span>
 <span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="observeEvent.html">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">plus</span>, <span class="op">{</span></span></span>
-<span class="r-in"><span>    <span class="va">newValue</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://future.futureverse.org/reference/value.html" class="external-link">value</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span>     <span class="co"># newValue &lt;- rv$value + 1</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://future.futureverse.org/reference/value.html" class="external-link">value</a></span><span class="op">(</span><span class="va">newValue</span><span class="op">)</span>             <span class="co"># rv$value &lt;- newValue</span></span></span>
+<span class="r-in"><span>    <span class="va">newValue</span> <span class="op">&lt;-</span> <span class="fu">value</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span>     <span class="co"># newValue &lt;- rv$value + 1</span></span></span>
+<span class="r-in"><span>    <span class="fu">value</span><span class="op">(</span><span class="va">newValue</span><span class="op">)</span>             <span class="co"># rv$value &lt;- newValue</span></span></span>
 <span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="va">output</span><span class="op">$</span><span class="va">value</span> <span class="op">&lt;-</span> <span class="fu"><a href="renderPrint.html">renderText</a></span><span class="op">(</span><span class="op">{</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://future.futureverse.org/reference/value.html" class="external-link">value</a></span><span class="op">(</span><span class="op">)</span>                     <span class="co"># rv$value</span></span></span>
+<span class="r-in"><span>    <span class="fu">value</span><span class="op">(</span><span class="op">)</span>                     <span class="co"># rv$value</span></span></span>
 <span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span></span></span>

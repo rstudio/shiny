@@ -261,8 +261,8 @@ values in the cache.</p>
 promises, but rather objects provided by the
 <a href="https://rstudio.github.io/promises/" class="external-link"><span class="pkg">promises</span></a>  package, which
 are similar to promises in JavaScript. (See <code><a href="https://rstudio.github.io/promises/reference/promise.html" class="external-link">promises::promise()</a></code> for more
-information.) You can also use <code><a href="https://future.futureverse.org/reference/future.html" class="external-link">future::future()</a></code> objects to run code in a
-separate process or even on a remote machine.</p>
+information.) You can also use <code><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai::mirai()</a></code> or <code><a href="https://future.futureverse.org/reference/future.html" class="external-link">future::future()</a></code>
+objects to run code in a separate process or even on a remote machine.</p>
 <p>If the value returns a promise, then anything that consumes the cached
 reactive must expect it to return a promise.</p>
 <p>Similarly, if the key is a promise (in other words, if it is asynchronous),

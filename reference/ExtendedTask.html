@@ -131,11 +131,12 @@ server function.</p><div class="section">
 <dd><p>The long-running operation to execute. This should be an
 asynchronous function, meaning, it should use the
 <a href="https://rstudio.github.io/promises/" class="external-link">{promises}</a> package, most
-likely in conjuction with the
+likely in conjunction with the
+<a href="https://mirai.r-lib.org" class="external-link">{mirai}</a> or
 <a href="https://rstudio.github.io/promises/articles/promises_04_futures.html" class="external-link">{future}</a>
 package. (In short, the return value of <code>func</code> should be a
-<code><a href="https://future.futureverse.org/reference/future.html" class="external-link">Future</a></code> object, or a <code>promise</code>, or something else
-that <code><a href="https://rstudio.github.io/promises/reference/is.promise.html" class="external-link">promises::as.promise()</a></code> understands.)</p>
+<code><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></code>, <code><a href="https://future.futureverse.org/reference/future.html" class="external-link">Future</a></code>, <code>promise</code>,
+or something else that <code><a href="https://rstudio.github.io/promises/reference/is.promise.html" class="external-link">promises::as.promise()</a></code> understands.)</p>
 <p>It's also important that this logic does not read from any
 reactive inputs/sources, as inputs may change after the function is
 invoked; instead, if the function needs to access reactive inputs, it
@@ -169,15 +170,15 @@ arguments.</p></dd>
 </div>
 
 </div><p></p><hr><a id="method-ExtendedTask-status"></a><div class="section">
-<h3 id="method-status-">Method <code>status()</code><a class="anchor" aria-label="anchor" href="#method-status-"></a></h3>
+<h3 id="method-status-">Method <code><a href="https://mirai.r-lib.org/reference/status.html" class="external-link">status()</a></code><a class="anchor" aria-label="anchor" href="#method-status-"></a></h3>
 <p>This is a reactive read that invalidates the caller when the task's
 status changes.</p>
 <p>Returns one of the following values:</p><ul><li><p><code>"initial"</code>: This <code>ExtendedTask</code> has not yet been invoked</p></li>
 <li><p><code>"running"</code>: An invocation is currently running</p></li>
 <li><p><code>"success"</code>: An invocation completed successfully, and a value can be
-retrieved via the <code><a href="https://future.futureverse.org/reference/result.html" class="external-link">result()</a></code> method</p></li>
+retrieved via the <code>result()</code> method</p></li>
 <li><p><code>"error"</code>: An invocation completed with an error, which will be
-re-thrown if you call the <code><a href="https://future.futureverse.org/reference/result.html" class="external-link">result()</a></code> method</p></li>
+re-thrown if you call the <code>result()</code> method</p></li>
 </ul><div class="section">
 <h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">ExtendedTask</span><span class="op">$</span><span class="fu">status</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
@@ -185,7 +186,7 @@ re-thrown if you call the <code><a href="https://future.futureverse.org/referenc
 
 
 </div><p></p><hr><a id="method-ExtendedTask-result"></a><div class="section">
-<h3 id="method-result-">Method <code><a href="https://future.futureverse.org/reference/result.html" class="external-link">result()</a></code><a class="anchor" aria-label="anchor" href="#method-result-"></a></h3>
+<h3 id="method-result-">Method <code>result()</code><a class="anchor" aria-label="anchor" href="#method-result-"></a></h3>
 <p>Attempts to read the results of the most recent invocation. This is a
 reactive read that invalidates as the task's status changes.</p>
 <p>The actual behavior differs greatly depending on the current status of
@@ -203,7 +204,7 @@ aware that if the result isn't ready for whatever reason, processing will
 stop in much the same way as <code>req(FALSE)</code> does, but when the result is
 ready you'll get invalidated, and when you run again the result should be
 there.</p>
-<p>Note that the <code><a href="https://future.futureverse.org/reference/result.html" class="external-link">result()</a></code> method is generally not meant to be used with
+<p>Note that the <code>result()</code> method is generally not meant to be used with
 <code><a href="observeEvent.html">observeEvent()</a></code>, <code><a href="observeEvent.html">eventReactive()</a></code>, <code><a href="bindEvent.html">bindEvent()</a></code>, or <code><a href="isolate.html">isolate()</a></code> as the
 invalidation will be ignored.</p><div class="section">
 <h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
@@ -217,12 +218,15 @@ invalidation will be ignored.</p><div class="section">
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># rlang::is_interactive() &amp;&amp; rlang::is_installed("future")</span></span></span>
-<span class="r-in"><span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># rlang::is_interactive() &amp;&amp; rlang::is_installed("mirai")</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://shiny.posit.co/" class="external-link">shiny</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/bslib/" class="external-link">bslib</a></span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://future.futureverse.org" class="external-link">future</a></span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">multisession</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mirai.r-lib.org" class="external-link">mirai</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Set background processes for running tasks</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://mirai.r-lib.org/reference/daemons.html" class="external-link">daemons</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Reset when the app is stopped</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="onStop.html">onStop</a></span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="fu"><a href="https://mirai.r-lib.org/reference/daemons.html" class="external-link">daemons</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rstudio.github.io/bslib/reference/page.html" class="external-link">page_fluid</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="titlePanel.html">titlePanel</a></span><span class="op">(</span><span class="st">"Extended Task Demo"</span><span class="op">)</span>,</span></span>
@@ -236,13 +240,12 @@ invalidation will be ignored.</p><div class="section">
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="va">rand_task</span> <span class="op">&lt;-</span> <span class="va">ExtendedTask</span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://future.futureverse.org/reference/future.html" class="external-link">future</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://mirai.r-lib.org/reference/mirai.html" class="external-link">mirai</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>      <span class="op">{</span></span></span>
 <span class="r-in"><span>        <span class="co"># Slow operation goes here</span></span></span>
 <span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span>      <span class="op">}</span>,</span></span>
-<span class="r-in"><span>      seed <span class="op">=</span> <span class="cn">TRUE</span></span></span>
+<span class="r-in"><span>      <span class="op">}</span></span></span>
 <span class="r-in"><span>    <span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>

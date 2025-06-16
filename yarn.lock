@@ -1220,12 +1220,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jqueryui@npm:1.12.16":
-  version: 1.12.16
-  resolution: "@types/jqueryui@npm:1.12.16"
+"@types/jqueryui@npm:1.12.24":
+  version: 1.12.24
+  resolution: "@types/jqueryui@npm:1.12.24"
   dependencies:
     "@types/jquery": "*"
-  checksum: a39a2b5c26a2b1341f50af49957b17a36423bdd6300c2a9188b1adc0d263f3e31255e8f2f77ffd59f750ede6cc713c84c9c88cdc6d43fa7d88949a40679f8a5e
+  checksum: 4bb147b591753f873f011cc591ef371d7ba8792fc2742f87cd96a7896ad817903a0e62863b5c6fd72a4036318877d3eb51573ee96ff70819fe3ad7f73fb805ec
   languageName: node
   linkType: hard
 
@@ -1287,7 +1287,7 @@ __metadata:
     "@types/ion-rangeslider": 2.3.0
     "@types/jest": ^26.0.23
     "@types/jquery": 3.5.32
-    "@types/jqueryui": 1.12.16
+    "@types/jqueryui": 1.12.24
     "@types/lodash": ^4.14.170
     "@types/node": ^18.14.2
     "@types/selectize": 0.12.34

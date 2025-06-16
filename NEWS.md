@@ -198,8 +198,6 @@ In addition, various properties of the spinners and pulse can be customized with
 
 * Fixed #3833: When `width` is provided to `textAreaInput()`, we now correctly set the width of the `<textarea>` element. (#3838)
 
-* Fixes #3840: `updateSliderInput()` now warns when attempting to set invalid `min`, `max`, or `value` values. Sending an invalid update message to an input no longer causes other update messages to fail. (#3843)
-
 * `shiny::shinyAppTemplate()` no longer errors without a call to `library(shiny)`. (#3870)
 
 # shiny 1.7.4.1

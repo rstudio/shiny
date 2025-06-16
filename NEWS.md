@@ -39,6 +39,8 @@
 
 * Fixed an issue with `ExtendedTask` where synchronous errors would cause an error that would stop the current session. (#4225)
 
+* `shiny::shinyAppTemplate()` no longer errors without a call to `library(shiny)`. (#3870)
+
 # shiny 1.10.0
 
 ## New features and improvements
@@ -197,8 +199,6 @@ In addition, various properties of the spinners and pulse can be customized with
 * Fixed #3771: Sometimes the error `ion.rangeSlider.min.js: i.stopPropagation is not a function` would appear in the JavaScript console. (#3772)
 
 * Fixed #3833: When `width` is provided to `textAreaInput()`, we now correctly set the width of the `<textarea>` element. (#3838)
-
-* `shiny::shinyAppTemplate()` no longer errors without a call to `library(shiny)`. (#3870)
 
 # shiny 1.7.4.1
 

@@ -59,7 +59,7 @@
 <li>Places a minimum height on recalculating outputs so that the spinner is always visible. (<a href="https://github.com/rstudio/shiny/issues/4172" class="external-link">#4172</a>)</li>
 </ul></li>
 <li><p>Shiny now uses <a href="https://cli.r-lib.org" class="external-link">cli</a> instead of <a href="https://r-lib.github.io/crayon/" class="external-link">crayon</a> for rich log messages. (thanks <a href="https://github.com/olivroy" class="external-link">@olivroy</a>, <a href="https://github.com/rstudio/shiny/issues/4170" class="external-link">#4170</a>)</p></li>
-<li><p><code><a href="../reference/renderPlot.html">renderPlot()</a></code> was updated to accomodate changes in ggplot2 v4.0.0. (<a href="https://github.com/rstudio/shiny/issues/4226" class="external-link">#4226</a>)</p></li>
+<li><p><code><a href="../reference/renderPlot.html">renderPlot()</a></code> was updated to accommodate changes in ggplot2 v4.0.0. (<a href="https://github.com/rstudio/shiny/issues/4226" class="external-link">#4226</a>)</p></li>
 <li><p>When adding the new tab via <code><a href="../reference/insertTab.html">insertTab()</a></code> or <code><a href="https://rstudio.github.io/bslib/reference/nav_select.html" class="external-link">bslib::nav_insert()</a></code>, the underlying JavaScript no longer renders content twice. (<a href="https://github.com/rstudio/shiny/issues/4179" class="external-link">#4179</a>)</p></li>
 </ul></div>
 <div class="section level3">
@@ -78,7 +78,7 @@
 <div class="section level3">
 <h3 id="bug-fixes-1-11-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-11-0"></a></h3>
 <ul><li><p>The Shiny Client Console (enabled with <code><a href="../reference/devmode.html">shiny::devmode()</a></code>) no longer displays duplicate warning or error message. (<a href="https://github.com/rstudio/shiny/issues/4177" class="external-link">#4177</a>)</p></li>
-<li><p>Synchronous errors that occur inside a <code>ExtendedTask</code> no longer stops the session. (<a href="https://github.com/rstudio/shiny/issues/4225" class="external-link">#4225</a>)</p></li>
+<li><p>Synchronous errors that occur inside a <code>ExtendedTask</code> no longer stop the session. (<a href="https://github.com/rstudio/shiny/issues/4225" class="external-link">#4225</a>)</p></li>
 <li><p>Calling <code><a href="../reference/showModal.html">removeModal()</a></code> immediately after <code><a href="../reference/showModal.html">showModal()</a></code> no longer fails to remove the modal (this would sometimes happen if the remove message was received while the modal was in the process of being revealed). (<a href="https://github.com/rstudio/shiny/issues/4173" class="external-link">#4173</a>)</p></li>
 <li><p><code>runExample("08_html")</code> now (correctly) requests to ‘shiny.min.css’, eliminating a network request failure. (<a href="https://github.com/rstudio/shiny/issues/4220" class="external-link">#4220</a>)</p></li>
 <li><p><code><a href="../reference/shinyAppTemplate.html">shiny::shinyAppTemplate()</a></code> no longer errors without a call to <code><a href="https://shiny.posit.co/" class="external-link">library(shiny)</a></code>. (<a href="https://github.com/rstudio/shiny/issues/3870" class="external-link">#3870</a>)</p></li>

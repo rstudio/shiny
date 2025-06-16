@@ -31,6 +31,8 @@
 
 * Upgraded jQuery from 3.6.0 to 3.7.1. (#3969)
 
+* Updated jQuery UI from 1.13.2 to 1.14.1. (#4175)
+
 ## Bug fixes
 
 * `runExample("08_html")` now (correctly) requests to 'shiny.min.css', eliminating a network request failure. (#4220)

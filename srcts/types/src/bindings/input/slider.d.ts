@@ -26,7 +26,7 @@ declare class SliderInputBinding extends TextInputBindingBase {
     setValue(el: HTMLElement, value: number | string | [number | string, number | string]): void;
     subscribe(el: HTMLElement, callback: (x: boolean) => void): void;
     unsubscribe(el: HTMLElement): void;
-    receiveMessage(el: HTMLElement, data: SliderReceiveMessageData): void;
+    receiveMessage(el: HTMLElement, data: SliderReceiveMessageData): Promise<void>;
     getRatePolicy(el: HTMLElement): {
         policy: "debounce";
         delay: 250;

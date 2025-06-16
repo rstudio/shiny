@@ -60,7 +60,7 @@ Authors@R: c(
     comment = "showdown.js library"),
     person("Ivan", "Sagalaev", role = c("ctb", "cph"),
     comment = "highlight.js library"),
-    person(family = "R Core Team", role = c("ctb", "cph"),
+    person(given = "R Core Team", role = c("ctb", "cph"),
     comment = "tar implementation from R")
     )
 Description: Makes it incredibly easy to build interactive web
@@ -107,6 +107,7 @@ Suggests:
     reactlog (>= 1.0.0),
     magrittr,
     yaml,
+    mirai,
     future,
     dygraphs,
     ragg,

@@ -61,7 +61,7 @@ Other contributors:
   \item John Fraser (showdown.js library) [contributor, copyright holder]
   \item John Gruber (showdown.js library) [contributor, copyright holder]
   \item Ivan Sagalaev (highlight.js library) [contributor, copyright holder]
-  \item  R Core Team (tar implementation from R) [contributor, copyright holder]
+  \item R Core Team (tar implementation from R) [contributor, copyright holder]
 }
 
 }

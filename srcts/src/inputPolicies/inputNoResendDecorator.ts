@@ -1,5 +1,5 @@
-import type { InputPolicy, InputPolicyOpts } from "./inputPolicy";
 import { hasDefinedProperty } from "../utils";
+import type { InputPolicy, InputPolicyOpts } from "./inputPolicy";
 import { splitInputNameType } from "./splitInputNameType";
 
 type LastSentValues = { [key: string]: { [key: string]: string } };

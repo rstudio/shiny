@@ -1,9 +1,9 @@
-import { TextOutputBinding } from "./text";
 import { BindingRegistry } from "../registry";
-import { DownloadLinkOutputBinding } from "./downloadlink";
 import { DatatableOutputBinding } from "./datatable";
+import { DownloadLinkOutputBinding } from "./downloadlink";
 import { HtmlOutputBinding } from "./html";
 import { imageOutputBinding } from "./image";
+import { TextOutputBinding } from "./text";
 
 import { OutputBinding } from "./outputBinding";
 

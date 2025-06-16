@@ -1,8 +1,8 @@
 import $ from "jquery";
 
-import { InputBinding } from "./inputBinding";
-import { $escape, updateLabel, hasDefinedProperty } from "../../utils";
+import { $escape, hasDefinedProperty, updateLabel } from "../../utils";
 import type { CheckedHTMLElement } from "./checkbox";
+import { InputBinding } from "./inputBinding";
 
 type CheckboxGroupHTMLElement = CheckedHTMLElement;
 type ValueLabelObject = {

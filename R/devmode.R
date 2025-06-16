@@ -128,6 +128,12 @@ in_devmode <- function() {
     !identical(Sys.getenv("TESTTHAT"), "true")
 }
 
+in_client_devmode <- function() {
+  # Client-side devmode enables client-side only dev features without local
+  # devmode. Currently, the main feature is the client-side error console.
+  isTRUE(getOption("shiny.client_devmode", FALSE))
+}
+
 #' @describeIn devmode Temporarily set Shiny Developer Mode and Developer
 #'   message verbosity
 #' @param code Code to execute with the temporary Dev Mode options set

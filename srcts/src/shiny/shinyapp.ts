@@ -1,32 +1,35 @@
 import $ from "jquery";
+import type { InputBinding } from "../bindings";
+import type { OutputBindingAdapter } from "../bindings/outputAdapter";
+import { showErrorInClientConsole } from "../components/errorConsole";
+import type {
+  ShinyEventError,
+  ShinyEventMessage,
+  ShinyEventUpdateInput,
+  ShinyEventValue,
+} from "../events/shinyEvents";
+import type { UploadEndValue, UploadInitValue } from "../file/fileProcessor";
+import { resetBrush } from "../imageutils/resetBrush";
 import { $escape, hasOwnProperty, randomId, scopeExprToFunc } from "../utils";
+import { AsyncQueue } from "../utils/asyncQueue";
+import { isQt } from "../utils/browser";
+import { indirectEval } from "../utils/eval";
 import {
   getShinyCreateWebsocket,
   getShinyOnCustomMessage,
   setShinyUser,
+  shinyBindAll,
   shinyForgetLastInputValue,
   shinyUnbindAll,
 } from "./initedMethods";
-import { isQt } from "../utils/browser";
-import { showNotification, removeNotification } from "./notifications";
-import { showModal, removeModal } from "./modal";
-import { renderContentAsync, renderHtmlAsync } from "./render";
-import type { HtmlDep } from "./render";
+import { removeModal, showModal } from "./modal";
+import { removeNotification, showNotification } from "./notifications";
 import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
-import { resetBrush } from "../imageutils/resetBrush";
-import type { OutputBindingAdapter } from "../bindings/outputAdapter";
-import type {
-  ShinyEventError,
-  ShinyEventMessage,
-  ShinyEventValue,
-  ShinyEventUpdateInput,
-} from "../events/shinyEvents";
-import type { InputBinding } from "../bindings";
-import { indirectEval } from "../utils/eval";
+import type { HtmlDep } from "./render";
+import { renderContentAsync, renderHtmlAsync } from "./render";
 import type { WherePosition } from "./singletons";
-import type { UploadInitValue, UploadEndValue } from "../file/fileProcessor";
-import { AsyncQueue } from "../utils/asyncQueue";
-import { showErrorInClientConsole } from "../components/errorConsole";
+
+import { OutputProgressReporter } from "./outputProgress";
 
 type ResponseValue = UploadEndValue | UploadInitValue;
 type Handler = (message: any) => Promise<void> | void;
@@ -107,6 +110,9 @@ function addCustomMessageHandler(type: string, handler: Handler): void {
 
 //// End message handler variables
 
+/**
+ * The ShinyApp class handles the communication with the Shiny Server.
+ */
 class ShinyApp {
   $socket: ShinyWebSocket | null = null;
 
@@ -130,7 +136,9 @@ class ShinyApp {
 
   // Output bindings
   $bindings: { [key: string]: OutputBindingAdapter } = {};
-  $persistentProgress: Set<string> = new Set();
+
+  // Output progress states
+  $outputProgress = new OutputProgressReporter();
 
   // Cached values/errors
   $values: { [key: string]: any } = {};
@@ -241,7 +249,7 @@ class ShinyApp {
 
       // This launches the action queue loop, which just runs in the background,
       // so we don't need to await it.
-      /* eslint-disable @typescript-eslint/no-floating-promises */
+      /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
       this.startActionQueueLoop();
     };
     socket.onmessage = (e) => {
@@ -359,6 +367,7 @@ class ShinyApp {
     ) {
       const delay = this.reconnectDelay.next();
 
+      /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
       showReconnectDialog(delay);
       this.$scheduleReconnect(delay);
     }
@@ -461,12 +470,10 @@ class ShinyApp {
   }
 
   $sendMsg(msg: MessageValue): void {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    if (!this.$socket!.readyState) {
-      this.$pendingMessages.push(msg);
+    if (this.$socket && this.$socket.readyState) {
+      this.$socket.send(msg);
     } else {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.$socket!.send(msg);
+      this.$pendingMessages.push(msg);
     }
   }
 
@@ -608,7 +615,7 @@ class ShinyApp {
 
       const nsPrefix = el.attr("data-ns-prefix") as string;
       const nsScope = this._narrowScope(scope, nsPrefix);
-      const show = condFunc(nsScope);
+      const show = Boolean(condFunc(nsScope));
       const showing = el.css("display") !== "none";
 
       if (show !== showing) {
@@ -658,6 +665,9 @@ class ShinyApp {
     $(document).trigger(evt);
     if (evt.isDefaultPrevented()) return;
 
+    // Before passing the message to handlers, use it to update output progress state
+    this.$outputProgress.updateStateFromMessage(evt.message);
+
     // Send msgObj.foo and msgObj.bar to appropriate handlers
     await this._sendMessagesToHandlers(
       evt.message,
@@ -689,13 +699,17 @@ class ShinyApp {
     }
   }
 
-  private _clearProgress() {
-    for (const name in this.$bindings) {
-      if (
-        hasOwnProperty(this.$bindings, name) &&
-        !this.$persistentProgress.has(name)
-      ) {
-        this.$bindings[name].showProgress(false);
+  // Call showProgress() on any output bindings that have changed their
+  // recalculating status since the last call to takeChanges().
+  // Note that we only need to call this function when a "flush" (i.e. "values")
+  // message or a "progress" message is received since these are the only
+  // two types of messages that can change the recalculating status. For more,
+  // see the state machine diagram in outputProgress.ts.
+  private _updateProgress() {
+    const changed = this.$outputProgress.takeChanges();
+    for (const [name, recalculating] of changed.entries()) {
+      if (hasOwnProperty(this.$bindings, name)) {
+        this.$bindings[name].showProgress(recalculating);
       }
     }
   }
@@ -706,11 +720,10 @@ class ShinyApp {
     // * However, `_sendMessagesToHandlers()` will adjust the `this` context to the same _`this`_.
 
     addMessageHandler("values", async (message: { [key: string]: any }) => {
-      this._clearProgress();
+      this._updateProgress();
 
       for (const key in message) {
         if (hasOwnProperty(message, key)) {
-          this.$persistentProgress.delete(key);
           await this.receiveOutput(key, message[key]);
         }
       }
@@ -721,7 +734,6 @@ class ShinyApp {
       (message: { [key: string]: ErrorsMessageValue }) => {
         for (const key in message) {
           if (hasOwnProperty(message, key)) {
-            this.$persistentProgress.delete(key);
             this.receiveError(key, message[key]);
           }
         }
@@ -1042,8 +1054,13 @@ class ShinyApp {
         const $tabContent = getTabContent($tabset);
         let tabsetId = $parentTabset.attr("data-tabsetid");
 
-        const $divTag = $(message.divTag.html);
-        const $liTag = $(message.liTag.html);
+        // Create a virtual element where we'll temporarily hold the rendered
+        // nav controls so we can rewrite some attributes and choose where to
+        // insert the new controls.
+        const $fragLi = $("<div>");
+        await renderContentAsync($fragLi, message.liTag, "afterBegin");
+
+        const $liTag = $($fragLi).find("> li");
         const $aTag = $liTag.find("> a");
 
         // Unless the item is being prepended/appended, the target tab
@@ -1086,13 +1103,16 @@ class ShinyApp {
         // text items (which function as dividers and headers inside
         // navbarMenus) and whole navbarMenus (since those get
         // constructed from scratch on the R side and therefore
-        // there are no ids that need matching)
+        // there are no ids that need matching). In other words, we're
+        // guaranteed to be inserting only one `nav_panel()`.
+        let fixupDivId = "";
         if ($aTag.attr("data-toggle") === "tab") {
           const index = getTabIndex($tabset, tabsetId);
           const tabId = "tab-" + tabsetId + "-" + index;
 
           $liTag.find("> a").attr("href", "#" + tabId);
-          $divTag.attr("id", tabId);
+          // We'll fixup the div ID after we insert it
+          fixupDivId = tabId;
         }
 
         // actually insert the item into the right place
@@ -1109,11 +1129,8 @@ class ShinyApp {
             $tabset.append($liTag);
           }
         }
+        await shinyBindAll($targetLiTag?.parent() || $tabset);
 
-        await renderContentAsync($liTag[0], {
-          html: $liTag.html(),
-          deps: message.liTag.deps,
-        });
         // jcheng 2017-07-28: This next part might look a little insane versus the
         // more obvious `$tabContent.append($divTag);`, but there's a method to the
         // madness.
@@ -1141,40 +1158,30 @@ class ShinyApp {
         // In theory the same problem exists for $liTag but since that content is
         // much less likely to include arbitrary scripts, we're skipping it.
         //
-        // This code could be nicer if we didn't use renderContent, but rather the
-        // lower-level functions that renderContent uses. Like if we pre-process
-        // the value of message.divTag.html for singletons, we could do that, then
-        // render dependencies, then do $tabContent.append($divTag).
-        await renderContentAsync(
-          $tabContent[0],
-          { html: "", deps: message.divTag.deps },
-          // @ts-expect-error; TODO-barret; There is no usage of beforeend
-          "beforeend"
-        );
-        for (const el of $divTag.get()) {
-          // Must not use jQuery for appending el to the doc, we don't want any
-          // scripts to run (since they will run when renderContent takes a crack).
-          $tabContent[0].appendChild(el);
-          // If `el` itself is a script tag, this approach won't work (the script
-          // won't be run), since we're only sending innerHTML through renderContent
-          // and not the whole tag. That's fine in this case because we control the
-          // R code that generates this HTML, and we know that the element is not
-          // a script tag.
-          await renderContentAsync(el, el.innerHTML || el.textContent);
+        // garrick 2025-01-23: Keeping in mind the above, the `shiny-insert-tab`
+        // method was re-written to avoid adding the nav controls (liTag) and
+        // the nav panel contents (divTag) twice. Now, we use
+        // renderContentAsync() to add both sections to the DOM only once.
+
+        await renderContentAsync($tabContent[0], message.divTag, "beforeEnd");
+
+        if (fixupDivId) {
+          // We're inserting one nav_panel() and need to fixup the content ID
+          $tabContent.find('[id="tab-tsid-id"]').attr("id", fixupDivId);
         }
 
         if (message.select) {
           $liTag.find("a").tab("show");
         }
         /* Barbara -- August 2017
-  Note: until now, the number of tabs in a tabsetPanel (or navbarPage
-  or navlistPanel) was always fixed. So, an easy way to give an id to
-  a tab was simply incrementing a counter. (Just like it was easy to
-  give a random 4-digit number to identify the tabsetPanel). Now that
-  we're introducing dynamic tabs, we must retrieve these numbers and
-  fix the dummy id given to the tab in the R side -- there, we always
-  set the tab id (counter dummy) to "id" and the tabset id to "tsid")
-  */
+         * Note: until now, the number of tabs in a tabsetPanel (or navbarPage
+         * or navlistPanel) was always fixed. So, an easy way to give an id to
+         * a tab was simply incrementing a counter. (Just like it was easy to
+         * give a random 4-digit number to identify the tabsetPanel). Now that
+         * we're introducing dynamic tabs, we must retrieve these numbers and
+         * fix the dummy id given to the tab in the R side -- there, we always
+         * set the tab id (counter dummy) to "id" and the tabset id to "tsid")
+         */
         function getTabIndex(
           $tabset: JQuery<HTMLElement>,
           tabsetId: string | undefined
@@ -1427,13 +1434,9 @@ class ShinyApp {
           binding: binding,
           name: key,
         });
-        if (binding.showProgress) binding.showProgress(true);
-        if (message.persistent) {
-          this.$persistentProgress.add(key);
-        } else {
-          this.$persistentProgress.delete(key);
-        }
       }
+
+      this._updateProgress();
     },
 
     // Open a page-level progress bar
@@ -1606,4 +1609,4 @@ class ShinyApp {
 }
 
 export { ShinyApp, addCustomMessageHandler };
-export type { Handler, ErrorsMessageValue };
+export type { Handler, ErrorsMessageValue, ShinyWebSocket };

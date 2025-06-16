@@ -1,5 +1,111 @@
 # shiny (development version)
 
+## New features
+
+* `textInput()`, `textAreaInput()`, `numericInput()` and `passwordInput()` all gain an `updateOn` option. `updateOn = "change"` is the default and previous behavior, where the input value updates immediately whenever the value changes. With `updateOn = "blur"`, the input value will update only when the text input loses focus or when the user presses Enter (or Cmd/Ctrl + Enter for `textAreaInput()`). (#4183)
+
+* `textAreaInput()` gains a `autoresize` option, which automatically resizes the text area to fit its content. (#4210)
+
+## Changes
+
+* Shiny no longer suspends input changes when _any_ `<input type="submit">` or `<button type="submit">` is on the page. Instead, it now only suspends when a `submitButton()` is present. If you have reason for creating a submit button from custom HTML, add a CSS class of `shiny-submit-button` to the button. (#4209)
+
+## Improvements
+
+* When auto-reload is enabled, Shiny now reloads the entire app when support files, like Shiny modules, additional script files, or web assets, change. To enable auto-reload, call `devmode(TRUE)` to enable Shiny's developer mode, or set `options(shiny.autoreload = TRUE)` to specifically enable auto-reload. You can choose which files are watched for changes with the `shiny.autoreload.pattern` option. (#4184)
+
+* When busy indicators are enabled (i.e., `useBusyIndicators()`), Shiny now:
+    * Shows a spinner on recalculating htmlwidgets that have previously rendered an error (including `req()` and `validate()`). (#4172)
+    * Shows a spinner on `tableOutput()`. (#4172)
+    * Places a minimum height on recalculating outputs so that the spinner is always visible. (#4172)
+
+* Shiny now uses `{cli}` instead of `{crayon}` for rich log messages. (@olivroy #4170)
+
+* Shiny's Typescript assets are now compiled to ES2021 instead of ES5. (#4066)
+
+* `ExtendedTask` now catches synchronous values and errors and returns them via `$result()`. Previously, the extended task function was required to always return a promise. This change makes it easier to use `ExtendedTask` with a function that may return early or do some synchronous work before returning a promise. (#4225)
+
+* `renderPlot()` was updated to accomodate changes in ggplot2 v4.0.0. (#4226)
+
+## Bug fixes
+
+* Fixed a bug with modals where calling `removeModal()` too quickly after `showModal()` would fail to remove the modal if the remove modal message was received while the modal was in the process of being revealed. (#4173)
+
+* The Shiny Client Console (enabled with `shiny::devmode()`) no longer displays duplicate warning or error message. (#4177)
+
+* Updated the JavaScript used when inserting a tab to avoid rendering dynamic UI elements twice when adding the new tab via `insertTab()` or `bslib::nav_insert()`. (#4179)
+
+* Fixed an issue with `ExtendedTask` where synchronous errors would cause an error that would stop the current session. (#4225)
+
+# shiny 1.10.0
+
+## New features and improvements
+
+* When busy indicators are enabled (i.e., `useBusyIndicators()` is in the UI), Shiny now:
+    * Shows the pulse indicator when dynamic UI elements are recalculating and no other spinners are visible in the app. (#4137)
+    * Makes the pulse indicator slightly smaller by default and improves its appearance to better blend with any background. (#4122)
+
+* Improve collection of deep stack traces (stack traces that are tracked across steps in an async promise chain) with `{coro}` async generators such as `{elmer}` chat streams. Previously, Shiny treated each iteration of an async generator as a distinct deep stack, leading to pathologically long stack traces; now, Shiny only keeps/prints unique deep stack trace, discarding duplicates. (#4156)
+
+* Added an example to the `ExtendedTask` documentation. (@daattali #4087)
+
+## Bug fixes
+
+* Fixed a bug in `conditionalPanel()` that would cause the panel to repeatedly show/hide itself when the provided condition was not boolean. (@kamilzyla, #4127)
+
+* Fixed a bug with `sliderInput()` when used as a range slider that made it impossible to change the slider value when both handles were at the maximum value. (#4131)
+
+* `dateInput()` and `dateRangeInput()` no longer send immediate updates to the server when the user is typing a date input. Instead, it waits until the user presses Enter or clicks out of the field to send the update, avoiding spurious and incorrect date values. Note that an update is still sent immediately when the field is cleared. (#3664)
+
+* Fixed a bug in `onBookmark()` hook that caused elements to not be excluded from URL bookmarking. (#3762)
+
+* Fixed a bug with stack trace capturing that caused reactives with very long async promise chains (hundreds/thousands of steps) to become extremely slow. Chains this long are unlikely to be written by hand, but `{coro}` async generators and `{elmer}` async streaming were easily creating problematically long chains. (#4155)
+
+* Duplicate input and output IDs -- e.g. using `"debug"` for two inputs or two outputs -- or shared IDs -- e.g. using `"debug"` as the `inputId` for an input and an output -- now result in a console warning message, but not an error. When `devmode()` is enabled, an informative message is shown in the Shiny Client Console. We recommend all Shiny devs enable `devmode()` when developing Shiny apps locally. (#4101)
+
+* Updating the choices of a `selectizeInput()` via `updateSelectizeInput()` with `server = TRUE` no longer retains the selected choice as a deselected option if the current value is not part of the new choices. (@dvg-p4 #4142)
+
+* Fixed a bug where stack traces from `observeEvent()` were being stripped of stack frames too aggressively. (#4163)
+
+# shiny 1.9.1
+
+## Bug fixes
+
+* Fixed a bug introduced in v1.9.0 where the boundaries of hover/click/brush regions on plots were being incorrectly scaled when browser zoom was used. (#4111)
+
+# shiny 1.9.0
+
+## New busy indication feature
+
+Add the new `useBusyIndicators()` function to any UI definition to:
+  1. Add a spinner overlay on calculating/recalculating outputs.
+  2. Show a page-level pulsing banner when Shiny is busy calculating something (e.g., a download, side-effect, etc), but no calculating/recalculating outputs are visible.
+
+In a future version of Shiny, busy indication will be enabled by default, so we encourage you to try it out now, provide feedback, and report any issues.
+
+In addition, various properties of the spinners and pulse can be customized with `busyIndicatorOptions()`. For more details, see `?busyIndicatorOptions`. (#4040, #4104)
+
+## New features and improvements
+
+* The client-side TypeScript code for Shiny has been refactored so that the `Shiny` object is now an instance of class `ShinyClass`. (#4063)
+
+* In TypeScript, the `Shiny` object has a new property `initializedPromise`, which is a Promise-like object that can be `await`ed or chained with `.then()`. This Promise-like object corresponds to the `shiny:sessioninitialized` JavaScript event, but is easier to use because it can be used both before and after the events have occurred. (#4063)
+
+* Output bindings now include the `.recalculating` CSS class when they are first bound, up until the first render. This makes it possible/easier to show progress indication when the output is calculating for the first time. (#4039)
+
+* A new `shiny.client_devmode` option controls client-side devmode features, in particular the client-side error console introduced in shiny 1.8.1, independently of the R-side features of `shiny::devmode()`. This usage is primarily intended for automatic use in Shinylive. (#4073)
+
+* Added function `reactlogAddMark()` to programmatically add _mark_ed locations in the reactlog log without the requirement of keyboard bindings during an idle reactive moment. (#4103)
+
+## Bug fixes
+
+* `downloadButton()` and `downloadLink()` are now disabled up until they are fully initialized. This prevents the user from clicking the button/link before the download is ready. (#4041)
+
+* Output bindings that are removed, invalidated, then inserted again (while invalidated) now correctly include the `.recalculating` CSS class. (#4039)
+
+* Fixed a recent issue with `uiOutput()` and `conditionalPanel()` not properly lower opacity when recalculation (in a Bootstrap 5 context). (#4027)
+
+* Image outputs that were scaled by CSS had certain regions that were unresponsive to hover/click/brush handlers. (#3234)
 
 # shiny 1.8.1.1
 
@@ -13,7 +119,7 @@
 
 * Added a JavaScript error dialog, reporting errors that previously were only discoverable by opening the browser's devtools open. Since this dialog is mainly useful for debugging and development, it must be enabled with `shiny::devmode()`. (#3931)
 
-* `runExamples()` now uses the `{bslib}` package to generate a better looking result. It also gains a `package` argument so that other packages can leverage this same function to run Shiny app examples. For more, see `?runExamples`. (#3963, #4005)
+* `runExample()` now uses the `{bslib}` package to generate a better looking result. It also gains a `package` argument so that other packages can leverage this same function to run Shiny app examples. For more, see `?runExample`. (#3963, #4005)
 
 * Added `onUnhandledError()` to register a function that will be called when an unhandled error occurs in a Shiny app. Note that this handler doesn't stop the error or prevent the session from closing, but it can be used to log the error or to clean up session-specific resources. (thanks @JohnCoene, #3993)
 
@@ -983,7 +1089,7 @@ Shiny can now display notifications on the client browser by using the `showNoti
 <img src="http://shiny.rstudio.com/images/notification.png" alt="notification" width="50%"/>
 </p>
 
-[Here](https://shiny.rstudio.com/articles/notifications.html)'s our article about it, and the [reference documentation](https://shiny.rstudio.com/reference/shiny/latest/showNotification.html).
+[Here](https://shiny.rstudio.com/articles/notifications.html)'s our article about it, and the [reference documentation](https://shiny.posit.co/r/reference/shiny/latest/shownotification.html).
 
 ## Progress indicators
 
@@ -992,7 +1098,7 @@ If your Shiny app contains computations that take a long time to complete, a pro
 **_Important note_:**
 > If you were already using progress bars and had customized them with your own CSS, you can add the `style = "old"` argument to your `withProgress()` call (or `Progress$new()`). This will result in the same appearance as before. You can also call `shinyOptions(progress.style = "old")` in your app's server function to make all progress indicators use the old styling.
 
-To see new progress bars in action, see [this app](https://gallery.shinyapps.io/085-progress/) in the gallery. You can also learn more about this in [our article](https://shiny.rstudio.com/articles/progress.html) and in the reference documentation (either for the easier [`withProgress` functional API](https://shiny.rstudio.com/reference/shiny/latest/withProgress.html) or the more complicated, but more powerful, [`Progress` object-oriented API](https://shiny.rstudio.com/reference/shiny/latest/Progress.html).
+To see new progress bars in action, see [this app](https://gallery.shinyapps.io/085-progress/) in the gallery. You can also learn more about this in [our article](https://shiny.rstudio.com/articles/progress.html) and in the reference documentation (either for the easier [`withProgress` functional API](https://shiny.posit.co/r/reference/shiny/latest/withprogress.html) or the more complicated, but more powerful, [`Progress` object-oriented API](https://shiny.posit.co/r/reference/shiny/latest/progress.html).
 
 ## Reconnection
 
@@ -1006,7 +1112,7 @@ Shiny has now built-in support for displaying modal dialogs like the one below (
 <img src="http://shiny.rstudio.com/images/modal-dialog.png" alt="modal-dialog" width="50%"/>
 </p>
 
-To learn more about this, read [our article](https://shiny.rstudio.com/articles/modal-dialogs.html) and the [reference documentation](https://shiny.rstudio.com/reference/shiny/latest/modalDialog.html).
+To learn more about this, read [our article](https://shiny.rstudio.com/articles/modal-dialogs.html) and the [reference documentation](https://shiny.posit.co/r/reference/shiny/latest/modaldialog.html).
 
 ## `insertUI` and `removeUI`
 
@@ -1014,7 +1120,7 @@ Sometimes in a Shiny app, arbitrary HTML UI may need to be created on-the-fly in
 
 See [this simple demo app](https://gallery.shinyapps.io/111-insert-ui/) of how one could use `insertUI` and `removeUI` to insert and remove text elements using a queue. Also see [this other app](https://gallery.shinyapps.io/insertUI/) that demonstrates how to insert and remove a few common Shiny input objects. Finally, [this app](https://gallery.shinyapps.io/insertUI-modules/) shows how to dynamically insert modules using `insertUI`.
 
-For more, read [our article](https://shiny.rstudio.com/articles/dynamic-ui.html) about dynamic UI generation and the reference documentation about [`insertUI`](https://shiny.rstudio.com/reference/shiny/latest/insertUI.html) and [`removeUI`](https://shiny.rstudio.com/reference/shiny/latest/insertUI.html).
+For more, read [our article](https://shiny.rstudio.com/articles/dynamic-ui.html) about dynamic UI generation and the reference documentation about [`insertUI`](https://shiny.posit.co/r/reference/shiny/latest/insertui.html) and [`removeUI`](https://shiny.posit.co/r/reference/shiny/latest/insertui.html).
 
 ## Documentation for connecting to an external database
 
@@ -1048,7 +1154,7 @@ There are many more minor features, small improvements, and bug fixes than we ca
       <img src="http://shiny.rstudio.com/images/render-table.png" alt="render-table" width="75%"/>
       </p>
 
-      For more, read our [short article](https://shiny.rstudio.com/articles/render-table.html) about this update, experiment with all the new features in this [demo app](https://gallery.shinyapps.io/109-render-table/), or check out the [reference documentation](https://shiny.rstudio.com/reference/shiny/latest/renderTable.html).
+      For more, read our [short article](https://shiny.rstudio.com/articles/render-table.html) about this update, experiment with all the new features in this [demo app](https://gallery.shinyapps.io/109-render-table/), or check out the [reference documentation](https://shiny.posit.co/r/reference/shiny/latest/rendertable.html).
 
 ## Full changelog
 

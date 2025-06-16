@@ -1,16 +1,26 @@
 import $ from "jquery";
+import { Shiny } from "..";
 import type { InputBinding, OutputBinding } from "../bindings";
 import { OutputBindingAdapter } from "../bindings/outputAdapter";
 import type { BindingRegistry } from "../bindings/registry";
+import { ShinyClientMessageEvent } from "../components/errorConsole";
 import type {
   InputRateDecorator,
   InputValidateDecorator,
 } from "../inputPolicies";
 import { shinyAppBindOutput, shinyAppUnbindOutput } from "./initedMethods";
 import { sendImageSizeFns } from "./sendImageSize";
-import { ShinyClientError } from "./error";
 
 type BindScope = HTMLElement | JQuery<HTMLElement>;
+
+/**
+ * Type guard to check if a value is a jQuery object containing HTMLElements
+ * @param value The value to check
+ * @returns A type predicate indicating if the value is a jQuery<HTMLElement>
+ */
+function isJQuery<T = HTMLElement>(value: unknown): value is JQuery<T> {
+  return Boolean(value && (value as any).jquery);
+}
 
 // todo make sure allowDeferred can NOT be supplied and still work
 function valueChangeCallback(
@@ -74,14 +84,17 @@ const bindingsRegistry = (() => {
    * accessibility and other reasons. However, in practice our bindings still
    * work as long as inputs the IDs within a binding type don't overlap.
    *
-   * @returns ShinyClientError if current ID bindings are invalid, otherwise
-   * returns an ok status.
+   * @returns ShinyClientMessageEvent if current ID bindings are invalid,
+   * otherwise returns an ok status.
    */
-  function checkValidity():
-    | { status: "error"; error: ShinyClientError }
-    | { status: "ok" } {
+  function checkValidity(scope: BindScope): void {
+    if (!isJQuery(scope) && !(scope instanceof HTMLElement)) {
+      return;
+    }
+
     type BindingCounts = { [T in BindingTypes]: number };
     const duplicateIds = new Map<string, BindingCounts>();
+    const problems: Set<string> = new Set();
 
     // count duplicate IDs of each binding type
     bindings.forEach((idTypes, id) => {
@@ -89,22 +102,30 @@ const bindingsRegistry = (() => {
 
       idTypes.forEach((type) => (counts[type] += 1));
 
-      // If there's a single duplication of ids across both binding types, then
-      // when we're not in devmode, we allow this to pass because a good amount of
-      // existing applications use this pattern even though its invalid. Eventually
-      // this behavior should be removed.
-      if (counts.input === 1 && counts.output === 1 && !Shiny.inDevMode()) {
+      if (counts.input + counts.output < 2) {
         return;
       }
+      // We have duplicated IDs, add them to the set of duplicated IDs to be
+      // reported to the user.
+      duplicateIds.set(id, counts);
 
-      // If we have duplicated IDs, then add them to the set of duplicated IDs
-      // to be reported to the user.
-      if (counts.input + counts.output > 1) {
-        duplicateIds.set(id, counts);
+      if (counts.input > 1) {
+        problems.add("input");
+      }
+      if (counts.output > 1) {
+        problems.add("output");
+      }
+      if (counts.input >= 1 && counts.output >= 1) {
+        problems.add("shared");
       }
     });
 
-    if (duplicateIds.size === 0) return { status: "ok" };
+    if (duplicateIds.size === 0) return;
+    // Duplicated IDs are now always a warning. Before the ShinyClient console
+    // was added duplicate output IDs were errors in "production" mode. After
+    // the Shiny Client console was introduced, duplicate IDs were no longer
+    // production errors but *would* break apps in dev mode. Now, in v1.10+,
+    // duplicate IDs are always warnings in all modes for consistency.
 
     const duplicateIdMsg = Array.from(duplicateIds.entries())
       .map(([id, counts]) => {
@@ -119,15 +140,27 @@ const bindingsRegistry = (() => {
       })
       .join("\n");
 
-    return {
-      status: "error",
-      error: new ShinyClientError({
-        headline: "Duplicate input/output IDs found",
-        message: `The following ${
-          duplicateIds.size === 1 ? "ID was" : "IDs were"
-        } repeated:\n${duplicateIdMsg}`,
-      }),
-    };
+    let txtVerb = "Duplicate";
+    let txtNoun = "input/output";
+    if (problems.has("input") && problems.has("output")) {
+      // base case
+    } else if (problems.has("input")) {
+      txtNoun = "input";
+    } else if (problems.has("output")) {
+      txtNoun = "output";
+    } else if (problems.has("shared")) {
+      txtVerb = "Shared";
+    }
+
+    const txtIdsWere = duplicateIds.size == 1 ? "ID was" : "IDs were";
+    const headline = `${txtVerb} ${txtNoun} ${txtIdsWere} found`;
+    const message = `The following ${txtIdsWere} used for more than one ${
+      problems.has("shared") ? "input/output" : txtNoun
+    }:\n${duplicateIdMsg}`;
+
+    const event = new ShinyClientMessageEvent({ headline, message });
+    const scopeElement = isJQuery(scope) ? scope.get(0) : scope;
+    (scopeElement || window).dispatchEvent(event);
   }
 
   /**
@@ -320,6 +353,10 @@ async function bindOutputs(
       $el.addClass("shiny-bound-output");
       if (!$el.attr("aria-live")) $el.attr("aria-live", "polite");
 
+      if (Shiny.shinyapp?.$outputProgress.isRecalculating(id)) {
+        bindingAdapter.showProgress(true);
+      }
+
       bindingsRegistry.addBinding(id, "output");
       $el.trigger({
         type: "shiny:bound",
@@ -418,15 +455,7 @@ async function _bindAll(
   // complete error message that contains everything they will need to fix. If
   // we threw as we saw collisions then the user would fix the first collision,
   // re-run, and then see the next collision, etc.
-  const bindingValidity = bindingsRegistry.checkValidity();
-  if (bindingValidity.status === "error") {
-    // Only throw if we're in dev mode. Otherwise, just log a warning.
-    if (Shiny.inDevMode()) {
-      throw bindingValidity.error;
-    } else {
-      console.warn("[shiny] " + bindingValidity.error.message);
-    }
-  }
+  bindingsRegistry.checkValidity(scope);
 
   return currentInputs;
 }
@@ -460,5 +489,4 @@ async function bindAll(
 }
 
 export { unbindAll, bindAll, _bindAll };
-
 export type { BindScope, BindInputsCtx };

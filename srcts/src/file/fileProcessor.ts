@@ -1,8 +1,8 @@
 import $ from "jquery";
 import { triggerFileInputChanged } from "../events/inputChanged";
-import { $escape } from "../utils";
-import type { ShinyApp } from "../shiny/shinyapp";
 import { getFileInputBinding } from "../shiny/initedMethods";
+import type { ShinyApp } from "../shiny/shinyapp";
+import { $escape } from "../utils";
 
 type JobId = string;
 type UploadUrl = string;
@@ -180,7 +180,7 @@ class FileUploader extends FileProcessor {
   onFile(file: File, cont: () => void): void {
     this.onProgress(file, 0);
 
-    /* eslint-disable @typescript-eslint/no-floating-promises */
+    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     $.ajax(this.uploadUrl, {
       type: "POST",
       cache: false,

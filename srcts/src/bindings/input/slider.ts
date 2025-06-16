@@ -5,10 +5,10 @@ import type {
 import $ from "jquery";
 // import { NameValueHTMLElement } from ".";
 import {
-  formatDateUTC,
-  updateLabel,
   $escape,
+  formatDateUTC,
   hasDefinedProperty,
+  updateLabel,
 } from "../../utils";
 
 import type { TextHTMLElement } from "./text";

@@ -951,7 +951,10 @@ Observable <- R6Class(
 #' See the [Shiny tutorial](https://shiny.rstudio.com/tutorial/) for
 #' more information about reactive expressions.
 #'
-#' @param x For `is.reactive()`, an object to test. For `reactive()`, an expression. When passing in a [`quo()`]sure with `reactive()`, remember to use [`rlang::inject()`] to distinguish that you are passing in the content of your quosure, not the expression of the quosure.
+#' @param x For `is.reactive()`, an object to test. For `reactive()`, an
+#'   expression. When passing in a [`rlang::quo()`]sure with `reactive()`,
+#'   remember to use [`rlang::inject()`] to distinguish that you are passing in
+#'   the content of your quosure, not the expression of the quosure.
 #' @template param-env
 #' @templateVar x x
 #' @templateVar env env
@@ -2301,7 +2304,7 @@ observeEvent <- function(eventExpr, handlerExpr,
     priority = priority,
     domain = domain,
     autoDestroy = TRUE,
-    ..stacktraceon = FALSE # TODO: Does this go in the bindEvent?
+    ..stacktraceon = TRUE
   ))
 
   o <- inject(bindEvent(

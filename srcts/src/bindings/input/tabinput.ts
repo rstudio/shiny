@@ -1,6 +1,6 @@
 import $ from "jquery";
-import { InputBinding } from "./inputBinding";
 import { hasDefinedProperty, isBS3 } from "../../utils";
+import { InputBinding } from "./inputBinding";
 
 type TabInputReceiveMessageData = { value?: string };
 

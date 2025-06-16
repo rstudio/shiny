@@ -50,13 +50,14 @@ function initReactlog(): void {
       window.escape(shinyAppConfig().sessionId);
 
     // send notification
-    /* eslint-disable @typescript-eslint/no-floating-promises */
+    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     $.get(url, function (result: "marked" | void) {
       if (result !== "marked") return;
 
       const html =
         '<span id="shiny-reactlog-mark-text">Marked time point in reactlog</span>';
 
+      /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
       showNotification({
         html: html,
         closeButton: true,

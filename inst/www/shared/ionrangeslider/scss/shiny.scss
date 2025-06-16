@@ -143,6 +143,11 @@ $font-family: $font-family-base !default;
     border-radius: $handle_width;
     z-index: 2;
 
+    &.type_last {
+      // Ensure last-used handle is on top if it overlaps with another handle
+      z-index: 3;
+    }
+
     &.state_hover,
     &:hover {
       background: $handle_color_hover;

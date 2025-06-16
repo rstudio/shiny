@@ -27,6 +27,7 @@
 
 * Fixes #3840: `updateSliderInput()` now warns when attempting to set invalid `min`, `max`, or `value` values. Sending an invalid update message to an input no longer causes other update messages to fail. (#3843)
 
+* `shiny::shinyAppTemplate()` no longer errors without a call to `library(shiny)`. (#3870)
 
 # shiny 1.7.4.1
 

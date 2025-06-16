@@ -115,7 +115,5 @@ test_that("tabItem titles can contain tag objects", {
   #   "<a ....> <i>Hello</i> world"
   # As opposed to:
   #   "<a ....>&lt;i&gt;Hello&lt;/i&gt; world
-  expect_true(
-    grepl("<a [^>]+>\\s*<i>Hello</i>\\s+world", x$html)
-  )
+  expect_match(x$html, "<a [^>]+>\\s*<i>Hello</i>\\s+world")
 })

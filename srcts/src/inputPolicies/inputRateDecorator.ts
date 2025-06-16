@@ -1,7 +1,7 @@
-import type { InputPolicy, InputPolicyOpts } from "./inputPolicy";
 import { Debouncer, Invoker, Throttler } from "../time";
-import { splitInputNameType } from "./splitInputNameType";
+import type { InputPolicy, InputPolicyOpts } from "./inputPolicy";
 import type { InputRatePolicy } from "./inputRatePolicy";
+import { splitInputNameType } from "./splitInputNameType";
 
 type RatePolicyModes = "debounce" | "direct" | "throttle";
 
@@ -66,5 +66,4 @@ class InputRateDecorator implements InputPolicy {
 }
 
 export { InputRateDecorator };
-
 export type { RatePolicyModes };

@@ -1,5 +1,5 @@
-import type { Offset } from "./findbox";
 import type { Bounds } from "./createBrush";
+import type { Offset } from "./findbox";
 type PanelInit = {
     domain: {
         top: number;

@@ -99,12 +99,12 @@ saveShinySaveState <- function(state) {
 
 # Encode the state to a URL. This does not save to disk.
 encodeShinySaveState <- function(state) {
-  exclude <- c(state$exclude, "._bookmark_")
-  inputVals <- serializeReactiveValues(state$input, exclude, stateDir = NULL)
-
   # Allow user-supplied onSave function to do things like add state$values.
   if (!is.null(state$onSave))
     isolate(state$onSave(state))
+
+  exclude <- c(state$exclude, "._bookmark_")
+  inputVals <- serializeReactiveValues(state$input, exclude, stateDir = NULL)
 
   inputVals <- vapply(inputVals,
     function(x) toJSON(x, strict_atomic = FALSE),

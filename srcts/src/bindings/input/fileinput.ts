@@ -1,7 +1,7 @@
 import $ from "jquery";
-import { InputBinding } from "./inputBinding";
 import { FileUploader } from "../../file/fileProcessor";
 import { shinyShinyApp } from "../../shiny/initedMethods";
+import { InputBinding } from "./inputBinding";
 
 const zoneActive = "shiny-file-input-active";
 const zoneOver = "shiny-file-input-over";

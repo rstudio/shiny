@@ -14,6 +14,7 @@ reference:
     contents:
       - absolutePanel
       - bootstrapPage
+      - busyIndicatorOptions
       - column
       - conditionalPanel
       - fillPage
@@ -31,6 +32,7 @@ reference:
       - inputPanel
       - flowLayout
       - splitLayout
+      - useBusyIndicators
       - verticalLayout
       - wellPanel
       - withMathJax

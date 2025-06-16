@@ -172,9 +172,10 @@ setCurrentTheme <- function(theme) {
 
 #' Register a theme dependency
 #'
-#' This function registers a function that returns an [htmlDependency()] or list
-#' of such objects. If `session$setCurrentTheme()` is called, the function will
-#' be re-executed, and the resulting html dependency will be sent to the client.
+#' This function registers a function that returns an
+#' [htmltools::htmlDependency()] or list of such objects. If
+#' `session$setCurrentTheme()` is called, the function will be re-executed, and
+#' the resulting html dependency will be sent to the client.
 #'
 #' Note that `func` should **not** be an anonymous function, or a function which
 #' is defined within the calling function. This is so that,
@@ -1112,7 +1113,7 @@ plotOutput <- function(outputId, width = "100%", height="400px",
 #' @rdname renderTable
 #' @export
 tableOutput <- function(outputId) {
-  div(id = outputId, class="shiny-html-output")
+  div(id = outputId, class="shiny-html-output shiny-table-output")
 }
 
 dataTableDependency <- list(
@@ -1276,10 +1277,13 @@ downloadButton <- function(outputId,
                            ...,
                            icon = shiny::icon("download")) {
   tags$a(id=outputId,
-         class=paste('btn btn-default shiny-download-link', class),
+         class='btn btn-default shiny-download-link disabled',
+         class=class,
          href='',
          target='_blank',
          download=NA,
+         "aria-disabled"="true",
+         tabindex="-1",
          validateIcon(icon),
          label, ...)
 }
@@ -1288,10 +1292,13 @@ downloadButton <- function(outputId,
 #' @export
 downloadLink <- function(outputId, label="Download", class=NULL, ...) {
   tags$a(id=outputId,
-         class=paste(c('shiny-download-link', class), collapse=" "),
+         class='shiny-download-link disabled',
+         class=class,
          href='',
          target='_blank',
          download=NA,
+         "aria-disabled"="true",
+         tabindex="-1",
          label, ...)
 }
 

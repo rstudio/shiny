@@ -9,8 +9,8 @@ import {
 } from "./initedMethods";
 import { sendImageSizeFns } from "./sendImageSize";
 
-import { renderHtml as singletonsRenderHtml } from "./singletons";
 import type { WherePosition } from "./singletons";
+import { renderHtml as singletonsRenderHtml } from "./singletons";
 
 // There are synchronous and asynchronous versions of the exported functions
 // renderContent(), renderHtml(), and renderDependencies(). This is because they

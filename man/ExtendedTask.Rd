@@ -45,6 +45,58 @@ is, a function that quickly returns a promise) and allows even that very
 session to immediately unblock and carry on with other user interactions.
 }
 
+\examples{
+\dontshow{if (rlang::is_interactive() && rlang::is_installed("mirai")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+library(shiny)
+library(bslib)
+library(mirai)
+
+# Set background processes for running tasks
+daemons(1)
+# Reset when the app is stopped
+onStop(function() daemons(0))
+
+ui <- page_fluid(
+  titlePanel("Extended Task Demo"),
+  p(
+    'Click the button below to perform a "calculation"',
+    "that takes a while to perform."
+  ),
+  input_task_button("recalculate", "Recalculate"),
+  p(textOutput("result"))
+)
+
+server <- function(input, output) {
+  rand_task <- ExtendedTask$new(function() {
+    mirai(
+      {
+        # Slow operation goes here
+        Sys.sleep(2)
+        sample(1:100, 1)
+      }
+    )
+  })
+
+  # Make button state reflect task.
+  # If using R >=4.1, you can do this instead:
+  # rand_task <- ExtendedTask$new(...) |> bind_task_button("recalculate")
+  bind_task_button(rand_task, "recalculate")
+
+  observeEvent(input$recalculate, {
+    # Invoke the extended in an observer
+    rand_task$invoke()
+  })
+
+  output$result <- renderText({
+    # React to updated results when the task completes
+    number <- rand_task$result()
+    paste0("Your number is ", number, ".")
+  })
+}
+
+shinyApp(ui, server)
+\dontshow{\}) # examplesIf}
+}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
@@ -71,11 +123,12 @@ server function.
 \item{\code{func}}{The long-running operation to execute. This should be an
 asynchronous function, meaning, it should use the
 \href{https://rstudio.github.io/promises/}{\{promises\}} package, most
-likely in conjuction with the
+likely in conjunction with the
+\href{https://mirai.r-lib.org}{\{mirai\}} or
 \href{https://rstudio.github.io/promises/articles/promises_04_futures.html}{\{future\}}
 package. (In short, the return value of \code{func} should be a
-\code{\link[future:future]{Future}} object, or a \code{promise}, or something else
-that \code{\link[promises:is.promise]{promises::as.promise()}} understands.)
+\code{\link[mirai:mirai]{mirai}}, \code{\link[future:future]{Future}}, \code{promise},
+or something else that \code{\link[promises:is.promise]{promises::as.promise()}} understands.)
 
 It's also important that this logic does not read from any
 reactive inputs/sources, as inputs may change after the function is

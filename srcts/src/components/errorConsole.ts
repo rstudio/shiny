@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { LitElement, html, css } from "lit";
+import { css, html, LitElement } from "lit";
+import { Shiny } from "..";
 import { ShinyClientError } from "../shiny/error";
 
 const buttonStyles = css`
@@ -199,6 +200,42 @@ class ShinyErrorConsole extends LitElement {
     });
   }
 
+  static createClientMessageElement({ headline, message }: ShinyClientMessage) {
+    const msg = document.createElement("shiny-error-message");
+    msg.setAttribute("headline", headline || "");
+    msg.setAttribute("message", message);
+    return msg;
+  }
+
+  appendConsoleMessage({ headline, message }: ShinyClientMessage) {
+    const content =
+      this.shadowRoot?.querySelector<HTMLSlotElement>("slot.content");
+
+    if (content) {
+      const nodeKey = (node: Element) => {
+        const headline = node.getAttribute("headline") || "";
+        const message = node.getAttribute("message") || "";
+        return `${headline}::${message}`;
+      };
+      const newKey = `${headline}::${message}`;
+
+      for (const node of content.assignedElements()) {
+        if (node.tagName.toLowerCase() === "shiny-error-message") {
+          if (nodeKey(node) === newKey) {
+            // Do nothing, this message is already in the console
+            // TODO: Increase count of message here
+            return;
+          }
+        }
+      }
+    }
+
+    this.appendChild(
+      ShinyErrorConsole.createClientMessageElement({ headline, message })
+    );
+    return;
+  }
+
   render() {
     return html` <div class="header">
         <span class="title"> Shiny Client Errors </span>
@@ -306,6 +343,7 @@ export class ShinyErrorMessage extends LitElement {
 
       .error-message {
         font-family: "Courier New", Courier, monospace;
+        white-space: pre-wrap;
       }
 
       .decoration-container {
@@ -488,6 +526,48 @@ export class ShinyErrorMessage extends LitElement {
 
 customElements.define("shiny-error-message", ShinyErrorMessage);
 
+export type ShinyClientMessage = {
+  message: string;
+  headline?: string;
+  status?: "error" | "info" | "warning";
+};
+
+function showShinyClientMessage({
+  headline = "",
+  message,
+  status = "warning",
+}: ShinyClientMessage): void {
+  const consoleMessage = `[shiny] ${headline}${
+    headline ? " - " : ""
+  }${message}`;
+
+  switch (status) {
+    case "error":
+      console.error(consoleMessage);
+      break;
+    case "warning":
+      console.warn(consoleMessage);
+      break;
+    default:
+      console.log(consoleMessage);
+      break;
+  }
+
+  if (!Shiny.inDevMode()) {
+    return;
+  }
+
+  // Check to see if an Error Console Container element already exists. If it
+  // doesn't we need to add it before putting an error on the screen
+  let sec = document.querySelector<ShinyErrorConsole>("shiny-error-console");
+  if (!sec) {
+    sec = document.createElement("shiny-error-console") as ShinyErrorConsole;
+    document.body.appendChild(sec);
+  }
+
+  sec.appendConsoleMessage({ headline, message });
+}
+
 /**
  * Function to show an error message to user in shiny-error-message web
  * component. Only shows the error if we're in development mode.
@@ -496,11 +576,6 @@ customElements.define("shiny-error-message", ShinyErrorMessage);
  * object.
  */
 export function showErrorInClientConsole(e: unknown): void {
-  if (!Shiny.inDevMode()) {
-    // If we're in production, don't show the error to the user
-    return;
-  }
-
   let errorMsg: string | null = null;
   let headline = "Error on client while running Shiny app";
 
@@ -515,17 +590,24 @@ export function showErrorInClientConsole(e: unknown): void {
     errorMsg = "Unknown error";
   }
 
-  // Check to see if an Error Console Container element already exists. If it
-  // doesn't we need to add it before putting an error on the screen
-  let errorConsoleContainer = document.querySelector("shiny-error-console");
-  if (!errorConsoleContainer) {
-    errorConsoleContainer = document.createElement("shiny-error-console");
-    document.body.appendChild(errorConsoleContainer);
-  }
-
-  const errorConsole = document.createElement("shiny-error-message");
-  errorConsole.setAttribute("headline", headline || "");
-  errorConsole.setAttribute("message", errorMsg);
-
-  errorConsoleContainer.appendChild(errorConsole);
+  showShinyClientMessage({ headline, message: errorMsg, status: "error" });
 }
+
+export class ShinyClientMessageEvent extends CustomEvent<ShinyClientMessage> {
+  constructor(detail: ShinyClientMessage) {
+    super("shiny:client-message", { detail, bubbles: true, cancelable: true });
+  }
+}
+
+window.addEventListener("shiny:client-message", (ev: Event) => {
+  if (!(ev instanceof CustomEvent)) {
+    throw new Error("[shiny] shiny:client-message expected a CustomEvent");
+  }
+  const { headline, message, status } = ev.detail;
+  if (!message) {
+    throw new Error(
+      "[shiny] shiny:client-message expected a `message` property in `event.detail`."
+    );
+  }
+  showShinyClientMessage({ headline, message, status });
+});

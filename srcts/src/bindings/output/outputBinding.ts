@@ -1,6 +1,6 @@
 import $ from "jquery";
-import { asArray } from "../../utils";
 import type { ErrorsMessageValue } from "../../shiny/shinyapp";
+import { asArray } from "../../utils";
 
 class OutputBinding {
   name!: string;

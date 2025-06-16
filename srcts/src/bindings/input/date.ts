@@ -1,13 +1,13 @@
 import $ from "jquery";
-import { InputBinding } from "./inputBinding";
 import {
-  formatDateUTC,
-  updateLabel,
   $escape,
-  parseDate,
+  formatDateUTC,
   hasDefinedProperty,
+  parseDate,
+  updateLabel,
 } from "../../utils";
 import type { NotUndefined } from "../../utils/extraTypes";
+import { InputBinding } from "./inputBinding";
 
 declare global {
   interface JQuery {
@@ -40,19 +40,15 @@ class DateInputBindingBase extends InputBinding {
     el;
   }
   subscribe(el: HTMLElement, callback: (x: boolean) => void): void {
-    $(el).on(
-      "keyup.dateInputBinding input.dateInputBinding",
-      // event: Event
-      function () {
-        // Use normal debouncing policy when typing
-        callback(true);
-      }
-    );
+    // Don't update when in the middle of typing; listening on keyup or input
+    // tends to send spurious values to the server, based on unpredictable
+    // browser-dependant interpretation of partially-typed date strings.
     $(el).on(
       "changeDate.dateInputBinding change.dateInputBinding",
       // event: Event
       function () {
         // Send immediately when clicked
+        // Or if typing, when enter pressed or focus lost
         callback(false);
       }
     );
@@ -296,10 +292,13 @@ class DateInputBinding extends DateInputBindingBase {
       startview: startview,
     };
   }
-  receiveMessage(el: HTMLElement, data: DateReceiveMessageData): void {
+  async receiveMessage(
+    el: HTMLElement,
+    data: DateReceiveMessageData
+  ): Promise<void> {
     const $input = $(el).find("input");
 
-    updateLabel(data.label, this._getLabelNode(el));
+    await updateLabel(data.label, this._getLabelNode(el));
 
     if (hasDefinedProperty(data, "min")) this._setMin($input[0], data.min);
 

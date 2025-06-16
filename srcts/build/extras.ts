@@ -5,13 +5,13 @@
 
 // - TypeScript -----------------------------------------------------------
 
-import { banner, build, outDir, babelPlugin } from "./_build";
+import { banner, build, outDir } from "./_build";
 
 build({
   bundle: true,
   sourcemap: true,
   minify: true,
-  plugins: [babelPlugin()],
+  plugins: [],
   banner: banner,
   entryPoints: [
     "srcts/extras/shiny-autoreload.ts",
@@ -52,4 +52,12 @@ build({
     outDir + "shiny_scss/shiny.scss",
   ],
   outfile: outDir + "shiny.min.css",
+});
+build({
+  ...sassOpts,
+  entryPoints: ["srcts/extras/busy-indicators/busy-indicators.scss"],
+  outfile: outDir + "busy-indicators/busy-indicators.css",
+  plugins: [sassPlugin()],
+  bundle: false,
+  metafile: true,
 });

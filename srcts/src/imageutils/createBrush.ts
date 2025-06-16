@@ -1,7 +1,7 @@
 import $ from "jquery";
+import { equal, isnan, mapValues, roundSignif } from "../utils";
 import type { Coordmap } from "./initCoordmap";
 import { findOrigin } from "./initCoordmap";
-import { equal, isnan, mapValues, roundSignif } from "../utils";
 import type { Panel } from "./initPanelScales";
 
 import type { Offset } from "./findbox";
@@ -656,5 +656,4 @@ function createBrush(
 }
 
 export { createBrush };
-
 export type { Bounds, BrushOpts, BoundsCss };

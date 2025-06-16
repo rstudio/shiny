@@ -162,11 +162,29 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
     sharedEnv <- globalenv()
   }
 
+  # To enable hot-reloading of support files, this function is called
+  # whenever the UI or Server func source is updated. To avoid loading
+  # support files 2x, we follow the last cache update trigger timestamp.
+  autoload_r_support_if_needed <- local({
+    autoload_last_loaded <- -1
+    function() {
+      if (!isTRUE(getOption("shiny.autoload.r", TRUE))) return()
+      
+      last_cache_trigger <- cachedAutoReloadLastChanged$get()
+      if (identical(autoload_last_loaded, last_cache_trigger)) return()
+
+      loadSupport(appDir, renv = sharedEnv, globalrenv = globalenv())
+
+      autoload_last_loaded <<- last_cache_trigger
+    }
+  })
+
   # uiHandlerSource is a function that returns an HTTP handler for serving up
   # ui.R as a webpage. The "cachedFuncWithFile" call makes sure that the closure
   # we're creating here only gets executed when ui.R's contents change.
   uiHandlerSource <- cachedFuncWithFile(appDir, "ui.R", case.sensitive = FALSE,
     function(uiR) {
+      autoload_r_support_if_needed()
       if (file.exists(uiR)) {
         # If ui.R contains a call to shinyUI (which sets .globals$ui), use that.
         # If not, then take the last expression that's returned from ui.R.
@@ -197,6 +215,7 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
 
   serverSource <- cachedFuncWithFile(appDir, "server.R", case.sensitive = FALSE,
     function(serverR) {
+      autoload_r_support_if_needed()
       # If server.R contains a call to shinyServer (which sets .globals$server),
       # use that. If not, then take the last expression that's returned from
       # server.R.
@@ -232,10 +251,9 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
   onStart <- function() {
     oldwd <<- getwd()
     setwd(appDir)
-    # TODO: we should support hot reloading on global.R and R/*.R changes.
     if (getOption("shiny.autoload.r", TRUE)) {
-      loadSupport(appDir, renv=sharedEnv, globalrenv=globalenv())
-    }  else {
+      autoload_r_support_if_needed()
+    } else {
       if (file.exists(file.path.ci(appDir, "global.R")))
         sourceUTF8(file.path.ci(appDir, "global.R"))
     }
@@ -290,33 +308,77 @@ initAutoReloadMonitor <- function(dir) {
     return(function(){})
   }
 
-  filePattern <- getOption("shiny.autoreload.pattern",
-    ".*\\.(r|html?|js|css|png|jpe?g|gif)$")
+  filePattern <- getOption(
+    "shiny.autoreload.pattern",
+    ".*\\.(r|html?|js|css|png|jpe?g|gif)$"
+  )
 
-  lastValue <- NULL
-  observeLabel <- paste0("File Auto-Reload - '", basename(dir), "'")
-  obs <- observe(label = observeLabel, {
-    files <- sort_c(
-      list.files(dir, pattern = filePattern, recursive = TRUE, ignore.case = TRUE)
-    )
-    times <- file.info(files)$mtime
-    names(times) <- files
-
-    if (is.null(lastValue)) {
-      # First run
-      lastValue <<- times
-    } else if (!identical(lastValue, times)) {
-      # We've changed!
-      lastValue <<- times
+  
+  if (is_installed("watcher")) {
+    check_for_update <- function(paths) {
+      paths <- grep(
+        filePattern,
+        paths,
+        ignore.case = TRUE,
+        value = TRUE
+      )
+      
+      if (length(paths) == 0) {
+        return()
+      }
+      
+      cachedAutoReloadLastChanged$set()
       autoReloadCallbacks$invoke()
     }
+    
+    # [garrick, 2025-02-20] Shiny <= v1.10.0 used `invalidateLater()` with an
+    # autoreload.interval in ms. {watcher} instead uses a latency parameter in
+    # seconds, which serves a similar purpose and that I'm keeping for backcompat.
+    latency <- getOption("shiny.autoreload.interval", 250) / 1000
+    watcher <- watcher::watcher(dir, check_for_update, latency = latency)
+    watcher$start()
+    onStop(watcher$stop)
+  } else {
+    # Fall back to legacy observer behavior
+    if (!is_false(getOption("shiny.autoreload.legacy_warning", TRUE))) {
+      cli::cli_warn(
+        c(
+          "Using legacy autoreload file watching. Please install {.pkg watcher} for a more performant autoreload file watcher.",
+          "i" = "Set {.run options(shiny.autoreload.legacy_warning = FALSE)} to suppress this warning."
+        ),
+        .frequency = "regularly",
+        .frequency_id = "shiny.autoreload.legacy_warning"
+      )
+    }
 
-    invalidateLater(getOption("shiny.autoreload.interval", 500))
-  })
+    lastValue <- NULL
+    observeLabel <- paste0("File Auto-Reload - '", basename(dir), "'")
+    watcher <- observe(label = observeLabel, {
+      files <- sort_c(
+        list.files(dir, pattern = filePattern, recursive = TRUE, ignore.case = TRUE)
+      )
+      times <- file.info(files)$mtime
+      names(times) <- files
+  
+      if (is.null(lastValue)) {
+        # First run
+        lastValue <<- times
+      } else if (!identical(lastValue, times)) {
+        # We've changed!
+        lastValue <<- times
+        cachedAutoReloadLastChanged$set()
+        autoReloadCallbacks$invoke()
+      }
+  
+      invalidateLater(getOption("shiny.autoreload.interval", 500))
+    })
+  
+    onStop(watcher$destroy)
+  
+    watcher$destroy
+  }
 
-  onStop(obs$destroy)
-
-  obs$destroy
+  invisible(watcher)
 }
 
 #' Load an app's supporting R files
@@ -421,8 +483,6 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
       wasDir <- setwd(appDir)
       on.exit(setwd(wasDir))
 
-      # TODO: we should support hot reloading on R/*.R changes.
-      # In an upcoming version of shiny, this option will go away.
       if (getOption("shiny.autoload.r", TRUE)) {
         # Create a child env which contains all the helpers and will be the shared parent
         # of the ui.R and server.R load.

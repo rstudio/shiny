@@ -1,6 +1,6 @@
 import $ from "jquery";
-import { InputBinding } from "./inputBinding";
 import { hasDefinedProperty } from "../../utils";
+import { InputBinding } from "./inputBinding";
 
 type CheckedHTMLElement = HTMLInputElement;
 

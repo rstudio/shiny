@@ -5,7 +5,7 @@ test_that("Initial snapshot values are consistent", {
   app$expect_values()
 }){{
 if (isTRUE(module)) {
-HTML('
+shiny::HTML('
 
 
 test_that("Module values are consistent", {

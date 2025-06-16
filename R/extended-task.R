@@ -100,11 +100,12 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
     #' @param func The long-running operation to execute. This should be an
     #'   asynchronous function, meaning, it should use the
     #'   [\{promises\}](https://rstudio.github.io/promises/) package, most
-    #'   likely in conjuction with the
+    #'   likely in conjunction with the
+    #'   [\{mirai\}](https://mirai.r-lib.org) or
     #'   [\{future\}](https://rstudio.github.io/promises/articles/promises_04_futures.html)
     #'   package. (In short, the return value of `func` should be a
-    #'   [`Future`][future::future()] object, or a `promise`, or something else
-    #'   that [promises::as.promise()] understands.)
+    #'   [`mirai`][mirai::mirai()], [`Future`][future::future()], `promise`,
+    #'   or something else that [promises::as.promise()] understands.)
     #'
     #'   It's also important that this logic does not read from any
     #'   reactive inputs/sources, as inputs may change after the function is

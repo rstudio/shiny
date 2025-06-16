@@ -121,11 +121,12 @@ server function.
 \item{\code{func}}{The long-running operation to execute. This should be an
 asynchronous function, meaning, it should use the
 \href{https://rstudio.github.io/promises/}{\{promises\}} package, most
-likely in conjuction with the
+likely in conjunction with the
+\href{https://mirai.r-lib.org}{\{mirai\}} or
 \href{https://rstudio.github.io/promises/articles/promises_04_futures.html}{\{future\}}
 package. (In short, the return value of \code{func} should be a
-\code{\link[future:future]{Future}} object, or a \code{promise}, or something else
-that \code{\link[promises:is.promise]{promises::as.promise()}} understands.)
+\code{\link[mirai:mirai]{mirai}}, \code{\link[future:future]{Future}}, \code{promise},
+or something else that \code{\link[promises:is.promise]{promises::as.promise()}} understands.)
 
 It's also important that this logic does not read from any
 reactive inputs/sources, as inputs may change after the function is

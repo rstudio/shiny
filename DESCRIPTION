@@ -107,6 +107,7 @@ Suggests:
     reactlog (>= 1.0.0),
     magrittr,
     yaml,
+    mirai,
     future,
     dygraphs,
     ragg,

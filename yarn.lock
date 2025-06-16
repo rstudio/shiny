@@ -921,7 +921,7 @@ __metadata:
   peerDependenciesMeta:
     jquery-ui:
       optional: true
-  checksum: 821744ebc11b9d40686fe29d1ce9e3579df6eaf377cce2008aaa38f672bb787083d770626d41ba2624ce56d9c0d9c03d51534decbe4d581810b837ee908edb0b
+  checksum: 8718ebda1068894fc1267459b603f492045723ed1000fdbe798f2fab78fed8536b1906f56c53e9bd0ff9dce24aed176045618d0a1eddcf48f7d0313ad4ad67e9
   languageName: node
   linkType: hard
 
@@ -1211,12 +1211,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jquery@npm:3.5.29":
-  version: 3.5.29
-  resolution: "@types/jquery@npm:3.5.29"
+"@types/jquery@npm:3.5.32":
+  version: 3.5.32
+  resolution: "@types/jquery@npm:3.5.32"
   dependencies:
     "@types/sizzle": "*"
-  checksum: 5e959762d6f7050b07b4387b6507a308113384566a77cfc4f8d0f54c2fb0a79f6bc8c057706c6aa4840cde56f32ad0e5814fb53c5f078c5db9e01670a1ecd535
+  checksum: 7fe7251bda3fc9d80417ef7c88ad963ccb591706bca2fb84ea5d9600498a8f9911c32302f28fd1910bb212c34193f38f63818757a9833b70e1f46c3a98a17625
   languageName: node
   linkType: hard
 
@@ -1286,7 +1286,7 @@ __metadata:
     "@types/highlightjs": ^9.12.1
     "@types/ion-rangeslider": 2.3.0
     "@types/jest": ^26.0.23
-    "@types/jquery": 3.5.29
+    "@types/jquery": 3.5.32
     "@types/jqueryui": 1.12.16
     "@types/lodash": ^4.14.170
     "@types/node": ^18.14.2

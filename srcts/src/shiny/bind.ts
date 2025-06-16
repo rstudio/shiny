@@ -1,6 +1,7 @@
 import $ from "jquery";
 import { Shiny } from "..";
 import type { InputBinding, OutputBinding } from "../bindings";
+import type { SubscribeEventPriority } from "../bindings/input/inputBinding";
 import { OutputBindingAdapter } from "../bindings/outputAdapter";
 import type { BindingRegistry } from "../bindings/registry";
 import { ShinyClientMessageEvent } from "../components/errorConsole";
@@ -263,19 +264,18 @@ function bindInputs(
         const thisBinding = binding;
         const thisEl = el;
 
-        // Historically speaking, this callback has only accepted a boolean value,
-        // but in recent versions it can also accept an input priority.
-        // The `priority` parameter can be:
-        // - A boolean: `true` maps to "deferred", and `false` maps to "immediate".
-        // - A string or other value representing a specific priority mode, which is passed through as-is.
-        // This conversion ensures backward compatibility while supporting new priority modes.
-        return function (priority: EventPriority | boolean) {
-          const normalizedPriority =
-            typeof priority !== "boolean"
-              ? priority
-              : priority
-              ? "deferred"
-              : "immediate";
+        return function (priority: SubscribeEventPriority) {
+          // Narrow the type of priority to EventPriority
+          let normalizedPriority: EventPriority;
+          if (priority === true) {
+            normalizedPriority = "deferred";
+          } else if (priority === false) {
+            normalizedPriority = "immediate";
+          } else if (typeof priority === "object" && "priority" in priority) {
+            normalizedPriority = priority.priority;
+          } else {
+            normalizedPriority = priority;
+          }
 
           valueChangeCallback(inputs, thisBinding, thisEl, normalizedPriority);
         };

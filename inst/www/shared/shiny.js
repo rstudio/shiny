@@ -5734,7 +5734,16 @@ ${duplicateIdMsg}`;
           const thisBinding = binding;
           const thisEl = el;
           return function(priority) {
-            const normalizedPriority = typeof priority !== "boolean" ? priority : priority ? "deferred" : "immediate";
+            let normalizedPriority;
+            if (priority === true) {
+              normalizedPriority = "deferred";
+            } else if (priority === false) {
+              normalizedPriority = "immediate";
+            } else if (typeof priority === "object" && "priority" in priority) {
+              normalizedPriority = priority.priority;
+            } else {
+              normalizedPriority = priority;
+            }
             valueChangeCallback(inputs, thisBinding, thisEl, normalizedPriority);
           };
         }();

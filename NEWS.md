@@ -29,6 +29,8 @@
 
 * `renderPlot()` was updated to accomodate changes in ggplot2 v4.0.0. (#4226)
 
+* Upgraded jQuery from 3.6.0 to 3.7.1. (#3969)
+
 ## Bug fixes
 
 * `runExample("08_html")` now (correctly) requests to 'shiny.min.css', eliminating a network request failure. (#4220)

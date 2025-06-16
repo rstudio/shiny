@@ -1031,8 +1031,7 @@
         deps: []
       };
     }
-    const emptyLabel = Array.isArray(labelContent.html) && labelContent.html.length === 0 || labelContent.html === "";
-    if (emptyLabel) {
+    if (labelContent.html === "") {
       labelNode.addClass("shiny-label-null");
     } else {
       await renderContent(labelNode, labelContent);

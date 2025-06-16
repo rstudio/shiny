@@ -41,12 +41,15 @@
 #'   is, a function that quickly returns a promise) and allows even that very
 #'   session to immediately unblock and carry on with other user interactions.
 #'
-#' @examplesIf rlang::is_interactive() && rlang::is_installed("future")
-#'
+#' @examplesIf rlang::is_interactive() && rlang::is_installed("mirai")
 #' library(shiny)
 #' library(bslib)
-#' library(future)
-#' plan(multisession)
+#' library(mirai)
+#'
+#' # Set background processes for running tasks
+#' daemons(1)
+#' # Reset when the app is stopped
+#' onStop(function() daemons(0))
 #'
 #' ui <- page_fluid(
 #'   titlePanel("Extended Task Demo"),
@@ -60,13 +63,12 @@
 #'
 #' server <- function(input, output) {
 #'   rand_task <- ExtendedTask$new(function() {
-#'     future(
+#'     mirai(
 #'       {
 #'         # Slow operation goes here
 #'         Sys.sleep(2)
 #'         sample(1:100, 1)
-#'       },
-#'       seed = TRUE
+#'       }
 #'     )
 #'   })
 #'

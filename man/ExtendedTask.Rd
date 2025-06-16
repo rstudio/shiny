@@ -46,12 +46,15 @@ session to immediately unblock and carry on with other user interactions.
 }
 
 \examples{
-\dontshow{if (rlang::is_interactive() && rlang::is_installed("future")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
-
+\dontshow{if (rlang::is_interactive() && rlang::is_installed("mirai")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(shiny)
 library(bslib)
-library(future)
-plan(multisession)
+library(mirai)
+
+# Set background processes for running tasks
+daemons(1)
+# Reset when the app is stopped
+onStop(function() daemons(0))
 
 ui <- page_fluid(
   titlePanel("Extended Task Demo"),
@@ -65,13 +68,12 @@ ui <- page_fluid(
 
 server <- function(input, output) {
   rand_task <- ExtendedTask$new(function() {
-    future(
+    mirai(
       {
         # Slow operation goes here
         Sys.sleep(2)
         sample(1:100, 1)
-      },
-      seed = TRUE
+      }
     )
   })
 

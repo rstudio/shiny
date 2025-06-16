@@ -8,7 +8,7 @@ import type {
   InputRateDecorator,
   InputValidateDecorator,
 } from "../inputPolicies";
-import type { InputPolicyOpts } from "../inputPolicies/inputPolicy";
+import type { EventPriority } from "../inputPolicies/inputPolicy";
 import { shinyAppBindOutput, shinyAppUnbindOutput } from "./initedMethods";
 import { sendImageSizeFns } from "./sendImageSize";
 
@@ -28,7 +28,7 @@ function valueChangeCallback(
   inputs: InputValidateDecorator,
   binding: InputBinding,
   el: HTMLElement,
-  priority: InputPolicyOpts["priority"]
+  priority: EventPriority
 ) {
   let id = binding.getId(el);
 
@@ -269,7 +269,7 @@ function bindInputs(
         // - A boolean: `true` maps to "deferred", and `false` maps to "immediate".
         // - A string or other value representing a specific priority mode, which is passed through as-is.
         // This conversion ensures backward compatibility while supporting new priority modes.
-        return function (priority: InputPolicyOpts["priority"] | boolean) {
+        return function (priority: EventPriority | boolean) {
           const normalizedPriority =
             typeof priority !== "boolean"
               ? priority

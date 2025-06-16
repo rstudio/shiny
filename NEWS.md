@@ -6,6 +6,8 @@
 
 * `textAreaInput()` gains a `autoresize` option, which automatically resizes the text area to fit its content. (#4210)
 
+* The family of `update*Input()` functions can now render HTML content passed to the `label` argument (e.g., `updateInputText(label = tags$b("New label"))`). (#3996)
+
 * The `callback` argument of Shiny.js' `InputBinding.subscribe()` method gains support for a value of `"event"`. This makes it possible for an input binding to use event priority when updating the value (i.e., send immediately and always resend, even if the value hasn't changed). (#4211)
 
 ## Changes
@@ -25,13 +27,27 @@
 
 * Shiny's Typescript assets are now compiled to ES2021 instead of ES5. (#4066)
 
+* `ExtendedTask` now catches synchronous values and errors and returns them via `$result()`. Previously, the extended task function was required to always return a promise. This change makes it easier to use `ExtendedTask` with a function that may return early or do some synchronous work before returning a promise. (#4225)
+
+* `renderPlot()` was updated to accomodate changes in ggplot2 v4.0.0. (#4226)
+
+* Upgraded jQuery from 3.6.0 to 3.7.1. (#3969)
+
+* Updated jQuery UI from 1.13.2 to 1.14.1. (#4175)
+
 ## Bug fixes
+
+* `runExample("08_html")` now (correctly) requests to 'shiny.min.css', eliminating a network request failure. (#4220)
 
 * Fixed a bug with modals where calling `removeModal()` too quickly after `showModal()` would fail to remove the modal if the remove modal message was received while the modal was in the process of being revealed. (#4173)
 
 * The Shiny Client Console (enabled with `shiny::devmode()`) no longer displays duplicate warning or error message. (#4177)
 
 * Updated the JavaScript used when inserting a tab to avoid rendering dynamic UI elements twice when adding the new tab via `insertTab()` or `bslib::nav_insert()`. (#4179)
+
+* Fixed an issue with `ExtendedTask` where synchronous errors would cause an error that would stop the current session. (#4225)
+
+* `shiny::shinyAppTemplate()` no longer errors without a call to `library(shiny)`. (#3870)
 
 # shiny 1.10.0
 
@@ -191,7 +207,6 @@ In addition, various properties of the spinners and pulse can be customized with
 * Fixed #3771: Sometimes the error `ion.rangeSlider.min.js: i.stopPropagation is not a function` would appear in the JavaScript console. (#3772)
 
 * Fixed #3833: When `width` is provided to `textAreaInput()`, we now correctly set the width of the `<textarea>` element. (#3838)
-
 
 # shiny 1.7.4.1
 

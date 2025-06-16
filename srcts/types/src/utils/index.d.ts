@@ -1,3 +1,4 @@
+import type { HtmlDep } from "../shiny/render";
 import type { MapValuesUnion, MapWithResult } from "./extraTypes";
 import { hasDefinedProperty, hasOwnProperty } from "./object";
 declare function escapeHTML(str: string): string;
@@ -26,7 +27,10 @@ declare function isnan(x: unknown): boolean;
 declare function _equal(x: unknown, y: unknown): boolean;
 declare function equal(...args: unknown[]): boolean;
 declare const compareVersion: (a: string, op: "<" | "<=" | "==" | ">" | ">=", b: string) => boolean;
-declare function updateLabel(labelTxt: string | undefined, labelNode: JQuery<HTMLElement>): void;
+declare function updateLabel(labelContent: string | {
+    html: string;
+    deps: HtmlDep[];
+} | undefined, labelNode: JQuery<HTMLElement>): Promise<void>;
 declare function getComputedLinkColor(el: HTMLElement): string;
 declare function isBS3(): boolean;
 declare function toLowerCase<T extends string>(str: T): Lowercase<T>;

@@ -231,8 +231,8 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'   promises, but rather objects provided by the
 #'   \href{https://rstudio.github.io/promises/}{\pkg{promises}}  package, which
 #'   are similar to promises in JavaScript. (See [promises::promise()] for more
-#'   information.) You can also use [future::future()] objects to run code in a
-#'   separate process or even on a remote machine.
+#'   information.) You can also use [mirai::mirai()] or [future::future()]
+#'   objects to run code in a separate process or even on a remote machine.
 #'
 #'   If the value returns a promise, then anything that consumes the cached
 #'   reactive must expect it to return a promise.

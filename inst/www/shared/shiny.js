@@ -143,7 +143,631 @@
   var import_jquery39 = __toESM(require_jquery());
 
   // srcts/src/utils/index.ts
+  var import_jquery6 = __toESM(require_jquery());
+
+  // srcts/src/shiny/render.ts
+  var import_jquery5 = __toESM(require_jquery());
+
+  // srcts/src/shiny/initedMethods.ts
+  var fullShinyObj;
+  function setShinyObj(shiny) {
+    fullShinyObj = shiny;
+  }
+  function validateShinyHasBeenSet() {
+    if (typeof fullShinyObj === "undefined") {
+      throw "Shiny has not finish initialization yet. Please wait for the 'shiny-initialized' event.";
+    }
+    return fullShinyObj;
+  }
+  function shinySetInputValue(name, value, opts) {
+    validateShinyHasBeenSet().setInputValue(name, value, opts);
+  }
+  function shinyShinyApp() {
+    return validateShinyHasBeenSet().shinyapp;
+  }
+  function setShinyUser(user) {
+    validateShinyHasBeenSet().user = user;
+  }
+  function shinyForgetLastInputValue(name) {
+    validateShinyHasBeenSet().forgetLastInputValue(name);
+  }
+  async function shinyBindAll(scope) {
+    await validateShinyHasBeenSet().bindAll(scope);
+  }
+  function shinyUnbindAll(scope, includeSelf = false) {
+    validateShinyHasBeenSet().unbindAll(scope, includeSelf);
+  }
+  function shinyInitializeInputs(scope) {
+    validateShinyHasBeenSet().initializeInputs(scope);
+  }
+  async function shinyAppBindOutput(id, binding) {
+    await shinyShinyApp().bindOutput(id, binding);
+  }
+  function shinyAppUnbindOutput(id, binding) {
+    return shinyShinyApp().unbindOutput(id, binding);
+  }
+  function getShinyOnCustomMessage() {
+    return validateShinyHasBeenSet().oncustommessage;
+  }
+  var fileInputBinding;
+  function getFileInputBinding() {
+    return fileInputBinding;
+  }
+  function setFileInputBinding(fileInputBinding_) {
+    fileInputBinding = fileInputBinding_;
+  }
+  function getShinyCreateWebsocket() {
+    return validateShinyHasBeenSet().createSocket;
+  }
+
+  // srcts/src/time/debounce.ts
+  var Debouncer = class {
+    constructor(target, func, delayMs) {
+      this.target = target;
+      this.func = func;
+      this.delayMs = delayMs;
+      this.timerId = null;
+      this.args = null;
+    }
+    normalCall(...args) {
+      this.$clearTimer();
+      this.args = args;
+      this.timerId = setTimeout(() => {
+        if (this.timerId === null)
+          return;
+        this.$clearTimer();
+        this.$invoke();
+      }, this.delayMs);
+    }
+    immediateCall(...args) {
+      this.$clearTimer();
+      this.args = args;
+      this.$invoke();
+    }
+    isPending() {
+      return this.timerId !== null;
+    }
+    $clearTimer() {
+      if (this.timerId !== null) {
+        clearTimeout(this.timerId);
+        this.timerId = null;
+      }
+    }
+    $invoke() {
+      if (this.args && this.args.length > 0) {
+        this.func.apply(this.target, this.args);
+      } else {
+        this.func.apply(this.target);
+      }
+      this.args = null;
+    }
+  };
+  function debounce(threshold, func) {
+    let timerId = null;
+    return function thisFunc(...args) {
+      if (timerId !== null) {
+        clearTimeout(timerId);
+        timerId = null;
+      }
+      timerId = setTimeout(() => {
+        if (timerId === null)
+          return;
+        timerId = null;
+        func.apply(thisFunc, args);
+      }, threshold);
+    };
+  }
+
+  // srcts/src/time/invoke.ts
+  var Invoker = class {
+    constructor(target, func) {
+      this.target = target;
+      this.func = func;
+    }
+    normalCall(...args) {
+      this.func.apply(this.target, args);
+    }
+    immediateCall(...args) {
+      this.func.apply(this.target, args);
+    }
+  };
+
+  // srcts/src/time/throttle.ts
+  var Throttler = class {
+    constructor(target, func, delayMs) {
+      this.target = target;
+      this.func = func;
+      this.delayMs = delayMs;
+      this.timerId = null;
+      this.args = null;
+    }
+    normalCall(...args) {
+      this.args = args;
+      if (this.timerId === null) {
+        this.$invoke();
+      }
+    }
+    immediateCall(...args) {
+      this.$clearTimer();
+      this.args = args;
+      this.$invoke();
+    }
+    isPending() {
+      return this.args !== null;
+    }
+    $clearTimer() {
+      if (this.timerId !== null) {
+        clearTimeout(this.timerId);
+        this.timerId = null;
+      }
+    }
+    $invoke() {
+      if (this.args === null) {
+        return;
+      }
+      this.func.apply(this.target, this.args);
+      this.args = null;
+      this.timerId = setTimeout(() => {
+        if (this.timerId === null)
+          return;
+        this.$clearTimer();
+        if (this.isPending()) {
+          this.$invoke();
+        }
+      }, this.delayMs);
+    }
+  };
+
+  // srcts/src/shiny/sendImageSize.ts
+  var SendImageSize = class {
+    setImageSend(inputBatchSender, doSendImageSize) {
+      const sendImageSizeDebouncer = new Debouncer(null, doSendImageSize, 0);
+      this.regular = function() {
+        sendImageSizeDebouncer.normalCall();
+      };
+      inputBatchSender.lastChanceCallback.push(function() {
+        if (sendImageSizeDebouncer.isPending())
+          sendImageSizeDebouncer.immediateCall();
+      });
+      this.transitioned = debounce(200, this.regular);
+      return sendImageSizeDebouncer;
+    }
+  };
+  var sendImageSizeFns = new SendImageSize();
+
+  // srcts/src/shiny/singletons.ts
   var import_jquery4 = __toESM(require_jquery());
+  var reSingleton = /<!--(SHINY.SINGLETON\[([\w]+)\])-->([\s\S]*?)<!--\/\1-->/;
+  var reHead = /<head(?:\s[^>]*)?>([\s\S]*?)<\/head>/;
+  var knownSingletons = {};
+  function renderHtml(html, el, where) {
+    const processed = processHtml(html);
+    addToHead(processed.head);
+    register(processed.singletons);
+    switch (where.toLowerCase()) {
+      case "replace":
+        (0, import_jquery4.default)(el).html(processed.html);
+        break;
+      case "beforebegin":
+        (0, import_jquery4.default)(el).before(processed.html);
+        break;
+      case "afterbegin":
+        (0, import_jquery4.default)(el).prepend(processed.html);
+        break;
+      case "beforeend":
+        (0, import_jquery4.default)(el).append(processed.html);
+        break;
+      case "afterend":
+        (0, import_jquery4.default)(el).after(processed.html);
+        break;
+      default:
+        throw new Error("Unknown where position: " + where);
+    }
+    return processed;
+  }
+  function register(s4) {
+    import_jquery4.default.extend(knownSingletons, s4);
+  }
+  function registerNames(s4) {
+    if (typeof s4 === "string") {
+      knownSingletons[s4] = true;
+    } else if (s4 instanceof Array) {
+      for (let i4 = 0; i4 < s4.length; i4++) {
+        knownSingletons[s4[i4]] = true;
+      }
+    }
+  }
+  function addToHead(head) {
+    if (head.length > 0) {
+      const tempDiv = (0, import_jquery4.default)("<div>" + head + "</div>").get(0);
+      const $head = (0, import_jquery4.default)("head");
+      while (tempDiv.hasChildNodes()) {
+        $head.append(tempDiv.firstChild);
+      }
+    }
+  }
+  function processHtml(val) {
+    const newSingletons = {};
+    let newVal;
+    const findNewPayload = function(match, p1, sig, payload) {
+      if (knownSingletons[sig] || newSingletons[sig])
+        return "";
+      newSingletons[sig] = true;
+      return payload;
+    };
+    while (true) {
+      newVal = val.replace(reSingleton, findNewPayload);
+      if (val.length === newVal.length)
+        break;
+      val = newVal;
+    }
+    const heads = [];
+    const headAddPayload = function(match, payload) {
+      heads.push(payload);
+      return "";
+    };
+    while (true) {
+      newVal = val.replace(reHead, headAddPayload);
+      if (val.length === newVal.length)
+        break;
+      val = newVal;
+    }
+    return {
+      html: val,
+      head: heads.join("\n"),
+      singletons: newSingletons
+    };
+  }
+
+  // srcts/src/shiny/render.ts
+  async function renderContentAsync(el, content, where = "replace") {
+    if (where === "replace") {
+      shinyUnbindAll(el);
+    }
+    let html = "";
+    let dependencies = [];
+    if (content === null) {
+      html = "";
+    } else if (typeof content === "string") {
+      html = content;
+    } else if (typeof content === "object") {
+      html = content.html;
+      dependencies = content.deps || [];
+    }
+    await renderHtmlAsync(html, el, dependencies, where);
+    let scope = el;
+    if (where === "replace") {
+      shinyInitializeInputs(el);
+      await shinyBindAll(el);
+    } else {
+      const $parent = (0, import_jquery5.default)(el).parent();
+      if ($parent.length > 0) {
+        scope = $parent;
+        if (where === "beforeBegin" || where === "afterEnd") {
+          const $grandparent = $parent.parent();
+          if ($grandparent.length > 0)
+            scope = $grandparent;
+        }
+      }
+      shinyInitializeInputs(scope);
+      await shinyBindAll(scope);
+    }
+  }
+  function renderContent(el, content, where = "replace") {
+    if (where === "replace") {
+      shinyUnbindAll(el);
+    }
+    let html = "";
+    let dependencies = [];
+    if (content === null) {
+      html = "";
+    } else if (typeof content === "string") {
+      html = content;
+    } else if (typeof content === "object") {
+      html = content.html;
+      dependencies = content.deps || [];
+    }
+    renderHtml2(html, el, dependencies, where);
+    let scope = el;
+    if (where === "replace") {
+      shinyInitializeInputs(el);
+      return shinyBindAll(el);
+    } else {
+      const $parent = (0, import_jquery5.default)(el).parent();
+      if ($parent.length > 0) {
+        scope = $parent;
+        if (where === "beforeBegin" || where === "afterEnd") {
+          const $grandparent = $parent.parent();
+          if ($grandparent.length > 0)
+            scope = $grandparent;
+        }
+      }
+      shinyInitializeInputs(scope);
+      return shinyBindAll(scope);
+    }
+  }
+  async function renderHtmlAsync(html, el, dependencies, where = "replace") {
+    await renderDependenciesAsync(dependencies);
+    return renderHtml(html, el, where);
+  }
+  function renderHtml2(html, el, dependencies, where = "replace") {
+    renderDependencies(dependencies);
+    return renderHtml(html, el, where);
+  }
+  async function renderDependenciesAsync(dependencies) {
+    if (dependencies) {
+      for (const dep of dependencies) {
+        await renderDependencyAsync(dep);
+      }
+    }
+  }
+  function renderDependencies(dependencies) {
+    if (dependencies) {
+      for (const dep of dependencies) {
+        renderDependency(dep);
+      }
+    }
+  }
+  var htmlDependencies = {};
+  function registerDependency(name, version) {
+    htmlDependencies[name] = version;
+  }
+  function needsRestyle(dep) {
+    if (!dep.restyle) {
+      return false;
+    }
+    const names = Object.keys(htmlDependencies);
+    const idx = names.indexOf(dep.name);
+    if (idx === -1) {
+      return false;
+    }
+    return htmlDependencies[names[idx]] === dep.version;
+  }
+  function addStylesheetsAndRestyle(links) {
+    const $head = (0, import_jquery5.default)("head").first();
+    const refreshStyle = function(href, oldSheet) {
+      const xhr = new XMLHttpRequest();
+      xhr.open("GET", href);
+      xhr.onload = function() {
+        const id = "shiny_restyle_" + href.split("?restyle")[0].replace(/\W/g, "_");
+        const oldStyle = $head.find("style#" + id);
+        const newStyle = (0, import_jquery5.default)("<style>").attr("id", id).html(xhr.responseText);
+        $head.append(newStyle);
+        oldStyle.remove();
+        removeSheet(oldSheet);
+        sendImageSizeFns.transitioned();
+      };
+      xhr.send();
+    };
+    const findSheet = function(href) {
+      if (!href)
+        return null;
+      for (let i4 = 0; i4 < document.styleSheets.length; i4++) {
+        const sheet = document.styleSheets[i4];
+        if (typeof sheet.href === "string" && sheet.href.indexOf(href) > -1) {
+          return sheet;
+        }
+      }
+      return null;
+    };
+    const removeSheet = function(sheet) {
+      if (!sheet)
+        return;
+      sheet.disabled = true;
+      if (isIE())
+        sheet.cssText = "";
+      if (sheet.ownerNode instanceof Element) {
+        (0, import_jquery5.default)(sheet.ownerNode).remove();
+      }
+    };
+    links.map((link) => {
+      const $link = (0, import_jquery5.default)(link);
+      const oldSheet = findSheet($link.attr("href"));
+      const href = $link.attr("href") + "?restyle=" + new Date().getTime();
+      if (isIE()) {
+        refreshStyle(href, oldSheet);
+      } else {
+        $link.attr("href", href);
+        $link.attr("onload", () => {
+          const $dummyEl = (0, import_jquery5.default)("<div>").css("transition", "0.1s all").css("position", "absolute").css("top", "-1000px").css("left", "0");
+          $dummyEl.one("transitionend", () => {
+            $dummyEl.remove();
+            removeSheet(oldSheet);
+            sendImageSizeFns.transitioned();
+          });
+          (0, import_jquery5.default)(document.body).append($dummyEl);
+          const color = "#" + Math.floor(Math.random() * 16777215).toString(16);
+          setTimeout(() => $dummyEl.css("color", color), 10);
+        });
+        $head.append(link);
+      }
+    });
+  }
+  function getStylesheetLinkTags(dep) {
+    return dep.stylesheet.map((x2) => {
+      if (!hasDefinedProperty(x2, "rel"))
+        x2.rel = "stylesheet";
+      if (!hasDefinedProperty(x2, "type"))
+        x2.type = "text/css";
+      const link = document.createElement("link");
+      Object.entries(x2).forEach(function([attr, val]) {
+        if (attr === "href") {
+          val = encodeURI(val);
+        }
+        link.setAttribute(attr, val ? val : "");
+      });
+      return link;
+    });
+  }
+  function appendStylesheetLinkTags(dep, $head) {
+    const stylesheetLinks = getStylesheetLinkTags(dep);
+    if (stylesheetLinks.length !== 0) {
+      $head.append(stylesheetLinks);
+    }
+  }
+  function appendScriptTags(dep, $head) {
+    dep.script.forEach((x2) => {
+      const script = document.createElement("script");
+      Object.entries(x2).forEach(function([attr, val]) {
+        if (attr === "src") {
+          val = encodeURI(val);
+        }
+        script.setAttribute(attr, val ? val : "");
+      });
+      $head.append(script);
+    });
+  }
+  async function appendScriptTagsAsync(dep) {
+    const scriptPromises = [];
+    dep.script.forEach((x2) => {
+      const script = document.createElement("script");
+      if (!hasDefinedProperty(x2, "async")) {
+        script.async = false;
+      }
+      Object.entries(x2).forEach(function([attr, val]) {
+        if (attr === "src") {
+          val = encodeURI(val);
+        }
+        script.setAttribute(attr, val ? val : "");
+      });
+      const p3 = new Promise((resolve, reject) => {
+        script.onload = (e4) => {
+          resolve(null);
+        };
+        script.onerror = (e4) => {
+          reject(e4);
+        };
+      });
+      scriptPromises.push(p3);
+      document.head.append(script);
+    });
+    await Promise.allSettled(scriptPromises);
+  }
+  function appendMetaTags(dep, $head) {
+    dep.meta.forEach((x2) => {
+      const meta = document.createElement("meta");
+      for (const [attr, val] of Object.entries(x2)) {
+        meta.setAttribute(attr, val);
+      }
+      $head.append(meta);
+    });
+  }
+  function appendAttachmentLinkTags(dep, $head) {
+    dep.attachment.forEach((x2) => {
+      const link = (0, import_jquery5.default)("<link rel='attachment'>").attr("id", dep.name + "-" + x2.key + "-attachment").attr("href", encodeURI(x2.href));
+      $head.append(link);
+    });
+  }
+  function appendExtraHeadContent(dep, $head) {
+    if (dep.head) {
+      const $newHead = (0, import_jquery5.default)("<head></head>");
+      $newHead.html(dep.head);
+      $head.append($newHead.children());
+    }
+  }
+  async function renderDependencyAsync(dep_) {
+    const dep = normalizeHtmlDependency(dep_);
+    if (needsRestyle(dep)) {
+      addStylesheetsAndRestyle(getStylesheetLinkTags(dep));
+      return true;
+    }
+    if (hasDefinedProperty(htmlDependencies, dep.name))
+      return false;
+    registerDependency(dep.name, dep.version);
+    const $head = (0, import_jquery5.default)("head").first();
+    appendMetaTags(dep, $head);
+    appendStylesheetLinkTags(dep, $head);
+    await appendScriptTagsAsync(dep);
+    appendAttachmentLinkTags(dep, $head);
+    appendExtraHeadContent(dep, $head);
+    return true;
+  }
+  function renderDependency(dep_) {
+    const dep = normalizeHtmlDependency(dep_);
+    if (needsRestyle(dep)) {
+      addStylesheetsAndRestyle(getStylesheetLinkTags(dep));
+      return true;
+    }
+    if (hasDefinedProperty(htmlDependencies, dep.name))
+      return false;
+    registerDependency(dep.name, dep.version);
+    const $head = (0, import_jquery5.default)("head").first();
+    appendMetaTags(dep, $head);
+    appendStylesheetLinkTags(dep, $head);
+    appendScriptTags(dep, $head);
+    appendAttachmentLinkTags(dep, $head);
+    appendExtraHeadContent(dep, $head);
+    return true;
+  }
+  function normalizeHtmlDependency(dep) {
+    const hrefPrefix = dep.src?.href;
+    const result = {
+      name: dep.name,
+      version: dep.version,
+      restyle: dep.restyle,
+      meta: [],
+      stylesheet: [],
+      script: [],
+      attachment: [],
+      head: dep.head
+    };
+    if (dep.meta) {
+      if (Array.isArray(dep.meta)) {
+        result.meta = dep.meta;
+      } else {
+        result.meta = Object.entries(dep.meta).map(function([attr, val]) {
+          return { name: attr, content: val };
+        });
+      }
+    }
+    result.stylesheet = asArray(dep.stylesheet).map((s4) => {
+      if (typeof s4 === "string") {
+        s4 = { href: s4 };
+      }
+      if (hrefPrefix) {
+        s4.href = hrefPrefix + "/" + s4.href;
+      }
+      return s4;
+    });
+    result.script = asArray(dep.script).map((s4) => {
+      if (typeof s4 === "string") {
+        s4 = { src: s4 };
+      }
+      if (hrefPrefix) {
+        s4.src = hrefPrefix + "/" + s4.src;
+      }
+      return s4;
+    });
+    let attachments = dep.attachment;
+    if (!attachments)
+      attachments = [];
+    if (typeof attachments === "string")
+      attachments = [attachments];
+    if (Array.isArray(attachments)) {
+      const tmp = attachments;
+      attachments = tmp.map((attachment, index) => {
+        if (typeof attachment === "string") {
+          return {
+            key: (index + 1).toString(),
+            href: attachment
+          };
+        } else {
+          return attachment;
+        }
+      });
+    } else {
+      attachments = Object.entries(attachments).map(function([attr, val]) {
+        return { key: attr, href: val };
+      });
+    }
+    result.attachment = attachments.map((s4) => {
+      if (hrefPrefix) {
+        s4.href = hrefPrefix + "/" + s4.href;
+      }
+      return s4;
+    });
+    return result;
+  }
 
   // srcts/src/window/pixelRatio.ts
   function windowDevicePixelRatio() {
@@ -332,7 +956,7 @@
     return typeof x2 === "number" && isNaN(x2);
   }
   function _equal(x2, y3) {
-    if (import_jquery4.default.type(x2) === "object" && import_jquery4.default.type(y3) === "object") {
+    if (import_jquery6.default.type(x2) === "object" && import_jquery6.default.type(y3) === "object") {
       const xo = x2;
       const yo = y3;
       if (Object.keys(xo).length !== Object.keys(yo).length)
@@ -342,7 +966,7 @@
           return false;
       }
       return true;
-    } else if (import_jquery4.default.type(x2) === "array" && import_jquery4.default.type(y3) === "array") {
+    } else if (import_jquery6.default.type(x2) === "array" && import_jquery6.default.type(y3) === "array") {
       const xa = x2;
       const ya = y3;
       if (xa.length !== ya.length)
@@ -395,17 +1019,22 @@
     else
       throw `Unknown operator: ${op}`;
   };
-  function updateLabel(labelTxt, labelNode) {
-    if (typeof labelTxt === "undefined")
+  async function updateLabel(labelContent, labelNode) {
+    if (typeof labelContent === "undefined")
       return;
     if (labelNode.length !== 1) {
       throw new Error("labelNode must be of length 1");
     }
-    const emptyLabel = Array.isArray(labelTxt) && labelTxt.length === 0;
-    if (emptyLabel) {
+    if (typeof labelContent === "string") {
+      labelContent = {
+        html: labelContent,
+        deps: []
+      };
+    }
+    if (labelContent.html === "") {
       labelNode.addClass("shiny-label-null");
     } else {
-      labelNode.text(labelTxt);
+      await renderContent(labelNode, labelContent);
       labelNode.removeClass("shiny-label-null");
     }
   }
@@ -507,26 +1136,26 @@
   };
 
   // srcts/src/bindings/input/actionbutton.ts
-  var import_jquery5 = __toESM(require_jquery());
+  var import_jquery7 = __toESM(require_jquery());
   var ActionButtonInputBinding = class extends InputBinding {
     find(scope) {
-      return (0, import_jquery5.default)(scope).find(".action-button");
+      return (0, import_jquery7.default)(scope).find(".action-button");
     }
     getValue(el) {
-      return (0, import_jquery5.default)(el).data("val") || 0;
+      return (0, import_jquery7.default)(el).data("val") || 0;
     }
     setValue(el, value) {
-      (0, import_jquery5.default)(el).data("val", value);
+      (0, import_jquery7.default)(el).data("val", value);
     }
     getType(el) {
       return "shiny.action";
       el;
     }
     subscribe(el, callback) {
-      (0, import_jquery5.default)(el).on(
+      (0, import_jquery7.default)(el).on(
         "click.actionButtonInputBinding",
         function() {
-          const $el = (0, import_jquery5.default)(this);
+          const $el = (0, import_jquery7.default)(this);
           const val = $el.data("val") || 0;
           $el.data("val", val + 1);
           callback(false);
@@ -537,14 +1166,14 @@
       return { value: this.getValue(el) };
     }
     receiveMessage(el, data) {
-      const $el = (0, import_jquery5.default)(el);
+      const $el = (0, import_jquery7.default)(el);
       if (hasDefinedProperty(data, "label") || hasDefinedProperty(data, "icon")) {
         let label = $el.text();
         let icon = "";
         if ($el.find("i[class]").length > 0) {
           const iconHtml = $el.find("i[class]")[0];
           if (iconHtml === $el.children()[0]) {
-            icon = (0, import_jquery5.default)(iconHtml).prop("outerHTML");
+            icon = (0, import_jquery7.default)(iconHtml).prop("outerHTML");
           }
         }
         if (hasDefinedProperty(data, "label")) {
@@ -564,18 +1193,18 @@
       }
     }
     unsubscribe(el) {
-      (0, import_jquery5.default)(el).off(".actionButtonInputBinding");
+      (0, import_jquery7.default)(el).off(".actionButtonInputBinding");
     }
   };
-  (0, import_jquery5.default)(document).on("click", "a.action-button", function(e4) {
+  (0, import_jquery7.default)(document).on("click", "a.action-button", function(e4) {
     e4.preventDefault();
   });
 
   // srcts/src/bindings/input/checkbox.ts
-  var import_jquery6 = __toESM(require_jquery());
+  var import_jquery8 = __toESM(require_jquery());
   var CheckboxInputBinding = class extends InputBinding {
     find(scope) {
-      return (0, import_jquery6.default)(scope).find('input[type="checkbox"]');
+      return (0, import_jquery8.default)(scope).find('input[type="checkbox"]');
     }
     getValue(el) {
       return el.checked;
@@ -584,16 +1213,16 @@
       el.checked = value;
     }
     subscribe(el, callback) {
-      (0, import_jquery6.default)(el).on("change.checkboxInputBinding", function() {
+      (0, import_jquery8.default)(el).on("change.checkboxInputBinding", function() {
         callback(true);
       });
     }
     unsubscribe(el) {
-      (0, import_jquery6.default)(el).off(".checkboxInputBinding");
+      (0, import_jquery8.default)(el).off(".checkboxInputBinding");
     }
     getState(el) {
       return {
-        label: (0, import_jquery6.default)(el).parent().find("span").text(),
+        label: (0, import_jquery8.default)(el).parent().find("span").text(),
         value: el.checked
       };
     }
@@ -602,30 +1231,30 @@
         el.checked = data.value;
       }
       if (hasDefinedProperty(data, "label")) {
-        (0, import_jquery6.default)(el).parent().find("span").text(data.label);
+        (0, import_jquery8.default)(el).parent().find("span").text(data.label);
       }
-      (0, import_jquery6.default)(el).trigger("change");
+      (0, import_jquery8.default)(el).trigger("change");
     }
   };
 
   // srcts/src/bindings/input/checkboxgroup.ts
-  var import_jquery7 = __toESM(require_jquery());
+  var import_jquery9 = __toESM(require_jquery());
   function getLabelNode(el) {
-    return (0, import_jquery7.default)(el).find('label[for="' + $escape(el.id) + '"]');
+    return (0, import_jquery9.default)(el).find('label[for="' + $escape(el.id) + '"]');
   }
   function getLabel(obj) {
     const parentNode = obj.parentNode;
     if (parentNode.tagName === "LABEL") {
-      return (0, import_jquery7.default)(parentNode).find("span").text().trim();
+      return (0, import_jquery9.default)(parentNode).find("span").text().trim();
     }
     return null;
   }
   var CheckboxGroupInputBinding = class extends InputBinding {
     find(scope) {
-      return (0, import_jquery7.default)(scope).find(".shiny-input-checkboxgroup");
+      return (0, import_jquery9.default)(scope).find(".shiny-input-checkboxgroup");
     }
     getValue(el) {
-      const $objs = (0, import_jquery7.default)('input:checkbox[name="' + $escape(el.id) + '"]:checked');
+      const $objs = (0, import_jquery9.default)('input:checkbox[name="' + $escape(el.id) + '"]:checked');
       const values = new Array($objs.length);
       for (let i4 = 0; i4 < $objs.length; i4++) {
         values[i4] = $objs[i4].value;
@@ -634,21 +1263,21 @@
     }
     setValue(el, value) {
       value = value ?? [];
-      (0, import_jquery7.default)('input:checkbox[name="' + $escape(el.id) + '"]').prop("checked", false);
+      (0, import_jquery9.default)('input:checkbox[name="' + $escape(el.id) + '"]').prop("checked", false);
       if (value instanceof Array) {
         for (let i4 = 0; i4 < value.length; i4++) {
-          (0, import_jquery7.default)(
+          (0, import_jquery9.default)(
             'input:checkbox[name="' + $escape(el.id) + '"][value="' + $escape(value[i4]) + '"]'
           ).prop("checked", true);
         }
       } else {
-        (0, import_jquery7.default)(
+        (0, import_jquery9.default)(
           'input:checkbox[name="' + $escape(el.id) + '"][value="' + $escape(value) + '"]'
         ).prop("checked", true);
       }
     }
     getState(el) {
-      const $objs = (0, import_jquery7.default)(
+      const $objs = (0, import_jquery9.default)(
         'input:checkbox[name="' + $escape(el.id) + '"]'
       );
       const options = new Array($objs.length);
@@ -661,8 +1290,8 @@
         options
       };
     }
-    receiveMessage(el, data) {
-      const $el = (0, import_jquery7.default)(el);
+    async receiveMessage(el, data) {
+      const $el = (0, import_jquery9.default)(el);
       if (hasDefinedProperty(data, "options")) {
         $el.find("div.shiny-options-group").remove();
         $el.find("label.checkbox").remove();
@@ -671,31 +1300,31 @@
       if (hasDefinedProperty(data, "value")) {
         this.setValue(el, data.value);
       }
-      updateLabel(data.label, getLabelNode(el));
-      (0, import_jquery7.default)(el).trigger("change");
+      await updateLabel(data.label, getLabelNode(el));
+      (0, import_jquery9.default)(el).trigger("change");
     }
     subscribe(el, callback) {
-      (0, import_jquery7.default)(el).on("change.checkboxGroupInputBinding", function() {
+      (0, import_jquery9.default)(el).on("change.checkboxGroupInputBinding", function() {
         callback(false);
       });
     }
     unsubscribe(el) {
-      (0, import_jquery7.default)(el).off(".checkboxGroupInputBinding");
+      (0, import_jquery9.default)(el).off(".checkboxGroupInputBinding");
     }
   };
 
   // srcts/src/bindings/input/date.ts
-  var import_jquery8 = __toESM(require_jquery());
+  var import_jquery10 = __toESM(require_jquery());
   var DateInputBindingBase = class extends InputBinding {
     find(scope) {
-      return (0, import_jquery8.default)(scope).find(".shiny-date-input");
+      return (0, import_jquery10.default)(scope).find(".shiny-date-input");
     }
     getType(el) {
       return "shiny.date";
       el;
     }
     subscribe(el, callback) {
-      (0, import_jquery8.default)(el).on(
+      (0, import_jquery10.default)(el).on(
         "changeDate.dateInputBinding change.dateInputBinding",
         function() {
           callback(false);
@@ -703,7 +1332,7 @@
       );
     }
     unsubscribe(el) {
-      (0, import_jquery8.default)(el).off(".dateInputBinding");
+      (0, import_jquery10.default)(el).off(".dateInputBinding");
     }
     getRatePolicy() {
       return {
@@ -717,7 +1346,7 @@
       data;
     }
     initialize(el) {
-      const $input = (0, import_jquery8.default)(el).find("input");
+      const $input = (0, import_jquery10.default)(el).find("input");
       let date = $input.data("initial-date");
       if (date === void 0 || date === null) {
         date = this._floorDateTime(this._dateAsUTC(new Date()));
@@ -731,7 +1360,7 @@
       }
     }
     _getLabelNode(el) {
-      return (0, import_jquery8.default)(el).find('label[for="' + $escape(el.id) + '"]');
+      return (0, import_jquery10.default)(el).find('label[for="' + $escape(el.id) + '"]');
     }
     _formatToString(format) {
       let str = "";
@@ -744,7 +1373,7 @@
     }
     _setMin(el, date) {
       if (date === null) {
-        (0, import_jquery8.default)(el).bsDatepicker("setStartDate", null);
+        (0, import_jquery10.default)(el).bsDatepicker("setStartDate", null);
         return;
       }
       const parsedDate = this._newDate(date);
@@ -753,17 +1382,17 @@
       date = parsedDate;
       if (isNaN(date.valueOf()))
         return;
-      const curValue = (0, import_jquery8.default)(el).bsDatepicker("getUTCDate");
-      (0, import_jquery8.default)(el).bsDatepicker("setStartDate", this._utcDateAsLocal(date));
+      const curValue = (0, import_jquery10.default)(el).bsDatepicker("getUTCDate");
+      (0, import_jquery10.default)(el).bsDatepicker("setStartDate", this._utcDateAsLocal(date));
       if (date && curValue && date.getTime() > curValue.getTime()) {
-        (0, import_jquery8.default)(el).bsDatepicker("clearDates");
+        (0, import_jquery10.default)(el).bsDatepicker("clearDates");
       } else {
-        (0, import_jquery8.default)(el).bsDatepicker("setUTCDate", curValue);
+        (0, import_jquery10.default)(el).bsDatepicker("setUTCDate", curValue);
       }
     }
     _setMax(el, date) {
       if (date === null) {
-        (0, import_jquery8.default)(el).bsDatepicker("setEndDate", null);
+        (0, import_jquery10.default)(el).bsDatepicker("setEndDate", null);
         return;
       }
       const parsedDate = this._newDate(date);
@@ -772,12 +1401,12 @@
       date = parsedDate;
       if (isNaN(date.valueOf()))
         return;
-      const curValue = (0, import_jquery8.default)(el).bsDatepicker("getUTCDate");
-      (0, import_jquery8.default)(el).bsDatepicker("setEndDate", this._utcDateAsLocal(date));
+      const curValue = (0, import_jquery10.default)(el).bsDatepicker("getUTCDate");
+      (0, import_jquery10.default)(el).bsDatepicker("setEndDate", this._utcDateAsLocal(date));
       if (date && curValue && date.getTime() < curValue.getTime()) {
-        (0, import_jquery8.default)(el).bsDatepicker("clearDates");
+        (0, import_jquery10.default)(el).bsDatepicker("clearDates");
       } else {
-        (0, import_jquery8.default)(el).bsDatepicker("setUTCDate", curValue);
+        (0, import_jquery10.default)(el).bsDatepicker("setUTCDate", curValue);
       }
     }
     _newDate(date) {
@@ -804,12 +1433,12 @@
   };
   var DateInputBinding = class extends DateInputBindingBase {
     getValue(el) {
-      const date = (0, import_jquery8.default)(el).find("input").bsDatepicker("getUTCDate");
+      const date = (0, import_jquery10.default)(el).find("input").bsDatepicker("getUTCDate");
       return formatDateUTC(date);
     }
     setValue(el, value) {
       if (value === null) {
-        (0, import_jquery8.default)(el).find("input").val("").bsDatepicker("update");
+        (0, import_jquery10.default)(el).find("input").val("").bsDatepicker("update");
         return;
       }
       const date = this._newDate(value);
@@ -818,10 +1447,10 @@
       }
       if (isNaN(date.valueOf()))
         return;
-      (0, import_jquery8.default)(el).find("input").bsDatepicker("setUTCDate", date);
+      (0, import_jquery10.default)(el).find("input").bsDatepicker("setUTCDate", date);
     }
     getState(el) {
-      const $el = (0, import_jquery8.default)(el);
+      const $el = (0, import_jquery10.default)(el);
       const $input = $el.find("input");
       let min = $input.data("datepicker").startDate;
       let max = $input.data("datepicker").endDate;
@@ -846,30 +1475,30 @@
         startview
       };
     }
-    receiveMessage(el, data) {
-      const $input = (0, import_jquery8.default)(el).find("input");
-      updateLabel(data.label, this._getLabelNode(el));
+    async receiveMessage(el, data) {
+      const $input = (0, import_jquery10.default)(el).find("input");
+      await updateLabel(data.label, this._getLabelNode(el));
       if (hasDefinedProperty(data, "min"))
         this._setMin($input[0], data.min);
       if (hasDefinedProperty(data, "max"))
         this._setMax($input[0], data.max);
       if (hasDefinedProperty(data, "value"))
         this.setValue(el, data.value);
-      (0, import_jquery8.default)(el).trigger("change");
+      (0, import_jquery10.default)(el).trigger("change");
     }
   };
 
   // srcts/src/bindings/input/daterange.ts
-  var import_jquery9 = __toESM(require_jquery());
+  var import_jquery11 = __toESM(require_jquery());
   function getLabelNode2(el) {
-    return (0, import_jquery9.default)(el).find('label[for="' + $escape(el.id) + '"]');
+    return (0, import_jquery11.default)(el).find('label[for="' + $escape(el.id) + '"]');
   }
   var DateRangeInputBinding = class extends DateInputBindingBase {
     find(scope) {
-      return (0, import_jquery9.default)(scope).find(".shiny-date-range-input");
+      return (0, import_jquery11.default)(scope).find(".shiny-date-range-input");
     }
     getValue(el) {
-      const $inputs = (0, import_jquery9.default)(el).find("input");
+      const $inputs = (0, import_jquery11.default)(el).find("input");
       const start = $inputs.eq(0).bsDatepicker("getUTCDate");
       const end = $inputs.eq(1).bsDatepicker("getUTCDate");
       return [formatDateUTC(start), formatDateUTC(end)];
@@ -878,7 +1507,7 @@
       if (!(value instanceof Object)) {
         return;
       }
-      const $inputs = (0, import_jquery9.default)(el).find("input");
+      const $inputs = (0, import_jquery11.default)(el).find("input");
       if (value.start !== void 0) {
         if (value.start === null) {
           $inputs.eq(0).val("").bsDatepicker("update");
@@ -897,7 +1526,7 @@
       }
     }
     getState(el) {
-      const $el = (0, import_jquery9.default)(el);
+      const $el = (0, import_jquery11.default)(el);
       const $inputs = $el.find("input");
       const $startinput = $inputs.eq(0);
       const $endinput = $inputs.eq(1);
@@ -924,12 +1553,12 @@
         startview
       };
     }
-    receiveMessage(el, data) {
-      const $el = (0, import_jquery9.default)(el);
+    async receiveMessage(el, data) {
+      const $el = (0, import_jquery11.default)(el);
       const $inputs = $el.find("input");
       const $startinput = $inputs.eq(0);
       const $endinput = $inputs.eq(1);
-      updateLabel(data.label, getLabelNode2(el));
+      await updateLabel(data.label, getLabelNode2(el));
       if (hasDefinedProperty(data, "min")) {
         this._setMin($startinput[0], data.min);
         this._setMin($endinput[0], data.min);
@@ -944,7 +1573,7 @@
       $el.trigger("change");
     }
     initialize(el) {
-      const $el = (0, import_jquery9.default)(el);
+      const $el = (0, import_jquery11.default)(el);
       const $inputs = $el.find("input");
       const $startinput = $inputs.eq(0);
       const $endinput = $inputs.eq(1);
@@ -961,7 +1590,7 @@
       this._setMax($endinput[0], $endinput.data("max-date"));
     }
     subscribe(el, callback) {
-      (0, import_jquery9.default)(el).on(
+      (0, import_jquery11.default)(el).on(
         "changeDate.dateRangeInputBinding change.dateRangeInputBinding",
         function() {
           callback(false);
@@ -969,79 +1598,27 @@
       );
     }
     unsubscribe(el) {
-      (0, import_jquery9.default)(el).off(".dateRangeInputBinding");
+      (0, import_jquery11.default)(el).off(".dateRangeInputBinding");
     }
   };
 
   // srcts/src/bindings/input/fileinput.ts
-  var import_jquery12 = __toESM(require_jquery());
+  var import_jquery14 = __toESM(require_jquery());
 
   // srcts/src/file/fileProcessor.ts
-  var import_jquery11 = __toESM(require_jquery());
+  var import_jquery13 = __toESM(require_jquery());
 
   // srcts/src/events/inputChanged.ts
-  var import_jquery10 = __toESM(require_jquery());
+  var import_jquery12 = __toESM(require_jquery());
   function triggerFileInputChanged(name, value, binding, el, inputType, onEl) {
-    const evt = import_jquery10.default.Event("shiny:inputchanged");
+    const evt = import_jquery12.default.Event("shiny:inputchanged");
     evt.name = name;
     evt.value = value;
     evt.binding = binding;
     evt.el = el;
     evt.inputType = inputType;
-    (0, import_jquery10.default)(onEl).trigger(evt);
+    (0, import_jquery12.default)(onEl).trigger(evt);
     return evt;
-  }
-
-  // srcts/src/shiny/initedMethods.ts
-  var fullShinyObj;
-  function setShinyObj(shiny) {
-    fullShinyObj = shiny;
-  }
-  function validateShinyHasBeenSet() {
-    if (typeof fullShinyObj === "undefined") {
-      throw "Shiny has not finish initialization yet. Please wait for the 'shiny-initialized' event.";
-    }
-    return fullShinyObj;
-  }
-  function shinySetInputValue(name, value, opts) {
-    validateShinyHasBeenSet().setInputValue(name, value, opts);
-  }
-  function shinyShinyApp() {
-    return validateShinyHasBeenSet().shinyapp;
-  }
-  function setShinyUser(user) {
-    validateShinyHasBeenSet().user = user;
-  }
-  function shinyForgetLastInputValue(name) {
-    validateShinyHasBeenSet().forgetLastInputValue(name);
-  }
-  async function shinyBindAll(scope) {
-    await validateShinyHasBeenSet().bindAll(scope);
-  }
-  function shinyUnbindAll(scope, includeSelf = false) {
-    validateShinyHasBeenSet().unbindAll(scope, includeSelf);
-  }
-  function shinyInitializeInputs(scope) {
-    validateShinyHasBeenSet().initializeInputs(scope);
-  }
-  async function shinyAppBindOutput(id, binding) {
-    await shinyShinyApp().bindOutput(id, binding);
-  }
-  function shinyAppUnbindOutput(id, binding) {
-    return shinyShinyApp().unbindOutput(id, binding);
-  }
-  function getShinyOnCustomMessage() {
-    return validateShinyHasBeenSet().oncustommessage;
-  }
-  var fileInputBinding;
-  function getFileInputBinding() {
-    return fileInputBinding;
-  }
-  function setFileInputBinding(fileInputBinding_) {
-    fileInputBinding = fileInputBinding_;
-  }
-  function getShinyCreateWebsocket() {
-    return validateShinyHasBeenSet().createSocket;
   }
 
   // srcts/src/file/fileProcessor.ts
@@ -1119,10 +1696,10 @@
       this.onProgress(null, 0);
       this.totalBytes = 0;
       this.progressBytes = 0;
-      import_jquery11.default.each(files, (i4, file) => {
+      import_jquery13.default.each(files, (i4, file) => {
         this.totalBytes += file.size;
       });
-      const fileInfo = import_jquery11.default.map(files, function(file) {
+      const fileInfo = import_jquery13.default.map(files, function(file) {
         return {
           name: file.name,
           size: file.size,
@@ -1145,13 +1722,13 @@
     }
     onFile(file, cont) {
       this.onProgress(file, 0);
-      import_jquery11.default.ajax(this.uploadUrl, {
+      import_jquery13.default.ajax(this.uploadUrl, {
         type: "POST",
         cache: false,
         xhr: () => {
-          if (typeof import_jquery11.default.ajaxSettings.xhr !== "function")
+          if (typeof import_jquery13.default.ajaxSettings.xhr !== "function")
             throw "jQuery's XHR is not a function";
-          const xhrVal = import_jquery11.default.ajaxSettings.xhr();
+          const xhrVal = import_jquery13.default.ajaxSettings.xhr();
           if (xhrVal.upload) {
             xhrVal.upload.onprogress = (e4) => {
               if (e4.lengthComputable) {
@@ -1178,7 +1755,7 @@
       });
     }
     onComplete() {
-      const fileInfo = import_jquery11.default.map(this.files, function(file, i4) {
+      const fileInfo = import_jquery13.default.map(this.files, function(file, i4) {
         return {
           name: file.name,
           size: file.size,
@@ -1201,7 +1778,7 @@
           this.$setActive(false);
           this.onProgress(null, 1);
           this.$bar().text("Upload complete");
-          (0, import_jquery11.default)(evt.el).val("");
+          (0, import_jquery13.default)(evt.el).val("");
         },
         (error) => {
           this.onError(error);
@@ -1222,10 +1799,10 @@
       this.$bar().text(file ? file.name : "");
     }
     $container() {
-      return (0, import_jquery11.default)("#" + $escape(this.id) + "_progress.shiny-file-input-progress");
+      return (0, import_jquery13.default)("#" + $escape(this.id) + "_progress.shiny-file-input-progress");
     }
     $bar() {
-      return (0, import_jquery11.default)(
+      return (0, import_jquery13.default)(
         "#" + $escape(this.id) + "_progress.shiny-file-input-progress .progress-bar"
       );
     }
@@ -1248,10 +1825,10 @@
   var zoneActive = "shiny-file-input-active";
   var zoneOver = "shiny-file-input-over";
   function zoneOf(el) {
-    return (0, import_jquery12.default)(el).closest("div.input-group");
+    return (0, import_jquery14.default)(el).closest("div.input-group");
   }
   function enableDraghover(el) {
-    const $el = (0, import_jquery12.default)(el);
+    const $el = (0, import_jquery14.default)(el);
     let childCounter = 0;
     $el.on({
       "dragenter.draghover": (e4) => {
@@ -1279,10 +1856,10 @@
     return $el;
   }
   function disableDraghover(el) {
-    return (0, import_jquery12.default)(el).off(".draghover");
+    return (0, import_jquery14.default)(el).off(".draghover");
   }
   function enableDocumentEvents() {
-    const $doc = (0, import_jquery12.default)("html");
+    const $doc = (0, import_jquery14.default)("html");
     enableDraghover($doc).on({
       "draghover:enter.draghover": () => {
         zoneOf($fileInputs).addClass(zoneActive);
@@ -1296,7 +1873,7 @@
     });
   }
   function disableDocumentEvents() {
-    const $doc = (0, import_jquery12.default)("html");
+    const $doc = (0, import_jquery14.default)("html");
     $doc.off(".draghover");
     disableDraghover($doc);
   }
@@ -1311,7 +1888,7 @@
     return true;
   }
   function handleDrop(e4, el) {
-    const files = e4.originalEvent?.dataTransfer?.files, $el = (0, import_jquery12.default)(el);
+    const files = e4.originalEvent?.dataTransfer?.files, $el = (0, import_jquery14.default)(el);
     if (files === void 0 || files === null) {
       console.log(
         "Dropping files is not supported on this browser. (no FileList)"
@@ -1340,7 +1917,7 @@
     $el.removeAttr("data-restore");
   }
   function uploadDroppedFilesIE10Plus(el, files) {
-    const $el = (0, import_jquery12.default)(el);
+    const $el = (0, import_jquery14.default)(el);
     abortCurrentUpload($el);
     setFileText($el, files);
     $el.data(
@@ -1349,7 +1926,7 @@
     );
   }
   function uploadFiles(evt) {
-    const $el = (0, import_jquery12.default)(evt.target);
+    const $el = (0, import_jquery14.default)(evt.target);
     abortCurrentUpload($el);
     const files = evt.target.files;
     const id = fileInputBindingGetId(evt.target);
@@ -1361,28 +1938,28 @@
       new FileUploader(shinyShinyApp(), id, files, evt.target)
     );
   }
-  var $fileInputs = (0, import_jquery12.default)();
+  var $fileInputs = (0, import_jquery14.default)();
   function fileInputBindingGetId(el) {
     return InputBinding.prototype.getId.call(this, el) || el.name;
   }
   var FileInputBinding = class extends InputBinding {
     find(scope) {
-      return (0, import_jquery12.default)(scope).find('input[type="file"]');
+      return (0, import_jquery14.default)(scope).find('input[type="file"]');
     }
     getId(el) {
       return fileInputBindingGetId(el);
     }
     getValue(el) {
-      const data = (0, import_jquery12.default)(el).attr("data-restore");
+      const data = (0, import_jquery14.default)(el).attr("data-restore");
       if (data) {
         const dataParsed = JSON.parse(data);
-        const $fileText = (0, import_jquery12.default)(el).closest("div.input-group").find("input[type=text]");
+        const $fileText = (0, import_jquery14.default)(el).closest("div.input-group").find("input[type=text]");
         if (dataParsed.name.length === 1) {
           $fileText.val(dataParsed.name[0]);
         } else {
           $fileText.val(dataParsed.name.length + " files");
         }
-        const $progress = (0, import_jquery12.default)(el).closest("div.form-group").find(".progress");
+        const $progress = (0, import_jquery14.default)(el).closest("div.form-group").find(".progress");
         const $bar = $progress.find(".progress-bar");
         $progress.removeClass("active");
         $bar.width("100%");
@@ -1402,7 +1979,7 @@
     }
     subscribe(el, callback) {
       callback;
-      (0, import_jquery12.default)(el).on("change.fileInputBinding", uploadFiles);
+      (0, import_jquery14.default)(el).on("change.fileInputBinding", uploadFiles);
       if ($fileInputs.length === 0)
         enableDocumentEvents();
       $fileInputs = $fileInputs.add(el);
@@ -1423,7 +2000,7 @@
       });
     }
     unsubscribe(el) {
-      const $el = (0, import_jquery12.default)(el), $zone = zoneOf(el);
+      const $el = (0, import_jquery14.default)(el), $zone = zoneOf(el);
       $zone.removeClass(zoneOver).removeClass(zoneActive);
       disableDraghover($zone);
       $el.off(".fileInputBinding");
@@ -1435,16 +2012,16 @@
   };
 
   // srcts/src/bindings/input/number.ts
-  var import_jquery14 = __toESM(require_jquery());
+  var import_jquery16 = __toESM(require_jquery());
 
   // srcts/src/bindings/input/text.ts
-  var import_jquery13 = __toESM(require_jquery());
+  var import_jquery15 = __toESM(require_jquery());
   function getLabelNode3(el) {
-    return (0, import_jquery13.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
+    return (0, import_jquery15.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
   }
   var TextInputBindingBase = class extends InputBinding {
     find(scope) {
-      const $inputs = (0, import_jquery13.default)(scope).find(
+      const $inputs = (0, import_jquery15.default)(scope).find(
         'input[type="text"], input[type="search"], input[type="url"], input[type="email"]'
       );
       return $inputs.not('input[type="text"][id$="-selectized"]');
@@ -1462,7 +2039,7 @@
       value;
     }
     subscribe(el, callback) {
-      const $el = (0, import_jquery13.default)(el);
+      const $el = (0, import_jquery15.default)(el);
       const updateOn = $el.data("update-on") || "change";
       if (updateOn === "change") {
         $el.on(
@@ -1493,7 +2070,7 @@
       });
     }
     unsubscribe(el) {
-      (0, import_jquery13.default)(el).off(".textInputBinding");
+      (0, import_jquery15.default)(el).off(".textInputBinding");
     }
     receiveMessage(el, data) {
       throw "not implemented";
@@ -1526,26 +2103,26 @@
         placeholder: el.placeholder
       };
     }
-    receiveMessage(el, data) {
+    async receiveMessage(el, data) {
       if (hasDefinedProperty(data, "value"))
         this.setValue(el, data.value);
-      updateLabel(data.label, getLabelNode3(el));
+      await updateLabel(data.label, getLabelNode3(el));
       if (hasDefinedProperty(data, "placeholder"))
         el.placeholder = data.placeholder;
-      (0, import_jquery13.default)(el).trigger("change");
+      (0, import_jquery15.default)(el).trigger("change");
     }
   };
 
   // srcts/src/bindings/input/number.ts
   function getLabelNode4(el) {
-    return (0, import_jquery14.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
+    return (0, import_jquery16.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
   }
   var NumberInputBinding = class extends TextInputBindingBase {
     find(scope) {
-      return (0, import_jquery14.default)(scope).find('input[type="number"]');
+      return (0, import_jquery16.default)(scope).find('input[type="number"]');
     }
     getValue(el) {
-      const numberVal = (0, import_jquery14.default)(el).val();
+      const numberVal = (0, import_jquery16.default)(el).val();
       if (typeof numberVal == "string") {
         if (/^\s*$/.test(numberVal))
           return null;
@@ -1563,7 +2140,7 @@
       return "shiny.number";
       el;
     }
-    receiveMessage(el, data) {
+    async receiveMessage(el, data) {
       if (hasDefinedProperty(data, "value"))
         el.value = data.value ?? "";
       if (hasDefinedProperty(data, "min"))
@@ -1572,8 +2149,8 @@
         el.max = data.max ?? "";
       if (hasDefinedProperty(data, "step"))
         el.step = data.step ?? "";
-      updateLabel(data.label, getLabelNode4(el));
-      (0, import_jquery14.default)(el).trigger("change");
+      await updateLabel(data.label, getLabelNode4(el));
+      (0, import_jquery16.default)(el).trigger("change");
     }
     getState(el) {
       return {
@@ -1587,10 +2164,10 @@
   };
 
   // srcts/src/bindings/input/password.ts
-  var import_jquery15 = __toESM(require_jquery());
+  var import_jquery17 = __toESM(require_jquery());
   var PasswordInputBinding = class extends TextInputBinding {
     find(scope) {
-      return (0, import_jquery15.default)(scope).find('input[type="password"]');
+      return (0, import_jquery17.default)(scope).find('input[type="password"]');
     }
     getType(el) {
       return "shiny.password";
@@ -1599,23 +2176,23 @@
   };
 
   // srcts/src/bindings/input/radio.ts
-  var import_jquery16 = __toESM(require_jquery());
+  var import_jquery18 = __toESM(require_jquery());
   function getLabelNode5(el) {
-    return (0, import_jquery16.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
+    return (0, import_jquery18.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
   }
   function getLabel2(obj) {
     const parentNode = obj.parentNode;
     if (parentNode.tagName === "LABEL") {
-      return (0, import_jquery16.default)(parentNode).find("span").text().trim();
+      return (0, import_jquery18.default)(parentNode).find("span").text().trim();
     }
     return null;
   }
   var RadioInputBinding = class extends InputBinding {
     find(scope) {
-      return (0, import_jquery16.default)(scope).find(".shiny-input-radiogroup");
+      return (0, import_jquery18.default)(scope).find(".shiny-input-radiogroup");
     }
     getValue(el) {
-      const checkedItems = (0, import_jquery16.default)(
+      const checkedItems = (0, import_jquery18.default)(
         'input:radio[name="' + $escape(el.id) + '"]:checked'
       );
       if (checkedItems.length === 0) {
@@ -1625,15 +2202,15 @@
     }
     setValue(el, value) {
       if (Array.isArray(value) && value.length === 0) {
-        (0, import_jquery16.default)('input:radio[name="' + $escape(el.id) + '"]').prop("checked", false);
+        (0, import_jquery18.default)('input:radio[name="' + $escape(el.id) + '"]').prop("checked", false);
       } else {
-        (0, import_jquery16.default)(
+        (0, import_jquery18.default)(
           'input:radio[name="' + $escape(el.id) + '"][value="' + $escape(value) + '"]'
         ).prop("checked", true);
       }
     }
     getState(el) {
-      const $objs = (0, import_jquery16.default)(
+      const $objs = (0, import_jquery18.default)(
         'input:radio[name="' + $escape(el.id) + '"]'
       );
       const options = new Array($objs.length);
@@ -1646,8 +2223,8 @@
         options
       };
     }
-    receiveMessage(el, data) {
-      const $el = (0, import_jquery16.default)(el);
+    async receiveMessage(el, data) {
+      const $el = (0, import_jquery18.default)(el);
       if (hasDefinedProperty(data, "options")) {
         $el.find("div.shiny-options-group").remove();
         $el.find("label.radio").remove();
@@ -1656,21 +2233,21 @@
       if (hasDefinedProperty(data, "value")) {
         this.setValue(el, data.value);
       }
-      updateLabel(data.label, getLabelNode5(el));
-      (0, import_jquery16.default)(el).trigger("change");
+      await updateLabel(data.label, getLabelNode5(el));
+      (0, import_jquery18.default)(el).trigger("change");
     }
     subscribe(el, callback) {
-      (0, import_jquery16.default)(el).on("change.radioInputBinding", function() {
+      (0, import_jquery18.default)(el).on("change.radioInputBinding", function() {
         callback(false);
       });
     }
     unsubscribe(el) {
-      (0, import_jquery16.default)(el).off(".radioInputBinding");
+      (0, import_jquery18.default)(el).off(".radioInputBinding");
     }
   };
 
   // srcts/src/bindings/input/selectInput.ts
-  var import_jquery17 = __toESM(require_jquery());
+  var import_jquery19 = __toESM(require_jquery());
 
   // srcts/src/utils/eval.ts
   var indirectEval = eval;
@@ -1681,18 +2258,18 @@
     if (isSelectize(el)) {
       escapedId += "-selectized";
     }
-    return (0, import_jquery17.default)(el).parent().parent().find('label[for="' + escapedId + '"]');
+    return (0, import_jquery19.default)(el).parent().parent().find('label[for="' + escapedId + '"]');
   }
   function isSelectize(el) {
-    const config = (0, import_jquery17.default)(el).parent().find('script[data-for="' + $escape(el.id) + '"]');
+    const config = (0, import_jquery19.default)(el).parent().find('script[data-for="' + $escape(el.id) + '"]');
     return config.length > 0;
   }
   var SelectInputBinding = class extends InputBinding {
     find(scope) {
-      return (0, import_jquery17.default)(scope).find("select");
+      return (0, import_jquery19.default)(scope).find("select");
     }
     getType(el) {
-      const $el = (0, import_jquery17.default)(el);
+      const $el = (0, import_jquery19.default)(el);
       if (!$el.hasClass("symbol")) {
         return null;
       }
@@ -1707,7 +2284,7 @@
     }
     getValue(el) {
       if (!isSelectize(el)) {
-        return (0, import_jquery17.default)(el).val();
+        return (0, import_jquery19.default)(el).val();
       } else {
         const selectize = this._selectize(el);
         return selectize?.getValue();
@@ -1715,7 +2292,7 @@
     }
     setValue(el, value) {
       if (!isSelectize(el)) {
-        (0, import_jquery17.default)(el).val(value);
+        (0, import_jquery19.default)(el).val(value);
       } else {
         const selectize = this._selectize(el);
         selectize?.setValue(value);
@@ -1737,8 +2314,8 @@
         options
       };
     }
-    receiveMessage(el, data) {
-      const $el = (0, import_jquery17.default)(el);
+    async receiveMessage(el, data) {
+      const $el = (0, import_jquery19.default)(el);
       if (hasDefinedProperty(data, "options")) {
         const selectize = this._selectize(el);
         selectize?.destroy();
@@ -1756,7 +2333,7 @@
         let loaded = false;
         selectize.settings.load = function(query, callback) {
           const settings = selectize.settings;
-          import_jquery17.default.ajax({
+          import_jquery19.default.ajax({
             url: data.url,
             data: {
               query,
@@ -1770,7 +2347,7 @@
               callback();
             },
             success: function(res) {
-              import_jquery17.default.each(res, function(index, elem) {
+              import_jquery19.default.each(res, function(index, elem) {
                 const optgroupId = elem[settings.optgroupField || "optgroup"];
                 const optgroup = {};
                 optgroup[settings.optgroupLabelField || "label"] = optgroupId;
@@ -1795,11 +2372,11 @@
       } else if (hasDefinedProperty(data, "value")) {
         this.setValue(el, data.value);
       }
-      updateLabel(data.label, getLabelNode6(el));
-      (0, import_jquery17.default)(el).trigger("change");
+      await updateLabel(data.label, getLabelNode6(el));
+      (0, import_jquery19.default)(el).trigger("change");
     }
     subscribe(el, callback) {
-      (0, import_jquery17.default)(el).on(
+      (0, import_jquery19.default)(el).on(
         "change.selectInputBinding",
         () => {
           if (el.nonempty && this.getValue(el) === "") {
@@ -1810,19 +2387,19 @@
       );
     }
     unsubscribe(el) {
-      (0, import_jquery17.default)(el).off(".selectInputBinding");
+      (0, import_jquery19.default)(el).off(".selectInputBinding");
     }
     initialize(el) {
       this._selectize(el);
     }
     _selectize(el, update = false) {
-      if (!import_jquery17.default.fn.selectize)
+      if (!import_jquery19.default.fn.selectize)
         return void 0;
-      const $el = (0, import_jquery17.default)(el);
+      const $el = (0, import_jquery19.default)(el);
       const config = $el.parent().find('script[data-for="' + $escape(el.id) + '"]');
       if (config.length === 0)
         return void 0;
-      let options = import_jquery17.default.extend(
+      let options = import_jquery19.default.extend(
         {
           labelField: "label",
           valueField: "value",
@@ -1832,11 +2409,11 @@
       );
       if (typeof config.data("nonempty") !== "undefined") {
         el.nonempty = true;
-        options = import_jquery17.default.extend(options, {
+        options = import_jquery19.default.extend(options, {
           onItemRemove: function(value) {
             if (this.getValue() === "")
-              (0, import_jquery17.default)("select#" + $escape(el.id)).empty().append(
-                (0, import_jquery17.default)("<option/>", {
+              (0, import_jquery19.default)("select#" + $escape(el.id)).empty().append(
+                (0, import_jquery19.default)("<option/>", {
                   value,
                   selected: true
                 })
@@ -1844,7 +2421,7 @@
           },
           onDropdownClose: function() {
             if (this.getValue() === "") {
-              this.setValue((0, import_jquery17.default)("select#" + $escape(el.id)).val());
+              this.setValue((0, import_jquery19.default)("select#" + $escape(el.id)).val());
             }
           }
         });
@@ -1852,12 +2429,12 @@
         el.nonempty = false;
       }
       if (config.data("eval") instanceof Array)
-        import_jquery17.default.each(config.data("eval"), function(i4, x2) {
+        import_jquery19.default.each(config.data("eval"), function(i4, x2) {
           options[x2] = indirectEval("(" + options[x2] + ")");
         });
       let control = $el.selectize(options)[0].selectize;
       if (update) {
-        const settings = import_jquery17.default.extend(control.settings, options);
+        const settings = import_jquery19.default.extend(control.settings, options);
         control.destroy();
         control = $el.selectize(settings)[0].selectize;
       }
@@ -1866,7 +2443,7 @@
   };
 
   // srcts/src/bindings/input/slider.ts
-  var import_jquery18 = __toESM(require_jquery());
+  var import_jquery20 = __toESM(require_jquery());
   function forceIonSliderUpdate(slider) {
     if (slider.$cache && slider.$cache.input)
       slider.$cache.input.trigger("change");
@@ -1897,23 +2474,23 @@
     return prettify;
   }
   function getLabelNode7(el) {
-    return (0, import_jquery18.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
+    return (0, import_jquery20.default)(el).parent().find('label[for="' + $escape(el.id) + '"]');
   }
   function numValues(el) {
-    if ((0, import_jquery18.default)(el).data("ionRangeSlider").options.type === "double")
+    if ((0, import_jquery20.default)(el).data("ionRangeSlider").options.type === "double")
       return 2;
     else
       return 1;
   }
   var SliderInputBinding = class extends TextInputBindingBase {
     find(scope) {
-      if (!import_jquery18.default.fn.ionRangeSlider) {
-        return (0, import_jquery18.default)();
+      if (!import_jquery20.default.fn.ionRangeSlider) {
+        return (0, import_jquery20.default)();
       }
-      return (0, import_jquery18.default)(scope).find("input.js-range-slider");
+      return (0, import_jquery20.default)(scope).find("input.js-range-slider");
     }
     getType(el) {
-      const dataType = (0, import_jquery18.default)(el).data("data-type");
+      const dataType = (0, import_jquery20.default)(el).data("data-type");
       if (dataType === "date")
         return "shiny.date";
       else if (dataType === "datetime")
@@ -1922,8 +2499,8 @@
         return null;
     }
     getValue(el) {
-      const $el = (0, import_jquery18.default)(el);
-      const result = (0, import_jquery18.default)(el).data("ionRangeSlider").result;
+      const $el = (0, import_jquery20.default)(el);
+      const result = (0, import_jquery20.default)(el).data("ionRangeSlider").result;
       let convert;
       const dataType = $el.data("data-type");
       if (dataType === "date") {
@@ -1946,7 +2523,7 @@
       }
     }
     setValue(el, value) {
-      const $el = (0, import_jquery18.default)(el);
+      const $el = (0, import_jquery20.default)(el);
       const slider = $el.data("ionRangeSlider");
       $el.data("immediate", true);
       try {
@@ -1961,15 +2538,15 @@
       }
     }
     subscribe(el, callback) {
-      (0, import_jquery18.default)(el).on("change.sliderInputBinding", function() {
-        callback(!(0, import_jquery18.default)(el).data("immediate") && !(0, import_jquery18.default)(el).data("animating"));
+      (0, import_jquery20.default)(el).on("change.sliderInputBinding", function() {
+        callback(!(0, import_jquery20.default)(el).data("immediate") && !(0, import_jquery20.default)(el).data("animating"));
       });
     }
     unsubscribe(el) {
-      (0, import_jquery18.default)(el).off(".sliderInputBinding");
+      (0, import_jquery20.default)(el).off(".sliderInputBinding");
     }
-    receiveMessage(el, data) {
-      const $el = (0, import_jquery18.default)(el);
+    async receiveMessage(el, data) {
+      const $el = (0, import_jquery20.default)(el);
       const slider = $el.data("ionRangeSlider");
       const msg = {};
       if (hasDefinedProperty(data, "value")) {
@@ -1999,7 +2576,7 @@
           msg[feats] = data[feats];
         }
       }
-      updateLabel(data.label, getLabelNode7(el));
+      await updateLabel(data.label, getLabelNode7(el));
       const domElements = [
         "data-type",
         "time-format",
@@ -2034,7 +2611,7 @@
       el;
     }
     initialize(el) {
-      const $el = (0, import_jquery18.default)(el);
+      const $el = (0, import_jquery20.default)(el);
       const dataType = $el.data("data-type");
       const timeFormat = $el.data("time-format");
       const timezone = $el.data("timezone");
@@ -2057,10 +2634,10 @@
     else
       return "";
   }
-  (0, import_jquery18.default)(document).on("click", ".slider-animate-button", function(evt) {
+  (0, import_jquery20.default)(document).on("click", ".slider-animate-button", function(evt) {
     evt.preventDefault();
-    const self = (0, import_jquery18.default)(this);
-    const target = (0, import_jquery18.default)("#" + $escape(self.attr("data-target-id")));
+    const self = (0, import_jquery20.default)(this);
+    const target = (0, import_jquery20.default)("#" + $escape(self.attr("data-target-id")));
     const startLabel = "Play";
     const stopLabel = "Pause";
     const loop = self.attr("data-loop") !== void 0 && !/^\s*false\s*$/i.test(self.attr("data-loop"));
@@ -2142,16 +2719,16 @@
   });
 
   // srcts/src/bindings/input/tabinput.ts
-  var import_jquery19 = __toESM(require_jquery());
+  var import_jquery21 = __toESM(require_jquery());
   function getTabName(anchor) {
     return anchor.attr("data-value") || anchor.text();
   }
   var BootstrapTabInputBinding = class extends InputBinding {
     find(scope) {
-      return (0, import_jquery19.default)(scope).find("ul.nav.shiny-tab-input");
+      return (0, import_jquery21.default)(scope).find("ul.nav.shiny-tab-input");
     }
     getValue(el) {
-      const anchor = isBS3() ? (0, import_jquery19.default)(el).find("li:not(.dropdown).active > a") : (0, import_jquery19.default)(el).find(
+      const anchor = isBS3() ? (0, import_jquery21.default)(el).find("li:not(.dropdown).active > a") : (0, import_jquery21.default)(el).find(
         ".nav-link:not(.dropdown-toggle).active, .dropdown-menu .dropdown-item.active"
       );
       if (anchor.length === 1)
@@ -2161,12 +2738,12 @@
     setValue(el, value) {
       let success = false;
       if (value) {
-        const anchors = isBS3() ? (0, import_jquery19.default)(el).find("li:not(.dropdown) > a") : (0, import_jquery19.default)(el).find(
+        const anchors = isBS3() ? (0, import_jquery21.default)(el).find("li:not(.dropdown) > a") : (0, import_jquery21.default)(el).find(
           ".nav-link:not(.dropdown-toggle), .dropdown-menu .dropdown-item"
         );
         anchors.each(function() {
-          if (getTabName((0, import_jquery19.default)(this)) === value) {
-            (0, import_jquery19.default)(this).tab("show");
+          if (getTabName((0, import_jquery21.default)(this)) === value) {
+            (0, import_jquery21.default)(this).tab("show");
             success = true;
             return false;
           }
@@ -2174,7 +2751,7 @@
         });
       }
       if (!success) {
-        (0, import_jquery19.default)(el).trigger("change");
+        (0, import_jquery21.default)(el).trigger("change");
       }
     }
     getState(el) {
@@ -2183,10 +2760,10 @@
     receiveMessage(el, data) {
       if (hasDefinedProperty(data, "value"))
         this.setValue(el, data.value);
-      (0, import_jquery19.default)(el).trigger("change");
+      (0, import_jquery21.default)(el).trigger("change");
     }
     subscribe(el, callback) {
-      (0, import_jquery19.default)(el).on(
+      (0, import_jquery21.default)(el).on(
         "change shown.bootstrapTabInputBinding shown.bs.tab.bootstrapTabInputBinding",
         function() {
           callback(false);
@@ -2194,12 +2771,12 @@
       );
     }
     unsubscribe(el) {
-      (0, import_jquery19.default)(el).off(".bootstrapTabInputBinding");
+      (0, import_jquery21.default)(el).off(".bootstrapTabInputBinding");
     }
   };
 
   // srcts/src/bindings/input/textarea.ts
-  var import_jquery20 = __toESM(require_jquery());
+  var import_jquery22 = __toESM(require_jquery());
   var intersectObserver = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
@@ -2214,7 +2791,7 @@
       __privateAdd(this, _inputHandler, null);
     }
     find(scope) {
-      return (0, import_jquery20.default)(scope).find("textarea");
+      return (0, import_jquery22.default)(scope).find("textarea");
     }
     initialize(el) {
       super.initialize(el);
@@ -2276,128 +2853,10 @@
   }
 
   // srcts/src/bindings/output/datatable.ts
-  var import_jquery22 = __toESM(require_jquery());
-
-  // srcts/src/time/debounce.ts
-  var Debouncer = class {
-    constructor(target, func, delayMs) {
-      this.target = target;
-      this.func = func;
-      this.delayMs = delayMs;
-      this.timerId = null;
-      this.args = null;
-    }
-    normalCall(...args) {
-      this.$clearTimer();
-      this.args = args;
-      this.timerId = setTimeout(() => {
-        if (this.timerId === null)
-          return;
-        this.$clearTimer();
-        this.$invoke();
-      }, this.delayMs);
-    }
-    immediateCall(...args) {
-      this.$clearTimer();
-      this.args = args;
-      this.$invoke();
-    }
-    isPending() {
-      return this.timerId !== null;
-    }
-    $clearTimer() {
-      if (this.timerId !== null) {
-        clearTimeout(this.timerId);
-        this.timerId = null;
-      }
-    }
-    $invoke() {
-      if (this.args && this.args.length > 0) {
-        this.func.apply(this.target, this.args);
-      } else {
-        this.func.apply(this.target);
-      }
-      this.args = null;
-    }
-  };
-  function debounce(threshold, func) {
-    let timerId = null;
-    return function thisFunc(...args) {
-      if (timerId !== null) {
-        clearTimeout(timerId);
-        timerId = null;
-      }
-      timerId = setTimeout(() => {
-        if (timerId === null)
-          return;
-        timerId = null;
-        func.apply(thisFunc, args);
-      }, threshold);
-    };
-  }
-
-  // srcts/src/time/invoke.ts
-  var Invoker = class {
-    constructor(target, func) {
-      this.target = target;
-      this.func = func;
-    }
-    normalCall(...args) {
-      this.func.apply(this.target, args);
-    }
-    immediateCall(...args) {
-      this.func.apply(this.target, args);
-    }
-  };
-
-  // srcts/src/time/throttle.ts
-  var Throttler = class {
-    constructor(target, func, delayMs) {
-      this.target = target;
-      this.func = func;
-      this.delayMs = delayMs;
-      this.timerId = null;
-      this.args = null;
-    }
-    normalCall(...args) {
-      this.args = args;
-      if (this.timerId === null) {
-        this.$invoke();
-      }
-    }
-    immediateCall(...args) {
-      this.$clearTimer();
-      this.args = args;
-      this.$invoke();
-    }
-    isPending() {
-      return this.args !== null;
-    }
-    $clearTimer() {
-      if (this.timerId !== null) {
-        clearTimeout(this.timerId);
-        this.timerId = null;
-      }
-    }
-    $invoke() {
-      if (this.args === null) {
-        return;
-      }
-      this.func.apply(this.target, this.args);
-      this.args = null;
-      this.timerId = setTimeout(() => {
-        if (this.timerId === null)
-          return;
-        this.$clearTimer();
-        if (this.isPending()) {
-          this.$invoke();
-        }
-      }, this.delayMs);
-    }
-  };
+  var import_jquery24 = __toESM(require_jquery());
 
   // srcts/src/bindings/output/outputBinding.ts
-  var import_jquery21 = __toESM(require_jquery());
+  var import_jquery23 = __toESM(require_jquery());
   var OutputBinding = class {
     find(scope) {
       throw "Not implemented";
@@ -2421,52 +2880,52 @@
     renderError(el, err) {
       this.clearError(el);
       if (err.message === "") {
-        (0, import_jquery21.default)(el).empty();
+        (0, import_jquery23.default)(el).empty();
         return;
       }
       let errClass = "shiny-output-error";
       if (err.type !== null) {
-        errClass = errClass + " " + import_jquery21.default.map(asArray(err.type), function(type) {
+        errClass = errClass + " " + import_jquery23.default.map(asArray(err.type), function(type) {
           return errClass + "-" + type;
         }).join(" ");
       }
-      (0, import_jquery21.default)(el).addClass(errClass).text(err.message);
+      (0, import_jquery23.default)(el).addClass(errClass).text(err.message);
     }
     clearError(el) {
-      (0, import_jquery21.default)(el).attr("class", function(i4, c4) {
+      (0, import_jquery23.default)(el).attr("class", function(i4, c4) {
         return c4.replace(/(^|\s)shiny-output-error\S*/g, "");
       });
     }
     showProgress(el, show3) {
       const recalcClass = "recalculating";
       if (show3)
-        (0, import_jquery21.default)(el).addClass(recalcClass);
+        (0, import_jquery23.default)(el).addClass(recalcClass);
       else
-        (0, import_jquery21.default)(el).removeClass(recalcClass);
+        (0, import_jquery23.default)(el).removeClass(recalcClass);
     }
   };
 
   // srcts/src/bindings/output/datatable.ts
   var DatatableOutputBinding = class extends OutputBinding {
     find(scope) {
-      return (0, import_jquery22.default)(scope).find(".shiny-datatable-output");
+      return (0, import_jquery24.default)(scope).find(".shiny-datatable-output");
     }
     onValueError(el, err) {
       shinyUnbindAll(el);
       this.renderError(el, err);
     }
     renderValue(el, data) {
-      const $el = (0, import_jquery22.default)(el).empty();
+      const $el = (0, import_jquery24.default)(el).empty();
       if (!data || !data.colnames)
         return;
-      const colnames = import_jquery22.default.makeArray(data.colnames);
-      let header = import_jquery22.default.map(colnames, function(x2) {
+      const colnames = import_jquery24.default.makeArray(data.colnames);
+      let header = import_jquery24.default.map(colnames, function(x2) {
         return "<th>" + x2 + "</th>";
       }).join("");
       header = "<thead><tr>" + header + "</tr></thead>";
       let footer = "";
       if (data.options?.searching ?? true) {
-        footer = import_jquery22.default.map(colnames, function(x2) {
+        footer = import_jquery24.default.map(colnames, function(x2) {
           return '<th><input type="text" placeholder="' + escapeHTML(x2.replace(/(<([^>]+)>)/gi, "")) + '" /></th>';
         }).join("");
         footer = "<tfoot>" + footer + "</tfoot>";
@@ -2474,13 +2933,13 @@
       const content = '<table class="table table-striped table-hover">' + header + footer + "</table>";
       $el.append(content);
       if (data.evalOptions) {
-        import_jquery22.default.each(data.evalOptions, function(i4, x2) {
+        import_jquery24.default.each(data.evalOptions, function(i4, x2) {
           data.options[x2] = indirectEval("(" + data.options[x2] + ")");
         });
       }
       const searchCI = data.options?.search?.caseInsensitive !== false;
-      const oTable = (0, import_jquery22.default)(el).children("table").DataTable(
-        import_jquery22.default.extend(
+      const oTable = (0, import_jquery24.default)(el).children("table").DataTable(
+        import_jquery24.default.extend(
           {
             processing: true,
             serverSide: true,
@@ -2512,7 +2971,7 @@
       );
       const searchInputs = $el.find("tfoot input");
       if (searchInputs.length > 0) {
-        import_jquery22.default.each(oTable.settings()[0].aoColumns, function(i4, x2) {
+        import_jquery24.default.each(oTable.settings()[0].aoColumns, function(i4, x2) {
           if (!x2.bSearchable)
             searchInputs.eq(i4).hide();
         });
@@ -2527,10 +2986,10 @@
   };
 
   // srcts/src/bindings/output/downloadlink.ts
-  var import_jquery23 = __toESM(require_jquery());
+  var import_jquery25 = __toESM(require_jquery());
   var DownloadLinkOutputBinding = class extends OutputBinding {
     find(scope) {
-      return (0, import_jquery23.default)(scope).find("a.shiny-download-link");
+      return (0, import_jquery25.default)(scope).find("a.shiny-download-link");
     }
     renderValue(el, data) {
       el.setAttribute("href", data);
@@ -2544,476 +3003,20 @@
       show3;
     }
   };
-  (0, import_jquery23.default)(document).on(
+  (0, import_jquery25.default)(document).on(
     "click.shinyDownloadLink",
     "a.shiny-download-link",
     function(e4) {
       e4;
-      const evt = import_jquery23.default.Event("shiny:filedownload");
+      const evt = import_jquery25.default.Event("shiny:filedownload");
       evt.name = this.id;
       evt.href = this.href;
-      (0, import_jquery23.default)(document).trigger(evt);
+      (0, import_jquery25.default)(document).trigger(evt);
     }
   );
 
   // srcts/src/bindings/output/html.ts
   var import_jquery26 = __toESM(require_jquery());
-
-  // srcts/src/shiny/render.ts
-  var import_jquery25 = __toESM(require_jquery());
-
-  // srcts/src/shiny/sendImageSize.ts
-  var SendImageSize = class {
-    setImageSend(inputBatchSender, doSendImageSize) {
-      const sendImageSizeDebouncer = new Debouncer(null, doSendImageSize, 0);
-      this.regular = function() {
-        sendImageSizeDebouncer.normalCall();
-      };
-      inputBatchSender.lastChanceCallback.push(function() {
-        if (sendImageSizeDebouncer.isPending())
-          sendImageSizeDebouncer.immediateCall();
-      });
-      this.transitioned = debounce(200, this.regular);
-      return sendImageSizeDebouncer;
-    }
-  };
-  var sendImageSizeFns = new SendImageSize();
-
-  // srcts/src/shiny/singletons.ts
-  var import_jquery24 = __toESM(require_jquery());
-  var reSingleton = /<!--(SHINY.SINGLETON\[([\w]+)\])-->([\s\S]*?)<!--\/\1-->/;
-  var reHead = /<head(?:\s[^>]*)?>([\s\S]*?)<\/head>/;
-  var knownSingletons = {};
-  function renderHtml(html, el, where) {
-    const processed = processHtml(html);
-    addToHead(processed.head);
-    register(processed.singletons);
-    switch (where.toLowerCase()) {
-      case "replace":
-        (0, import_jquery24.default)(el).html(processed.html);
-        break;
-      case "beforebegin":
-        (0, import_jquery24.default)(el).before(processed.html);
-        break;
-      case "afterbegin":
-        (0, import_jquery24.default)(el).prepend(processed.html);
-        break;
-      case "beforeend":
-        (0, import_jquery24.default)(el).append(processed.html);
-        break;
-      case "afterend":
-        (0, import_jquery24.default)(el).after(processed.html);
-        break;
-      default:
-        throw new Error("Unknown where position: " + where);
-    }
-    return processed;
-  }
-  function register(s4) {
-    import_jquery24.default.extend(knownSingletons, s4);
-  }
-  function registerNames(s4) {
-    if (typeof s4 === "string") {
-      knownSingletons[s4] = true;
-    } else if (s4 instanceof Array) {
-      for (let i4 = 0; i4 < s4.length; i4++) {
-        knownSingletons[s4[i4]] = true;
-      }
-    }
-  }
-  function addToHead(head) {
-    if (head.length > 0) {
-      const tempDiv = (0, import_jquery24.default)("<div>" + head + "</div>").get(0);
-      const $head = (0, import_jquery24.default)("head");
-      while (tempDiv.hasChildNodes()) {
-        $head.append(tempDiv.firstChild);
-      }
-    }
-  }
-  function processHtml(val) {
-    const newSingletons = {};
-    let newVal;
-    const findNewPayload = function(match, p1, sig, payload) {
-      if (knownSingletons[sig] || newSingletons[sig])
-        return "";
-      newSingletons[sig] = true;
-      return payload;
-    };
-    while (true) {
-      newVal = val.replace(reSingleton, findNewPayload);
-      if (val.length === newVal.length)
-        break;
-      val = newVal;
-    }
-    const heads = [];
-    const headAddPayload = function(match, payload) {
-      heads.push(payload);
-      return "";
-    };
-    while (true) {
-      newVal = val.replace(reHead, headAddPayload);
-      if (val.length === newVal.length)
-        break;
-      val = newVal;
-    }
-    return {
-      html: val,
-      head: heads.join("\n"),
-      singletons: newSingletons
-    };
-  }
-
-  // srcts/src/shiny/render.ts
-  async function renderContentAsync(el, content, where = "replace") {
-    if (where === "replace") {
-      shinyUnbindAll(el);
-    }
-    let html = "";
-    let dependencies = [];
-    if (content === null) {
-      html = "";
-    } else if (typeof content === "string") {
-      html = content;
-    } else if (typeof content === "object") {
-      html = content.html;
-      dependencies = content.deps || [];
-    }
-    await renderHtmlAsync(html, el, dependencies, where);
-    let scope = el;
-    if (where === "replace") {
-      shinyInitializeInputs(el);
-      await shinyBindAll(el);
-    } else {
-      const $parent = (0, import_jquery25.default)(el).parent();
-      if ($parent.length > 0) {
-        scope = $parent;
-        if (where === "beforeBegin" || where === "afterEnd") {
-          const $grandparent = $parent.parent();
-          if ($grandparent.length > 0)
-            scope = $grandparent;
-        }
-      }
-      shinyInitializeInputs(scope);
-      await shinyBindAll(scope);
-    }
-  }
-  function renderContent(el, content, where = "replace") {
-    if (where === "replace") {
-      shinyUnbindAll(el);
-    }
-    let html = "";
-    let dependencies = [];
-    if (content === null) {
-      html = "";
-    } else if (typeof content === "string") {
-      html = content;
-    } else if (typeof content === "object") {
-      html = content.html;
-      dependencies = content.deps || [];
-    }
-    renderHtml2(html, el, dependencies, where);
-    let scope = el;
-    if (where === "replace") {
-      shinyInitializeInputs(el);
-      return shinyBindAll(el);
-    } else {
-      const $parent = (0, import_jquery25.default)(el).parent();
-      if ($parent.length > 0) {
-        scope = $parent;
-        if (where === "beforeBegin" || where === "afterEnd") {
-          const $grandparent = $parent.parent();
-          if ($grandparent.length > 0)
-            scope = $grandparent;
-        }
-      }
-      shinyInitializeInputs(scope);
-      return shinyBindAll(scope);
-    }
-  }
-  async function renderHtmlAsync(html, el, dependencies, where = "replace") {
-    await renderDependenciesAsync(dependencies);
-    return renderHtml(html, el, where);
-  }
-  function renderHtml2(html, el, dependencies, where = "replace") {
-    renderDependencies(dependencies);
-    return renderHtml(html, el, where);
-  }
-  async function renderDependenciesAsync(dependencies) {
-    if (dependencies) {
-      for (const dep of dependencies) {
-        await renderDependencyAsync(dep);
-      }
-    }
-  }
-  function renderDependencies(dependencies) {
-    if (dependencies) {
-      for (const dep of dependencies) {
-        renderDependency(dep);
-      }
-    }
-  }
-  var htmlDependencies = {};
-  function registerDependency(name, version) {
-    htmlDependencies[name] = version;
-  }
-  function needsRestyle(dep) {
-    if (!dep.restyle) {
-      return false;
-    }
-    const names = Object.keys(htmlDependencies);
-    const idx = names.indexOf(dep.name);
-    if (idx === -1) {
-      return false;
-    }
-    return htmlDependencies[names[idx]] === dep.version;
-  }
-  function addStylesheetsAndRestyle(links) {
-    const $head = (0, import_jquery25.default)("head").first();
-    const refreshStyle = function(href, oldSheet) {
-      const xhr = new XMLHttpRequest();
-      xhr.open("GET", href);
-      xhr.onload = function() {
-        const id = "shiny_restyle_" + href.split("?restyle")[0].replace(/\W/g, "_");
-        const oldStyle = $head.find("style#" + id);
-        const newStyle = (0, import_jquery25.default)("<style>").attr("id", id).html(xhr.responseText);
-        $head.append(newStyle);
-        oldStyle.remove();
-        removeSheet(oldSheet);
-        sendImageSizeFns.transitioned();
-      };
-      xhr.send();
-    };
-    const findSheet = function(href) {
-      if (!href)
-        return null;
-      for (let i4 = 0; i4 < document.styleSheets.length; i4++) {
-        const sheet = document.styleSheets[i4];
-        if (typeof sheet.href === "string" && sheet.href.indexOf(href) > -1) {
-          return sheet;
-        }
-      }
-      return null;
-    };
-    const removeSheet = function(sheet) {
-      if (!sheet)
-        return;
-      sheet.disabled = true;
-      if (isIE())
-        sheet.cssText = "";
-      if (sheet.ownerNode instanceof Element) {
-        (0, import_jquery25.default)(sheet.ownerNode).remove();
-      }
-    };
-    links.map((link) => {
-      const $link = (0, import_jquery25.default)(link);
-      const oldSheet = findSheet($link.attr("href"));
-      const href = $link.attr("href") + "?restyle=" + new Date().getTime();
-      if (isIE()) {
-        refreshStyle(href, oldSheet);
-      } else {
-        $link.attr("href", href);
-        $link.attr("onload", () => {
-          const $dummyEl = (0, import_jquery25.default)("<div>").css("transition", "0.1s all").css("position", "absolute").css("top", "-1000px").css("left", "0");
-          $dummyEl.one("transitionend", () => {
-            $dummyEl.remove();
-            removeSheet(oldSheet);
-            sendImageSizeFns.transitioned();
-          });
-          (0, import_jquery25.default)(document.body).append($dummyEl);
-          const color = "#" + Math.floor(Math.random() * 16777215).toString(16);
-          setTimeout(() => $dummyEl.css("color", color), 10);
-        });
-        $head.append(link);
-      }
-    });
-  }
-  function getStylesheetLinkTags(dep) {
-    return dep.stylesheet.map((x2) => {
-      if (!hasDefinedProperty(x2, "rel"))
-        x2.rel = "stylesheet";
-      if (!hasDefinedProperty(x2, "type"))
-        x2.type = "text/css";
-      const link = document.createElement("link");
-      Object.entries(x2).forEach(function([attr, val]) {
-        if (attr === "href") {
-          val = encodeURI(val);
-        }
-        link.setAttribute(attr, val ? val : "");
-      });
-      return link;
-    });
-  }
-  function appendStylesheetLinkTags(dep, $head) {
-    const stylesheetLinks = getStylesheetLinkTags(dep);
-    if (stylesheetLinks.length !== 0) {
-      $head.append(stylesheetLinks);
-    }
-  }
-  function appendScriptTags(dep, $head) {
-    dep.script.forEach((x2) => {
-      const script = document.createElement("script");
-      Object.entries(x2).forEach(function([attr, val]) {
-        if (attr === "src") {
-          val = encodeURI(val);
-        }
-        script.setAttribute(attr, val ? val : "");
-      });
-      $head.append(script);
-    });
-  }
-  async function appendScriptTagsAsync(dep) {
-    const scriptPromises = [];
-    dep.script.forEach((x2) => {
-      const script = document.createElement("script");
-      if (!hasDefinedProperty(x2, "async")) {
-        script.async = false;
-      }
-      Object.entries(x2).forEach(function([attr, val]) {
-        if (attr === "src") {
-          val = encodeURI(val);
-        }
-        script.setAttribute(attr, val ? val : "");
-      });
-      const p3 = new Promise((resolve, reject) => {
-        script.onload = (e4) => {
-          resolve(null);
-        };
-        script.onerror = (e4) => {
-          reject(e4);
-        };
-      });
-      scriptPromises.push(p3);
-      document.head.append(script);
-    });
-    await Promise.allSettled(scriptPromises);
-  }
-  function appendMetaTags(dep, $head) {
-    dep.meta.forEach((x2) => {
-      const meta = document.createElement("meta");
-      for (const [attr, val] of Object.entries(x2)) {
-        meta.setAttribute(attr, val);
-      }
-      $head.append(meta);
-    });
-  }
-  function appendAttachmentLinkTags(dep, $head) {
-    dep.attachment.forEach((x2) => {
-      const link = (0, import_jquery25.default)("<link rel='attachment'>").attr("id", dep.name + "-" + x2.key + "-attachment").attr("href", encodeURI(x2.href));
-      $head.append(link);
-    });
-  }
-  function appendExtraHeadContent(dep, $head) {
-    if (dep.head) {
-      const $newHead = (0, import_jquery25.default)("<head></head>");
-      $newHead.html(dep.head);
-      $head.append($newHead.children());
-    }
-  }
-  async function renderDependencyAsync(dep_) {
-    const dep = normalizeHtmlDependency(dep_);
-    if (needsRestyle(dep)) {
-      addStylesheetsAndRestyle(getStylesheetLinkTags(dep));
-      return true;
-    }
-    if (hasDefinedProperty(htmlDependencies, dep.name))
-      return false;
-    registerDependency(dep.name, dep.version);
-    const $head = (0, import_jquery25.default)("head").first();
-    appendMetaTags(dep, $head);
-    appendStylesheetLinkTags(dep, $head);
-    await appendScriptTagsAsync(dep);
-    appendAttachmentLinkTags(dep, $head);
-    appendExtraHeadContent(dep, $head);
-    return true;
-  }
-  function renderDependency(dep_) {
-    const dep = normalizeHtmlDependency(dep_);
-    if (needsRestyle(dep)) {
-      addStylesheetsAndRestyle(getStylesheetLinkTags(dep));
-      return true;
-    }
-    if (hasDefinedProperty(htmlDependencies, dep.name))
-      return false;
-    registerDependency(dep.name, dep.version);
-    const $head = (0, import_jquery25.default)("head").first();
-    appendMetaTags(dep, $head);
-    appendStylesheetLinkTags(dep, $head);
-    appendScriptTags(dep, $head);
-    appendAttachmentLinkTags(dep, $head);
-    appendExtraHeadContent(dep, $head);
-    return true;
-  }
-  function normalizeHtmlDependency(dep) {
-    const hrefPrefix = dep.src?.href;
-    const result = {
-      name: dep.name,
-      version: dep.version,
-      restyle: dep.restyle,
-      meta: [],
-      stylesheet: [],
-      script: [],
-      attachment: [],
-      head: dep.head
-    };
-    if (dep.meta) {
-      if (Array.isArray(dep.meta)) {
-        result.meta = dep.meta;
-      } else {
-        result.meta = Object.entries(dep.meta).map(function([attr, val]) {
-          return { name: attr, content: val };
-        });
-      }
-    }
-    result.stylesheet = asArray(dep.stylesheet).map((s4) => {
-      if (typeof s4 === "string") {
-        s4 = { href: s4 };
-      }
-      if (hrefPrefix) {
-        s4.href = hrefPrefix + "/" + s4.href;
-      }
-      return s4;
-    });
-    result.script = asArray(dep.script).map((s4) => {
-      if (typeof s4 === "string") {
-        s4 = { src: s4 };
-      }
-      if (hrefPrefix) {
-        s4.src = hrefPrefix + "/" + s4.src;
-      }
-      return s4;
-    });
-    let attachments = dep.attachment;
-    if (!attachments)
-      attachments = [];
-    if (typeof attachments === "string")
-      attachments = [attachments];
-    if (Array.isArray(attachments)) {
-      const tmp = attachments;
-      attachments = tmp.map((attachment, index) => {
-        if (typeof attachment === "string") {
-          return {
-            key: (index + 1).toString(),
-            href: attachment
-          };
-        } else {
-          return attachment;
-        }
-      });
-    } else {
-      attachments = Object.entries(attachments).map(function([attr, val]) {
-        return { key: attr, href: val };
-      });
-    }
-    result.attachment = attachments.map((s4) => {
-      if (hrefPrefix) {
-        s4.href = hrefPrefix + "/" + s4.href;
-      }
-      return s4;
-    });
-    return result;
-  }
-
-  // srcts/src/bindings/output/html.ts
   var HtmlOutputBinding = class extends OutputBinding {
     find(scope) {
       return (0, import_jquery26.default)(scope).find(".shiny-html-output");

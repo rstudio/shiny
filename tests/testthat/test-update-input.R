@@ -30,6 +30,6 @@ test_that("Radio buttons and checkboxes work with modules", {
   expect_length(resultB$message$label, 2)
   expect_s3_class(resultB$message$label$html, "html")
   expect_null(resultB$message$value)
-  expect_true(grepl('"modB-test2"', resultB$message$options))
-  expect_false(grepl('"test2"', resultB$message$options))
+  expect_match(resultB$message$options, '"modB-test2"')
+  expect_no_match(resultB$message$options, '"test2"')
 })

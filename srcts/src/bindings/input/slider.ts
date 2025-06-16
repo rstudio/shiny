@@ -179,7 +179,10 @@ class SliderInputBinding extends TextInputBindingBase {
   unsubscribe(el: HTMLElement): void {
     $(el).off(".sliderInputBinding");
   }
-  receiveMessage(el: HTMLElement, data: SliderReceiveMessageData): void {
+  async receiveMessage(
+    el: HTMLElement,
+    data: SliderReceiveMessageData
+  ): Promise<void> {
     const $el = $(el);
     const slider = $el.data("ionRangeSlider");
     const msg: {
@@ -226,7 +229,7 @@ class SliderInputBinding extends TextInputBindingBase {
       }
     }
 
-    updateLabel(data.label, getLabelNode(el));
+    await updateLabel(data.label, getLabelNode(el));
 
     // (maybe) update data elements
     const domElements: Array<"data-type" | "time-format" | "timezone"> = [

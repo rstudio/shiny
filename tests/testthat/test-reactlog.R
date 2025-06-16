@@ -126,3 +126,12 @@ test_that("message logger appears", {
   })
 
 })
+
+
+test_that("reactlog_version is as expected", {
+  expect_match(
+    packageDescription("shiny")$Suggests,
+    # The space between reactlog and the version number can include \n
+    sprintf("\\breactlog\\s+\\Q(>= %s)\\E", reactlog_min_version)
+  )
+})

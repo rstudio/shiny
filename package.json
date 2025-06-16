@@ -3,7 +3,7 @@
   "homepage": "https://shiny.rstudio.com",
   "repository": "github:rstudio/shiny",
   "name": "@types/rstudio-shiny",
-  "version": "1.7.4-alpha.9003",
+  "version": "1.10.0-alpha.9001",
   "license": "GPL-3.0-only",
   "main": "",
   "browser": "",
@@ -24,15 +24,12 @@
     "@types/datatables.net": "^1.10.19",
     "@types/ion-rangeslider": "2.3.0",
     "@types/jquery": "3.5.14",
-    "@types/selectize": "0.12.34"
+    "@types/selectize": "0.12.34",
+    "lit": "^3.0.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.14.3",
-    "@babel/plugin-proposal-class-properties": "^7.13.0",
-    "@babel/preset-env": "^7.14.2",
-    "@babel/preset-typescript": "^7.13.0",
-    "@babel/runtime": "^7.14.0",
     "@deanc/esbuild-plugin-postcss": "^1.0.2",
+    "@selectize/selectize": "https://github.com/selectize/selectize.js.git#e3f2e0b4aa251375bc21b5fcd8ca7d374a921f08",
     "@testing-library/dom": "^7.31.0",
     "@testing-library/jest-dom": "^5.12.0",
     "@testing-library/user-event": "^13.1.9",
@@ -49,7 +46,6 @@
     "caniuse-lite": "^1.0.30001312",
     "core-js": "^3.13.0",
     "esbuild": "^0.15.10",
-    "esbuild-plugin-babel": "https://github.com/schloerke/esbuild-plugin-babel#patch-2",
     "esbuild-plugin-globals": "^0.1.1",
     "esbuild-plugin-sass": "^1.0.1",
     "eslint": "^8.24.0",
@@ -67,6 +63,7 @@
     "phantomjs-prebuilt": "^2.1.16",
     "postcss": "^8.3.5",
     "prettier": "^2.7.1",
+    "prettier-plugin-organize-imports": "^3.2.4",
     "readcontrol": "^1.0.0",
     "replace": "^1.2.1",
     "ts-jest": "^26",
@@ -92,5 +89,11 @@
     "coverage": "type-coverage -p tsconfig.json --at-least 90",
     "circular": "madge --circular --extensions ts srcts/src",
     "circular_image": "madge --circular --extensions ts --image madge.svg srcts/src"
+  },
+  "prettier": {
+    "plugins": [
+      "prettier-plugin-organize-imports"
+    ],
+    "organizeImportsSkipDestructiveCodeActions": true
   }
 }

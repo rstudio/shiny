@@ -99,12 +99,12 @@ saveShinySaveState <- function(state) {
 
 # Encode the state to a URL. This does not save to disk.
 encodeShinySaveState <- function(state) {
-  exclude <- c(state$exclude, "._bookmark_")
-  inputVals <- serializeReactiveValues(state$input, exclude, stateDir = NULL)
-
   # Allow user-supplied onSave function to do things like add state$values.
   if (!is.null(state$onSave))
     isolate(state$onSave(state))
+
+  exclude <- c(state$exclude, "._bookmark_")
+  inputVals <- serializeReactiveValues(state$input, exclude, stateDir = NULL)
 
   inputVals <- vapply(inputVals,
     function(x) toJSON(x, strict_atomic = FALSE),
@@ -551,7 +551,7 @@ restoreInput <- function(id, default) {
 #' `window.history.pushState(null, null, queryString)`.
 #'
 #' @param queryString The new query string to show in the location bar.
-#' @param mode When the query string is updated, should the the current history
+#' @param mode When the query string is updated, should the current history
 #'   entry be replaced (default), or should a new history entry be pushed onto
 #'   the history stack? The former should only be used in a live bookmarking
 #'   context. The latter is useful if you want to navigate between states using

@@ -1,19 +1,19 @@
 Package: shiny
 Type: Package
 Title: Web Application Framework for R
-Version: 1.7.4.9003
+Version: 1.10.0.9001
 Authors@R: c(
-    person("Winston", "Chang", role = c("aut", "cre"), email = "winston@rstudio.com", comment = c(ORCID = "0000-0002-1576-2126")),
-    person("Joe", "Cheng", role = "aut", email = "joe@rstudio.com"),
-    person("JJ", "Allaire", role = "aut", email = "jj@rstudio.com"),
-    person("Carson", "Sievert", role = "aut", email = "carson@rstudio.com", comment = c(ORCID = "0000-0002-4958-2844")),
-    person("Barret", "Schloerke", role = "aut", email = "barret@rstudio.com", comment = c(ORCID = "0000-0001-9986-114X")),
-    person("Yihui", "Xie", role = "aut", email = "yihui@rstudio.com"),
-    person("Jeff", "Allen", role = "aut", email = "jeff@rstudio.com"),
-    person("Jonathan", "McPherson", role = "aut", email = "jonathan@rstudio.com"),
+    person("Winston", "Chang", role = c("aut", "cre"), email = "winston@posit.co", comment = c(ORCID = "0000-0002-1576-2126")),
+    person("Joe", "Cheng", role = "aut", email = "joe@posit.co"),
+    person("JJ", "Allaire", role = "aut", email = "jj@posit.co"),
+    person("Carson", "Sievert", role = "aut", email = "carson@posit.co", comment = c(ORCID = "0000-0002-4958-2844")),
+    person("Barret", "Schloerke", role = "aut", email = "barret@posit.co", comment = c(ORCID = "0000-0001-9986-114X")),
+    person("Yihui", "Xie", role = "aut", email = "yihui@posit.co"),
+    person("Jeff", "Allen", role = "aut"),
+    person("Jonathan", "McPherson", role = "aut", email = "jonathan@posit.co"),
     person("Alan", "Dipert", role = "aut"),
     person("Barbara", "Borges", role = "aut"),
-    person(family = "RStudio", role = "cph"),
+    person("Posit Software, PBC", role = c("cph", "fnd")),
     person(family = "jQuery Foundation", role = "cph",
     comment = "jQuery library and jQuery UI library"),
     person(family = "jQuery contributors", role = c("ctb", "cph"),
@@ -60,7 +60,7 @@ Authors@R: c(
     comment = "showdown.js library"),
     person("Ivan", "Sagalaev", role = c("ctb", "cph"),
     comment = "highlight.js library"),
-    person(family = "R Core Team", role = c("ctb", "cph"),
+    person(given = "R Core Team", role = c("ctb", "cph"),
     comment = "tar implementation from R")
     )
 Description: Makes it incredibly easy to build interactive web
@@ -83,22 +83,23 @@ Imports:
     R6 (>= 2.0),
     sourcetools,
     later (>= 1.0.0),
-    promises (>= 1.1.0),
+    promises (>= 1.3.2),
     tools,
-    crayon,
+    cli,
     rlang (>= 0.4.10),
     fastmap (>= 1.1.1),
     withr,
     commonmark (>= 1.7),
     glue (>= 1.3.2),
-    bslib (>= 0.3.0),
-    cachem,
-    ellipsis,
+    bslib (>= 0.6.0),
+    cachem (>= 1.1.0),
     lifecycle (>= 0.2.0)
 Suggests:
+    coro (>= 1.1.0),
     datasets,
+    DT,
     Cairo (>= 1.5-5),
-    testthat (>= 3.0.0),
+    testthat (>= 3.2.1),
     knitr (>= 1.6),
     markdown,
     rmarkdown,
@@ -106,11 +107,13 @@ Suggests:
     reactlog (>= 1.0.0),
     magrittr,
     yaml,
+    mirai,
     future,
     dygraphs,
     ragg,
     showtext,
-    sass
+    sass,
+    watcher 
 URL: https://shiny.posit.co/,
     https://github.com/rstudio/shiny
 BugReports: https://github.com/rstudio/shiny/issues
@@ -128,10 +131,13 @@ Collate:
     'map.R'
     'utils.R'
     'bootstrap.R'
+    'busy-indicators-spinners.R'
+    'busy-indicators.R'
     'cache-utils.R'
     'deprecated.R'
     'devmode.R'
     'diagnose.R'
+    'extended-task.R'
     'fileupload.R'
     'graph.R'
     'reactives.R'
@@ -203,10 +209,9 @@ Collate:
     'version_selectize.R'
     'version_strftime.R'
     'viewer.R'
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RdMacros: lifecycle
 Config/testthat/edition: 3
 Config/Needs/check:
   shinytest2

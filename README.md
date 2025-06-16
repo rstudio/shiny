@@ -3,7 +3,7 @@
 <!-- badges: start -->
 [![CRAN](https://www.r-pkg.org/badges/version/shiny)](https://CRAN.R-project.org/package=shiny)
 [![R build status](https://github.com/rstudio/shiny/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/rstudio/shiny/actions)
-[![RStudio community](https://img.shields.io/badge/community-shiny-blue?style=social&logo=rstudio&logoColor=75AADB)](https://community.rstudio.com/new-topic?category=shiny&tags=shiny)
+[![RStudio community](https://img.shields.io/badge/community-shiny-blue?style=social&logo=rstudio&logoColor=75AADB)](https://forum.posit.co/new-topic?category=shiny&tags=shiny)
 
 <!-- badges: end -->
 
@@ -47,11 +47,11 @@ For help with learning fundamental Shiny programming concepts, check out the [Ma
 
 ## Join the conversation
 
-If you want to chat about Shiny, meet other developers, or help us decide what to work on next, [join us on Discord](https://discord.gg/yMGCamUMnS).
+If you want to chat about Shiny, meet other developers, or help us decide what to work on next, [join us on Discord](https://discord.com/invite/yMGCamUMnS).
 
 ## Getting Help
 
-To ask a question about Shiny, please use the [RStudio Community website](https://community.rstudio.com/new-topic?category=shiny&tags=shiny).
+To ask a question about Shiny, please use the [RStudio Community website](https://forum.posit.co/new-topic?category=shiny&tags=shiny).
 
 For bug reports, please use the [issue tracker](https://github.com/rstudio/shiny/issues) and also keep in mind that by [writing a good bug report](https://github.com/rstudio/shiny/wiki/Writing-Good-Bug-Reports), you're more likely to get help with your problem.
 

@@ -1,8 +1,7 @@
 import $ from "jquery";
-import { InputBinding } from "./inputBinding";
 import { $escape, hasDefinedProperty, updateLabel } from "../../utils";
 import { indirectEval } from "../../utils/eval";
-import type { NotUndefined } from "../../utils/extraTypes";
+import { InputBinding } from "./inputBinding";
 
 type SelectHTMLElement = HTMLSelectElement & { nonempty: boolean };
 
@@ -61,10 +60,14 @@ class SelectInputBinding extends InputBinding {
   getId(el: SelectHTMLElement): string {
     return InputBinding.prototype.getId.call(this, el) || el.name;
   }
-  getValue(
-    el: HTMLElement
-  ): NotUndefined<ReturnType<JQuery<HTMLElement>["val"]>> {
-    return $(el).val() as NotUndefined<ReturnType<JQuery<HTMLElement>["val"]>>;
+  getValue(el: SelectHTMLElement): any {
+    if (!isSelectize(el)) {
+      return $(el).val();
+    } else {
+      const selectize = this._selectize(el);
+
+      return selectize?.getValue();
+    }
   }
   setValue(el: SelectHTMLElement, value: string): void {
     if (!isSelectize(el)) {
@@ -99,10 +102,10 @@ class SelectInputBinding extends InputBinding {
       options: options,
     };
   }
-  receiveMessage(
+  async receiveMessage(
     el: SelectHTMLElement,
     data: SelectInputReceiveMessageData
-  ): void {
+  ): Promise<void> {
     const $el = $(el);
 
     // This will replace all the options
@@ -139,12 +142,19 @@ class SelectInputBinding extends InputBinding {
         };
       };
 
+      // Calling selectize.clear() first works around https://github.com/selectize/selectize.js/issues/2146
+      // As of selectize.js >= v0.13.1, .clearOptions() clears the selection,
+      // but does NOT remove the previously-selected options. So unless we call
+      // .clear() first, the current selection(s) will remain as (deselected)
+      // options. See #3966 #4142
+      selectize.clear();
       selectize.clearOptions();
       let loaded = false;
 
       selectize.settings.load = function (query: string, callback: CallbackFn) {
         const settings = selectize.settings;
 
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         $.ajax({
           url: data.url,
           data: {
@@ -195,7 +205,7 @@ class SelectInputBinding extends InputBinding {
       this.setValue(el, data.value);
     }
 
-    updateLabel(data.label, getLabelNode(el));
+    await updateLabel(data.label, getLabelNode(el));
 
     $(el).trigger("change");
   }
@@ -292,6 +302,7 @@ class SelectInputBinding extends InputBinding {
       control.destroy();
       control = $el.selectize(settings)[0].selectize as SelectizeInfo;
     }
+
     return control;
   }
 }

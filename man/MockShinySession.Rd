@@ -108,6 +108,7 @@ user. Always \code{NULL} for a \code{MockShinySesion}.}
 \item \href{#method-MockShinySession-getReturned}{\code{MockShinySession$getReturned()}}
 \item \href{#method-MockShinySession-genId}{\code{MockShinySession$genId()}}
 \item \href{#method-MockShinySession-rootScope}{\code{MockShinySession$rootScope()}}
+\item \href{#method-MockShinySession-onUnhandledError}{\code{MockShinySession$onUnhandledError()}}
 \item \href{#method-MockShinySession-unhandledError}{\code{MockShinySession$unhandledError()}}
 \item \href{#method-MockShinySession-freezeValue}{\code{MockShinySession$freezeValue()}}
 \item \href{#method-MockShinySession-onSessionEnded}{\code{MockShinySession$onSessionEnded()}}
@@ -513,18 +514,42 @@ The root \code{MockShinySession}.
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MockShinySession-onUnhandledError"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-onUnhandledError}{}}}
+\subsection{Method \code{onUnhandledError()}}{
+Add an unhandled error callback.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$onUnhandledError(callback)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{callback}}{The callback to add, which should accept an error object
+as its first argument.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A deregistration function.
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-MockShinySession-unhandledError"></a>}}
 \if{latex}{\out{\hypertarget{method-MockShinySession-unhandledError}{}}}
 \subsection{Method \code{unhandledError()}}{
 Called by observers when a reactive expression errors.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$unhandledError(e)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$unhandledError(e, close = TRUE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{e}}{An error object.}
+
+\item{\code{close}}{If \code{TRUE}, the session will be closed after the error is
+handled, defaults to \code{FALSE}.}
 }
 \if{html}{\out{</div>}}
 }

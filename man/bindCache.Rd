@@ -182,7 +182,7 @@ If you want to use a cache that is shared across multiple R processes, you
 can use a \code{\link[cachem:cache_disk]{cachem::cache_disk()}}. You can create a application-level shared
 cache by putting this at the top of your app.R, server.R, or global.R:
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{shinyOptions(cache = cachem::cache_disk(file.path(dirname(tempdir()), "myapp-cache"))
+\if{html}{\out{<div class="sourceCode">}}\preformatted{shinyOptions(cache = cachem::cache_disk(file.path(dirname(tempdir()), "myapp-cache")))
 }\if{html}{\out{</div>}}
 
 This will create a subdirectory in your system temp directory named
@@ -234,8 +234,8 @@ With a cached reactive expression, the key and/or value expression can be
 promises, but rather objects provided by the
 \href{https://rstudio.github.io/promises/}{\pkg{promises}}  package, which
 are similar to promises in JavaScript. (See \code{\link[promises:promise]{promises::promise()}} for more
-information.) You can also use \code{\link[future:future]{future::future()}} objects to run code in a
-separate process or even on a remote machine.
+information.) You can also use \code{\link[mirai:mirai]{mirai::mirai()}} or \code{\link[future:future]{future::future()}}
+objects to run code in a separate process or even on a remote machine.
 
 If the value returns a promise, then anything that consumes the cached
 reactive must expect it to return a promise.
@@ -448,7 +448,7 @@ shinyApp(
       bindEvent(input$go)
       # The cached, eventified reactive takes a reactive dependency on
       # input$go, but doesn't use it for the cache key. It uses input$x and
-      # input$y for the cache key, but doesn't take a reactive depdency on
+      # input$y for the cache key, but doesn't take a reactive dependency on
       # them, because the reactive dependency is superseded by addEvent().
 
     output$txt <- renderText(r())

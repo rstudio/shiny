@@ -1,0 +1,13 @@
+diff --git a/inst/www/shared/selectize/js/selectize.js b/inst/www/shared/selectize/js/selectize.js
+index a902fae5b..5fa6dccaf 100644
+--- a/inst/www/shared/selectize/js/selectize.js
++++ b/inst/www/shared/selectize/js/selectize.js
+@@ -2757,7 +2757,7 @@ Selectize.defaults = {
+   maxItems: null,
+   hideSelected: null,
+   addPrecedence: false,
+-  selectOnTab: true,
++  selectOnTab: false,
+   preload: false,
+   allowEmptyOption: false,
+   showEmptyOptionInDropdown: false,

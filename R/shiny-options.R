@@ -65,16 +65,20 @@ getShinyOption <- function(name, default = NULL) {
 #'   changes are detected, all connected Shiny sessions are reloaded. This
 #'   allows for fast feedback loops when tweaking Shiny UI.
 #'
-#'   Since monitoring for changes is expensive (we simply poll for last
-#'   modified times), this feature is intended only for development.
+#'   Monitoring for changes is no longer expensive, thanks to the \pkg{watcher}
+#'   package, but this feature is still intended only for development.
 #'
 #'   You can customize the file patterns Shiny will monitor by setting the
-#'   shiny.autoreload.pattern option. For example, to monitor only ui.R:
-#'   `options(shiny.autoreload.pattern = glob2rx("ui.R"))`
+#'   shiny.autoreload.pattern option. For example, to monitor only `ui.R`:
+#'   `options(shiny.autoreload.pattern = glob2rx("ui.R"))`. 
 #'
-#'   The default polling interval is 500 milliseconds. You can change this
-#'   by setting e.g. `options(shiny.autoreload.interval = 2000)` (every
-#'   two seconds).}
+#'   As mentioned above, Shiny no longer polls watched files for changes.
+#'   Instead, using \pkg{watcher}, Shiny is notified of file changes as they
+#'   occur. These changes are batched together within a customizable latency
+#'   period. You can adjust this period by setting
+#'   `options(shiny.autoreload.interval = 2000)` (in milliseconds). This value
+#'   converted to seconds and passed to the `latency` argument of
+#'   [watcher::watcher()]. The default latency is 250ms.}
 #' \item{shiny.deprecation.messages (defaults to `TRUE`)}{This controls whether messages for
 #'   deprecated functions in Shiny will be printed. See
 #'   [shinyDeprecated()] for more information.}
@@ -90,8 +94,9 @@ getShinyOption <- function(name, default = NULL) {
 #' \item{shiny.jquery.version (defaults to `3`)}{The major version of jQuery to use.
 #'   Currently only values of `3` or `1` are supported. If `1`, then jQuery 1.12.4 is used. If `3`,
 #'   then jQuery `r version_jquery` is used.}
-#' \item{shiny.json.digits (defaults to `16`)}{The number of digits to use when converting
-#'   numbers to JSON format to send to the client web browser.}
+#' \item{shiny.json.digits (defaults to `I(16)`)}{Max number of digits to use when converting
+#'   numbers to JSON format to send to the client web browser. Use [I()] to specify significant digits.
+#'   Use `NA` for max precision.}
 #' \item{shiny.launch.browser (defaults to `interactive()`)}{A boolean which controls the default behavior
 #'   when an app is run. See [runApp()] for more information.}
 #' \item{shiny.mathjax.url (defaults to `"https://mathjax.rstudio.com/latest/MathJax.js"`)}{
@@ -112,7 +117,7 @@ getShinyOption <- function(name, default = NULL) {
 #'   production.}
 #' \item{shiny.sanitize.errors (defaults to `FALSE`)}{If `TRUE`, then normal errors (i.e.
 #'   errors not wrapped in `safeError`) won't show up in the app; a simple
-#'   generic error message is printed instead (the error and strack trace printed
+#'   generic error message is printed instead (the error and stack trace printed
 #'   to the console remain unchanged). If you want to sanitize errors in general, but you DO want a
 #'   particular error `e` to get displayed to the user, then set this option
 #'   to `TRUE` and use `stop(safeError(e))` for errors you want the
@@ -150,6 +155,11 @@ getShinyOption <- function(name, default = NULL) {
 # ' \item{shiny.devmode.verbose (defaults to `TRUE`)}{If `TRUE`, will display messages printed
 # '   about which options are being set. See [devmode()] for more details. }
 ### (end not documenting 'shiny.devmode.verbose')
+### start shiny.client_devmode is primarily for niche, internal shinylive usage
+# ' \item{shiny.client_devmode (defaults to `FALSE`)}{If `TRUE`, enables client-
+# '  side devmode features. Currently the primary feature is the client-side
+# '  error console.}
+### end shiny.client_devmode
 #' }
 #'
 #'

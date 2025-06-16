@@ -1,6 +1,5 @@
 /// <reference types="selectize" />
 import { InputBinding } from "./inputBinding";
-import type { NotUndefined } from "../../utils/extraTypes";
 type SelectHTMLElement = HTMLSelectElement & {
     nonempty: boolean;
 };
@@ -19,7 +18,7 @@ declare class SelectInputBinding extends InputBinding {
     find(scope: HTMLElement): JQuery<HTMLElement>;
     getType(el: HTMLElement): string | null;
     getId(el: SelectHTMLElement): string;
-    getValue(el: HTMLElement): NotUndefined<ReturnType<JQuery<HTMLElement>["val"]>>;
+    getValue(el: SelectHTMLElement): any;
     setValue(el: SelectHTMLElement, value: string): void;
     getState(el: SelectHTMLElement): {
         label: JQuery<HTMLElement>;
@@ -29,7 +28,7 @@ declare class SelectInputBinding extends InputBinding {
             label: string;
         }>;
     };
-    receiveMessage(el: SelectHTMLElement, data: SelectInputReceiveMessageData): void;
+    receiveMessage(el: SelectHTMLElement, data: SelectInputReceiveMessageData): Promise<void>;
     subscribe(el: SelectHTMLElement, callback: (x: boolean) => void): void;
     unsubscribe(el: HTMLElement): void;
     initialize(el: SelectHTMLElement): void;

@@ -53,10 +53,12 @@ Context <- R6Class(
 
       promises::with_promise_domain(reactivePromiseDomain(), {
         withReactiveDomain(.domain, {
-          env <- .getReactiveEnvironment()
-          rLog$enter(.reactId, id, .reactType, .domain)
-          on.exit(rLog$exit(.reactId, id, .reactType, .domain), add = TRUE)
-          env$runWith(self, func)
+          captureStackTraces({
+            env <- .getReactiveEnvironment()
+            rLog$enter(.reactId, id, .reactType, .domain)
+            on.exit(rLog$exit(.reactId, id, .reactType, .domain), add = TRUE)
+            env$runWith(self, func)
+          })
         })
       })
     },
@@ -219,13 +221,11 @@ getDummyContext <- function() {
 
 wrapForContext <- function(func, ctx) {
   force(func)
-  force(ctx)
+  force(ctx) # may be NULL (in the case of maskReactiveContext())
 
   function(...) {
-    ctx$run(function() {
-      captureStackTraces(
-        func(...)
-      )
+    .getReactiveEnvironment()$runWith(ctx, function() {
+      func(...)
     })
   }
 }
@@ -234,12 +234,18 @@ reactivePromiseDomain <- function() {
   promises::new_promise_domain(
     wrapOnFulfilled = function(onFulfilled) {
       force(onFulfilled)
-      ctx <- getCurrentContext()
+
+      # ctx will be NULL if we're in a maskReactiveContext()
+      ctx <- if (hasCurrentContext()) getCurrentContext() else NULL
+
       wrapForContext(onFulfilled, ctx)
     },
     wrapOnRejected = function(onRejected) {
       force(onRejected)
-      ctx <- getCurrentContext()
+
+      # ctx will be NULL if we're in a maskReactiveContext()
+      ctx <- if (hasCurrentContext()) getCurrentContext() else NULL
+
       wrapForContext(onRejected, ctx)
     }
   )

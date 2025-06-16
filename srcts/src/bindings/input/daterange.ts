@@ -106,13 +106,16 @@ class DateRangeInputBinding extends DateInputBindingBase {
       startview: startview,
     };
   }
-  receiveMessage(el: HTMLElement, data: DateRangeReceiveMessageData): void {
+  async receiveMessage(
+    el: HTMLElement,
+    data: DateRangeReceiveMessageData
+  ): Promise<void> {
     const $el = $(el);
     const $inputs = $el.find("input");
     const $startinput = $inputs.eq(0);
     const $endinput = $inputs.eq(1);
 
-    updateLabel(data.label, getLabelNode(el));
+    await updateLabel(data.label, getLabelNode(el));
 
     if (hasDefinedProperty(data, "min")) {
       this._setMin($startinput[0], data.min);
@@ -161,19 +164,15 @@ class DateRangeInputBinding extends DateInputBindingBase {
     this._setMax($endinput[0], $endinput.data("max-date"));
   }
   subscribe(el: HTMLElement, callback: (x: boolean) => void): void {
-    $(el).on(
-      "keyup.dateRangeInputBinding input.dateRangeInputBinding",
-      // event: Event
-      function () {
-        // Use normal debouncing policy when typing
-        callback(true);
-      }
-    );
+    // Don't update when in the middle of typing; listening on keyup or input
+    // tends to send spurious values to the server, based on unpredictable
+    // browser-dependant interpretation of partially-typed date strings.
     $(el).on(
       "changeDate.dateRangeInputBinding change.dateRangeInputBinding",
       // event: Event
       function () {
         // Send immediately when clicked
+        // Or if typing, when enter pressed or focus lost
         callback(false);
       }
     );

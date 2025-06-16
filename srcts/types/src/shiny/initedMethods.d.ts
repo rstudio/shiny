@@ -1,20 +1,20 @@
-import type { Shiny } from ".";
+import type { ShinyClass } from ".";
 import type { FileInputBinding } from "../bindings/input/fileinput";
 import type { OutputBindingAdapter } from "../bindings/outputAdapter";
 import type { EventPriority } from "../inputPolicies";
 import type { BindScope } from "./bind";
 import type { Handler, ShinyApp } from "./shinyapp";
-declare function setShinyObj(shiny: Shiny): void;
+declare function setShinyObj(shiny: ShinyClass): void;
 declare function shinySetInputValue(name: string, value: unknown, opts?: {
     priority?: EventPriority;
 }): void;
 declare function shinyShinyApp(): ShinyApp;
 declare function setShinyUser(user: string): void;
 declare function shinyForgetLastInputValue(name: string): void;
-declare function shinyBindAll(scope: BindScope): void;
+declare function shinyBindAll(scope: BindScope): Promise<void>;
 declare function shinyUnbindAll(scope: BindScope, includeSelf?: boolean): void;
 declare function shinyInitializeInputs(scope: BindScope): void;
-declare function shinyAppBindOutput(id: string, binding: OutputBindingAdapter): void;
+declare function shinyAppBindOutput(id: string, binding: OutputBindingAdapter): Promise<void>;
 declare function shinyAppUnbindOutput(id: string, binding: OutputBindingAdapter): boolean;
 declare function getShinyOnCustomMessage(): Handler | null;
 declare function getFileInputBinding(): FileInputBinding;

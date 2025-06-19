@@ -1,6 +1,7 @@
 import $ from "jquery";
 import { Shiny } from "..";
 import type { InputBinding, OutputBinding } from "../bindings";
+import type { SubscribeEventPriority } from "../bindings/input/inputBinding";
 import { OutputBindingAdapter } from "../bindings/outputAdapter";
 import type { BindingRegistry } from "../bindings/registry";
 import { ShinyClientMessageEvent } from "../components/errorConsole";
@@ -8,6 +9,7 @@ import type {
   InputRateDecorator,
   InputValidateDecorator,
 } from "../inputPolicies";
+import type { EventPriority } from "../inputPolicies/inputPolicy";
 import { shinyAppBindOutput, shinyAppUnbindOutput } from "./initedMethods";
 import { sendImageSizeFns } from "./sendImageSize";
 
@@ -27,7 +29,7 @@ function valueChangeCallback(
   inputs: InputValidateDecorator,
   binding: InputBinding,
   el: HTMLElement,
-  allowDeferred: boolean
+  priority: EventPriority
 ) {
   let id = binding.getId(el);
 
@@ -37,17 +39,7 @@ function valueChangeCallback(
 
     if (type) id = id + ":" + type;
 
-    const opts: {
-      priority: "deferred" | "immediate";
-      binding: typeof binding;
-      el: typeof el;
-    } = {
-      priority: allowDeferred ? "deferred" : "immediate",
-      binding: binding,
-      el: el,
-    };
-
-    inputs.setInput(id, value, opts);
+    inputs.setInput(id, value, { priority, binding, el });
   }
 }
 
@@ -272,8 +264,20 @@ function bindInputs(
         const thisBinding = binding;
         const thisEl = el;
 
-        return function (allowDeferred: boolean) {
-          valueChangeCallback(inputs, thisBinding, thisEl, allowDeferred);
+        return function (priority: SubscribeEventPriority) {
+          // Narrow the type of priority to EventPriority
+          let normalizedPriority: EventPriority;
+          if (priority === true) {
+            normalizedPriority = "deferred";
+          } else if (priority === false) {
+            normalizedPriority = "immediate";
+          } else if (typeof priority === "object" && "priority" in priority) {
+            normalizedPriority = priority.priority;
+          } else {
+            normalizedPriority = priority;
+          }
+
+          valueChangeCallback(inputs, thisBinding, thisEl, normalizedPriority);
         };
       })();
 

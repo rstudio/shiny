@@ -5611,19 +5611,14 @@
   function isJQuery(value) {
     return Boolean(value && value.jquery);
   }
-  function valueChangeCallback(inputs, binding, el, allowDeferred) {
+  function valueChangeCallback(inputs, binding, el, priority) {
     let id = binding.getId(el);
     if (id) {
       const value = binding.getValue(el);
       const type = binding.getType(el);
       if (type)
         id = id + ":" + type;
-      const opts = {
-        priority: allowDeferred ? "deferred" : "immediate",
-        binding,
-        el
-      };
-      inputs.setInput(id, value, opts);
+      inputs.setInput(id, value, { priority, binding, el });
     }
   }
   var bindingsRegistry = (() => {
@@ -5738,8 +5733,18 @@ ${duplicateIdMsg}`;
         const thisCallback = function() {
           const thisBinding = binding;
           const thisEl = el;
-          return function(allowDeferred) {
-            valueChangeCallback(inputs, thisBinding, thisEl, allowDeferred);
+          return function(priority) {
+            let normalizedPriority;
+            if (priority === true) {
+              normalizedPriority = "deferred";
+            } else if (priority === false) {
+              normalizedPriority = "immediate";
+            } else if (typeof priority === "object" && "priority" in priority) {
+              normalizedPriority = priority.priority;
+            } else {
+              normalizedPriority = priority;
+            }
+            valueChangeCallback(inputs, thisBinding, thisEl, normalizedPriority);
           };
         }();
         binding.subscribe(el, thisCallback);

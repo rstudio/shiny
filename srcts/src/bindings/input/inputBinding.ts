@@ -15,6 +15,8 @@ type SubscribeEventPriority =
 // In recent versions, the value can also be "event", meaning that the
 // value should be sent immediately regardless of whether it has changed.
 
+type InputSubscribeCallback = (value: SubscribeEventPriority) => void;
+
 class InputBinding {
   name!: string;
 
@@ -40,10 +42,7 @@ class InputBinding {
     el; // unused var
   }
 
-  subscribe(
-    el: HTMLElement,
-    callback: (value: SubscribeEventPriority) => void
-  ): void {
+  subscribe(el: HTMLElement, callback: InputSubscribeCallback): void {
     // empty
     el; // unused var
     callback; // unused var
@@ -116,4 +115,4 @@ class InputBinding {
 //// END NOTES FOR FUTURE DEV
 
 export { InputBinding };
-export type { SubscribeEventPriority };
+export type { InputSubscribeCallback, SubscribeEventPriority };

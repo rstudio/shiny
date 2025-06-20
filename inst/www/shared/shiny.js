@@ -1226,12 +1226,13 @@
         value: el.checked
       };
     }
-    receiveMessage(el, data) {
+    async receiveMessage(el, data) {
       if (hasDefinedProperty(data, "value")) {
         el.checked = data.value;
       }
       if (hasDefinedProperty(data, "label")) {
-        (0, import_jquery8.default)(el).parent().find("span").text(data.label);
+        const labelSpan = (0, import_jquery8.default)(el).parent().find("span");
+        await renderContent(labelSpan, data.label);
       }
       (0, import_jquery8.default)(el).trigger("change");
     }

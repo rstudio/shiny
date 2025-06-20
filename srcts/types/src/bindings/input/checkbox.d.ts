@@ -1,9 +1,13 @@
+import type { HtmlDep } from "../../shiny/render";
 import { InputBinding } from "./inputBinding";
 type CheckedHTMLElement = HTMLInputElement;
 type CheckboxChecked = CheckedHTMLElement["checked"];
 type CheckboxReceiveMessageData = {
     value?: CheckboxChecked;
-    label?: string;
+    label?: {
+        html: string;
+        deps: HtmlDep[];
+    };
 };
 declare class CheckboxInputBinding extends InputBinding {
     find(scope: HTMLElement): JQuery<HTMLElement>;
@@ -15,7 +19,7 @@ declare class CheckboxInputBinding extends InputBinding {
         label: string;
         value: CheckboxChecked;
     };
-    receiveMessage(el: CheckedHTMLElement, data: CheckboxReceiveMessageData): void;
+    receiveMessage(el: CheckedHTMLElement, data: CheckboxReceiveMessageData): Promise<void>;
 }
 export { CheckboxInputBinding };
 export type { CheckedHTMLElement, CheckboxReceiveMessageData };

@@ -1231,8 +1231,8 @@
         el.checked = data.value;
       }
       if (hasDefinedProperty(data, "label")) {
-        const span = (0, import_jquery8.default)(el).parent().find("span");
-        await renderContent(span, data.label);
+        const labelSpan = (0, import_jquery8.default)(el).parent().find("span");
+        await renderContent(labelSpan, data.label);
       }
       (0, import_jquery8.default)(el).trigger("change");
     }

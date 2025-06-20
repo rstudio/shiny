@@ -48,8 +48,8 @@ class CheckboxInputBinding extends InputBinding {
     // checkboxInput()'s label works different from other
     // input labels...the label container should always exist
     if (hasDefinedProperty(data, "label")) {
-      const span = $(el).parent().find("span");
-      await renderContent(span, data.label);
+      const labelSpan = $(el).parent().find("span");
+      await renderContent(labelSpan, data.label);
     }
 
     $(el).trigger("change");

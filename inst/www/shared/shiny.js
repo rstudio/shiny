@@ -1165,24 +1165,22 @@
     getState(el) {
       return { value: this.getValue(el) };
     }
-    receiveMessage(el, data) {
+    async receiveMessage(el, data) {
       const $el = (0, import_jquery7.default)(el);
       if (hasDefinedProperty(data, "label") || hasDefinedProperty(data, "icon")) {
-        let label = $el.text();
-        let icon = "";
-        if ($el.find("i[class]").length > 0) {
-          const iconHtml = $el.find("i[class]")[0];
-          if (iconHtml === $el.children()[0]) {
-            icon = (0, import_jquery7.default)(iconHtml).prop("outerHTML");
-          }
-        }
+        const deps = [];
         if (hasDefinedProperty(data, "label")) {
-          label = data.label;
+          $el.data("label", data.label.html);
+          deps.push(...data.label.deps);
         }
         if (hasDefinedProperty(data, "icon")) {
-          icon = Array.isArray(data.icon) ? "" : data.icon ?? "";
+          $el.data("icon", data.icon.html);
+          deps.push(...data.icon.deps);
         }
-        $el.html(icon + " " + label);
+        const label = $el.data("label") || "";
+        const icon = $el.data("icon") || "";
+        const html = icon + " " + label;
+        await renderContent(el, { html, deps });
       }
       if (hasDefinedProperty(data, "disabled")) {
         if (data.disabled) {

@@ -1,10 +1,12 @@
 import $ from "jquery";
+import type { HtmlDep } from "../../shiny/render";
+import { renderContent } from "../../shiny/render";
 import { hasDefinedProperty } from "../../utils";
 import { InputBinding } from "./inputBinding";
 
 type ActionButtonReceiveMessageData = {
-  label?: string;
-  icon?: string | [];
+  label?: { html: string; deps: HtmlDep[] };
+  icon?: { html: string; deps: HtmlDep[] };
   disabled?: boolean;
 };
 
@@ -39,38 +41,30 @@ class ActionButtonInputBinding extends InputBinding {
   getState(el: HTMLElement): { value: number } {
     return { value: this.getValue(el) };
   }
-  receiveMessage(el: HTMLElement, data: ActionButtonReceiveMessageData): void {
+  async receiveMessage(
+    el: HTMLElement,
+    data: ActionButtonReceiveMessageData
+  ): Promise<void> {
     const $el = $(el);
 
     if (hasDefinedProperty(data, "label") || hasDefinedProperty(data, "icon")) {
-      // retrieve current label and icon
-      let label: string = $el.text();
-      let icon = "";
+      const deps: HtmlDep[] = [];
 
-      // to check (and store) the previous icon, we look for a $el child
-      // object that has an i tag, and some (any) class (this prevents
-      // italicized text - which has an i tag but, usually, no class -
-      // from being mistakenly selected)
-      if ($el.find("i[class]").length > 0) {
-        const iconHtml = $el.find("i[class]")[0];
-
-        if (iconHtml === $el.children()[0]) {
-          // another check for robustness
-          icon = $(iconHtml).prop("outerHTML");
-        }
-      }
-
-      // update the requested properties
       if (hasDefinedProperty(data, "label")) {
-        label = data.label;
-      }
-      if (hasDefinedProperty(data, "icon")) {
-        // `data.icon` can be an [] if user gave `character(0)`.
-        icon = Array.isArray(data.icon) ? "" : data.icon ?? "";
+        $el.data("label", data.label.html);
+        deps.push(...data.label.deps);
       }
 
-      // produce new html
-      $el.html(icon + " " + label);
+      if (hasDefinedProperty(data, "icon")) {
+        $el.data("icon", data.icon.html);
+        deps.push(...data.icon.deps);
+      }
+
+      const label = ($el.data("label") || "") as string;
+      const icon = ($el.data("icon") || "") as string;
+      const html = icon + " " + label;
+
+      await renderContent(el, { html, deps });
     }
 
     if (hasDefinedProperty(data, "disabled")) {

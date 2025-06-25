@@ -56,12 +56,15 @@ actionButton <- function(inputId, label, icon = NULL, width = NULL,
 
   value <- restoreInput(id = inputId, default = NULL)
 
-  tags$button(id=inputId,
+  tags$button(
+    id = inputId,
     style = css(width = validateCssUnit(width)),
-    type="button",
-    class="btn btn-default action-button",
-    `data-val` = value,
+    type = "button",
+    class = "btn btn-default action-button",
     disabled = if (isTRUE(disabled)) NA else NULL,
+    `data-val` = value,
+    `data-label` = as.character(label),
+    `data-icon` = as.character(icon),
     list(validateIcon(icon), label),
     ...
   )
@@ -72,30 +75,39 @@ actionButton <- function(inputId, label, icon = NULL, width = NULL,
 actionLink <- function(inputId, label, icon = NULL, ...) {
   value <- restoreInput(id = inputId, default = NULL)
 
-  tags$a(id=inputId,
-    href="#",
-    class="action-button",
+  tags$a(
+    id = inputId,
+    href = "#",
+    class = "action-button",
     `data-val` = value,
+    `data-label` = as.character(label),
+    `data-icon` = as.character(icon),
     list(validateIcon(icon), label),
     ...
   )
 }
 
 
-# Check that the icon parameter is valid:
-# 1) Check  if the user wants to actually add an icon:
-#    -- if icon=NULL, it means leave the icon unchanged
-#    -- if icon=character(0), it means don't add an icon or, more usefully,
-#       remove the previous icon
-# 2) If so, check that the icon has the right format (this does not check whether
-# it is a *real* icon - currently that would require a massive cross reference
-# with the "font-awesome" and the "glyphicon" libraries)
+# Throw an informative warning if icon isn't html-ish
 validateIcon <- function(icon) {
-  if (is.null(icon) || identical(icon, character(0))) {
+  if (!length(icon)) {
     return(icon)
-  } else if (inherits(icon, "shiny.tag") && icon$name == "i") {
-    return(icon)
-  } else {
-    stop("Invalid icon. Use Shiny's 'icon()' function to generate a valid icon")
   }
+
+  if (!is_htmlish(icon)) {
+    rlang::warn(
+      c(
+        "Unknown (seemingly non-HTML) value provided to `icon`.",
+        i = "Try using a `shiny::icon()` (or an equivalent) to get an icon."
+      ),
+      class = "shiny-validate-icon"
+    )
+  }
+
+  icon
+}
+
+is_htmlish <- function(x) {
+  inherits(x, c("shiny.tag", "shiny.tag.list")) ||
+    isTRUE(attr(x, "html"))
 }

@@ -1,5 +1,13 @@
 # shiny (development version)
 
+## New features
+
+* The `icon` argument of `actionButton()`, `downloadButton()`, etc. now accepts values other than `shiny::icon()` (like `fontawesome::fa()` and `bsicons::bs_icon()`). (#4242)
+
+## Bug fixes
+
+* `updateActionButton()` and `updateActionLink()` once again handle `label` updates correctly (which can now include HTML). (#4242)
+
 # shiny 1.11.0
 
 ## Improvements

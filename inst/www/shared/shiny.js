@@ -5736,10 +5736,10 @@ ${duplicateIdMsg}`;
           const thisEl = el;
           return function(priority) {
             let normalizedPriority;
-            if (priority === true) {
-              normalizedPriority = "deferred";
-            } else if (priority === false) {
+            if (priority === false || priority === void 0) {
               normalizedPriority = "immediate";
+            } else if (priority === true) {
+              normalizedPriority = "deferred";
             } else if (typeof priority === "object" && "priority" in priority) {
               normalizedPriority = priority.priority;
             } else {

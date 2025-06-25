@@ -264,13 +264,13 @@ function bindInputs(
         const thisBinding = binding;
         const thisEl = el;
 
-        return function (priority: SubscribeEventPriority) {
+        return function (priority: SubscribeEventPriority | undefined) {
           // Narrow the type of priority to EventPriority
           let normalizedPriority: EventPriority;
-          if (priority === true) {
-            normalizedPriority = "deferred";
-          } else if (priority === false) {
+          if (priority === false || priority === undefined) {
             normalizedPriority = "immediate";
+          } else if (priority === true) {
+            normalizedPriority = "deferred";
           } else if (typeof priority === "object" && "priority" in priority) {
             normalizedPriority = priority.priority;
           } else {

@@ -56,6 +56,10 @@ actionButton <- function(inputId, label, icon = NULL, width = NULL,
 
   value <- restoreInput(id = inputId, default = NULL)
 
+  if (!is.null(icon)) {
+    icon <- list(validateIcon(icon), icon_separator())
+  }
+
   tags$button(
     id = inputId,
     style = css(width = validateCssUnit(width)),
@@ -63,9 +67,7 @@ actionButton <- function(inputId, label, icon = NULL, width = NULL,
     class = "btn btn-default action-button",
     disabled = if (isTRUE(disabled)) NA else NULL,
     `data-val` = value,
-    `data-label` = as.character(label),
-    `data-icon` = as.character(icon),
-    list(validateIcon(icon), label),
+    tagList(!!!icon, label),
     ...
   )
 }
@@ -75,16 +77,25 @@ actionButton <- function(inputId, label, icon = NULL, width = NULL,
 actionLink <- function(inputId, label, icon = NULL, ...) {
   value <- restoreInput(id = inputId, default = NULL)
 
+  if (!is.null(icon)) {
+    icon <- list(validateIcon(icon), icon_separator())
+  }
+
   tags$a(
     id = inputId,
     href = "#",
     class = "action-button",
     `data-val` = value,
-    `data-label` = as.character(label),
-    `data-icon` = as.character(icon),
-    list(validateIcon(icon), label),
+    tagList(!!!icon, label),
     ...
   )
+}
+
+# When dynamically updating the label/icon, we need a way to distinguish between
+# the label and icon. This separator helps us do that. It doesn't need to be
+# added by updateActionButton()/ actionLink() since the JS logic will handle it.
+icon_separator <- function() {
+  tags$span(class = "shiny-icon-separator")
 }
 
 

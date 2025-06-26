@@ -1137,6 +1137,8 @@
 
   // srcts/src/bindings/input/actionbutton.ts
   var import_jquery7 = __toESM(require_jquery());
+  var separatorClass = "shiny-icon-separator";
+  var separatorHTML = `<span class='${separatorClass}'></span>`;
   var ActionButtonInputBinding = class extends InputBinding {
     find(scope) {
       return (0, import_jquery7.default)(scope).find(".action-button");
@@ -1168,19 +1170,21 @@
     async receiveMessage(el, data) {
       const $el = (0, import_jquery7.default)(el);
       if (hasDefinedProperty(data, "label") || hasDefinedProperty(data, "icon")) {
+        let label = this._getLabel(el);
+        let icon = this._getIcon(el);
         const deps = [];
         if (hasDefinedProperty(data, "label")) {
-          $el.data("label", data.label.html);
+          label = data.label.html;
           deps.push(...data.label.deps);
         }
         if (hasDefinedProperty(data, "icon")) {
-          $el.data("icon", data.icon.html);
+          icon = data.icon.html;
           deps.push(...data.icon.deps);
         }
-        const label = $el.data("label") || "";
-        const icon = $el.data("icon") || "";
-        const html = icon + " " + label;
-        await renderContent(el, { html, deps });
+        if (icon.trim()) {
+          icon = icon + separatorHTML;
+        }
+        await renderContent(el, { html: icon + label, deps });
       }
       if (hasDefinedProperty(data, "disabled")) {
         if (data.disabled) {
@@ -1192,6 +1196,25 @@
     }
     unsubscribe(el) {
       (0, import_jquery7.default)(el).off(".actionButtonInputBinding");
+    }
+    _getLabel(el) {
+      const idx = this._findSeparatorIndex(el);
+      return Array.from(el.childNodes).slice(idx + 1).map(
+        (node) => node instanceof Element ? node.outerHTML : node.textContent
+      ).join("");
+    }
+    _getIcon(el) {
+      const idx = this._findSeparatorIndex(el);
+      if (idx === -1) {
+        return "";
+      }
+      return Array.from(el.childNodes).slice(0, idx).map(
+        (node) => node instanceof Element ? node.outerHTML : node.textContent
+      ).join("");
+    }
+    _findSeparatorIndex(el) {
+      const separator = el.querySelector(`.${separatorClass}`);
+      return separator ? Array.from(el.childNodes).indexOf(separator) : -1;
     }
   };
   (0, import_jquery7.default)(document).on("click", "a.action-button", function(e4) {

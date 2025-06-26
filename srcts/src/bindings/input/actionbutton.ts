@@ -10,6 +10,10 @@ type ActionButtonReceiveMessageData = {
   disabled?: boolean;
 };
 
+// Needs to mirror shiny:::icon_separator()'s markup.
+const separatorClass = "shiny-icon-separator";
+const separatorHTML = `<span class='${separatorClass}'></span>`;
+
 class ActionButtonInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     return $(scope).find(".action-button");
@@ -48,23 +52,25 @@ class ActionButtonInputBinding extends InputBinding {
     const $el = $(el);
 
     if (hasDefinedProperty(data, "label") || hasDefinedProperty(data, "icon")) {
+      let label = this._getLabel(el);
+      let icon = this._getIcon(el);
       const deps: HtmlDep[] = [];
 
       if (hasDefinedProperty(data, "label")) {
-        $el.data("label", data.label.html);
+        label = data.label.html;
         deps.push(...data.label.deps);
       }
 
       if (hasDefinedProperty(data, "icon")) {
-        $el.data("icon", data.icon.html);
+        icon = data.icon.html;
         deps.push(...data.icon.deps);
       }
 
-      const label = ($el.data("label") || "") as string;
-      const icon = ($el.data("icon") || "") as string;
-      const html = icon + " " + label;
+      if (icon.trim()) {
+        icon = icon + separatorHTML;
+      }
 
-      await renderContent(el, { html, deps });
+      await renderContent(el, { html: icon + label, deps });
     }
 
     if (hasDefinedProperty(data, "disabled")) {
@@ -78,6 +84,42 @@ class ActionButtonInputBinding extends InputBinding {
 
   unsubscribe(el: HTMLElement): void {
     $(el).off(".actionButtonInputBinding");
+  }
+
+  // All the contents *after* the icon/label separator are considered the label.
+  // If no separator is found, the entire contents are considered the label.
+  private _getLabel(el: HTMLElement): string {
+    const idx = this._findSeparatorIndex(el);
+
+    return Array.from(el.childNodes)
+      .slice(idx + 1)
+      .map((node) =>
+        node instanceof Element ? node.outerHTML : node.textContent
+      )
+      .join("");
+  }
+
+  // All the contents *before* the icon/label separator are considered the icon.
+  // If no separator is found, an icon isn't present (i.e., empty string).
+  private _getIcon(el: HTMLElement): string {
+    const idx = this._findSeparatorIndex(el);
+    if (idx === -1) {
+      return "";
+    }
+
+    // Don't include the separator in this result (we'll add it later)
+    return Array.from(el.childNodes)
+      .slice(0, idx)
+      .map((node) =>
+        node instanceof Element ? node.outerHTML : node.textContent
+      )
+      .join("");
+  }
+
+  // Find the index of the separator element in the child nodes.
+  private _findSeparatorIndex(el: HTMLElement): number {
+    const separator = el.querySelector(`.${separatorClass}`);
+    return separator ? Array.from(el.childNodes).indexOf(separator) : -1;
   }
 }
 

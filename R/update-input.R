@@ -181,10 +181,9 @@ updateCheckboxInput <- function(session = getDefaultReactiveDomain(), inputId, l
 updateActionButton <- function(session = getDefaultReactiveDomain(), inputId, label = NULL, icon = NULL, disabled = NULL) {
   validate_session_object(session)
 
-  if (!is.null(icon)) icon <- as.character(validateIcon(icon))
   message <- dropNulls(list(
     label = if (!is.null(label)) processDeps(label, session),
-    icon = icon,
+    icon = if (!is.null(icon)) processDeps(validateIcon(icon), session),
     disabled = disabled
   ))
   session$sendInputMessage(inputId, message)

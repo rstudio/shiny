@@ -105,10 +105,10 @@ validateIcon <- function(icon) {
     return(icon)
   }
 
-  if (!is_htmlish(icon)) {
+  if (!isTagLike(icon)) {
     rlang::warn(
       c(
-        "Unknown (seemingly non-HTML) value provided to `icon`.",
+        "It appears that a non-HTML value was provided to `icon`.",
         i = "Try using a `shiny::icon()` (or an equivalent) to get an icon."
       ),
       class = "shiny-validate-icon"
@@ -118,7 +118,3 @@ validateIcon <- function(icon) {
   icon
 }
 
-is_htmlish <- function(x) {
-  inherits(x, c("shiny.tag", "shiny.tag.list")) ||
-    isTRUE(attr(x, "html"))
-}

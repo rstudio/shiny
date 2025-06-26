@@ -1170,8 +1170,7 @@
     async receiveMessage(el, data) {
       const $el = (0, import_jquery7.default)(el);
       if (hasDefinedProperty(data, "label") || hasDefinedProperty(data, "icon")) {
-        let label = this._getLabel(el);
-        let icon = this._getIcon(el);
+        let { label, icon } = this._getIconLabel(el);
         const deps = [];
         if (hasDefinedProperty(data, "label")) {
           label = data.label.html;
@@ -1197,24 +1196,20 @@
     unsubscribe(el) {
       (0, import_jquery7.default)(el).off(".actionButtonInputBinding");
     }
-    _getLabel(el) {
-      const idx = this._findSeparatorIndex(el);
-      return Array.from(el.childNodes).slice(idx + 1).map(
+    _getIconLabel(el) {
+      const nodes = Array.from(el.childNodes);
+      const nodeContents = nodes.map(
         (node) => node instanceof Element ? node.outerHTML : node.textContent
-      ).join("");
-    }
-    _getIcon(el) {
-      const idx = this._findSeparatorIndex(el);
-      if (idx === -1) {
-        return "";
-      }
-      return Array.from(el.childNodes).slice(0, idx).map(
-        (node) => node instanceof Element ? node.outerHTML : node.textContent
-      ).join("");
-    }
-    _findSeparatorIndex(el) {
+      );
       const separator = el.querySelector(`.${separatorClass}`);
-      return separator ? Array.from(el.childNodes).indexOf(separator) : -1;
+      if (!separator) {
+        return { icon: "", label: nodeContents.join("") };
+      }
+      const idx = nodes.indexOf(separator);
+      return {
+        icon: nodeContents.slice(0, idx).join(""),
+        label: nodeContents.slice(idx + 1).join("")
+      };
     }
   };
   (0, import_jquery7.default)(document).on("click", "a.action-button", function(e4) {

@@ -52,8 +52,7 @@ class ActionButtonInputBinding extends InputBinding {
     const $el = $(el);
 
     if (hasDefinedProperty(data, "label") || hasDefinedProperty(data, "icon")) {
-      let label = this._getLabel(el);
-      let icon = this._getIcon(el);
+      let { label, icon } = this._getIconLabel(el);
       const deps: HtmlDep[] = [];
 
       if (hasDefinedProperty(data, "label")) {
@@ -86,40 +85,27 @@ class ActionButtonInputBinding extends InputBinding {
     $(el).off(".actionButtonInputBinding");
   }
 
-  // All the contents *after* the icon/label separator are considered the label.
-  // If no separator is found, the entire contents are considered the label.
-  private _getLabel(el: HTMLElement): string {
-    const idx = this._findSeparatorIndex(el);
+  // Split the contents of the element into the icon and label.
+  private _getIconLabel(el: HTMLElement): { icon: string; label: string } {
+    const nodes = Array.from(el.childNodes);
+    const nodeContents = nodes.map((node) =>
+      node instanceof Element ? node.outerHTML : node.textContent
+    );
 
-    return Array.from(el.childNodes)
-      .slice(idx + 1)
-      .map((node) =>
-        node instanceof Element ? node.outerHTML : node.textContent
-      )
-      .join("");
-  }
+    // Query the separator element
+    const separator = el.querySelector(`.${separatorClass}`);
 
-  // All the contents *before* the icon/label separator are considered the icon.
-  // If no separator is found, an icon isn't present (i.e., empty string).
-  private _getIcon(el: HTMLElement): string {
-    const idx = this._findSeparatorIndex(el);
-    if (idx === -1) {
-      return "";
+    // No separator found, so the entire contents are the label.
+    if (!separator) {
+      return { icon: "", label: nodeContents.join("") };
     }
 
-    // Don't include the separator in this result (we'll add it later)
-    return Array.from(el.childNodes)
-      .slice(0, idx)
-      .map((node) =>
-        node instanceof Element ? node.outerHTML : node.textContent
-      )
-      .join("");
-  }
-
-  // Find the index of the separator element in the child nodes.
-  private _findSeparatorIndex(el: HTMLElement): number {
-    const separator = el.querySelector(`.${separatorClass}`);
-    return separator ? Array.from(el.childNodes).indexOf(separator) : -1;
+    // Find the index of the separator element in the child nodes.
+    const idx = nodes.indexOf(separator);
+    return {
+      icon: nodeContents.slice(0, idx).join(""),
+      label: nodeContents.slice(idx + 1).join(""),
+    };
   }
 }
 

@@ -11,8 +11,7 @@ type ActionButtonReceiveMessageData = {
 };
 
 // Mirror the classes in the CSS/R markup generation for action buttons.
-const iconSeparatorClass = "shiny-icon-separator";
-const iconSpacingClass = "shiny-icon-spacer";
+const iconSeparatorClasses = ["shiny-icon-separator", "shiny-icon-spacer"];
 
 class ActionButtonInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
@@ -68,10 +67,10 @@ class ActionButtonInputBinding extends InputBinding {
       // Always add the separator when icon is present, but spacing is only needed
       // when both icon and label are present.
       if (icon.trim()) {
-        const cssClass = label.trim()
-          ? iconSeparatorClass + " " + iconSpacingClass
-          : iconSeparatorClass;
-        icon += `<span class='${cssClass}'></span>`;
+        const separatorClasses = label.trim()
+          ? iconSeparatorClasses.join(" ")
+          : iconSeparatorClasses[0];
+        icon += `<span class='${separatorClasses}'></span>`;
       }
 
       await renderContent(el, { html: icon + label, deps });
@@ -98,7 +97,7 @@ class ActionButtonInputBinding extends InputBinding {
     );
 
     // Query the separator element
-    const separator = el.querySelector(`.${iconSeparatorClass}`);
+    const separator = el.querySelector(`.${iconSeparatorClasses[0]}`);
 
     // No separator found, so the entire contents are the label.
     if (!separator) {

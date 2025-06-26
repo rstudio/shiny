@@ -22,9 +22,7 @@ declare class ActionButtonInputBinding extends InputBinding {
     };
     receiveMessage(el: HTMLElement, data: ActionButtonReceiveMessageData): Promise<void>;
     unsubscribe(el: HTMLElement): void;
-    private _getLabel;
-    private _getIcon;
-    private _findSeparatorIndex;
+    private _getIconLabel;
 }
 export { ActionButtonInputBinding };
 export type { ActionButtonReceiveMessageData };

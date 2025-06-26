@@ -12,7 +12,6 @@ type ActionButtonReceiveMessageData = {
     disabled?: boolean;
 };
 declare class ActionButtonInputBinding extends InputBinding {
-    #private;
     find(scope: HTMLElement): JQuery<HTMLElement>;
     getValue(el: HTMLElement): number;
     setValue(el: HTMLElement, value: number): void;

@@ -3,7 +3,9 @@
 ## New features
 
 * The `icon` argument of `actionButton()`, `downloadButton()`, etc. now accepts values other than `shiny::icon()` (like `fontawesome::fa()` and `bsicons::bs_icon()`). (#4242)
+## Improvements
 
+* Padding is now provided between the `icon` and `label` of an `actionButton()`. (#4242)
 ## Bug fixes
 
 * Fixed a regression in v1.11.0 where `InputBinding` implementations that don't pass a value to their `subscribe` callback were no longer notifying Shiny of input changes. (#4243)

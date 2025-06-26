@@ -5619,8 +5619,21 @@
       const type = binding.getType(el);
       if (type)
         id = id + ":" + type;
-      inputs.setInput(id, value, { priority, binding, el });
+      const normalizedPriority = normalizeEventPriority(priority);
+      inputs.setInput(id, value, { priority: normalizedPriority, binding, el });
     }
+  }
+  function normalizeEventPriority(priority) {
+    if (priority === false || priority === void 0) {
+      return "immediate";
+    }
+    if (priority === true) {
+      return "deferred";
+    }
+    if (typeof priority === "object" && "priority" in priority) {
+      return priority.priority;
+    }
+    return priority;
   }
   var bindingsRegistry = (() => {
     const bindings = /* @__PURE__ */ new Map();
@@ -5735,17 +5748,7 @@ ${duplicateIdMsg}`;
           const thisBinding = binding;
           const thisEl = el;
           return function(priority) {
-            let normalizedPriority;
-            if (priority === true) {
-              normalizedPriority = "deferred";
-            } else if (priority === false) {
-              normalizedPriority = "immediate";
-            } else if (typeof priority === "object" && "priority" in priority) {
-              normalizedPriority = priority.priority;
-            } else {
-              normalizedPriority = priority;
-            }
-            valueChangeCallback(inputs, thisBinding, thisEl, normalizedPriority);
+            valueChangeCallback(inputs, thisBinding, thisEl, priority);
           };
         }();
         binding.subscribe(el, thisCallback);

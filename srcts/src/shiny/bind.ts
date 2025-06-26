@@ -29,7 +29,7 @@ function valueChangeCallback(
   inputs: InputValidateDecorator,
   binding: InputBinding,
   el: HTMLElement,
-  priority: EventPriority
+  priority?: SubscribeEventPriority
 ) {
   let id = binding.getId(el);
 
@@ -39,8 +39,30 @@ function valueChangeCallback(
 
     if (type) id = id + ":" + type;
 
-    inputs.setInput(id, value, { priority, binding, el });
+    // Normalize the priority to a valid EventPriority
+    const normalizedPriority = normalizeEventPriority(priority);
+
+    inputs.setInput(id, value, { priority: normalizedPriority, binding, el });
   }
+}
+
+// Narrow the type of the subscribe callback value to EventPriority
+function normalizeEventPriority(
+  priority?: SubscribeEventPriority
+): EventPriority {
+  if (priority === false || priority === undefined) {
+    return "immediate";
+  }
+
+  if (priority === true) {
+    return "deferred";
+  }
+
+  if (typeof priority === "object" && "priority" in priority) {
+    return priority.priority;
+  }
+
+  return priority;
 }
 
 /**
@@ -264,20 +286,8 @@ function bindInputs(
         const thisBinding = binding;
         const thisEl = el;
 
-        return function (priority: SubscribeEventPriority) {
-          // Narrow the type of priority to EventPriority
-          let normalizedPriority: EventPriority;
-          if (priority === true) {
-            normalizedPriority = "deferred";
-          } else if (priority === false) {
-            normalizedPriority = "immediate";
-          } else if (typeof priority === "object" && "priority" in priority) {
-            normalizedPriority = priority.priority;
-          } else {
-            normalizedPriority = priority;
-          }
-
-          valueChangeCallback(inputs, thisBinding, thisEl, normalizedPriority);
+        return function (priority?: SubscribeEventPriority) {
+          valueChangeCallback(inputs, thisBinding, thisEl, priority);
         };
       })();
 

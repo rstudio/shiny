@@ -463,8 +463,7 @@ textarea.textarea-autoresize.form-control {
   }
 }
 
-// Add some spacing between icon and label in actionButton()
-button.action-button > .shiny-icon-separator {
+button.action-button > .shiny-icon-spacer {
   padding-right: 0.5ch;
 }
 

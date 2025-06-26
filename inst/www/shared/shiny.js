@@ -1,4 +1,4 @@
-/*! shiny 1.11.0.9000 | (c) 2012-2025 Posit Software, PBC. | License: GPL-3 | file LICENSE */
+/*! shiny 1.11.1 | (c) 2012-2025 Posit Software, PBC. | License: GPL-3 | file LICENSE */
 "use strict";
 (() => {
   var __create = Object.create;
@@ -1138,7 +1138,7 @@
   // srcts/src/bindings/input/actionbutton.ts
   var import_jquery7 = __toESM(require_jquery());
   var iconSeparatorClass = "shiny-icon-separator";
-  var iconSeparatorHTML = `<span class='${iconSeparatorClass}'></span>`;
+  var iconSpacingClass = "shiny-icon-spacer";
   var ActionButtonInputBinding = class extends InputBinding {
     find(scope) {
       return (0, import_jquery7.default)(scope).find(".action-button");
@@ -1181,7 +1181,8 @@
           deps.push(...data.icon.deps);
         }
         if (icon.trim()) {
-          icon = icon + iconSeparatorHTML;
+          const cssClass = label.trim() ? iconSeparatorClass + " " + iconSpacingClass : iconSeparatorClass;
+          icon += `<span class='${cssClass}'></span>`;
         }
         await renderContent(el, { html: icon + label, deps });
       }
@@ -7213,7 +7214,7 @@ ${duplicateIdMsg}`;
   // srcts/src/shiny/index.ts
   var ShinyClass = class {
     constructor() {
-      this.version = "1.11.0.9000";
+      this.version = "1.11.1";
       const { inputBindings, fileInputBinding: fileInputBinding2 } = initInputBindings();
       const { outputBindings } = initOutputBindings();
       setFileInputBinding(fileInputBinding2);

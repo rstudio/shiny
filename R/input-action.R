@@ -56,10 +56,6 @@ actionButton <- function(inputId, label, icon = NULL, width = NULL,
 
   value <- restoreInput(id = inputId, default = NULL)
 
-  if (length(icon) > 0) {
-    icon <- list(validateIcon(icon), icon_separator())
-  }
-
   tags$button(
     id = inputId,
     style = css(width = validateCssUnit(width)),
@@ -67,7 +63,7 @@ actionButton <- function(inputId, label, icon = NULL, width = NULL,
     class = "btn btn-default action-button",
     `data-val` = value,
     disabled = if (isTRUE(disabled)) NA else NULL,
-    tagList(!!!icon, label),
+    get_action_children(label, icon),
     ...
   )
 }
@@ -77,27 +73,38 @@ actionButton <- function(inputId, label, icon = NULL, width = NULL,
 actionLink <- function(inputId, label, icon = NULL, ...) {
   value <- restoreInput(id = inputId, default = NULL)
 
-  if (length(icon) > 0) {
-    icon <- list(validateIcon(icon), icon_separator())
-  }
-
   tags$a(
     id = inputId,
     href = "#",
     class = "action-button",
     `data-val` = value,
-    tagList(!!!icon, label),
+    get_action_children(label, icon),
     ...
   )
 }
 
-# When dynamically updating the label/icon, we need a way to distinguish between
-# the label and icon. This separator helps us do that. It doesn't need to be
-# added by updateActionButton()/ actionLink() since the JS logic will handle it.
-icon_separator <- function() {
-  tags$span(class = "shiny-icon-separator")
-}
+get_action_children <- function(label, icon) {
+  icon <- validateIcon(icon)
 
+  if (length(icon) > 0) {
+    # The separator elements helps us distinguish between the icon and label
+    # when dynamically updating the button/link. Ideally, we would wrap each
+    # in a container element, but is currently done with a separator to help
+    # minimize the chance of breaking existing code.
+    tagList(
+      icon,
+      tags$span(class = "shiny-icon-separator"),
+      label
+    )
+  } else {
+    # This else case is here to support backwards compatibility of reaching into
+    # btn$children[[1]][[2]] to get the label in the case of no icon.
+    # The shinyGovstyle package has one such test that relies on this.
+    # We should remove this case once their test is updated to not rely on this,
+    # but this is here for now so we can move forward with a patch release.
+    tagList(icon, label)
+  }
+}
 
 # Throw an informative warning if icon isn't html-ish
 validateIcon <- function(icon) {

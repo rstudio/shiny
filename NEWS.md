@@ -3,6 +3,7 @@
 ## New features
 
 * The `icon` argument of `actionButton()`, `downloadButton()`, etc. now accepts values other than `shiny::icon()` (like `fontawesome::fa()` and `bsicons::bs_icon()`). (#4242)
+
 ## Improvements
 
 * Padding is now provided between the `icon` and `label` of an `actionButton()`. (#4242)

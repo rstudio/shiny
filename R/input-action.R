@@ -56,7 +56,7 @@ actionButton <- function(inputId, label, icon = NULL, width = NULL,
 
   value <- restoreInput(id = inputId, default = NULL)
 
-  if (!is.null(icon)) {
+  if (length(icon) > 0) {
     icon <- list(validateIcon(icon), icon_separator())
   }
 
@@ -65,8 +65,8 @@ actionButton <- function(inputId, label, icon = NULL, width = NULL,
     style = css(width = validateCssUnit(width)),
     type = "button",
     class = "btn btn-default action-button",
-    disabled = if (isTRUE(disabled)) NA else NULL,
     `data-val` = value,
+    disabled = if (isTRUE(disabled)) NA else NULL,
     tagList(!!!icon, label),
     ...
   )
@@ -77,7 +77,7 @@ actionButton <- function(inputId, label, icon = NULL, width = NULL,
 actionLink <- function(inputId, label, icon = NULL, ...) {
   value <- restoreInput(id = inputId, default = NULL)
 
-  if (!is.null(icon)) {
+  if (length(icon) > 0) {
     icon <- list(validateIcon(icon), icon_separator())
   }
 
@@ -101,7 +101,7 @@ icon_separator <- function() {
 
 # Throw an informative warning if icon isn't html-ish
 validateIcon <- function(icon) {
-  if (!length(icon)) {
+  if (length(icon) == 0) {
     return(icon)
   }
 
@@ -117,4 +117,3 @@ validateIcon <- function(icon) {
 
   icon
 }
-

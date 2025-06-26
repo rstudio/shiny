@@ -6,7 +6,7 @@
 
 ## Bug fixes
 
-* `updateActionButton()` and `updateActionLink()` once again handle `label` updates correctly (which can now include HTML). (#4242)
+* `updateActionButton()` and `updateActionLink()` once again handles `label` updates correctly (which can now include HTML). (#4242)
 
 # shiny 1.11.0
 

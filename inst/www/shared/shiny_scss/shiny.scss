@@ -463,6 +463,10 @@ textarea.textarea-autoresize.form-control {
   }
 }
 
+.shiny-icon-separator {
+  padding-right: 0.5ch;
+}
+
 /* Overrides bootstrap-datepicker3.css styling for invalid date ranges.
    See https://github.com/rstudio/shiny/issues/2042 for details. */
 .datepicker table tbody tr td.disabled,

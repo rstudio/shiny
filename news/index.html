@@ -49,15 +49,19 @@
 
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.11.1" id="shiny-1111">shiny 1.11.1<a class="anchor" aria-label="anchor" href="#shiny-1111"></a></h2>
+<p>This is a patch release primarily for addressing the bugs introduced in v1.11.0.</p>
+<div class="section level3">
+<h3 id="bug-fixes-1-11-1">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-11-1"></a></h3>
+<ul><li><p>Fixed a regression in v1.11.0 where <code>InputBinding</code> implementations that don’t pass a value to their <code>subscribe</code> callback were no longer notifying Shiny of input changes. (<a href="https://github.com/rstudio/shiny/issues/4243" class="external-link">#4243</a>)</p></li>
+<li><p><code><a href="../reference/updateActionButton.html">updateActionButton()</a></code> and <code><a href="../reference/updateActionButton.html">updateActionLink()</a></code> once again handle <code>label</code> updates correctly (which can now include HTML). (<a href="https://github.com/rstudio/shiny/issues/4242" class="external-link">#4242</a>)</p></li>
+</ul></div>
 <div class="section level3">
 <h3 id="new-features-1-11-1">New features<a class="anchor" aria-label="anchor" href="#new-features-1-11-1"></a></h3>
 <ul><li>The <code>icon</code> argument of <code><a href="../reference/actionButton.html">actionButton()</a></code>, <code><a href="../reference/downloadButton.html">downloadButton()</a></code>, etc. now accepts values other than <code><a href="../reference/icon.html">shiny::icon()</a></code> (like <code><a href="https://rstudio.github.io/fontawesome/reference/fa.html" class="external-link">fontawesome::fa()</a></code> and <code>bsicons::bs_icon()</code>). (<a href="https://github.com/rstudio/shiny/issues/4242" class="external-link">#4242</a>)</li>
 </ul></div>
 <div class="section level3">
 <h3 id="improvements-1-11-1">Improvements<a class="anchor" aria-label="anchor" href="#improvements-1-11-1"></a></h3>
-<ul><li><p>Padding is now provided between the <code>icon</code> and <code>label</code> of an <code><a href="../reference/actionButton.html">actionButton()</a></code>. (<a href="https://github.com/rstudio/shiny/issues/4242" class="external-link">#4242</a>) ## Bug fixes</p></li>
-<li><p>Fixed a regression in v1.11.0 where <code>InputBinding</code> implementations that don’t pass a value to their <code>subscribe</code> callback were no longer notifying Shiny of input changes. (<a href="https://github.com/rstudio/shiny/issues/4243" class="external-link">#4243</a>)</p></li>
-<li><p><code><a href="../reference/updateActionButton.html">updateActionButton()</a></code> and <code><a href="../reference/updateActionButton.html">updateActionLink()</a></code> once again handle <code>label</code> updates correctly (which can now include HTML). (<a href="https://github.com/rstudio/shiny/issues/4242" class="external-link">#4242</a>)</p></li>
+<ul><li>Padding is now provided between the <code>icon</code> and <code>label</code> of an <code><a href="../reference/actionButton.html">actionButton()</a></code>. (<a href="https://github.com/rstudio/shiny/issues/4242" class="external-link">#4242</a>)</li>
 </ul></div>
 </div>
     <div class="section level2">

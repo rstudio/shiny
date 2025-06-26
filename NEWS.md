@@ -1,5 +1,9 @@
 # shiny (development version)
 
+## Bug fixes
+
+* Fixed a regression in v1.11.0 where `InputBinding`'s that didn't pass a value to their `subscribe` callback where to no longer working. (#4243)
+
 # shiny 1.11.0
 
 ## Improvements

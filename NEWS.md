@@ -8,7 +8,7 @@
 
 * Fixed a regression in v1.11.0 where `InputBinding` implementations that don't pass a value to their `subscribe` callback were no longer notifying Shiny of input changes. (#4243)
 
-* `updateActionButton()` and `updateActionLink()` once again handles `label` updates correctly (which can now include HTML). (#4242)
+* `updateActionButton()` and `updateActionLink()` once again handle `label` updates correctly (which can now include HTML). (#4242)
 
 # shiny 1.11.0
 

@@ -97,11 +97,9 @@ get_action_children <- function(label, icon) {
       label
     )
   } else {
-    # This else case is here to support backwards compatibility of reaching into
-    # btn$children[[1]][[2]] to get the label in the case of no icon.
-    # The shinyGovstyle package has one such test that relies on this.
-    # We should remove this case once their test is updated to not rely on this,
-    # but this is here for now so we can move forward with a patch release.
+    # Technically, we don't need the `icon` here, but keeping it maintains
+    # backwards compatibility of `btn$children[[1]][[2]]` to get the label.
+    # The shinyGovstyle package is at least one example of this.
     tagList(icon, label)
   }
 }

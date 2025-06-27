@@ -1137,8 +1137,6 @@
 
   // srcts/src/bindings/input/actionbutton.ts
   var import_jquery7 = __toESM(require_jquery());
-  var iconSeparatorClass = "shiny-icon-separator";
-  var iconSeparatorHTML = `<span class='${iconSeparatorClass}'></span>`;
   var ActionButtonInputBinding = class extends InputBinding {
     find(scope) {
       return (0, import_jquery7.default)(scope).find(".action-button");
@@ -1168,48 +1166,38 @@
       return { value: this.getValue(el) };
     }
     async receiveMessage(el, data) {
-      const $el = (0, import_jquery7.default)(el);
-      if (hasDefinedProperty(data, "label") || hasDefinedProperty(data, "icon")) {
-        let { label, icon } = this._getIconLabel(el);
-        const deps = [];
-        if (hasDefinedProperty(data, "label")) {
-          label = data.label.html;
-          deps.push(...data.label.deps);
+      if (hasDefinedProperty(data, "icon")) {
+        let iconContainer = el.querySelector(
+          ":scope > .action-icon"
+        );
+        if (!iconContainer) {
+          iconContainer = document.createElement("span");
+          iconContainer.className = "action-icon";
+          el.prepend(iconContainer);
         }
-        if (hasDefinedProperty(data, "icon")) {
-          icon = data.icon.html;
-          deps.push(...data.icon.deps);
+        await renderContent(iconContainer, data.icon);
+      }
+      if (hasDefinedProperty(data, "label")) {
+        let labelContainer = el.querySelector(
+          ":scope > .action-label"
+        );
+        if (!labelContainer) {
+          labelContainer = document.createElement("span");
+          labelContainer.className = "action-label";
+          el.appendChild(labelContainer);
         }
-        if (icon.trim()) {
-          icon = icon + iconSeparatorHTML;
-        }
-        await renderContent(el, { html: icon + label, deps });
+        await renderContent(labelContainer, data.label);
       }
       if (hasDefinedProperty(data, "disabled")) {
         if (data.disabled) {
-          $el.attr("disabled", "");
+          el.setAttribute("disabled", "");
         } else {
-          $el.attr("disabled", null);
+          el.removeAttribute("disabled");
         }
       }
     }
     unsubscribe(el) {
       (0, import_jquery7.default)(el).off(".actionButtonInputBinding");
-    }
-    _getIconLabel(el) {
-      const nodes = Array.from(el.childNodes);
-      const nodeContents = nodes.map(
-        (node) => node instanceof Element ? node.outerHTML : node.textContent
-      );
-      const separator = el.querySelector(`.${iconSeparatorClass}`);
-      if (!separator) {
-        return { icon: "", label: nodeContents.join("") };
-      }
-      const idx = nodes.indexOf(separator);
-      return {
-        icon: nodeContents.slice(0, idx).join(""),
-        label: nodeContents.slice(idx + 1).join("")
-      };
     }
   };
   (0, import_jquery7.default)(document).on("click", "a.action-button", function(e4) {

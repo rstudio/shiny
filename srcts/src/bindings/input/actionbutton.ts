@@ -10,10 +10,6 @@ type ActionButtonReceiveMessageData = {
   disabled?: boolean;
 };
 
-// Needs to mirror shiny:::icon_separator()'s markup.
-const iconSeparatorClass = "shiny-icon-separator";
-const iconSeparatorHTML = `<span class='${iconSeparatorClass}'></span>`;
-
 class ActionButtonInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     return $(scope).find(".action-button");
@@ -49,63 +45,42 @@ class ActionButtonInputBinding extends InputBinding {
     el: HTMLElement,
     data: ActionButtonReceiveMessageData
   ): Promise<void> {
-    const $el = $(el);
-
-    if (hasDefinedProperty(data, "label") || hasDefinedProperty(data, "icon")) {
-      let { label, icon } = this._getIconLabel(el);
-      const deps: HtmlDep[] = [];
-
-      if (hasDefinedProperty(data, "label")) {
-        label = data.label.html;
-        deps.push(...data.label.deps);
+    if (hasDefinedProperty(data, "icon")) {
+      let iconContainer = el.querySelector<HTMLElement>(
+        ":scope > .action-icon"
+      );
+      // If no container exists yet, create one
+      if (!iconContainer) {
+        iconContainer = document.createElement("span");
+        iconContainer.className = "action-icon";
+        el.prepend(iconContainer);
       }
+      await renderContent(iconContainer, data.icon);
+    }
 
-      if (hasDefinedProperty(data, "icon")) {
-        icon = data.icon.html;
-        deps.push(...data.icon.deps);
+    if (hasDefinedProperty(data, "label")) {
+      let labelContainer = el.querySelector<HTMLElement>(
+        ":scope > .action-label"
+      );
+      if (!labelContainer) {
+        labelContainer = document.createElement("span");
+        labelContainer.className = "action-label";
+        el.appendChild(labelContainer);
       }
-
-      if (icon.trim()) {
-        icon = icon + iconSeparatorHTML;
-      }
-
-      await renderContent(el, { html: icon + label, deps });
+      await renderContent(labelContainer, data.label);
     }
 
     if (hasDefinedProperty(data, "disabled")) {
       if (data.disabled) {
-        $el.attr("disabled", "");
+        el.setAttribute("disabled", "");
       } else {
-        $el.attr("disabled", null);
+        el.removeAttribute("disabled");
       }
     }
   }
 
   unsubscribe(el: HTMLElement): void {
     $(el).off(".actionButtonInputBinding");
-  }
-
-  // Split the contents of the element into the icon and label.
-  private _getIconLabel(el: HTMLElement): { icon: string; label: string } {
-    const nodes = Array.from(el.childNodes);
-    const nodeContents = nodes.map((node) =>
-      node instanceof Element ? node.outerHTML : node.textContent
-    );
-
-    // Query the separator element
-    const separator = el.querySelector(`.${iconSeparatorClass}`);
-
-    // No separator found, so the entire contents are the label.
-    if (!separator) {
-      return { icon: "", label: nodeContents.join("") };
-    }
-
-    // Find the index of the separator element in the child nodes.
-    const idx = nodes.indexOf(separator);
-    return {
-      icon: nodeContents.slice(0, idx).join(""),
-      label: nodeContents.slice(idx + 1).join(""),
-    };
   }
 }
 

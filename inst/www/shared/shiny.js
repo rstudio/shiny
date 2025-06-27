@@ -1137,8 +1137,7 @@
 
   // srcts/src/bindings/input/actionbutton.ts
   var import_jquery7 = __toESM(require_jquery());
-  var iconSeparatorClass = "shiny-icon-separator";
-  var iconSeparatorHTML = `<span class='${iconSeparatorClass}'></span>`;
+  var iconSeparatorClasses = ["shiny-icon-separator", "shiny-icon-spacer"];
   var ActionButtonInputBinding = class extends InputBinding {
     find(scope) {
       return (0, import_jquery7.default)(scope).find(".action-button");
@@ -1181,7 +1180,8 @@
           deps.push(...data.icon.deps);
         }
         if (icon.trim()) {
-          icon = icon + iconSeparatorHTML;
+          const separatorClasses = label.trim() ? iconSeparatorClasses.join(" ") : iconSeparatorClasses[0];
+          icon += `<span class='${separatorClasses}'></span>`;
         }
         await renderContent(el, { html: icon + label, deps });
       }
@@ -1201,7 +1201,7 @@
       const nodeContents = nodes.map(
         (node) => node instanceof Element ? node.outerHTML : node.textContent
       );
-      const separator = el.querySelector(`.${iconSeparatorClass}`);
+      const separator = el.querySelector(`.${iconSeparatorClasses[0]}`);
       if (!separator) {
         return { icon: "", label: nodeContents.join("") };
       }

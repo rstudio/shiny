@@ -12,7 +12,7 @@
     Output
       <button id="foo" type="button" class="btn btn-default action-button">
         <i class="far fa-star" role="presentation" aria-label="star icon"></i>
-        <span class="shiny-icon-separator"></span>
+        <span class="shiny-icon-separator shiny-icon-spacer"></span>
         Click me
       </button>
 

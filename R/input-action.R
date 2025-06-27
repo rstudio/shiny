@@ -93,10 +93,7 @@ get_action_children <- function(label, icon) {
     # minimize the chance of breaking existing code.
     tagList(
       icon,
-      tags$span(
-        class = "shiny-icon-separator",
-        class = if (length(label) > 0) "shiny-icon-spacer"
-      ),
+      tags$span(class = "shiny-icon-separator"),
       label
     )
   } else {

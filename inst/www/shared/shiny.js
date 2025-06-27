@@ -1,4 +1,4 @@
-/*! shiny 1.11.0.9000 | (c) 2012-2025 Posit Software, PBC. | License: GPL-3 | file LICENSE */
+/*! shiny 1.11.1 | (c) 2012-2025 Posit Software, PBC. | License: GPL-3 | file LICENSE */
 "use strict";
 (() => {
   var __create = Object.create;
@@ -1137,7 +1137,8 @@
 
   // srcts/src/bindings/input/actionbutton.ts
   var import_jquery7 = __toESM(require_jquery());
-  var iconSeparatorClasses = ["shiny-icon-separator", "shiny-icon-spacer"];
+  var iconSeparatorClass = "shiny-icon-separator";
+  var iconSeparatorHTML = `<span class='${iconSeparatorClass}'></span>`;
   var ActionButtonInputBinding = class extends InputBinding {
     find(scope) {
       return (0, import_jquery7.default)(scope).find(".action-button");
@@ -1180,8 +1181,7 @@
           deps.push(...data.icon.deps);
         }
         if (icon.trim()) {
-          const separatorClasses = label.trim() ? iconSeparatorClasses.join(" ") : iconSeparatorClasses[0];
-          icon += `<span class='${separatorClasses}'></span>`;
+          icon = icon + iconSeparatorHTML;
         }
         await renderContent(el, { html: icon + label, deps });
       }
@@ -1201,7 +1201,7 @@
       const nodeContents = nodes.map(
         (node) => node instanceof Element ? node.outerHTML : node.textContent
       );
-      const separator = el.querySelector(`.${iconSeparatorClasses[0]}`);
+      const separator = el.querySelector(`.${iconSeparatorClass}`);
       if (!separator) {
         return { icon: "", label: nodeContents.join("") };
       }
@@ -7213,7 +7213,7 @@ ${duplicateIdMsg}`;
   // srcts/src/shiny/index.ts
   var ShinyClass = class {
     constructor() {
-      this.version = "1.11.0.9000";
+      this.version = "1.11.1";
       const { inputBindings, fileInputBinding: fileInputBinding2 } = initInputBindings();
       const { outputBindings } = initOutputBindings();
       setFileInputBinding(fileInputBinding2);

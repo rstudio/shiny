@@ -10,10 +10,6 @@ type ActionButtonReceiveMessageData = {
   disabled?: boolean;
 };
 
-// Needs to mirror shiny:::icon_separator()'s markup.
-const iconSeparatorClass = "shiny-icon-separator";
-const iconSeparatorHTML = `<span class='${iconSeparatorClass}'></span>`;
-
 class ActionButtonInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
     return $(scope).find(".action-button");
@@ -51,25 +47,14 @@ class ActionButtonInputBinding extends InputBinding {
   ): Promise<void> {
     const $el = $(el);
 
-    if (hasDefinedProperty(data, "label") || hasDefinedProperty(data, "icon")) {
-      let { label, icon } = this._getIconLabel(el);
-      const deps: HtmlDep[] = [];
+    if (hasDefinedProperty(data, "label")) {
+      const labelContainer = el.querySelector(".action-label") as HTMLElement;
+      await renderContent(labelContainer, data.label);
+    }
 
-      if (hasDefinedProperty(data, "label")) {
-        label = data.label.html;
-        deps.push(...data.label.deps);
-      }
-
-      if (hasDefinedProperty(data, "icon")) {
-        icon = data.icon.html;
-        deps.push(...data.icon.deps);
-      }
-
-      if (icon.trim()) {
-        icon = icon + iconSeparatorHTML;
-      }
-
-      await renderContent(el, { html: icon + label, deps });
+    if (hasDefinedProperty(data, "icon")) {
+      const iconContainer = el.querySelector(".action-icon") as HTMLElement;
+      await renderContent(iconContainer, data.icon);
     }
 
     if (hasDefinedProperty(data, "disabled")) {
@@ -83,29 +68,6 @@ class ActionButtonInputBinding extends InputBinding {
 
   unsubscribe(el: HTMLElement): void {
     $(el).off(".actionButtonInputBinding");
-  }
-
-  // Split the contents of the element into the icon and label.
-  private _getIconLabel(el: HTMLElement): { icon: string; label: string } {
-    const nodes = Array.from(el.childNodes);
-    const nodeContents = nodes.map((node) =>
-      node instanceof Element ? node.outerHTML : node.textContent
-    );
-
-    // Query the separator element
-    const separator = el.querySelector(`.${iconSeparatorClass}`);
-
-    // No separator found, so the entire contents are the label.
-    if (!separator) {
-      return { icon: "", label: nodeContents.join("") };
-    }
-
-    // Find the index of the separator element in the child nodes.
-    const idx = nodes.indexOf(separator);
-    return {
-      icon: nodeContents.slice(0, idx).join(""),
-      label: nodeContents.slice(idx + 1).join(""),
-    };
   }
 }
 

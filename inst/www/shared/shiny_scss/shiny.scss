@@ -463,6 +463,12 @@ textarea.textarea-autoresize.form-control {
   }
 }
 
+button.action-button {
+  .action-icon:not(:empty) + .action-label:not(:empty) {
+    padding-left: 0.5ch;
+  }
+}
+
 /* Overrides bootstrap-datepicker3.css styling for invalid date ranges.
    See https://github.com/rstudio/shiny/issues/2042 for details. */
 .datepicker table tbody tr td.disabled,

@@ -1137,8 +1137,6 @@
 
   // srcts/src/bindings/input/actionbutton.ts
   var import_jquery7 = __toESM(require_jquery());
-  var iconSeparatorClass = "shiny-icon-separator";
-  var iconSeparatorHTML = `<span class='${iconSeparatorClass}'></span>`;
   var ActionButtonInputBinding = class extends InputBinding {
     find(scope) {
       return (0, import_jquery7.default)(scope).find(".action-button");
@@ -1169,21 +1167,13 @@
     }
     async receiveMessage(el, data) {
       const $el = (0, import_jquery7.default)(el);
-      if (hasDefinedProperty(data, "label") || hasDefinedProperty(data, "icon")) {
-        let { label, icon } = this._getIconLabel(el);
-        const deps = [];
-        if (hasDefinedProperty(data, "label")) {
-          label = data.label.html;
-          deps.push(...data.label.deps);
-        }
-        if (hasDefinedProperty(data, "icon")) {
-          icon = data.icon.html;
-          deps.push(...data.icon.deps);
-        }
-        if (icon.trim()) {
-          icon = icon + iconSeparatorHTML;
-        }
-        await renderContent(el, { html: icon + label, deps });
+      if (hasDefinedProperty(data, "label")) {
+        const labelContainer = el.querySelector(".action-label");
+        await renderContent(labelContainer, data.label);
+      }
+      if (hasDefinedProperty(data, "icon")) {
+        const iconContainer = el.querySelector(".action-icon");
+        await renderContent(iconContainer, data.icon);
       }
       if (hasDefinedProperty(data, "disabled")) {
         if (data.disabled) {
@@ -1195,21 +1185,6 @@
     }
     unsubscribe(el) {
       (0, import_jquery7.default)(el).off(".actionButtonInputBinding");
-    }
-    _getIconLabel(el) {
-      const nodes = Array.from(el.childNodes);
-      const nodeContents = nodes.map(
-        (node) => node instanceof Element ? node.outerHTML : node.textContent
-      );
-      const separator = el.querySelector(`.${iconSeparatorClass}`);
-      if (!separator) {
-        return { icon: "", label: nodeContents.join("") };
-      }
-      const idx = nodes.indexOf(separator);
-      return {
-        icon: nodeContents.slice(0, idx).join(""),
-        label: nodeContents.slice(idx + 1).join("")
-      };
     }
   };
   (0, import_jquery7.default)(document).on("click", "a.action-button", function(e4) {

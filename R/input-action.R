@@ -63,7 +63,14 @@ actionButton <- function(inputId, label, icon = NULL, width = NULL,
     class = "btn btn-default action-button",
     `data-val` = value,
     disabled = if (isTRUE(disabled)) NA else NULL,
-    get_action_children(label, icon),
+    span(
+      class = "action-icon",
+      validateIcon(icon)
+    ),
+    span(
+      class = "action-label",
+      label
+    ),
     ...
   )
 }
@@ -76,32 +83,18 @@ actionLink <- function(inputId, label, icon = NULL, ...) {
   tags$a(
     id = inputId,
     href = "#",
-    class = "action-button",
+    class = "action-button action-link",
     `data-val` = value,
-    get_action_children(label, icon),
+    span(
+      class = "action-icon",
+      validateIcon(icon)
+    ),
+    span(
+      class = "action-label",
+      label
+    ),
     ...
   )
-}
-
-get_action_children <- function(label, icon) {
-  icon <- validateIcon(icon)
-
-  if (length(icon) > 0) {
-    # The separator elements helps us distinguish between the icon and label
-    # when dynamically updating the button/link. Ideally, we would wrap each
-    # in a container element, but is currently done with a separator to help
-    # minimize the chance of breaking existing code.
-    tagList(
-      icon,
-      tags$span(class = "shiny-icon-separator"),
-      label
-    )
-  } else {
-    # Technically, we don't need the `icon` here, but keeping it maintains
-    # backwards compatibility of `btn$children[[1]][[2]]` to get the label.
-    # The shinyGovstyle package is at least one example of this.
-    tagList(icon, label)
-  }
 }
 
 # Throw an informative warning if icon isn't html-ish

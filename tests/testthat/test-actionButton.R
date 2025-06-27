@@ -58,7 +58,6 @@ test_that("Action link accepts class arguments", {
 
 
 test_that("Action button allows icon customization", {
-
   # No separator between icon and label
   expect_snapshot(actionButton("foo", "Click me"))
 
@@ -86,7 +85,13 @@ test_that("Action button allows icon customization", {
   btn4 <- expect_no_warning(
     actionButton("foo", "Click me", icon = HTML("<svg></svg>"))
   )
-  expect_equal(as.character(btn), as.character(btn2))
-  expect_equal(as.character(btn2), as.character(btn3))
-  expect_equal(as.character(btn3), as.character(btn4))
+
+  # Ignore newlines+indentation for comparison
+  as_character <- function(x) {
+    gsub("\\n\\s*", "", as.character(x))
+  }
+
+  expect_equal(as_character(btn), as_character(btn2))
+  expect_equal(as_character(btn2), as_character(btn3))
+  expect_equal(as_character(btn3), as_character(btn4))
 })

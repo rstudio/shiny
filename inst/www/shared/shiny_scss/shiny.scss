@@ -463,8 +463,9 @@ textarea.textarea-autoresize.form-control {
   }
 }
 
-button.action-button {
-  .action-icon:not(:empty) + .action-label:not(:empty) {
+// Add spacing between icon and label for actionButton()
+.action-button:not(.action-link) {
+  .action-icon + .action-label {
     padding-left: 0.5ch;
   }
 }

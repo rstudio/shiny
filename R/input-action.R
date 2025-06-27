@@ -56,6 +56,16 @@ actionButton <- function(inputId, label, icon = NULL, width = NULL,
 
   value <- restoreInput(id = inputId, default = NULL)
 
+  icon <- validateIcon(icon)
+
+  if (!is.null(icon)) {
+    icon <- span(icon, class = "action-icon")
+  }
+
+  if (!is.null(label)) {
+    label <- span(label, class = "action-label")
+  }
+
   tags$button(
     id = inputId,
     style = css(width = validateCssUnit(width)),
@@ -63,14 +73,7 @@ actionButton <- function(inputId, label, icon = NULL, width = NULL,
     class = "btn btn-default action-button",
     `data-val` = value,
     disabled = if (isTRUE(disabled)) NA else NULL,
-    span(
-      class = "action-icon",
-      validateIcon(icon)
-    ),
-    span(
-      class = "action-label",
-      label
-    ),
+    icon, label,
     ...
   )
 }
@@ -80,19 +83,22 @@ actionButton <- function(inputId, label, icon = NULL, width = NULL,
 actionLink <- function(inputId, label, icon = NULL, ...) {
   value <- restoreInput(id = inputId, default = NULL)
 
+  icon <- validateIcon(icon)
+
+  if (!is.null(icon)) {
+    icon <- span(icon, class = "action-icon")
+  }
+
+  if (!is.null(label)) {
+    label <- span(label, class = "action-label")
+  }
+
   tags$a(
     id = inputId,
     href = "#",
     class = "action-button action-link",
     `data-val` = value,
-    span(
-      class = "action-icon",
-      validateIcon(icon)
-    ),
-    span(
-      class = "action-label",
-      label
-    ),
+    icon, label,
     ...
   )
 }

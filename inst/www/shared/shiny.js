@@ -1166,20 +1166,33 @@
       return { value: this.getValue(el) };
     }
     async receiveMessage(el, data) {
-      const $el = (0, import_jquery7.default)(el);
-      if (hasDefinedProperty(data, "label")) {
-        const labelContainer = el.querySelector(".action-label");
-        await renderContent(labelContainer, data.label);
-      }
       if (hasDefinedProperty(data, "icon")) {
-        const iconContainer = el.querySelector(".action-icon");
+        let iconContainer = el.querySelector(
+          ":scope > .action-icon"
+        );
+        if (!iconContainer) {
+          iconContainer = document.createElement("span");
+          iconContainer.className = "action-icon";
+          el.prepend(iconContainer);
+        }
         await renderContent(iconContainer, data.icon);
+      }
+      if (hasDefinedProperty(data, "label")) {
+        let labelContainer = el.querySelector(
+          ":scope > .action-label"
+        );
+        if (!labelContainer) {
+          labelContainer = document.createElement("span");
+          labelContainer.className = "action-label";
+          el.appendChild(labelContainer);
+        }
+        await renderContent(labelContainer, data.label);
       }
       if (hasDefinedProperty(data, "disabled")) {
         if (data.disabled) {
-          $el.attr("disabled", "");
+          el.setAttribute("disabled", "");
         } else {
-          $el.attr("disabled", null);
+          el.removeAttribute("disabled");
         }
       }
     }

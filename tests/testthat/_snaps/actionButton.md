@@ -4,7 +4,6 @@
       actionButton("foo", "Click me")
     Output
       <button id="foo" type="button" class="btn btn-default action-button">
-        <span class="action-icon"></span>
         <span class="action-label">Click me</span>
       </button>
 

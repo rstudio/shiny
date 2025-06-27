@@ -45,23 +45,36 @@ class ActionButtonInputBinding extends InputBinding {
     el: HTMLElement,
     data: ActionButtonReceiveMessageData
   ): Promise<void> {
-    const $el = $(el);
-
-    if (hasDefinedProperty(data, "label")) {
-      const labelContainer = el.querySelector(".action-label") as HTMLElement;
-      await renderContent(labelContainer, data.label);
+    if (hasDefinedProperty(data, "icon")) {
+      let iconContainer = el.querySelector<HTMLElement>(
+        ":scope > .action-icon"
+      );
+      // If no container exists yet, create one
+      if (!iconContainer) {
+        iconContainer = document.createElement("span");
+        iconContainer.className = "action-icon";
+        el.prepend(iconContainer);
+      }
+      await renderContent(iconContainer, data.icon);
     }
 
-    if (hasDefinedProperty(data, "icon")) {
-      const iconContainer = el.querySelector(".action-icon") as HTMLElement;
-      await renderContent(iconContainer, data.icon);
+    if (hasDefinedProperty(data, "label")) {
+      let labelContainer = el.querySelector<HTMLElement>(
+        ":scope > .action-label"
+      );
+      if (!labelContainer) {
+        labelContainer = document.createElement("span");
+        labelContainer.className = "action-label";
+        el.appendChild(labelContainer);
+      }
+      await renderContent(labelContainer, data.label);
     }
 
     if (hasDefinedProperty(data, "disabled")) {
       if (data.disabled) {
-        $el.attr("disabled", "");
+        el.setAttribute("disabled", "");
       } else {
-        $el.attr("disabled", null);
+        el.removeAttribute("disabled");
       }
     }
   }

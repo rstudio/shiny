@@ -202,7 +202,6 @@ Collate:
     'test.R'
     'update-input.R'
     'utils-lang.R'
-    'utils-tags.R'
     'version_bs_date_picker.R'
     'version_ion_range_slider.R'
     'version_jquery.R'

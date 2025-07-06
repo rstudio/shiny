@@ -1,6 +1,7 @@
 import $ from "jquery";
 import { Shiny } from "..";
 import type { InputBinding, OutputBinding } from "../bindings";
+import type { SubscribeEventPriority } from "../bindings/input/inputBinding";
 import { OutputBindingAdapter } from "../bindings/outputAdapter";
 import type { BindingRegistry } from "../bindings/registry";
 import { ShinyClientMessageEvent } from "../components/errorConsole";
@@ -8,6 +9,7 @@ import type {
   InputRateDecorator,
   InputValidateDecorator,
 } from "../inputPolicies";
+import type { EventPriority } from "../inputPolicies/inputPolicy";
 import { shinyAppBindOutput, shinyAppUnbindOutput } from "./initedMethods";
 import { sendImageSizeFns } from "./sendImageSize";
 
@@ -19,7 +21,7 @@ type BindScope = HTMLElement | JQuery<HTMLElement>;
  * @returns A type predicate indicating if the value is a jQuery<HTMLElement>
  */
 function isJQuery<T = HTMLElement>(value: unknown): value is JQuery<T> {
-  return typeof (value as any).jquery === "string";
+  return Boolean(value && (value as any).jquery);
 }
 
 // todo make sure allowDeferred can NOT be supplied and still work
@@ -27,7 +29,7 @@ function valueChangeCallback(
   inputs: InputValidateDecorator,
   binding: InputBinding,
   el: HTMLElement,
-  allowDeferred: boolean
+  priority?: SubscribeEventPriority
 ) {
   let id = binding.getId(el);
 
@@ -37,18 +39,30 @@ function valueChangeCallback(
 
     if (type) id = id + ":" + type;
 
-    const opts: {
-      priority: "deferred" | "immediate";
-      binding: typeof binding;
-      el: typeof el;
-    } = {
-      priority: allowDeferred ? "deferred" : "immediate",
-      binding: binding,
-      el: el,
-    };
+    // Normalize the priority to a valid EventPriority
+    const normalizedPriority = normalizeEventPriority(priority);
 
-    inputs.setInput(id, value, opts);
+    inputs.setInput(id, value, { priority: normalizedPriority, binding, el });
   }
+}
+
+// Narrow the type of the subscribe callback value to EventPriority
+function normalizeEventPriority(
+  priority?: SubscribeEventPriority
+): EventPriority {
+  if (priority === false || priority === undefined) {
+    return "immediate";
+  }
+
+  if (priority === true) {
+    return "deferred";
+  }
+
+  if (typeof priority === "object" && "priority" in priority) {
+    return priority.priority;
+  }
+
+  return priority;
 }
 
 /**
@@ -272,8 +286,8 @@ function bindInputs(
         const thisBinding = binding;
         const thisEl = el;
 
-        return function (allowDeferred: boolean) {
-          valueChangeCallback(inputs, thisBinding, thisEl, allowDeferred);
+        return function (priority?: SubscribeEventPriority) {
+          valueChangeCallback(inputs, thisBinding, thisEl, priority);
         };
       })();
 

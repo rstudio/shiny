@@ -126,3 +126,6 @@ vecFun()
 
 })
 }
+\seealso{
+\code{\link[=outputOptions]{outputOptions()}}
+}

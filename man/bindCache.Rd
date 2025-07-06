@@ -234,8 +234,8 @@ With a cached reactive expression, the key and/or value expression can be
 promises, but rather objects provided by the
 \href{https://rstudio.github.io/promises/}{\pkg{promises}}  package, which
 are similar to promises in JavaScript. (See \code{\link[promises:promise]{promises::promise()}} for more
-information.) You can also use \code{\link[future:future]{future::future()}} objects to run code in a
-separate process or even on a remote machine.
+information.) You can also use \code{\link[mirai:mirai]{mirai::mirai()}} or \code{\link[future:future]{future::future()}}
+objects to run code in a separate process or even on a remote machine.
 
 If the value returns a promise, then anything that consumes the cached
 reactive must expect it to return a promise.

@@ -1,25 +1,70 @@
 # shiny (development version)
 
-## New features and improvements
+## New features
+
+* The `icon` argument of `actionButton()`, `downloadButton()`, etc. now accepts values other than `shiny::icon()` (like `fontawesome::fa()` and `bsicons::bs_icon()`). (#4242)
+
+## Improvements
+
+* Padding is now provided between the `icon` and `label` of an `actionButton()`. (#4242)
+## Bug fixes
+
+* Fixed a regression in v1.11.0 where `InputBinding` implementations that don't pass a value to their `subscribe` callback were no longer notifying Shiny of input changes. (#4243)
+
+* `updateActionButton()` and `updateActionLink()` once again handle `label` updates correctly (which can now include HTML). (#4242)
+
+# shiny 1.11.0
+
+## Improvements
+
+* When auto-reload is enabled, Shiny now reloads the entire app when support files, like Shiny modules, additional script files, or web assets, change. To enable auto-reload, call `devmode(TRUE)` to enable Shiny's developer mode, or set `options(shiny.autoreload = TRUE)` to specifically enable auto-reload. You can choose which files are watched for changes with the `shiny.autoreload.pattern` option. (#4184)
 
 * When busy indicators are enabled (i.e., `useBusyIndicators()`), Shiny now:
     * Shows a spinner on recalculating htmlwidgets that have previously rendered an error (including `req()` and `validate()`). (#4172)
     * Shows a spinner on `tableOutput()`. (#4172)
     * Places a minimum height on recalculating outputs so that the spinner is always visible. (#4172)
 
-* Shiny now uses `{cli}` instead of `{crayon}` for rich log messages. (@olivroy #4170)
+* Shiny now uses `{cli}` instead of `{crayon}` for rich log messages. (thanks @olivroy, #4170)
 
-* Shiny's Typescript assets are now compiled to ES2021 instead of ES5. (#4066)
+* `renderPlot()` was updated to accommodate changes in ggplot2 v4.0.0. (#4226)
+
+* When adding the new tab via `insertTab()` or `bslib::nav_insert()`, the underlying JavaScript no longer renders content twice. (#4179)
+
+## New features
+
+* `textInput()`, `textAreaInput()`, `numericInput()` and `passwordInput()` all gain an `updateOn` option. `updateOn = "change"` is the default and previous behavior, where the input value updates immediately whenever the value changes. With `updateOn = "blur"`, the input value will update only when the text input loses focus or when the user presses Enter (or Cmd/Ctrl + Enter for `textAreaInput()`). (#4183)
+
+* `textAreaInput()` gains a `autoresize` option, which automatically resizes the text area to fit its content. (#4210)
+
+* The family of `update*Input()` functions can now render HTML content passed to the `label` argument (e.g., `updateInputText(label = tags$b("New label"))`). (#3996)
+
+* `ExtendedTask` now catches synchronous values and errors and returns them via `$result()`. Previously, the extended task function was required to always return a promise. This change makes it easier to use `ExtendedTask` with a function that may return early or do some synchronous work before returning a promise. (#4225)
+
+* The `callback` argument of Shiny.js' `InputBinding.subscribe()` method gains support for a value of `"event"`. This makes it possible for an input binding to use event priority when updating the value (i.e., send immediately and always resend, even if the value hasn't changed). (#4211)
+
+## Changes
+
+* Shiny no longer suspends input changes when _any_ `<input type="submit">` or `<button type="submit">` is on the page. Instead, it now only suspends when a `submitButton()` is present. If you have reason for creating a submit button from custom HTML, add a CSS class of `shiny-submit-button` to the button. (#4209)
+
+* Shiny's JavaScript assets are now compiled to ES2021 instead of ES5. (#4066)
+
+* Upgraded jQuery from 3.6.0 to 3.7.1. (#3969)
+
+* Updated jQuery UI from 1.13.2 to 1.14.1. (#4175)
 
 * Shiny better truncates stack traces when errors occur (@olivroy #4186).
 
 ## Bug fixes
 
-* Fixed a bug with modals where calling `removeModal()` too quickly after `showModal()` would fail to remove the modal if the remove modal message was received while the modal was in the process of being revealed. (#4173)
-
 * The Shiny Client Console (enabled with `shiny::devmode()`) no longer displays duplicate warning or error message. (#4177)
 
-* Updated the JavaScript used when inserting a tab to avoid rendering dynamic UI elements twice when adding the new tab via `insertTab()` or `bslib::nav_insert()`. (#4179)
+* Synchronous errors that occur inside a `ExtendedTask` no longer stop the session. (#4225)
+
+* Calling `removeModal()` immediately after `showModal()` no longer fails to remove the modal (this would sometimes happen if the remove message was received while the modal was in the process of being revealed). (#4173)
+
+* `runExample("08_html")` now (correctly) requests to 'shiny.min.css', eliminating a network request failure. (#4220)
+
+* `shiny::shinyAppTemplate()` no longer errors without a call to `library(shiny)`. (#3870)
 
 # shiny 1.10.0
 
@@ -179,7 +224,6 @@ In addition, various properties of the spinners and pulse can be customized with
 * Fixed #3771: Sometimes the error `ion.rangeSlider.min.js: i.stopPropagation is not a function` would appear in the JavaScript console. (#3772)
 
 * Fixed #3833: When `width` is provided to `textAreaInput()`, we now correctly set the width of the `<textarea>` element. (#3838)
-
 
 # shiny 1.7.4.1
 
@@ -369,7 +413,7 @@ This release focuses on improvements in three main areas:
 
 * Fixed #2951: screen readers correctly announce labels and date formats for `dateInput()` and `dateRangeInput()` widgets. (#2978)
 
-* Closed #2847: `selectInput()` is reasonably accessible for screen readers even when `selectize` option is set to TRUE. To improve `selectize.js` accessibility, we have added [selectize-plugin-a11y](https://github.com/SLMNBJ/selectize-plugin-a11y) by default. (#2993)
+* Closed #2847: `selectInput()` is reasonably accessible for screen readers even when `selectize` option is set to TRUE. To improve `selectize.js` accessibility, we have added [selectize-plugin-a11y](https://github.com/SalmenBejaoui/selectize-plugin-a11y) by default. (#2993)
 
 * Closed #612: Added `alt` argument to `renderPlot()` and `renderCachedPlot()` to specify descriptive texts for `plotOutput()` objects, which is essential for screen readers. By default, alt text is set to the static text, "Plot object," but even dynamic text can be made with reactive function. (#3006, thanks @trafficonese and @leonawicz for the original PR and discussion via #2494)
 

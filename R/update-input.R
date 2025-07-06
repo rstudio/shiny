@@ -37,7 +37,11 @@
 updateTextInput <- function(session = getDefaultReactiveDomain(), inputId, label = NULL, value = NULL, placeholder = NULL) {
   validate_session_object(session)
 
-  message <- dropNulls(list(label=label, value=value, placeholder=placeholder))
+  message <- dropNulls(list(
+    label = if (!is.null(label)) processDeps(label, session),
+    value = value,
+    placeholder = placeholder
+  ))
   session$sendInputMessage(inputId, message)
 }
 
@@ -111,7 +115,10 @@ updateTextAreaInput <- updateTextInput
 updateCheckboxInput <- function(session = getDefaultReactiveDomain(), inputId, label = NULL, value = NULL) {
   validate_session_object(session)
 
-  message <- dropNulls(list(label=label, value=value))
+  message <- dropNulls(list(
+    label = if (!is.null(label)) processDeps(label, session),
+    value = value
+  ))
   session$sendInputMessage(inputId, message)
 }
 
@@ -174,14 +181,22 @@ updateCheckboxInput <- function(session = getDefaultReactiveDomain(), inputId, l
 updateActionButton <- function(session = getDefaultReactiveDomain(), inputId, label = NULL, icon = NULL, disabled = NULL) {
   validate_session_object(session)
 
-  if (!is.null(icon)) icon <- as.character(validateIcon(icon))
-  message <- dropNulls(list(label=label, icon=icon, disabled=disabled))
+  message <- dropNulls(list(
+    label = if (!is.null(label)) processDeps(label, session),
+    icon = if (!is.null(icon)) processDeps(validateIcon(icon), session),
+    disabled = disabled
+  ))
   session$sendInputMessage(inputId, message)
 }
 #' @rdname updateActionButton
 #' @export
 updateActionLink <- function(session = getDefaultReactiveDomain(), inputId, label = NULL, icon = NULL) {
-  updateActionButton(session, inputId=inputId, label=label, icon=icon)
+  updateActionButton(
+    session,
+    inputId = inputId,
+    label = label,
+    icon = icon
+  )
 }
 
 
@@ -225,7 +240,12 @@ updateDateInput <- function(session = getDefaultReactiveDomain(), inputId, label
   min   <- dateYMD(min, "min")
   max   <- dateYMD(max, "max")
 
-  message <- dropNulls(list(label=label, value=value, min=min, max=max))
+  message <- dropNulls(list(
+    label = if (!is.null(label)) processDeps(label, session),
+    value = value,
+    min = min,
+    max = max
+  ))
   session$sendInputMessage(inputId, message)
 }
 
@@ -275,7 +295,7 @@ updateDateRangeInput <- function(session = getDefaultReactiveDomain(), inputId, 
   max <- dateYMD(max, "max")
 
   message <- dropNulls(list(
-    label = label,
+    label = if (!is.null(label)) processDeps(label, session),
     value = dropNulls(list(start = start, end = end)),
     min = min,
     max = max
@@ -374,13 +394,16 @@ updateNavlistPanel <- updateTabsetPanel
 #' }
 #' @export
 updateNumericInput <- function(session = getDefaultReactiveDomain(), inputId, label = NULL, value = NULL,
-    min = NULL, max = NULL, step = NULL) {
+  min = NULL, max = NULL, step = NULL) {
 
   validate_session_object(session)
 
   message <- dropNulls(list(
-    label = label, value = formatNoSci(value),
-    min = formatNoSci(min), max = formatNoSci(max), step = formatNoSci(step)
+    label = if (!is.null(label)) processDeps(label, session),
+    value = formatNoSci(value),
+    min = formatNoSci(min),
+    max = formatNoSci(max),
+    step = formatNoSci(step)
   ))
   session$sendInputMessage(inputId, message)
 }
@@ -460,7 +483,7 @@ updateSliderInput <- function(session = getDefaultReactiveDomain(), inputId, lab
   }
 
   message <- dropNulls(list(
-    label = label,
+    label = if (!is.null(label)) processDeps(label, session),
     value = formatNoSci(value),
     min = formatNoSci(min),
     max = formatNoSci(max),
@@ -491,7 +514,11 @@ updateInputOptions <- function(session, inputId, label = NULL, choices = NULL,
     ))
   }
 
-  message <- dropNulls(list(label = label, options = options, value = selected))
+  message <- dropNulls(list(
+    label = if (!is.null(label)) processDeps(label, session),
+    options = options,
+    value = selected
+  ))
 
   session$sendInputMessage(inputId, message)
 }
@@ -644,7 +671,11 @@ updateSelectInput <- function(session = getDefaultReactiveDomain(), inputId, lab
   choices <- if (!is.null(choices)) choicesWithNames(choices)
   if (!is.null(selected)) selected <- as.character(selected)
   options <- if (!is.null(choices)) selectOptions(choices, selected, inputId, FALSE)
-  message <- dropNulls(list(label = label, options = options, value = selected))
+  message <- dropNulls(list(
+    label = if (!is.null(label)) processDeps(label, session),
+    options = options,
+    value = selected
+  ))
   session$sendInputMessage(inputId, message)
 }
 

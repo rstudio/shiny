@@ -27,7 +27,7 @@ declare class TextInputBinding extends TextInputBindingBase {
         value: string;
         placeholder: string;
     };
-    receiveMessage(el: TextHTMLElement, data: TextReceiveMessageData): void;
+    receiveMessage(el: TextHTMLElement, data: TextReceiveMessageData): Promise<void>;
 }
 export { TextInputBinding, TextInputBindingBase };
 export type { TextHTMLElement, TextReceiveMessageData };

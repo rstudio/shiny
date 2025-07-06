@@ -1,4 +1,3 @@
-/// <reference types="selectize" />
 import { InputBinding } from "./inputBinding";
 type SelectHTMLElement = HTMLSelectElement & {
     nonempty: boolean;

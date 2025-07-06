@@ -1,7 +1,5 @@
 {
   "search.exclude": {
-    "**/.yarn": true,
-    "**/.pnp.*": true
   },
   "prettier.prettierPath": "./node_modules/prettier",
   "typescript.enablePromptUseWorkspaceTsdk": true,

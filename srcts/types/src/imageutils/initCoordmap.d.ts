@@ -1,4 +1,3 @@
-/// <reference types="jquery" />
 import type { Bounds } from "./createBrush";
 import type { Offset } from "./findbox";
 import type { Panel, PanelInit } from "./initPanelScales";

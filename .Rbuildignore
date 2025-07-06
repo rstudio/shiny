@@ -22,18 +22,16 @@
 ^manualtests$
 ^\.github$
 
-^\.yarn$
 ^\.vscode$
 ^\.madgerc$
 ^\.prettierrc\.yml$
 ^jest\.config\.js$
 ^package\.json$
 ^tsconfig\.json$
-^yarn\.lock$
+^package-lock\.json$
 ^node_modules$
 ^coverage$
 ^.ignore$
 ^\.browserslistrc$
 ^\.eslintrc\.yml$
-^\.yarnrc\.yml$
 ^_dev$

@@ -16,15 +16,13 @@ function findScalingRatio($el: JQuery<HTMLElement>) {
   const boundingRect = $el[0].getBoundingClientRect();
 
   return {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     x: boundingRect.width / $el.outerWidth()!,
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     y: boundingRect.height / $el.outerHeight()!,
   };
 }
 
 function findOrigin($el: JQuery<HTMLElement>): Offset {
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const offset = $el.offset()!;
   const scalingRatio = findScalingRatio($el);
 
@@ -53,9 +51,8 @@ function findDims($el: JQuery<HTMLElement>) {
   // If there's any padding/border, we need to find the ratio of the actual
   // element content compared to the element plus padding and border.
   const contentRatio = {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     x: $el.width()! / $el.outerWidth()!,
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     y: $el.height()! / $el.outerHeight()!,
   };
 
@@ -125,7 +122,7 @@ type Coordmap = {
   mouseCoordinateSender: (
     inputId: string,
     clip?: boolean,
-    nullOutside?: boolean
+    nullOutside?: boolean,
   ) => (e: JQuery.MouseDownEvent | JQuery.MouseMoveEvent | null) => void;
 };
 
@@ -150,7 +147,7 @@ type Coordmap = {
 //    than the other two, because there can be multiple panels (as in facets).
 function initCoordmap(
   $el: JQuery<HTMLElement>,
-  coordmap_: CoordmapInit
+  coordmap_: CoordmapInit,
 ): Coordmap {
   const $img = $el.find("img");
   const img = $img[0];
@@ -350,7 +347,7 @@ function initCoordmap(
   coordmap.mouseCoordinateSender = function (
     inputId,
     clip = true,
-    nullOutside = false
+    nullOutside = false,
   ) {
     return function (e) {
       if (e === null) {
@@ -377,7 +374,7 @@ function initCoordmap(
         shinySetInputValue(inputId, coords, { priority: "event" });
         return;
       }
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
       const panel = coordmap.getPanelCss(coordsCss)!;
 
       const coordsImg = coordmap.scaleCssToImg(coordsCss);

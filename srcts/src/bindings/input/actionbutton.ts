@@ -26,7 +26,7 @@ class ActionButtonInputBinding extends InputBinding {
   }
   getType(el: HTMLElement): string {
     return "shiny.action";
-    el;
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
   subscribe(el: HTMLElement, callback: (x: boolean) => void): void {
     $(el).on(
@@ -39,7 +39,7 @@ class ActionButtonInputBinding extends InputBinding {
         $el.data("val", val + 1);
 
         callback(false);
-      }
+      },
     );
   }
   getState(el: HTMLElement): { value: number } {
@@ -47,7 +47,7 @@ class ActionButtonInputBinding extends InputBinding {
   }
   async receiveMessage(
     el: HTMLElement,
-    data: ActionButtonReceiveMessageData
+    data: ActionButtonReceiveMessageData,
   ): Promise<void> {
     const $el = $(el);
 
@@ -56,13 +56,16 @@ class ActionButtonInputBinding extends InputBinding {
       const deps: HtmlDep[] = [];
 
       if (hasDefinedProperty(data, "label")) {
-        label = data.label.html;
-        deps.push(...data.label.deps);
+        label = data.label!.html;
+        deps.push(...data.label!.deps);
       }
 
       if (hasDefinedProperty(data, "icon")) {
-        icon = data.icon.html;
-        deps.push(...data.icon.deps);
+        // `data.icon` can be an [] if user gave `character(0)`.
+        icon = Array.isArray(data.icon) ? "" : (data.icon?.html ?? "");
+        if (hasDefinedProperty(data.icon!, "deps")) {
+          deps.push(...data.icon!.deps);
+        }
       }
 
       if (icon.trim()) {
@@ -89,7 +92,7 @@ class ActionButtonInputBinding extends InputBinding {
   private _getIconLabel(el: HTMLElement): { icon: string; label: string } {
     const nodes = Array.from(el.childNodes);
     const nodeContents = nodes.map((node) =>
-      node instanceof Element ? node.outerHTML : node.textContent
+      node instanceof Element ? node.outerHTML : node.textContent,
     );
 
     // Query the separator element

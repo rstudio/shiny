@@ -5,4 +5,4 @@ declare class InputValidateDecorator implements InputPolicy {
     constructor(target: InputPolicy);
     setInput(nameType: string, value: unknown, opts?: Partial<InputPolicyOpts>): void;
 }
-export { InputValidateDecorator, addDefaultInputOpts };
+export { addDefaultInputOpts, InputValidateDecorator };

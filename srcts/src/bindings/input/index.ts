@@ -31,7 +31,7 @@ function initInputBindings(): {
   inputBindings.register(new CheckboxInputBinding(), "shiny.checkboxInput");
   inputBindings.register(
     new CheckboxGroupInputBinding(),
-    "shiny.checkboxGroupInput"
+    "shiny.checkboxGroupInput",
   );
   inputBindings.register(new RadioInputBinding(), "shiny.radioInput");
   inputBindings.register(new SliderInputBinding(), "shiny.sliderInput");
@@ -40,11 +40,11 @@ function initInputBindings(): {
   inputBindings.register(new SelectInputBinding(), "shiny.selectInput");
   inputBindings.register(
     new ActionButtonInputBinding(),
-    "shiny.actionButtonInput"
+    "shiny.actionButtonInput",
   );
   inputBindings.register(
     new BootstrapTabInputBinding(),
-    "shiny.bootstrapTabInput"
+    "shiny.bootstrapTabInput",
   );
   const fileInputBinding = new FileInputBinding();
 

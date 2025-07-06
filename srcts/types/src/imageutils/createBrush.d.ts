@@ -76,4 +76,4 @@ type Brush = {
 };
 declare function createBrush($el: JQuery<HTMLElement>, opts: BrushOpts, coordmap: Coordmap, expandPixels: number): Brush;
 export { createBrush };
-export type { Bounds, BrushOpts, BoundsCss };
+export type { Bounds, BoundsCss, BrushOpts };

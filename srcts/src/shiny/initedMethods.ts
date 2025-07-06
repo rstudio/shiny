@@ -42,7 +42,7 @@ function validateShinyHasBeenSet(): FullShinyDef {
 function shinySetInputValue(
   name: string,
   value: unknown,
-  opts?: { priority?: EventPriority }
+  opts?: { priority?: EventPriority },
 ): void {
   validateShinyHasBeenSet().setInputValue(name, value, opts);
 }
@@ -67,14 +67,14 @@ function shinyInitializeInputs(scope: BindScope): void {
 
 async function shinyAppBindOutput(
   id: string,
-  binding: OutputBindingAdapter
+  binding: OutputBindingAdapter,
 ): Promise<void> {
   await shinyShinyApp().bindOutput(id, binding);
 }
 
 function shinyAppUnbindOutput(
   id: string,
-  binding: OutputBindingAdapter
+  binding: OutputBindingAdapter,
 ): boolean {
   return shinyShinyApp().unbindOutput(id, binding);
 }
@@ -97,18 +97,18 @@ function getShinyCreateWebsocket(): (() => WebSocket) | void {
 }
 
 export {
+  getFileInputBinding,
+  getShinyCreateWebsocket,
+  getShinyOnCustomMessage,
+  setFileInputBinding,
   setShinyObj,
-  shinySetInputValue,
-  shinyShinyApp,
   setShinyUser,
-  shinyForgetLastInputValue,
-  shinyBindAll,
-  shinyUnbindAll,
-  shinyInitializeInputs,
   shinyAppBindOutput,
   shinyAppUnbindOutput,
-  getShinyOnCustomMessage,
-  getFileInputBinding,
-  setFileInputBinding,
-  getShinyCreateWebsocket,
+  shinyBindAll,
+  shinyForgetLastInputValue,
+  shinyInitializeInputs,
+  shinySetInputValue,
+  shinyShinyApp,
+  shinyUnbindAll,
 };

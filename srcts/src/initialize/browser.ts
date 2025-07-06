@@ -10,7 +10,7 @@ function getIEVersion() {
     // IE 10 or older => return version number
     return parseInt(
       userAgent.substring(msie + 5, userAgent.indexOf(".", msie)),
-      10
+      10,
     );
   }
   const trident = userAgent.indexOf("Trident/");
@@ -21,7 +21,7 @@ function getIEVersion() {
 
     return parseInt(
       userAgent.substring(rv + 3, userAgent.indexOf(".", rv)),
-      10
+      10,
     );
   }
   return -1;

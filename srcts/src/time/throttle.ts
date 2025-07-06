@@ -1,4 +1,3 @@
-/* eslint-disable indent */
 import type { InputPolicy } from "../inputPolicies";
 import type { InputRatePolicy } from "../inputPolicies/inputRatePolicy";
 import type { AnyVoidFunction } from "../utils/extraTypes";
@@ -13,7 +12,7 @@ class Throttler<X extends AnyVoidFunction> implements InputRatePolicy<X> {
   constructor(
     target: InputPolicy | null,
     func: X,
-    delayMs: number | undefined
+    delayMs: number | undefined,
   ) {
     this.target = target;
     this.func = func;
@@ -132,7 +131,4 @@ class Throttler<X extends AnyVoidFunction> implements InputRatePolicy<X> {
 //   return throttled;
 // }
 
-export {
-  Throttler,
-  // throttle
-};
+export { Throttler };

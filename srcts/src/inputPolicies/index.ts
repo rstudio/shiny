@@ -10,10 +10,10 @@ import type { InputRatePolicy } from "./inputRatePolicy";
 
 export {
   InputBatchSender,
+  InputDeferDecorator,
   InputEventDecorator,
   InputNoResendDecorator,
   InputRateDecorator,
-  InputDeferDecorator,
   InputValidateDecorator,
 };
-export type { InputPolicy, EventPriority, InputRatePolicy };
+export type { EventPriority, InputPolicy, InputRatePolicy };

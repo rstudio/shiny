@@ -16,7 +16,8 @@
   "include": [
     "srcts/src/index.ts",
     "srcts/src/**/*.ts",
-    "srcts/extras/globalShiny.ts"
+    "srcts/build/*.ts",
+    "srcts/extras/*.ts"
   ],
   "exclude": [
     "node_modules",

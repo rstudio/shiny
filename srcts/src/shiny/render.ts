@@ -38,7 +38,7 @@ import { renderHtml as singletonsRenderHtml } from "./singletons";
 async function renderContentAsync(
   el: BindScope,
   content: string | { html: string; deps?: HtmlDep[] } | null,
-  where: WherePosition = "replace"
+  where: WherePosition = "replace",
 ): Promise<void> {
   if (where === "replace") {
     shinyUnbindAll(el);
@@ -82,7 +82,7 @@ async function renderContentAsync(
 function renderContent(
   el: BindScope,
   content: string | { html: string; deps?: HtmlDep[] } | null,
-  where: WherePosition = "replace"
+  where: WherePosition = "replace",
 ): Promise<void> {
   if (where === "replace") {
     shinyUnbindAll(el);
@@ -131,7 +131,7 @@ async function renderHtmlAsync(
   html: string,
   el: BindScope,
   dependencies: HtmlDep[],
-  where: WherePosition = "replace"
+  where: WherePosition = "replace",
 ): Promise<ReturnType<typeof singletonsRenderHtml>> {
   await renderDependenciesAsync(dependencies);
   return singletonsRenderHtml(html, el, where);
@@ -142,7 +142,7 @@ function renderHtml(
   html: string,
   el: BindScope,
   dependencies: HtmlDep[],
-  where: WherePosition = "replace"
+  where: WherePosition = "replace",
 ): ReturnType<typeof singletonsRenderHtml> {
   renderDependencies(dependencies);
   return singletonsRenderHtml(html, el, where);
@@ -152,7 +152,7 @@ function renderHtml(
 // renderDependencies
 // =============================================================================
 async function renderDependenciesAsync(
-  dependencies: HtmlDep[] | null
+  dependencies: HtmlDep[] | null,
 ): Promise<void> {
   if (dependencies) {
     for (const dep of dependencies) {
@@ -372,14 +372,14 @@ function getStylesheetLinkTags(dep: HtmlDepNormalized): HTMLLinkElement[] {
   // pass them through to `addStylesheetsAndRestyle` below.
   return dep.stylesheet.map((x) => {
     // Add "rel" and "type" fields if not already present.
-    if (!hasDefinedProperty(x, "rel")) x.rel = "stylesheet";
-    if (!hasDefinedProperty(x, "type")) x.type = "text/css";
+    if (x.rel === undefined) x.rel = "stylesheet";
+    if (x.type === undefined) x.type = "text/css";
 
     const link = document.createElement("link");
 
     Object.entries(x).forEach(function ([attr, val]: [
       string,
-      string | undefined
+      string | undefined,
     ]) {
       if (attr === "href") {
         val = encodeURI(val as string);
@@ -394,7 +394,7 @@ function getStylesheetLinkTags(dep: HtmlDepNormalized): HTMLLinkElement[] {
 
 function appendStylesheetLinkTags(
   dep: HtmlDepNormalized,
-  $head: JQuery<HTMLElement>
+  $head: JQuery<HTMLElement>,
 ): void {
   const stylesheetLinks = getStylesheetLinkTags(dep);
 
@@ -468,7 +468,7 @@ async function appendScriptTagsAsync(dep: HtmlDepNormalized): Promise<void> {
 
 function appendMetaTags(
   dep: HtmlDepNormalized,
-  $head: JQuery<HTMLElement>
+  $head: JQuery<HTMLElement>,
 ): void {
   dep.meta.forEach((x) => {
     const meta = document.createElement("meta");
@@ -482,7 +482,7 @@ function appendMetaTags(
 
 function appendAttachmentLinkTags(
   dep: HtmlDepNormalized,
-  $head: JQuery<HTMLElement>
+  $head: JQuery<HTMLElement>,
 ): void {
   dep.attachment.forEach((x) => {
     const link = $("<link rel='attachment'>")
@@ -495,7 +495,7 @@ function appendAttachmentLinkTags(
 
 function appendExtraHeadContent(
   dep: HtmlDepNormalized,
-  $head: JQuery<HTMLElement>
+  $head: JQuery<HTMLElement>,
 ): void {
   if (dep.head) {
     const $newHead = $("<head></head>");
@@ -684,12 +684,12 @@ function normalizeHtmlDependency(dep: HtmlDep): HtmlDepNormalized {
 }
 
 export {
-  renderContentAsync,
-  renderContent,
-  renderHtmlAsync,
-  renderHtml,
-  renderDependenciesAsync,
-  renderDependencies,
   registerDependency,
+  renderContent,
+  renderContentAsync,
+  renderDependencies,
+  renderDependenciesAsync,
+  renderHtml,
+  renderHtmlAsync,
 };
 export type { HtmlDep };

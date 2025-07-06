@@ -14,4 +14,4 @@ declare class Throttler<X extends AnyVoidFunction> implements InputRatePolicy<X>
     $clearTimer(): void;
     $invoke(): void;
 }
-export { Throttler, };
+export { Throttler };

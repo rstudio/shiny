@@ -93,9 +93,9 @@ declare class ShinyApp {
         update: (message: {
             style: "notification" | "old";
             id: string;
-            message?: string | undefined;
-            detail?: string | undefined;
-            value?: number | undefined;
+            message?: string;
+            detail?: string;
+            value?: number;
         }) => void;
         close: (message: {
             style: "notification";
@@ -106,5 +106,5 @@ declare class ShinyApp {
         fullUrl?: boolean | undefined;
     }): string;
 }
-export { ShinyApp, addCustomMessageHandler };
-export type { Handler, ErrorsMessageValue, ShinyWebSocket };
+export { addCustomMessageHandler, ShinyApp };
+export type { ErrorsMessageValue, Handler, ShinyWebSocket };

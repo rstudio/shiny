@@ -88,6 +88,7 @@ function canSetFiles(fileList: FileList): boolean {
     testEl.files = fileList;
   } catch (e) {
     return false;
+    e; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
   return true;
 }
@@ -99,7 +100,7 @@ function handleDrop(e: JQuery.DragEventBase, el: HTMLInputElement): void {
     // 1. The FileList object isn't supported by this browser, and
     // there's nothing else we can try. (< IE 10)
     console.log(
-      "Dropping files is not supported on this browser. (no FileList)"
+      "Dropping files is not supported on this browser. (no FileList)",
     );
   } else if (!canSetFiles(files)) {
     // 2. The browser doesn't support assigning a type=file input's .files
@@ -146,7 +147,7 @@ function abortCurrentUpload($el: JQuery<EventTarget>) {
 
 function uploadDroppedFilesIE10Plus(
   el: HTMLInputElement,
-  files: FileList
+  files: FileList,
 ): void {
   const $el = $(el);
 
@@ -158,7 +159,7 @@ function uploadDroppedFilesIE10Plus(
   // Start the new upload and put the uploader in 'currentUploader'.
   $el.data(
     "currentUploader",
-    new FileUploader(shinyShinyApp(), fileInputBindingGetId(el), files, el)
+    new FileUploader(shinyShinyApp(), fileInputBindingGetId(el), files, el),
   );
 }
 
@@ -178,7 +179,7 @@ function uploadFiles(evt: JQuery.DragEvent): void {
   // Start the new upload and put the uploader in 'currentUploader'.
   $el.data(
     "currentUploader",
-    new FileUploader(shinyShinyApp(), id, files, evt.target)
+    new FileUploader(shinyShinyApp(), id, files, evt.target),
   );
 }
 
@@ -237,17 +238,18 @@ class FileInputBinding extends InputBinding {
   }
   setValue(el: HTMLElement, value: void): void {
     // Not implemented
-    el;
-    value;
+    return;
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
+    value; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
   getType(el: HTMLElement): string {
     // This will be used only when restoring a file from a saved state.
     return "shiny.file";
-    el;
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
 
   subscribe(el: HTMLInputElement, callback: (x: boolean) => void): void {
-    callback;
+    callback; // eslint-disable-line @typescript-eslint/no-unused-expressions
 
     $(el).on("change.fileInputBinding", uploadFiles);
     // Here we try to set up the necessary events for Drag and Drop ("DnD").
@@ -257,8 +259,9 @@ class FileInputBinding extends InputBinding {
 
     enableDraghover($zone).on({
       "draghover:enter.draghover": (e) => {
-        e;
         $zone.addClass(zoneOver);
+        return;
+        e; // eslint-disable-line @typescript-eslint/no-unused-expressions
       },
       "draghover:leave.draghover": (e) => {
         $zone.removeClass(zoneOver);
@@ -267,8 +270,9 @@ class FileInputBinding extends InputBinding {
         e.stopPropagation();
       },
       "draghover:drop.draghover": (e, dropEvent) => {
-        e;
         handleDrop(dropEvent, el);
+        return;
+        e; // eslint-disable-line @typescript-eslint/no-unused-expressions
       },
     });
   }

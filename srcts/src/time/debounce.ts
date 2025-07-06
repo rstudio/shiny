@@ -12,7 +12,7 @@ class Debouncer<X extends AnyVoidFunction> implements InputRatePolicy<X> {
   constructor(
     target: InputPolicy | null,
     func: X,
-    delayMs: number | undefined
+    delayMs: number | undefined,
   ) {
     this.target = target;
     this.func = func;
@@ -72,7 +72,7 @@ class Debouncer<X extends AnyVoidFunction> implements InputRatePolicy<X> {
 // call.
 function debounce<T extends (...args: unknown[]) => void>(
   threshold: number | undefined,
-  func: T
+  func: T,
 ): (...args: Parameters<T>) => void {
   let timerId: ReturnType<typeof setTimeout> | null = null;
 
@@ -94,4 +94,4 @@ function debounce<T extends (...args: unknown[]) => void>(
   };
 }
 
-export { Debouncer, debounce };
+export { debounce, Debouncer };

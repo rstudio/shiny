@@ -9,7 +9,7 @@ import $ from "jquery";
 function createClickInfo(
   $el: JQuery<HTMLElement>,
   dblclickId: string,
-  dblclickDelay: number
+  dblclickDelay: number,
 ): {
   mousedown: (e: JQuery.MouseDownEvent) => void;
   dblclickIE8: (e: JQuery.DoubleClickEvent) => void;
@@ -21,7 +21,7 @@ function createClickInfo(
   // it with the information stored in this.e.
   function triggerEvent(
     newEventType: string,
-    e: JQuery.DoubleClickEvent | JQuery.MouseDownEvent
+    e: JQuery.DoubleClickEvent | JQuery.MouseDownEvent,
   ) {
     // Extract important info from e and construct a new event with type
     // eventType.

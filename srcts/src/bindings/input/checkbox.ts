@@ -39,17 +39,17 @@ class CheckboxInputBinding extends InputBinding {
   }
   async receiveMessage(
     el: CheckedHTMLElement,
-    data: CheckboxReceiveMessageData
+    data: CheckboxReceiveMessageData,
   ): Promise<void> {
     if (hasDefinedProperty(data, "value")) {
-      el.checked = data.value;
+      el.checked = data.value!;
     }
 
     // checkboxInput()'s label works different from other
     // input labels...the label container should always exist
     if (hasDefinedProperty(data, "label")) {
       const labelSpan = $(el).parent().find("span");
-      await renderContent(labelSpan, data.label);
+      await renderContent(labelSpan, data.label!);
     }
 
     $(el).trigger("change");
@@ -57,4 +57,4 @@ class CheckboxInputBinding extends InputBinding {
 }
 
 export { CheckboxInputBinding };
-export type { CheckedHTMLElement, CheckboxReceiveMessageData };
+export type { CheckboxReceiveMessageData, CheckedHTMLElement };

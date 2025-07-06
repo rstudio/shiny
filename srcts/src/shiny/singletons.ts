@@ -16,7 +16,7 @@ type WherePosition =
 function renderHtml(
   html: string,
   el: BindScope,
-  where: WherePosition
+  where: WherePosition,
 ): ReturnType<typeof processHtml> {
   const processed = processHtml(html);
 
@@ -88,14 +88,13 @@ function processHtml(val: string): {
     match: string,
     p1: string,
     sig: string,
-    payload: string
+    payload: string,
   ) {
     if (knownSingletons[sig] || newSingletons[sig]) return "";
     newSingletons[sig] = true;
     return payload;
   };
 
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     newVal = val.replace(reSingleton, findNewPayload);
     if (val.length === newVal.length) break;
@@ -108,7 +107,6 @@ function processHtml(val: string): {
     return "";
   };
 
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     newVal = val.replace(reHead, headAddPayload);
     if (val.length === newVal.length) break;
@@ -122,5 +120,5 @@ function processHtml(val: string): {
   };
 }
 
-export { renderHtml, registerNames };
+export { registerNames, renderHtml };
 export type { WherePosition };

@@ -20,4 +20,4 @@ declare function getShinyOnCustomMessage(): Handler | null;
 declare function getFileInputBinding(): FileInputBinding;
 declare function setFileInputBinding(fileInputBinding_: FileInputBinding): void;
 declare function getShinyCreateWebsocket(): (() => WebSocket) | void;
-export { setShinyObj, shinySetInputValue, shinyShinyApp, setShinyUser, shinyForgetLastInputValue, shinyBindAll, shinyUnbindAll, shinyInitializeInputs, shinyAppBindOutput, shinyAppUnbindOutput, getShinyOnCustomMessage, getFileInputBinding, setFileInputBinding, getShinyCreateWebsocket, };
+export { getFileInputBinding, getShinyCreateWebsocket, getShinyOnCustomMessage, setFileInputBinding, setShinyObj, setShinyUser, shinyAppBindOutput, shinyAppUnbindOutput, shinyBindAll, shinyForgetLastInputValue, shinyInitializeInputs, shinySetInputValue, shinyShinyApp, shinyUnbindAll, };

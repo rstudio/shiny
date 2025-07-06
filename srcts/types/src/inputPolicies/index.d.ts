@@ -6,5 +6,5 @@ import { InputRateDecorator } from "./inputRateDecorator";
 import { InputValidateDecorator } from "./inputValidateDecorator";
 import type { EventPriority, InputPolicy } from "./inputPolicy";
 import type { InputRatePolicy } from "./inputRatePolicy";
-export { InputBatchSender, InputEventDecorator, InputNoResendDecorator, InputRateDecorator, InputDeferDecorator, InputValidateDecorator, };
-export type { InputPolicy, EventPriority, InputRatePolicy };
+export { InputBatchSender, InputDeferDecorator, InputEventDecorator, InputNoResendDecorator, InputRateDecorator, InputValidateDecorator, };
+export type { EventPriority, InputPolicy, InputRatePolicy };

@@ -50,4 +50,4 @@ function hideReconnectDialog(): void {
   removeNotification("reconnect");
 }
 
-export { showReconnectDialog, hideReconnectDialog };
+export { hideReconnectDialog, showReconnectDialog };

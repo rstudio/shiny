@@ -1,4 +1,3 @@
-/// <reference types="jquery" />
 import type { Bounds, BoundsCss, BrushOpts } from "./createBrush";
 import type { Offset } from "./findbox";
 import type { Coordmap } from "./initCoordmap";
@@ -34,5 +33,5 @@ type NullOutside = Parameters<Coordmap["mouseCoordinateSender"]>[2];
 declare function createClickHandler(inputId: InputId, clip: Clip, coordmap: Coordmap): CreateHandler;
 declare function createHoverHandler(inputId: InputId, delay: number, delayType: string | "throttle", clip: Clip, nullOutside: NullOutside, coordmap: Coordmap): CreateHandler;
 declare function createBrushHandler(inputId: InputId, $el: JQuery<HTMLElement>, opts: BrushOpts, coordmap: Coordmap, outputId: BrushInfo["outputId"]): CreateHandler;
-export { createClickHandler, createHoverHandler, createBrushHandler };
+export { createBrushHandler, createClickHandler, createHoverHandler };
 export type { BrushInfo };

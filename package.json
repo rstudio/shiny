@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@types/bootstrap": "5.2.10",
-    "@types/bootstrap-datepicker": "1.10.0",
+    "@types/bootstrap-datepicker": "^1.10.0",
     "@types/datatables.net": "^1.10.28",
     "@types/ion-rangeslider": "2.3.5",
     "@types/jquery": "3.5.32",
@@ -36,11 +36,13 @@
     "@types/jest": "^26.0.23",
     "@types/jqueryui": "1.12.16",
     "@types/lodash": "^4.14.170",
+    "@types/madge": "^5.0.3",
     "@types/node": "^18.14.2",
     "@types/showdown": "^1.9.3",
     "@typescript-eslint/eslint-plugin": "^8.23.0",
     "@typescript-eslint/parser": "^8.23.0",
     "autoprefixer": "^10.2.6",
+    "bootstrap-datepicker": "^1.10.0",
     "browserslist": "^4.19.1",
     "esbuild": ">=0.20.0",
     "esbuild-plugin-globals": "^0.1.1",
@@ -55,7 +57,6 @@
     "jest": "^29.7.0",
     "jquery": "^3.6.0",
     "lodash": "^4.17.21",
-    "@types/madge": "^5.0.3",
     "madge": "^8.0.0",
     "node-gyp": "^8.1.0",
     "postcss": "^8.5.1",
@@ -79,9 +80,9 @@
     "checks": "npm run lint && npm run build_types && npm run coverage && npm run circular",
     "lint": "node --eval \"console.log('linting code...')\" && eslint 'srcts/src/**/*.ts' --fix",
     "build_types": "tsc -p tsconfig.json",
-    "coverage_detailed": "npx type-check --detail",
+    "coverage_detailed": "npx --yes type-check --detail",
     "coverage": "type-coverage -p tsconfig.json --at-least 90",
-    "circular": "npx dpdm --transform ./srcts/src/index.ts"
+    "circular": "npx --yes dpdm --transform ./srcts/src/index.ts"
   },
   "prettier": {
     "plugins": [

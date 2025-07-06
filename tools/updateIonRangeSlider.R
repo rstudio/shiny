@@ -29,7 +29,7 @@ file.rename(
 
 # Grab less src files and convert to sass
 # Use `npx` to temp install and execute on the entire less folder
-system(paste0("npx less2sass ", file.path(src, "less")))
+system(paste0("npx --yes less2sass ", file.path(src, "less")))
 
 # Copy over only the base (i.e., core) scss that we need for the shiny skin
 dir.create(file.path(target, "scss"))

@@ -44,16 +44,20 @@ have the extensions: r, htm, html, js, css, png, jpg, jpeg, gif. If any
 changes are detected, all connected Shiny sessions are reloaded. This
 allows for fast feedback loops when tweaking Shiny UI.
 
-Since monitoring for changes is expensive (we simply poll for last
-modified times), this feature is intended only for development.
+Monitoring for changes is no longer expensive, thanks to the \pkg{watcher}
+package, but this feature is still intended only for development.
 
 You can customize the file patterns Shiny will monitor by setting the
-shiny.autoreload.pattern option. For example, to monitor only ui.R:
-\code{options(shiny.autoreload.pattern = glob2rx("ui.R"))}
+shiny.autoreload.pattern option. For example, to monitor only \code{ui.R}:
+\code{options(shiny.autoreload.pattern = glob2rx("ui.R"))}.
 
-The default polling interval is 500 milliseconds. You can change this
-by setting e.g. \code{options(shiny.autoreload.interval = 2000)} (every
-two seconds).}
+As mentioned above, Shiny no longer polls watched files for changes.
+Instead, using \pkg{watcher}, Shiny is notified of file changes as they
+occur. These changes are batched together within a customizable latency
+period. You can adjust this period by setting
+\code{options(shiny.autoreload.interval = 2000)} (in milliseconds). This value
+converted to seconds and passed to the \code{latency} argument of
+\code{\link[watcher:watcher]{watcher::watcher()}}. The default latency is 250ms.}
 \item{shiny.deprecation.messages (defaults to \code{TRUE})}{This controls whether messages for
 deprecated functions in Shiny will be printed. See
 \code{\link[=shinyDeprecated]{shinyDeprecated()}} for more information.}
@@ -68,7 +72,7 @@ be done 100\% correctly.}
 \code{\link[=runApp]{runApp()}} for more information.}
 \item{shiny.jquery.version (defaults to \code{3})}{The major version of jQuery to use.
 Currently only values of \code{3} or \code{1} are supported. If \code{1}, then jQuery 1.12.4 is used. If \code{3},
-then jQuery 3.6.0 is used.}
+then jQuery 3.7.1 is used.}
 \item{shiny.json.digits (defaults to \code{I(16)})}{Max number of digits to use when converting
 numbers to JSON format to send to the client web browser. Use \code{\link[=I]{I()}} to specify significant digits.
 Use \code{NA} for max precision.}

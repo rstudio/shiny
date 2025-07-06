@@ -34,3 +34,4 @@
 ^.ignore$
 ^\.browserslistrc$
 ^\.eslintrc\.yml$
+^_dev$

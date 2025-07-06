@@ -383,8 +383,10 @@ markOutputAttrs <- function(renderFunc, snapshotExclude = NULL,
 #' The corresponding HTML output tag should be `div` or `img` and have
 #' the CSS class name `shiny-image-output`.
 #'
-#' @seealso For more details on how the images are generated, and how to control
+#' @seealso 
+#' * For more details on how the images are generated, and how to control
 #'   the output, see [plotPNG()].
+#' * Use [outputOptions()] to set general output options for an image output.
 #'
 #' @param expr An expression that returns a list.
 #' @inheritParams renderUI
@@ -598,6 +600,7 @@ isTemp <- function(path, tempDir = tempdir(), mustExist) {
 #'   used in an interactive RMarkdown document.
 #'
 #' @example res/text-example.R
+#' @seealso [outputOptions()]
 #' @export
 renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
                         width = getOption('width'), outputArgs=list())
@@ -719,7 +722,7 @@ renderText <- function(expr, env = parent.frame(), quoted = FALSE,
 #'   call to [uiOutput()] when `renderUI` is used in an
 #'   interactive R Markdown document.
 #'
-#' @seealso [uiOutput()]
+#' @seealso [uiOutput()], [outputOptions()]
 #' @export
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -809,6 +812,13 @@ renderUI <- function(expr, env = parent.frame(), quoted = FALSE,
 #'
 #' shinyApp(ui, server)
 #' }
+#'
+#' @seealso
+#' * The download handler, like other outputs, is suspended (disabled) by
+#'   default for download buttons and links that are hidden. Use 
+#'   [outputOptions()] to control this behavior, e.g. to set 
+#'   `suspendWhenHidden = FALSE` if the download is initiated by 
+#'   programmatically clicking on the download button using JavaScript.
 #' @export
 downloadHandler <- function(filename, content, contentType=NULL, outputArgs=list()) {
   renderFunc <- function(shinysession, name, ...) {

@@ -1,7 +1,7 @@
 Package: shiny
 Type: Package
 Title: Web Application Framework for R
-Version: 1.10.0.9000
+Version: 1.11.0.9000
 Authors@R: c(
     person("Winston", "Chang", role = c("aut", "cre"), email = "winston@posit.co", comment = c(ORCID = "0000-0002-1576-2126")),
     person("Joe", "Cheng", role = "aut", email = "joe@posit.co"),
@@ -60,7 +60,7 @@ Authors@R: c(
     comment = "showdown.js library"),
     person("Ivan", "Sagalaev", role = c("ctb", "cph"),
     comment = "highlight.js library"),
-    person(family = "R Core Team", role = c("ctb", "cph"),
+    person(given = "R Core Team", role = c("ctb", "cph"),
     comment = "tar implementation from R")
     )
 Description: Makes it incredibly easy to build interactive web
@@ -107,11 +107,13 @@ Suggests:
     reactlog (>= 1.0.0),
     magrittr,
     yaml,
+    mirai,
     future,
     dygraphs,
     ragg,
     showtext,
-    sass
+    sass,
+    watcher 
 URL: https://shiny.posit.co/,
     https://github.com/rstudio/shiny
 BugReports: https://github.com/rstudio/shiny/issues
@@ -200,6 +202,7 @@ Collate:
     'test.R'
     'update-input.R'
     'utils-lang.R'
+    'utils-tags.R'
     'version_bs_date_picker.R'
     'version_ion_range_slider.R'
     'version_jquery.R'

@@ -10,6 +10,14 @@
 #' @param placeholder A character string giving the user a hint as to what can
 #'   be entered into the control. Internet Explorer 8 and 9 do not support this
 #'   option.
+#' @param ... Ignored, included to require named arguments and for future
+#'   feature expansion.
+#' @param updateOn A character vector specifying when the input should be
+#'   updated. Options are `"change"` (default) and `"blur"`. Use `"change"` to
+#'   update the input immediately whenever the value changes. Use `"blur"`to
+#'   delay the input update until the input loses focus (the user moves away
+#'   from the input), or when Enter is pressed (or Cmd/Ctrl + Enter for
+#'   [textAreaInput()]).
 #' @return A text input control that can be added to a UI definition.
 #'
 #' @family input elements
@@ -34,15 +42,31 @@
 #' unless `value` is provided.
 #'
 #' @export
-textInput <- function(inputId, label, value = "", width = NULL,
-  placeholder = NULL) {
+textInput <- function(
+  inputId,
+  label,
+  value = "",
+  width = NULL,
+  placeholder = NULL,
+  ...,
+  updateOn = c("change", "blur")
+) {
+  rlang::check_dots_empty()
+  updateOn <- rlang::arg_match(updateOn)
 
   value <- restoreInput(id = inputId, default = value)
 
-  div(class = "form-group shiny-input-container",
+  div(
+    class = "form-group shiny-input-container",
     style = css(width = validateCssUnit(width)),
     shinyInputLabel(inputId, label),
-    tags$input(id = inputId, type="text", class="shiny-input-text form-control", value=value,
-      placeholder = placeholder)
+    tags$input(
+      id = inputId,
+      type = "text",
+      class = "shiny-input-text form-control",
+      value = value,
+      placeholder = placeholder,
+      `data-update-on` = updateOn
+    )
   )
 }

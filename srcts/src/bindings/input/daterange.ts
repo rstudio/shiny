@@ -106,13 +106,16 @@ class DateRangeInputBinding extends DateInputBindingBase {
       startview: startview,
     };
   }
-  receiveMessage(el: HTMLElement, data: DateRangeReceiveMessageData): void {
+  async receiveMessage(
+    el: HTMLElement,
+    data: DateRangeReceiveMessageData
+  ): Promise<void> {
     const $el = $(el);
     const $inputs = $el.find("input");
     const $startinput = $inputs.eq(0);
     const $endinput = $inputs.eq(1);
 
-    updateLabel(data.label, getLabelNode(el));
+    await updateLabel(data.label, getLabelNode(el));
 
     if (hasDefinedProperty(data, "min")) {
       this._setMin($startinput[0], data.min!);

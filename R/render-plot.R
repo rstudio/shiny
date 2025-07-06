@@ -266,6 +266,8 @@ drawPlot <- function(name, session, func, width, height, alt, pixelratio, res, .
               # addition to ggplot, and there's a print method for that class, that we
               # won't override that method. https://github.com/rstudio/shiny/issues/841
               print.ggplot <- custom_print.ggplot
+              # For compatibility with ggplot2 >v4.0.0
+              `print.ggplot2::ggplot` <- custom_print.ggplot
 
               # Use capture.output to squelch printing to the actual console; we
               # are only interested in plot output

@@ -1,12 +1,18 @@
 import $ from "jquery";
+import type { HtmlDep } from "../../shiny/render";
+import { renderContent } from "../../shiny/render";
 import { hasDefinedProperty } from "../../utils";
 import { InputBinding } from "./inputBinding";
 
 type ActionButtonReceiveMessageData = {
-  label?: string;
-  icon?: string | [];
+  label?: { html: string; deps: HtmlDep[] };
+  icon?: { html: string; deps: HtmlDep[] };
   disabled?: boolean;
 };
+
+// Needs to mirror shiny:::icon_separator()'s markup.
+const iconSeparatorClass = "shiny-icon-separator";
+const iconSeparatorHTML = `<span class='${iconSeparatorClass}'></span>`;
 
 class ActionButtonInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
@@ -39,38 +45,34 @@ class ActionButtonInputBinding extends InputBinding {
   getState(el: HTMLElement): { value: number } {
     return { value: this.getValue(el) };
   }
-  receiveMessage(el: HTMLElement, data: ActionButtonReceiveMessageData): void {
+  async receiveMessage(
+    el: HTMLElement,
+    data: ActionButtonReceiveMessageData,
+  ): Promise<void> {
     const $el = $(el);
 
     if (hasDefinedProperty(data, "label") || hasDefinedProperty(data, "icon")) {
-      // retrieve current label and icon
-      let label: string = $el.text();
-      let icon = "";
+      let { label, icon } = this._getIconLabel(el);
+      const deps: HtmlDep[] = [];
 
-      // to check (and store) the previous icon, we look for a $el child
-      // object that has an i tag, and some (any) class (this prevents
-      // italicized text - which has an i tag but, usually, no class -
-      // from being mistakenly selected)
-      if ($el.find("i[class]").length > 0) {
-        const iconHtml = $el.find("i[class]")[0];
+      if (hasDefinedProperty(data, "label")) {
+        label = data.label!.html;
+        deps.push(...data.label!.deps);
+      }
 
-        if (iconHtml === $el.children()[0]) {
-          // another check for robustness
-          icon = $(iconHtml).prop("outerHTML");
+      if (hasDefinedProperty(data, "icon")) {
+        // `data.icon` can be an [] if user gave `character(0)`.
+        icon = Array.isArray(data.icon) ? "" : (data.icon?.html ?? "");
+        if (hasDefinedProperty(data.icon!, "deps")) {
+          deps.push(...data.icon!.deps);
         }
       }
 
-      // update the requested properties
-      if (hasDefinedProperty(data, "label")) {
-        label = data.label!;
-      }
-      if (hasDefinedProperty(data, "icon")) {
-        // `data.icon` can be an [] if user gave `character(0)`.
-        icon = Array.isArray(data.icon) ? "" : (data.icon ?? "");
+      if (icon.trim()) {
+        icon = icon + iconSeparatorHTML;
       }
 
-      // produce new html
-      $el.html(icon + " " + label);
+      await renderContent(el, { html: icon + label, deps });
     }
 
     if (hasDefinedProperty(data, "disabled")) {
@@ -84,6 +86,29 @@ class ActionButtonInputBinding extends InputBinding {
 
   unsubscribe(el: HTMLElement): void {
     $(el).off(".actionButtonInputBinding");
+  }
+
+  // Split the contents of the element into the icon and label.
+  private _getIconLabel(el: HTMLElement): { icon: string; label: string } {
+    const nodes = Array.from(el.childNodes);
+    const nodeContents = nodes.map((node) =>
+      node instanceof Element ? node.outerHTML : node.textContent,
+    );
+
+    // Query the separator element
+    const separator = el.querySelector(`.${iconSeparatorClass}`);
+
+    // No separator found, so the entire contents are the label.
+    if (!separator) {
+      return { icon: "", label: nodeContents.join("") };
+    }
+
+    // Find the index of the separator element in the child nodes.
+    const idx = nodes.indexOf(separator);
+    return {
+      icon: nodeContents.slice(0, idx).join(""),
+      label: nodeContents.slice(idx + 1).join(""),
+    };
   }
 }
 

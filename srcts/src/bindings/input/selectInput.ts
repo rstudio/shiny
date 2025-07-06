@@ -102,10 +102,10 @@ class SelectInputBinding extends InputBinding {
       options: options,
     };
   }
-  receiveMessage(
+  async receiveMessage(
     el: SelectHTMLElement,
     data: SelectInputReceiveMessageData,
-  ): void {
+  ): Promise<void> {
     const $el = $(el);
 
     // This will replace all the options
@@ -205,7 +205,7 @@ class SelectInputBinding extends InputBinding {
       this.setValue(el, data.value);
     }
 
-    updateLabel(data.label, getLabelNode(el));
+    await updateLabel(data.label, getLabelNode(el));
 
     $(el).trigger("change");
   }

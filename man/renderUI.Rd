@@ -52,5 +52,5 @@ shinyApp(ui, server)
 
 }
 \seealso{
-\code{\link[=uiOutput]{uiOutput()}}
+\code{\link[=uiOutput]{uiOutput()}}, \code{\link[=outputOptions]{outputOptions()}}
 }

@@ -41,12 +41,15 @@
 #'   is, a function that quickly returns a promise) and allows even that very
 #'   session to immediately unblock and carry on with other user interactions.
 #'
-#' @examplesIf rlang::is_interactive() && rlang::is_installed("future")
-#'
+#' @examplesIf rlang::is_interactive() && rlang::is_installed("mirai")
 #' library(shiny)
 #' library(bslib)
-#' library(future)
-#' plan(multisession)
+#' library(mirai)
+#'
+#' # Set background processes for running tasks
+#' daemons(1)
+#' # Reset when the app is stopped
+#' onStop(function() daemons(0))
 #'
 #' ui <- page_fluid(
 #'   titlePanel("Extended Task Demo"),
@@ -60,13 +63,12 @@
 #'
 #' server <- function(input, output) {
 #'   rand_task <- ExtendedTask$new(function() {
-#'     future(
+#'     mirai(
 #'       {
 #'         # Slow operation goes here
 #'         Sys.sleep(2)
 #'         sample(1:100, 1)
-#'       },
-#'       seed = TRUE
+#'       }
 #'     )
 #'   })
 #'
@@ -100,11 +102,12 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
     #' @param func The long-running operation to execute. This should be an
     #'   asynchronous function, meaning, it should use the
     #'   [\{promises\}](https://rstudio.github.io/promises/) package, most
-    #'   likely in conjuction with the
+    #'   likely in conjunction with the
+    #'   [\{mirai\}](https://mirai.r-lib.org) or
     #'   [\{future\}](https://rstudio.github.io/promises/articles/promises_04_futures.html)
     #'   package. (In short, the return value of `func` should be a
-    #'   [`Future`][future::future()] object, or a `promise`, or something else
-    #'   that [promises::as.promise()] understands.)
+    #'   [`mirai`][mirai::mirai()], [`Future`][future::future()], `promise`,
+    #'   or something else that [promises::as.promise()] understands.)
     #'
     #'   It's also important that this logic does not read from any
     #'   reactive inputs/sources, as inputs may change after the function is
@@ -130,14 +133,15 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
     #'   arguments.
     invoke = function(...) {
       args <- rlang::dots_list(..., .ignore_empty = "none")
+      call <- rlang::caller_call(n = 0)
 
       if (
         isolate(private$rv_status()) == "running" ||
           private$invocation_queue$size() > 0
       ) {
-        private$invocation_queue$add(args)
+        private$invocation_queue$add(list(args = args, call = call))
       } else {
-        private$do_invoke(args)
+        private$do_invoke(args, call = call)
       }
       invisible(NULL)
     },
@@ -204,44 +208,41 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
     rv_error = NULL,
     invocation_queue = NULL,
 
-    do_invoke = function(args) {
+    do_invoke = function(args, call = NULL) {
       private$rv_status("running")
       private$rv_value(NULL)
       private$rv_error(NULL)
 
-      p <- NULL
-      tryCatch({
-        maskReactiveContext({
-          # TODO: Bounce the do.call off of a promise_resolve(), so that the
-          # call to invoke() always returns immediately?
-          result <- do.call(private$func, args)
-          p <- promises::as.promise(result)
-        })
-      }, error = function(e) {
-        private$on_error(e)
-      })
+      p <- promises::promise_resolve(
+        maskReactiveContext(do.call(private$func, args))
+      )
 
-      promises::finally(
-        promises::then(p,
-          onFulfilled = function(value, .visible) {
-            private$on_success(list(value=value, visible=.visible))
-          },
-          onRejected = function(error) {
-            private$on_error(error)
-          }
-        ),
-        onFinally = function() {
-          if (private$invocation_queue$size() > 0) {
-            private$do_invoke(private$invocation_queue$remove())
-          }
+      p <- promises::then(
+        p,
+        onFulfilled = function(value, .visible) {
+          private$on_success(list(value = value, visible = .visible))
+        },
+        onRejected = function(error) {
+          private$on_error(error, call = call)
         }
       )
 
+      promises::finally(p, onFinally = function() {
+        if (private$invocation_queue$size() > 0) {
+          next_call <- private$invocation_queue$remove()
+          private$do_invoke(next_call$args, next_call$call)
+        }
+      })
 
       invisible(NULL)
     },
 
-    on_error = function(err) {
+    on_error = function(err, call = NULL) {
+      cli::cli_warn(
+        "ERROR: An error occurred when invoking the ExtendedTask.",
+        parent = err,
+        call = call
+      )
       private$rv_status("error")
       private$rv_error(err)
     },

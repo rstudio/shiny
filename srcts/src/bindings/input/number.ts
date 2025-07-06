@@ -51,7 +51,10 @@ class NumberInputBinding extends TextInputBindingBase {
     return "shiny.number";
     el; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
-  receiveMessage(el: NumberHTMLElement, data: NumberReceiveMessageData): void {
+  async receiveMessage(
+    el: NumberHTMLElement,
+    data: NumberReceiveMessageData
+  ): Promise<void> {
     // Setting values to `""` will remove the attribute value from the DOM element.
     // The attr key will still remain, but there is not value... ex: `<input id="foo" type="number" min max/>`
     if (hasDefinedProperty(data, "value")) el.value = data.value ?? "";
@@ -59,7 +62,7 @@ class NumberInputBinding extends TextInputBindingBase {
     if (hasDefinedProperty(data, "max")) el.max = data.max ?? "";
     if (hasDefinedProperty(data, "step")) el.step = data.step ?? "";
 
-    updateLabel(data.label, getLabelNode(el));
+    await updateLabel(data.label, getLabelNode(el));
 
     $(el).trigger("change");
   }

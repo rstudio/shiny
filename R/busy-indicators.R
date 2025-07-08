@@ -288,7 +288,6 @@ busyIndicatorDependency <- function() {
     src = "www/shared/busy-indicators",
     package = "shiny",
     stylesheet = "busy-indicators.css",
-    # TODO-future: In next release make spinners and pulse opt-out
-    # head = as.character(useBusyIndicators())
+    head = as.character(useBusyIndicators())
   )
 }

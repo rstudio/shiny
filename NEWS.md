@@ -95,6 +95,15 @@ This is a patch release primarily for addressing the bugs introduced in v1.11.0.
 
 * Fixed a bug introduced in v1.9.0 where the boundaries of hover/click/brush regions on plots were being incorrectly scaled when browser zoom was used. (#4111)
 
+## New features and improvements
+
+## Changes
+
+* Busy indication is now enabled by default. If this happens to have an undesirable affect, disable busy indication by putting `useBusyIndicators(spinners = FALSE, pulse = FALSE)` somewhere in the UI definition. (#4040)
+
+## Bug fixes
+
+
 # shiny 1.9.0
 
 ## New busy indication feature

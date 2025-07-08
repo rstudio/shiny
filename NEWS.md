@@ -1,17 +1,12 @@
-# shiny (development version)
+# shiny 1.11.1
 
-## New features
+This is a patch release primarily for addressing the bugs introduced in v1.11.0.
 
-* The `icon` argument of `actionButton()`, `downloadButton()`, etc. now accepts values other than `shiny::icon()` (like `fontawesome::fa()` and `bsicons::bs_icon()`). (#4242)
-
-## Improvements
-
-* Padding is now provided between the `icon` and `label` of an `actionButton()`. (#4242)
 ## Bug fixes
 
-* Fixed a regression in v1.11.0 where `InputBinding` implementations that don't pass a value to their `subscribe` callback were no longer notifying Shiny of input changes. (#4243)
+* Fixed an issue where `InputBinding` implementations that don't pass a value to their `subscribe` callback were no longer notifying Shiny of input changes. (#4243)
 
-* `updateActionButton()` and `updateActionLink()` once again handle `label` updates correctly (which can now include HTML). (#4242)
+* `updateActionButton()` and `updateActionLink()` once again handle `label` updates correctly. (#4245)
 
 # shiny 1.11.0
 

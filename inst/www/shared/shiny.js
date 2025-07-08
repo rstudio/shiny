@@ -1,4 +1,4 @@
-/*! shiny 1.11.0.9000 | (c) 2012-2025 Posit Software, PBC. | License: GPL-3 | file LICENSE */
+/*! shiny 1.11.1 | (c) 2012-2025 Posit Software, PBC. | License: GPL-3 | file LICENSE */
 "use strict";
 (() => {
   var __create = Object.create;
@@ -1137,8 +1137,6 @@
 
   // srcts/src/bindings/input/actionbutton.ts
   var import_jquery7 = __toESM(require_jquery());
-  var iconSeparatorClass = "shiny-icon-separator";
-  var iconSeparatorHTML = `<span class='${iconSeparatorClass}'></span>`;
   var ActionButtonInputBinding = class extends InputBinding {
     find(scope) {
       return (0, import_jquery7.default)(scope).find(".action-button");
@@ -1167,23 +1165,24 @@
     getState(el) {
       return { value: this.getValue(el) };
     }
-    async receiveMessage(el, data) {
+    receiveMessage(el, data) {
       const $el = (0, import_jquery7.default)(el);
       if (hasDefinedProperty(data, "label") || hasDefinedProperty(data, "icon")) {
-        let { label, icon } = this._getIconLabel(el);
-        const deps = [];
+        let label = $el.text();
+        let icon = "";
+        if ($el.find("i[class]").length > 0) {
+          const iconHtml = $el.find("i[class]")[0];
+          if (iconHtml === $el.children()[0]) {
+            icon = (0, import_jquery7.default)(iconHtml).prop("outerHTML");
+          }
+        }
         if (hasDefinedProperty(data, "label")) {
-          label = data.label.html;
-          deps.push(...data.label.deps);
+          label = data.label;
         }
         if (hasDefinedProperty(data, "icon")) {
-          icon = data.icon.html;
-          deps.push(...data.icon.deps);
+          icon = Array.isArray(data.icon) ? "" : data.icon ?? "";
         }
-        if (icon.trim()) {
-          icon = icon + iconSeparatorHTML;
-        }
-        await renderContent(el, { html: icon + label, deps });
+        $el.html(icon + " " + label);
       }
       if (hasDefinedProperty(data, "disabled")) {
         if (data.disabled) {
@@ -1195,21 +1194,6 @@
     }
     unsubscribe(el) {
       (0, import_jquery7.default)(el).off(".actionButtonInputBinding");
-    }
-    _getIconLabel(el) {
-      const nodes = Array.from(el.childNodes);
-      const nodeContents = nodes.map(
-        (node) => node instanceof Element ? node.outerHTML : node.textContent
-      );
-      const separator = el.querySelector(`.${iconSeparatorClass}`);
-      if (!separator) {
-        return { icon: "", label: nodeContents.join("") };
-      }
-      const idx = nodes.indexOf(separator);
-      return {
-        icon: nodeContents.slice(0, idx).join(""),
-        label: nodeContents.slice(idx + 1).join("")
-      };
     }
   };
   (0, import_jquery7.default)(document).on("click", "a.action-button", function(e4) {
@@ -7213,7 +7197,7 @@ ${duplicateIdMsg}`;
   // srcts/src/shiny/index.ts
   var ShinyClass = class {
     constructor() {
-      this.version = "1.11.0.9000";
+      this.version = "1.11.1";
       const { inputBindings, fileInputBinding: fileInputBinding2 } = initInputBindings();
       const { outputBindings } = initOutputBindings();
       setFileInputBinding(fileInputBinding2);

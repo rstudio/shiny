@@ -847,7 +847,7 @@
   }
   function formatDateUTC(date) {
     if (date instanceof Date) {
-      return date.getUTCFullYear() + "-" + padZeros(date.getUTCMonth() + 1, 2) + "-" + padZeros(date.getUTCDate(), 2);
+      return date.getUTCFullYear().toString().padStart(4, "0") + "-" + padZeros(date.getUTCMonth() + 1, 2) + "-" + padZeros(date.getUTCDate(), 2);
     } else {
       return null;
     }

@@ -921,7 +921,7 @@ __metadata:
   peerDependenciesMeta:
     jquery-ui:
       optional: true
-  checksum: ba260ba5804c16b1455ff79f9d00ce860e12ae36e29d7a5f702da6b384c9454497421b8e06fe683d10fac53e2dc6ec008da4fa129a153cbbfe5396e027eb4247
+  checksum: 821744ebc11b9d40686fe29d1ce9e3579df6eaf377cce2008aaa38f672bb787083d770626d41ba2624ce56d9c0d9c03d51534decbe4d581810b837ee908edb0b
   languageName: node
   linkType: hard
 

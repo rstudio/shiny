@@ -94,7 +94,7 @@ function formatDateUTC(x: Date): string;
 function formatDateUTC(date: Date | null): string | null {
   if (date instanceof Date) {
     return (
-      date.getUTCFullYear() +
+      date.getUTCFullYear().toString().padStart(4, "0") +
       "-" +
       padZeros(date.getUTCMonth() + 1, 2) +
       "-" +

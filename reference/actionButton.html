@@ -149,9 +149,13 @@ This implies two things:</p><ul><li><p>Event handlers (e.g., <code><a href="obse
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Example of adding extra class values</span></span></span>
 <span class="r-in"><span><span class="fu">actionButton</span><span class="op">(</span><span class="st">"largeButton"</span>, <span class="st">"Large Primary Button"</span>, class <span class="op">=</span> <span class="st">"btn-primary btn-lg"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;button class="btn btn-default action-button btn-primary btn-lg" id="largeButton" type="button"&gt;Large Primary Button&lt;/button&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;button class="btn btn-default action-button btn-primary btn-lg" id="largeButton" type="button"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;span class="action-label"&gt;Large Primary Button&lt;/span&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;/button&gt;</span>
 <span class="r-in"><span><span class="fu">actionLink</span><span class="op">(</span><span class="st">"infoLink"</span>, <span class="st">"Information Link"</span>, class <span class="op">=</span> <span class="st">"btn-info"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;a class="action-button btn-info" href="#" id="infoLink"&gt;Information Link&lt;/a&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;a class="action-button action-link btn-info" href="#" id="infoLink"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;span class="action-label"&gt;Information Link&lt;/span&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;/a&gt;</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

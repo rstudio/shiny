@@ -49,6 +49,19 @@
 
     <div class="section level2">
 <h2 class="page-header" data-toc-text="development version" id="shiny-development-version">shiny (development version)<a class="anchor" aria-label="anchor" href="#shiny-development-version"></a></h2>
+<div class="section level3">
+<h3 id="new-features-development-version">New features<a class="anchor" aria-label="anchor" href="#new-features-development-version"></a></h3>
+<ul><li>The <code>icon</code> argument of <code><a href="../reference/updateActionButton.html">updateActionButton()</a></code>/<code><a href="../reference/updateActionButton.html">updateActionLink()</a></code> nows allows values other than <code><a href="../reference/icon.html">shiny::icon()</a></code> (e.g., <code><a href="https://rstudio.github.io/fontawesome/reference/fa.html" class="external-link">fontawesome::fa()</a></code>, <code>bsicons::bs_icon()</code>, etc). (<a href="https://github.com/rstudio/shiny/issues/4249" class="external-link">#4249</a>)</li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>
+<ul><li>
+<code><a href="../reference/updateActionButton.html">updateActionButton()</a></code>/<code><a href="../reference/updateActionButton.html">updateActionLink()</a></code> now correctly renders HTML content passed to the <code>label</code> argument. (<a href="https://github.com/rstudio/shiny/issues/4249" class="external-link">#4249</a>)</li>
+</ul></div>
+<div class="section level3">
+<h3 id="changes-development-version">Changes<a class="anchor" aria-label="anchor" href="#changes-development-version"></a></h3>
+<ul><li>The return value of <code><a href="../reference/actionButton.html">actionButton()</a></code>/<code><a href="../reference/actionButton.html">actionLink()</a></code> changed slightly: <code>label</code> and <code>icon</code> are wrapped in an additional HTML container element. This allows for: 1. <code><a href="../reference/updateActionButton.html">updateActionButton()</a></code>/<code><a href="../reference/updateActionButton.html">updateActionLink()</a></code> to distinguish between the <code>label</code> and <code>icon</code> when making updates and 2. spacing between <code>label</code> and <code>icon</code> to be more easily customized via CSS.</li>
+</ul></div>
 </div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.11.1" id="shiny-1111">shiny 1.11.1<small>2025-07-03</small><a class="anchor" aria-label="anchor" href="#shiny-1111"></a></h2>

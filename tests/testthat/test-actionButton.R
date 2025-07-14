@@ -56,7 +56,6 @@ test_that("Action link accepts class arguments", {
   )
 })
 
-
 test_that("Action button allows icon customization", {
   # No separator between icon and label
   expect_snapshot(actionButton("foo", "Click me"))

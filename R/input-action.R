@@ -103,12 +103,12 @@ actionLink <- function(inputId, label, icon = NULL, ...) {
   )
 }
 
+
 # Throw an informative warning if icon isn't html-ish
 validateIcon <- function(icon) {
   if (length(icon) == 0) {
     return(icon)
   }
-
   if (!isTagLike(icon)) {
     rlang::warn(
       c(
@@ -118,6 +118,5 @@ validateIcon <- function(icon) {
       class = "shiny-validate-icon"
     )
   }
-
   icon
 }

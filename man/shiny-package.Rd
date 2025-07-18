@@ -20,14 +20,15 @@ includes extensive annotated examples.
 \link{shiny-options} for documentation about global options.
 }
 \author{
-\strong{Maintainer}: Winston Chang \email{winston@posit.co} (\href{https://orcid.org/0000-0002-1576-2126}{ORCID})
+\strong{Maintainer}: Carson Sievert \email{carson@posit.co} (\href{https://orcid.org/0000-0002-4958-2844}{ORCID})
 
 Authors:
 \itemize{
+  \item Winston Chang \email{winston@posit.co} (\href{https://orcid.org/0000-0002-1576-2126}{ORCID})
   \item Joe Cheng \email{joe@posit.co}
   \item JJ Allaire \email{jj@posit.co}
-  \item Carson Sievert \email{carson@posit.co} (\href{https://orcid.org/0000-0002-4958-2844}{ORCID})
   \item Barret Schloerke \email{barret@posit.co} (\href{https://orcid.org/0000-0001-9986-114X}{ORCID})
+  \item Garrick Aden-Buie \email{garrick@adenbuie.com} (\href{https://orcid.org/0000-0002-7111-0077}{ORCID})
   \item Yihui Xie \email{yihui@posit.co}
   \item Jeff Allen
   \item Jonathan McPherson \email{jonathan@posit.co}
@@ -37,7 +38,7 @@ Authors:
 
 Other contributors:
 \itemize{
-  \item Posit Software, PBC [copyright holder, funder]
+  \item Posit Software, PBC (03wc8by49) [copyright holder, funder]
   \item  jQuery Foundation (jQuery library and jQuery UI library) [copyright holder]
   \item  jQuery contributors (jQuery library; authors listed in inst/www/shared/jquery-AUTHORS.txt) [contributor, copyright holder]
   \item  jQuery UI contributors (jQuery UI library; authors listed in inst/www/shared/jqueryui/AUTHORS.txt) [contributor, copyright holder]

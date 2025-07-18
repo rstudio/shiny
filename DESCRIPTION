@@ -14,7 +14,7 @@ Authors@R: c(
     person("Jonathan", "McPherson", role = "aut", email = "jonathan@posit.co"),
     person("Alan", "Dipert", role = "aut"),
     person("Barbara", "Borges", role = "aut"),
-    person("Posit Software, PBC", role = c("cph", "fnd")),
+    person("Posit Software, PBC", role = c("cph", "fnd"), comment = c(ROR = "03wc8by49")),
     person(family = "jQuery Foundation", role = "cph",
     comment = "jQuery library and jQuery UI library"),
     person(family = "jQuery contributors", role = c("ctb", "cph"),

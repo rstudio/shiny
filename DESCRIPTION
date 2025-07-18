@@ -8,6 +8,7 @@ Authors@R: c(
     person("JJ", "Allaire", role = "aut", email = "jj@posit.co"),
     person("Carson", "Sievert", role = c("aut", "cre"), email = "carson@posit.co", comment = c(ORCID = "0000-0002-4958-2844")),
     person("Barret", "Schloerke", role = "aut", email = "barret@posit.co", comment = c(ORCID = "0000-0001-9986-114X")),
+    person("Garrick", "Aden-Buie", , "garrick@adenbuie.com", role = "aut", comment = c(ORCID = "0000-0002-7111-0077")),
     person("Yihui", "Xie", role = "aut", email = "yihui@posit.co"),
     person("Jeff", "Allen", role = "aut"),
     person("Jonathan", "McPherson", role = "aut", email = "jonathan@posit.co"),

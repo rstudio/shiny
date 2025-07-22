@@ -12,6 +12,7 @@
 
 * The return value of `actionButton()`/`actionLink()` changed slightly: `label` and `icon` are wrapped in an additional HTML container element. This allows for: 1. `updateActionButton()`/`updateActionLink()` to distinguish between the `label` and `icon` when making updates and 2. spacing between `label` and `icon` to be more easily customized via CSS. 
 
+
 # shiny 1.11.1
 
 This is a patch release primarily for addressing the bugs introduced in v1.11.0.

@@ -65,4 +65,4 @@ The shiny package as a whole is licensed under the GPLv3. See the [LICENSE](LICE
 
 ## R version support
 
-Shiny is supported on the latest release version of R, as well as the previous four minor release versions of R. For example, if the latest release R version is 4.5, then that version is supported, as well as 4.4, 4.3, 4.2, and 4.1.
+Shiny is supported on the latest release version of R, as well as the previous four minor release versions of R. For example, if the latest release R version is 4.3, then that version is supported, as well as 4.2, 4.1, 4.0, 3.6.

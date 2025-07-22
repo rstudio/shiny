@@ -1,122 +1,129 @@
-Package: shiny
 Type: Package
+Package: shiny
 Title: Web Application Framework for R
 Version: 1.11.1.9000
 Authors@R: c(
-    person("Winston", "Chang", role = c("aut", "cre"), email = "winston@posit.co", comment = c(ORCID = "0000-0002-1576-2126")),
-    person("Joe", "Cheng", role = "aut", email = "joe@posit.co"),
-    person("JJ", "Allaire", role = "aut", email = "jj@posit.co"),
-    person("Carson", "Sievert", role = "aut", email = "carson@posit.co", comment = c(ORCID = "0000-0002-4958-2844")),
-    person("Barret", "Schloerke", role = "aut", email = "barret@posit.co", comment = c(ORCID = "0000-0001-9986-114X")),
-    person("Yihui", "Xie", role = "aut", email = "yihui@posit.co"),
+    person("Winston", "Chang", , "winston@posit.co", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-1576-2126")),
+    person("Joe", "Cheng", , "joe@posit.co", role = "aut"),
+    person("JJ", "Allaire", , "jj@posit.co", role = "aut"),
+    person("Carson", "Sievert", , "carson@posit.co", role = "aut",
+           comment = c(ORCID = "0000-0002-4958-2844")),
+    person("Barret", "Schloerke", , "barret@posit.co", role = "aut",
+           comment = c(ORCID = "0000-0001-9986-114X")),
+    person("Yihui", "Xie", , "yihui@posit.co", role = "aut"),
     person("Jeff", "Allen", role = "aut"),
-    person("Jonathan", "McPherson", role = "aut", email = "jonathan@posit.co"),
+    person("Jonathan", "McPherson", , "jonathan@posit.co", role = "aut"),
     person("Alan", "Dipert", role = "aut"),
     person("Barbara", "Borges", role = "aut"),
     person("Posit Software, PBC", role = c("cph", "fnd")),
-    person(family = "jQuery Foundation", role = "cph",
-    comment = "jQuery library and jQuery UI library"),
-    person(family = "jQuery contributors", role = c("ctb", "cph"),
-    comment = "jQuery library; authors listed in inst/www/shared/jquery-AUTHORS.txt"),
-    person(family = "jQuery UI contributors", role = c("ctb", "cph"),
-    comment = "jQuery UI library; authors listed in inst/www/shared/jqueryui/AUTHORS.txt"),
+    person(, "jQuery Foundation", role = "cph",
+           comment = "jQuery library and jQuery UI library"),
+    person(, "jQuery contributors", role = c("ctb", "cph"),
+           comment = "jQuery library; authors listed in inst/www/shared/jquery-AUTHORS.txt"),
+    person(, "jQuery UI contributors", role = c("ctb", "cph"),
+           comment = "jQuery UI library; authors listed in inst/www/shared/jqueryui/AUTHORS.txt"),
     person("Mark", "Otto", role = "ctb",
-    comment = "Bootstrap library"),
+           comment = "Bootstrap library"),
     person("Jacob", "Thornton", role = "ctb",
-    comment = "Bootstrap library"),
-    person(family = "Bootstrap contributors", role = "ctb",
-    comment = "Bootstrap library"),
-    person(family = "Twitter, Inc", role = "cph",
-    comment = "Bootstrap library"),
+           comment = "Bootstrap library"),
+    person(, "Bootstrap contributors", role = "ctb",
+           comment = "Bootstrap library"),
+    person(, "Twitter, Inc", role = "cph",
+           comment = "Bootstrap library"),
     person("Prem Nawaz", "Khan", role = "ctb",
-    comment = "Bootstrap accessibility plugin"),
+           comment = "Bootstrap accessibility plugin"),
     person("Victor", "Tsaran", role = "ctb",
-    comment = "Bootstrap accessibility plugin"),
+           comment = "Bootstrap accessibility plugin"),
     person("Dennis", "Lembree", role = "ctb",
-    comment = "Bootstrap accessibility plugin"),
+           comment = "Bootstrap accessibility plugin"),
     person("Srinivasu", "Chakravarthula", role = "ctb",
-    comment = "Bootstrap accessibility plugin"),
+           comment = "Bootstrap accessibility plugin"),
     person("Cathy", "O'Connor", role = "ctb",
-    comment = "Bootstrap accessibility plugin"),
-    person(family = "PayPal, Inc", role = "cph",
-    comment = "Bootstrap accessibility plugin"),
+           comment = "Bootstrap accessibility plugin"),
+    person(, "PayPal, Inc", role = "cph",
+           comment = "Bootstrap accessibility plugin"),
     person("Stefan", "Petre", role = c("ctb", "cph"),
-    comment = "Bootstrap-datepicker library"),
+           comment = "Bootstrap-datepicker library"),
     person("Andrew", "Rowls", role = c("ctb", "cph"),
-    comment = "Bootstrap-datepicker library"),
+           comment = "Bootstrap-datepicker library"),
     person("Brian", "Reavis", role = c("ctb", "cph"),
-    comment = "selectize.js library"),
+           comment = "selectize.js library"),
     person("Salmen", "Bejaoui", role = c("ctb", "cph"),
-    comment = "selectize-plugin-a11y library"),
+           comment = "selectize-plugin-a11y library"),
     person("Denis", "Ineshin", role = c("ctb", "cph"),
-    comment = "ion.rangeSlider library"),
+           comment = "ion.rangeSlider library"),
     person("Sami", "Samhuri", role = c("ctb", "cph"),
-    comment = "Javascript strftime library"),
-    person(family = "SpryMedia Limited", role = c("ctb", "cph"),
-    comment = "DataTables library"),
+           comment = "Javascript strftime library"),
+    person(, "SpryMedia Limited", role = c("ctb", "cph"),
+           comment = "DataTables library"),
     person("John", "Fraser", role = c("ctb", "cph"),
-    comment = "showdown.js library"),
+           comment = "showdown.js library"),
     person("John", "Gruber", role = c("ctb", "cph"),
-    comment = "showdown.js library"),
+           comment = "showdown.js library"),
     person("Ivan", "Sagalaev", role = c("ctb", "cph"),
-    comment = "highlight.js library"),
-    person(given = "R Core Team", role = c("ctb", "cph"),
-    comment = "tar implementation from R")
-    )
+           comment = "highlight.js library"),
+    person("R Core Team", role = c("ctb", "cph"),
+           comment = "tar implementation from R")
+  )
 Description: Makes it incredibly easy to build interactive web
     applications with R. Automatic "reactive" binding between inputs and
     outputs and extensive prebuilt widgets make it possible to build
     beautiful, responsive, and powerful applications with minimal effort.
 License: GPL-3 | file LICENSE
+URL: https://shiny.posit.co/, https://github.com/rstudio/shiny
+BugReports: https://github.com/rstudio/shiny/issues
 Depends:
-    R (>= 3.0.2),
-    methods
+    methods,
+    R (>= 3.0.2)
 Imports:
-    utils,
-    grDevices,
-    httpuv (>= 1.5.2),
-    mime (>= 0.3),
-    jsonlite (>= 0.9.16),
-    xtable,
-    fontawesome (>= 0.4.0),
-    htmltools (>= 0.5.4),
-    R6 (>= 2.0),
-    sourcetools,
-    later (>= 1.0.0),
-    promises (>= 1.3.2),
-    tools,
-    cli,
-    rlang (>= 0.4.10),
-    fastmap (>= 1.1.1),
-    withr,
-    commonmark (>= 1.7),
-    glue (>= 1.3.2),
     bslib (>= 0.6.0),
     cachem (>= 1.1.0),
-    lifecycle (>= 0.2.0)
+    cli,
+    commonmark (>= 1.7),
+    fastmap (>= 1.1.1),
+    fontawesome (>= 0.4.0),
+    glue (>= 1.3.2),
+    grDevices,
+    htmltools (>= 0.5.4),
+    httpuv (>= 1.5.2),
+    jsonlite (>= 0.9.16),
+    later (>= 1.0.0),
+    lifecycle (>= 0.2.0),
+    mime (>= 0.3),
+    promises (>= 1.3.2),
+    R6 (>= 2.0),
+    rlang (>= 0.4.10),
+    sourcetools,
+    tools,
+    utils,
+    withr,
+    xtable
 Suggests:
+    Cairo (>= 1.5-5),
     coro (>= 1.1.0),
     datasets,
     DT,
-    Cairo (>= 1.5-5),
-    testthat (>= 3.2.1),
-    knitr (>= 1.6),
-    markdown,
-    rmarkdown,
-    ggplot2,
-    reactlog (>= 1.0.0),
-    magrittr,
-    yaml,
-    mirai,
-    future,
     dygraphs,
+    future,
+    ggplot2,
+    knitr (>= 1.6),
+    magrittr,
+    markdown,
+    mirai,
     ragg,
-    showtext,
+    reactlog (>= 1.0.0),
+    rmarkdown,
     sass,
-    watcher 
-URL: https://shiny.posit.co/,
-    https://github.com/rstudio/shiny
-BugReports: https://github.com/rstudio/shiny/issues
+    showtext,
+    testthat (>= 3.2.1),
+    watcher,
+    yaml
+Config/Needs/check: shinytest2
+Config/testthat/edition: 3
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
 Collate:
     'globals.R'
     'app-state.R'
@@ -210,9 +217,3 @@ Collate:
     'version_selectize.R'
     'version_strftime.R'
     'viewer.R'
-RoxygenNote: 7.3.2
-Encoding: UTF-8
-Roxygen: list(markdown = TRUE)
-Config/testthat/edition: 3
-Config/Needs/check:
-  shinytest2

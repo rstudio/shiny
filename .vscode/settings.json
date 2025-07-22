@@ -20,5 +20,6 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "files.trimTrailingWhitespace": true,
     "files.insertFinalNewline": true,
-},
+  },
+  "typescript.tsdk": "./node_modules/typescript/lib",
 }

@@ -92,7 +92,7 @@ function setFileInputBinding(fileInputBinding_: FileInputBinding): void {
   fileInputBinding = fileInputBinding_;
 }
 
-function getShinyCreateWebsocket(): (() => WebSocket) | void {
+function getShinyCreateWebsocket(): (() => Promise<WebSocket>) | void {
   return validateShinyHasBeenSet().createSocket;
 }
 

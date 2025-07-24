@@ -82,7 +82,7 @@ class ShinyClass {
   addCustomMessageHandler: typeof addCustomMessageHandler;
 
   // The following are added in the initialization, by initShiny()
-  createSocket?: () => WebSocket;
+  createSocket?: () => Promise<WebSocket>;
   user?: string;
   progressHandlers?: ShinyApp["progressHandlers"];
   shinyapp?: ShinyApp;
@@ -669,7 +669,7 @@ class ShinyClass {
 
     // We've collected all the initial values--start the server process!
     inputsNoResend.reset(initialValues);
-    shinyapp.connect(initialValues);
+    await shinyapp.connect(initialValues);
     $(document).one("shiny:connected", () => {
       initDeferredIframes();
     });

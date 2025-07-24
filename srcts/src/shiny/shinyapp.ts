@@ -159,11 +159,11 @@ class ShinyApp {
     this._init();
   }
 
-  connect(initialInput: InputValues): void {
+  async connect(initialInput: InputValues): Promise<void> {
     if (this.$socket)
       throw "Connect was already called on this application object";
 
-    this.$socket = this.createSocket();
+    this.$socket = await this.createSocket();
     this.$initialInput = initialInput;
     $.extend(this.$inputValues, initialInput);
 
@@ -176,7 +176,7 @@ class ShinyApp {
 
   private scheduledReconnect: number | undefined = undefined;
 
-  reconnect(): void {
+  async reconnect(): Promise<void> {
     // This function can be invoked directly even if there's a scheduled
     // reconnect, so be sure to clear any such scheduled reconnects.
     clearTimeout(this.scheduledReconnect);
@@ -184,15 +184,15 @@ class ShinyApp {
     if (this.isConnected())
       throw "Attempted to reconnect, but already connected.";
 
-    this.$socket = this.createSocket();
+    this.$socket = await this.createSocket();
     this.$initialInput = $.extend({}, this.$inputValues);
     this.$updateConditionals();
   }
 
-  createSocket(): ShinyWebSocket {
-    const createSocketFunc: () => ShinyWebSocket =
+  async createSocket(): Promise<ShinyWebSocket> {
+    const createSocketFunc: () => Promise<ShinyWebSocket> =
       getShinyCreateWebsocket() ||
-      (() => {
+      (async () => {
         let protocol = "ws:";
 
         if (window.location.protocol === "https:") protocol = "wss:";
@@ -211,6 +211,12 @@ class ShinyApp {
         if (!/\/$/.test(defaultPath)) defaultPath += "/";
         defaultPath += "websocket/";
 
+        const sessionId = await this.$getSessionId();
+        if (sessionId) {
+          defaultPath += "?session_id=" + sessionId;
+        }
+
+        // Fail gracefully if the server does not support this endpoint
         const ws: ShinyWebSocket = new WebSocket(
           protocol + "//" + window.location.host + defaultPath
         );
@@ -220,7 +226,7 @@ class ShinyApp {
         return ws;
       });
 
-    const socket = createSocketFunc();
+    const socket = await createSocketFunc();
     let hasOpened = false;
 
     socket.onopen = () => {
@@ -277,6 +283,39 @@ class ShinyApp {
     return socket;
   }
 
+  async $getSessionId(): Promise<string | null> {
+    // If the session ID has been received through a websocket message,
+    // no need to create a new one.
+    if (this.config) {
+      return this.config.sessionId;
+    }
+
+    // Fetch this client's session ID from the server. When successful, the
+    // server will require a (valid) session ID when establishing a websocket
+    // connection.
+    try {
+      const response = await fetch("/new_shiny_session/");
+
+      if (response.ok) {
+        const data = await response.json();
+        return data.session_id;
+      }
+
+      // If the endpoint doesn't exist, then a session ID isn't required
+      // to establish a websocket connection.
+      if (response.status === 404) {
+        return null;
+      }
+
+      // If other problems happen, we probably want to know about it.
+      console.error("Error fetching session ID:", response);
+      return null;
+    } catch (error) {
+      console.error("Error fetching session ID:", error);
+      return null;
+    }
+  }
+
   async startActionQueueLoop(): Promise<void> {
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -314,8 +353,8 @@ class ShinyApp {
   }
 
   $scheduleReconnect(delay: Parameters<typeof setTimeout>[1]): void {
-    this.scheduledReconnect = window.setTimeout(() => {
-      this.reconnect();
+    this.scheduledReconnect = window.setTimeout(async () => {
+      await this.reconnect();
     }, delay);
   }
 

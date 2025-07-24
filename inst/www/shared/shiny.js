@@ -6433,10 +6433,10 @@ ${duplicateIdMsg}`;
       };
       this._init();
     }
-    connect(initialInput) {
+    async connect(initialInput) {
       if (this.$socket)
         throw "Connect was already called on this application object";
-      this.$socket = this.createSocket();
+      this.$socket = await this.createSocket();
       this.$initialInput = initialInput;
       import_jquery38.default.extend(this.$inputValues, initialInput);
       this.$updateConditionals();
@@ -6444,16 +6444,16 @@ ${duplicateIdMsg}`;
     isConnected() {
       return !!this.$socket;
     }
-    reconnect() {
+    async reconnect() {
       clearTimeout(this.scheduledReconnect);
       if (this.isConnected())
         throw "Attempted to reconnect, but already connected.";
-      this.$socket = this.createSocket();
+      this.$socket = await this.createSocket();
       this.$initialInput = import_jquery38.default.extend({}, this.$inputValues);
       this.$updateConditionals();
     }
-    createSocket() {
-      const createSocketFunc = getShinyCreateWebsocket() || (() => {
+    async createSocket() {
+      const createSocketFunc = getShinyCreateWebsocket() || (async () => {
         let protocol = "ws:";
         if (window.location.protocol === "https:")
           protocol = "wss:";
@@ -6467,13 +6467,17 @@ ${duplicateIdMsg}`;
         if (!/\/$/.test(defaultPath))
           defaultPath += "/";
         defaultPath += "websocket/";
+        const sessionId = await this.$getSessionId();
+        if (sessionId) {
+          defaultPath += "?session_id=" + sessionId;
+        }
         const ws = new WebSocket(
           protocol + "//" + window.location.host + defaultPath
         );
         ws.binaryType = "arraybuffer";
         return ws;
       });
-      const socket = createSocketFunc();
+      const socket = await createSocketFunc();
       let hasOpened = false;
       socket.onopen = () => {
         hasOpened = true;
@@ -6511,6 +6515,26 @@ ${duplicateIdMsg}`;
       };
       return socket;
     }
+    async $getSessionId() {
+      if (this.config) {
+        return this.config.sessionId;
+      }
+      try {
+        const response = await fetch("/new_shiny_session/");
+        if (response.ok) {
+          const data = await response.json();
+          return data.session_id;
+        }
+        if (response.status === 404) {
+          return null;
+        }
+        console.error("Error fetching session ID:", response);
+        return null;
+      } catch (error) {
+        console.error("Error fetching session ID:", error);
+        return null;
+      }
+    }
     async startActionQueueLoop() {
       while (true) {
         try {
@@ -6540,8 +6564,8 @@ ${duplicateIdMsg}`;
       this.$socket = null;
     }
     $scheduleReconnect(delay) {
-      this.scheduledReconnect = window.setTimeout(() => {
-        this.reconnect();
+      this.scheduledReconnect = window.setTimeout(async () => {
+        await this.reconnect();
       }, delay);
     }
     onDisconnected(reloading = false) {
@@ -7579,7 +7603,7 @@ ${duplicateIdMsg}`;
         }
       });
       inputsNoResend.reset(initialValues);
-      shinyapp.connect(initialValues);
+      await shinyapp.connect(initialValues);
       (0, import_jquery39.default)(document).one("shiny:connected", () => {
         initDeferredIframes();
       });

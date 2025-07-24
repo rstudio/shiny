@@ -19,5 +19,5 @@ declare function shinyAppUnbindOutput(id: string, binding: OutputBindingAdapter)
 declare function getShinyOnCustomMessage(): Handler | null;
 declare function getFileInputBinding(): FileInputBinding;
 declare function setFileInputBinding(fileInputBinding_: FileInputBinding): void;
-declare function getShinyCreateWebsocket(): (() => WebSocket) | void;
+declare function getShinyCreateWebsocket(): (() => Promise<WebSocket>) | void;
 export { setShinyObj, shinySetInputValue, shinyShinyApp, setShinyUser, shinyForgetLastInputValue, shinyBindAll, shinyUnbindAll, shinyInitializeInputs, shinyAppBindOutput, shinyAppUnbindOutput, getShinyOnCustomMessage, getFileInputBinding, setFileInputBinding, getShinyCreateWebsocket, };

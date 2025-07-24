@@ -35,7 +35,7 @@ declare class ShinyClass {
     renderHtmlAsync: typeof renderHtmlAsync;
     renderHtml: typeof renderHtml;
     addCustomMessageHandler: typeof addCustomMessageHandler;
-    createSocket?: () => WebSocket;
+    createSocket?: () => Promise<WebSocket>;
     user?: string;
     progressHandlers?: ShinyApp["progressHandlers"];
     shinyapp?: ShinyApp;

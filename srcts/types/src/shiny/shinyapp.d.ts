@@ -52,11 +52,12 @@ declare class ShinyApp {
     $nextRequestId: number;
     $allowReconnect: boolean | "force";
     constructor();
-    connect(initialInput: InputValues): void;
+    connect(initialInput: InputValues): Promise<void>;
     isConnected(): boolean;
     private scheduledReconnect;
-    reconnect(): void;
-    createSocket(): ShinyWebSocket;
+    reconnect(): Promise<void>;
+    createSocket(): Promise<ShinyWebSocket>;
+    $getSessionId(): Promise<string | null>;
     startActionQueueLoop(): Promise<void>;
     sendInput(values: InputValues): void;
     $notifyDisconnected(): void;

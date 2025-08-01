@@ -56,14 +56,13 @@ actionButton <- function(inputId, label, icon = NULL, width = NULL,
 
   value <- restoreInput(id = inputId, default = NULL)
 
-  tags$button(
-    id = inputId,
+  tags$button(id=inputId,
     style = css(width = validateCssUnit(width)),
-    type = "button",
-    class = "btn btn-default action-button",
+    type="button",
+    class="btn btn-default action-button",
     `data-val` = value,
     disabled = if (isTRUE(disabled)) NA else NULL,
-    get_action_children(label, icon),
+    list(validateIcon(icon), label),
     ...
   )
 }
@@ -73,52 +72,30 @@ actionButton <- function(inputId, label, icon = NULL, width = NULL,
 actionLink <- function(inputId, label, icon = NULL, ...) {
   value <- restoreInput(id = inputId, default = NULL)
 
-  tags$a(
-    id = inputId,
-    href = "#",
-    class = "action-button",
+  tags$a(id=inputId,
+    href="#",
+    class="action-button",
     `data-val` = value,
-    get_action_children(label, icon),
+    list(validateIcon(icon), label),
     ...
   )
 }
 
-get_action_children <- function(label, icon) {
-  icon <- validateIcon(icon)
 
-  if (length(icon) > 0) {
-    # The separator elements helps us distinguish between the icon and label
-    # when dynamically updating the button/link. Ideally, we would wrap each
-    # in a container element, but is currently done with a separator to help
-    # minimize the chance of breaking existing code.
-    tagList(
-      icon,
-      tags$span(class = "shiny-icon-separator"),
-      label
-    )
-  } else {
-    # Technically, we don't need the `icon` here, but keeping it maintains
-    # backwards compatibility of `btn$children[[1]][[2]]` to get the label.
-    # The shinyGovstyle package is at least one example of this.
-    tagList(icon, label)
-  }
-}
-
-# Throw an informative warning if icon isn't html-ish
+# Check that the icon parameter is valid:
+# 1) Check  if the user wants to actually add an icon:
+#    -- if icon=NULL, it means leave the icon unchanged
+#    -- if icon=character(0), it means don't add an icon or, more usefully,
+#       remove the previous icon
+# 2) If so, check that the icon has the right format (this does not check whether
+# it is a *real* icon - currently that would require a massive cross reference
+# with the "font-awesome" and the "glyphicon" libraries)
 validateIcon <- function(icon) {
-  if (length(icon) == 0) {
+  if (is.null(icon) || identical(icon, character(0))) {
     return(icon)
+  } else if (inherits(icon, "shiny.tag") && icon$name == "i") {
+    return(icon)
+  } else {
+    stop("Invalid icon. Use Shiny's 'icon()' function to generate a valid icon")
   }
-
-  if (!isTagLike(icon)) {
-    rlang::warn(
-      c(
-        "It appears that a non-HTML value was provided to `icon`.",
-        i = "Try using a `shiny::icon()` (or an equivalent) to get an icon."
-      ),
-      class = "shiny-validate-icon"
-    )
-  }
-
-  icon
 }

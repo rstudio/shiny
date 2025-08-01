@@ -35,7 +35,7 @@ class ActionButtonInputBinding extends InputBinding {
         $el.data("val", val + 1);
 
         callback(false);
-      }
+      },
     );
   }
   getState(el: HTMLElement): { value: number } {
@@ -43,11 +43,11 @@ class ActionButtonInputBinding extends InputBinding {
   }
   async receiveMessage(
     el: HTMLElement,
-    data: ActionButtonReceiveMessageData
-  ): Promise {
+    data: ActionButtonReceiveMessageData,
+  ): Promise<void> {
     if (hasDefinedProperty(data, "icon")) {
       let iconContainer = el.querySelector<HTMLElement>(
-        ":scope > .action-icon"
+        ":scope > .action-icon",
       );
       // If no container exists yet, create one
       if (!iconContainer) {
@@ -60,7 +60,7 @@ class ActionButtonInputBinding extends InputBinding {
 
     if (hasDefinedProperty(data, "label")) {
       let labelContainer = el.querySelector<HTMLElement>(
-        ":scope > .action-label"
+        ":scope > .action-label",
       );
       if (!labelContainer) {
         labelContainer = document.createElement("span");

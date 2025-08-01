@@ -20,3 +20,4 @@ madge.svg
 
 # GHA remotes installation
 .github/r-depends.rds
+.claude/settings.local.json

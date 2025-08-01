@@ -33,4 +33,5 @@ declare function updateLabel(labelContent: string | {
 declare function getComputedLinkColor(el: HTMLElement): string;
 declare function isBS3(): boolean;
 declare function toLowerCase<T extends string>(str: T): Lowercase<T>;
-export { $escape, _equal, asArray, compareVersion, equal, escapeHTML, formatDateUTC, getBoundingClientSizeBeforeZoom, getComputedLinkColor, getStyle, hasDefinedProperty, hasOwnProperty, isBS3, isnan, makeResizeFilter, mapValues, mergeSort, padZeros, parseDate, pixelRatio, randomId, roundSignif, scopeExprToFunc, strToBool, toLowerCase, updateLabel, };
+declare function isShinyInDevMode(): boolean;
+export { $escape, _equal, asArray, compareVersion, equal, escapeHTML, formatDateUTC, getBoundingClientSizeBeforeZoom, getComputedLinkColor, getStyle, hasDefinedProperty, hasOwnProperty, isBS3, isnan, isShinyInDevMode, makeResizeFilter, mapValues, mergeSort, padZeros, parseDate, pixelRatio, randomId, roundSignif, scopeExprToFunc, strToBool, toLowerCase, updateLabel, };

@@ -1,6 +1,6 @@
 import { css, html, LitElement } from "lit";
-import { Shiny } from "../initialize";
 import { ShinyClientError } from "../shiny/error";
+import { isShinyInDevMode } from "../utils";
 
 const buttonStyles = css`
   button {
@@ -549,7 +549,7 @@ function showShinyClientMessage({
       break;
   }
 
-  if (!Shiny.inDevMode()) {
+  if (!isShinyInDevMode()) {
     return;
   }
 

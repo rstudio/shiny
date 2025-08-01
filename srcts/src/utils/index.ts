@@ -400,6 +400,11 @@ function toLowerCase<T extends string>(str: T): Lowercase<T> {
   return str.toLowerCase() as Lowercase<T>;
 }
 
+function isShinyInDevMode(): boolean {
+  if ("__SHINY_DEV_MODE__" in window) return Boolean(window.__SHINY_DEV_MODE__);
+  return false;
+}
+
 export {
   $escape,
   _equal,
@@ -415,6 +420,7 @@ export {
   hasOwnProperty,
   isBS3,
   isnan,
+  isShinyInDevMode,
   makeResizeFilter,
   mapValues,
   mergeSort,

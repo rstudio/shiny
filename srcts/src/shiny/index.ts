@@ -25,6 +25,7 @@ import {
   getComputedLinkColor,
   getStyle,
   hasDefinedProperty,
+  isShinyInDevMode,
   mapValues,
   pixelRatio,
 } from "../utils";
@@ -156,10 +157,7 @@ class ShinyClass {
    * @returns `true` if Shiny is running in development mode, `false` otherwise.
    */
   inDevMode(): boolean {
-    if ("__SHINY_DEV_MODE__" in window)
-      return Boolean(window.__SHINY_DEV_MODE__);
-
-    return false;
+    return isShinyInDevMode();
   }
 
   async initialize(): Promise<void> {

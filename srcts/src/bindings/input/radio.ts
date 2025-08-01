@@ -105,7 +105,7 @@ class RadioInputBinding extends InputBinding {
   }
   async receiveMessage(
     el: RadioHTMLElement,
-    data: RadioReceiveMessageData
+    data: RadioReceiveMessageData,
   ): Promise<void> {
     const $el = $(el);
     // This will replace all the options

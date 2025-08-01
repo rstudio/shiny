@@ -55,7 +55,8 @@ class ShinyErrorConsole extends LitElement {
 
         --shadow-color: 220 3% 15%;
         --shadow-strength: 1%;
-        --shadow-3: 0 -1px 3px 0
+        --shadow-3:
+          0 -1px 3px 0
             hsl(var(--shadow-color) / calc(var(--shadow-strength) + 2%)),
           0 1px 2px -5px
             hsl(var(--shadow-color) / calc(var(--shadow-strength) + 2%)),

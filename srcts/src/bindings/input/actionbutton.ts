@@ -62,7 +62,7 @@ class ActionButtonInputBinding extends InputBinding {
 
       // update the requested properties
       if (hasDefinedProperty(data, "label")) {
-        label = data.label;
+        label = data.label!;
       }
       if (hasDefinedProperty(data, "icon")) {
         // `data.icon` can be an [] if user gave `character(0)`.

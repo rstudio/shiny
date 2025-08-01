@@ -131,7 +131,7 @@ class TextInputBinding extends TextInputBindingBase {
     el: TextHTMLElement,
     data: TextReceiveMessageData,
   ): Promise<void> {
-    if (hasDefinedProperty(data, "value")) this.setValue(el, data.value);
+    if (hasDefinedProperty(data, "value")) this.setValue(el, data.value!);
 
     await updateLabel(data.label, getLabelNode(el));
 

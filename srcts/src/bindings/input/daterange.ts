@@ -108,7 +108,7 @@ class DateRangeInputBinding extends DateInputBindingBase {
   }
   async receiveMessage(
     el: HTMLElement,
-    data: DateRangeReceiveMessageData
+    data: DateRangeReceiveMessageData,
   ): Promise<void> {
     const $el = $(el);
     const $inputs = $el.find("input");

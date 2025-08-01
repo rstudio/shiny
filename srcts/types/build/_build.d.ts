@@ -1,4 +1,4 @@
-import type { BuildIncremental, BuildOptions, BuildResult } from "esbuild";
+import type { BuildOptions } from "esbuild";
 declare const outDir = "./inst/www/shared/";
 type ShinyDesc = {
     version: string;
@@ -10,5 +10,5 @@ declare const banner: {
     js: string;
     css: string;
 };
-declare function build(opts: BuildOptions): Promise<BuildIncremental | BuildResult>;
-export { outDir, build, shinyDesc, banner };
+declare function build(opts: BuildOptions): Promise<void>;
+export { banner, build, outDir, shinyDesc };

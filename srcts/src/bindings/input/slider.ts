@@ -181,7 +181,7 @@ class SliderInputBinding extends TextInputBindingBase {
   }
   async receiveMessage(
     el: HTMLElement,
-    data: SliderReceiveMessageData
+    data: SliderReceiveMessageData,
   ): Promise<void> {
     const $el = $(el);
     const slider = $el.data("ionRangeSlider");

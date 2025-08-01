@@ -53,7 +53,7 @@ class NumberInputBinding extends TextInputBindingBase {
   }
   async receiveMessage(
     el: NumberHTMLElement,
-    data: NumberReceiveMessageData
+    data: NumberReceiveMessageData,
   ): Promise<void> {
     // Setting values to `""` will remove the attribute value from the DOM element.
     // The attr key will still remain, but there is not value... ex: `<input id="foo" type="number" min max/>`

@@ -9,6 +9,7 @@
 shinyapps/
 README.html
 .*.Rnb.cached
+/_dev/
 
 # TypeScript
 /node_modules/

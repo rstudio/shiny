@@ -1,11 +1,11 @@
 import $ from "jquery";
-import { imageOutputBinding } from "../bindings/output/image";
 import type { InputRatePolicy } from "../inputPolicies";
 import { shinySetInputValue } from "../shiny/initedMethods";
 import { Debouncer, Throttler } from "../time";
 import type { Bounds, BoundsCss, BrushOpts } from "./createBrush";
 import { createBrush } from "./createBrush";
 import type { Offset } from "./findbox";
+import { findImageOutputs } from "./imageBindingUtils";
 import type { Coordmap } from "./initCoordmap";
 import type { Panel } from "./initPanelScales";
 
@@ -184,12 +184,13 @@ function createBrushHandler(
     if (isNaN(coords.xmin)) {
       shinySetInputValue(inputId, null);
       // Must tell other brushes to clear.
-      imageOutputBinding
-        .find(document.documentElement)
-        .trigger("shiny-internal:brushed", {
+      findImageOutputs(document.documentElement).trigger(
+        "shiny-internal:brushed",
+        {
           brushId: inputId,
           outputId: null,
-        });
+        },
+      );
       return;
     }
 
@@ -221,9 +222,10 @@ function createBrushHandler(
     shinySetInputValue(inputId, coords);
 
     $el.data("mostRecentBrush", true);
-    imageOutputBinding
-      .find(document.documentElement)
-      .trigger("shiny-internal:brushed", coords);
+    findImageOutputs(document.documentElement).trigger(
+      "shiny-internal:brushed",
+      coords,
+    );
   }
 
   let brushInfoSender:

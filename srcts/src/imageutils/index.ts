@@ -7,6 +7,7 @@ import {
 } from "./createHandlers";
 import { disableDrag } from "./disableDrag";
 import { findBox } from "./findbox";
+import { findImageOutputs } from "./imageBindingUtils";
 import { initCoordmap } from "./initCoordmap";
 import { initPanelScales } from "./initPanelScales";
 import { shiftToRange } from "./shiftToRange";
@@ -19,6 +20,7 @@ export {
   createHoverHandler,
   disableDrag,
   findBox,
+  findImageOutputs,
   initCoordmap,
   initPanelScales,
   shiftToRange,

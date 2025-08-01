@@ -154,8 +154,6 @@ All config files are located in the root folder to avoid opening two separate VS
   * Package used to determine if circular dependencies are found. `type` only imports are ignored as they are not included in the final bundle.
 * `.prettierrc.yml`
   * Used by `prettier` to know how to adjust code when a file is saved in VSCode or within `eslint`'s linting process.
-* `jest.config.js`
-  * Used to configure [`jest` testing](https://jestjs.io/)
 * `package.json`
   * Contains useful scripts that can be run by `yarn` via `yarn run SCRIPTNAME`.
   * The scripts described below are inteded for developer use. All other scripts are means to an end.

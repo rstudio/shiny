@@ -1,6 +1,5 @@
 import typescriptEslint from "@typescript-eslint/eslint-plugin";
 import prettier from "eslint-plugin-prettier";
-import jestDom from "eslint-plugin-jest-dom";
 import unicorn from "eslint-plugin-unicorn";
 import globals from "globals";
 import tsParser from "@typescript-eslint/parser";
@@ -18,18 +17,15 @@ const compat = new FlatCompat({
 });
 
 export default [{
-    ignores: ["**/__tests__", "**/*.d.ts"],
+    ignores: ["**/*.d.ts"],
 }, ...compat.extends(
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:jest/recommended",
     "plugin:prettier/recommended",
-    "plugin:jest-dom/recommended",
 ), {
     plugins: {
         "@typescript-eslint": typescriptEslint,
         prettier,
-        "jest-dom": jestDom,
         unicorn,
     },
 

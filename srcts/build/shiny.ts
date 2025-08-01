@@ -29,6 +29,7 @@ const opts: BuildOptions = {
 // Make sure all ts files contain jquery import statements before building
 verifyJqueryImport("srcts/src")
   .then(() => {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     Promise.all([
       build({
         ...opts,

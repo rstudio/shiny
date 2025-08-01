@@ -25,7 +25,8 @@
     "@types/ion-rangeslider": "2.3.5",
     "@types/jquery": "3.5.32",
     "@types/selectize": "0.12.39",
-    "lit": "^3.2.1"
+    "lit": "^3.2.1",
+    "postcss-preset-env": "^10.2.4"
   },
   "devDependencies": {
     "@selectize/selectize": "https://github.com/selectize/selectize.js.git#e3f2e0b4aa251375bc21b5fcd8ca7d374a921f08",

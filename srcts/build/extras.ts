@@ -5,9 +5,9 @@
 
 // - TypeScript -----------------------------------------------------------
 
-import { banner, build, outDir } from "./_build";
+import { banner, build, outDir } from "./_build.js";
 
-build({
+await build({
   bundle: true,
   sourcemap: true,
   minify: true,
@@ -33,7 +33,8 @@ const sassOpts = {
   banner: banner,
   plugins: [
     sassPlugin({
-      async transform(source, resolveDir) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      async transform(source: string, resolveDir: string) {
         const { css } = await postcss([
           autoprefixer,
           postcssPresetEnv({ stage: 0 }),
@@ -44,12 +45,12 @@ const sassOpts = {
   ],
 };
 
-build({
+await build({
   ...sassOpts,
   entryPoints: ["srcts/extras/shiny-showcase.scss"],
   outfile: outDir + "shiny-showcase.css",
 });
-build({
+await build({
   ...sassOpts,
   entryPoints: [
     // Must keep shiny.scss within `inst` to be able to use as htmldependency
@@ -57,7 +58,7 @@ build({
   ],
   outfile: outDir + "shiny.min.css",
 });
-build({
+await build({
   ...sassOpts,
   entryPoints: ["srcts/extras/busy-indicators/busy-indicators.scss"],
   outfile: outDir + "busy-indicators/busy-indicators.css",

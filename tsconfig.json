@@ -1,13 +1,15 @@
 {
   "declaration": true,
   "compilerOptions": {
+    "skipLibCheck": true,
+    "module": "es2022",
     "target": "ES2021",
     "isolatedModules": true,
     "esModuleInterop": true,
     "declaration": true,
     "declarationDir": "./srcts/types",
     "emitDeclarationOnly": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     // Can not use `types: []` to disable injecting NodeJS types. More types are
     // needed than just the DOM's `window.setTimeout`
     // "types": [],
@@ -16,8 +18,12 @@
   "include": [
     "srcts/src/index.ts",
     "srcts/src/**/*.ts",
+    "srcts/src/**/*.mts",
     "srcts/build/*.ts",
-    "srcts/extras/*.ts"
+    "srcts/extras/*.ts",
+    "srcts/extras/*.mts",
+    "srcts/build/extras.ts",
+    "srcts/src/components/errorConsole.ts"
   ],
   "exclude": [
     "node_modules",

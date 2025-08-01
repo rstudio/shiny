@@ -1146,30 +1146,34 @@
     getState(el) {
       return { value: this.getValue(el) };
     }
-    receiveMessage(el, data) {
-      const $el = (0, import_jquery7.default)(el);
-      if (hasDefinedProperty(data, "label") || hasDefinedProperty(data, "icon")) {
-        let label = $el.text();
-        let icon = "";
-        if ($el.find("i[class]").length > 0) {
-          const iconHtml = $el.find("i[class]")[0];
-          if (iconHtml === $el.children()[0]) {
-            icon = (0, import_jquery7.default)(iconHtml).prop("outerHTML");
-          }
+    async receiveMessage(el, data) {
+      if (hasDefinedProperty(data, "icon")) {
+        let iconContainer = el.querySelector(
+          ":scope > .action-icon"
+        );
+        if (!iconContainer) {
+          iconContainer = document.createElement("span");
+          iconContainer.className = "action-icon";
+          el.prepend(iconContainer);
         }
-        if (hasDefinedProperty(data, "label")) {
-          label = data.label;
+        await renderContent(iconContainer, data.icon);
+      }
+      if (hasDefinedProperty(data, "label")) {
+        let labelContainer = el.querySelector(
+          ":scope > .action-label"
+        );
+        if (!labelContainer) {
+          labelContainer = document.createElement("span");
+          labelContainer.className = "action-label";
+          el.appendChild(labelContainer);
         }
-        if (hasDefinedProperty(data, "icon")) {
-          icon = Array.isArray(data.icon) ? "" : data.icon ?? "";
-        }
-        $el.html(icon + " " + label);
+        await renderContent(labelContainer, data.label);
       }
       if (hasDefinedProperty(data, "disabled")) {
         if (data.disabled) {
-          $el.attr("disabled", "");
+          el.setAttribute("disabled", "");
         } else {
-          $el.attr("disabled", null);
+          el.removeAttribute("disabled");
         }
       }
     }

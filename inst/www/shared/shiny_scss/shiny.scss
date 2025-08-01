@@ -464,6 +464,13 @@ textarea.textarea-autoresize.form-control {
   }
 }
 
+// Add spacing between icon and label for actionButton()
+.action-button:not(.action-link) {
+  .action-icon + .action-label {
+    padding-left: 0.5ch;
+  }
+}
+
 /* Overrides bootstrap-datepicker3.css styling for invalid date ranges.
    See https://github.com/rstudio/shiny/issues/2042 for details. */
 .datepicker table tbody tr td.disabled,

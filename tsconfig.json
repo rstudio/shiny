@@ -23,11 +23,11 @@
     "srcts/extras/*.ts",
     "srcts/extras/*.mts",
     "srcts/build/extras.ts",
-    "srcts/src/components/errorConsole.ts"
+    "srcts/src/components/errorConsole.ts",
   ],
   "exclude": [
     "node_modules",
     "srcts/types/",
-    "**/__tests__"
+    "**/__tests__",
   ]
 }

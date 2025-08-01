@@ -69,6 +69,7 @@ async function build(opts: BuildOptions): Promise<void> {
   } else {
     await ctx.rebuild();
     onRebuild(null);
+    await ctx.dispose();
   }
 }
 

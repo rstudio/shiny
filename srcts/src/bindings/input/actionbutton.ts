@@ -11,7 +11,7 @@ type ActionButtonReceiveMessageData = {
 };
 
 class ActionButtonInputBinding extends InputBinding {
-  find(scope: HTMLElement): JQuery<HTMLElement> {
+  find(scope: HTMLElement): JQuery {
     return $(scope).find(".action-button");
   }
   getValue(el: HTMLElement): number {
@@ -35,7 +35,7 @@ class ActionButtonInputBinding extends InputBinding {
         $el.data("val", val + 1);
 
         callback(false);
-      },
+      }
     );
   }
   getState(el: HTMLElement): { value: number } {
@@ -44,7 +44,7 @@ class ActionButtonInputBinding extends InputBinding {
   async receiveMessage(
     el: HTMLElement,
     data: ActionButtonReceiveMessageData
-  ): Promise<void> {
+  ): Promise {
     if (hasDefinedProperty(data, "icon")) {
       let iconContainer = el.querySelector<HTMLElement>(
         ":scope > .action-icon"
@@ -55,7 +55,7 @@ class ActionButtonInputBinding extends InputBinding {
         iconContainer.className = "action-icon";
         el.prepend(iconContainer);
       }
-      await renderContent(iconContainer, data.icon);
+      await renderContent(iconContainer, data.icon!);
     }
 
     if (hasDefinedProperty(data, "label")) {
@@ -67,7 +67,7 @@ class ActionButtonInputBinding extends InputBinding {
         labelContainer.className = "action-label";
         el.appendChild(labelContainer);
       }
-      await renderContent(labelContainer, data.label);
+      await renderContent(labelContainer, data.label!);
     }
 
     if (hasDefinedProperty(data, "disabled")) {
@@ -77,6 +77,7 @@ class ActionButtonInputBinding extends InputBinding {
         el.removeAttribute("disabled");
       }
     }
+    return;
   }
 
   unsubscribe(el: HTMLElement): void {

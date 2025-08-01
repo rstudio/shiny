@@ -12,7 +12,7 @@ type ActionButtonReceiveMessageData = {
     disabled?: boolean;
 };
 declare class ActionButtonInputBinding extends InputBinding {
-    find(scope: HTMLElement): JQuery<HTMLElement>;
+    find(scope: HTMLElement): JQuery;
     getValue(el: HTMLElement): number;
     setValue(el: HTMLElement, value: number): void;
     getType(el: HTMLElement): string;
@@ -20,7 +20,7 @@ declare class ActionButtonInputBinding extends InputBinding {
     getState(el: HTMLElement): {
         value: number;
     };
-    receiveMessage(el: HTMLElement, data: ActionButtonReceiveMessageData): Promise<void>;
+    receiveMessage(el: HTMLElement, data: ActionButtonReceiveMessageData): Promise;
     unsubscribe(el: HTMLElement): void;
 }
 export { ActionButtonInputBinding };

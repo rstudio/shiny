@@ -216,7 +216,7 @@ class ShinyClass {
     const inputBindings = this.inputBindings;
     const outputBindings = this.outputBindings;
 
-    function shinyBindCtx(): BindInputsCtx {
+    const shinyBindCtx = (): BindInputsCtx => {
       return {
         inputs,
         inputsRate,
@@ -225,8 +225,10 @@ class ShinyClass {
         inputBindings,
         outputBindings,
         initDeferredIframes,
+        outputIsRecalculating: (id: string) =>
+          this.shinyapp?.$outputProgress.isRecalculating(id) ?? false,
       };
-    }
+    };
 
     this.bindAll = async function (scope: BindScope) {
       await bindAll(shinyBindCtx(), scope);

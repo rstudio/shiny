@@ -10,6 +10,7 @@ type BindInputsCtx = {
     sendOutputHiddenState: () => void;
     maybeAddThemeObserver: (el: HTMLElement) => void;
     initDeferredIframes: () => void;
+    outputIsRecalculating: (id: string) => boolean;
 };
 declare function bindInputs(shinyCtx: BindInputsCtx, scope?: BindScope): {
     [key: string]: {

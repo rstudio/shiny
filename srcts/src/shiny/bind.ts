@@ -4,7 +4,6 @@ import type { SubscribeEventPriority } from "../bindings/input/inputBinding";
 import { OutputBindingAdapter } from "../bindings/outputAdapter";
 import type { BindingRegistry } from "../bindings/registry";
 import { ShinyClientMessageEvent } from "../components/errorConsole";
-import { Shiny } from "../initialize";
 import type {
   InputRateDecorator,
   InputValidateDecorator,
@@ -233,6 +232,7 @@ type BindInputsCtx = {
   sendOutputHiddenState: () => void;
   maybeAddThemeObserver: (el: HTMLElement) => void;
   initDeferredIframes: () => void;
+  outputIsRecalculating: (id: string) => boolean;
 };
 function bindInputs(
   shinyCtx: BindInputsCtx,
@@ -322,6 +322,7 @@ async function bindOutputs(
     sendOutputHiddenState,
     maybeAddThemeObserver,
     outputBindings,
+    outputIsRecalculating,
   }: BindInputsCtx,
   scope: BindScope = document.documentElement,
 ): Promise<void> {
@@ -367,7 +368,7 @@ async function bindOutputs(
       $el.addClass("shiny-bound-output");
       if (!$el.attr("aria-live")) $el.attr("aria-live", "polite");
 
-      if (Shiny.shinyapp?.$outputProgress.isRecalculating(id)) {
+      if (outputIsRecalculating(id)) {
         bindingAdapter.showProgress(true);
       }
 

@@ -20,7 +20,7 @@ declare class ActionButtonInputBinding extends InputBinding {
     getState(el: HTMLElement): {
         value: number;
     };
-    receiveMessage(el: HTMLElement, data: ActionButtonReceiveMessageData): Promise;
+    receiveMessage(el: HTMLElement, data: ActionButtonReceiveMessageData): Promise<void>;
     unsubscribe(el: HTMLElement): void;
 }
 export { ActionButtonInputBinding };

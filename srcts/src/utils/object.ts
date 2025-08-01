@@ -39,4 +39,10 @@ function ifUndefined<X, Y>(value: X, alternate: Y): X | Y {
   return value;
 }
 
-export { hasDefinedProperty, hasOwnProperty, ifUndefined };
+function asArray<T>(value: T | T[] | null | undefined): T[] {
+  if (value === null || value === undefined) return [];
+  if (Array.isArray(value)) return value;
+  return [value];
+}
+
+export { asArray, hasDefinedProperty, hasOwnProperty, ifUndefined };

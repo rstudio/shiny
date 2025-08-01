@@ -3,7 +3,7 @@ import type { HtmlDep } from "../shiny/render";
 import { renderContent } from "../shiny/render";
 import { windowDevicePixelRatio } from "../window/pixelRatio";
 import type { MapValuesUnion, MapWithResult } from "./extraTypes";
-import { hasDefinedProperty, hasOwnProperty } from "./object";
+import { asArray, hasDefinedProperty, hasOwnProperty } from "./object";
 
 function escapeHTML(str: string): string {
   /* eslint-disable @typescript-eslint/naming-convention */
@@ -197,12 +197,6 @@ function scopeExprToFunc(expr: string): (scope: unknown) => unknown {
   return function (scope: unknown): unknown {
     return func.call(scope);
   };
-}
-
-function asArray<T>(value: T | T[] | null | undefined): T[] {
-  if (value === null || value === undefined) return [];
-  if (Array.isArray(value)) return value;
-  return [value];
 }
 
 // We need a stable sorting algorithm for ordering

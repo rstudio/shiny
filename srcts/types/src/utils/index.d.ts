@@ -1,6 +1,6 @@
 import type { HtmlDep } from "../shiny/render";
 import type { MapValuesUnion, MapWithResult } from "./extraTypes";
-import { hasDefinedProperty, hasOwnProperty } from "./object";
+import { asArray, hasDefinedProperty, hasOwnProperty } from "./object";
 declare function escapeHTML(str: string): string;
 declare function randomId(): string;
 declare function strToBool(str: string): boolean | undefined;
@@ -16,7 +16,6 @@ declare function getBoundingClientSizeBeforeZoom(el: HTMLElement): {
     height: number;
 };
 declare function scopeExprToFunc(expr: string): (scope: unknown) => unknown;
-declare function asArray<T>(value: T | T[] | null | undefined): T[];
 declare function mergeSort<Item>(list: Item[], sortfunc: (a: Item, b: Item) => boolean | number): Item[];
 declare function $escape(val: undefined): undefined;
 declare function $escape(val: string): string;

@@ -11,4 +11,5 @@ declare function hasDefinedProperty<Prop extends keyof X, X extends {
 };
 declare function ifUndefined<X extends NotUndefined<any>, Y>(value: X, alternate: Y): NotUndefined<X>;
 declare function ifUndefined<X extends undefined, Y>(value: X, alternate: Y): Y;
-export { hasDefinedProperty, hasOwnProperty, ifUndefined };
+declare function asArray<T>(value: T | T[] | null | undefined): T[];
+export { asArray, hasDefinedProperty, hasOwnProperty, ifUndefined };

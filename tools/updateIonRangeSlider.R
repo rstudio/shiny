@@ -74,7 +74,8 @@ withr::with_dir(
       sass_file("scss/shiny.scss"),
       bslib::bs_theme(version = 3),
       output = "css/ion.rangeSlider.css",
-      options = sass_options()
+      options = sass_options(),
+      write_attachments = FALSE
     )
   }
 )
@@ -90,11 +91,11 @@ writeLines(
 
 # Finally, run `npm run build` so the JS patches propogate to the minified files
 withr::with_dir(rprojroot::find_package_root_file(), {
-  exit_code <- system(paste0("yarn add --dev ion-rangeslider@", version))
-  if (exit_code != 0) stop("yarn could not install ion-rangeslider")
+  # exit_code <- system(paste0("npm install --save-dev --save-exact ion-rangeslider@", version))
+  # if (exit_code != 0) stop("npm could not install ion-rangeslider")
 
-  exit_code <- system(paste0("yarn add @types/ion-rangeslider@", types_version))
-  if (exit_code != 0) stop("yarn could not install @types/ion-rangeslider")
+  exit_code <- system(paste0("npm install --save --save-exact @types/ion-rangeslider@", types_version))
+  if (exit_code != 0) stop("npm could not install @types/ion-rangeslider")
 
-  system("yarn bundle_external_libs")
+  system("npm run bundle_external_libs")
 })

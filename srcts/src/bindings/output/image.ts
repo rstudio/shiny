@@ -5,6 +5,7 @@ import {
   createClickInfo,
   createHoverHandler,
   disableDrag,
+  findImageOutputs,
   initCoordmap,
 } from "../../imageutils";
 import type { CoordmapInit } from "../../imageutils/initCoordmap";
@@ -21,7 +22,7 @@ import { OutputBinding } from "./outputBinding";
 
 class ImageOutputBinding extends OutputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
-    return $(scope).find(".shiny-image-output, .shiny-plot-output");
+    return findImageOutputs(scope);
   }
 
   renderValue(

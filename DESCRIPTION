@@ -3,8 +3,7 @@ Package: shiny
 Title: Web Application Framework for R
 Version: 1.11.1.9000
 Authors@R: c(
-    person("Winston", "Chang", , "winston@posit.co", role = "aut",
-           comment = c(ORCID = "0000-0002-1576-2126")),
+    person("Winston", "Chang", , "winston@posit.co", role = "aut", comment = c(ORCID = "0000-0002-1576-2126")),
     person("Joe", "Cheng", , "joe@posit.co", role = "aut"),
     person("JJ", "Allaire", , "jj@posit.co", role = "aut"),
     person("Carson", "Sievert", , "carson@posit.co", role = c("aut", "cre"),

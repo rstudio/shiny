@@ -6,7 +6,7 @@ interface OutpuBindingWithResize extends OutputBinding {
   resize?: (
     el: HTMLElement,
     width: number | string,
-    height: number | string
+    height: number | string,
   ) => void;
 }
 
@@ -22,7 +22,6 @@ class OutputBindingAdapter {
     // onResize with a version that does a makeResizeFilter on the element.
     if (binding.resize) {
       this.onResize = makeResizeFilter(el, function (width, height) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         binding.resize!(el, width, height);
       });
     }

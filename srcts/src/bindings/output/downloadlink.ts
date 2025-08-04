@@ -16,8 +16,8 @@ class DownloadLinkOutputBinding extends OutputBinding {
   // (progress will be shown as a page level pulse instead)
   showProgress(el: HTMLElement, show: boolean): void {
     return;
-    el;
-    show;
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
+    show; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
 }
 
@@ -32,14 +32,15 @@ $(document).on(
   "click.shinyDownloadLink",
   "a.shiny-download-link",
   function (e: Event) {
-    e;
-
     const evt: FileDownloadEvent = $.Event("shiny:filedownload");
 
     evt.name = this.id;
     evt.href = this.href;
     $(document).trigger(evt);
-  }
+
+    return;
+    e; // eslint-disable-line @typescript-eslint/no-unused-expressions
+  },
 );
 
 export { DownloadLinkOutputBinding };

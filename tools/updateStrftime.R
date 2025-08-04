@@ -7,10 +7,19 @@
 
 version <- "0.9.2"
 ref <- paste0("v", version)
-destdir <- rprojroot::find_package_root_file("inst", "www", "shared", "strftime")
+destdir <- rprojroot::find_package_root_file(
+  "inst",
+  "www",
+  "shared",
+  "strftime"
+)
 
 download.file(
-  paste0("https://raw.githubusercontent.com/samsonjs/strftime/", ref, "/strftime-min.js"),
+  paste0(
+    "https://raw.githubusercontent.com/samsonjs/strftime/",
+    ref,
+    "/strftime-min.js"
+  ),
   destfile = file.path(destdir, "strftime-min.js")
 )
 
@@ -22,11 +31,3 @@ writeLines(
   rprojroot::find_package_root_file("R", "version_strftime.R")
 )
 
-# Update TypeScript installation
-withr::with_dir(
-  rprojroot::find_package_root_file(),
-  {
-    exit_code <- system(paste0("yarn add strftime@", version))
-    if (exit_code != 0) stop("yarn could not install strftime")
-  }
-)

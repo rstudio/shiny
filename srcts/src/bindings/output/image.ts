@@ -5,6 +5,7 @@ import {
   createClickInfo,
   createHoverHandler,
   disableDrag,
+  findImageOutputs,
   initCoordmap,
 } from "../../imageutils";
 import type { CoordmapInit } from "../../imageutils/initCoordmap";
@@ -21,7 +22,7 @@ import { OutputBinding } from "./outputBinding";
 
 class ImageOutputBinding extends OutputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
-    return $(scope).find(".shiny-image-output, .shiny-plot-output");
+    return findImageOutputs(scope);
   }
 
   renderValue(
@@ -29,7 +30,7 @@ class ImageOutputBinding extends OutputBinding {
     data: {
       coordmap: CoordmapInit;
       error?: string;
-    } & { [key: string]: string }
+    } & { [key: string]: string },
   ): void {
     // The overall strategy:
     // * Clear out existing image and event handlers.
@@ -81,7 +82,7 @@ class ImageOutputBinding extends OutputBinding {
       hoverDelay: ifUndefined($el.data("hover-delay"), 300),
       hoverNullOutside: ifUndefined(
         strToBool($el.data("hover-null-outside")),
-        false
+        false,
       ),
 
       brushId: $el.data("brush-id"),
@@ -94,7 +95,7 @@ class ImageOutputBinding extends OutputBinding {
       brushDirection: ifUndefined($el.data("brush-direction"), "xy"),
       brushResetOnNew: ifUndefined(
         strToBool($el.data("brush-reset-on-new")),
-        false
+        false,
       ),
 
       coordmap: data.coordmap,
@@ -167,7 +168,7 @@ class ImageOutputBinding extends OutputBinding {
       const clickInfo = createClickInfo(
         $el,
         opts.dblclickId,
-        opts.dblclickDelay
+        opts.dblclickDelay,
       );
 
       $el.on("mousedown.image_output", clickInfo.mousedown);
@@ -185,7 +186,7 @@ class ImageOutputBinding extends OutputBinding {
         const clickHandler = createClickHandler(
           opts.clickId,
           opts.clickClip,
-          optsCoordmap
+          optsCoordmap,
         );
 
         $el.on("mousedown2.image_output", clickHandler.mousedown);
@@ -205,7 +206,7 @@ class ImageOutputBinding extends OutputBinding {
         const dblclickHandler = createClickHandler(
           opts.dblclickId,
           opts.clickClip,
-          optsCoordmap
+          optsCoordmap,
         );
 
         $el.on("dblclick2.image_output", dblclickHandler.mousedown);
@@ -223,7 +224,7 @@ class ImageOutputBinding extends OutputBinding {
           opts.hoverDelayType,
           opts.hoverClip,
           opts.hoverNullOutside,
-          optsCoordmap
+          optsCoordmap,
         );
 
         $el.on("mousemove.image_output", hoverHandler.mousemove);
@@ -241,7 +242,7 @@ class ImageOutputBinding extends OutputBinding {
           $el,
           opts,
           optsCoordmap,
-          outputId
+          outputId,
         );
 
         $el.on("mousedown.image_output", brushHandler.mousedown);
@@ -285,12 +286,12 @@ class ImageOutputBinding extends OutputBinding {
   resize(
     el: HTMLElement,
     width: number | string,
-    height: number | string
+    height: number | string,
   ): void {
     $(el).find("img").trigger("resize");
     return;
-    width;
-    height;
+    width; // eslint-disable-line @typescript-eslint/no-unused-expressions
+    height; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
 }
 

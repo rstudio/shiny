@@ -146,7 +146,7 @@ class OutputProgressReporter {
         default:
           throw new Error(
             `Shiny server sent a message that the output '${name}' is recalculating,
-            but the output is in an unexpected state of: '${state}'.`
+            but the output is in an unexpected state of: '${state}'.`,
           );
       }
     }
@@ -159,7 +159,7 @@ class OutputProgressReporter {
         default:
           throw new Error(
             `Shiny server sent a message that the output '${name}' has been recalculated,
-            but the output is in an unexpected state of: '${state}'.`
+            but the output is in an unexpected state of: '${state}'.`,
           );
       }
     }
@@ -190,7 +190,7 @@ class OutputProgressReporter {
         default:
           throw new Error(
             `Shiny server sent a flush message, and after processing the values and errors,
-            the output '${name}' has an unexpected ending state of: '${state}'.`
+            the output '${name}' has an unexpected ending state of: '${state}'.`,
           );
       }
     }
@@ -207,7 +207,7 @@ class OutputProgressReporter {
         default:
           throw new Error(
             `Shiny server has sent a 'persistent progress' message for ${id},
-            but the output is in an unexpected state of: ${state}`
+            but the output is in an unexpected state of: ${state}`,
           );
       }
     } else {
@@ -222,7 +222,7 @@ class OutputProgressReporter {
         default:
           throw new Error(
             `Shiny server has sent a progress message for ${id},
-            but the output is in an unexpected state of: ${state}`
+            but the output is in an unexpected state of: ${state}`,
           );
       }
     }
@@ -232,7 +232,7 @@ class OutputProgressReporter {
   // be moving from Idle to Value/Error state.
   #updateStateFromValueOrError(
     name: string,
-    type: OutputStates.Error | OutputStates.Value
+    type: OutputStates.Error | OutputStates.Value,
   ): void {
     const state = this.#getState(name);
     switch (state) {
@@ -242,7 +242,7 @@ class OutputProgressReporter {
       default:
         throw new Error(
           `Shiny server has sent a ${type} for the output '${name}',
-          but the output is in an unexpected state of: '${state}'.`
+          but the output is in an unexpected state of: '${state}'.`,
         );
     }
   }

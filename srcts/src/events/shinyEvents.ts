@@ -32,9 +32,9 @@ interface ShinyEventMessage extends JQuery.Event {
 }
 
 export type {
+  ShinyEventError,
   ShinyEventInputChanged,
+  ShinyEventMessage,
   ShinyEventUpdateInput,
   ShinyEventValue,
-  ShinyEventError,
-  ShinyEventMessage,
 };

@@ -11,10 +11,9 @@ export function promiseWithResolvers<T>(): {
     (res: (value: PromiseLike<T> | T) => void, rej: (reason?: any) => void) => {
       resolve = res;
       reject = rej;
-    }
+    },
   );
 
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   return { promise, resolve: resolve!, reject: reject! };
 }
 

@@ -48,4 +48,4 @@ declare class FileUploader extends FileProcessor {
     $setActive(active: boolean): void;
 }
 export { FileUploader };
-export type { UploadInitValue, UploadEndValue };
+export type { UploadEndValue, UploadInitValue };

@@ -105,10 +105,10 @@ writeLines(
 withr::with_dir(
   rprojroot::find_package_root_file(),
   {
-    exit_code <- system(paste0("npm install --save-dev bootstrap-datepicker@", version))
+    exit_code <- system(paste0("npm install --save-dev --save-exact bootstrap-datepicker@", version))
     if (exit_code != 0) stop("npm could not install bootstrap-datepicker")
 
-    exit_code <- system(paste0("npm install --save-prod @types/bootstrap-datepicker@", types_version))
+    exit_code <- system(paste0("npm install --save --save-exact @types/bootstrap-datepicker@", types_version))
     if (exit_code != 0) stop("npm could not install @types/bootstrap-datepicker")
   }
 )

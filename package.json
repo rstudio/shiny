@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@types/bootstrap": "5.2.x",
-    "@types/bootstrap-datepicker": "1.10.x",
+    "@types/bootstrap-datepicker": "1.10.0",
     "@types/datatables.net": "1.10.x",
     "@types/ion-rangeslider": "2.3.0",
     "@types/jquery": "3.5.32",
@@ -38,7 +38,7 @@
     "@typescript-eslint/eslint-plugin": "8.x",
     "@typescript-eslint/parser": "8.x",
     "autoprefixer": "10.x",
-    "bootstrap-datepicker": "1.x",
+    "bootstrap-datepicker": "1.10.0",
     "browserslist": "4.x",
     "esbuild": ">=0.20.0",
     "esbuild-plugin-globals": "0.1.x",

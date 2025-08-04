@@ -2,7 +2,7 @@
   "declaration": true,
   "compilerOptions": {
     "skipLibCheck": true,
-    "module": "es2022",
+    "module": "ES2020",
     "target": "ES2021",
     "isolatedModules": true,
     "esModuleInterop": true,
@@ -18,10 +18,8 @@
   "include": [
     "srcts/src/index.ts",
     "srcts/src/**/*.ts",
-    "srcts/src/**/*.mts",
     "srcts/build/*.ts",
     "srcts/extras/*.ts",
-    "srcts/extras/*.mts",
     "srcts/build/extras.ts",
     "srcts/src/components/errorConsole.ts",
   ],

@@ -3976,7 +3976,6 @@
   var ImageOutputBinding = class extends OutputBinding {
     find(scope) {
       return findImageOutputs(scope);
-      return (0, import_jquery32.default)(scope).find(".shiny-image-output, .shiny-plot-output");
     }
     renderValue(el, data) {
       const outputId = this.getId(el);

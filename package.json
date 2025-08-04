@@ -25,8 +25,7 @@
     "@types/ion-rangeslider": "2.3.0",
     "@types/jquery": "3.5.32",
     "@types/selectize": "0.12.x",
-    "lit": "3.2.x",
-    "postcss-preset-env": "10.2.x"
+    "lit": "3.2.x"
   },
   "devDependencies": {
     "@selectize/selectize": "https://github.com/selectize/selectize.js.git#e3f2e0b4aa251375bc21b5fcd8ca7d374a921f08",
@@ -51,6 +50,7 @@
     "jquery": "3.7.1",
     "lodash": "4.x",
     "postcss": "8.x",
+    "postcss-preset-env": "10.2.x",
     "prettier": "3.x",
     "prettier-plugin-organize-imports": "4.x",
     "readcontrol": "1.x",

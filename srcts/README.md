@@ -3,7 +3,7 @@
 When developing TypeScript projects that use `window.Shiny`, we recommend installing the Shiny TypeScript definitions to your package. To install the latest stable definitions, run:
 
 ```bash
-npm install https://github.com/rstudio/shiny\#v1.10.0 --save-dev
+npm install https://github.com/rstudio/shiny\#v1.11.0 --save-dev
 ```
 
 , matching the GitHub tag to your current the Shiny CRAN release (ex: `v1.10.0`).  If you are asked to select a version of `@types/jquery`, please select the closest matching version.

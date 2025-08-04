@@ -1,11 +1,9 @@
 # Using Shiny TypeScript Definitions
 
-When developing TypeScript projects that use `window.Shiny`, we recommend installing the Shiny TypeScript definitions to your package. To install the latest stable definitions, run one of the following (depending on if you're using `npm` or `yarn`):
+When developing TypeScript projects that use `window.Shiny`, we recommend installing the Shiny TypeScript definitions to your package. To install the latest stable definitions, run:
 
 ```bash
 npm install https://github.com/rstudio/shiny\#v1.10.0 --save-dev
-# or
-yarn add https://github.com/rstudio/shiny\#v1.10.0 --dev
 ```
 
 , matching the GitHub tag to your current the Shiny CRAN release (ex: `v1.10.0`).  If you are asked to select a version of `@types/jquery`, please select the closest matching version.
@@ -28,31 +26,36 @@ When loading your compiled file, it should be loaded after `shiny.js` is loaded.
 All files will be described as if the working directory is the root folder of `rstudio/shiny`, not relative to this `README.md` file.
 
 ## First-time setup
-Shiny's TypeScript build tools use Node.js, along with [yarn](https://yarnpkg.com/) v2 to manage the JavaScript packages.
+
+Shiny's TypeScript build tools use Node.js and `npm`.
 
 Installation of Node.js differs across platforms, see [the official Node.js website](https://nodejs.org/) for instructions on downloading and installing. We presume that you have Node.js installed on your machine before continuing.
 
-Install yarn using the [official instructions](https://yarnpkg.com/en/docs/install).
+Install npm using the [official instructions](https://docs.npmjs.com/getting-started/installing-node).
 
-You can test that Node.js and yarn are installed properly by running the following commands:
+You can test that Node.js and `npm` are installed properly by running the following commands:
 
 ```bash
 node --version
-yarn --version
+npm --version
 ```
 
 Once both are installed, run the following in the root repo directory to install the packages :
 
 ```bash
 # Sitting in `rstudio/shiny` repo
-yarn install
+npm install
 ```
 
-### Yarn v2
+### Reproducible builds
 
-This repo uses Yarn v2. If you have the latest yarn installed from brew (v1.x), Yarn will pick up on the fact that this repo is a Yarn v2 (`berry`) repo.
+To ensure that the same versions of packages are used between users, install the package lock dependencies by running:
 
-For compatibility with `esbuild`, the `./node_modules` is still maintained.
+```bash
+npm ci
+```
+
+This command will install the exact versions of packages specified in the `package-lock.json` file, ensuring that all developers are using the same versions of dependencies.
 
 ## Updating Node
 
@@ -69,26 +72,22 @@ npx n ls
 ```
 
 ## Adding packages
+
 If in the future you want to upgrade or add a package, run:
 
 ```bash
-yarn add --dev [packagename]
+npm install --save-dev [packagename]
 ```
 
-This will automatically add the package to the dependencies in `package.json`, and it will also update the `yarn.lock` to reflect that change. If someone other than yourself does this, simply run `yarn` to update your local packages to match the new `package.json`.
+This will automatically add the package to the dependencies in `package.json`, and it will also update the `package-lock.json` to reflect that change. If someone other than yourself does this, simply run `npm ci` to update your local packages to match the new `package.json`.
 
 ## Upgrading packages
+
 Periodically, it's good to upgrade the packages to a recent version. There's two ways of doing this, depending on your intention:
 
-1. Use `yarn up` to upgrade all dependencies to their latest version based on the version range specified in the package.json file (the `yarn.lock` file will be recreated as well. Yarn packages use [semantic versioning](https://yarnpkg.com/en/docs/dependency-versions), i.e. each version is writen with a maximum of 3 dot-separated numbers such that: `major.minor.patch`. For example in the version `3.1.4`, 3 is the major version number, 1 is the minor version number and 4 is the patch version number. Here are the most used operators (these appear before the version number):
+1. Use `npm outdated` to see outdated dependencies based on the version range specified in the `package.json` file. Npm packages use [semantic versioning](https://docs.npmjs.com/about-semantic-versioning), i.e. each version is writen with a maximum of 3 dot-separated numbers such that: `major.minor.patch`. For example in the version `3.1.4`, 3 is the major version number, 1 is the minor version number and 4 is the patch version number. Please use an `x` to denote where packages can automatically bump their version. For example, `3.1.x` will accept any patch version for `3.1`. Or `3.x` to accept any v3 minor version.
 
-  - `~` is for upgrades that keep the minor version the same (assuming that was specified);
-
-  - `^` is for upgrades that keep the major version the same (more or less -- more specifically, it allow changes that do not modify the first non-zero digit in the version, either the 3 in 3.1.4 or the 4 in 0.4.2.). This is the default operator added to the package.json when you run `yarn add [package-name]`.
-
-2. Use `yarn up [package]` to upgrade a single named package to the version specified by the latest tag (potentially upgrading the package across major versions).
-
-3. To see all outdated packages, run `yarn outdated`
+2. Use `npm update [package]` to upgrade a single named package to the version specified by the latest tag (potentially upgrading the package across major versions).
 
 # TypeScript
 
@@ -155,12 +154,11 @@ All config files are located in the root folder to avoid opening two separate VS
 * `.prettierrc.yml`
   * Used by `prettier` to know how to adjust code when a file is saved in VSCode or within `eslint`'s linting process.
 * `package.json`
-  * Contains useful scripts that can be run by `yarn` via `yarn run SCRIPTNAME`.
+  * Contains useful scripts that can be run by `npm` via `npm run SCRIPTNAME`.
   * The scripts described below are inteded for developer use. All other scripts are means to an end.
-    * `yarn run watch` - Watch `srcts/src` for changes and rebuild the JavaScript files.
-    * `yarn run build` - Build `shiny.js` and `shiny.min.js` in `inst/www/shared`. Both files will have a corresponding sourcemap
-    * `yarn run lint` - Fix all TypeScript lints using [`eslint`](https://eslint.org/) and [`prettier`](https://prettier.io/)
-    * `yarn run test` - Run all TypeScript tests
+    * `npm run watch` - Watch `srcts/src` for changes and rebuild the JavaScript files.
+    * `npm run build` - Build `shiny.js` and `shiny.min.js` in `inst/www/shared`. Both files will have a corresponding sourcemap
+    * `npm run lint` - Fix all TypeScript lints using [`eslint`](https://eslint.org/) and [`prettier`](https://prettier.io/)
 * `tsconfig.json` -
   * TypeScript config file
   * Notable options set:
@@ -181,7 +179,7 @@ npm run build
 It's also useful to have `esbuild` watch for updated files and immediately re-build `shiny.js` as necessary during development. This is done with:
 
 ```bash
-yarn watch
+npm run watch
 ```
 
 Both JavaScript files will produce a sourcemap (`**.js.map`) that the browser will understand.  This will help you debug Shiny's JavaScript code within the browser and point back to the original TypeScript files.
@@ -194,40 +192,8 @@ Both JavaScript files will produce a sourcemap (`**.js.map`) that the browser wi
 
 On push to the `main` branch or push to a Pull Request to the `main` branch, a GitHub Action will be run to make sure the bundled JavaScript code is up to date. If the source code does not compile to the exact same file, it will be committed an pushed back to the outdated branch. (This makes it so the full build tools are not necessary for small tweaks and comments. 🎉)
 
-<!-- #### Auto build and browser refresh
 
-An alternative to `yarn watch` is to use `entr` to trigger `grunt` when sources change. `entr` can be installed with `brew install entr` on a Mac, or on Linux using your distribution's package manager. Using this technique, it's possible to both automatically rebuild sources and reload Chrome at the same time:
-
-*macOS*:
-
-```bash
-find ../srcts/ | entr bash -c './node_modules/grunt/bin/grunt && osascript -e "tell application \"Google Chrome\" to reload active tab of window 1"'
-```
-
-*Linux*:
-
-For this to work you must first install `xdotool` using your distribution's package manager.
-
-```bash
-find ../srcts/ | entr bash -c './node_modules/grunt/bin/grunt && xdotool search --onlyvisible --class Chrome windowfocus key ctrl+r'
-``` -->
 # Updating dependencies
-### `@types/jquery`
-
-As of v3.5.5, `@types/jquery` produces a globally available constant of `$` and `jQuery`. This is problematic as TypeScript is there to enforce that all variables are accounted for. Declaring that these two variables exist globally removes the requirement to import `$` (or `jQuery`). This is bad for Shiny as the `$` would not be enforced to the "within package" `$`.
-
-To overcome this, a patch is used to remove the globally defined `$` (and `Symbol`) variable declarations. Yarn v2 has a [`patch` protocol](https://yarnpkg.com/features/protocols#patch) that allows a local patch to be applied to the publically available `@types/jquery` package upon installation.
-
-If in the future where the variables are not globally declared anymore, the patch may be removed and `@types/jquery` can be imported directly.
-
-A global module plugin is used by `esbuild` to swap out a real `jquery` module to just return `window.jQuery`. This allows for tests and core code to behave the same way.
-
-### `core-js`
-
-To update the version of `core-js`:
-
-* Check if there is a newer version available by running `yarn outdated core-js`. (If there's no output, then you have the latest version.)
-* Run `yarn add --dev core-js --exact`.
 
 
 ### External libraries
@@ -239,3 +205,4 @@ Shiny already has a handful of html dependencies that should NOT be bundled with
 * `bootstrap-datepicker` / `@types/bootstrap-datepicker`
 * `ion-rangeslider` / `@types/ion-rangeslider`
 * `selectize` / `@types/selectize`
+* `strftime`

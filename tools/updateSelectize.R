@@ -2,6 +2,8 @@
 library(rprojroot)
 library(withr)
 
+# `@selectize/selectize` and `@types/selectize` versions set within package.json
+
 if (!identical(getwd(), find_package_root_file())) {
   stop("This script must be run from the top directory of the shiny package")
 }
@@ -9,6 +11,8 @@ if (!identical(getwd(), find_package_root_file())) {
 if (Sys.which("npm") == "") {
   stop("The npm CLI must be installed and in your PATH")
 }
+
+system("npm install")
 
 node_dir <- find_package_root_file("node_modules/@selectize/selectize/dist")
 inst_dir <- find_package_root_file("inst/www/shared/selectize")

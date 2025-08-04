@@ -149,8 +149,6 @@ All config files are located in the root folder to avoid opening two separate VS
 
 * `.eslintrc.yml`
   * Used with `eslint` and `prettier` to determine how the TypeScript files should be formatted and which lint failures should cause warnings, errors, or be ignored.
-* `.madgerc`
-  * Package used to determine if circular dependencies are found. `type` only imports are ignored as they are not included in the final bundle.
 * `.prettierrc.yml`
   * Used by `prettier` to know how to adjust code when a file is saved in VSCode or within `eslint`'s linting process.
 * `package.json`

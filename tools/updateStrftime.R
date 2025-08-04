@@ -31,11 +31,11 @@ writeLines(
   rprojroot::find_package_root_file("R", "version_strftime.R")
 )
 
-# Update TypeScript installation
-withr::with_dir(
-  rprojroot::find_package_root_file(),
-  {
-    exit_code <- system(paste0("yarn add strftime@", version))
-    if (exit_code != 0) stop("yarn could not install strftime")
-  }
-)
+# # Update TypeScript installation
+# withr::with_dir(
+#   rprojroot::find_package_root_file(),
+#   {
+#     exit_code <- system(paste0("npm install --save-dev --save-exact strftime@", version))
+#     if (exit_code != 0) stop("npm could not install strftime")
+#   }
+# )

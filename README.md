@@ -57,7 +57,7 @@ For bug reports, please use the [issue tracker](https://github.com/rstudio/shiny
 
 ## Contributing
 
-We welcome contributions to the **shiny** package. Please see our [CONTRIBUTING.md](https://github.com/rstudio/shiny/blob/main/.github/CONTRIBUTING.md) file for detailed guidelines of how to contribute.
+We welcome contributions to the **shiny** package. Please see our [CONTRIBUTING.md](https://github.com/rstudio/shiny/blob/main/CONTRIBUTING.md) file for detailed guidelines of how to contribute.
 
 ## License
 

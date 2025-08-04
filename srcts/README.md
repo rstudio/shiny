@@ -5,10 +5,10 @@ When developing TypeScript projects that use `window.Shiny`, we recommend instal
 ```bash
 npm install https://github.com/rstudio/shiny\#v1.11.1 --save-dev
 # or
-yarn add https://github.com/rstudio/shiny\#v1.11.1 --dev
+yarn add shiny@https://github.com/rstudio/shiny\#v1.11.1 --dev
 ```
 
-, matching the GitHub tag to your current the Shiny CRAN release (ex: `v1.11.1`).  If you are asked to select a version of `@types/jquery`, please select the closest matching version.
+, matching the GitHub tag to your current the [Shiny CRAN release](https://cran.r-project.org/web/packages/shiny/index.html) (ex: `v1.11.1`).  If you are asked to select a version of `@types/jquery`, please select the closest matching version.
 
 This will provide a global type definition of `window.Shiny`. In your code, you can access the Shiny object via `window.Shiny` or just `Shiny`. However, note that if you are using TypeScript, it will be OK with `window.Shiny` but it will flag uses of `Shiny` (without the `window.` prefix), because TypeScript won't know that it's a global variable. We consider it better practice to use `window.Shiny` instead of `Shiny`, but if you want TypeScript to know that `Shiny` is available as a global variable, you can add the following to a TypeScript file in your code base.
 

@@ -164,7 +164,6 @@ getShinyOption <- function(name, default = NULL) {
 #'   observers will be automatically bound to OpenTelemetry spans. This is
 #'   useful for debugging and profiling, but incurs a performance penalty.
 #'   This option should only be used if the `otelsdk` package is installed.}
-#' }
 #' \item{shiny.otel.graphlocked (defaults to `FALSE`)}{If `TRUE`, then all reactive expressions and
 #'   observers will be automatically bound to OpenTelemetry spans. This is
 #'   useful for debugging and profiling, but incurs a performance penalty.

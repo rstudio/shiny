@@ -50,7 +50,7 @@ span.
 }
 
 \examples{
-# TODO: Add examples!!
+# TODO: Update examples!!
 \dontrun{
 rc <- bindCache(
   x = reactive({

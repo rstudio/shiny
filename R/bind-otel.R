@@ -118,8 +118,17 @@ is_recording_otel_reactive_graph_lock <- function() {
   getOption("shiny.otel.graphlocked", FALSE)
 }
 
-#' TODO: documentation
+#' Set OpenTelemetry options for Shiny reactives
+#'
+#' @param expr The expression to run with OpenTelemetry spans enabled.
+#' @param ... Future parameter expansion.
+#' @param bindAll If `TRUE`, then all reactive objects will be bound to Open Telemetry spans.
+#'   If `FALSE`, then only the reactive objects created within the expression
+#'   will be bound to Open Telemetry spans.
+#'   Defaults to `TRUE`.
 #' @export
+#' @examples
+#' # TODO: Update examples!!
 withOtelShiny <- function(expr, ..., bindAll = TRUE) {
   rlang::check_dots_empty()
 
@@ -456,6 +465,7 @@ generateOtelFun <- function(
 ) {
   function() {
     is_tracing <- otel::is_tracing_enabled()
+    with_otel_active_span_promise_domain <- rlang::ns_env("promises")[["with_otel_active_span_promise_domain"]]
     hybrid_chain(
       {
         # Use a placeholder to indicate that otel is tracing.
@@ -474,7 +484,7 @@ generateOtelFun <- function(
             )
 
           # Use the local promise domain
-          promises:::with_otel_active_span_promise_domain(
+          with_otel_active_span_promise_domain(
             active_span,
             force(expr)
           )

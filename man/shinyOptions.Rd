@@ -134,7 +134,6 @@ different default \code{getOption(key)} values will be returned. See \code{\link
 observers will be automatically bound to OpenTelemetry spans. This is
 useful for debugging and profiling, but incurs a performance penalty.
 This option should only be used if the \code{otelsdk} package is installed.}
-}
 \item{shiny.otel.graphlocked (defaults to \code{FALSE})}{If \code{TRUE}, then all reactive expressions and
 observers will be automatically bound to OpenTelemetry spans. This is
 useful for debugging and profiling, but incurs a performance penalty.

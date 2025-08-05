@@ -1142,6 +1142,11 @@ ShinySession <- R6Class(
         attr(label, "srcref") <- srcref
         attr(label, "srcfile") <- srcfile
 
+        # TODO: Q: Should we move the otel tracing to here for render functions? Then we could report the status of the calculation within the otel attributes
+        if (otel::is_tracing_enabled()) {
+          local_otel_active_reactive_lock_span(self)
+        }
+
         obs <- observe(..stacktraceon = FALSE, {
 
           private$sendMessage(recalculating = list(
@@ -2195,6 +2200,15 @@ ShinySession <- R6Class(
       if (private$busyCount == 0L) {
         rLog$asyncStart(domain = self)
         private$sendMessage(busy = "busy")
+        if (otel::is_tracing_enabled()) {
+          if (is_recording_otel_reactive_graph_lock()) {
+            # Must activate the session span before making the lock span
+            otel::local_active_span(self$userData[["otel_span"]])
+
+            self$userData[["otelGraphLockedSpan"]] <-
+              otel_start_active_shiny_span(self, "lock_reactive_graph")
+          }
+        }
       }
       private$busyCount <- private$busyCount + 1L
     },
@@ -2216,6 +2230,14 @@ ShinySession <- R6Class(
             private$startCycle()
           }
         })
+
+        if (otel::is_tracing_enabled()) {
+          lockedSpan <- self$userData[["otelGraphLockedSpan"]]
+          if (!is.null(lockedSpan)) {
+            otel::end_span(lockedSpan)
+            self$userData[["otelGraphLockedSpan"]] <- NULL
+          }
+        }
       }
     }
   )

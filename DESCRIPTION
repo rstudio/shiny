@@ -135,6 +135,7 @@ Collate:
     'app_template.R'
     'bind-cache.R'
     'bind-event.R'
+    'bind-otel.R'
     'bookmark-state-local.R'
     'bookmark-state.R'
     'bootstrap-deprecated.R'

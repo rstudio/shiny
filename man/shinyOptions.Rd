@@ -130,6 +130,15 @@ ragg package. See \code{\link[=plotPNG]{plotPNG()}} for more information.}
 Cairo package. See \code{\link[=plotPNG]{plotPNG()}} for more information.}
 \item{shiny.devmode (defaults to \code{NULL})}{Option to enable Shiny Developer Mode. When set,
 different default \code{getOption(key)} values will be returned. See \code{\link[=devmode]{devmode()}} for more details.}
+\item{shiny.otel.bindall (defaults to \code{FALSE})}{If \code{TRUE}, then all reactive expressions and
+observers will be automatically bound to OpenTelemetry spans. This is
+useful for debugging and profiling, but incurs a performance penalty.
+This option should only be used if the \code{otelsdk} package is installed.}
+}
+\item{shiny.otel.graphlocked (defaults to \code{FALSE})}{If \code{TRUE}, then all reactive expressions and
+observers will be automatically bound to OpenTelemetry spans. This is
+useful for debugging and profiling, but incurs a performance penalty.
+This option should only be used if the \code{otelsdk} package is installed.}
 }
 }
 

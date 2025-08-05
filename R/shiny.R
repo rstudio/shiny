@@ -2195,6 +2195,12 @@ ShinySession <- R6Class(
       if (private$busyCount == 0L) {
         rLog$asyncStart(domain = self)
         private$sendMessage(busy = "busy")
+        if (otel::is_tracing_enabled()) {
+          if (is_recording_otel_reactive_graph_lock()) {
+            self$userData[["otelGraphLockedSpan"]] <-
+              otel_start_active_shiny_span(self, "lock_reactive_graph")
+          }
+        }
       }
       private$busyCount <- private$busyCount + 1L
     },
@@ -2216,6 +2222,14 @@ ShinySession <- R6Class(
             private$startCycle()
           }
         })
+
+        if (otel::is_tracing_enabled()) {
+          lockedSpan <- self$userData[["otelGraphLockedSpan"]]
+          if (!is.null(lockedSpan)) {
+            otel::end_span(lockedSpan)
+            self$userData[["otelGraphLockedSpan"]] <- NULL
+          }
+        }
       }
     }
   )

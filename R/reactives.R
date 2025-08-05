@@ -79,6 +79,7 @@ ReactiveVal <- R6Class(
     dependents = NULL
   ),
   public = list(
+    .is_logging_otel = FALSE, # needs to be accessed/set within Shiny
     initialize = function(value, label = NULL) {
       reactId <- nextGlobalReactId()
       private$reactId <- reactId
@@ -98,6 +99,9 @@ ReactiveVal <- R6Class(
     set = function(value) {
       if (identical(private$value, value)) {
         return(invisible(FALSE))
+      }
+      if (.is_logging_otel && otel::is_logging_enabled("info")) {
+        otel::log_info(paste0("Setting reactive value: ", private$label))
       }
       rLog$valueChange(private$reactId, value, getDefaultReactiveDomain())
       private$value <- value
@@ -211,7 +215,7 @@ reactiveVal <- function(value = NULL, label = NULL) {
   }
 
   rv <- ReactiveVal$new(value, label)
-  structure(
+  ret <- structure(
     function(x) {
       if (missing(x)) {
         rv$get()
@@ -224,6 +228,12 @@ reactiveVal <- function(value = NULL, label = NULL) {
     label = label,
     .impl = rv
   )
+
+  if (is_binding_all_otel()) {
+    ret <- bindOtel(ret)
+  }
+
+  ret
 }
 
 #' @rdname freezeReactiveValue
@@ -329,6 +339,7 @@ ReactiveValues <- R6Class(
     # All names, in insertion order. The names are also stored in the .values
     # object, but it does not preserve order.
     .nameOrder = character(0),
+    .is_logging_otel = FALSE,
 
 
     initialize = function(
@@ -404,6 +415,10 @@ ReactiveValues <- R6Class(
 
       if (key_exists && !isTRUE(force) && .dedupe && identical(.values$get(key), value)) {
         return(invisible())
+      }
+
+      if (.is_logging_otel && otel::is_logging_enabled("info")) {
+        otel::log_info(paste0("Setting reactive values: ", key, " = ", value))
       }
 
       # If it's new, append key to the name order
@@ -583,6 +598,11 @@ reactiveValues <- function(...) {
 
   # Use .subset2() instead of [[, to avoid method dispatch
   .subset2(values, 'impl')$mset(args)
+
+  if (is_binding_all_otel()) {
+    values <- bindOtel(values)
+  }
+
   values
 }
 
@@ -1017,12 +1037,18 @@ reactive <- function(
   label <- exprToLabel(userExpr, "reactive", label)
 
   o <- Observable$new(func, label, domain, ..stacktraceon = ..stacktraceon)
-  structure(
+  ret <- structure(
     o$getValue,
     observable = o,
     cacheHint = list(userExpr = zap_srcref(userExpr)),
     class = c("reactiveExpr", "reactive", "function")
   )
+
+  if (is_binding_all_otel()) {
+    ret <- bindOtel(ret)
+  }
+
+  ret
 }
 
 # Given the srcref to a reactive expression, attempts to figure out what the
@@ -1127,9 +1153,19 @@ Observer <- R6Class(
     .prevId = character(0),
     .ctx = NULL,
 
+    # __new__
+    #   if otel, then return otelboundobserver
+    #   else return observer
+
+    # __init__
+
     initialize = function(observerFunc, label, suspended = FALSE, priority = 0,
                           domain = getDefaultReactiveDomain(),
                           autoDestroy = TRUE, ..stacktraceon = TRUE) {
+      # if (shinyOption$bindOtel) {
+      #   return(withOption(FALSE, Observer$new(a,b,c)) |> bindOtel(self))
+      # }
+
       if (length(formals(observerFunc)) > 0)
         rlang::abort(c(
           "Can't make an observer from a function that takes arguments.",
@@ -1441,6 +1477,11 @@ observe <- function(
     autoDestroy = autoDestroy,
     ..stacktraceon = ..stacktraceon
   )
+
+  if (is_binding_all_otel()) {
+    o <- bindOtel(o)
+  }
+
   invisible(o)
 }
 

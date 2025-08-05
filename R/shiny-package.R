@@ -42,4 +42,4 @@ release_bullets <- function() {
   )
 }
 
-otel_tracer_name <- "r.package.shiny"
+otel_tracer_name <- "co.posit.r-package.shiny"

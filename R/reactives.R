@@ -87,6 +87,8 @@ ReactiveVal <- R6Class(
       private$label <- label
       private$dependents <- Dependents$new(reactId = private$reactId)
       rLog$define(private$reactId, value, private$label, type = "reactiveVal", getDefaultReactiveDomain())
+
+      .is_logging_otel <<- is_binding_all_otel()
     },
     get = function() {
       private$dependents$register()
@@ -100,10 +102,15 @@ ReactiveVal <- R6Class(
       if (identical(private$value, value)) {
         return(invisible(FALSE))
       }
-      if (.is_logging_otel && otel::is_logging_enabled("info")) {
-        otel::log_info(paste0("Setting reactive value: ", private$label))
+
+      domain <- getDefaultReactiveDomain()
+      if (!is.null(domain)) {
+        if (.is_logging_otel && otel::is_logging_enabled("info")) {
+          local_otel_active_reactive_lock_span(domain)
+          otel::log_info(paste0("Setting reactive value: ", private$label))
+        }
       }
-      rLog$valueChange(private$reactId, value, getDefaultReactiveDomain())
+      rLog$valueChange(private$reactId, value, domain)
       private$value <- value
       private$dependents$invalidate()
       invisible(TRUE)
@@ -356,6 +363,8 @@ ReactiveValues <- R6Class(
       .allValuesDeps <<- Dependents$new(reactId = rLog$asListAllIdStr(.reactId))
       .valuesDeps <<- Dependents$new(reactId = rLog$asListIdStr(.reactId))
       .dedupe <<- dedupe
+
+      .is_logging_otel <<- is_binding_all_otel()
     },
 
     get = function(key) {
@@ -417,8 +426,11 @@ ReactiveValues <- R6Class(
         return(invisible())
       }
 
-      if (.is_logging_otel && otel::is_logging_enabled("info")) {
-        otel::log_info(paste0("Setting reactive values: ", key, " = ", value))
+      if (!is.null(domain)) {
+        if (.is_logging_otel && otel::is_logging_enabled("info")) {
+          local_otel_active_reactive_lock_span(domain)
+          otel::log_info(paste0("Setting reactive values: ", key, " = ", value))
+        }
       }
 
       # If it's new, append key to the name order
@@ -1162,10 +1174,6 @@ Observer <- R6Class(
     initialize = function(observerFunc, label, suspended = FALSE, priority = 0,
                           domain = getDefaultReactiveDomain(),
                           autoDestroy = TRUE, ..stacktraceon = TRUE) {
-      # if (shinyOption$bindOtel) {
-      #   return(withOption(FALSE, Observer$new(a,b,c)) |> bindOtel(self))
-      # }
-
       if (length(formals(observerFunc)) > 0)
         rlang::abort(c(
           "Can't make an observer from a function that takes arguments.",

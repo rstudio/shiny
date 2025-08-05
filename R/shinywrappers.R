@@ -134,7 +134,7 @@ markRenderFunction <- function(
     else renderFunc(...)
   }
 
-  structure(
+  ret <- structure(
     wrappedRenderFunc,
     class          = c("shiny.render.function", "function"),
     outputFunc     = uiFunc,
@@ -144,6 +144,12 @@ markRenderFunction <- function(
     cacheWriteHook = cacheWriteHook,
     cacheReadHook  = cacheReadHook
   )
+
+  if (is_binding_all_otel()) {
+    ret <- bindOtel(ret)
+  }
+
+  ret
 }
 
 #' @export
@@ -383,7 +389,7 @@ markOutputAttrs <- function(renderFunc, snapshotExclude = NULL,
 #' The corresponding HTML output tag should be `div` or `img` and have
 #' the CSS class name `shiny-image-output`.
 #'
-#' @seealso 
+#' @seealso
 #' * For more details on how the images are generated, and how to control
 #'   the output, see [plotPNG()].
 #' * Use [outputOptions()] to set general output options for an image output.
@@ -815,9 +821,9 @@ renderUI <- function(expr, env = parent.frame(), quoted = FALSE,
 #'
 #' @seealso
 #' * The download handler, like other outputs, is suspended (disabled) by
-#'   default for download buttons and links that are hidden. Use 
-#'   [outputOptions()] to control this behavior, e.g. to set 
-#'   `suspendWhenHidden = FALSE` if the download is initiated by 
+#'   default for download buttons and links that are hidden. Use
+#'   [outputOptions()] to control this behavior, e.g. to set
+#'   `suspendWhenHidden = FALSE` if the download is initiated by
 #'   programmatically clicking on the download button using JavaScript.
 #' @export
 downloadHandler <- function(filename, content, contentType=NULL, outputArgs=list()) {

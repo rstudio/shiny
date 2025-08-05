@@ -48,15 +48,18 @@ barret <- function() {
   # * https://github.com/r-lib/otel/commit/09c0eb6c80d5b907976de8fbaf89798cb11f8e6e#diff-169b8f234d0b208affb106fce375f86fefe2f16dba4ad66495a1dc06c8a4cd7b
 
   otel_tracer <- otel::get_tracer("kmeans-shiny-app")
-  otel_start_shiny_session <- function(session) {
+  otel_start_shiny_session <- function(
+    session,
+    activation_scope = parent.frame()
+  ) {
     message("Starting OpenTelemetry session for Shiny app")
     session$userData[["otel_tracer"]] <- otel_tracer
     session$userData[["otel_span"]] <-
       otel::start_local_active_span(
         "session",
         tracer = otel_tracer,
-        # scope = NULL,
         attributes = otel_session_attr(session),
+        activation_scope = activation_scope,
         end_on_exit = FALSE
       )
   }
@@ -71,7 +74,10 @@ barret <- function() {
     try(attr[["SERVER_PORT"]] <- as.integer(attr[["SERVER_PORT"]]))
 
     session$onSessionEnded(function(...) {
-      session$userData$otel_span$end()
+      otel_span <- session$userData[["otel_span"]]
+      if (!is.null(otel_span)) {
+        otel::end_span(otel_span)
+      }
     })
 
     attr
@@ -96,12 +102,14 @@ barret <- function() {
         Sys.sleep(1)
         input$x * input$y
       })
-      # |>
+      #  |>
       #   bindOtel(
-      #     # name = "Expensive calc!!",
-      #     # extraAttributes = function() {
+      #     label = "Expensive calc"
+      #     # # name = "Expensive calc!!",
+      #     # attributes = \() {
       #     #   list(x = input$x, y = input$y)
       #     # }
+      #     # # ,
       #     # name_x = {input$x},
       #     # name_y = {input$y}
       #   )
@@ -152,6 +160,16 @@ withOtelShiny <- function(expr, ..., bindAll = TRUE) {
       shiny.otel.bindall = isTRUE(bindAll)
     ),
     expr
+  )
+}
+localOtelShiny <- function(..., bindAll = TRUE, .envir = parent.frame()) {
+  rlang::check_dots_empty()
+
+  withr::local_options(
+    list(
+      shiny.otel.bindall = isTRUE(bindAll)
+    ),
+    .envir = .envir
   )
 }
 
@@ -333,6 +351,7 @@ bindOtel.reactiveValues <- function(x, ...) {
 bindOtel.reactiveExpr <- function(x, ...) {
   check_dots_unnamed()
 
+  # TODO: This value feels wrong. `bindCache()` is also probably wrong.
   label <- exprToLabel(substitute(key), "otel")
   domain <- reactive_get_domain(x)
 
@@ -502,7 +521,6 @@ generateOtelFun <- function(
             local_otel_active_reactive_lock_span(domain)
           }
           # Create an inactive span
-          # inactive_span <- promises:::otel_create_inactive_span(
           active_span <-
             otel_start_active_shiny_span(
               domain,
@@ -591,14 +609,14 @@ local_otel_active_reactive_lock_span <- function(
   domain,
   activation_scope = parent.frame()
 ) {
-  if (is.null(domain$userData[["otelGraphLockedSpan"]])) {
+  if (!is.null(domain$userData[["otelGraphLockedSpan"]])) {
     # If the graph is locked, we need to use the locked span
     # This is useful for debugging and tracing the reactive graph
     otel::local_active_span(
       domain$userData[["otelGraphLockedSpan"]],
       activation_scope = activation_scope
     )
-  } else {
+  } else if (!is.null(domain$userData[["otel_span"]])) {
     # Otherwise, we use the default active span
     otel::local_active_span(
       domain$userData[["otel_span"]],

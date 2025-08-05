@@ -2197,6 +2197,9 @@ ShinySession <- R6Class(
         private$sendMessage(busy = "busy")
         if (otel::is_tracing_enabled()) {
           if (is_recording_otel_reactive_graph_lock()) {
+            # Must activate the session span before making the lock span
+            otel::local_active_span(self$userData[["otel_span"]])
+
             self$userData[["otelGraphLockedSpan"]] <-
               otel_start_active_shiny_span(self, "lock_reactive_graph")
           }

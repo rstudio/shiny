@@ -7,6 +7,7 @@
 #     * Reactive values - `reactiveValues`
 #     * Reactive expression - `reactive`
 #     * Render function - `shiny.render.function`
+#     * Observer - `observe`
 # * Global options:
 #   * shiny.otel.graphlocked: TRUE/FALSE - whether to lock the graph for
 #     OpenTelemetry spans, so that they are not modified while being traced.
@@ -30,7 +31,7 @@
 # TODO: reactiveTimer / invalidateLater / reactivePoll / reactiveFileReader
 # TODO: observeEvent / eventReactive - I don't believe these are possible except when binding all otel
 # TODO: debounce / throttle - I don't believe these are possible except when binding all otel
-
+# TODO: Extended Tasks are linked from parent span. Maybe use an envvar for span context? It is allowed for child process can end much later than the parent process. Take inspiration from callr PR (copying of the span context to the child process).
 
 # Personal debugging function -------------------------------
 # system("air format ./R/bind-otel.R"); devtools::load_all(); barret() |> runApp(port = 8080)
@@ -49,7 +50,6 @@ barret <- function() {
   otel_tracer <- otel::get_tracer("kmeans-shiny-app")
   otel_start_shiny_session <- function(session) {
     message("Starting OpenTelemetry session for Shiny app")
-    otel_tracer$start_span("app")
     session$userData[["otel_tracer"]] <- otel_tracer
     session$userData[["otel_span"]] <-
       otel::start_local_active_span(
@@ -96,6 +96,15 @@ barret <- function() {
         Sys.sleep(1)
         input$x * input$y
       })
+      # |>
+      #   bindOtel(
+      #     # name = "Expensive calc!!",
+      #     # extraAttributes = function() {
+      #     #   list(x = input$x, y = input$y)
+      #     # }
+      #     # name_x = {input$x},
+      #     # name_y = {input$y}
+      #   )
       #  |>
       #   bindOtel()
       # Q: Automatically sets x = isolate(input$x), y = isolate(input$y) as otel attributes?
@@ -352,6 +361,8 @@ bindOtel.reactiveExpr <- function(x, ...) {
           valueFunc()
         },
         "reactiveExpr",
+        # Should only be active within a currently active reactive context
+        activate_reactive_lock_span = FALSE,
         attributes = list(
           label = label
         ),
@@ -380,6 +391,10 @@ bindOtel.shiny.render.function <- function(x, ...) {
         valueFunc(...)
       },
       "shiny.render.function",
+
+      # This is a root context, so we need to join to the current active span
+      activate_reactive_lock_span = TRUE,
+
       # !!!otel_dots,
       # attributes = NULL,
       # links = NULL,
@@ -428,6 +443,8 @@ bindOtel.Observer <- function(x, ..., label = NULL) {
           obsFunc()
         },
         "bindOtel.Observer",
+        # This is a root context, so it must be within the reactive lock span
+        activate_reactive_lock_span = TRUE,
         attributes = list(label = x$.label),
         links = NULL,
         option = NULL,
@@ -464,6 +481,7 @@ generateOtelFun <- function(
   expr,
   name,
   ...,
+  activate_reactive_lock_span,
   attributes = NULL,
   links = NULL,
   option = NULL,
@@ -471,12 +489,18 @@ generateOtelFun <- function(
 ) {
   function() {
     is_tracing <- otel::is_tracing_enabled()
-    with_otel_active_span_promise_domain <- rlang::ns_env("promises")[["with_otel_active_span_promise_domain"]]
+    with_otel_active_span_promise_domain <- rlang::ns_env("promises")[[
+      "with_otel_active_span_promise_domain"
+    ]]
+
     hybrid_chain(
       {
         # Use a placeholder to indicate that otel is tracing.
         # This way we shut down only the spans that we create
         if (is_tracing) {
+          if (activate_reactive_lock_span) {
+            local_otel_active_reactive_lock_span(domain)
+          }
           # Create an inactive span
           # inactive_span <- promises:::otel_create_inactive_span(
           active_span <-
@@ -528,15 +552,57 @@ bindOtel.Observer.otel <- bindOtel.reactive.otel
 
 # - Create Shiny Domain otel span ---------------------------
 
-otel_start_active_shiny_span <- function(domain, name, ..., attributes = NULL) {
+# TODO: otel_log(msg, level = "info") helper method that reactivates the session span
+
+# Learnings... spans are only "active" for the function context.
+# All existing spans MUST be reactivated when starting in another function context. As anything can happen in the meantime.
+# This means, we must manage
+
+otel_start_active_shiny_span <- function(
+  domain,
+  name,
+  ...,
+  attributes = NULL,
+  activation_scope = parent.frame()
+) {
+  # # MUST set activate parent span before creating ANY new spans (or logs)
+  # otel::local_active_span(
+  #   domain$userData[["otel_span"]]
+  # )
+
+  # # Useful for starting a new sub process
+  # otel::get_active_span_context()$to_http_headers()
+
   otel::start_local_active_span(
     name,
-    tracer = domain$userData[["otel_tracer"]],
+    # tracer = domain$userData[["otel_tracer"]],
     ...,
     attributes = otel::as_attributes(c(
       attributes,
       list(session = domain$token)
     )),
+    activation_scope = activation_scope,
     end_on_exit = FALSE
   )
+}
+
+
+local_otel_active_reactive_lock_span <- function(
+  domain,
+  activation_scope = parent.frame()
+) {
+  if (is.null(domain$userData[["otelGraphLockedSpan"]])) {
+    # If the graph is locked, we need to use the locked span
+    # This is useful for debugging and tracing the reactive graph
+    otel::local_active_span(
+      domain$userData[["otelGraphLockedSpan"]],
+      activation_scope = activation_scope
+    )
+  } else {
+    # Otherwise, we use the default active span
+    otel::local_active_span(
+      domain$userData[["otel_span"]],
+      activation_scope = activation_scope
+    )
+  }
 }

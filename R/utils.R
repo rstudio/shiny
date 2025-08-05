@@ -1063,8 +1063,10 @@ validate <- function(..., errorClass = character(0)) {
 #' @rdname validate
 need <- function(expr, message = paste(label, "must be provided"), label) {
 
-  force(message) # Fail fast on message/label both being missing
-
+  if (missing(label) && missing(message)) {
+    return("label is missing in `need()`")
+  }
+  
   if (!isTruthy(expr))
     return(message)
   else

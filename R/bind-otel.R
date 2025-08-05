@@ -18,6 +18,12 @@
 #     * Note: When adding otel to an object, prepend a class of `FOO.otel`. Then add a dispatch method for `bindOtel.FOO.otel()` that declares the object already has been bound.
 #   * withOtelShiny() - runs the expression with OpenTelemetry spans enabled
 
+# - TODO -----------------------------------
+# * Tests with otel recording
+`_ignore` <- function() {
+  otelsdk::with_otel_record
+}
+
 
 # - Questions -----------------------------------
 # TODO: freeze / thaw? - log restart event?

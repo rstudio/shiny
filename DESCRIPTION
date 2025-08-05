@@ -125,6 +125,7 @@ Suggests:
     watcher,
     yaml
 Remotes:
+    r-lib/otelsdk,
     rstudio/promises@feat/otel
 Config/Needs/check: shinytest2
 Config/testthat/edition: 3

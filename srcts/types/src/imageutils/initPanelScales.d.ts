@@ -40,5 +40,5 @@ type Panel = PanelInit & {
     };
 };
 declare function initPanelScales(panels: PanelInit[]): Panel[];
-export type { Panel, PanelInit };
 export { initPanelScales };
+export type { Panel, PanelInit };

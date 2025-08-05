@@ -8,7 +8,7 @@ function triggerFileInputChanged(
   binding: FileInputBinding,
   el: HTMLElement,
   inputType: string,
-  onEl: typeof document
+  onEl: typeof document,
 ): ShinyEventInputChanged {
   const evt = $.Event("shiny:inputchanged") as ShinyEventInputChanged;
 

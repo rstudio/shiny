@@ -84,4 +84,4 @@ function remove(): void {
   }
 }
 
-export { show as showModal, remove as removeModal };
+export { remove as removeModal, show as showModal };

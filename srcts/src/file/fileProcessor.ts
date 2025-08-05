@@ -31,12 +31,14 @@ class FileProcessor {
 
   // Begin callbacks. Subclassers/cloners may override any or all of these.
   onBegin(files: File[], cont: () => void): void {
-    files;
     setTimeout(cont, 0);
+    return;
+    files; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
   onFile(file: File, cont: () => void): void {
-    file;
     setTimeout(cont, 0);
+    return;
+    file; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
   onComplete(): void {
     return;
@@ -108,7 +110,7 @@ class FileUploader extends FileProcessor {
     shinyapp: ShinyApp,
     id: string,
     files: FileList,
-    el: HTMLElement
+    el: HTMLElement,
   ) {
     // Init super with files, do not execute `this.$run()` before setting variables
     super(files, false);
@@ -123,7 +125,7 @@ class FileUploader extends FileProcessor {
     args: Array<Array<{ name: string; size: number; type: string }>>,
     onSuccess: (value: UploadInitValue) => void,
     onFailure: Parameters<ShinyApp["makeRequest"]>[3],
-    blobs: Parameters<ShinyApp["makeRequest"]>[4]
+    blobs: Parameters<ShinyApp["makeRequest"]>[4],
   ): void;
   makeRequest(
     method: "uploadEnd",
@@ -131,14 +133,14 @@ class FileUploader extends FileProcessor {
     // UploadEndValue can not be used as the type will not conform
     onSuccess: (value: unknown) => void,
     onFailure: Parameters<ShinyApp["makeRequest"]>[3],
-    blobs: Parameters<ShinyApp["makeRequest"]>[4]
+    blobs: Parameters<ShinyApp["makeRequest"]>[4],
   ): void;
   makeRequest(
     method: string,
     args: unknown[],
     onSuccess: Parameters<ShinyApp["makeRequest"]>[2],
     onFailure: Parameters<ShinyApp["makeRequest"]>[3],
-    blobs: Parameters<ShinyApp["makeRequest"]>[4]
+    blobs: Parameters<ShinyApp["makeRequest"]>[4],
   ): void {
     this.shinyapp.makeRequest(method, args, onSuccess, onFailure, blobs);
   }
@@ -174,13 +176,12 @@ class FileUploader extends FileProcessor {
       (error) => {
         this.onError(error);
       },
-      undefined
+      undefined,
     );
   }
   onFile(file: File, cont: () => void): void {
     this.onProgress(file, 0);
 
-    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     $.ajax(this.uploadUrl, {
       type: "POST",
       cache: false,
@@ -195,7 +196,7 @@ class FileUploader extends FileProcessor {
             if (e.lengthComputable) {
               this.onProgress(
                 file,
-                (this.progressBytes + e.loaded) / this.totalBytes
+                (this.progressBytes + e.loaded) / this.totalBytes,
               );
             }
           };
@@ -210,8 +211,9 @@ class FileUploader extends FileProcessor {
         cont();
       },
       error: (jqXHR, textStatus, errorThrown) => {
-        errorThrown;
         this.onError(jqXHR.responseText || textStatus);
+        return;
+        errorThrown; // eslint-disable-line @typescript-eslint/no-unused-expressions
       },
     });
   }
@@ -222,7 +224,7 @@ class FileUploader extends FileProcessor {
         size: file.size,
         type: file.type,
       };
-      i;
+      i; // eslint-disable-line @typescript-eslint/no-unused-expressions
     });
 
     // Trigger shiny:inputchanged. Unlike a normal shiny:inputchanged event,
@@ -234,7 +236,7 @@ class FileUploader extends FileProcessor {
       getFileInputBinding(),
       this.el,
       "shiny.fileupload",
-      document
+      document,
     );
 
     this.makeRequest(
@@ -251,7 +253,7 @@ class FileUploader extends FileProcessor {
       (error) => {
         this.onError(error);
       },
-      undefined
+      undefined,
     );
     this.$bar().text("Finishing upload");
   }
@@ -273,7 +275,7 @@ class FileUploader extends FileProcessor {
     return $(
       "#" +
         $escape(this.id) +
-        "_progress.shiny-file-input-progress .progress-bar"
+        "_progress.shiny-file-input-progress .progress-bar",
     );
   }
   $setVisible(visible: boolean): void {
@@ -292,4 +294,4 @@ class FileUploader extends FileProcessor {
 }
 
 export { FileUploader };
-export type { UploadInitValue, UploadEndValue };
+export type { UploadEndValue, UploadInitValue };

@@ -10,7 +10,7 @@ class PasswordInputBinding extends TextInputBinding {
 
   getType(el: HTMLElement): string {
     return "shiny.password";
-    el;
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
 }
 

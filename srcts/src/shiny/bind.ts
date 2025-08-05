@@ -1,5 +1,4 @@
 import $ from "jquery";
-import { Shiny } from "..";
 import type { InputBinding, OutputBinding } from "../bindings";
 import type { SubscribeEventPriority } from "../bindings/input/inputBinding";
 import { OutputBindingAdapter } from "../bindings/outputAdapter";
@@ -29,7 +28,7 @@ function valueChangeCallback(
   inputs: InputValidateDecorator,
   binding: InputBinding,
   el: HTMLElement,
-  priority?: SubscribeEventPriority
+  priority?: SubscribeEventPriority,
 ) {
   let id = binding.getId(el);
 
@@ -48,7 +47,7 @@ function valueChangeCallback(
 
 // Narrow the type of the subscribe callback value to EventPriority
 function normalizeEventPriority(
-  priority?: SubscribeEventPriority
+  priority?: SubscribeEventPriority,
 ): EventPriority {
   if (priority === false || priority === undefined) {
     return "immediate";
@@ -233,10 +232,11 @@ type BindInputsCtx = {
   sendOutputHiddenState: () => void;
   maybeAddThemeObserver: (el: HTMLElement) => void;
   initDeferredIframes: () => void;
+  outputIsRecalculating: (id: string) => boolean;
 };
 function bindInputs(
   shinyCtx: BindInputsCtx,
-  scope: BindScope = document.documentElement
+  scope: BindScope = document.documentElement,
 ): {
   [key: string]: {
     value: ReturnType<InputBinding["getValue"]>;
@@ -300,7 +300,7 @@ function bindInputs(
         inputsRate.setRatePolicy(
           effectiveId,
           ratePolicy.policy,
-          ratePolicy.delay
+          ratePolicy.delay,
         );
       }
 
@@ -322,8 +322,9 @@ async function bindOutputs(
     sendOutputHiddenState,
     maybeAddThemeObserver,
     outputBindings,
+    outputIsRecalculating,
   }: BindInputsCtx,
-  scope: BindScope = document.documentElement
+  scope: BindScope = document.documentElement,
 ): Promise<void> {
   const $scope = $(scope);
 
@@ -367,7 +368,7 @@ async function bindOutputs(
       $el.addClass("shiny-bound-output");
       if (!$el.attr("aria-live")) $el.attr("aria-live", "polite");
 
-      if (Shiny.shinyapp?.$outputProgress.isRecalculating(id)) {
+      if (outputIsRecalculating(id)) {
         bindingAdapter.showProgress(true);
       }
 
@@ -388,7 +389,7 @@ async function bindOutputs(
 
 function unbindInputs(
   scope: BindScope = document.documentElement,
-  includeSelf = false
+  includeSelf = false,
 ) {
   const inputs: Array<HTMLElement | JQuery<HTMLElement>> = $(scope)
     .find(".shiny-bound-input")
@@ -420,7 +421,7 @@ function unbindInputs(
 function unbindOutputs(
   { sendOutputHiddenState }: BindInputsCtx,
   scope: BindScope = document.documentElement,
-  includeSelf = false
+  includeSelf = false,
 ) {
   const outputs: Array<HTMLElement | JQuery<HTMLElement>> = $(scope)
     .find(".shiny-bound-output")
@@ -459,7 +460,7 @@ function unbindOutputs(
 // eslint-disable-next-line @typescript-eslint/naming-convention
 async function _bindAll(
   shinyCtx: BindInputsCtx,
-  scope: BindScope
+  scope: BindScope,
 ): Promise<ReturnType<typeof bindInputs>> {
   await bindOutputs(shinyCtx, scope);
   const currentInputs = bindInputs(shinyCtx, scope);
@@ -476,14 +477,14 @@ async function _bindAll(
 function unbindAll(
   shinyCtx: BindInputsCtx,
   scope: BindScope,
-  includeSelf = false
+  includeSelf = false,
 ): void {
   unbindInputs(scope, includeSelf);
   unbindOutputs(shinyCtx, scope, includeSelf);
 }
 async function bindAll(
   shinyCtx: BindInputsCtx,
-  scope: BindScope
+  scope: BindScope,
 ): Promise<void> {
   // _bindAll returns input values; it doesn't send them to the server.
   // Shiny.bindAll needs to send the values to the server.
@@ -502,5 +503,5 @@ async function bindAll(
   shinyCtx.initDeferredIframes();
 }
 
-export { unbindAll, bindAll, _bindAll };
-export type { BindScope, BindInputsCtx };
+export { _bindAll, bindAll, unbindAll };
+export type { BindInputsCtx, BindScope };

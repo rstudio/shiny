@@ -3,7 +3,7 @@ import type { HtmlDep } from "../shiny/render";
 import { renderContent } from "../shiny/render";
 import { windowDevicePixelRatio } from "../window/pixelRatio";
 import type { MapValuesUnion, MapWithResult } from "./extraTypes";
-import { hasDefinedProperty, hasOwnProperty } from "./object";
+import { asArray, hasDefinedProperty, hasOwnProperty } from "./object";
 
 function escapeHTML(str: string): string {
   /* eslint-disable @typescript-eslint/naming-convention */
@@ -11,7 +11,7 @@ function escapeHTML(str: string): string {
     "&": "&amp;",
     "<": "&lt;",
     ">": "&gt;",
-    // eslint-disable-next-line prettier/prettier
+
     '"': "&quot;",
     "'": "&#039;",
     "/": "&#x2F;",
@@ -122,8 +122,8 @@ function makeResizeFilter(
   el: HTMLElement,
   func: (
     width: HTMLElement["offsetWidth"],
-    height: HTMLElement["offsetHeight"]
-  ) => void
+    height: HTMLElement["offsetHeight"],
+  ) => void,
 ): () => void {
   let lastSize: LastSizeInterface = {};
 
@@ -187,7 +187,7 @@ function scopeExprToFunc(expr: string): (scope: unknown) => unknown {
           console.error('Error evaluating expression: ${exprEscaped}');
           throw e;
         }
-      }`
+      }`,
     );
   } catch (e) {
     console.error("Error parsing expression: " + expr);
@@ -199,17 +199,11 @@ function scopeExprToFunc(expr: string): (scope: unknown) => unknown {
   };
 }
 
-function asArray<T>(value: T | T[] | null | undefined): T[] {
-  if (value === null || value === undefined) return [];
-  if (Array.isArray(value)) return value;
-  return [value];
-}
-
 // We need a stable sorting algorithm for ordering
 // bindings by priority and insertion order.
 function mergeSort<Item>(
   list: Item[],
-  sortfunc: (a: Item, b: Item) => boolean | number
+  sortfunc: (a: Item, b: Item) => boolean | number,
 ): Item[] {
   function merge(a: Item[], b: Item[]) {
     let ia = 0;
@@ -217,7 +211,7 @@ function mergeSort<Item>(
     const sorted = [];
 
     while (ia < a.length && ib < b.length) {
-      if (sortfunc(a[ia], b[ib]) <= 0) {
+      if (Number(sortfunc(a[ia], b[ib])) <= 0) {
         sorted.push(a[ia++]);
       } else {
         sorted.push(b[ib++]);
@@ -258,7 +252,7 @@ function $escape(val: string | undefined): string | undefined {
 // function from lodash.
 function mapValues<T extends { [key: string]: any }, R>(
   obj: T,
-  f: (value: MapValuesUnion<T>, key: string, object: typeof obj) => R
+  f: (value: MapValuesUnion<T>, key: string, object: typeof obj) => R,
 ): MapWithResult<T, R> {
   const newObj = {} as MapWithResult<T, R>;
 
@@ -319,7 +313,7 @@ function equal(...args: unknown[]): boolean {
 const compareVersion = function (
   a: string,
   op: "<" | "<=" | "==" | ">" | ">=",
-  b: string
+  b: string,
 ): boolean {
   function versionParts(ver: string) {
     return (ver + "")
@@ -355,7 +349,7 @@ const compareVersion = function (
 
 async function updateLabel(
   labelContent: string | { html: string; deps: HtmlDep[] } | undefined,
-  labelNode: JQuery<HTMLElement>
+  labelNode: JQuery<HTMLElement>,
 ): Promise<void> {
   // Only update if label was specified in the update method
   if (typeof labelContent === "undefined") return;
@@ -399,7 +393,6 @@ function getComputedLinkColor(el: HTMLElement): string {
 }
 
 function isBS3(): boolean {
-  // @ts-expect-error; Check if `window.bootstrap` exists
   return !window.bootstrap;
 }
 
@@ -407,31 +400,37 @@ function toLowerCase<T extends string>(str: T): Lowercase<T> {
   return str.toLowerCase() as Lowercase<T>;
 }
 
+function isShinyInDevMode(): boolean {
+  if ("__SHINY_DEV_MODE__" in window) return Boolean(window.__SHINY_DEV_MODE__);
+  return false;
+}
+
 export {
-  escapeHTML,
-  randomId,
-  strToBool,
-  getStyle,
-  padZeros,
-  roundSignif,
-  parseDate,
-  formatDateUTC,
-  makeResizeFilter,
-  pixelRatio,
-  getBoundingClientSizeBeforeZoom,
-  scopeExprToFunc,
-  asArray,
-  mergeSort,
   $escape,
-  mapValues,
-  isnan,
   _equal,
-  equal,
+  asArray,
   compareVersion,
-  updateLabel,
+  equal,
+  escapeHTML,
+  formatDateUTC,
+  getBoundingClientSizeBeforeZoom,
   getComputedLinkColor,
-  hasOwnProperty,
+  getStyle,
   hasDefinedProperty,
+  hasOwnProperty,
   isBS3,
+  isnan,
+  isShinyInDevMode,
+  makeResizeFilter,
+  mapValues,
+  mergeSort,
+  padZeros,
+  parseDate,
+  pixelRatio,
+  randomId,
+  roundSignif,
+  scopeExprToFunc,
+  strToBool,
   toLowerCase,
+  updateLabel,
 };

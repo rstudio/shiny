@@ -24,7 +24,7 @@ class InputBinding {
   // descendants of scope that match this binding
   find(scope: BindScope): JQuery<HTMLElement> {
     throw "Not implemented";
-    scope; // unused var
+    scope; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
 
   getId(el: HTMLElement): string {
@@ -35,21 +35,23 @@ class InputBinding {
   // to deserialize the JSON correctly
   getType(el: HTMLElement): string | null {
     return null;
-    el; // unused var
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
   getValue(el: HTMLElement): any {
     throw "Not implemented";
-    el; // unused var
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
 
   subscribe(el: HTMLElement, callback: InputSubscribeCallback): void {
     // empty
-    el; // unused var
-    callback; // unused var
+    return;
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
+    callback; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
   unsubscribe(el: HTMLElement): void {
     // empty
-    el; // unused var
+    return;
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
 
   // This is used for receiving messages that tell the input object to do
@@ -59,19 +61,19 @@ class InputBinding {
   // trigger a change event.
   receiveMessage(el: HTMLElement, data: unknown): Promise<void> | void {
     throw "Not implemented";
-    el; // unused var
-    data; // unused var
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
+    data; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
   getState(el: HTMLElement): unknown {
     throw "Not implemented";
-    el; // unused var
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
 
   getRatePolicy(
-    el: HTMLElement
+    el: HTMLElement,
   ): { policy: RatePolicyModes; delay: number } | null {
     return null;
-    el; // unused var
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
 
   // Some input objects need initialization before being bound. This is
@@ -81,13 +83,15 @@ class InputBinding {
   // This is called before the input is bound.
   initialize(el: HTMLElement): void {
     //empty
-    el;
+    return;
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
 
   // This is called after unbinding the output.
   dispose(el: HTMLElement): void {
     //empty
-    el;
+    return;
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
 }
 

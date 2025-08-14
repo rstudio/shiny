@@ -1,4 +1,3 @@
-@use "sass:meta";
 // DEFAULTS
 $shiny-disconnected-bg:             #999 !default;
 $shiny-table-na:                    #909090 !default;
@@ -48,7 +47,7 @@ $shiny-file-over-shadow:            inset 0 1px 1px rgba(black, .075), 0 0 8px r
 // Both BS3 and BS4 define a border radius mixin, but just in case
 // we're trying to compile this without bootstrapSass
 @mixin border-radius-shim($radius) {
-  @if meta.mixin-exists("border-radius") {
+  @if mixin-exists("border-radius") {
     @include border-radius($radius);
   } @else {
     border-radius: $radius;

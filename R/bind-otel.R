@@ -53,10 +53,7 @@ barret <- function() {
     session,
     activation_scope = parent.frame()
   ) {
-    message("Starting OpenTelemetry session for Shiny app")
-
     session$userData[["otel_tracer"]] <- otel_tracer
-
     start_session_ospan(OSPAN_SESSION_NAME, tracer = otel_tracer, attributes = otel_session_attr(session), domain = session)
   }
   otel_session_attr <- function(session) {
@@ -82,13 +79,26 @@ barret <- function() {
       # shiny::bindOtel(TRUE)
 
       otel_start_shiny_session(session)
-      otel::log_info("Start new Shiny session")
-      # otel_cnt_session$add()
+      with_existing_ospan_async(OSPAN_SESSION_NAME, {
+        otel::log_info("Start new Shiny session")
+      }, domain = session)
 
-      r <- reactive({
+      x <- reactive({
+        x_val <- input$x
+        otel_log_safe("X Val: {x_val}")
+        Sys.sleep(0.5)
+        x_val
+      })
+      y <- reactive({
+        y_val <- input$y
+        otel_log_safe("Y Val: {y_val}")
+        Sys.sleep(0.5)
+        y_val
+      })
+
+      calc <- reactive({
         message("Doing expensive computation...")
-        Sys.sleep(1)
-        input$x * input$y
+        x() * y()
       })
       #  |>
       #   bindOtel(
@@ -108,8 +118,13 @@ barret <- function() {
       # Q: Manually accept reactive expressions to isolate on during otel span creation?
       # * Ans: Maybe? Let's leave a door open for that via `bindOtel(...)`.
 
-      output$txt <-
-        renderText(r())
+      observe({
+        message("x: ", x())
+      })
+
+      output$txt <- renderText({
+        calc()
+      })
       # |>
       # bindOtel()
     }
@@ -437,6 +452,7 @@ bindOtel.Observer <- function(x, ..., label = NULL) {
       with_ospan_async(
         paste0("bindOtel.Observer(", x$.label, ")"),
         {
+          # browser()
           obsFunc()
         }
       )

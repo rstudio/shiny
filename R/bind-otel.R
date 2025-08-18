@@ -54,7 +54,12 @@ barret <- function() {
     activation_scope = parent.frame()
   ) {
     session$userData[["otel_tracer"]] <- otel_tracer
-    start_session_ospan(OSPAN_SESSION_NAME, tracer = otel_tracer, attributes = otel_session_attr(session), domain = session)
+    start_session_ospan(
+      OSPAN_SESSION_NAME,
+      tracer = otel_tracer,
+      attributes = otel_session_attr(session),
+      domain = session
+    )
   }
   otel_session_attr <- function(session) {
     attr <- list(
@@ -79,20 +84,24 @@ barret <- function() {
       # shiny::bindOtel(TRUE)
 
       otel_start_shiny_session(session)
-      with_existing_ospan_async(OSPAN_SESSION_NAME, {
-        otel::log_info("Start new Shiny session")
-      }, domain = session)
+      with_existing_ospan_async(
+        OSPAN_SESSION_NAME,
+        {
+          otel::log_info("Start new Shiny session")
+        },
+        domain = session
+      )
 
       x <- reactive({
         x_val <- input$x
         otel_log_safe("X Val: {x_val}")
-        Sys.sleep(0.5)
+        # Sys.sleep(0.5)
         x_val
       })
       y <- reactive({
         y_val <- input$y
         otel_log_safe("Y Val: {y_val}")
-        Sys.sleep(0.5)
+        # Sys.sleep(0.5)
         y_val
       })
 
@@ -125,6 +134,79 @@ barret <- function() {
       output$txt <- renderText({
         calc()
       })
+
+      log_and_msg <- function(...) {
+        msg <- paste(...)
+        message(msg)
+        otel::log_info(msg)
+      }
+
+      x_prom <- reactive({
+        x_span_id <- force(otel::get_active_span_context()$get_span_id())
+        # message("x_prom span id: ", x_span_id)
+        x_val <- force(input$x)
+        log_and_msg("x_prom init")
+        promises::promise_resolve(\() {
+          log_and_msg("x_prom 0")
+          x_val
+        }) |>
+          promises::then(function(x_val) {
+            log_and_msg("x_prom 1")
+            x_val
+          }) |>
+          promises::then(function(x_val) {
+            log_and_msg("x_prom 2")
+            x_val
+          }) |>
+          promises::then(function(x_val) {
+            log_and_msg("x_prom 3")
+            x_val
+          })
+      })
+
+      y_prom <- reactive({
+        y_span_id <- force(otel::get_active_span_context()$get_span_id())
+        # message("y_prom span id: ", y_span_id)
+        y_val <- force(input$y)
+        log_and_msg("y_prom init")
+        promises::promise_resolve(\() {
+          log_and_msg("y_prom 0")
+          y_val
+        }) |>
+          promises::then(function(y_val) {
+            log_and_msg("y_prom 1")
+            y_val
+          }) |>
+          promises::then(function(y_val) {
+            log_and_msg("y_prom 2")
+            y_val
+          }) |>
+          promises::then(function(y_val) {
+            log_and_msg("y_prom 3")
+            y_val
+          })
+      })
+
+      observe(label = "proms_observer", {
+        p <- promises::promise_all(
+          x_prom(),
+          y_prom()
+        )
+
+        promises::then(p, \(vals) {
+          message("Vals[1]: ", vals[[1]]())
+          message("Vals[2]: ", vals[[2]]())
+
+          # Shut down the app so the telemetry can be seen easily
+          later::later(
+            \() {
+              session$close()
+            },
+            delay = 10 / 1000
+          )
+        })
+      })
+
       # |>
       # bindOtel()
     }
@@ -328,7 +410,7 @@ bindOtel.default <- function(x, ...) {
 
 #' @export
 bindOtel.reactiveVal <- function(x, ...) {
-  check_dots_unnamed()
+  rlang::check_dots_empty()
 
   impl <- attr(x, ".impl", exact = TRUE)
   impl$.is_logging_otel <- TRUE
@@ -340,7 +422,7 @@ bindOtel.reactiveVal <- function(x, ...) {
 
 #' @export
 bindOtel.reactiveValues <- function(x, ...) {
-  check_dots_unnamed()
+  rlang::check_dots_empty()
 
   impl <- attr(x, ".impl", exact = TRUE)
   impl$.is_logging_otel <- TRUE
@@ -352,7 +434,7 @@ bindOtel.reactiveValues <- function(x, ...) {
 
 #' @export
 bindOtel.reactiveExpr <- function(x, ...) {
-  check_dots_unnamed()
+  rlang::check_dots_empty()
 
   # TODO: This value feels wrong. `bindCache()` is also probably wrong.
   # label <- exprToLabel(substitute(key), "otel")
@@ -396,7 +478,7 @@ bindOtel.reactiveExpr <- function(x, ...) {
 
 #' @export
 bindOtel.shiny.render.function <- function(x, ...) {
-  check_dots_unnamed()
+  rlang::check_dots_empty()
 
   valueFunc <- x
 
@@ -430,32 +512,30 @@ bindOtel.reactive.event <- function(x, ...) {
 
 #' @export
 bindOtel.Observer <- function(x, ..., label = NULL) {
+  rlang::check_dots_empty()
+
   if (x$.execCount > 0) {
     stop(
       "Cannot call bindOtel() on an Observer that has already been executed."
     )
   }
 
-  qs <- enquos0(...)
   # eventFunc <- quos_to_func(qs)
   obsFunc <- x$.func
 
   # Note that because the observer will already have been logged by this point,
   # this updated label won't show up in the reactlog.
   x$.label <- label %||%
-    sprintf('bindOtel(%s, %s)', x$.label, quos_to_label(qs))
+    sprintf('observe(%s)', x$.label)
 
   x$.func <- wrapFunctionLabel(
     name = x$.label,
     ..stacktraceon = FALSE,
     func = function() {
-      with_ospan_async(
-        paste0("bindOtel.Observer(", x$.label, ")"),
-        {
-          # browser()
-          obsFunc()
-        }
-      )
+      with_ospan_async(x$.label, {
+        # browser()
+        force(obsFunc())
+      })
     }
   )
 
@@ -554,7 +634,6 @@ bindOtel.shiny.render.function.event <- bindOtel.reactive.event
 #' @export
 bindOtel.Observer.otel <- bindOtel.reactive.otel
 
-
 # - Create Shiny Domain otel span ---------------------------
 
 # TODO: otel_log(msg, level = "info") helper method that reactivates the session span
@@ -590,7 +669,6 @@ bindOtel.Observer.otel <- bindOtel.reactive.otel
 #     end_on_exit = FALSE
 #   )
 # }
-
 
 # local_otel_active_reactive_lock_span <- function(
 #   domain,

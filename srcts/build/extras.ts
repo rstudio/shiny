@@ -4,11 +4,15 @@
 // ```
 
 import autoprefixer from "autoprefixer";
+import { exec } from "child_process";
 import { sassPlugin } from "esbuild-sass-plugin";
 import postcss from "postcss";
 import postcssPresetEnv from "postcss-preset-env";
+import { promisify } from "util";
 
 import { banner, build, outDir } from "./_build.js";
+
+const execAsync = promisify(exec);
 
 const sassOpts = {
   minify: true,
@@ -45,19 +49,17 @@ async function main(): Promise<void> {
       outdir: outDir,
     }),
 
+    // Shiny sass MUST be built using `Rscript tools/updateShinyCss.R`
+    execAsync("Rscript tools/updateShinyCss.R").then(({ stdout, stderr }) => {
+      if (stdout) console.log(stdout);
+      if (stderr) console.error(stderr);
+    }),
+
     // Sass builds
     build({
       ...sassOpts,
       entryPoints: ["srcts/extras/shiny-showcase.scss"],
       outfile: outDir + "shiny-showcase.css",
-    }),
-    build({
-      ...sassOpts,
-      entryPoints: [
-        // Must keep shiny.scss within `inst` to be able to use as htmldependency
-        outDir + "shiny_scss/shiny.scss",
-      ],
-      outfile: outDir + "shiny.min.css",
     }),
     build({
       ...sassOpts,

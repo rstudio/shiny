@@ -191,6 +191,7 @@ Collate:
     'modal.R'
     'modules.R'
     'notifications.R'
+    'otel.R'
     'priorityqueue.R'
     'progress.R'
     'react.R'

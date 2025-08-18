@@ -1154,9 +1154,9 @@ ShinySession <- R6Class(
             hybrid_chain(
               {
                 private$withCurrentOutput(name, {
-                  with_existing_ospan_async(OSPAN_SESSION_NAME, {
+                  with_existing_ospan_async(OSPAN_REACTIVE_LOCK_NAME, {
                     shinyCallingHandlers(func())
-                  })
+                  }, domain = self)
                 })
               },
               catch = function(cond) {

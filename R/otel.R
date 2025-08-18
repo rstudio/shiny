@@ -1,5 +1,5 @@
 debug_msg <- function(...) {
-  if (TRUE) {
+  if (FALSE) {
     message(...)
   }
 }
@@ -407,37 +407,23 @@ create_otel_active_span_promise_domain <- function(active_span) {
     wrapSync = function(expr) {
       otel::with_active_span(active_span, {
         debug_msg(
-          "Enter active span: ",
+          "wrapSync Enter active span: ",
           active_span$name,
           " - ",
           otel::get_active_span_context()$get_span_id()
         )
+        on.exit({
+          debug_msg(
+            "wrapSync Exit active span: ",
+            active_span$name,
+            " - ",
+            otel::get_active_span_context()$get_span_id()
+          )
+        }, add = TRUE)
         force(expr)
-        debug_msg(
-          "Exit active span: ",
-          active_span$name,
-          " - ",
-          otel::get_active_span_context()$get_span_id()
-        )
       })
     }
   )
-}
-
-with_promise_domain <- function(domain, expr, replace = FALSE) {
-  oldval <- promises:::current_promise_domain()
-  globals <- promises:::globals
-  if (replace) {
-    globals$domain <- domain
-  } else {
-    globals$domain <- compose_domains(oldval, domain)
-  }
-  on.exit(globals$domain <- oldval)
-  if (!is.null(domain)) {
-    domain$wrapSync(expr)
-  } else {
-    force(expr)
-  }
 }
 
 with_otel_active_span_promise_domain <- function(
@@ -450,10 +436,14 @@ with_otel_active_span_promise_domain <- function(
   stopifnot(length(list(...)) == 0L)
   act_span_pd <- create_otel_active_span_promise_domain(span)
 
+  # We need the current active span to be activated last, not first
+  # Compose the new promise domain at the end, not beginning.
   new_domain <- promises:::compose_domains(
     act_span_pd,
     promises:::current_promise_domain()
   )
+  # new_domain$wrapSync <- act_span_pd$wrapSync
+
   promises::with_promise_domain(new_domain, expr, replace = TRUE)
 }
 

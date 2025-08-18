@@ -105,9 +105,17 @@ ReactiveVal <- R6Class(
 
       domain <- getDefaultReactiveDomain()
       if (!is.null(domain)) {
-        if (.is_logging_otel && otel::is_logging_enabled("info")) {
-          local_otel_active_reactive_lock_span(domain)
-          otel::log_info(paste0("Setting reactive value: ", private$label))
+        if (.is_logging_otel) {
+          if (has_existing_ospan(OSPAN_REACTIVE_LOCK_NAME)) {
+            # Perform as is...
+            # with_existing_ospan_async(OSPAN_REACTIVE_LOCK_NAME, {
+            otel_log_safe("Setting reactive value: {private$label}", severity = "info")
+            # })
+          } else if(has_existing_ospan(OSPAN_SESSION_NAME)) {
+            with_existing_ospan_async(OSPAN_SESSION_NAME, {
+              otel_log_safe("Setting reactive value: {private$label}", severity = "info")
+            })
+          }
         }
       }
       rLog$valueChange(private$reactId, value, domain)
@@ -427,9 +435,17 @@ ReactiveValues <- R6Class(
       }
 
       if (!is.null(domain)) {
-        if (.is_logging_otel && otel::is_logging_enabled("info")) {
-          local_otel_active_reactive_lock_span(domain)
-          otel::log_info(paste0("Setting reactive values: ", key, " = ", value))
+        if (.is_logging_otel) {
+          if (has_existing_ospan(OSPAN_REACTIVE_LOCK_NAME)) {
+            # Perform as is
+            # with_existing_ospan_async(OSPAN_REACTIVE_LOCK_NAME, {
+            otel_log_safe(glue::glue_safe("Setting reactive values: {key} = {value}"), severity = "info")
+            # })
+          } else if (has_existing_ospan(OSPAN_SESSION_NAME)) {
+            with_existing_ospan_async(OSPAN_SESSION_NAME, {
+              otel_log_safe(glue::glue_safe("Setting reactive values: {key} = {value}"), severity = "info")
+            })
+          }
         }
       }
 
@@ -1164,12 +1180,6 @@ Observer <- R6Class(
     .destroyed = logical(0),
     .prevId = character(0),
     .ctx = NULL,
-
-    # __new__
-    #   if otel, then return otelboundobserver
-    #   else return observer
-
-    # __init__
 
     initialize = function(observerFunc, label, suspended = FALSE, priority = 0,
                           domain = getDefaultReactiveDomain(),

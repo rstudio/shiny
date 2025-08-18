@@ -95,13 +95,13 @@ barret <- function() {
       x <- reactive({
         x_val <- input$x
         otel_log_safe("X Val: {x_val}")
-        # Sys.sleep(0.5)
+        Sys.sleep(0.5)
         x_val
       })
       y <- reactive({
         y_val <- input$y
         otel_log_safe("Y Val: {y_val}")
-        # Sys.sleep(0.5)
+        Sys.sleep(0.5)
         y_val
       })
 
@@ -127,13 +127,13 @@ barret <- function() {
       # Q: Manually accept reactive expressions to isolate on during otel span creation?
       # * Ans: Maybe? Let's leave a door open for that via `bindOtel(...)`.
 
-      observe({
-        message("x: ", x())
-      })
+      # observe({
+      #   message("x: ", x())
+      # })
 
-      output$txt <- renderText({
-        calc()
-      })
+      # output$txt <- renderText({
+      #   calc()
+      # })
 
       log_and_msg <- function(...) {
         msg <- paste(...)
@@ -146,9 +146,9 @@ barret <- function() {
         # message("x_prom span id: ", x_span_id)
         x_val <- force(input$x)
         log_and_msg("x_prom init")
-        promises::promise_resolve(\() {
+        promises::promise(\(resolve, reject) {
           log_and_msg("x_prom 0")
-          x_val
+          resolve(x_val)
         }) |>
           promises::then(function(x_val) {
             log_and_msg("x_prom 1")
@@ -169,9 +169,9 @@ barret <- function() {
         # message("y_prom span id: ", y_span_id)
         y_val <- force(input$y)
         log_and_msg("y_prom init")
-        promises::promise_resolve(\() {
+        promises::promise(\(resolve, reject) {
           log_and_msg("y_prom 0")
-          y_val
+          resolve(y_val)
         }) |>
           promises::then(function(y_val) {
             log_and_msg("y_prom 1")
@@ -179,7 +179,7 @@ barret <- function() {
           }) |>
           promises::then(function(y_val) {
             log_and_msg("y_prom 2")
-            y_val
+            y_val + calc()
           }) |>
           promises::then(function(y_val) {
             log_and_msg("y_prom 3")
@@ -194,8 +194,8 @@ barret <- function() {
         )
 
         promises::then(p, \(vals) {
-          message("Vals[1]: ", vals[[1]]())
-          message("Vals[2]: ", vals[[2]]())
+          message("Vals[1]: ", vals[[1]])
+          message("Vals[2]: ", vals[[2]])
 
           # Shut down the app so the telemetry can be seen easily
           later::later(

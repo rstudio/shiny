@@ -406,7 +406,7 @@ otel_log_safe <- function(
   }
 
   # Pre process
-  msg <- glue::glue_safe(msg)
+  msg <- glue::glue_safe(msg, .envir = .envir)
   # Escape any curly braces
   msg <- gsub("{", "{{", msg, fixed = TRUE)
   msg <- gsub("}", "}}", msg, fixed = TRUE)
@@ -423,7 +423,10 @@ get_ospan_from_domain <- function(
   span_name,
   domain = getDefaultReactiveDomain()
 ) {
-  get0("_otel", envir = domain$userData)[[span_name]]
+  env = domain$userData
+  if (is.null(env)) return(NULL)
+
+  get0("_otel", envir = env)[[span_name]]
 }
 set_ospan_in_domain <- function(
   span_name,

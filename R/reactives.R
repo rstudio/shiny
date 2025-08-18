@@ -110,11 +110,11 @@ ReactiveVal <- R6Class(
             # Perform as is...
             # with_existing_ospan_async(OSPAN_REACTIVE_LOCK_NAME, {
             otel_log_safe("Setting reactive value: {private$label}", severity = "info")
-            # })
+            # }, domain = domain)
           } else if(has_existing_ospan(OSPAN_SESSION_NAME)) {
             with_existing_ospan_async(OSPAN_SESSION_NAME, {
               otel_log_safe("Setting reactive value: {private$label}", severity = "info")
-            })
+            }, domain = domain)
           }
         }
       }
@@ -440,11 +440,11 @@ ReactiveValues <- R6Class(
             # Perform as is
             # with_existing_ospan_async(OSPAN_REACTIVE_LOCK_NAME, {
             otel_log_safe(glue::glue_safe("Setting reactive values: {key} = {value}"), severity = "info")
-            # })
+            # }, domain = domain)
           } else if (has_existing_ospan(OSPAN_SESSION_NAME)) {
             with_existing_ospan_async(OSPAN_SESSION_NAME, {
               otel_log_safe(glue::glue_safe("Setting reactive values: {key} = {value}"), severity = "info")
-            })
+            }, domain = domain)
           }
         }
       }

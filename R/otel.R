@@ -324,7 +324,7 @@ with_ospan_async <- function(
 #' result <- with_existing_ospan_async("parent_operation", {
 #'   # ... do work within the existing span ...
 #'   some_function()
-#' })
+#' }, domain = domain)
 #'
 #' # End the span when done
 #' end_ospan(span)
@@ -337,7 +337,7 @@ with_existing_ospan_async <- function(
   name,
   expr,
   ...,
-  domain = getDefaultReactiveDomain()
+  domain
 ) {
   if (!otel::is_tracing_enabled()) {
     return(force(expr))

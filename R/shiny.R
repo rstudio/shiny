@@ -1142,12 +1142,7 @@ ShinySession <- R6Class(
         attr(label, "srcref") <- srcref
         attr(label, "srcfile") <- srcfile
 
-        # TODO: Q: Should we move the otel tracing to here for render functions? Then we could report the status of the calculation within the otel attributes
-        if (otel::is_tracing_enabled()) {
-          local_otel_active_reactive_lock_span(self)
-        }
-
-        obs <- observe(..stacktraceon = FALSE, {
+        obs <- withOtelShiny(bindAll = FALSE, observe(..stacktraceon = FALSE, {
 
           private$sendMessage(recalculating = list(
             name = name, status = 'recalculating'
@@ -1250,7 +1245,7 @@ ShinySession <- R6Class(
                 private$invalidatedOutputValues$set(name, value)
             }
           )
-        }, suspended=private$shouldSuspend(name), label=label)
+        }, suspended=private$shouldSuspend(name), label=label))
 
         # If any output attributes were added to the render function attach
         # them to observer.

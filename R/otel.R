@@ -1,3 +1,9 @@
+debug_msg <- function(...) {
+  if (TRUE) {
+    message(...)
+  }
+}
+
 if (FALSE) {
   # 1. Synchronous
 
@@ -269,10 +275,15 @@ with_ospan_async <- function(
     return(force(expr))
   }
 
+  debug_msg("\n\nStarting ospan: ", name)
   span <- start_ospan(name, ..., attributes = attributes, domain = domain)
 
   needs_cleanup <- TRUE
-  on.exit(if (needs_cleanup) end_ospan(span), add = TRUE)
+  cleanup <- function() {
+    debug_msg("\n\nEnding ospan: ", name)
+    end_ospan(span)
+  }
+  on.exit(if (needs_cleanup) cleanup(), add = TRUE)
 
   with_ospan_promise_domain(span, {
     result <- force(expr)
@@ -281,8 +292,8 @@ with_ospan_async <- function(
       needs_cleanup <- FALSE
 
       result <-
-        finally(result, function() {
-          end_ospan(span)
+        promises::finally(result, function() {
+          cleanup()
         })
     }
 
@@ -364,15 +375,97 @@ has_existing_ospan <- function(name, domain = getDefaultReactiveDomain()) {
   !is.null(get_ospan_from_domain(name, domain = domain))
 }
 
-with_ospan_promise_domain <- function(span, expr) {
-  # Reach into promises to pull the otel implementation out
-  with_otel_active_span_promise_domain <- rlang::ns_env("promises")[[
-    "with_otel_active_span_promise_domain"
-  ]]
 
-  # Activate the span
+create_otel_active_span_promise_domain <- function(active_span) {
+  force(active_span)
+  promises::new_promise_domain(
+    wrapOnFulfilled = function(onFulfilled) {
+      force(onFulfilled)
+      function(...) {
+        # print(names(active_span))
+        otel::with_active_span(active_span, {
+
+          debug_msg(
+            "Restoring active span: ",
+            active_span$name,
+            " - ",
+            otel::get_active_span_context()$get_span_id()
+          )
+
+          onFulfilled(...)
+        })
+      }
+    },
+    wrapOnRejected = function(onRejected) {
+      force(onRejected)
+      function(...) {
+        otel::with_active_span(active_span, {
+          onRejected(...)
+        })
+      }
+    },
+    wrapSync = function(expr) {
+      otel::with_active_span(active_span, {
+        debug_msg(
+          "Enter active span: ",
+          active_span$name,
+          " - ",
+          otel::get_active_span_context()$get_span_id()
+        )
+        force(expr)
+        debug_msg(
+          "Exit active span: ",
+          active_span$name,
+          " - ",
+          otel::get_active_span_context()$get_span_id()
+        )
+      })
+    }
+  )
+}
+
+with_promise_domain <- function(domain, expr, replace = FALSE) {
+  oldval <- promises:::current_promise_domain()
+  globals <- promises:::globals
+  if (replace) {
+    globals$domain <- domain
+  } else {
+    globals$domain <- compose_domains(oldval, domain)
+  }
+  on.exit(globals$domain <- oldval)
+  if (!is.null(domain)) {
+    domain$wrapSync(expr)
+  } else {
+    force(expr)
+  }
+}
+
+with_otel_active_span_promise_domain <- function(
+  span,
+  expr,
+  ...
+  # ,
+  # replace = FALSE
+) {
+  stopifnot(length(list(...)) == 0L)
+  act_span_pd <- create_otel_active_span_promise_domain(span)
+
+  new_domain <- promises:::compose_domains(
+    act_span_pd,
+    promises:::current_promise_domain()
+  )
+  promises::with_promise_domain(new_domain, expr, replace = TRUE)
+}
+
+
+with_ospan_promise_domain <- function(span, expr) {
+  # # Reach into promises to pull the otel implementation out
+  # with_otel_active_span_promise_domain <- rlang::ns_env("promises")[[
+  #   "with_otel_active_span_promise_domain"
+  # ]]
+
+  # Return promise domain with `otel::with_active_span` in the `wrapSync` method
   otel::with_active_span(span, {
-    # Set the otel promise domain
     with_otel_active_span_promise_domain(span, expr)
   })
 }
@@ -424,7 +517,9 @@ get_ospan_from_domain <- function(
   domain = getDefaultReactiveDomain()
 ) {
   env = domain$userData
-  if (is.null(env)) return(NULL)
+  if (is.null(env)) {
+    return(NULL)
+  }
 
   get0("_otel", envir = env)[[span_name]]
 }

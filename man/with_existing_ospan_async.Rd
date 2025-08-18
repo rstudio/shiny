@@ -4,7 +4,7 @@
 \alias{with_existing_ospan_async}
 \title{Execute code within an existing OpenTelemetry span for asynchronous operations}
 \usage{
-with_existing_ospan_async(name, expr, ..., domain = getDefaultReactiveDomain())
+with_existing_ospan_async(name, expr, ..., domain)
 }
 \arguments{
 \item{name}{Character string. The name of the existing span to retrieve from
@@ -43,7 +43,7 @@ span <- start_ospan("parent_operation")
 result <- with_existing_ospan_async("parent_operation", {
   # ... do work within the existing span ...
   some_function()
-})
+}, domain = domain)
 
 # End the span when done
 end_ospan(span)

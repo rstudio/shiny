@@ -107,10 +107,8 @@ ReactiveVal <- R6Class(
       if (!is.null(domain)) {
         if (.is_logging_otel) {
           if (has_existing_ospan(OSPAN_REACTIVE_LOCK_NAME)) {
-            # Perform as is...
-            # with_existing_ospan_async(OSPAN_REACTIVE_LOCK_NAME, {
+            # Perform as is so that the current span is used
             otel_log_safe("Setting reactive value: {private$label}", severity = "info")
-            # }, domain = domain)
           } else if(has_existing_ospan(OSPAN_SESSION_NAME)) {
             with_existing_ospan_async(OSPAN_SESSION_NAME, {
               otel_log_safe("Setting reactive value: {private$label}", severity = "info")

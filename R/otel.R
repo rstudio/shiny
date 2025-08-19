@@ -1,8 +1,3 @@
-debug_msg <- function(...) {
-  if (FALSE) {
-    message(...)
-  }
-}
 
 if (FALSE) {
   # 1. Synchronous
@@ -114,19 +109,6 @@ start_ospan <- function(
     domain = domain
   )
   span
-
-  # # Return cancellation function that is only effective once
-  # called <- FALSE
-  # return(function() {
-  #   if (called) {
-  #     return(invisible())
-  #   }
-
-  #   otel::end_span(span)
-
-  #   called <<- TRUE
-  #   invisible()
-  # })
 }
 
 end_ospan <- function(span) {
@@ -275,12 +257,12 @@ with_ospan_async <- function(
     return(force(expr))
   }
 
-  debug_msg("\n\nStarting ospan: ", name)
+  # message("\n\nStarting ospan: ", name)
   span <- start_ospan(name, ..., attributes = attributes, domain = domain)
 
   needs_cleanup <- TRUE
   cleanup <- function() {
-    debug_msg("\n\nEnding ospan: ", name)
+    # message("\n\nEnding ospan: ", name)
     end_ospan(span)
   }
   on.exit(if (needs_cleanup) cleanup(), add = TRUE)
@@ -385,12 +367,12 @@ create_otel_active_span_promise_domain <- function(active_span) {
         # print(names(active_span))
         otel::with_active_span(active_span, {
 
-          debug_msg(
-            "Restoring active span: ",
-            active_span$name,
-            " - ",
-            otel::get_active_span_context()$get_span_id()
-          )
+          # message(
+          #   "Restoring active span: ",
+          #   active_span$name,
+          #   " - ",
+          #   otel::get_active_span_context()$get_span_id()
+          # )
 
           onFulfilled(...)
         })
@@ -406,20 +388,20 @@ create_otel_active_span_promise_domain <- function(active_span) {
     },
     wrapSync = function(expr) {
       otel::with_active_span(active_span, {
-        debug_msg(
-          "wrapSync Enter active span: ",
-          active_span$name,
-          " - ",
-          otel::get_active_span_context()$get_span_id()
-        )
-        on.exit({
-          debug_msg(
-            "wrapSync Exit active span: ",
-            active_span$name,
-            " - ",
-            otel::get_active_span_context()$get_span_id()
-          )
-        }, add = TRUE)
+        # message(
+        #   "wrapSync Enter active span: ",
+        #   active_span$name,
+        #   " - ",
+        #   otel::get_active_span_context()$get_span_id()
+        # )
+        # on.exit({
+        #   message(
+        #     "wrapSync Exit active span: ",
+        #     active_span$name,
+        #     " - ",
+        #     otel::get_active_span_context()$get_span_id()
+        #   )
+        # }, add = TRUE)
         force(expr)
       })
     }
@@ -454,9 +436,19 @@ with_ospan_promise_domain <- function(span, expr) {
   #   "with_otel_active_span_promise_domain"
   # ]]
 
-  # Return promise domain with `otel::with_active_span` in the `wrapSync` method
+  act_span_pd <- create_otel_active_span_promise_domain(span)
+  # We need the current active span to be activated last, not first
+  # Compose the new promise domain at the end, not beginning.
+  new_domain <- promises:::compose_domains(
+    act_span_pd,
+    promises:::current_promise_domain()
+  )
+
+  # Don't overwrite the wrapSync method. Instead, call `otel::with_active_span()` directly
+  # new_domain$wrapSync <- act_span_pd$wrapSync
+
   otel::with_active_span(span, {
-    with_otel_active_span_promise_domain(span, expr)
+    promises::with_promise_domain(new_domain, expr, replace = TRUE)
   })
 }
 

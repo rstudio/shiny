@@ -43,6 +43,8 @@ barret <- function() {
     shiny.otel.graphlocked = TRUE,
     shiny.otel.bindall = TRUE
   )
+  library(mirai)
+  daemons(2)
 
   # Inspiration from
   # * https://github.com/r-lib/otel/commit/a2ef493ae4b97701e4e178ac527f313580539080
@@ -153,7 +155,17 @@ barret <- function() {
         }) |>
           promises::then(function(x_val) {
             log_and_msg("x_prom 1")
+            log_and_msg("Launching mirai")
             x_val
+            mirai(
+              {
+                otel::start_local_active_span("slow compute")
+                val
+                Sys.sleep(0.2)
+                val
+              },
+              val = x_val
+            )
           }) |>
           promises::then(function(x_val) {
             log_and_msg("x_prom 2")
@@ -199,13 +211,18 @@ barret <- function() {
           message("Vals[2]: ", vals[[2]])
 
           # Shut down the app so the telemetry can be seen easily
-          later::later(
-            \() {
-              message("\n\nClosing session for tight graphs")
-              session$close()
-            },
-            delay = 10 / 1000
-          )
+          if (vals[[1]] == 5) {
+            updateSliderInput("x", value = 6, session = session)
+          } else {
+            later::later(
+              \() {
+                message("\n\nClosing session for small logfire graphs")
+                session$close()
+                mirai::daemons(0)
+              },
+              delay = 10 / 1000
+            )
+          }
         })
       })
 

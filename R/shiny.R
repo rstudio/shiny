@@ -1151,6 +1151,7 @@ ShinySession <- R6Class(
           # This shinyCallingHandlers should maybe be at a higher level,
           # to include the $then/$catch calls below?
           hybrid_chain(
+            # TODO: Move ospan wrapper here to capture return value
             hybrid_chain(
               {
                 private$withCurrentOutput(name, {
@@ -2200,7 +2201,13 @@ ShinySession <- R6Class(
 
         if (is_recording_otel_reactive_graph_lock()) {
           with_existing_ospan_async(OSPAN_SESSION_NAME, {
-            start_session_ospan(OSPAN_REACTIVE_LOCK_NAME, domain = self)
+            start_session_ospan(
+              OSPAN_REACTIVE_LOCK_NAME,
+              domain = self
+              # links = list(
+              #   session = get_ospan_from_domain(OSPAN_SESSION_NAME, domain = self)
+              # )
+            )
           }, domain = self)
         }
       }
@@ -2226,9 +2233,7 @@ ShinySession <- R6Class(
         })
 
         if (is_recording_otel_reactive_graph_lock()) {
-          with_existing_ospan_async(OSPAN_SESSION_NAME, {
-            end_session_ospan(OSPAN_REACTIVE_LOCK_NAME, domain = self)
-          }, domain = self)
+          end_session_ospan(OSPAN_REACTIVE_LOCK_NAME, domain = self)
         }
       }
     }

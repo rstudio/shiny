@@ -1,3 +1,6 @@
+on_load({
+  otel_tracing <- base::requireNamespace("otel", quietly = TRUE) && otel::is_tracing_enabled()
+})
 
 if (FALSE) {
   # 1. Synchronous
@@ -98,7 +101,7 @@ start_ospan <- function(
   attributes = NULL,
   domain = getDefaultReactiveDomain()
 ) {
-  if (!otel::is_tracing_enabled()) {
+  if (!otel_tracing) {
     return(NULL)
   }
 
@@ -112,7 +115,7 @@ start_ospan <- function(
 }
 
 end_ospan <- function(span) {
-  if (!otel::is_tracing_enabled()) {
+  if (!otel_tracing) {
     return(invisible())
   }
 
@@ -127,7 +130,7 @@ start_session_ospan <- function(
   attributes = NULL,
   domain = getDefaultReactiveDomain()
 ) {
-  if (!otel::is_tracing_enabled()) {
+  if (!otel_tracing) {
     return(NULL)
   }
 
@@ -161,7 +164,7 @@ start_session_ospan <- function(
 # End a span who has been stored on the session obect
 end_session_ospan <- function(name, ..., domain = getDefaultReactiveDomain()) {
   stopifnot(length(list(...)) == 0)
-  if (!otel::is_tracing_enabled()) {
+  if (!otel_tracing) {
     return(invisible())
   }
 
@@ -253,7 +256,7 @@ with_ospan_async <- function(
   attributes = NULL,
   domain = getDefaultReactiveDomain()
 ) {
-  if (!otel::is_tracing_enabled()) {
+  if (!otel_tracing) {
     return(force(expr))
   }
 
@@ -332,7 +335,7 @@ with_existing_ospan_async <- function(
   ...,
   domain
 ) {
-  if (!otel::is_tracing_enabled()) {
+  if (!otel_tracing) {
     return(force(expr))
   }
 

@@ -21,6 +21,7 @@
 
 # - TODO -----------------------------------
 # * Tests with otel recording
+
 `_ignore` <- function() {
   otelsdk::with_otel_record
 }
@@ -221,10 +222,10 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 
 # TODO: Maybe a top level option to set the defaults? `shiny.otel = TRUE`?
 is_binding_all_otel <- function() {
-  otel::is_tracing_enabled() && getOption("shiny.otel.bindall", FALSE)
+  otel_tracing && getOption("shiny.otel.bindall", FALSE)
 }
 is_recording_otel_reactive_graph_lock <- function() {
-  otel::is_tracing_enabled() && getOption("shiny.otel.graphlocked", FALSE)
+  otel_tracing && getOption("shiny.otel.graphlocked", FALSE)
 }
 
 #' Set OpenTelemetry options for Shiny reactives

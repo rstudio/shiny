@@ -200,6 +200,7 @@ barret <- function() {
           # Shut down the app so the telemetry can be seen easily
           later::later(
             \() {
+              message("\n\nClosing session for tight graphs")
               session$close()
             },
             delay = 10 / 1000

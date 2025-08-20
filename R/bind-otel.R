@@ -1,17 +1,18 @@
 # - Goals -----------------------------------
 # * Integration locations:
 #   * Server:
-#     * Start when reactive busy count > 0; Close when reactive busy count == 0
+#     * √ Start when reactive busy count > 0
+#     * √ Close when reactive busy count == 0
 #   * Reactives:
-#     * Reactive value - `reactiveVal`
-#     * Reactive values - `reactiveValues`
-#     * Reactive expression - `reactive`
-#     * Render function - `shiny.render.function`
-#     * Observer - `observe`
+#     * √ Reactive value - `reactiveVal`
+#     * √ Reactive values - `reactiveValues`
+#     * √ Reactive expression - `reactive`
+#     * √ Render function - `shiny.render.function`
+#     * √ Observer - `observe`
 # * Global options:
-#   * shiny.otel.graphlocked: TRUE/FALSE - whether to lock the graph for
+#   * √ shiny.otel.graphlocked: TRUE/FALSE - whether to lock the graph for
 #     OpenTelemetry spans, so that they are not modified while being traced.
-#   * shiny.otel.bindall: TRUE/FALSE - whether to bind all reactive objects
+#   * √ shiny.otel.bindall: TRUE/FALSE - whether to bind all reactive objects
 #     to OpenTelemetry spans. If TRUE, every reactive objects
 #     are bound to OpenTelemetry spans
 # * Methods:
@@ -50,6 +51,8 @@ barret <- function() {
   # * https://github.com/r-lib/otel/commit/a2ef493ae4b97701e4e178ac527f313580539080
   # * https://github.com/r-lib/otel/commit/09c0eb6c80d5b907976de8fbaf89798cb11f8e6e#diff-169b8f234d0b208affb106fce375f86fefe2f16dba4ad66495a1dc06c8a4cd7b
 
+  # TODO: Maybe the name is the folder name, similar to shinyapps.io naming
+  # Maybe set from a function call somewhere?
   otel_tracer <- otel::get_tracer("kmeans-shiny-app-v2")
 
   otel_start_shiny_session <- function(

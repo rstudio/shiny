@@ -1155,6 +1155,7 @@ ShinySession <- R6Class(
             hybrid_chain(
               {
                 private$withCurrentOutput(name, {
+                  # TODO: Error handling must be done within ospan methods to get the proper status value. There is currently no way to access a already closed span from within `func()`.
                   with_existing_ospan_async(OSPAN_REACTIVE_LOCK_NAME, {
                     shinyCallingHandlers(func())
                   }, domain = self)

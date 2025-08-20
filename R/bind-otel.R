@@ -432,6 +432,7 @@ bindOtel.reactiveVal <- function(x, ...) {
   rlang::check_dots_empty()
 
   impl <- attr(x, ".impl", exact = TRUE)
+  # Set flag for otel logging when setting the value
   impl$.is_logging_otel <- TRUE
 
   class(x) <- c("reactiveVal.otel", class(x))
@@ -444,6 +445,7 @@ bindOtel.reactiveValues <- function(x, ...) {
   rlang::check_dots_empty()
 
   impl <- attr(x, ".impl", exact = TRUE)
+  # Set flag for otel logging when setting values
   impl$.is_logging_otel <- TRUE
 
   class(x) <- c("reactiveValues.otel", class(x))
@@ -479,15 +481,18 @@ bindOtel.reactiveExpr <- function(x, ...) {
   # Turn off binding all otel, so that we don't recursively bind forever
   # `withOtelShiny()` does not virally enable/disable binding all otel,
   # only in "this" tick
+  span_label <- paste0("reactive(", label, ")")
   withOtelShiny(bindAll = FALSE, {
     res <- reactive(label = label, domain = domain, {
-      with_ospan_async(
-        paste0("reactive(", label, ")"),
-        {
-          valueFunc()
-        },
-        domain = domain
-      )
+      # Force all `{shiny}` spans to be under `{shiny}` tracer, not the app's tracer
+      # with_shiny_ospan_async(span_label, {
+      with_ospan_async(span_label, {
+        # TODO: Need `otel::with_tracer(tracer, CODE)`
+        # Set the app's tracer to be the default when running the expression
+        # with_app_tracer(domain = domain, {
+        valueFunc()
+        # })
+      }, domain = domain)
     })
   })
 
@@ -500,19 +505,17 @@ bindOtel.shiny.render.function <- function(x, ...) {
   rlang::check_dots_empty()
 
   valueFunc <- x
-
-  # str(x)
-
-  # browser()
+  span_label <- NULL
 
   renderFunc <- function(...) {
-    with_ospan_async(
-      # TODO: Better label
-      paste0("shiny.render.function"),
-      {
-        valueFunc(...)
-      }
-    )
+    session <- getDefaultReactiveDomain()
+    if (is.null(span_label)) {
+      span_label <<- paste0("output(", getCurrentOutputInfo(session = session)$name, ")")
+    }
+
+    with_ospan_async(span_label, {
+      valueFunc(...)
+    }, domain = session)
   }
 
   renderFunc <- addAttributes(renderFunc, renderFunctionAttributes(valueFunc))
@@ -530,7 +533,7 @@ bindOtel.reactive.event <- function(x, ...) {
 
 
 #' @export
-bindOtel.Observer <- function(x, ..., label = NULL) {
+bindOtel.Observer <- function(x, ...) {
   rlang::check_dots_empty()
 
   if (x$.execCount > 0) {
@@ -542,16 +545,19 @@ bindOtel.Observer <- function(x, ..., label = NULL) {
   # eventFunc <- quos_to_func(qs)
   obsFunc <- x$.func
 
-  # Note that because the observer will already have been logged by this point,
-  # this updated label won't show up in the reactlog.
-  x$.label <- label %||%
-    sprintf('observe(%s)', x$.label)
+  span_label <- x$.label
+  # By default, observe() sets the label to `observe(CODE)`
+  # If a user supplies their own label, wrap it in `observe(LABEL)` to be
+  # consistent with other label formats of `FN(LABEL)`
+  if (!isDefaultLabel(span_label)) {
+    span_label <- sprintf('observe(%s)', span_label)
+  }
 
   x$.func <- wrapFunctionLabel(
-    name = x$.label,
+    name = span_label,
     ..stacktraceon = FALSE,
     func = function() {
-      with_ospan_async(x$.label, {
+      with_ospan_async(span_label, {
         # browser()
         force(obsFunc())
       })

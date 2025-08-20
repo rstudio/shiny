@@ -229,11 +229,16 @@ funcToLabelBody <- function(func) {
 funcToLabel <- function(func, functionLabel, label = NULL) {
   if (!is.null(label)) return(label)
 
-  sprintf(
+  txt <- sprintf(
     '%s(%s)',
     functionLabel,
     funcToLabelBody(func)
   )
+  class(txt) <- c("default_label", class(txt))
+  txt
+}
+isDefaultLabel <- function(x) {
+  inherits(x, "default_label")
 }
 quoToLabelBody <- function(q) {
   paste(deparse(quo_get_expr(q)), collapse='\n')

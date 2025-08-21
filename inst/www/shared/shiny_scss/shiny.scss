@@ -480,6 +480,13 @@ textarea.textarea-autoresize.form-control {
   cursor: not-allowed;
 }
 
+// Selectize's remove_button plugin has a bug that can lead to multiple remove
+// buttons being displayed when options get updated. This prevents that from
+// happening (see #4274 for reprex)
+.shiny-input-select .selectize-input > .item > .remove:not(:first-child) {
+  display: none;
+}
+
 /* Hidden tabPanels */
 .nav-hidden {
   /* override anything bootstrap sets for `.nav` */

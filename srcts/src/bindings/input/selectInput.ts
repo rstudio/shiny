@@ -29,12 +29,17 @@ function getLabelNode(el: SelectHTMLElement): JQuery<HTMLElement> {
     .parent()
     .find('label[for="' + escapedId + '"]');
 }
-// Return true if it's a selectize input, false if it's a regular select input.
 
-function isSelectize(el: HTMLElement): boolean {
-  const config = $(el)
+function getConfigScript(el: SelectHTMLElement): JQuery<HTMLElement> {
+  return $(el)
     .parent()
     .find('script[data-for="' + $escape(el.id) + '"]');
+}
+
+// Return true if it's a selectize input, false if it's a regular select input.
+
+function isSelectize(el: SelectHTMLElement): boolean {
+  const config = getConfigScript(el);
 
   return config.length > 0;
 }
@@ -122,10 +127,19 @@ class SelectInputBinding extends InputBinding {
 
     // re-initialize selectize
     if (hasDefinedProperty(data, "config")) {
-      $el
-        .parent()
-        .find('script[data-for="' + $escape(el.id) + '"]')
-        .replaceWith(data.config!);
+      const config = getConfigScript(el);
+
+      // Before replacing, remember the default-plugins (for py-shiny)
+      const plugins = config.attr("data-default-plugins");
+      config.replaceWith(data.config!);
+
+      // If plugins were present in the old but not the new config,
+      // keep them since default plugins should be sticky across updates
+      const newConfig = getConfigScript(el);
+      if (plugins && !newConfig.attr("data-default-plugins")) {
+        newConfig.attr("data-default-plugins", plugins);
+      }
+
       this._selectize(el, true);
     }
 
@@ -238,11 +252,11 @@ class SelectInputBinding extends InputBinding {
     // Safe-guard against missing the selectize js library
     if (!$.fn.selectize) return undefined;
     const $el = $(el);
-    const config = $el
-      .parent()
-      .find('script[data-for="' + $escape(el.id) + '"]');
+    const config = getConfigScript(el);
 
     if (config.length === 0) return undefined;
+
+    this._supplyDefaultPlugins(config);
 
     let options: SelectizeOptions & {
       labelField: "label";
@@ -304,6 +318,27 @@ class SelectInputBinding extends InputBinding {
     }
 
     return control;
+  }
+
+  // py-shiny may include a data-default-plugins attribute, requesting
+  // "default" plugins (i.e., plugins not specified by the user).
+  // If present, update the config (i.e., the <script> tag's JSON object)
+  // to include them.
+  private _supplyDefaultPlugins(config: JQuery<HTMLElement>): void {
+    const plugins = config.data("default-plugins");
+    if (!Array.isArray(plugins)) return;
+
+    const configJSON: SelectizeOptions = JSON.parse(config.html());
+    const pluginsJSON = configJSON.plugins || [];
+
+    plugins.forEach((plugin) => {
+      if (!pluginsJSON.includes(plugin)) {
+        pluginsJSON.push(plugin);
+      }
+    });
+
+    configJSON.plugins = pluginsJSON;
+    config.html(JSON.stringify(configJSON));
   }
 }
 

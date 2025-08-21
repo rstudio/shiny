@@ -2267,8 +2267,11 @@
     }
     return (0, import_jquery19.default)(el).parent().parent().find('label[for="' + escapedId + '"]');
   }
+  function getConfigScript(el) {
+    return (0, import_jquery19.default)(el).parent().find('script[data-for="' + $escape(el.id) + '"]');
+  }
   function isSelectize(el) {
-    const config = (0, import_jquery19.default)(el).parent().find('script[data-for="' + $escape(el.id) + '"]');
+    const config = getConfigScript(el);
     return config.length > 0;
   }
   var SelectInputBinding = class extends InputBinding {
@@ -2331,7 +2334,13 @@
         this._selectize(el);
       }
       if (hasDefinedProperty(data, "config")) {
-        $el.parent().find('script[data-for="' + $escape(el.id) + '"]').replaceWith(data.config);
+        const config = getConfigScript(el);
+        const plugins = config.attr("data-default-plugins");
+        config.replaceWith(data.config);
+        const newConfig = getConfigScript(el);
+        if (plugins && !newConfig.attr("data-default-plugins")) {
+          newConfig.attr("data-default-plugins", plugins);
+        }
         this._selectize(el, true);
       }
       if (hasDefinedProperty(data, "url")) {
@@ -2404,8 +2413,9 @@
     _selectize(el, update = false) {
       if (!import_jquery19.default.fn.selectize) return void 0;
       const $el = (0, import_jquery19.default)(el);
-      const config = $el.parent().find('script[data-for="' + $escape(el.id) + '"]');
+      const config = getConfigScript(el);
       if (config.length === 0) return void 0;
+      this._supplyDefaultPlugins(config);
       let options = import_jquery19.default.extend(
         {
           labelField: "label",
@@ -2449,6 +2459,23 @@
         control = $el.selectize(settings)[0].selectize;
       }
       return control;
+    }
+    // py-shiny may include a data-default-plugins attribute, requesting
+    // "default" plugins (i.e., plugins not specified by the user).
+    // If present, update the config (i.e., the <script> tag's JSON object)
+    // to include them.
+    _supplyDefaultPlugins(config) {
+      const plugins = config.data("default-plugins");
+      if (!Array.isArray(plugins)) return;
+      const configJSON = JSON.parse(config.html());
+      const pluginsJSON = configJSON.plugins || [];
+      plugins.forEach((plugin) => {
+        if (!pluginsJSON.includes(plugin)) {
+          pluginsJSON.push(plugin);
+        }
+      });
+      configJSON.plugins = pluginsJSON;
+      config.html(JSON.stringify(configJSON));
     }
   };
 

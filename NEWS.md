@@ -7,6 +7,7 @@
 ## Bug fixes
 
 * `updateActionButton()`/`updateActionLink()` now correctly renders HTML content passed to the `label` argument. (#4249)
+* Fixed an issue where `updateSelectizeInput(options = list(plugins="remove_button"))` could lead to multiple remove buttons. (#4275)
 
 ## Changes
 

@@ -30,7 +30,7 @@ function getLabelNode(el: SelectHTMLElement): JQuery<HTMLElement> {
     .find('label[for="' + escapedId + '"]');
 }
 
-function getConfigScript(el: SelectHTMLElement): JQuery<HTMLElement> {
+function getConfigScript(el: SelectHTMLElement): JQuery<HTMLScriptElement> {
   return $(el)
     .parent()
     .find('script[data-for="' + $escape(el.id) + '"]');
@@ -125,21 +125,24 @@ class SelectInputBinding extends InputBinding {
       this._selectize(el);
     }
 
-    // re-initialize selectize
     if (hasDefinedProperty(data, "config")) {
-      const config = getConfigScript(el);
+      const oldConfig = getConfigScript(el);
 
-      // Before replacing, remember the default-plugins (for py-shiny)
-      const plugins = config.attr("data-default-plugins");
-      config.replaceWith(data.config!);
+      // Before replacing the config, remember the remove-button (for py-shiny)
+      const oldRemoveButton = oldConfig[0].getAttribute("data-remove-button");
 
-      // If plugins were present in the old but not the new config,
-      // keep them since default plugins should be sticky across updates
+      // Replace the old config with the new one
+      oldConfig.replaceWith(data.config!);
+
+      // If remove-button was present in the old but not the new config,
+      // keep it since it should be sticky across updates
       const newConfig = getConfigScript(el);
-      if (plugins && !newConfig.attr("data-default-plugins")) {
-        newConfig.attr("data-default-plugins", plugins);
+      const newRemoveButton = newConfig[0].getAttribute("data-remove-button");
+      if (oldRemoveButton !== null && newRemoveButton === null) {
+        newConfig[0].setAttribute("data-remove-button", oldRemoveButton);
       }
 
+      // re-initialize selectize (with the new config)
       this._selectize(el, true);
     }
 
@@ -256,7 +259,7 @@ class SelectInputBinding extends InputBinding {
 
     if (config.length === 0) return undefined;
 
-    this._supplyDefaultPlugins(config);
+    this._addRemoveButtonPlugins(el, config[0]);
 
     let options: SelectizeOptions & {
       labelField: "label";
@@ -320,15 +323,26 @@ class SelectInputBinding extends InputBinding {
     return control;
   }
 
-  // py-shiny may include a data-default-plugins attribute, requesting
+  // py-shiny may include a data-remove-button attribute, requesting
   // "default" plugins (i.e., plugins not specified by the user).
   // If present, update the config (i.e., the <script> tag's JSON object)
   // to include them.
-  private _supplyDefaultPlugins(config: JQuery<HTMLElement>): void {
-    const plugins = config.data("default-plugins");
-    if (!Array.isArray(plugins)) return;
+  private _addRemoveButtonPlugins(
+    el: SelectHTMLElement,
+    config: HTMLScriptElement,
+  ): void {
+    if (!config.hasAttribute("data-remove-button")) return;
 
-    const configJSON: SelectizeOptions = JSON.parse(config.html());
+    const removeButton = config.getAttribute("data-remove-button");
+
+    const plugins = [];
+    if (removeButton == "both") {
+      plugins.push("remove_button", "clear_button");
+    } else if (removeButton == "true") {
+      plugins.push(el.multiple ? "remove_button" : "clear_button");
+    }
+
+    const configJSON: SelectizeOptions = JSON.parse(config.innerHTML);
     const pluginsJSON = configJSON.plugins || [];
 
     plugins.forEach((plugin) => {
@@ -338,7 +352,7 @@ class SelectInputBinding extends InputBinding {
     });
 
     configJSON.plugins = pluginsJSON;
-    config.html(JSON.stringify(configJSON));
+    config.innerHTML = JSON.stringify(configJSON);
   }
 }
 

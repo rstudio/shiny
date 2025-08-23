@@ -2335,12 +2335,13 @@
       }
       if (hasDefinedProperty(data, "config")) {
         const oldConfig = getConfigScript(el);
-        const oldRemoveButton = oldConfig[0].getAttribute("data-remove-button");
+        const oldJSON = JSON.parse(oldConfig.html());
         oldConfig.replaceWith(data.config);
         const newConfig = getConfigScript(el);
-        const newRemoveButton = newConfig[0].getAttribute("data-remove-button");
-        if (oldRemoveButton !== null && newRemoveButton === null) {
-          newConfig[0].setAttribute("data-remove-button", oldRemoveButton);
+        const newJSON = JSON.parse(newConfig.html());
+        if (oldJSON.shinyRemoveButton !== void 0 && newJSON.shinyRemoveButton === void 0) {
+          newJSON.shinyRemoveButton = oldJSON.shinyRemoveButton;
+          newConfig.html(JSON.stringify(newJSON));
         }
         this._selectize(el, true);
       }
@@ -2416,7 +2417,6 @@
       const $el = (0, import_jquery19.default)(el);
       const config = getConfigScript(el);
       if (config.length === 0) return void 0;
-      this._addRemoveButtonPlugins(el, config[0]);
       let options = import_jquery19.default.extend(
         {
           labelField: "label",
@@ -2425,6 +2425,7 @@
         },
         JSON.parse(config.html())
       );
+      this._addShinyRemoveButton(options, el.hasAttribute("multiple"));
       if (typeof config.data("nonempty") !== "undefined") {
         el.nonempty = true;
         options = import_jquery19.default.extend(options, {
@@ -2465,24 +2466,25 @@
     // "default" plugins (i.e., plugins not specified by the user).
     // If present, update the config (i.e., the <script> tag's JSON object)
     // to include them.
-    _addRemoveButtonPlugins(el, config) {
-      if (!config.hasAttribute("data-remove-button")) return;
-      const removeButton = config.getAttribute("data-remove-button");
+    _addShinyRemoveButton(options, multiple) {
+      const removeButton = options.shinyRemoveButton;
+      if (removeButton === void 0) {
+        return;
+      }
       const plugins = [];
       if (removeButton == "both") {
         plugins.push("remove_button", "clear_button");
       } else if (removeButton == "true") {
-        plugins.push(el.multiple ? "remove_button" : "clear_button");
+        plugins.push(multiple ? "remove_button" : "clear_button");
       }
-      const configJSON = JSON.parse(config.innerHTML);
-      const pluginsJSON = configJSON.plugins || [];
+      const optionPlugins = options.plugins || [];
       plugins.forEach((plugin) => {
-        if (!pluginsJSON.includes(plugin)) {
-          pluginsJSON.push(plugin);
+        if (!optionPlugins.includes(plugin)) {
+          optionPlugins.push(plugin);
         }
       });
-      configJSON.plugins = pluginsJSON;
-      config.innerHTML = JSON.stringify(configJSON);
+      options.plugins = optionPlugins;
+      delete options.shinyRemoveButton;
     }
   };
 

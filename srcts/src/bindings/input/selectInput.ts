@@ -18,6 +18,10 @@ type SelectizeInfo = Selectize.IApi<string, unknown> & {
   settings: SelectizeOptions;
 };
 
+type SelectizeShinyOptions = SelectizeOptions & {
+  shinyRemoveButton?: "true" | "false" | "both";
+};
+
 function getLabelNode(el: SelectHTMLElement): JQuery<HTMLElement> {
   let escapedId = $escape(el.id);
 
@@ -128,18 +132,22 @@ class SelectInputBinding extends InputBinding {
     if (hasDefinedProperty(data, "config")) {
       const oldConfig = getConfigScript(el);
 
-      // Before replacing the config, remember the remove-button (for py-shiny)
-      const oldRemoveButton = oldConfig[0].getAttribute("data-remove-button");
+      // Before replacing the config, remember the old one since some values want to be sticky across updates
+      const oldJSON: SelectizeShinyOptions = JSON.parse(oldConfig.html());
 
       // Replace the old config with the new one
       oldConfig.replaceWith(data.config!);
 
-      // If remove-button was present in the old but not the new config,
-      // keep it since it should be sticky across updates
+      // If shinyRemoveButton was present in the old but not the new config,
+      // keep the old value
       const newConfig = getConfigScript(el);
-      const newRemoveButton = newConfig[0].getAttribute("data-remove-button");
-      if (oldRemoveButton !== null && newRemoveButton === null) {
-        newConfig[0].setAttribute("data-remove-button", oldRemoveButton);
+      const newJSON: SelectizeShinyOptions = JSON.parse(newConfig.html());
+      if (
+        oldJSON.shinyRemoveButton !== undefined &&
+        newJSON.shinyRemoveButton === undefined
+      ) {
+        newJSON.shinyRemoveButton = oldJSON.shinyRemoveButton;
+        newConfig.html(JSON.stringify(newJSON));
       }
 
       // re-initialize selectize (with the new config)
@@ -259,8 +267,6 @@ class SelectInputBinding extends InputBinding {
 
     if (config.length === 0) return undefined;
 
-    this._addRemoveButtonPlugins(el, config[0]);
-
     let options: SelectizeOptions & {
       labelField: "label";
       valueField: "value";
@@ -275,6 +281,8 @@ class SelectInputBinding extends InputBinding {
       },
       JSON.parse(config.html()),
     );
+
+    this._addShinyRemoveButton(options, el.hasAttribute("multiple"));
 
     // selectize created from selectInput()
     if (typeof config.data("nonempty") !== "undefined") {
@@ -327,32 +335,32 @@ class SelectInputBinding extends InputBinding {
   // "default" plugins (i.e., plugins not specified by the user).
   // If present, update the config (i.e., the <script> tag's JSON object)
   // to include them.
-  private _addRemoveButtonPlugins(
-    el: SelectHTMLElement,
-    config: HTMLScriptElement,
+  private _addShinyRemoveButton(
+    options: SelectizeShinyOptions,
+    multiple: boolean,
   ): void {
-    if (!config.hasAttribute("data-remove-button")) return;
-
-    const removeButton = config.getAttribute("data-remove-button");
+    const removeButton = options.shinyRemoveButton;
+    if (removeButton === undefined) {
+      return;
+    }
 
     const plugins = [];
     if (removeButton == "both") {
       plugins.push("remove_button", "clear_button");
     } else if (removeButton == "true") {
-      plugins.push(el.multiple ? "remove_button" : "clear_button");
+      plugins.push(multiple ? "remove_button" : "clear_button");
     }
 
-    const configJSON: SelectizeOptions = JSON.parse(config.innerHTML);
-    const pluginsJSON = configJSON.plugins || [];
+    const optionPlugins = options.plugins || [];
 
     plugins.forEach((plugin) => {
-      if (!pluginsJSON.includes(plugin)) {
-        pluginsJSON.push(plugin);
+      if (!optionPlugins.includes(plugin)) {
+        optionPlugins.push(plugin);
       }
     });
 
-    configJSON.plugins = pluginsJSON;
-    config.innerHTML = JSON.stringify(configJSON);
+    options.plugins = optionPlugins;
+    delete options.shinyRemoveButton;
   }
 }
 

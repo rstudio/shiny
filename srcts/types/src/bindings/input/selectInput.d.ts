@@ -32,7 +32,7 @@ declare class SelectInputBinding extends InputBinding {
     unsubscribe(el: HTMLElement): void;
     initialize(el: SelectHTMLElement): void;
     protected _selectize(el: SelectHTMLElement, update?: boolean): SelectizeInfo | undefined;
-    private _addRemoveButtonPlugins;
+    private _addShinyRemoveButton;
 }
 export { SelectInputBinding };
 export type { SelectInputReceiveMessageData };

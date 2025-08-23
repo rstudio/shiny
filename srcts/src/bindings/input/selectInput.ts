@@ -18,8 +18,11 @@ type SelectizeInfo = Selectize.IApi<string, unknown> & {
   settings: SelectizeOptions;
 };
 
+// Extend SelectizeOptions to include shinyRemoveButton option
+// Currently, py-shiny leverages this option to power the
+// remove_button parameter.
 type SelectizeShinyOptions = SelectizeOptions & {
-  shinyRemoveButton?: "true" | "false" | "both";
+  shinyRemoveButton?: "none" | "true" | "false" | "both";
 };
 
 function getLabelNode(el: SelectHTMLElement): JQuery<HTMLElement> {
@@ -33,17 +36,12 @@ function getLabelNode(el: SelectHTMLElement): JQuery<HTMLElement> {
     .parent()
     .find('label[for="' + escapedId + '"]');
 }
-
-function getConfigScript(el: SelectHTMLElement): JQuery<HTMLScriptElement> {
-  return $(el)
-    .parent()
-    .find('script[data-for="' + $escape(el.id) + '"]');
-}
-
 // Return true if it's a selectize input, false if it's a regular select input.
 
 function isSelectize(el: SelectHTMLElement): boolean {
-  const config = getConfigScript(el);
+  const config = $(el)
+    .parent()
+    .find('script[data-for="' + $escape(el.id) + '"]');
 
   return config.length > 0;
 }
@@ -129,28 +127,13 @@ class SelectInputBinding extends InputBinding {
       this._selectize(el);
     }
 
+    // re-initialize selectize
     if (hasDefinedProperty(data, "config")) {
-      const oldConfig = getConfigScript(el);
+      $el
+        .parent()
+        .find('script[data-for="' + $escape(el.id) + '"]')
+        .replaceWith(data.config!);
 
-      // Before replacing the config, remember the old one since some values want to be sticky across updates
-      const oldJSON: SelectizeShinyOptions = JSON.parse(oldConfig.html());
-
-      // Replace the old config with the new one
-      oldConfig.replaceWith(data.config!);
-
-      // If shinyRemoveButton was present in the old but not the new config,
-      // keep the old value
-      const newConfig = getConfigScript(el);
-      const newJSON: SelectizeShinyOptions = JSON.parse(newConfig.html());
-      if (
-        oldJSON.shinyRemoveButton !== undefined &&
-        newJSON.shinyRemoveButton === undefined
-      ) {
-        newJSON.shinyRemoveButton = oldJSON.shinyRemoveButton;
-        newConfig.html(JSON.stringify(newJSON));
-      }
-
-      // re-initialize selectize (with the new config)
       this._selectize(el, true);
     }
 
@@ -263,7 +246,9 @@ class SelectInputBinding extends InputBinding {
     // Safe-guard against missing the selectize js library
     if (!$.fn.selectize) return undefined;
     const $el = $(el);
-    const config = getConfigScript(el);
+    const config = $el
+      .parent()
+      .find('script[data-for="' + $escape(el.id) + '"]');
 
     if (config.length === 0) return undefined;
 
@@ -331,23 +316,29 @@ class SelectInputBinding extends InputBinding {
     return control;
   }
 
-  // py-shiny may include a data-remove-button attribute, requesting
-  // "default" plugins (i.e., plugins not specified by the user).
-  // If present, update the config (i.e., the <script> tag's JSON object)
-  // to include them.
+  // Translate shinyRemoveButton option into selectize plugins
   private _addShinyRemoveButton(
     options: SelectizeShinyOptions,
     multiple: boolean,
   ): void {
-    const removeButton = options.shinyRemoveButton;
+    let removeButton = options.shinyRemoveButton;
     if (removeButton === undefined) {
       return;
     }
 
+    // None really means 'smart default'
+    if (removeButton === "none") {
+      removeButton = multiple ? "true" : "false";
+    }
+
+    if (removeButton === "false") {
+      return;
+    }
+
     const plugins = [];
-    if (removeButton == "both") {
+    if (removeButton === "both") {
       plugins.push("remove_button", "clear_button");
-    } else if (removeButton == "true") {
+    } else if (removeButton === "true") {
       plugins.push(multiple ? "remove_button" : "clear_button");
     }
 

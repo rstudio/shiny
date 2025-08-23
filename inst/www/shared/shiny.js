@@ -2267,11 +2267,8 @@
     }
     return (0, import_jquery19.default)(el).parent().parent().find('label[for="' + escapedId + '"]');
   }
-  function getConfigScript(el) {
-    return (0, import_jquery19.default)(el).parent().find('script[data-for="' + $escape(el.id) + '"]');
-  }
   function isSelectize(el) {
-    const config = getConfigScript(el);
+    const config = (0, import_jquery19.default)(el).parent().find('script[data-for="' + $escape(el.id) + '"]');
     return config.length > 0;
   }
   var SelectInputBinding = class extends InputBinding {
@@ -2334,15 +2331,7 @@
         this._selectize(el);
       }
       if (hasDefinedProperty(data, "config")) {
-        const oldConfig = getConfigScript(el);
-        const oldJSON = JSON.parse(oldConfig.html());
-        oldConfig.replaceWith(data.config);
-        const newConfig = getConfigScript(el);
-        const newJSON = JSON.parse(newConfig.html());
-        if (oldJSON.shinyRemoveButton !== void 0 && newJSON.shinyRemoveButton === void 0) {
-          newJSON.shinyRemoveButton = oldJSON.shinyRemoveButton;
-          newConfig.html(JSON.stringify(newJSON));
-        }
+        $el.parent().find('script[data-for="' + $escape(el.id) + '"]').replaceWith(data.config);
         this._selectize(el, true);
       }
       if (hasDefinedProperty(data, "url")) {
@@ -2415,7 +2404,7 @@
     _selectize(el, update = false) {
       if (!import_jquery19.default.fn.selectize) return void 0;
       const $el = (0, import_jquery19.default)(el);
-      const config = getConfigScript(el);
+      const config = $el.parent().find('script[data-for="' + $escape(el.id) + '"]');
       if (config.length === 0) return void 0;
       let options = import_jquery19.default.extend(
         {
@@ -2462,19 +2451,22 @@
       }
       return control;
     }
-    // py-shiny may include a data-remove-button attribute, requesting
-    // "default" plugins (i.e., plugins not specified by the user).
-    // If present, update the config (i.e., the <script> tag's JSON object)
-    // to include them.
+    // Translate shinyRemoveButton option into selectize plugins
     _addShinyRemoveButton(options, multiple) {
-      const removeButton = options.shinyRemoveButton;
+      let removeButton = options.shinyRemoveButton;
       if (removeButton === void 0) {
         return;
       }
+      if (removeButton === "none") {
+        removeButton = multiple ? "true" : "false";
+      }
+      if (removeButton === "false") {
+        return;
+      }
       const plugins = [];
-      if (removeButton == "both") {
+      if (removeButton === "both") {
         plugins.push("remove_button", "clear_button");
-      } else if (removeButton == "true") {
+      } else if (removeButton === "true") {
         plugins.push(multiple ? "remove_button" : "clear_button");
       }
       const optionPlugins = options.plugins || [];

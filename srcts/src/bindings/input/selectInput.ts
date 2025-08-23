@@ -38,7 +38,7 @@ function getLabelNode(el: SelectHTMLElement): JQuery<HTMLElement> {
 }
 // Return true if it's a selectize input, false if it's a regular select input.
 
-function isSelectize(el: SelectHTMLElement): boolean {
+function isSelectize(el: HTMLElement): boolean {
   const config = $(el)
     .parent()
     .find('script[data-for="' + $escape(el.id) + '"]');
@@ -133,7 +133,6 @@ class SelectInputBinding extends InputBinding {
         .parent()
         .find('script[data-for="' + $escape(el.id) + '"]')
         .replaceWith(data.config!);
-
       this._selectize(el, true);
     }
 

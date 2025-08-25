@@ -7,8 +7,14 @@ OSPAN_SESSION_NAME <- "session"
 # OSPAN_REACTIVE_LOCK_NAME <- "Update reactively"
 # OSPAN_REACTIVE_LOCK_NAME <- "Update reactives"
 # OSPAN_REACTIVE_LOCK_NAME <- "Calculate reactives"
-# OSPAN_REACTIVE_LOCK_NAME <- "Reactive update"
-OSPAN_REACTIVE_LOCK_NAME <- "Reactive update (blocking)"
+OSPAN_REACTIVE_LOCK_NAME <- "Reactive update"
+# OSPAN_REACTIVE_LOCK_NAME <- "Reactive update (blocking)"
+# OSPAN_REACTIVE_LOCK_NAME <- "Reactivity"
+
+# global blocking - reactivity
+# session blocking - promises?
+# non-blocking - extended tasks
+# OSPAN_REACTIVE_LOCK_NAME <- "Blocking reactive update"
 
 # -- Start / stop ------------------------
 

@@ -456,7 +456,6 @@ otel_log_safe <- function(
   msg,
   ...,
   severity = "info",
-  .envir = parent.frame(),
   logger = NULL
 ) {
   # Quit early if necessary
@@ -464,14 +463,8 @@ otel_log_safe <- function(
     return(invisible())
   }
 
-  # Pre process
-  msg <- glue::glue_safe(msg, .envir = .envir)
-  # Escape any curly braces
-  msg <- gsub("{", "{{", msg, fixed = TRUE)
-  msg <- gsub("}", "}}", msg, fixed = TRUE)
-
   # Send in processed msg
-  otel::log(msg, ..., severity = severity, .envir = emptyenv(), logger = logger)
+  otel::log("{msg}", ..., severity = severity, logger = logger)
 }
 
 

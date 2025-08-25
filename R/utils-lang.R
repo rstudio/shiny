@@ -213,7 +213,9 @@ exprToLabel <- function(expr, function_name, label = NULL) {
   }
   if (length(srcref) >= 2) attr(label, "srcref") <- srcref[[2]]
   attr(label, "srcfile") <- srcFileOfRef(srcref[[1]])
-  label
+
+  domain <- getDefaultReactiveDomain()
+  domain$ns(label)
 }
 simpleExprToFunction <- function(expr, function_name) {
   sprintf('%s(%s)', function_name, paste(deparse(expr), collapse='\n'))

@@ -179,7 +179,8 @@ ReactiveEnvironment <- R6Class(
 
       while (hasPendingFlush()) {
         ctx <- .pendingFlush$dequeue()
-        with_existing_ospan_async(OSPAN_REACTIVE_LOCK_NAME, {
+
+        with_reactive_lock_ospan_async({
           ctx$executeFlushCallbacks()
         }, domain = ctx$.domain)
       }

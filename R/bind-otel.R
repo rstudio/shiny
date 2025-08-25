@@ -9,6 +9,15 @@
 #     * √ Reactive expression - `reactive`
 #     * √ Render function - `shiny.render.function`
 #     * √ Observer - `observe`
+#   * Combinations:
+#     * debounce() / throttle()
+#     * bindCache()
+#     * bindEvent()
+#     * bindProgress()?
+#   * Special functions:
+#     * ExtendedTask()
+#     * observeEvent()
+#     * eventReactive()
 # * Global options:
 #   * √ shiny.otel.graphlocked: TRUE/FALSE - whether to lock the graph for
 #     OpenTelemetry spans, so that they are not modified while being traced.
@@ -29,10 +38,12 @@
 
 
 # - Questions -----------------------------------
+# Add error handling for every otel. Use withCallingHandlers similar to https://github.com/r-lib/mirai/pull/395/files#diff-9e809582679952a93b9f34755bb38207471945eb36cedb9e2aa755125449f531R214-R215
+# TODO: log events for bookmark?
+# TODO: log events like fatal errors?
+# TODO: Add spans for session callbacks? onRestore/onRestored, onSessionEnded, onUnhandledError, on any callback for the session
 # TODO: freeze / thaw? - log restart event?
 # TODO: reactiveTimer / invalidateLater / reactivePoll / reactiveFileReader
-# TODO: observeEvent / eventReactive - I don't believe these are possible except when binding all otel
-# TODO: debounce / throttle - I don't believe these are possible except when binding all otel
 # TODO: Extended Tasks are linked from parent span. Maybe use an envvar for span context? It is allowed for child process can end much later than the parent process. Take inspiration from callr PR (copying of the span context to the child process).
 
 # Personal debugging function -------------------------------
@@ -44,7 +55,7 @@ barret <- function() {
     shiny.otel.graphlocked = TRUE,
     shiny.otel.bindall = TRUE
   )
-  library(mirai)
+  # library(mirai)
   daemons(2)
 
   # Inspiration from
@@ -53,184 +64,199 @@ barret <- function() {
 
   # TODO: Maybe the name is the folder name, similar to shinyapps.io naming
   # Maybe set from a function call somewhere?
-  otel_tracer <- otel::get_tracer("kmeans-shiny-app-v2")
+  otel_tracer <- otel::get_tracer("my-app")
+  otel_logger <- otel::get_logger("my-app-logger")
 
-  otel_start_shiny_session <- function(
-    session,
-    activation_scope = parent.frame()
-  ) {
-    session$userData[["otel_tracer"]] <- otel_tracer
-    start_session_ospan(
-      OSPAN_SESSION_NAME,
-      tracer = otel_tracer,
-      attributes = otel_session_attr(session),
-      domain = session
-    )
-  }
-  otel_session_attr <- function(session) {
-    attr <- list(
-      PATH_INFO = session[["request"]][["PATH_INFO"]] %||% "",
-      HTTP_HOST = session[["request"]][["HTTP_HOST"]] %||% "",
-      HTTP_ORIGIN = session[["request"]][["HTTP_ORIGIN"]] %||% "",
-      QUERY_STRING = session[["request"]][["QUERY_STRING"]] %||% "",
-      SERVER_PORT = session[["request"]][["SERVER_PORT"]] %||% ""
-    )
-    try(attr[["SERVER_PORT"]] <- as.integer(attr[["SERVER_PORT"]]))
-    attr
-  }
+  options("shiny.otel.tracer" = otel_tracer)
 
   shinyApp(
     ui = fluidPage(
-      sliderInput("x", "x", 1, 10, 5),
-      sliderInput("y", "y", 1, 10, 5),
+      sliderInput("mymod-x", "x", 1, 10, 5),
+      sliderInput("mymod-y", "y", 1, 10, 5),
       div("x * y: "),
-      verbatimTextOutput("txt")
+      verbatimTextOutput("mymod-txt")
     ),
     server = function(input, output, session) {
       # shiny::bindOtel(TRUE)
 
-      otel_start_shiny_session(session)
-      with_existing_ospan_async(
-        OSPAN_SESSION_NAME,
-        {
-          otel::log_info("Start new Shiny session")
-        },
-        domain = session
-      )
-
-      x <- reactive({
-        x_val <- input$x
-        otel_log_safe("X Val: {x_val}")
-        Sys.sleep(0.5)
-        x_val
-      })
-      y <- reactive({
-        y_val <- input$y
-        otel_log_safe("Y Val: {y_val}")
-        Sys.sleep(0.5)
-        y_val
-      })
-
-      calc <- reactive({
-        message("Doing expensive computation...")
-        x() * y()
-      })
-      #  |>
-      #   bindOtel(
-      #     label = "Expensive calc"
-      #     # # name = "Expensive calc!!",
-      #     # attributes = \() {
-      #     #   list(x = input$x, y = input$y)
-      #     # }
-      #     # # ,
-      #     # name_x = {input$x},
-      #     # name_y = {input$y}
-      #   )
-      #  |>
-      #   bindOtel()
-      # Q: Automatically sets x = isolate(input$x), y = isolate(input$y) as otel attributes?
-      # * Ans: No. Values could be HUGE, so we don't want to do that.
-      # Q: Manually accept reactive expressions to isolate on during otel span creation?
-      # * Ans: Maybe? Let's leave a door open for that via `bindOtel(...)`.
-
-      # observe({
-      #   message("x: ", x())
-      # })
-
-      # output$txt <- renderText({
-      #   calc()
-      # })
-
-      log_and_msg <- function(...) {
+      log_and_msg <- function(..., .envir = parent.frame()) {
         msg <- paste(...)
         message(msg)
-        otel::log_info(msg)
+        # otel::log_info(msg, tracer = session$userData[["_otel_tracer"]])
+        otel_log_safe(msg, logger = otel_logger, .envir = .envir)
       }
 
-      x_prom <- reactive({
-        x_span_id <- force(otel::get_active_span_context()$get_span_id())
-        # message("x_prom span id: ", x_span_id)
-        x_val <- force(input$x)
-        log_and_msg("x_prom init")
-        promises::promise(\(resolve, reject) {
-          log_and_msg("x_prom 0")
-          resolve(x_val)
-        }) |>
-          promises::then(function(x_val) {
-            log_and_msg("x_prom 1")
-            log_and_msg("Launching mirai")
-            x_val
-            mirai(
-              {
-                otel::start_local_active_span("slow compute")
-                val
-                Sys.sleep(0.2)
-                val
-              },
-              val = x_val
-            )
-          }) |>
-          promises::then(function(x_val) {
-            log_and_msg("x_prom 2")
-            x_val
-          }) |>
-          promises::then(function(x_val) {
-            log_and_msg("x_prom 3")
-            x_val
-          })
-      })
-
-      y_prom <- reactive({
-        y_span_id <- force(otel::get_active_span_context()$get_span_id())
-        # message("y_prom span id: ", y_span_id)
-        y_val <- force(input$y)
-        log_and_msg("y_prom init")
-        promises::promise(\(resolve, reject) {
-          log_and_msg("y_prom 0")
-          resolve(y_val)
-        }) |>
-          promises::then(function(y_val) {
-            log_and_msg("y_prom 1")
-            y_val
-          }) |>
-          promises::then(function(y_val) {
-            log_and_msg("y_prom 2")
-            y_val + calc()
-          }) |>
-          promises::then(function(y_val) {
-            log_and_msg("y_prom 3")
-            y_val
-          })
-      })
-
-      observe(label = "proms_observer", {
-        p <- promises::promise_all(
-          x_prom(),
-          y_prom()
+      shutdown <- function() {
+        later::later(
+          function() {
+            message("\n\nClosing session for minimal logfire graphs")
+            session$close()
+            # mirai::daemons(0)
+          },
+          delay = 10 / 1000
         )
+      }
 
-        promises::then(p, \(vals) {
-          message("Vals[1]: ", vals[[1]])
-          message("Vals[2]: ", vals[[2]])
+      xMod <- function(id) {
+        moduleServer(id, function(input, output, session) {
+          xVal <- reactiveVal(NULL)
 
-          # Shut down the app so the telemetry can be seen easily
-          if (vals[[1]] == 5) {
-            updateSliderInput("x", value = 6, session = session)
-          } else {
-            later::later(
-              \() {
-                message("\n\nClosing session for small logfire graphs")
-                session$close()
-                mirai::daemons(0)
-              },
-              delay = 10 / 1000
+          # with_existing_ospan_async(
+          #   OSPAN_SESSION_NAME,
+          #   {
+          log_and_msg("Start new Shiny session")
+          #   },
+          #   domain = session
+          # )
+
+          # x_raw <- reactive({
+          x <- reactive({
+            x_val <- xVal()
+            req(x_val)
+            log_and_msg("X Val: {x_val}")
+            # Sys.sleep(0.5)
+            x_val
+          })
+          # x <- debounce(x_raw, 100)
+          y <- reactive({
+            y_val <- input$y
+            log_and_msg("Y Val: {y_val}")
+            # Sys.sleep(0.5)
+            y_val
+          })
+
+          calc <- reactive(label = "barret_calc", {
+            message("Doing expensive computation...")
+            x() * y()
+          })
+          #  |>
+          #   bindOtel(
+          #     label = "Expensive calc"
+          #     # # name = "Expensive calc!!",
+          #     # attributes = \() {
+          #     #   list(x = input$x, y = input$y)
+          #     # }
+          #     # # ,
+          #     # name_x = {input$x},
+          #     # name_y = {input$y}
+          #   )
+          #  |>
+          #   bindOtel()
+          # Q: Automatically sets x = isolate(input$x), y = isolate(input$y) as otel attributes?
+          # * Ans: No. Values could be HUGE, so we don't want to do that.
+          # Q: Manually accept reactive expressions to isolate on during otel span creation?
+          # * Ans: Maybe? Let's leave a door open for that via `bindOtel(...)`.
+
+          # observe(label = "barret_observe", {
+          #   message("x: ", x())
+          # })
+
+          # observe({
+          #   message("y: ", y())
+          # })
+
+          output$txt <- renderText({
+            # on.exit({shutdown()}, add = TRUE)
+            calc()
+          })
+
+          x_prom <- reactive({
+            x_span_id <- force(otel::get_active_span_context()$get_span_id())
+            # message("x_prom span id: ", x_span_id)
+            x_val <- x()
+            log_and_msg("x_prom init")
+            promises::promise(\(resolve, reject) {
+              log_and_msg("x_prom 0")
+              resolve(x_val)
+            }) |>
+              promises::then(function(x_val) {
+                log_and_msg("x_prom 1")
+                log_and_msg("Launching mirai")
+                x_val
+                mirai_map(seq_len(x_val), \(i) {
+                  otel::start_local_active_span("slow compute")
+                  Sys.sleep(i / 10 / 100)
+                  i
+                }) |>
+                  promises::then(\(vals) {max(unlist(vals))})
+                # mirai(
+                #   {
+                #     otel::start_local_active_span("slow compute")
+                #     # val
+                #     # Sys.sleep(0.2)
+                #     val
+                #   },
+                #   val = x_val
+                # )
+              }) |>
+              promises::then(function(x_val) {
+                log_and_msg("x_prom 2")
+                x_val
+              }) |>
+              promises::then(function(x_val) {
+                log_and_msg("x_prom 3")
+                x_val
+              })
+          })
+
+          y_prom <- reactive({
+            y_span_id <- force(otel::get_active_span_context()$get_span_id())
+            # message("y_prom span id: ", y_span_id)
+            y_val <- y()
+            log_and_msg("y_prom init")
+            promises::promise(\(resolve, reject) {
+              log_and_msg("y_prom 0")
+              resolve(y_val)
+            }) |>
+              promises::then(function(y_val) {
+                log_and_msg("y_prom 1")
+                y_val
+              }) |>
+              promises::then(function(y_val) {
+                log_and_msg("y_prom 2")
+                y_val + calc()
+              }) |>
+              promises::then(function(y_val) {
+                log_and_msg("y_prom 3")
+                y_val
+              })
+          })
+
+          observe(label = "proms_observer", {
+            p <- promises::promise_all(
+              x_prom(),
+              y_prom()
             )
-          }
-        })
-      })
+            promises::then(p, function(vals) {
+              message("Vals[1]: ", vals[[1]])
+              message("Vals[2]: ", vals[[2]])
 
-      # |>
-      # bindOtel()
+              # cat(force)
+
+              # Shut down the app so the telemetry can be seen easily
+              if (vals[[1]] < 6) {
+                updateSliderInput(
+                  "x",
+                  value = vals[[1]] + 1,
+                  session = session
+                )
+              } else {
+                shutdown()
+              }
+            })
+          })
+
+          # |>
+          # bindOtel()
+
+          # Set the value late in the reactive calc
+          observe(label = "set_x", {
+            message("Setting x!")
+            xVal(input$x)
+          })
+        })
+      }
+      xMod("mymod")
     }
   )
 }
@@ -242,10 +268,10 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 
 # TODO: Maybe a top level option to set the defaults? `shiny.otel = TRUE`?
 is_binding_all_otel <- function() {
-  otel_tracing && getOption("shiny.otel.bindall", FALSE)
+  otel_is_tracing && getOption("shiny.otel.bindall", FALSE)
 }
 is_recording_otel_reactive_graph_lock <- function() {
-  otel_tracing && getOption("shiny.otel.graphlocked", FALSE)
+  otel_is_tracing && getOption("shiny.otel.graphlocked", FALSE)
 }
 
 #' Set OpenTelemetry options for Shiny reactives
@@ -436,7 +462,7 @@ bindOtel.reactiveVal <- function(x, ...) {
 
   impl <- attr(x, ".impl", exact = TRUE)
   # Set flag for otel logging when setting the value
-  impl$.is_logging_otel <- TRUE
+  impl$.isLoggingOtel <- TRUE
 
   class(x) <- c("reactiveVal.otel", class(x))
 
@@ -444,14 +470,14 @@ bindOtel.reactiveVal <- function(x, ...) {
 }
 
 #' @export
-bindOtel.reactiveValues <- function(x, ...) {
+bindOtel.reactivevalues <- function(x, ...) {
   rlang::check_dots_empty()
 
   impl <- attr(x, ".impl", exact = TRUE)
   # Set flag for otel logging when setting values
-  impl$.is_logging_otel <- TRUE
+  impl$.isLoggingOtel <- TRUE
 
-  class(x) <- c("reactiveValues.otel", class(x))
+  class(x) <- c("reactivevalues.otel", class(x))
 
   x
 }
@@ -477,7 +503,10 @@ bindOtel.reactiveExpr <- function(x, ...) {
   rm(x)
   # Hacky workaround for issue with `%>%` preventing GC:
   # https://github.com/tidyverse/magrittr/issues/229
-  if (exists(".GenericCallEnv") && exists(".", envir = .GenericCallEnv, inherits = FALSE)) {
+  if (
+    exists(".GenericCallEnv") &&
+      exists(".", envir = .GenericCallEnv, inherits = FALSE)
+  ) {
     rm(list = ".", envir = .GenericCallEnv, inherits = FALSE)
   }
 
@@ -489,13 +518,17 @@ bindOtel.reactiveExpr <- function(x, ...) {
     res <- reactive(label = label, domain = domain, {
       # Force all `{shiny}` spans to be under `{shiny}` tracer, not the app's tracer
       # with_shiny_ospan_async(span_label, {
-      with_ospan_async(span_label, {
-        # TODO: Need `otel::with_tracer(tracer, CODE)`
-        # Set the app's tracer to be the default when running the expression
-        # with_app_tracer(domain = domain, {
-        valueFunc()
-        # })
-      }, domain = domain)
+      with_ospan_async(
+        span_label,
+        {
+          # TODO: Need `otel::with_tracer(tracer, CODE)`
+          # Set the app's tracer to be the default when running the expression
+          # with_app_tracer(domain = domain, {
+          valueFunc()
+          # })
+        },
+        domain = domain
+      )
     })
   })
 
@@ -513,12 +546,20 @@ bindOtel.shiny.render.function <- function(x, ...) {
   renderFunc <- function(...) {
     session <- getDefaultReactiveDomain()
     if (is.null(span_label)) {
-      span_label <<- paste0("output(", getCurrentOutputInfo(session = session)$name, ")")
+      span_label <<- paste0(
+        "output(",
+        getCurrentOutputInfo(session = session)$name,
+        ")"
+      )
     }
 
-    with_ospan_async(span_label, {
-      valueFunc(...)
-    }, domain = session)
+    with_ospan_async(
+      span_label,
+      {
+        valueFunc(...)
+      },
+      domain = session
+    )
   }
 
   renderFunc <- addAttributes(renderFunc, renderFunctionAttributes(valueFunc))
@@ -600,7 +641,7 @@ bindOtel.reactive.otel <- function(x, ...) {
 #' @export
 bindOtel.reactiveVal.otel <- bindOtel.reactive.otel
 #' @export
-bindOtel.reactiveValues.otel <- bindOtel.reactive.otel
+bindOtel.reactivevalues.otel <- bindOtel.reactive.otel
 #' @export
 bindOtel.shiny.render.function.otel <- bindOtel.reactive.otel
 #' @export

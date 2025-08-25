@@ -1,5 +1,5 @@
 on_load({
-  otel_tracing <- base::requireNamespace("otel", quietly = TRUE) && otel::is_tracing_enabled()
+  otel_is_tracing <- base::requireNamespace("otel", quietly = TRUE) && otel::is_tracing_enabled()
 })
 
 if (FALSE) {
@@ -31,9 +31,9 @@ if (FALSE) {
   # 3. Discontiguous
 
   # √YES - DOES NOT ACTIVATE
-  start_session_ospan("my_operation")
+  start_domain_ospan("my_operation")
   ... # Do work
-  end_session_ospan("my_operation")
+  end_domain_ospan("my_operation")
 
   # start_domain_ospan("my_operation")
   # end_domain_span("my_operation")
@@ -101,7 +101,7 @@ start_ospan <- function(
   attributes = NULL,
   domain = getDefaultReactiveDomain()
 ) {
-  if (!otel_tracing) {
+  if (!otel_is_tracing) {
     return(NULL)
   }
 
@@ -115,7 +115,7 @@ start_ospan <- function(
 }
 
 end_ospan <- function(span) {
-  if (!otel_tracing) {
+  if (!otel_is_tracing) {
     return(invisible())
   }
 
@@ -124,13 +124,13 @@ end_ospan <- function(span) {
 
 
 # Start a span who will be stored on the session obect
-start_session_ospan <- function(
+start_domain_ospan <- function(
   name,
   ...,
   attributes = NULL,
   domain = getDefaultReactiveDomain()
 ) {
-  if (!otel_tracing) {
+  if (!otel_is_tracing) {
     return(NULL)
   }
 
@@ -149,7 +149,7 @@ start_session_ospan <- function(
   set_ospan_in_domain(name, span, domain = domain)
 
   # Add a failsafe to end the span
-  end_forgotten_session_ospans_on_session_end(domain)
+  end_forgotten_domain_ospans_on_session_end(domain)
 
   return(invisible())
 
@@ -162,9 +162,9 @@ start_session_ospan <- function(
 
 
 # End a span who has been stored on the session obect
-end_session_ospan <- function(name, ..., domain = getDefaultReactiveDomain()) {
+end_domain_ospan <- function(name, ..., domain = getDefaultReactiveDomain()) {
   stopifnot(length(list(...)) == 0)
-  if (!otel_tracing) {
+  if (!otel_is_tracing) {
     return(invisible())
   }
 
@@ -184,29 +184,10 @@ end_session_ospan <- function(name, ..., domain = getDefaultReactiveDomain()) {
   invisible()
 }
 
-OSPAN_SESSION_NAME <- "session"
-OSPAN_REACTIVE_LOCK_NAME <- "reactive_lock"
-# Safety method to close all spans once the session is done
-# Ex: `session` span is not closed so that it is the LAST otel domain to live
-#
-# It is recommended that all other spans are manually closed
-# If any are somehow forgotten, they will be closed here
-end_forgotten_session_ospans_on_session_end <- function(domain) {
-  # Only register once
-  if (!is.null(domain$userData[["_otel_on_end"]])) {
-    return()
-  }
-  domain$userData[["_otel_on_end"]] <- TRUE
 
-  domain$onSessionEnded(function(...) {
-    # Remove all spans from the session
 
-    # Perform in reverse order as older spans were added first
-    for (name in rev(get_ospan_names_from_domain(domain = domain))) {
-      end_session_ospan(name, domain = domain)
-    }
-  })
-}
+
+
 
 
 #' Execute code within an OpenTelemetry span for asynchronous operations
@@ -256,7 +237,7 @@ with_ospan_async <- function(
   attributes = NULL,
   domain = getDefaultReactiveDomain()
 ) {
-  if (!otel_tracing) {
+  if (!otel_is_tracing) {
     return(force(expr))
   }
 
@@ -335,7 +316,7 @@ with_existing_ospan_async <- function(
   ...,
   domain
 ) {
-  if (!otel_tracing) {
+  if (!otel_is_tracing) {
     return(force(expr))
   }
 

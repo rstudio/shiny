@@ -1056,6 +1056,12 @@ ShinySession <- R6Class(
         class(e) <- c("shiny.error.fatal", class(e))
       }
 
+      if (otel_is_tracing) {
+        with_session_ospan(domain = self, {
+          otel_log_safe("Fatal error", attributes = list(error = e))
+        })
+      }
+
       private$unhandledErrorCallbacks$invoke(e, onError = printError)
       .globals$onUnhandledErrorCallbacks$invoke(e, onError = printError)
 
@@ -1156,7 +1162,7 @@ ShinySession <- R6Class(
               {
                 private$withCurrentOutput(name, {
                   # TODO: Error handling must be done within ospan methods to get the proper status value. There is currently no way to access a already closed span from within `func()`.
-                  with_existing_ospan_async(OSPAN_REACTIVE_LOCK_NAME, {
+                  with_reactive_lock_ospan_async({
                     shinyCallingHandlers(func())
                   }, domain = self)
                 })
@@ -2201,15 +2207,10 @@ ShinySession <- R6Class(
         private$sendMessage(busy = "busy")
 
         if (is_recording_otel_reactive_graph_lock()) {
-          with_existing_ospan_async(OSPAN_SESSION_NAME, {
-            start_session_ospan(
-              OSPAN_REACTIVE_LOCK_NAME,
-              domain = self
-              # links = list(
-              #   session = get_ospan_from_domain(OSPAN_SESSION_NAME, domain = self)
-              # )
-            )
+          with_session_ospan_async({
+            start_reactive_lock_ospan(domain = self)
           }, domain = self)
+          #
         }
       }
       private$busyCount <- private$busyCount + 1L
@@ -2234,7 +2235,7 @@ ShinySession <- R6Class(
         })
 
         if (is_recording_otel_reactive_graph_lock()) {
-          end_session_ospan(OSPAN_REACTIVE_LOCK_NAME, domain = self)
+          end_reactive_lock_ospan(domain = self)
         }
       }
     }

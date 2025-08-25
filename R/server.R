@@ -274,14 +274,19 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
                 args <- argsForServerFunc(serverFunc, shinysession)
 
                 withReactiveDomain(shinysession, {
-                  do.call(
-                    # No corresponding ..stacktraceoff; the server func is pure
-                    # user code
-                    wrapFunctionLabel(appvars$server, "server",
-                      ..stacktraceon = TRUE
-                    ),
-                    args
-                  )
+
+                  start_session_ospan(domain = shinysession, stop_on_session_end = TRUE)
+
+                  with_session_ospan_async(domain = shinysession, {
+                    do.call(
+                      # No corresponding ..stacktraceoff; the server func is pure
+                      # user code
+                      wrapFunctionLabel(appvars$server, "server",
+                        ..stacktraceon = TRUE
+                      ),
+                      args
+                    )
+                  })
                 })
               })
             },

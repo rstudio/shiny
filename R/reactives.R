@@ -79,7 +79,7 @@ ReactiveVal <- R6Class(
     dependents = NULL
   ),
   public = list(
-    .is_logging_otel = FALSE, # needs to be accessed/set within Shiny
+    .isLoggingOtel = FALSE, # needs to be accessed/set within Shiny
     initialize = function(value, label = NULL) {
       reactId <- nextGlobalReactId()
       private$reactId <- reactId
@@ -88,7 +88,7 @@ ReactiveVal <- R6Class(
       private$dependents <- Dependents$new(reactId = private$reactId)
       rLog$define(private$reactId, value, private$label, type = "reactiveVal", getDefaultReactiveDomain())
 
-      .is_logging_otel <<- is_binding_all_otel()
+      .isLoggingOtel <<- is_binding_all_otel()
     },
     get = function() {
       private$dependents$register()
@@ -104,17 +104,15 @@ ReactiveVal <- R6Class(
       }
 
       domain <- getDefaultReactiveDomain()
-      if (!is.null(domain)) {
-        if (.is_logging_otel) {
-          if (has_existing_ospan(OSPAN_REACTIVE_LOCK_NAME)) {
-            # Perform as is so that the current span is used
-            otel_log_safe("Setting reactive value: {private$label}", severity = "info")
-          } else if(has_existing_ospan(OSPAN_SESSION_NAME)) {
-            with_existing_ospan_async(OSPAN_SESSION_NAME, {
-              otel_log_safe("Setting reactive value: {private$label}", severity = "info")
-            }, domain = domain)
-          }
-        }
+      if ((!is.null(domain)) && .isLoggingOtel) {
+        with_reactive_lock_or_session_ospan_async(domain = domain, {
+          # Set reactive value `x`
+          # Set reactive value `mymod-x`
+          # Set `x`
+          # Set `mymod-x`
+          ospan_label <- private$label
+          otel_log_safe("Set `{ospan_label}`", severity = "info")
+        })
       }
       rLog$valueChange(private$reactId, value, domain)
       private$value <- value
@@ -225,6 +223,10 @@ reactiveVal <- function(value = NULL, label = NULL) {
   if (missing(label)) {
     call <- sys.call()
     label <- rvalSrcrefToLabel(attr(call, "srcref", exact = TRUE))
+    domain <- getDefaultReactiveDomain()
+    if (!is.null(domain)) {
+      label <- domain$ns(label)
+    }
   }
 
   rv <- ReactiveVal$new(value, label)
@@ -352,7 +354,7 @@ ReactiveValues <- R6Class(
     # All names, in insertion order. The names are also stored in the .values
     # object, but it does not preserve order.
     .nameOrder = character(0),
-    .is_logging_otel = FALSE,
+    .isLoggingOtel = FALSE,
 
 
     initialize = function(
@@ -370,7 +372,7 @@ ReactiveValues <- R6Class(
       .valuesDeps <<- Dependents$new(reactId = rLog$asListIdStr(.reactId))
       .dedupe <<- dedupe
 
-      .is_logging_otel <<- is_binding_all_otel()
+      .isLoggingOtel <<- is_binding_all_otel()
     },
 
     get = function(key) {
@@ -432,19 +434,14 @@ ReactiveValues <- R6Class(
         return(invisible())
       }
 
-      if (!is.null(domain)) {
-        if (.is_logging_otel) {
-          if (has_existing_ospan(OSPAN_REACTIVE_LOCK_NAME)) {
-            # Perform as is
-            # with_existing_ospan_async(OSPAN_REACTIVE_LOCK_NAME, {
-            otel_log_safe(glue::glue_safe("Setting reactive values: {key} = {value}"), severity = "info")
-            # }, domain = domain)
-          } else if (has_existing_ospan(OSPAN_SESSION_NAME)) {
-            with_existing_ospan_async(OSPAN_SESSION_NAME, {
-              otel_log_safe(glue::glue_safe("Setting reactive values: {key} = {value}"), severity = "info")
-            }, domain = domain)
-          }
-        }
+      if ((!is.null(domain)) && .isLoggingOtel) {
+        with_reactive_lock_or_session_ospan_async(domain = domain, {
+          # Set reactive values `x$key`
+          # Set reactive values `mymod-x$key`
+          # Set `x$key`
+          # Set `mymod-x$key`
+          otel_log_safe("Set `{.label}${key}`", severity = "info")
+        })
       }
 
       # If it's new, append key to the name order

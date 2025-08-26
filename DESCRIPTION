@@ -1,7 +1,7 @@
 Type: Package
 Package: shiny
 Title: Web Application Framework for R
-Version: 1.11.1.9000
+Version: 1.11.1.9001
 Authors@R: c(
     person("Winston", "Chang", , "winston@posit.co", role = "aut",
            comment = c(ORCID = "0000-0002-1576-2126")),
@@ -193,6 +193,7 @@ Collate:
     'notifications.R'
     'otel-existing-spans.R'
     'otel-label.R'
+    'otel-with.R'
     'otel.R'
     'priorityqueue.R'
     'progress.R'

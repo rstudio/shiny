@@ -59,13 +59,13 @@ if (FALSE) {
   # 5. Set attributes on the current active span
   set_ospan_attrs(status = 200L)
 
-  # - Observer's run() must be called with with_existing_ospan_async(reactive_lock_span) (and, with_ospan_async if the observer itself has otel logging turned on)
+  # - Observer's run() must be called with with_existing_ospan_async(reactive_update_span) (and, with_ospan_async if the observer itself has otel logging turned on)
   # - Other operations should simply use with_ospan_async
 }
 
 
 # Integration points:
-# - Observer's run() must be called with with_existing_ospan_async(reactive_lock_span) (and, with_ospan_async if the observer itself has otel logging turned on)
+# - Observer's run() must be called with with_existing_ospan_async(reactive_update_span) (and, with_ospan_async if the observer itself has otel logging turned on)
 # - Other operations should simply use with_ospan_async
 # - calling of `server(input, output)` function
 # - Maybe enhance all `withReactiveDomain()` calls?

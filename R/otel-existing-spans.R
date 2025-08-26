@@ -1,20 +1,9 @@
 OSPAN_SESSION_NAME <- "session"
-# OSPAN_REACTIVE_LOCK_NAME <- "Lock reactive graph"
-# OSPAN_REACTIVE_LOCK_NAME <- "Update app"
-# OSPAN_REACTIVE_LOCK_NAME <- "Update app (blocking)"
-# OSPAN_REACTIVE_LOCK_NAME <- "Reactivity"
-# OSPAN_REACTIVE_LOCK_NAME <- "Reactively update"
-# OSPAN_REACTIVE_LOCK_NAME <- "Update reactively"
-# OSPAN_REACTIVE_LOCK_NAME <- "Update reactives"
-# OSPAN_REACTIVE_LOCK_NAME <- "Calculate reactives"
-OSPAN_REACTIVE_LOCK_NAME <- "Reactive update"
-# OSPAN_REACTIVE_LOCK_NAME <- "Reactive update (blocking)"
-# OSPAN_REACTIVE_LOCK_NAME <- "Reactivity"
+OSPAN_REACTIVE_UPDATE_NAME <- "Reactive update"
 
 # global blocking - reactivity
 # session blocking - promises?
 # non-blocking - extended tasks
-# OSPAN_REACTIVE_LOCK_NAME <- "Blocking reactive update"
 
 # -- Start / stop ------------------------
 
@@ -33,9 +22,9 @@ start_session_ospan <- function(..., domain, stop_on_session_end = FALSE) {
 }
 
 
-start_reactive_lock_ospan <- function(..., domain) {
+start_reactive_update_ospan <- function(..., domain) {
   start_domain_ospan(
-    OSPAN_REACTIVE_LOCK_NAME,
+    OSPAN_REACTIVE_UPDATE_NAME,
     # tracer = otel_session_tracer(domain),
     links = list(
       session = get_session_ospan(domain = domain)
@@ -43,8 +32,8 @@ start_reactive_lock_ospan <- function(..., domain) {
     domain = domain
   )
 }
-end_reactive_lock_ospan <- function(..., domain) {
-  end_domain_ospan(OSPAN_REACTIVE_LOCK_NAME, domain = domain)
+end_reactive_update_ospan <- function(..., domain) {
+  end_domain_ospan(OSPAN_REACTIVE_UPDATE_NAME, domain = domain)
 }
 
 
@@ -56,8 +45,8 @@ with_session_ospan_async <- function(expr, ..., domain) {
   with_existing_ospan_async(OSPAN_SESSION_NAME, domain = domain, expr)
 }
 
-with_reactive_lock_ospan_async <- function(expr, ..., domain) {
-  with_existing_ospan_async(OSPAN_REACTIVE_LOCK_NAME, domain = domain, expr)
+with_reactive_update_ospan_async <- function(expr, ..., domain) {
+  with_existing_ospan_async(OSPAN_REACTIVE_UPDATE_NAME, domain = domain, expr)
 }
 
 # -- Get ------------------------
@@ -66,8 +55,8 @@ get_session_ospan <- function(..., domain) {
   get_ospan_from_domain(OSPAN_SESSION_NAME, domain = domain)
 }
 
-# get_reactive_lock_ospan <- function(..., domain) {
-#   get_ospan_from_domain(OSPAN_REACTIVE_LOCK_NAME, domain = domain)
+# get_reactive_update_ospan <- function(..., domain) {
+#   get_ospan_from_domain(OSPAN_REACTIVE_UPDATE_NAME, domain = domain)
 # }
 
 # -- Has ------------------------
@@ -76,8 +65,8 @@ has_session_ospan <- function(..., domain) {
   has_existing_ospan(OSPAN_SESSION_NAME, domain = domain)
 }
 
-has_reactive_lock_ospan <- function(..., domain) {
-  has_existing_ospan(OSPAN_REACTIVE_LOCK_NAME, domain = domain)
+has_reactive_update_ospan <- function(..., domain) {
+  has_existing_ospan(OSPAN_REACTIVE_UPDATE_NAME, domain = domain)
 }
 
 # -- Convenience ----------------------
@@ -85,8 +74,8 @@ has_reactive_lock_ospan <- function(..., domain) {
 # Wrap the expression in a reactive lock ospan.
 # If the reactive lock ospan doesn't exist, use the session ospan
 # If neither exist, do NOT execute the expression unless `force_expr = TRUE`
-with_reactive_lock_or_session_ospan_async <- function(expr, ..., force_expr = FALSE, domain) {
-  if (has_reactive_lock_ospan(domain = domain)) {
+with_reactive_update_or_session_ospan_async <- function(expr, ..., force_expr = FALSE, domain) {
+  if (has_reactive_update_ospan(domain = domain)) {
     # Perform as is because we are within some reactive span
     force(expr)
   } else if (has_session_ospan(domain = domain)) {

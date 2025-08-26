@@ -1162,7 +1162,7 @@ ShinySession <- R6Class(
               {
                 private$withCurrentOutput(name, {
                   # TODO: Error handling must be done within ospan methods to get the proper status value. There is currently no way to access a already closed span from within `func()`.
-                  with_reactive_lock_ospan_async({
+                  with_reactive_update_ospan_async({
                     shinyCallingHandlers(func())
                   }, domain = self)
                 })
@@ -2206,9 +2206,9 @@ ShinySession <- R6Class(
         rLog$asyncStart(domain = self)
         private$sendMessage(busy = "busy")
 
-        if (is_recording_otel_reactive_graph_lock()) {
+        if (is_recording_ospan_reactive_update()) {
           with_session_ospan_async({
-            start_reactive_lock_ospan(domain = self)
+            start_reactive_update_ospan(domain = self)
           }, domain = self)
           #
         }
@@ -2234,8 +2234,8 @@ ShinySession <- R6Class(
           }
         })
 
-        if (is_recording_otel_reactive_graph_lock()) {
-          end_reactive_lock_ospan(domain = self)
+        if (is_recording_ospan_reactive_update()) {
+          end_reactive_update_ospan(domain = self)
         }
       }
     }

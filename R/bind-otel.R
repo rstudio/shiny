@@ -292,7 +292,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 is_binding_all_otel <- function() {
   otel_is_tracing && getOption("shiny.otel.bindall", FALSE)
 }
-is_recording_otel_reactive_graph_lock <- function() {
+is_recording_ospan_reactive_update <- function() {
   otel_is_tracing && getOption("shiny.otel.graphlocked", FALSE)
 }
 

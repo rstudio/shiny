@@ -55,8 +55,9 @@ barret <- function() {
     shiny.otel.graphlocked = TRUE,
     shiny.otel.bindall = TRUE
   )
+  # shiny::otelBindAll()
   # library(mirai)
-  daemons(2)
+  # daemons(2)
 
   # Inspiration from
   # * https://github.com/r-lib/otel/commit/a2ef493ae4b97701e4e178ac527f313580539080
@@ -77,13 +78,18 @@ barret <- function() {
       verbatimTextOutput("mymod-txt")
     ),
     server = function(input, output, session) {
+      otel::start_local_active_span("session")
+
+      b <- reactiveVal(1)
+      observe(b(42))
+
       # shiny::bindOtel(TRUE)
 
       log_and_msg <- function(..., .envir = parent.frame()) {
         msg <- paste(...)
         message(msg)
         # otel::log_info(msg, tracer = session$userData[["_otel_tracer"]])
-        otel_log_safe(msg, logger = otel_logger, .envir = .envir)
+        otel_log_safe(msg, logger = otel_logger)
       }
 
       shutdown <- function() {
@@ -113,14 +119,14 @@ barret <- function() {
           x <- reactive({
             x_val <- xVal()
             req(x_val)
-            log_and_msg("X Val: {x_val}")
+            log_and_msg(sprintf("X Val: %s", x_val))
             # Sys.sleep(0.5)
             x_val
           })
           # x <- debounce(x_raw, 100)
           y <- reactive({
             y_val <- input$y
-            log_and_msg("Y Val: {y_val}")
+            log_and_msg(sprintf("Y Val: %s", y_val))
             # Sys.sleep(0.5)
             y_val
           })
@@ -148,15 +154,29 @@ barret <- function() {
           # * Ans: Maybe? Let's leave a door open for that via `bindOtel(...)`.
 
           # observe(label = "barret_observe", {
-          #   message("x: ", x())
-          # })
+          observe({
+            message("x: ", x())
+          })
 
-          # observe({
-          #   message("y: ", y())
-          # })
+          observe(message("longer message. y: ", y()))
 
           output$txt <- renderText({
-            # on.exit({shutdown()}, add = TRUE)
+
+            # lapply(1:10, function(i) {
+            #   otel::start_local_active_span("my_span")
+            #   Sys.sleep(0.1)
+            #   otel::log_info("Extra info: {q()}")
+            #   my_val <- "q()"
+            #   otel::log_info("Extra info: {my_val}")
+            # })
+
+            # my_val <- 42
+            # otel::log_info("Extra info: {my_val}")
+
+            # this_span <- otel::get_active_span_context()$current_span()
+            # this_span$set_attribute("key", val)
+
+            # otel::start_local_active_span("output(mymod-txt)", attributes = otel::as_attributes(list(session = getDefaultReactiveDomain(()), file = "bind-otel.R", file_line = 164)))
             calc()
           })
 
@@ -173,12 +193,14 @@ barret <- function() {
                 log_and_msg("x_prom 1")
                 log_and_msg("Launching mirai")
                 x_val
-                mirai_map(seq_len(x_val), \(i) {
-                  otel::start_local_active_span("slow compute")
-                  Sys.sleep(i / 10 / 100)
-                  i
-                }) |>
-                  promises::then(\(vals) {max(unlist(vals))})
+                # mirai_map(seq_len(x_val), \(i) {
+                #   otel::start_local_active_span("slow compute")
+                #   Sys.sleep(i / 10 / 100)
+                #   i
+                # }) |>
+                #   promises::then(\(vals) {
+                #     max(unlist(vals))
+                #   })
                 # mirai(
                 #   {
                 #     otel::start_local_active_span("slow compute")
@@ -234,7 +256,7 @@ barret <- function() {
               # cat(force)
 
               # Shut down the app so the telemetry can be seen easily
-              if (vals[[1]] < 6) {
+              if (vals[[1]] < 5) {
                 updateSliderInput(
                   "x",
                   value = vals[[1]] + 1,
@@ -368,79 +390,76 @@ localOtelShiny <- function(..., bindAll = TRUE, .envir = parent.frame()) {
 #'   input$x * 100
 #' }) %>%
 #'   bindCache(input$x)
-#'
 #' }
 #'
 #' ## Only run app examples in interactive R sessions
 #' if (interactive()) {
+#'   # Basic example
+#'   shinyApp(
+#'     ui = fluidPage(
+#'       sliderInput("x", "x", 1, 10, 5),
+#'       sliderInput("y", "y", 1, 10, 5),
+#'       div("x * y: "),
+#'       verbatimTextOutput("txt")
+#'     ),
+#'     server = function(input, output) {
+#'       r <- reactive({
+#'         # The value expression is an _expensive_ computation
+#'         message("Doing expensive computation...")
+#'         Sys.sleep(2)
+#'         input$x * input$y
+#'       }) %>%
+#'         bindCache(input$x, input$y)
 #'
-#' # Basic example
-#' shinyApp(
-#'   ui = fluidPage(
-#'     sliderInput("x", "x", 1, 10, 5),
-#'     sliderInput("y", "y", 1, 10, 5),
-#'     div("x * y: "),
-#'     verbatimTextOutput("txt")
-#'   ),
-#'   server = function(input, output) {
-#'     r <- reactive({
-#'       # The value expression is an _expensive_ computation
-#'       message("Doing expensive computation...")
-#'       Sys.sleep(2)
-#'       input$x * input$y
-#'     }) %>%
-#'       bindCache(input$x, input$y)
-#'
-#'     output$txt <- renderText(r())
-#'   }
-#' )
-#'
-#'
-#' # Caching renderText
-#' shinyApp(
-#'   ui = fluidPage(
-#'     sliderInput("x", "x", 1, 10, 5),
-#'     sliderInput("y", "y", 1, 10, 5),
-#'     div("x * y: "),
-#'     verbatimTextOutput("txt")
-#'   ),
-#'   server = function(input, output) {
-#'     output$txt <- renderText({
-#'       message("Doing expensive computation...")
-#'       Sys.sleep(2)
-#'       input$x * input$y
-#'     }) %>%
-#'       bindCache(input$x, input$y)
-#'   }
-#' )
+#'       output$txt <- renderText(r())
+#'     }
+#'   )
 #'
 #'
-#' # Demo of using events and caching with an actionButton
-#' shinyApp(
-#'   ui = fluidPage(
-#'     sliderInput("x", "x", 1, 10, 5),
-#'     sliderInput("y", "y", 1, 10, 5),
-#'     actionButton("go", "Go"),
-#'     div("x * y: "),
-#'     verbatimTextOutput("txt")
-#'   ),
-#'   server = function(input, output) {
-#'     r <- reactive({
-#'       message("Doing expensive computation...")
-#'       Sys.sleep(2)
-#'       input$x * input$y
-#'     }) %>%
-#'       bindCache(input$x, input$y) %>%
-#'       bindEvent(input$go)
+#'   # Caching renderText
+#'   shinyApp(
+#'     ui = fluidPage(
+#'       sliderInput("x", "x", 1, 10, 5),
+#'       sliderInput("y", "y", 1, 10, 5),
+#'       div("x * y: "),
+#'       verbatimTextOutput("txt")
+#'     ),
+#'     server = function(input, output) {
+#'       output$txt <- renderText({
+#'         message("Doing expensive computation...")
+#'         Sys.sleep(2)
+#'         input$x * input$y
+#'       }) %>%
+#'         bindCache(input$x, input$y)
+#'     }
+#'   )
+#'
+#'
+#'   # Demo of using events and caching with an actionButton
+#'   shinyApp(
+#'     ui = fluidPage(
+#'       sliderInput("x", "x", 1, 10, 5),
+#'       sliderInput("y", "y", 1, 10, 5),
+#'       actionButton("go", "Go"),
+#'       div("x * y: "),
+#'       verbatimTextOutput("txt")
+#'     ),
+#'     server = function(input, output) {
+#'       r <- reactive({
+#'         message("Doing expensive computation...")
+#'         Sys.sleep(2)
+#'         input$x * input$y
+#'       }) %>%
+#'         bindCache(input$x, input$y) %>%
+#'         bindEvent(input$go)
 #'       # The cached, eventified reactive takes a reactive dependency on
 #'       # input$go, but doesn't use it for the cache key. It uses input$x and
 #'       # input$y for the cache key, but doesn't take a reactive dependency on
 #'       # them, because the reactive dependency is superseded by addEvent().
 #'
-#'     output$txt <- renderText(r())
-#'   }
-#' )
-#'
+#'       output$txt <- renderText(r())
+#'     }
+#'   )
 #' }
 #'
 #' @export
@@ -486,10 +505,10 @@ bindOtel.reactivevalues <- function(x, ...) {
 bindOtel.reactiveExpr <- function(x, ...) {
   rlang::check_dots_empty()
 
-  # TODO: This value feels wrong. `bindCache()` is also probably wrong.
-  # label <- exprToLabel(substitute(key), "otel")
-  label <- attr(x, "observable", exact = TRUE)[[".label"]]
   domain <- reactive_get_domain(x)
+
+  x_label <- attr(x, "observable", exact = TRUE)[[".label"]]
+  span_label <- ospan_label_reactive(x, domain = domain)
 
   valueFunc <- reactive_get_value_func(x)
   valueFunc <- wrapFunctionLabel(
@@ -513,9 +532,8 @@ bindOtel.reactiveExpr <- function(x, ...) {
   # Turn off binding all otel, so that we don't recursively bind forever
   # `withOtelShiny()` does not virally enable/disable binding all otel,
   # only in "this" tick
-  span_label <- paste0("reactive(", label, ")")
   withOtelShiny(bindAll = FALSE, {
-    res <- reactive(label = label, domain = domain, {
+    res <- reactive(label = x_label, domain = domain, {
       # Force all `{shiny}` spans to be under `{shiny}` tracer, not the app's tracer
       # with_shiny_ospan_async(span_label, {
       with_ospan_async(
@@ -546,11 +564,7 @@ bindOtel.shiny.render.function <- function(x, ...) {
   renderFunc <- function(...) {
     session <- getDefaultReactiveDomain()
     if (is.null(span_label)) {
-      span_label <<- paste0(
-        "output(",
-        getCurrentOutputInfo(session = session)$name,
-        ")"
-      )
+      span_label <<- ospan_label_render_function(domain = session)
     }
 
     with_ospan_async(
@@ -586,25 +600,19 @@ bindOtel.Observer <- function(x, ...) {
     )
   }
 
-  # eventFunc <- quos_to_func(qs)
   obsFunc <- x$.func
 
-  span_label <- x$.label
-  # By default, observe() sets the label to `observe(CODE)`
-  # If a user supplies their own label, wrap it in `observe(LABEL)` to be
-  # consistent with other label formats of `FN(LABEL)`
-  if (!isDefaultLabel(span_label)) {
-    span_label <- sprintf('observe(%s)', span_label)
-  }
+  domain <- x$.domain
+
+  span_label <- ospan_label_observer(x, domain = domain)
 
   x$.func <- wrapFunctionLabel(
     name = span_label,
     ..stacktraceon = FALSE,
     func = function() {
       with_ospan_async(span_label, {
-        # browser()
         force(obsFunc())
-      })
+      }, domain = domain)
     }
   )
 

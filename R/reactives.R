@@ -106,12 +106,11 @@ ReactiveVal <- R6Class(
       domain <- getDefaultReactiveDomain()
       if ((!is.null(domain)) && .isLoggingOtel) {
         with_reactive_lock_or_session_ospan_async(domain = domain, {
-          # Set reactive value `x`
-          # Set reactive value `mymod-x`
-          # Set `x`
-          # Set `mymod-x`
-          ospan_label <- private$label
-          otel_log_safe("Set `{ospan_label}`", severity = "info")
+          # [mymod] Set reactiveVal: x
+          otel_log_safe(
+            ospan_label_set_reactive_val(private$label, domain = domain),
+            severity = "info"
+          )
         })
       }
       rLog$valueChange(private$reactId, value, domain)
@@ -436,11 +435,11 @@ ReactiveValues <- R6Class(
 
       if ((!is.null(domain)) && .isLoggingOtel) {
         with_reactive_lock_or_session_ospan_async(domain = domain, {
-          # Set reactive values `x$key`
-          # Set reactive values `mymod-x$key`
-          # Set `x$key`
-          # Set `mymod-x$key`
-          otel_log_safe("Set `{.label}${key}`", severity = "info")
+          # [mymod] Set reactiveValues: x$key
+          otel_log_safe(
+            ospan_label_set_reactive_values(.label, key, domain = domain),
+            severity = "info"
+          )
         })
       }
 

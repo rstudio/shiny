@@ -4,13 +4,7 @@
 \alias{with_ospan_async}
 \title{Execute code within an OpenTelemetry span for asynchronous operations}
 \usage{
-with_ospan_async(
-  name,
-  expr,
-  ...,
-  attributes = NULL,
-  domain = getDefaultReactiveDomain()
-)
+with_ospan_async(name, expr, ..., attributes = NULL, domain)
 }
 \arguments{
 \item{name}{Character string. The name of the span.}
@@ -47,7 +41,7 @@ result <- with_ospan_async("my_operation", {
 })
 
 # Asynchronous operation
-promise <- with_ospan_async("async_operation", {
+promise <- with_ospan_async("async_operation", domain = domain, {
   # ... return a promise ...
   some_async_function()
 })

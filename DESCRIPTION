@@ -192,6 +192,7 @@ Collate:
     'modules.R'
     'notifications.R'
     'otel-existing-spans.R'
+    'otel-label.R'
     'otel.R'
     'priorityqueue.R'
     'progress.R'

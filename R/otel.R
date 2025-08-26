@@ -221,7 +221,7 @@ end_domain_ospan <- function(name, ..., domain = getDefaultReactiveDomain()) {
 #' })
 #'
 #' # Asynchronous operation
-#' promise <- with_ospan_async("async_operation", {
+#' promise <- with_ospan_async("async_operation", domain = domain, {
 #'   # ... return a promise ...
 #'   some_async_function()
 #' })
@@ -235,7 +235,7 @@ with_ospan_async <- function(
   expr,
   ...,
   attributes = NULL,
-  domain = getDefaultReactiveDomain()
+  domain
 ) {
   if (!otel_is_tracing) {
     return(force(expr))
@@ -334,6 +334,7 @@ with_existing_ospan_async <- function(
 # # TODO: Set attributes on the current active span
 # # 5. Set attributes on the current active span
 # set_ospan_attrs(status = 200L)
+
 
 # -- Helpers --------------------------------------------------------------
 

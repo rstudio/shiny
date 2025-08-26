@@ -2,67 +2,6 @@ on_load({
   otel_is_tracing <- base::requireNamespace("otel", quietly = TRUE) && otel::is_tracing_enabled()
 })
 
-if (FALSE) {
-  # 1. Synchronous
-
-  # NO
-  local_ospan("my_operation")
-  ... # Do work
-
-  # or
-
-  # NO
-  with_ospan("my_operation", {
-    ... # Do work
-  })
-
-  # 2. Asynchronous
-
-  # NO
-  local_ospan_async("my_operation")
-  ... # Do work
-
-  # √YES
-  # Different than with_ospan in that it installs a promise domain
-  with_ospan_async("my_operation", {
-    ... # Do work
-  })
-
-  # 3. Discontiguous
-
-  # √YES - DOES NOT ACTIVATE
-  start_domain_ospan("my_operation")
-  ... # Do work
-  end_domain_ospan("my_operation")
-
-  # start_domain_ospan("my_operation")
-  # end_domain_span("my_operation")
-
-  # 4. Repeated? (Needed for reactive lock)
-
-  # YES
-  with_existing_ospan_async("existing_name", {
-    # Do this if reactive lock is otel-enabled
-    with_ospan_async("my_observer", {
-      # Do this if observer is otel-enabled
-      with_ospan_async("my_reactive_expr", {
-        # Do this if reactive expr is otel-enabled
-        ... # Do work
-      })
-    })
-  })
-
-  if (has_existing_ospan("my_operation")) {
-    # Do something iff the span exists
-  }
-
-  # 5. Set attributes on the current active span
-  set_ospan_attrs(status = 200L)
-
-  # - Observer's run() must be called with with_existing_ospan_async(reactive_update_span) (and, with_ospan_async if the observer itself has otel logging turned on)
-  # - Other operations should simply use with_ospan_async
-}
-
 
 # Integration points:
 # - Observer's run() must be called with with_existing_ospan_async(reactive_update_span) (and, with_ospan_async if the observer itself has otel logging turned on)
@@ -257,9 +196,7 @@ with_ospan_async <- function(
       needs_cleanup <- FALSE
 
       result <-
-        promises::finally(result, function() {
-          cleanup()
-        })
+        promises::finally(result, cleanup)
     }
 
     result
@@ -392,28 +329,6 @@ create_otel_active_span_promise_domain <- function(active_span) {
   )
 }
 
-with_otel_active_span_promise_domain <- function(
-  span,
-  expr,
-  ...
-  # ,
-  # replace = FALSE
-) {
-  stopifnot(length(list(...)) == 0L)
-  act_span_pd <- create_otel_active_span_promise_domain(span)
-
-  # We need the current active span to be activated last, not first
-  # Compose the new promise domain at the end, not beginning.
-  new_domain <- promises:::compose_domains(
-    act_span_pd,
-    promises:::current_promise_domain()
-  )
-  # new_domain$wrapSync <- act_span_pd$wrapSync
-
-  promises::with_promise_domain(new_domain, expr, replace = TRUE)
-}
-
-
 with_ospan_promise_domain <- function(span, expr) {
   # # Reach into promises to pull the otel implementation out
   # with_otel_active_span_promise_domain <- rlang::ns_env("promises")[[
@@ -458,12 +373,7 @@ otel_log_safe <- function(
   severity = "info",
   logger = NULL
 ) {
-  # Quit early if necessary
-  if (!otel::is_logging_enabled("info")) {
-    return(invisible())
-  }
-
-  # Send in processed msg
+  # Use `"{msg}"` instead of `msg` to prevent otel from doing glue processing on the message
   otel::log("{msg}", ..., severity = severity, logger = logger)
 }
 

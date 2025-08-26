@@ -1,7 +1,8 @@
-on_load({
-  otel_is_tracing <- base::requireNamespace("otel", quietly = TRUE) && otel::is_tracing_enabled()
-})
-
+#' Check if OpenTelemetry tracing is enabled
+#' @noRd
+is_otel_tracing <- function() {
+  requireNamespace("otel", quietly = TRUE) && otel::is_tracing_enabled()
+}
 
 
 #' Create an OpenTelemetry span and return a closure to end it
@@ -35,7 +36,7 @@ create_ospan <- function(
   attributes = NULL,
   domain
 ) {
-  if (!otel_is_tracing) {
+  if (!is_otel_tracing()) {
     return(NULL)
   }
 
@@ -49,7 +50,7 @@ create_ospan <- function(
 }
 
 end_ospan <- function(span) {
-  if (!otel_is_tracing) {
+  if (!is_otel_tracing()) {
     return(invisible())
   }
 
@@ -64,7 +65,7 @@ create_domain_ospan <- function(
   attributes = NULL,
   domain = getDefaultReactiveDomain()
 ) {
-  if (!otel_is_tracing) {
+  if (!is_otel_tracing()) {
     return(NULL)
   }
 
@@ -98,7 +99,7 @@ create_domain_ospan <- function(
 # End a span who has been stored on the session obect
 end_domain_ospan <- function(name, ..., domain = getDefaultReactiveDomain()) {
   stopifnot(length(list(...)) == 0)
-  if (!otel_is_tracing) {
+  if (!is_otel_tracing()) {
     return(invisible())
   }
 
@@ -170,7 +171,7 @@ with_ospan_async <- function(
   attributes = NULL,
   domain
 ) {
-  if (!otel_is_tracing) {
+  if (!is_otel_tracing()) {
     return(force(expr))
   }
 
@@ -247,7 +248,7 @@ with_existing_ospan_async <- function(
   ...,
   domain
 ) {
-  if (!otel_is_tracing) {
+  if (!is_otel_tracing()) {
     return(force(expr))
   }
 

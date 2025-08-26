@@ -7,7 +7,7 @@ has_otel_bind <- function(bind) {
   if (is_shiny_pkgload_loaded) {
     stopifnot(length(bind) == 1, any(bind == otel_bind_choices))
   }
-  otel_is_tracing && any(bind %in% getOption("shiny.otel.bind", "none"))
+  is_otel_tracing() && any(bind %in% getOption("shiny.otel.bind", "none"))
 }
 
 #' Set OpenTelemetry options for Shiny reactives

@@ -1056,7 +1056,7 @@ ShinySession <- R6Class(
         class(e) <- c("shiny.error.fatal", class(e))
       }
 
-      if (otel_is_tracing) {
+      if (is_otel_tracing()) {
         with_session_ospan_async(domain = self, {
           otel_log_safe("Fatal error", attributes = list(error = e))
         })

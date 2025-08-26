@@ -27,9 +27,10 @@
 # * Methods:
 #   * bindOtel() - S3 method that binds the reactive object to OpenTelemetry spans
 #     * Note: When adding otel to an object, prepend a class of `FOO.otel`. Then add a dispatch method for `bindOtel.FOO.otel()` that declares the object already has been bound.
-#   * withOtelShiny() - runs the expression with OpenTelemetry spans enabled
+#   * withOtel(expr, ..., bind) - runs the expression with OpenTelemetry spans enabled
 
 # - TODO -----------------------------------
+# * Add code file/line markers when we are able discover the name from the srcinfo
 # * Tests with otel recording
 
 `_ignore` <- function() {
@@ -52,7 +53,9 @@
 # TODO: Remove this function when done debugging
 barret <- function() {
   options(
+    # TODO: shiny.otel.bind = c("all", "none", "session", "graphlocked", "reactive", "observe", ...),
     shiny.otel.graphlocked = TRUE,
+    shiny.otel.session = TRUE,
     shiny.otel.bindall = TRUE
   )
   # shiny::otelBindAll()
@@ -288,45 +291,6 @@ barret <- function() {
 
 utils::globalVariables(".GenericCallEnv", add = TRUE)
 
-# TODO: Maybe a top level option to set the defaults? `shiny.otel = TRUE`?
-is_binding_all_otel <- function() {
-  otel_is_tracing && getOption("shiny.otel.bindall", FALSE)
-}
-is_recording_ospan_reactive_update <- function() {
-  otel_is_tracing && getOption("shiny.otel.graphlocked", FALSE)
-}
-
-#' Set OpenTelemetry options for Shiny reactives
-#'
-#' @param expr The expression to run with OpenTelemetry spans enabled.
-#' @param ... Future parameter expansion.
-#' @param bindAll If `TRUE`, then all reactive objects will be bound to Open Telemetry spans.
-#'   If `FALSE`, then only the reactive objects created within the expression
-#'   will be bound to Open Telemetry spans.
-#'   Defaults to `TRUE`.
-#' @export
-#' @examples
-#' # TODO: Update examples!!
-withOtelShiny <- function(expr, ..., bindAll = TRUE) {
-  rlang::check_dots_empty()
-
-  withr::with_options(
-    list(
-      shiny.otel.bindall = isTRUE(bindAll)
-    ),
-    expr
-  )
-}
-localOtelShiny <- function(..., bindAll = TRUE, .envir = parent.frame()) {
-  rlang::check_dots_empty()
-
-  withr::local_options(
-    list(
-      shiny.otel.bindall = isTRUE(bindAll)
-    ),
-    .envir = .envir
-  )
-}
 
 #' Add Open Telemetry for reactivity to an object
 #'
@@ -376,7 +340,7 @@ localOtelShiny <- function(..., bindAll = TRUE, .envir = parent.frame()) {
 #' \dontrun{
 #' rc <- bindCache(
 #'   x = reactive({
-#'     Sys.sleep(2)   # Pretend this is expensive
+#'     Sys.sleep(2) # Pretend this is expensive
 #'     input$x * 100
 #'   }),
 #'   input$x
@@ -530,9 +494,9 @@ bindOtel.reactiveExpr <- function(x, ...) {
   }
 
   # Turn off binding all otel, so that we don't recursively bind forever
-  # `withOtelShiny()` does not virally enable/disable binding all otel,
+  # `withOtel()` does not virally enable/disable binding all otel,
   # only in "this" tick
-  withOtelShiny(bindAll = FALSE, {
+  withOtel(bind = "none", {
     res <- reactive(label = x_label, domain = domain, {
       # Force all `{shiny}` spans to be under `{shiny}` tracer, not the app's tracer
       # with_shiny_ospan_async(span_label, {

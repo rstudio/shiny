@@ -88,7 +88,7 @@ ReactiveVal <- R6Class(
       private$dependents <- Dependents$new(reactId = private$reactId)
       rLog$define(private$reactId, value, private$label, type = "reactiveVal", getDefaultReactiveDomain())
 
-      .isLoggingOtel <<- is_binding_all_otel()
+      .isLoggingOtel <<- has_otel_bind("reactiveVal")
     },
     get = function() {
       private$dependents$register()
@@ -243,7 +243,7 @@ reactiveVal <- function(value = NULL, label = NULL) {
     .impl = rv
   )
 
-  if (is_binding_all_otel()) {
+  if (has_otel_bind("reactiveVal")) {
     ret <- bindOtel(ret)
   }
 
@@ -371,7 +371,7 @@ ReactiveValues <- R6Class(
       .valuesDeps <<- Dependents$new(reactId = rLog$asListIdStr(.reactId))
       .dedupe <<- dedupe
 
-      .isLoggingOtel <<- is_binding_all_otel()
+      .isLoggingOtel <<- has_otel_bind("reactiveValues")
     },
 
     get = function(key) {
@@ -621,7 +621,7 @@ reactiveValues <- function(...) {
   # Use .subset2() instead of [[, to avoid method dispatch
   .subset2(values, 'impl')$mset(args)
 
-  if (is_binding_all_otel()) {
+  if (has_otel_bind("reactiveValues")) {
     values <- bindOtel(values)
   }
 
@@ -1066,7 +1066,7 @@ reactive <- function(
     class = c("reactiveExpr", "reactive", "function")
   )
 
-  if (is_binding_all_otel()) {
+  if (has_otel_bind("reactiveExpr")) {
     ret <- bindOtel(ret)
   }
 
@@ -1490,7 +1490,7 @@ observe <- function(
     ..stacktraceon = ..stacktraceon
   )
 
-  if (is_binding_all_otel()) {
+  if (has_otel_bind("observe")) {
     o <- bindOtel(o)
   }
 

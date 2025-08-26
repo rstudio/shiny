@@ -1148,7 +1148,8 @@ ShinySession <- R6Class(
         attr(label, "srcref") <- srcref
         attr(label, "srcfile") <- srcfile
 
-        obs <- withOtelShiny(bindAll = FALSE, observe(..stacktraceon = FALSE, {
+        # Do not bind this `observe()` call
+        obs <- withOtel(bind = "none", observe(..stacktraceon = FALSE, {
 
           private$sendMessage(recalculating = list(
             name = name, status = 'recalculating'
@@ -2206,7 +2207,7 @@ ShinySession <- R6Class(
         rLog$asyncStart(domain = self)
         private$sendMessage(busy = "busy")
 
-        if (is_recording_ospan_reactive_update()) {
+        if (has_otel_bind("reactive-update")) {
           with_session_ospan_async({
             start_reactive_update_ospan(domain = self)
           }, domain = self)
@@ -2234,7 +2235,7 @@ ShinySession <- R6Class(
           }
         })
 
-        if (is_recording_ospan_reactive_update()) {
+        if (has_otel_bind("reactive-update")) {
           end_reactive_update_ospan(domain = self)
         }
       }

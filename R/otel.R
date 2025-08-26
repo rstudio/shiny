@@ -171,8 +171,7 @@ end_domain_ospan <- function(name, ..., domain = getDefaultReactiveDomain()) {
   span <- get_ospan_from_domain(name, domain = domain)
 
   if (is.null(span)) {
-    cli::cli_abort("Open Telemetry span {.var {name}} not found on session")
-    # Must have been called already. Return early
+    # Span does not exist. Return early
     return(invisible())
   }
 

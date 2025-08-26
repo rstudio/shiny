@@ -145,7 +145,7 @@ markRenderFunction <- function(
     cacheReadHook  = cacheReadHook
   )
 
-  if (is_binding_all_otel()) {
+  if (has_otel_bind("output")) {
     ret <- bindOtel(ret)
   }
 

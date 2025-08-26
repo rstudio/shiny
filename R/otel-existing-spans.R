@@ -13,6 +13,8 @@ OSPAN_REACTIVE_UPDATE_NAME <- "Reactive update"
 start_session_ospan <- function(..., domain, stop_on_session_end = FALSE) {
   stopifnot(isTRUE(stop_on_session_end))
 
+  if (!has_otel_bind("session")) return()
+
   start_domain_ospan(
     OSPAN_SESSION_NAME,
     # tracer = otel_session_tracer(domain),
@@ -23,6 +25,8 @@ start_session_ospan <- function(..., domain, stop_on_session_end = FALSE) {
 
 
 start_reactive_update_ospan <- function(..., domain) {
+  if (!has_otel_bind("reactive-update")) return()
+
   start_domain_ospan(
     OSPAN_REACTIVE_UPDATE_NAME,
     # tracer = otel_session_tracer(domain),
@@ -33,6 +37,7 @@ start_reactive_update_ospan <- function(..., domain) {
   )
 }
 end_reactive_update_ospan <- function(..., domain) {
+  # Always try to end the span
   end_domain_ospan(OSPAN_REACTIVE_UPDATE_NAME, domain = domain)
 }
 
@@ -80,12 +85,7 @@ with_reactive_update_or_session_ospan_async <- function(expr, ..., force_expr = 
     force(expr)
   } else if (has_session_ospan(domain = domain)) {
     # Attach to session ospan
-    with_existing_ospan_async(OSPAN_SESSION_NAME,
-      {
-        force(expr)
-      },
-      domain = domain
-    )
+    with_session_ospan_async(expr, domain = domain)
   } else if (force_expr) {
     force(expr)
   }

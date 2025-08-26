@@ -10,12 +10,12 @@ OSPAN_REACTIVE_UPDATE_NAME <- "Reactive update"
 # Used just as a domain is created and before the server() is called
 # Will only start the span iff the otel tracing is enabled
 # There is no `end_session_ospan()` as `end_forgotten_domain_ospans_on_session_end()` will automatically clean up the dangling ospan
-start_session_ospan <- function(..., domain, stop_on_session_end = FALSE) {
+create_session_ospan <- function(..., domain, stop_on_session_end = FALSE) {
   stopifnot(isTRUE(stop_on_session_end))
 
   if (!has_otel_bind("session")) return()
 
-  start_domain_ospan(
+  create_domain_ospan(
     OSPAN_SESSION_NAME,
     # tracer = otel_session_tracer(domain),
     attributes = otel_session_attrs(domain),
@@ -24,10 +24,10 @@ start_session_ospan <- function(..., domain, stop_on_session_end = FALSE) {
 }
 
 
-start_reactive_update_ospan <- function(..., domain) {
+create_reactive_update_ospan <- function(..., domain) {
   if (!has_otel_bind("reactive-update")) return()
 
-  start_domain_ospan(
+  create_domain_ospan(
     OSPAN_REACTIVE_UPDATE_NAME,
     # tracer = otel_session_tracer(domain),
     links = list(

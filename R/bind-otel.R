@@ -18,6 +18,7 @@
 #     * ExtendedTask()
 #     * observeEvent()
 #     * eventReactive()
+#   * Maybe enhance all `withReactiveDomain()` calls?
 # * Global options:
 #   * √ shiny.otel.graphlocked: TRUE/FALSE - whether to lock the graph for
 #     OpenTelemetry spans, so that they are not modified while being traced.

@@ -3,42 +3,37 @@ on_load({
 })
 
 
-# Integration points:
-# - Observer's run() must be called with with_existing_ospan_async(reactive_update_span) (and, with_ospan_async if the observer itself has otel logging turned on)
-# - Other operations should simply use with_ospan_async
-# - calling of `server(input, output)` function
-# - Maybe enhance all `withReactiveDomain()` calls?
 
-#' Start an OpenTelemetry span and return a closure to end it
+#' Create an OpenTelemetry span and return a closure to end it
 #'
 #' Creates an OpenTelemetry span for discontiguous operations where you need
-#' manual control over when the span ends. Returns a closure function that
-#' can be called to end the span. The returned function is idempotent - it
-#' can be called multiple times but will only end the span once.
+#' manual control over when the span ends.
+#'
+#' Note, the created span is not activated. Please use [`with_ospan_async()`] to
+#' activate it for the supplied expression.
 #'
 #' @param name Character string. The name of the span.
 #' @param ... Additional arguments passed to `otel::start_span()`.
 #' @param domain The reactive domain to associate with the span. Defaults to
 #'   the current reactive domain from `getDefaultReactiveDomain()`.
 #'
-#' @return A function that, when called, ends the span. The function returns
-#'   `invisible()` and is safe to call multiple times.
+#' @return An \pkg{otel} span object.
 #'
 #' @examples
 #' \dontrun{
 #' # Start a span for discontiguous work
-#' end_my_operation_span <- start_ospan("my_operation")
+#' my_operation_span <- create_ospan("my_operation", domain = domain)
 #' # ... do some work ...
-#' end_my_operation_span()
+#' end_ospan(my_operation_span)
 #' }
 #'
-#' @seealso \code{\link{with_ospan_async}} for continuous span operations
+#' @seealso [`with_ospan_async`] for continuous span operations
 #' @keywords internal
-start_ospan <- function(
+create_ospan <- function(
   name,
   ...,
   attributes = NULL,
-  domain = getDefaultReactiveDomain()
+  domain
 ) {
   if (!otel_is_tracing) {
     return(NULL)
@@ -63,7 +58,7 @@ end_ospan <- function(span) {
 
 
 # Start a span who will be stored on the session obect
-start_domain_ospan <- function(
+create_domain_ospan <- function(
   name,
   ...,
   attributes = NULL,
@@ -137,7 +132,7 @@ end_domain_ospan <- function(name, ..., domain = getDefaultReactiveDomain()) {
 #'
 #' @param name Character string. The name of the span.
 #' @param expr An expression to evaluate within the span context.
-#' @param ... Additional arguments passed to `start_ospan()`.
+#' @param ... Additional arguments passed to `create_ospan()`.
 #' @param domain The reactive domain to associate with the span. Defaults to
 #'   the current reactive domain from `getDefaultReactiveDomain()`.
 #'
@@ -165,8 +160,8 @@ end_domain_ospan <- function(name, ..., domain = getDefaultReactiveDomain()) {
 #' })
 #' }
 #'
-#' @seealso \code{\link{start_ospan}} for manual span control,
-#'   \code{\link{with_existing_ospan_async}} for using existing spans
+#' @seealso [`create_ospan`] for manual span control,
+#'   [`with_existing_ospan_async`] for using existing spans
 #' @keywords internal
 with_ospan_async <- function(
   name,
@@ -180,7 +175,7 @@ with_ospan_async <- function(
   }
 
   # message("\n\nStarting ospan: ", name)
-  span <- start_ospan(name, ..., attributes = attributes, domain = domain)
+  span <- create_ospan(name, ..., attributes = attributes, domain = domain)
 
   needs_cleanup <- TRUE
   cleanup <- function() {
@@ -231,7 +226,7 @@ with_ospan_async <- function(
 #' @examples
 #' \dontrun{
 #' # First, create and store a span in the domain
-#' span <- start_ospan("parent_operation")
+#' span <- create_ospan("parent_operation", domain = domain)
 #'
 #' # Later, use the existing span by name
 #' result <- with_existing_ospan_async("parent_operation", {
@@ -243,8 +238,8 @@ with_ospan_async <- function(
 #' end_ospan(span)
 #' }
 #'
-#' @seealso \code{\link{with_ospan_async}} for creating and using new spans,
-#'   \code{\link{start_ospan}} for manual span creation
+#' @seealso [`with_ospan_async`] for creating and using new spans,
+#'   [`create_ospan`] for manual span creation
 #' @keywords internal
 with_existing_ospan_async <- function(
   name,

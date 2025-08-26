@@ -2209,7 +2209,7 @@ ShinySession <- R6Class(
 
         if (has_otel_bind("reactive-update")) {
           with_session_ospan_async({
-            start_reactive_update_ospan(domain = self)
+            create_reactive_update_ospan(domain = self)
           }, domain = self)
           #
         }

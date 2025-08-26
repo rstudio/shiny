@@ -275,7 +275,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
 
                 withReactiveDomain(shinysession, {
 
-                  start_session_ospan(domain = shinysession, stop_on_session_end = TRUE)
+                  create_session_ospan(domain = shinysession, stop_on_session_end = TRUE)
 
                   with_session_ospan_async(domain = shinysession, {
                     do.call(

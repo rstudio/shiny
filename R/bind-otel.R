@@ -55,9 +55,6 @@
 
 # TODO: Remove this function when done debugging
 barret <- function() {
-  options(
-    shiny.otel.bind = "all"
-  )
   # library(mirai)
   # daemons(2)
 
@@ -67,12 +64,16 @@ barret <- function() {
 
   # TODO: Maybe the name is the folder name, similar to shinyapps.io naming
   # Maybe set from a function call somewhere?
-  otel_tracer <- otel::get_tracer("my-app")
+  # otel_tracer <- otel::get_tracer("my-app")
   otel_logger <- otel::get_logger("my-app-logger")
+  # options("shiny.otel.tracer" = otel_tracer)
 
-  options("shiny.otel.tracer" = otel_tracer)
+  withr::with_environment(globalenv(), {
+    otel_tracer_name <- "my-app"
+  })
 
-  shinyApp(
+
+  app <- shinyApp(
     ui = fluidPage(
       sliderInput("mymod-x", "x", 1, 10, 5),
       sliderInput("mymod-y", "y", 1, 10, 5),
@@ -91,7 +92,9 @@ barret <- function() {
         msg <- paste(...)
         message(msg)
         # otel::log_info(msg, tracer = session$userData[["_otel_tracer"]])
+        # TODO try to remove the logger param once function is removed from Shiny package
         otel_log_safe(msg, logger = otel_logger)
+        # otel_log_safe(msg)
       }
 
       shutdown <- function() {
@@ -281,6 +284,15 @@ barret <- function() {
         })
       }
       xMod("mymod")
+    }
+  )
+
+  withr::with_options(
+    list(
+      shiny.otel.bind = "all"
+    ),
+    {
+      runApp(app)
     }
   )
 }

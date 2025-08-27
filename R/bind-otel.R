@@ -22,9 +22,11 @@
 # * Global options:
 #   * √ shiny.otel.graphlocked: TRUE/FALSE - whether to lock the graph for
 #     OpenTelemetry spans, so that they are not modified while being traced.
-#   * √ shiny.otel.bindall: TRUE/FALSE - whether to bind all reactive objects
-#     to OpenTelemetry spans. If TRUE, every reactive objects
-#     are bound to OpenTelemetry spans
+#   * √ shiny.otel.bind:
+#     * "all", "none" - all or nothing
+#     * "reactiveVal", "reactiveValues", "reactiveExpr", "observe", "output" - corresponding reactive objects
+#     * "reactive-update" - Surrounds a reactive update. Shiny is "busy"
+#     * "session" - Surrounds the app `server()` function
 # * Methods:
 #   * bindOtel() - S3 method that binds the reactive object to OpenTelemetry spans
 #     * Note: When adding otel to an object, prepend a class of `FOO.otel`. Then add a dispatch method for `bindOtel.FOO.otel()` that declares the object already has been bound.

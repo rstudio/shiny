@@ -160,10 +160,27 @@ getShinyOption <- function(name, default = NULL) {
 # '  side devmode features. Currently the primary feature is the client-side
 # '  error console.}
 ### end shiny.client_devmode
-#' \item{shiny.otel.bindall (defaults to `FALSE`)}{If `TRUE`, then all reactive expressions and
-#'   observers will be automatically bound to OpenTelemetry spans. This is
-#'   useful for debugging and profiling, but incurs a performance penalty.
-#'   This option should only be used if the `otelsdk` package is installed.}
+#' \item{shiny.otel.bind (defaults to `"none"`)}{Determines how Shiny will interact with OpenTelemetry.
+#'
+#'   Possible options:
+#'   * `"all"` - Shorthand for recording all supported OpenTelemetry spans and logs.
+#'   * `"none"` - Shorthand for disabling all supported OpenTelemetry spans and logs.
+#'   * `"reactiveVal"`, `"reactiveValues"`, `"reactiveExpr"`, `"observe"`, `"output"` - corresponding reactive objects
+#'   * `"reactive-update"` - Creates an OpenTelemetry span for a reactive
+#'     update. This corresponds to when Shiny knows of work to be completed (but
+#'     not necessarily blocking).
+#'   * `"session"` - Creates an OpenTelemetry span for each of the app's
+#'     sessions. It is activated for each call to the app's `server()` function.
+#'     The span is closed when the session is closed.
+#'
+#'   Any combination of these values can be provided to automatically track
+#'   activity within Shiny. If both `"all"` and `"none"` are provided, an error
+#'   will be thrown. For simpler use cases, `options(shiny.otel.bind =
+#'   c("session", "reactive-update"))` will suffice as it will create
+#'   OpenTelemetry spans for each session and their reactive update duration.
+#'
+#'   This option is useful for debugging and profiling while in production. This
+#'   option will only be useful if the `otelsdk` package is installed.}
 #' \item{shiny.otel.graphlocked (defaults to `FALSE`)}{If `TRUE`, then all reactive expressions and
 #'   observers will be automatically bound to OpenTelemetry spans. This is
 #'   useful for debugging and profiling, but incurs a performance penalty.

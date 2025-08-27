@@ -167,7 +167,7 @@ reference:
     desc: Functions for binding OpenTelemetry to Shiny applications.
     contents:
       - bindOtel
-      - withOtelShiny
+      - withOtel
   - title: Utility functions
     desc: Miscellaneous utilities that may be useful to advanced users or when extending Shiny.
     contents:

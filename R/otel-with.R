@@ -1,13 +1,12 @@
-on_load({
-  is_shiny_pkgload_loaded <- exists(".__DEVTOOLS__")
-})
 
 has_otel_bind <- function(bind) {
   # Only check pkg author input iff loaded with pkgload
-  if (is_shiny_pkgload_loaded) {
+  if (IS_SHINY_LOCAL_PKG) {
     stopifnot(length(bind) == 1, any(bind == otel_bind_choices))
   }
-  is_otel_tracing() && any(bind %in% getOption("shiny.otel.bind", "none"))
+
+  is_otel_tracing() &&
+    any(bind %in% as_otel_bind(getOption("shiny.otel.bind", "none")))
 }
 
 #' Set OpenTelemetry options for Shiny reactives
@@ -24,11 +23,9 @@ has_otel_bind <- function(bind) {
 withOtel <- function(expr, ..., bind = "all") {
   rlang::check_dots_empty()
 
-  bind <- as_otel_bind(bind)
-
   withr::with_options(
     list(
-      shiny.otel.bind = bind
+      shiny.otel.bind = as_otel_bind(bind)
     ),
     expr
   )
@@ -66,7 +63,7 @@ as_otel_bind <- function(bind = "all") {
   }
 
   if (has_none) {
-    return(character(0))
+    return("none")
   }
 
   match.arg(bind, otel_bind_choices, several.ok = TRUE)

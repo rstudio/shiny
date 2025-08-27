@@ -54,12 +54,8 @@
 # TODO: Remove this function when done debugging
 barret <- function() {
   options(
-    # TODO: shiny.otel.bind = c("all", "none", "session", "graphlocked", "reactive", "observe", ...),
-    shiny.otel.graphlocked = TRUE,
-    shiny.otel.session = TRUE,
-    shiny.otel.bindall = TRUE
+    shiny.otel.bind = "all"
   )
-  # shiny::otelBindAll()
   # library(mirai)
   # daemons(2)
 

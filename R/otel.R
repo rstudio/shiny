@@ -29,7 +29,7 @@ is_otel_tracing <- function() {
 #' }
 #'
 #' @seealso [`with_ospan_async`] for continuous span operations
-#' @keywords internal
+#' @noRd
 create_ospan <- function(
   name,
   ...,
@@ -40,7 +40,7 @@ create_ospan <- function(
     return(NULL)
   }
 
-  span <- otel_start_span(
+  span <- otel_create_span(
     name,
     ...,
     attributes = attributes,
@@ -55,67 +55,6 @@ end_ospan <- function(span) {
   }
 
   otel::end_span(span)
-}
-
-
-# Start a span who will be stored on the session obect
-create_domain_ospan <- function(
-  name,
-  ...,
-  attributes = NULL,
-  domain = getDefaultReactiveDomain()
-) {
-  if (!is_otel_tracing()) {
-    return(NULL)
-  }
-
-  span <- otel_start_span(
-    name,
-    ...,
-    attributes = attributes,
-    domain = domain
-  )
-
-  # Make sure there is no existing span
-  cur_span <- get_ospan_from_domain(name, domain = domain)
-  stopifnot(is.null(cur_span))
-
-  # Store span in session
-  set_ospan_in_domain(name, span, domain = domain)
-
-  # Add a failsafe to end the span
-  end_forgotten_domain_ospans_on_session_end(domain)
-
-  return(invisible())
-
-  # return(function() {
-  #   cli::cli_abort(
-  #     "This span {.var name} was stored in the session. Please call {.fun end_session_ospan} to end it."
-  #   )
-  # })
-}
-
-
-# End a span who has been stored on the session obect
-end_domain_ospan <- function(name, ..., domain = getDefaultReactiveDomain()) {
-  stopifnot(length(list(...)) == 0)
-  if (!is_otel_tracing()) {
-    return(invisible())
-  }
-
-  span <- get_ospan_from_domain(name, domain = domain)
-
-  if (is.null(span)) {
-    # Span does not exist. Return early
-    return(invisible())
-  }
-
-  otel::end_span(span)
-
-  # Remove span from session
-  set_ospan_in_domain(name, NULL, domain = domain)
-
-  invisible()
 }
 
 
@@ -134,8 +73,7 @@ end_domain_ospan <- function(name, ..., domain = getDefaultReactiveDomain()) {
 #' @param name Character string. The name of the span.
 #' @param expr An expression to evaluate within the span context.
 #' @param ... Additional arguments passed to `create_ospan()`.
-#' @param domain The reactive domain to associate with the span. Defaults to
-#'   the current reactive domain from `getDefaultReactiveDomain()`.
+#' @param domain The reactive domain to associate with the span.
 #'
 #' @return The result of evaluating `expr`. If `expr` returns a promise,
 #'   the span will be automatically ended when the promise completes.
@@ -163,7 +101,7 @@ end_domain_ospan <- function(name, ..., domain = getDefaultReactiveDomain()) {
 #'
 #' @seealso [`create_ospan`] for manual span control,
 #'   [`with_existing_ospan_async`] for using existing spans
-#' @keywords internal
+#' @noRd
 with_ospan_async <- function(
   name,
   expr,
@@ -212,8 +150,7 @@ with_ospan_async <- function(
 #'   the reactive domain.
 #' @param expr An expression to evaluate within the span context.
 #' @param ... Currently unused.
-#' @param domain The reactive domain to retrieve the span from. Defaults to
-#'   the current reactive domain from `getDefaultReactiveDomain()`.
+#' @param domain The reactive domain to retrieve the span from.
 #'
 #' @return The result of evaluating `expr` within the active span context.
 #'
@@ -241,7 +178,7 @@ with_ospan_async <- function(
 #'
 #' @seealso [`with_ospan_async`] for creating and using new spans,
 #'   [`create_ospan`] for manual span creation
-#' @keywords internal
+#' @noRd
 with_existing_ospan_async <- function(
   name,
   expr,
@@ -270,7 +207,10 @@ with_existing_ospan_async <- function(
 
 # -- Helpers --------------------------------------------------------------
 
-has_existing_ospan <- function(name, domain = getDefaultReactiveDomain()) {
+has_existing_ospan <- function(name, ..., domain) {
+  if (IS_SHINY_LOCAL_PKG) {
+    stopifnot(length(list(...)) == 0)
+  }
   !is.null(get_ospan_from_domain(name, domain = domain))
 }
 
@@ -347,11 +287,15 @@ with_ospan_promise_domain <- function(span, expr) {
   })
 }
 
-otel_start_span <- function(
+#' Create OpenTelemetry span
+#'
+#' Within the attributes, include the session token.
+#' @noRd
+otel_create_span <- function(
   name,
   ...,
   attributes = NULL,
-  domain = getDefaultReactiveDomain()
+  domain
 ) {
   otel::start_span(
     name,
@@ -374,12 +318,12 @@ otel_log_safe <- function(
 }
 
 
-get_ospan_names_from_domain <- function(domain = getDefaultReactiveDomain()) {
+get_ospan_names_from_domain <- function(domain) {
   names(domain$userData[["_otel"]])
 }
 get_ospan_from_domain <- function(
   span_name,
-  domain = getDefaultReactiveDomain()
+  domain
 ) {
   env = domain$userData
   if (is.null(env)) {
@@ -391,7 +335,8 @@ get_ospan_from_domain <- function(
 set_ospan_in_domain <- function(
   span_name,
   span,
-  domain = getDefaultReactiveDomain()
+  ...,
+  domain
 ) {
   if (is.null(get0("_otel", envir = domain$userData))) {
     domain$userData[["_otel"]] <- list()

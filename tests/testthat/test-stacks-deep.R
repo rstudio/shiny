@@ -8,7 +8,9 @@ formatError <- function(err, full = FALSE, offset = TRUE, cleanPaths = TRUE) {
     suppressWarnings(
       suppressMessages(
         withCallingHandlers(
-          printError(err, full = full, offset = offset),
+          {
+            printError(err, full = full, offset = offset)
+          },
           warning = function(cnd) {
             cat(conditionMessage(cnd), "\n", sep = "", file = stderr())
           },

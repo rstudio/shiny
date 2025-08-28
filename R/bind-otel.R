@@ -35,7 +35,7 @@
 #   * withOtel(expr, ..., bind) - runs the expression with OpenTelemetry spans enabled
 
 # - TODO -----------------------------------
-# * Nerf bind options to just `"all"` and `"none"`
+# * √ Nerf bind options to just `"all"` and `"none"`
 # * Labels `reactive_update`
 # * Value `reactive-update` -> `reactive_update`
 # * Labels: (apply to others accordingly)
@@ -100,7 +100,8 @@ barret <- function() {
       verbatimTextOutput("mymod-txt")
     ),
     server = function(input, output, session) {
-      otel::start_local_active_span("session")
+
+      log_and_msg("Start new Shiny session")
 
       b <- reactiveVal(1)
       observe(b(42))
@@ -134,7 +135,7 @@ barret <- function() {
           # with_existing_ospan_async(
           #   OSPAN_SESSION_NAME,
           #   {
-          log_and_msg("Start new Shiny session")
+          log_and_msg("Start new Shiny session module")
           #   },
           #   domain = session
           # )

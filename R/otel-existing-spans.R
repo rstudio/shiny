@@ -30,6 +30,8 @@ create_session_ospan <- function(..., domain, stop_on_session_end) {
     stopifnot(isTRUE(stop_on_session_end))
   }
 
+  print(lobstr::cst())
+
   if (!has_otel_bind("session")) return()
 
   create_domain_ospan(

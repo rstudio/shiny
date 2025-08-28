@@ -9,9 +9,8 @@ type SelectInputReceiveMessageData = {
     url?: string;
     value?: string;
 };
-type SelectizeOptions = Selectize.IOptions<string, unknown>;
 type SelectizeInfo = Selectize.IApi<string, unknown> & {
-    settings: SelectizeOptions;
+    settings: Selectize.IOptions<string, unknown>;
 };
 declare class SelectInputBinding extends InputBinding {
     find(scope: HTMLElement): JQuery<HTMLElement>;

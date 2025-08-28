@@ -13,14 +13,21 @@ type SelectInputReceiveMessageData = {
   value?: string;
 };
 
-type SelectizeOptions = Selectize.IOptions<string, unknown>;
 type SelectizeInfo = Selectize.IApi<string, unknown> & {
-  settings: SelectizeOptions;
+  settings: Selectize.IOptions<string, unknown>;
 };
 
-// Extend SelectizeOptions to include shinyRemoveButton option
-// Currently, py-shiny leverages this option to power the
-// remove_button parameter.
+type SelectizeOptions = Selectize.IOptions<string, unknown> & {
+  // Provide some stronger typing for the Selectize options
+  labelField: "label";
+  valueField: "value";
+  searchField: ["label"];
+  onItemRemove?: (value: string) => void;
+  onDropdownClose?: () => void;
+};
+
+// Adds a py-shiny specific "option" that makes the
+// input_selectize(remove_button) parameter possible
 type SelectizeShinyOptions = SelectizeOptions & {
   shinyRemoveButton?: "none" | "true" | "false" | "both";
 };
@@ -251,13 +258,7 @@ class SelectInputBinding extends InputBinding {
 
     if (config.length === 0) return undefined;
 
-    let options: SelectizeOptions & {
-      labelField: "label";
-      valueField: "value";
-      searchField: ["label"];
-      onItemRemove?: (value: string) => void;
-      onDropdownClose?: () => void;
-    } = $.extend(
+    let options: SelectizeShinyOptions = $.extend(
       {
         labelField: "label",
         valueField: "value",
@@ -266,7 +267,7 @@ class SelectInputBinding extends InputBinding {
       JSON.parse(config.html()),
     );
 
-    this._addShinyRemoveButton(options, el.hasAttribute("multiple"));
+    options = this._addShinyRemoveButton(options, el.hasAttribute("multiple"));
 
     // selectize created from selectInput()
     if (typeof config.data("nonempty") !== "undefined") {
@@ -319,10 +320,10 @@ class SelectInputBinding extends InputBinding {
   private _addShinyRemoveButton(
     options: SelectizeShinyOptions,
     multiple: boolean,
-  ): void {
+  ): SelectizeOptions {
     let removeButton = options.shinyRemoveButton;
     if (removeButton === undefined) {
-      return;
+      return options;
     }
 
     // None really means 'smart default'
@@ -331,7 +332,7 @@ class SelectInputBinding extends InputBinding {
     }
 
     if (removeButton === "false") {
-      return;
+      return options;
     }
 
     const plugins = [];
@@ -341,16 +342,16 @@ class SelectInputBinding extends InputBinding {
       plugins.push(multiple ? "remove_button" : "clear_button");
     }
 
-    const optionPlugins = options.plugins || [];
-
-    plugins.forEach((plugin) => {
-      if (!optionPlugins.includes(plugin)) {
-        optionPlugins.push(plugin);
-      }
-    });
-
-    options.plugins = optionPlugins;
-    delete options.shinyRemoveButton;
+    // Add plugins to existing plugins if not already present
+    return {
+      ...options,
+      plugins: Array.from(
+        new Set([
+          ...(Array.isArray(options.plugins) ? options.plugins : []),
+          ...plugins,
+        ]),
+      ),
+    };
   }
 }
 

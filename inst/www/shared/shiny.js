@@ -2414,7 +2414,7 @@
         },
         JSON.parse(config.html())
       );
-      this._addShinyRemoveButton(options, el.hasAttribute("multiple"));
+      options = this._addShinyRemoveButton(options, el.hasAttribute("multiple"));
       if (typeof config.data("nonempty") !== "undefined") {
         el.nonempty = true;
         options = import_jquery19.default.extend(options, {
@@ -2455,13 +2455,13 @@
     _addShinyRemoveButton(options, multiple) {
       let removeButton = options.shinyRemoveButton;
       if (removeButton === void 0) {
-        return;
+        return options;
       }
       if (removeButton === "none") {
         removeButton = multiple ? "true" : "false";
       }
       if (removeButton === "false") {
-        return;
+        return options;
       }
       const plugins = [];
       if (removeButton === "both") {
@@ -2469,14 +2469,15 @@
       } else if (removeButton === "true") {
         plugins.push(multiple ? "remove_button" : "clear_button");
       }
-      const optionPlugins = options.plugins || [];
-      plugins.forEach((plugin) => {
-        if (!optionPlugins.includes(plugin)) {
-          optionPlugins.push(plugin);
-        }
-      });
-      options.plugins = optionPlugins;
-      delete options.shinyRemoveButton;
+      return {
+        ...options,
+        plugins: Array.from(
+          /* @__PURE__ */ new Set([
+            ...Array.isArray(options.plugins) ? options.plugins : [],
+            ...plugins
+          ])
+        )
+      };
     }
   };
 

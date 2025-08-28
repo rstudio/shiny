@@ -26,9 +26,10 @@
 #     OpenTelemetry spans, so that they are not modified while being traced.
 #   * √ shiny.otel.bind:
 #     * "all", "none" - all or nothing
-#     * "reactiveVal", "reactiveValues", "reactiveExpr", "observe", "output" - corresponding reactive objects
-#     * "reactive-update" - Surrounds a reactive update. Shiny is "busy"
-#     * "session" - Surrounds the app `server()` function
+#     * Currently non-public options:
+#       * "reactiveVal", "reactiveValues", "reactiveExpr", "observe", "output" - corresponding reactive objects
+#       * "reactive_update" - Surrounds a reactive update. Shiny is "busy"
+#       * "session" - Surrounds the app `server()` function
 # * Methods:
 #   * bindOtel() - S3 method that binds the reactive object to OpenTelemetry spans
 #     * Note: When adding otel to an object, prepend a class of `FOO.otel`. Then add a dispatch method for `bindOtel.FOO.otel()` that declares the object already has been bound.
@@ -36,8 +37,8 @@
 
 # - TODO -----------------------------------
 # * √ Nerf bind options to just `"all"` and `"none"`
-# * Labels `reactive_update`
-# * Value `reactive-update` -> `reactive_update`
+# * √ Labels `reactive_update`
+# * √ Value `reactive-update` -> `reactive_update`
 # * Labels: (apply to others accordingly)
 #   * observe mymod:<anonymous>
 #   * observe <anonymous>

@@ -1,5 +1,5 @@
 OSPAN_SESSION_NAME <- "session"
-OSPAN_REACTIVE_UPDATE_NAME <- "Reactive update"
+OSPAN_REACTIVE_UPDATE_NAME <- "reactive_update"
 
 # ## 2025-08-Barret - Motivation for this file
 # This file was created to reduce maintainer cognitive load by providing
@@ -45,7 +45,7 @@ create_session_ospan <- function(..., domain, stop_on_session_end) {
 }
 
 
-#' Create a `reactive-update` OpenTelemetry span
+#' Create a `reactive_update` OpenTelemetry span
 #' Used when a reactive expression is updated
 #' Will only start the span iff the otel tracing is enabled
 #' @param ... Ignored
@@ -54,7 +54,7 @@ create_session_ospan <- function(..., domain, stop_on_session_end) {
 #' @seealso [`end_reactive_update_ospan()`]
 #' @noRd
 create_reactive_update_ospan <- function(..., domain) {
-  if (!has_otel_bind("reactive-update")) return()
+  if (!has_otel_bind("reactive_update")) return()
 
   create_domain_ospan(
     OSPAN_REACTIVE_UPDATE_NAME,
@@ -67,7 +67,7 @@ create_reactive_update_ospan <- function(..., domain) {
 
   return(invisible())
 }
-#' End a `reactive-update` OpenTelemetry span
+#' End a `reactive_update` OpenTelemetry span
 #' @param ... Ignored
 #' @param domain The reactive domain to associate with the span
 #' @return Invisibly returns.
@@ -93,7 +93,7 @@ with_session_ospan_async <- function(expr, ..., domain) {
   with_existing_ospan_async(OSPAN_SESSION_NAME, domain = domain, expr)
 }
 
-#' Run expr within a `reactive-update` OpenTelemetry span
+#' Run expr within a `reactive_update` OpenTelemetry span
 #'
 #' Used to wrap the execution of a reactive expression. Will only
 #' require/activate the span iff the otel tracing is enabled
@@ -128,7 +128,7 @@ has_reactive_update_ospan <- function(..., domain) {
 
 # -- Convenience ----------------------
 
-#' Run expr within a `reactive-update` or `session` OpenTelemetry span
+#' Run expr within a `reactive_update` or `session` OpenTelemetry span
 #'
 #' Workflow:
 #' * If the reactive update ospan exists, run the expression as is.

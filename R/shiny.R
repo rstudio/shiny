@@ -2207,7 +2207,7 @@ ShinySession <- R6Class(
         rLog$asyncStart(domain = self)
         private$sendMessage(busy = "busy")
 
-        if (has_otel_bind("reactive-update")) {
+        if (has_otel_bind("reactive_update")) {
           with_session_ospan_async({
             create_reactive_update_ospan(domain = self)
           }, domain = self)
@@ -2235,7 +2235,7 @@ ShinySession <- R6Class(
           }
         })
 
-        if (has_otel_bind("reactive-update")) {
+        if (has_otel_bind("reactive_update")) {
           end_reactive_update_ospan(domain = self)
         }
       }

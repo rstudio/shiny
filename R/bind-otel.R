@@ -16,6 +16,8 @@
 #     * bindProgress()?
 #   * Special functions:
 #     * ExtendedTask()
+#       * Extended task links to submission reactive
+#       * Reactive update that gets result links to the extended task
 #     * observeEvent()
 #     * eventReactive()
 #   * Maybe enhance all `withReactiveDomain()` calls?
@@ -33,8 +35,21 @@
 #   * withOtel(expr, ..., bind) - runs the expression with OpenTelemetry spans enabled
 
 # - TODO -----------------------------------
+# * Nerf bind options to just `"all"` and `"none"`
+# * Labels `reactive_update`
+# * Value `reactive-update` -> `reactive_update`
+# * Labels: (apply to others accordingly)
+#   * observe mymod:<anonymous>
+#   * observe <anonymous>
+#   * observe mylabel (edited)
 # * Add code file/line markers when we are able discover the name from the srcinfo
+# * Session
+#   * Move Session span to a log start and log end: https://opentelemetry.io/docs/specs/semconv/registry/attributes/session/
+#   * Add `session.id` with the token to attrs
+# * Connect `user.id` to be their user name: https://opentelemetry.io/docs/specs/semconv/registry/attributes/user/
+# * bindOtel() should no-op when binding an already bound object (where as currently it throws)
 # * Tests with otel recording
+# * √ Errors should happen in the span only
 
 `_ignore` <- function() {
   otelsdk::with_otel_record
@@ -44,8 +59,12 @@
 # - Questions -----------------------------------
 # Add error handling for every otel. Use withCallingHandlers similar to https://github.com/r-lib/mirai/pull/395/files#diff-9e809582679952a93b9f34755bb38207471945eb36cedb9e2aa755125449f531R214-R215
 # TODO: log events for bookmark?
-# TODO: log events like fatal errors?
+  # Ans: Seems possibly excessive in amount
+# TODO: log events like fatal errors? / onUnhandledError
+  # Good idea!
+
 # TODO: Add spans for session callbacks? onRestore/onRestored, onSessionEnded, onUnhandledError, on any callback for the session
+  # Ans: It is the user's responsiblity to add spans for these methods
 # TODO: freeze / thaw? - log restart event?
 # TODO: reactiveTimer / invalidateLater / reactivePoll / reactiveFileReader
 # TODO: Extended Tasks are linked from parent span. Maybe use an envvar for span context? It is allowed for child process can end much later than the parent process. Take inspiration from callr PR (copying of the span context to the child process).

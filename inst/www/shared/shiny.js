@@ -2267,8 +2267,11 @@
     }
     return (0, import_jquery19.default)(el).parent().parent().find('label[for="' + escapedId + '"]');
   }
+  function getConfigScript(el) {
+    return (0, import_jquery19.default)(el).parent().find('script[data-for="' + $escape(el.id) + '"]');
+  }
   function isSelectize(el) {
-    const config = (0, import_jquery19.default)(el).parent().find('script[data-for="' + $escape(el.id) + '"]');
+    const config = getConfigScript(el);
     return config.length > 0;
   }
   var SelectInputBinding = class extends InputBinding {
@@ -2331,7 +2334,15 @@
         this._selectize(el);
       }
       if (hasDefinedProperty(data, "config")) {
-        $el.parent().find('script[data-for="' + $escape(el.id) + '"]').replaceWith(data.config);
+        const oldConfig = getConfigScript(el);
+        const oldJSON = JSON.parse(oldConfig.html());
+        oldConfig.replaceWith(data.config);
+        const newConfig = getConfigScript(el);
+        const newJSON = JSON.parse(newConfig.html());
+        if (oldJSON.shinyRemoveButton !== void 0 && newJSON.shinyRemoveButton === void 0) {
+          newJSON.shinyRemoveButton = oldJSON.shinyRemoveButton;
+          newConfig.html(JSON.stringify(newJSON));
+        }
         this._selectize(el, true);
       }
       if (hasDefinedProperty(data, "url")) {
@@ -2404,7 +2415,7 @@
     _selectize(el, update = false) {
       if (!import_jquery19.default.fn.selectize) return void 0;
       const $el = (0, import_jquery19.default)(el);
-      const config = $el.parent().find('script[data-for="' + $escape(el.id) + '"]');
+      const config = getConfigScript(el);
       if (config.length === 0) return void 0;
       let options = import_jquery19.default.extend(
         {

@@ -43,13 +43,16 @@ function getLabelNode(el: SelectHTMLElement): JQuery<HTMLElement> {
     .parent()
     .find('label[for="' + escapedId + '"]');
 }
-// Return true if it's a selectize input, false if it's a regular select input.
 
-function isSelectize(el: HTMLElement): boolean {
-  const config = $(el)
+function getConfigScript(el: SelectHTMLElement): JQuery<HTMLScriptElement> {
+  return $(el)
     .parent()
     .find('script[data-for="' + $escape(el.id) + '"]');
+}
 
+// Return true if it's a selectize input, false if it's a regular select input.
+function isSelectize(el: SelectHTMLElement): boolean {
+  const config = getConfigScript(el);
   return config.length > 0;
 }
 
@@ -136,10 +139,28 @@ class SelectInputBinding extends InputBinding {
 
     // re-initialize selectize
     if (hasDefinedProperty(data, "config")) {
-      $el
-        .parent()
-        .find('script[data-for="' + $escape(el.id) + '"]')
-        .replaceWith(data.config!);
+      // Get current selectize 'config' (this holds the options argument from R/Python)
+      const oldConfig = getConfigScript(el);
+
+      // Before replacing the config, remember the old one since some values
+      // want to be sticky across updates
+      const oldJSON: SelectizeShinyOptions = JSON.parse(oldConfig.html());
+
+      // Replace the old config with the new one
+      oldConfig.replaceWith(data.config!);
+
+      // If shinyRemoveButton was present in the old but not the new config,
+      // keep the old value
+      const newConfig = getConfigScript(el);
+      const newJSON: SelectizeShinyOptions = JSON.parse(newConfig.html());
+      if (
+        oldJSON.shinyRemoveButton !== undefined &&
+        newJSON.shinyRemoveButton === undefined
+      ) {
+        newJSON.shinyRemoveButton = oldJSON.shinyRemoveButton;
+        newConfig.html(JSON.stringify(newJSON));
+      }
+
       this._selectize(el, true);
     }
 
@@ -252,9 +273,7 @@ class SelectInputBinding extends InputBinding {
     // Safe-guard against missing the selectize js library
     if (!$.fn.selectize) return undefined;
     const $el = $(el);
-    const config = $el
-      .parent()
-      .find('script[data-for="' + $escape(el.id) + '"]');
+    const config = getConfigScript(el);
 
     if (config.length === 0) return undefined;
 

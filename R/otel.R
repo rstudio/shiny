@@ -302,7 +302,7 @@ otel_create_span <- function(
     ...,
     attributes = otel::as_attributes(c(
       attributes,
-      list(session = domain$token)
+      list(session.id = domain$token)
     ))
   )
 }

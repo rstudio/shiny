@@ -60,6 +60,13 @@ create_reactive_update_ospan <- function(..., domain) {
     links = list(
       session = get_session_ospan(domain = domain)
     ),
+    attributes = list(
+      # Pairs with session.start and session.end events
+      # https://opentelemetry.io/docs/specs/semconv/general/session/
+      # Since this encapsulates all reactive calculations elements,
+      # the session.id isn't needed to be present in all lower spans
+      session.id = domain$token
+    ),
     domain = domain
   )
 
@@ -243,8 +250,7 @@ create_domain_ospan <- function(
   span <- otel_create_span(
     name,
     ...,
-    attributes = attributes,
-    domain = domain
+    attributes = attributes
   )
 
   # Store span in session

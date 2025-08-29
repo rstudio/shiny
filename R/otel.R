@@ -14,16 +14,14 @@ is_otel_tracing <- function() {
 #' activate it for the supplied expression.
 #'
 #' @param name Character string. The name of the span.
-#' @param ... Additional arguments passed to `otel::start_span()`.
-#' @param domain The reactive domain to associate with the span. Defaults to
-#'   the current reactive domain from `getDefaultReactiveDomain()`.
+#' @param ...,attributes Additional arguments passed to `otel::start_span()`.
 #'
 #' @return An \pkg{otel} span object.
 #'
 #' @examples
 #' \dontrun{
 #' # Start a span for discontiguous work
-#' my_operation_span <- create_ospan("my_operation", domain = domain)
+#' my_operation_span <- create_ospan("my_operation")
 #' # ... do some work ...
 #' end_ospan(my_operation_span)
 #' }
@@ -33,8 +31,7 @@ is_otel_tracing <- function() {
 create_ospan <- function(
   name,
   ...,
-  attributes = NULL,
-  domain
+  attributes = NULL
 ) {
   if (!is_otel_tracing()) {
     return(NULL)
@@ -43,8 +40,7 @@ create_ospan <- function(
   span <- otel_create_span(
     name,
     ...,
-    attributes = attributes,
-    domain = domain
+    attributes = attributes
   )
   span
 }
@@ -72,8 +68,7 @@ end_ospan <- function(span) {
 #'
 #' @param name Character string. The name of the span.
 #' @param expr An expression to evaluate within the span context.
-#' @param ... Additional arguments passed to `create_ospan()`.
-#' @param domain The reactive domain to associate with the span.
+#' @param ...,attributes Additional arguments passed to `create_ospan()`.
 #'
 #' @return The result of evaluating `expr`. If `expr` returns a promise,
 #'   the span will be automatically ended when the promise completes.
@@ -93,7 +88,7 @@ end_ospan <- function(span) {
 #' })
 #'
 #' # Asynchronous operation
-#' promise <- with_ospan_async("async_operation", domain = domain, {
+#' promise <- with_ospan_async("async_operation", {
 #'   # ... return a promise ...
 #'   some_async_function()
 #' })
@@ -106,15 +101,14 @@ with_ospan_async <- function(
   name,
   expr,
   ...,
-  attributes = NULL,
-  domain
+  attributes = NULL
 ) {
   if (!is_otel_tracing()) {
     return(force(expr))
   }
 
   # message("\n\nStarting ospan: ", name)
-  span <- create_ospan(name, ..., attributes = attributes, domain = domain)
+  span <- create_ospan(name, ..., attributes = attributes)
 
   needs_cleanup <- TRUE
   cleanup <- function() {
@@ -164,7 +158,7 @@ with_ospan_async <- function(
 #' @examples
 #' \dontrun{
 #' # First, create and store a span in the domain
-#' span <- create_ospan("parent_operation", domain = domain)
+#' span <- create_ospan("parent_operation")
 #'
 #' # Later, use the existing span by name
 #' result <- with_existing_ospan_async("parent_operation", {
@@ -294,15 +288,13 @@ with_ospan_promise_domain <- function(span, expr) {
 otel_create_span <- function(
   name,
   ...,
-  attributes = NULL,
-  domain
+  attributes = NULL
 ) {
   otel::start_span(
     name,
     ...,
     attributes = otel::as_attributes(c(
-      attributes,
-      list(session.id = domain$token)
+      attributes
     ))
   )
 }

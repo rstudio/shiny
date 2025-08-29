@@ -544,8 +544,7 @@ bindOtel.reactiveExpr <- function(x, ...) {
           valueFunc()
           # })
         },
-        attributes = ospan_attrs,
-        domain = domain
+        attributes = ospan_attrs
       )
     })
   })
@@ -567,9 +566,9 @@ bindOtel.shiny.render.function <- function(x, ...) {
   ospan_attrs <- attr(x, "otelAttrs")
 
   renderFunc <- function(...) {
-    session <- getDefaultReactiveDomain()
     if (is.null(span_label)) {
-      span_label <<- ospan_label_render_function(domain = session)
+      span_label <<-
+        ospan_label_render_function(domain = getDefaultReactiveDomain())
     }
 
     with_ospan_async(
@@ -577,8 +576,7 @@ bindOtel.shiny.render.function <- function(x, ...) {
       {
         valueFunc(...)
       },
-      attributes = ospan_attrs,
-      domain = session
+      attributes = ospan_attrs
     )
   }
 
@@ -610,9 +608,7 @@ bindOtel.Observer <- function(x, ...) {
   origFunc <- attr(x$.func, "wrappedFunc")
   ospan_attrs <- x$.otelAttrs
 
-  domain <- x$.domain
-
-  span_label <- ospan_label_observer(x, domain = domain)
+  span_label <- ospan_label_observer(x, domain = x$.domain)
 
   x$.func <- wrapFunctionLabel(
     name = span_label,
@@ -621,9 +617,8 @@ bindOtel.Observer <- function(x, ...) {
       with_ospan_async(
         span_label,
         {
-          force(obsFunc())
+          obsFunc()
         },
-        domain = domain,
         attributes = ospan_attrs
       )
     }

@@ -191,6 +191,7 @@ Collate:
     'modal.R'
     'modules.R'
     'notifications.R'
+    'otel-attr-srcref.R'
     'otel-existing-spans.R'
     'otel-label.R'
     'otel-with.R'

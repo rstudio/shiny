@@ -80,6 +80,7 @@ ReactiveVal <- R6Class(
   ),
   public = list(
     .isLoggingOtel = FALSE, # needs to be accessed/set within Shiny
+    .otelAttrs = NULL, # needs to be accessed/set within Shiny
     initialize = function(value, label = NULL) {
       reactId <- nextGlobalReactId()
       private$reactId <- reactId
@@ -108,8 +109,9 @@ ReactiveVal <- R6Class(
         with_reactive_update_or_session_ospan_async(domain = domain, {
           # [mymod] Set reactiveVal: x
           otel_log_safe(
-            ospan_label_set_reactive_val(private$label, domain = domain),
-            severity = "info"
+            otel_label_set_reactive_val(private$label, domain = domain),
+            severity = "info",
+            attributes = private$.otelAttrs
           )
         })
       }
@@ -219,9 +221,9 @@ ReactiveVal <- R6Class(
 #'
 #' @export
 reactiveVal <- function(value = NULL, label = NULL) {
+  call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
   if (missing(label)) {
-    call <- sys.call()
-    label <- rvalSrcrefToLabel(attr(call, "srcref", exact = TRUE))
+    label <- rvalSrcrefToLabel(call_srcref)
     domain <- getDefaultReactiveDomain()
     if (!is.null(domain)) {
       label <- domain$ns(label)
@@ -229,6 +231,10 @@ reactiveVal <- function(value = NULL, label = NULL) {
   }
 
   rv <- ReactiveVal$new(value, label)
+  if (!is.null(call_srcref)) {
+    rv$.otelAttrs <- otel_srcref_attributes(call_srcref)
+  }
+
   ret <- structure(
     function(x) {
       if (missing(x)) {
@@ -354,6 +360,7 @@ ReactiveValues <- R6Class(
     # object, but it does not preserve order.
     .nameOrder = character(0),
     .isLoggingOtel = FALSE,
+    .otelAttrs = NULL,
 
 
     initialize = function(
@@ -437,8 +444,9 @@ ReactiveValues <- R6Class(
         with_reactive_update_or_session_ospan_async(domain = domain, {
           # [mymod] Set reactiveValues: x$key
           otel_log_safe(
-            ospan_label_set_reactive_values(.label, key, domain = domain),
-            severity = "info"
+            otel_label_set_reactive_values(.label, key, domain = domain),
+            severity = "info",
+            attributes = private$.otelAttrs
           )
         })
       }
@@ -617,6 +625,11 @@ reactiveValues <- function(...) {
     rlang::abort("All arguments passed to reactiveValues() must be named.")
 
   values <- .createReactiveValues(ReactiveValues$new())
+
+  call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
+  if (!is.null(call_srcref)) {
+    .subset2(values, 'impl')$.otelAttrs <- otel_srcref_attributes(call_srcref)
+  }
 
   # Use .subset2() instead of [[, to avoid method dispatch
   .subset2(values, 'impl')$mset(args)
@@ -1174,6 +1187,7 @@ Observer <- R6Class(
     .destroyed = logical(0),
     .prevId = character(0),
     .ctx = NULL,
+    .otelAttrs = NULL,
 
     initialize = function(observerFunc, label, suspended = FALSE, priority = 0,
                           domain = getDefaultReactiveDomain(),
@@ -1489,6 +1503,10 @@ observe <- function(
     autoDestroy = autoDestroy,
     ..stacktraceon = ..stacktraceon
   )
+  call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
+  if (!is.null(call_srcref)) {
+    o$.otelAttrs <- otel_srcref_attributes(call_srcref)
+  }
 
   if (has_otel_bind("observe")) {
     o <- bindOtel(o)
@@ -2639,7 +2657,7 @@ throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
     } else {
       trigger()
     }
-  }, priority = priority, domain = domain)
+  }, priority = priority, domain = domain, label = "throttle trigger")
 
   # This is the actual reactive that is returned to the user. It returns the
   # value of r(), but only invalidates/updates when v$trigger is touched.

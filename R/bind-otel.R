@@ -39,7 +39,7 @@
 # * √ Nerf bind options to just `"all"` and `"none"`
 # * √ Labels `reactive_update`
 # * √ Value `reactive-update` -> `reactive_update`
-# * Labels: (apply to others accordingly)
+# * √ Labels: (apply to others accordingly)
 #   * observe mymod:<anonymous>
 #   * observe <anonymous>
 #   * observe mylabel (edited)
@@ -92,6 +92,14 @@ barret <- function() {
     otel_tracer_name <- "my-app"
   })
 
+  log_and_msg <- function(..., .envir = parent.frame()) {
+    msg <- paste(...)
+    message(msg)
+    # otel::log_info(msg, tracer = session$userData[["_otel_tracer"]])
+    # TODO try to remove the logger param once function is removed from Shiny package
+    otel_log_safe(msg, logger = otel_logger)
+    # otel_log_safe(msg)
+  }
 
   app <- shinyApp(
     ui = fluidPage(
@@ -109,14 +117,6 @@ barret <- function() {
 
       # shiny::bindOtel(TRUE)
 
-      log_and_msg <- function(..., .envir = parent.frame()) {
-        msg <- paste(...)
-        message(msg)
-        # otel::log_info(msg, tracer = session$userData[["_otel_tracer"]])
-        # TODO try to remove the logger param once function is removed from Shiny package
-        otel_log_safe(msg, logger = otel_logger)
-        # otel_log_safe(msg)
-      }
 
       shutdown <- function() {
         later::later(
@@ -136,13 +136,13 @@ barret <- function() {
           # with_existing_ospan_async(
           #   OSPAN_SESSION_NAME,
           #   {
-          log_and_msg("Start new Shiny session module")
+          log_and_msg("Shiny module")
           #   },
           #   domain = session
           # )
 
           # x_raw <- reactive({
-          x <- reactive({
+          bar <<- x <- reactive({
             x_val <- xVal()
             req(x_val)
             log_and_msg(sprintf("X Val: %s", x_val))
@@ -227,15 +227,16 @@ barret <- function() {
                 #   promises::then(\(vals) {
                 #     max(unlist(vals))
                 #   })
-                # mirai(
-                #   {
-                #     otel::start_local_active_span("slow compute")
-                #     # val
-                #     # Sys.sleep(0.2)
-                #     val
-                #   },
-                #   val = x_val
-                # )
+
+                # # mirai(
+                # #   {
+                # #     otel::start_local_active_span("slow compute")
+                # #     # val
+                # #     # Sys.sleep(0.2)
+                # #     val
+                # #   },
+                # #   val = x_val
+                # # )
               }) |>
               promises::then(function(x_val) {
                 log_and_msg("x_prom 2")
@@ -507,6 +508,8 @@ bindOtel.reactiveExpr <- function(x, ...) {
   span_label <- ospan_label_reactive(x, domain = domain)
 
   valueFunc <- reactive_get_value_func(x)
+  origFunc <- valueFunc
+  ospan_attrs <- otel_srcref_attributes(origFunc)
   valueFunc <- wrapFunctionLabel(
     valueFunc,
     # TODO: Better name
@@ -541,10 +544,15 @@ bindOtel.reactiveExpr <- function(x, ...) {
           valueFunc()
           # })
         },
+        attributes = ospan_attrs,
         domain = domain
       )
     })
   })
+
+  # Set the original function as an attribute for later introspection
+  internal_observable <- attr(res, "observable", exact = TRUE)
+  internal_observable$.origFunc <- origFunc
 
   class(res) <- c("reactive.otel", class(res))
   res
@@ -556,6 +564,7 @@ bindOtel.shiny.render.function <- function(x, ...) {
 
   valueFunc <- x
   span_label <- NULL
+  ospan_attrs <- attr(x, "otelAttrs")
 
   renderFunc <- function(...) {
     session <- getDefaultReactiveDomain()
@@ -568,6 +577,7 @@ bindOtel.shiny.render.function <- function(x, ...) {
       {
         valueFunc(...)
       },
+      attributes = ospan_attrs,
       domain = session
     )
   }
@@ -597,6 +607,8 @@ bindOtel.Observer <- function(x, ...) {
   }
 
   obsFunc <- x$.func
+  origFunc <- attr(x$.func, "wrappedFunc")
+  ospan_attrs <- x$.otelAttrs
 
   domain <- x$.domain
 
@@ -606,11 +618,17 @@ bindOtel.Observer <- function(x, ...) {
     name = span_label,
     ..stacktraceon = FALSE,
     func = function() {
-      with_ospan_async(span_label, {
-        force(obsFunc())
-      }, domain = domain)
+      with_ospan_async(
+        span_label,
+        {
+          force(obsFunc())
+        },
+        domain = domain,
+        attributes = ospan_attrs
+      )
     }
   )
+  # attr(x$.func, "wrappedFunc") <- origFunc
 
   class(x) <- c("Observer.otel", class(x))
   invisible(x)

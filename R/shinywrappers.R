@@ -134,6 +134,8 @@ markRenderFunction <- function(
     else renderFunc(...)
   }
 
+  otelAttrs <- otel_srcref_attributes(attr(renderFunc, "wrappedFunc"))
+
   ret <- structure(
     wrappedRenderFunc,
     class          = c("shiny.render.function", "function"),
@@ -142,7 +144,8 @@ markRenderFunction <- function(
     hasExecuted    = hasExecuted,
     cacheHint      = cacheHint,
     cacheWriteHook = cacheWriteHook,
-    cacheReadHook  = cacheReadHook
+    cacheReadHook  = cacheReadHook,
+    otelAttrs      = otelAttrs
   )
 
   if (has_otel_bind("output")) {
@@ -327,7 +330,7 @@ as.tags.shiny.render.function <- function(x, ..., inline = FALSE) {
 
 # Get relevant attributes from a render function object.
 renderFunctionAttributes <- function(x) {
-  attrs <- c("outputFunc", "outputArgs", "hasExecuted", "cacheHint")
+  attrs <- c("outputFunc", "outputArgs", "hasExecuted", "cacheHint", "otelAttrs")
   names(attrs) <- attrs
   lapply(attrs, function(name) attr(x, name, exact = TRUE))
 }

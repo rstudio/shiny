@@ -55,10 +55,6 @@ end_ospan <- function(span) {
 
 
 
-
-
-
-
 #' Execute code within an OpenTelemetry span for asynchronous operations
 #'
 #' Creates an OpenTelemetry span and executes the given expression within it.
@@ -95,7 +91,7 @@ end_ospan <- function(span) {
 #' }
 #'
 #' @seealso [`create_ospan`] for manual span control,
-#'   [`with_existing_ospan_async`] for using existing spans
+#'   [`with_active_span_async`] for using already created spans
 #' @noRd
 with_ospan_async <- function(
   name,
@@ -110,6 +106,11 @@ with_ospan_async <- function(
   # message("\n\nStarting ospan: ", name)
   span <- create_ospan(name, ..., attributes = attributes)
 
+  with_active_span_async(span, expr)
+}
+
+# Maybe move to {promises}?
+with_active_span_async <- function(span, expr) {
   needs_cleanup <- TRUE
   cleanup <- function() {
     # message("\n\nEnding ospan: ", name)
@@ -132,67 +133,6 @@ with_ospan_async <- function(
 }
 
 
-#' Execute code within an existing OpenTelemetry span for asynchronous operations
-#'
-#' Executes the given expression within the context of an existing OpenTelemetry
-#' span that was previously stored in the reactive domain. This function retrieves
-#' the span by name and sets up the appropriate promise domain for handling
-#' asynchronous operations. Unlike `with_ospan_async`, this function does not
-#' create a new span but uses an existing one.
-#'
-#' @param name Character string. The name of the existing span to retrieve from
-#'   the reactive domain.
-#' @param expr An expression to evaluate within the span context.
-#' @param ... Currently unused.
-#' @param domain The reactive domain to retrieve the span from.
-#'
-#' @return The result of evaluating `expr` within the active span context.
-#'
-#' @details
-#' This function is particularly useful for operations that need to run within
-#' the context of a span that was created elsewhere and stored in the reactive
-#' domain, such as reactive lock operations or observer runs. It properly sets
-#' up the promise domain to ensure that asynchronous operations are correctly
-#' traced.
-#'
-#' @examples
-#' \dontrun{
-#' # First, create and store a span in the domain
-#' span <- create_ospan("parent_operation")
-#'
-#' # Later, use the existing span by name
-#' result <- with_existing_ospan_async("parent_operation", {
-#'   # ... do work within the existing span ...
-#'   some_function()
-#' }, domain = domain)
-#'
-#' # End the span when done
-#' end_ospan(span)
-#' }
-#'
-#' @seealso [`with_ospan_async`] for creating and using new spans,
-#'   [`create_ospan`] for manual span creation
-#' @noRd
-with_existing_ospan_async <- function(
-  name,
-  expr,
-  ...,
-  domain
-) {
-  if (!is_otel_tracing()) {
-    return(force(expr))
-  }
-
-  # Retrieve the existing span from the domain
-  span <- get_ospan_from_domain(name, domain = domain)
-
-  if (is.null(span)) {
-    # If no span exists, just execute the expression
-    return(force(expr))
-  }
-
-  with_ospan_promise_domain(span, expr)
-}
 
 # # TODO: Set attributes on the current active span
 # # 5. Set attributes on the current active span
@@ -200,14 +140,6 @@ with_existing_ospan_async <- function(
 
 
 # -- Helpers --------------------------------------------------------------
-
-has_existing_ospan <- function(name, ..., domain) {
-  if (IS_SHINY_LOCAL_PKG) {
-    stopifnot(length(list(...)) == 0)
-  }
-  !is.null(get_ospan_from_domain(name, domain = domain))
-}
-
 
 create_otel_active_span_promise_domain <- function(active_span) {
   force(active_span)
@@ -293,9 +225,7 @@ otel_create_span <- function(
   otel::start_span(
     name,
     ...,
-    attributes = otel::as_attributes(c(
-      attributes
-    ))
+    attributes = if (!is.null(attributes)) otel::as_attributes(attributes)
   )
 }
 
@@ -305,35 +235,9 @@ otel_log_safe <- function(
   severity = "info",
   logger = NULL
 ) {
+  if (!is_otel_tracing()) return()
   # Use `"{msg}"` instead of `msg` to prevent otel from doing glue processing on the message
-  otel::log("{msg}", ..., severity = severity, logger = logger)
-}
-
-
-get_ospan_names_from_domain <- function(domain) {
-  names(domain$userData[["_otel"]])
-}
-get_ospan_from_domain <- function(
-  span_name,
-  domain
-) {
-  env = domain$userData
-  if (is.null(env)) {
-    return(NULL)
-  }
-
-  get0("_otel", envir = env)[[span_name]]
-}
-set_ospan_in_domain <- function(
-  span_name,
-  span,
-  ...,
-  domain
-) {
-  if (is.null(get0("_otel", envir = domain$userData))) {
-    domain$userData[["_otel"]] <- list()
-  }
-  otel_info <- domain$userData[["_otel"]]
-  otel_info[[span_name]] <- span
-  domain$userData[["_otel"]] <- otel_info
+  # otel::log("{msg}", ..., severity = severity, logger = logger)
+  # TODO: What happened to the processing?
+  otel::log(msg, ..., severity = severity, logger = logger)
 }

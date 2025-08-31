@@ -1056,11 +1056,11 @@ ShinySession <- R6Class(
         class(e) <- c("shiny.error.fatal", class(e))
       }
 
-      if (is_otel_tracing()) {
-        with_session_ospan_async(domain = self, {
-          otel_log_safe("Fatal error", attributes = list(error = e))
-        })
-      }
+      otel_log_safe(
+        "Fatal error",
+        severity = if (close) "fatal" else "error",
+        attributes = list(error = e, session.id = self$token)
+      )
 
       private$unhandledErrorCallbacks$invoke(e, onError = printError)
       .globals$onUnhandledErrorCallbacks$invoke(e, onError = printError)
@@ -1079,7 +1079,9 @@ ShinySession <- R6Class(
       }
       # ..stacktraceon matches with the top-level ..stacktraceoff..
       withReactiveDomain(self, {
-        private$closedCallbacks$invoke(onError = printError, ..stacktraceon = TRUE)
+        with_session_stop_ospan_async(domain = self, {
+          private$closedCallbacks$invoke(onError = printError, ..stacktraceon = TRUE)
+        })
       })
     },
     isClosed = function() {
@@ -2207,12 +2209,7 @@ ShinySession <- R6Class(
         rLog$asyncStart(domain = self)
         private$sendMessage(busy = "busy")
 
-        if (has_otel_bind("reactive_update")) {
-          with_session_ospan_async({
-            create_reactive_update_ospan(domain = self)
-          }, domain = self)
-          #
-        }
+        create_reactive_update_ospan(domain = self)
       }
       private$busyCount <- private$busyCount + 1L
     },
@@ -2235,9 +2232,7 @@ ShinySession <- R6Class(
           }
         })
 
-        if (has_otel_bind("reactive_update")) {
-          end_reactive_update_ospan(domain = self)
-        }
+        end_reactive_update_ospan(domain = self)
       }
     }
   )

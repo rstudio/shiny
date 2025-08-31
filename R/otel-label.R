@@ -54,9 +54,7 @@ ospan_label_observer <- function(x, ..., domain) {
 # [MOD] Set reactiveVal LABEL
 # Set reactiveVal x
 # Set reactiveVal mymod:x
-otel_label_set_reactive_val <- function(x, ..., domain) {
-  label <- attr(x, "observable", exact = TRUE)[[".label"]]
-
+otel_label_set_reactive_val <- function(label, ..., domain) {
   sprintf(
     "Set reactiveVal %s",
     otel_label_module_prefix(label, domain = domain)
@@ -66,12 +64,11 @@ otel_label_set_reactive_val <- function(x, ..., domain) {
 # Set reactiveValues MOD:LABEL$KEY
 # Set reactiveValues x$key
 # Set reactiveValues mymod:x$key
-otel_label_set_reactive_values <- function(x, key, ..., domain) {
-  label <- attr(x, "observable", exact = TRUE)[[".label"]]
-
+otel_label_set_reactive_values <- function(label, key, ..., domain) {
   sprintf(
-    "Set reactiveValues %s",
-    otel_label_module_prefix(label, domain = domain)
+    "Set reactiveValues %s$%s",
+    otel_label_module_prefix(label, domain = domain),
+    key
   )
 }
 

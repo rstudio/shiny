@@ -43,14 +43,16 @@
 #   * observe mymod:<anonymous>
 #   * observe <anonymous>
 #   * observe mylabel (edited)
-# * Add code file/line markers when we are able discover the name from the srcinfo
+# * √ Add code file/line markers when we are able discover the name from the srcinfo
 # * Session
-#   * Move Session span to a log start and log end: https://opentelemetry.io/docs/specs/semconv/registry/attributes/session/
-#   * Add `session.id` with the token to attrs
+#   * √ Move Session span to a log start and log end: https://opentelemetry.io/docs/specs/semconv/registry/attributes/session/
+#     * Added session_start and session_end spans to encapsulate the session.start (also includes the `server()` initialization) and session.end events
+#   * √ Add `session.id` with the token to attrs
+# * √ Delay init input/clientData reactive value logs
 # * Connect `user.id` to be their user name: https://opentelemetry.io/docs/specs/semconv/registry/attributes/user/
 # * bindOtel() should no-op when binding an already bound object (where as currently it throws)
 # * Tests with otel recording
-# * √ Errors should happen in the span only
+# * √ Errors should happen in the final span only
 
 `_ignore` <- function() {
   otelsdk::with_otel_record
@@ -96,7 +98,7 @@ barret <- function() {
     msg <- paste(...)
     message(msg)
     # otel::log_info(msg, tracer = session$userData[["_otel_tracer"]])
-    # TODO try to remove the logger param once function is removed from Shiny package
+    # TODO: Remove the logger param once function is removed from Shiny package
     otel_log_safe(msg, logger = otel_logger)
     # otel_log_safe(msg)
   }
@@ -133,16 +135,10 @@ barret <- function() {
         moduleServer(id, function(input, output, session) {
           xVal <- reactiveVal(NULL)
 
-          # with_existing_ospan_async(
-          #   OSPAN_SESSION_NAME,
-          #   {
           log_and_msg("Shiny module")
-          #   },
-          #   domain = session
-          # )
 
           # x_raw <- reactive({
-          bar <<- x <- reactive({
+          x <- reactive({
             x_val <- xVal()
             req(x_val)
             log_and_msg(sprintf("X Val: %s", x_val))
@@ -283,7 +279,7 @@ barret <- function() {
               # cat(force)
 
               # Shut down the app so the telemetry can be seen easily
-              if (vals[[1]] < 5) {
+              if (vals[[1]] < 6) {
                 updateSliderInput(
                   "x",
                   value = vals[[1]] + 1,

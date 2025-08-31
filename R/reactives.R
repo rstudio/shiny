@@ -95,7 +95,7 @@ ReactiveVal <- R6Class(
       private$dependents$register()
 
       if (private$frozen)
-        reactiveStop()
+      reactiveStop()
 
       private$value
     },
@@ -106,14 +106,12 @@ ReactiveVal <- R6Class(
 
       domain <- getDefaultReactiveDomain()
       if ((!is.null(domain)) && .isLoggingOtel) {
-        with_reactive_update_or_session_ospan_async(domain = domain, {
-          # [mymod] Set reactiveVal: x
-          otel_log_safe(
-            otel_label_set_reactive_val(private$label, domain = domain),
-            severity = "info",
-            attributes = private$.otelAttrs
-          )
-        })
+        # [mymod] Set reactiveVal: x
+        otel_log_safe(
+          otel_label_set_reactive_val(private$label, domain = domain),
+          severity = "info",
+          attributes = private$.otelAttrs
+        )
       }
       rLog$valueChange(private$reactId, value, domain)
       private$value <- value
@@ -441,14 +439,15 @@ ReactiveValues <- R6Class(
       }
 
       if ((!is.null(domain)) && .isLoggingOtel) {
-        with_reactive_update_or_session_ospan_async(domain = domain, {
+        # Do not include updates to input or clientData unless _some_ reactivity has occured
+        if (has_reactive_ospan_cleanup(domain) || !(.label == "input" || .label == "clientData")) {
           # [mymod] Set reactiveValues: x$key
           otel_log_safe(
             otel_label_set_reactive_values(.label, key, domain = domain),
             severity = "info",
-            attributes = private$.otelAttrs
+            attributes = .otelAttrs
           )
-        })
+        }
       }
 
       # If it's new, append key to the name order

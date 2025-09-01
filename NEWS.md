@@ -11,6 +11,7 @@
 * Fixed an issue where `updateSelectizeInput(options = list(plugins="remove_button"))` could lead to multiple remove buttons. (#4275)
 
 ## Changes
+* Resolved [#2519](https://github.com/rstudio/shiny/issues/2519): While running the app in showcase mode, clicking the `AuthorUrl` provided in the metadata will now open the window in a new tab instead of navigating away from the application.
 
 * The return value of `actionButton()`/`actionLink()` changed slightly: `label` and `icon` are wrapped in an additional HTML container element. This allows for: 1. `updateActionButton()`/`updateActionLink()` to distinguish between the `label` and `icon` when making updates and 2. spacing between `label` and `icon` to be more easily customized via CSS. 
 

@@ -20,7 +20,7 @@
 #       * Reactive update that gets result links to the extended task
 #     * observeEvent()
 #     * eventReactive()
-#   * Maybe enhance all `withReactiveDomain()` calls?
+#  * Maybe enhance all `withReactiveDomain()` calls?
 # * Global options:
 #   * √ shiny.otel.graphlocked: TRUE/FALSE - whether to lock the graph for
 #     OpenTelemetry spans, so that they are not modified while being traced.
@@ -249,22 +249,31 @@ barret <- function() {
             # message("y_prom span id: ", y_span_id)
             y_val <- y()
             log_and_msg("y_prom init")
-            promises::promise(\(resolve, reject) {
+            yp <- promises::promise(\(resolve, reject) {
               log_and_msg("y_prom 0")
               resolve(y_val)
-            }) |>
+            })
+            message("make y_prom 1")
+            yp <- yp |>
               promises::then(function(y_val) {
                 log_and_msg("y_prom 1")
                 y_val
-              }) |>
+              })
+            message("make y_prom 2")
+            yp <- yp |>
               promises::then(function(y_val) {
                 log_and_msg("y_prom 2")
                 y_val + calc()
-              }) |>
+              })
+            message("make y_prom 3")
+            yp <- yp |>
               promises::then(function(y_val) {
                 log_and_msg("y_prom 3")
                 y_val
               })
+
+            message("done y_prom - ", getCurrentContext()$id, " - ", getCurrentContext()$.label)
+            yp
           })
 
           observe(label = "proms_observer", {
@@ -272,14 +281,14 @@ barret <- function() {
               x_prom(),
               y_prom()
             )
-            promises::then(p, function(vals) {
+            p <- promises::then(p, function(vals) {
               message("Vals[1]: ", vals[[1]])
               message("Vals[2]: ", vals[[2]])
 
               # cat(force)
 
               # Shut down the app so the telemetry can be seen easily
-              if (vals[[1]] < 6) {
+              if (vals[[1]] < 5) {
                 updateSliderInput(
                   "x",
                   value = vals[[1]] + 1,
@@ -289,6 +298,8 @@ barret <- function() {
                 shutdown()
               }
             })
+            message("done proms_observer - ", getCurrentContext()$id, " - ", getCurrentContext()$.label)
+            p
           })
 
           # |>

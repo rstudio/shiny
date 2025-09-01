@@ -198,19 +198,13 @@ with_ospan_promise_domain <- function(span, expr) {
   # ]]
 
   act_span_pd <- create_otel_active_span_promise_domain(span)
-  # We need the current active span to be activated last, not first
-  # Compose the new promise domain at the end, not beginning.
+
+  # Requires https://github.com/rstudio/promises/pull/166
   new_domain <- promises:::compose_domains(
-    act_span_pd,
-    promises:::current_promise_domain()
+    promises:::current_promise_domain(),
+    act_span_pd
   )
-
-  # Don't overwrite the wrapSync method. Instead, call `otel::with_active_span()` directly
-  # new_domain$wrapSync <- act_span_pd$wrapSync
-
-  otel::with_active_span(span, {
-    promises::with_promise_domain(new_domain, expr, replace = TRUE)
-  })
+  promises::with_promise_domain(new_domain, expr, replace = TRUE)
 }
 
 #' Create OpenTelemetry span

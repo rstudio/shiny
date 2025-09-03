@@ -13,10 +13,9 @@ has_otel_bind <- function(bind) {
 #'
 #' @param expr The expression to run with OpenTelemetry spans enabled.
 #' @param ... Future parameter expansion.
-#' @param bindAll If `TRUE`, then all reactive objects will be bound to Open Telemetry spans.
-#'   If `FALSE`, then only the reactive objects created within the expression
+#' @param bind If `"all"` (default), then all reactive objects will be bound to Open Telemetry spans.
+#'   If `"none"`, then only the reactive objects created within the expression
 #'   will be bound to Open Telemetry spans.
-#'   Defaults to `TRUE`.
 #' @export
 #' @examples
 #' # TODO: Make examples!!

@@ -17,7 +17,7 @@ use_session_start_ospan_async <- function(expr, ..., domain) {
     return(force(expr))
   }
 
-  with_ospan_async("session_start", {
+  with_shiny_ospan_async("session_start", {
     local({
       # session_start
       spn <- otel::get_active_span()
@@ -45,7 +45,7 @@ with_session_stop_ospan_async <- function(expr, ..., domain) {
     return(force(expr))
   }
 
-  with_ospan_async(
+  with_shiny_ospan_async(
     "session_stop",
     attributes = list(session.id = domain$token),
     expr

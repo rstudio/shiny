@@ -126,7 +126,7 @@ Suggests:
     yaml
 Remotes:
     r-lib/otelsdk,
-    rstudio/promises@feat/otel
+    rstudio/promises
 Config/Needs/check: shinytest2
 Config/testthat/edition: 3
 Encoding: UTF-8

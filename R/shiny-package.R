@@ -41,5 +41,3 @@ release_bullets <- function() {
     "Update static imports: `staticimports::import()`"
   )
 }
-
-otel_tracer_name <- "co.posit.r-package.shiny"

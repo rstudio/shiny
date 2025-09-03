@@ -542,7 +542,7 @@ bindOtel.reactiveExpr <- function(x, ...) {
     res <- reactive(label = x_label, domain = domain, {
       # Force all `{shiny}` spans to be under `{shiny}` tracer, not the app's tracer
       # with_shiny_ospan_async(span_label, {
-      with_ospan_async(
+      with_shiny_ospan_async(
         span_label,
         {
           # TODO: Need `otel::with_tracer(tracer, CODE)`
@@ -578,7 +578,7 @@ bindOtel.shiny.render.function <- function(x, ...) {
         ospan_label_render_function(domain = getDefaultReactiveDomain())
     }
 
-    with_ospan_async(
+    with_shiny_ospan_async(
       span_label,
       {
         valueFunc(...)
@@ -621,7 +621,7 @@ bindOtel.Observer <- function(x, ...) {
     name = span_label,
     ..stacktraceon = FALSE,
     func = function() {
-      with_ospan_async(
+      with_shiny_ospan_async(
         span_label,
         {
           obsFunc()

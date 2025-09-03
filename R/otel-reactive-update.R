@@ -1,9 +1,13 @@
 OSPAN_REACTIVE_UPDATE_NAME <- "reactive_update"
+
 # * `session$userData[["_otel_reactive_update_ospan"]]` - The active reactive update span (or `NULL`)
 # * `session$userData[["_otel_has_reactive_cleanup"]]` - Whether the reactive span cleanup has been set
 
 has_reactive_ospan_cleanup <- function(domain) {
   !is.null(domain$userData[["_otel_has_reactive_cleanup"]])
+}
+set_reactive_ospan_cleanup <- function(domain) {
+  domain$userData[["_otel_has_reactive_cleanup"]] <- TRUE
 }
 
 #' Create a `reactive_update` OpenTelemetry span
@@ -21,11 +25,11 @@ create_reactive_update_ospan <- function(..., domain) {
   if (!has_reactive_ospan_cleanup(domain)) {
     # Clean up any dangling reactive span
     domain$onSessionEnded(function() {
-      if (!is.null(domain$userData[["_otel_has_reactive_cleanup"]])) {
+      if (has_reactive_ospan_cleanup(domain)) {
         end_reactive_update_ospan(domain = domain)
       }
     })
-    domain$userData[["_otel_has_reactive_cleanup"]] <- TRUE
+    set_reactive_ospan_cleanup(domain)
   }
 
   prev_ospan <- domain$userData[["_otel_reactive_update_ospan"]]
@@ -33,7 +37,7 @@ create_reactive_update_ospan <- function(..., domain) {
     stop("Reactive update span already exists")
   }
 
-  reactive_update_ospan <- otel_create_span(
+  reactive_update_ospan <- create_shiny_ospan(
     OSPAN_REACTIVE_UPDATE_NAME,
     ...,
     attributes = list(
@@ -75,9 +79,12 @@ end_reactive_update_ospan <- function(..., domain) {
 #' @noRd
 with_reactive_update_ospan_async <- function(expr, ..., domain) {
   reactive_update_ospan <- domain$userData[["_otel_reactive_update_ospan"]]
-  if (!is.null(reactive_update_ospan)) {
-    with_active_span_async(reactive_update_ospan, expr)
-  } else {
-    force(expr)
+
+  if (is.null(reactive_update_ospan)) {
+    return(force(expr))
   }
+
+  # Given the reactive span is started before and ended when exec count is 0,
+  # we only need to wrap the expr in the span context
+  with_ospan_promise_domain(reactive_update_ospan, expr)
 }

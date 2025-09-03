@@ -199,28 +199,39 @@ bindEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE
   label <- label %||%
     sprintf('bindEvent(%s, %s)', attr(x, "observable", exact = TRUE)$.label, quos_to_label(qs))
 
+  x_classes <- class(x)
+
   # Don't hold on to the reference for x, so that it can be GC'd
   rm(x)
 
   initialized <- FALSE
 
-  res <- reactive(label = label, domain = domain, ..stacktraceon = FALSE, {
-    hybrid_chain(
-      eventFunc(),
-      function(value) {
-        if (ignoreInit && !initialized) {
-          initialized <<- TRUE
-          req(FALSE)
+  withOtel(bind = "none", {
+    res <- reactive(label = label, domain = domain, ..stacktraceon = FALSE, {
+      hybrid_chain(
+        {
+          eventFunc()
+        },
+        function(value) {
+          if (ignoreInit && !initialized) {
+            initialized <<- TRUE
+            req(FALSE)
+          }
+
+          req(!ignoreNULL || !isNullEvent(value))
+
+          isolate(valueFunc())
         }
-
-        req(!ignoreNULL || !isNullEvent(value))
-
-        isolate(valueFunc())
-      }
-    )
+      )
+    })
   })
 
-  class(res) <- c("reactive.event", class(res))
+  class(res) <- c("reactive.event", x_classes)
+
+  if (has_otel_bind("reactiveExpr")) {
+    res <- bindOtel(res)
+  }
+
   res
 }
 
@@ -302,6 +313,9 @@ bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
   )
 
   class(x) <- c("Observer.event", class(x))
+  if (has_otel_bind("observe")) {
+    x <- bindOtel(x)
+  }
   invisible(x)
 }
 

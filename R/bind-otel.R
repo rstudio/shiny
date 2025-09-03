@@ -12,7 +12,7 @@
 #   * Combinations:
 #     * debounce() / throttle()
 #     * bindCache()
-#     * bindEvent()
+#     * √ bindEvent()
 #     * bindProgress()?
 #   * Special functions:
 #     * ExtendedTask()
@@ -20,6 +20,7 @@
 #       * Reactive update that gets result links to the extended task
 #     * observeEvent()
 #     * eventReactive()
+#       * TODO: Not recording updates within the span!!
 #  * Maybe enhance all `withReactiveDomain()` calls?
 # * Global options:
 #   * √ shiny.otel.graphlocked: TRUE/FALSE - whether to lock the graph for
@@ -50,7 +51,7 @@
 #   * √ Add `session.id` with the token to attrs
 # * √ Delay init input/clientData reactive value logs
 # * Connect `user.id` to be their user name: https://opentelemetry.io/docs/specs/semconv/registry/attributes/user/
-# * bindOtel() should no-op when binding an already bound object (where as currently it throws)
+# * √ bindOtel() should no-op when binding an already bound object (where as currently it throws)
 # * Tests with otel recording
 # * √ Errors should happen in the final span only
 
@@ -309,17 +310,31 @@ barret <- function() {
           # bindOtel()
 
           # Set the value late in the reactive calc
-          observe(label = "set_x", {
+          observeEvent({input$x},{
             rv$x <- input$x
           })
-          observe(label = "set_y", {
-            rv$y <- input$y
+
+          tmp_val <- reactiveVal(NULL)
+
+          # TODO: Not recording updates within the span!!
+          x_calc <- eventReactive({isolate(tmp_val(1)); rv$x}, {
+            tmp_val(2)
+            rv$x
           })
+          y_calc <- eventReactive({isolate(tmp_val(3)); input$y * 2}, {
+            # x_calc()
+            tmp_val(4)
+            input$y * 2 / 2
+          })
+          # observeEvent(label = "set_y", {
+          #   rv$y <- input$y
+          # })
           observe(label = "set xVal", {
+            x_calc()
             xVal(rv$x)
           })
           observe(label = "set yVal", {
-            yVal(rv$y)
+            yVal(y_calc())
           })
         })
       }
@@ -523,6 +538,7 @@ bindOtel.reactiveExpr <- function(x, ...) {
   domain <- reactive_get_domain(x)
 
   x_label <- attr(x, "observable", exact = TRUE)[[".label"]]
+
   span_label <- ospan_label_reactive(x, domain = domain)
 
   valueFunc <- reactive_get_value_func(x)
@@ -534,6 +550,7 @@ bindOtel.reactiveExpr <- function(x, ...) {
     "otelReactiveValueFunc",
     ..stacktraceon = TRUE
   )
+  x_classes <- class(x)
 
   # Don't hold on to the reference for x, so that it can be GC'd
   rm(x)
@@ -571,7 +588,8 @@ bindOtel.reactiveExpr <- function(x, ...) {
   internal_observable <- attr(res, "observable", exact = TRUE)
   internal_observable$.origFunc <- origFunc
 
-  class(res) <- c("reactive.otel", class(res))
+  # Pass through the original classes
+  class(res) <- c("reactive.otel", x_classes)
   res
 }
 
@@ -650,10 +668,12 @@ bindOtel.Observer <- function(x, ...) {
 
 #' @export
 bindEvent.reactive.otel <- function(x, ...) {
-  # TODO: What is the proper support for bindEvent() and bindOtel()?
-  stop(
-    "bindEvent() has already been called on the object attempting to add OpenTelemetry."
-  )
+  NextMethod()
+}
+
+#' @export
+bindOtel.reactive.event <- function(x, ...) {
+  NextMethod()
 }
 
 
@@ -671,7 +691,8 @@ bindOtel.function <- function(x, ...) {
 
 #' @export
 bindOtel.reactive.otel <- function(x, ...) {
-  stop("bindOtel() has already been called on the object.")
+  # Don't double bind. Return as is
+  x
 }
 #' @export
 bindOtel.reactiveVal.otel <- bindOtel.reactive.otel

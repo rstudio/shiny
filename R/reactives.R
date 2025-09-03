@@ -2363,15 +2363,17 @@ observeEvent <- function(eventExpr, handlerExpr,
   handlerQ <- exprToQuo(handlerExpr, handler.env, handler.quoted)
   label <- quoToLabel(eventQ, "observeEvent", label)
 
-  handler <- inject(observe(
-    !!handlerQ,
-    label = label,
-    suspended = suspended,
-    priority = priority,
-    domain = domain,
-    autoDestroy = TRUE,
-    ..stacktraceon = TRUE
-  ))
+  withOtel(bind = "none", {
+    handler <- inject(observe(
+      !!handlerQ,
+      label = label,
+      suspended = suspended,
+      priority = priority,
+      domain = domain,
+      autoDestroy = TRUE,
+      ..stacktraceon = TRUE
+    ))
+  })
 
   o <- inject(bindEvent(
     ignoreNULL = ignoreNULL,
@@ -2404,13 +2406,16 @@ eventReactive <- function(eventExpr, valueExpr,
   userEventExpr <- fn_body(func)
   label <- exprToLabel(userEventExpr, "eventReactive", label)
 
+  withOtel(bind = "none", {
+    value_r <- inject(reactive(!!valueQ, domain = domain, label = label))
+  })
 
   invisible(inject(bindEvent(
     ignoreNULL = ignoreNULL,
     ignoreInit = ignoreInit,
     label = label,
     !!eventQ,
-    x = reactive(!!valueQ, domain = domain, label = label)
+    x = value_r
   )))
 }
 

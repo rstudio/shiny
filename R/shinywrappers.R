@@ -134,7 +134,10 @@ markRenderFunction <- function(
     else renderFunc(...)
   }
 
-  otelAttrs <- otel_srcref_attributes(attr(renderFunc, "wrappedFunc"))
+  otelAttrs <-
+    otel_srcref_attributes(
+      attr(renderFunc, "wrappedFunc", exact = TRUE)
+    )
 
   ret <- structure(
     wrappedRenderFunc,
@@ -280,9 +283,7 @@ createRenderFunction <- function(
   # Hoist func's wrappedFunc attribute into renderFunc, so that when we pass
   # renderFunc on to markRenderFunction, it is able to find the original user
   # function.
-  if (identical(cacheHint, "auto")) {
-    attr(renderFunc, "wrappedFunc") <- attr(func, "wrappedFunc", exact = TRUE)
-  }
+  attr(renderFunc, "wrappedFunc") <- attr(func, "wrappedFunc", exact = TRUE)
 
   markRenderFunction(outputFunc, renderFunc, outputArgs, cacheHint,
                      cacheWriteHook, cacheReadHook)

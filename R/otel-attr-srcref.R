@@ -2,16 +2,16 @@
 
 # Very similar to srcrefFromShinyCall(),
 # however, this works when the function does not have a srcref attr set
-otel_srcref_attributes <- function(x) {
-  if (is.function(x)) {
-    # Get the first srcref
-    x <- getSrcRefs(x)[[1]][[1]]
-    srcref <- attr(srcref, "srcref", exact = TRUE)
+otel_srcref_attributes <- function(srcref) {
+  if (is.function(srcref)) {
+    srcref <- getSrcRefs(srcref)[[1]][[1]]
   }
 
-  stopifnot(inherits(x, "srcref"))
+  if (is.null(srcref)) {
+    return(NULL)
+  }
 
-  srcref <- x
+  stopifnot(inherits(srcref, "srcref"))
 
   # Semantic conventions for code: https://opentelemetry.io/docs/specs/semconv/registry/attributes/code/
   #

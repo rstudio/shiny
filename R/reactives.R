@@ -1087,7 +1087,7 @@ reactive <- function(
 # scans the line of code that started the reactive block and looks for something
 # that looks like assignment. If we fail, fall back to a default value (likely
 # the block of code in the body of the reactive).
-rexprSrcrefToLabel <- function(srcref, defaultLabel) {
+rexprSrcrefToLabel <- function(srcref, defaultLabel, fnName) {
   if (is.null(srcref))
     return(defaultLabel)
 
@@ -1110,7 +1110,7 @@ rexprSrcrefToLabel <- function(srcref, defaultLabel) {
 
   firstLine <- substring(lines[srcref[1]], 1, srcref[2] - 1)
 
-  m <- regexec("(.*)(<-|=)\\s*reactive\\s*\\($", firstLine)
+  m <- regexec(paste0("(.*)(<-|=)\\s*", fnName, "\\s*\\($"), firstLine)
   if (m[[1]][1] == -1) {
     return(defaultLabel)
   }
@@ -2361,7 +2361,6 @@ observeEvent <- function(eventExpr, handlerExpr,
 
   eventQ <- exprToQuo(eventExpr, event.env, event.quoted)
   handlerQ <- exprToQuo(handlerExpr, handler.env, handler.quoted)
-
   label <- quoToLabel(eventQ, "observeEvent", label)
 
   handler <- inject(observe(
@@ -2400,7 +2399,11 @@ eventReactive <- function(eventExpr, valueExpr,
   eventQ <- exprToQuo(eventExpr, event.env, event.quoted)
   valueQ <- exprToQuo(valueExpr, value.env, value.quoted)
 
-  label <- quoToLabel(eventQ, "eventReactive", label)
+  func <- installExprFunction(eventExpr, "func", event.env, event.quoted, wrappedWithLabel = FALSE)
+  # Attach a label and a reference to the original user source for debugging
+  userEventExpr <- fn_body(func)
+  label <- exprToLabel(userEventExpr, "eventReactive", label)
+
 
   invisible(inject(bindEvent(
     ignoreNULL = ignoreNULL,

@@ -222,10 +222,6 @@ reactiveVal <- function(value = NULL, label = NULL) {
   call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
   if (missing(label)) {
     label <- rvalSrcrefToLabel(call_srcref)
-    domain <- getDefaultReactiveDomain()
-    if (!is.null(domain)) {
-      label <- domain$ns(label)
-    }
   }
 
   rv <- ReactiveVal$new(value, label)

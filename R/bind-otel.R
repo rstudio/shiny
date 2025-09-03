@@ -134,6 +134,9 @@ barret <- function() {
       xMod <- function(id) {
         moduleServer(id, function(input, output, session) {
           xVal <- reactiveVal(NULL)
+          yVal <- reactiveVal(NULL)
+          rv <- reactiveValues(x = NULL, y = NULL)
+
 
           log_and_msg("Shiny module")
 
@@ -288,7 +291,7 @@ barret <- function() {
               # cat(force)
 
               # Shut down the app so the telemetry can be seen easily
-              if (vals[[1]] < 5) {
+              if (vals[[1]] < 6) {
                 updateSliderInput(
                   "x",
                   value = vals[[1]] + 1,
@@ -307,8 +310,16 @@ barret <- function() {
 
           # Set the value late in the reactive calc
           observe(label = "set_x", {
-            message("Setting x!")
-            xVal(input$x)
+            rv$x <- input$x
+          })
+          observe(label = "set_y", {
+            rv$y <- input$y
+          })
+          observe(label = "set xVal", {
+            xVal(rv$x)
+          })
+          observe(label = "set yVal", {
+            yVal(rv$y)
           })
         })
       }

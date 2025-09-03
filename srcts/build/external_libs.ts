@@ -1,11 +1,11 @@
 // This build script must be executed from the root repo directory via
 // ```
-// yarn build
+// npm run build
 // ```
 
-import { build, outDir } from "./_build";
-import { readdir, unlink, writeFile } from "fs/promises";
 import globalsPlugin from "esbuild-plugin-globals";
+import { readdir, unlink, writeFile } from "fs/promises";
+import { build, outDir } from "./_build";
 
 const opts = {
   bundle: false,

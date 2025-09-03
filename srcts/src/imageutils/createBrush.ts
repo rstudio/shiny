@@ -109,7 +109,7 @@ function createBrush(
   $el: JQuery<HTMLElement>,
   opts: BrushOpts,
   coordmap: Coordmap,
-  expandPixels: number
+  expandPixels: number,
 ): Brush {
   // Number of pixels outside of brush to allow start resizing
   const resizeExpand = 10;
@@ -306,7 +306,6 @@ function createBrush(
     let minCss: Offset = { x: boxCss.xmin, y: boxCss.ymin };
     let maxCss: Offset = { x: boxCss.xmax, y: boxCss.ymax };
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const panel = state.panel!;
     const panelBoundsImg = panel.range;
 
@@ -343,15 +342,15 @@ function createBrush(
     // Round to 14 significant digits to avoid spurious changes in FP values
     // (#1634).
     state.boundsData = mapValues(state.boundsData, (val) =>
-      roundSignif(val, 14)
+      roundSignif(val, 14),
     );
 
     // We also need to attach the data bounds and panel as data attributes, so
     // that if the image is re-sent, we can grab the data bounds to create a new
     // brush. This should be fast because it doesn't actually modify the DOM.
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     $div!.data("bounds-data", state.boundsData);
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     $div!.data("panel", state.panel);
     return undefined;
   }
@@ -364,7 +363,6 @@ function createBrush(
       return { ...state.boundsData };
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     let boxCss = imgToCss(state.panel!.scaleDataToImg(boxData));
     // Round to 13 significant digits to avoid spurious changes in FP values
     // (#2197).
@@ -424,7 +422,7 @@ function createBrush(
     $div
       .offset(
         // @ts-expect-error; This is a jQuery Typing issue
-        { x: 0, y: 0 }
+        { x: 0, y: 0 },
       )
       .width(0)
       .outerHeight(0);
@@ -437,7 +435,6 @@ function createBrush(
     const imgOffsetCss = findOrigin($el.find("img"));
     const b = state.boundsCss;
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     $div!
       .offset({
         top: imgOffsetCss.y + b.ymin,
@@ -480,7 +477,7 @@ function createBrush(
 
   function brushTo(offsetCss: Offset) {
     boundsCss(findBox(state.down, offsetCss));
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     $div!.show();
     updateDiv();
   }
@@ -527,12 +524,12 @@ function createBrush(
       xvalsImg = shiftToRange(
         xvalsImg,
         panelBoundsImg.left,
-        panelBoundsImg.right
+        panelBoundsImg.right,
       );
       yvalsImg = shiftToRange(
         yvalsImg,
         panelBoundsImg.top,
-        panelBoundsImg.bottom
+        panelBoundsImg.bottom,
       );
 
       // Convert back to bounds format
@@ -580,7 +577,7 @@ function createBrush(
       const xminImg = shiftToRange(
         bImg.xmin + dImg.x,
         panelBoundsImg.left,
-        bImg.xmax
+        bImg.xmax,
       )[0];
 
       bImg.xmin = xminImg;
@@ -588,7 +585,7 @@ function createBrush(
       const xmaxImg = shiftToRange(
         bImg.xmax + dImg.x,
         bImg.xmin,
-        panelBoundsImg.right
+        panelBoundsImg.right,
       )[0];
 
       bImg.xmax = xmaxImg;
@@ -598,7 +595,7 @@ function createBrush(
       const yminImg = shiftToRange(
         bImg.ymin + dImg.y,
         panelBoundsImg.top,
-        bImg.ymax
+        bImg.ymax,
       )[0];
 
       bImg.ymin = yminImg;
@@ -606,7 +603,7 @@ function createBrush(
       const ymaxImg = shiftToRange(
         bImg.ymax + dImg.y,
         bImg.ymin,
-        panelBoundsImg.bottom
+        panelBoundsImg.bottom,
       )[0];
 
       bImg.ymax = ymaxImg;
@@ -656,4 +653,4 @@ function createBrush(
 }
 
 export { createBrush };
-export type { Bounds, BrushOpts, BoundsCss };
+export type { Bounds, BoundsCss, BrushOpts };

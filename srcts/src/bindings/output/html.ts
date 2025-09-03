@@ -15,7 +15,7 @@ class HtmlOutputBinding extends OutputBinding {
   }
   override async renderValue(
     el: HTMLElement,
-    data: Parameters<typeof renderContentAsync>[1]
+    data: Parameters<typeof renderContentAsync>[1],
   ): Promise<void> {
     await renderContentAsync(el, data);
   }

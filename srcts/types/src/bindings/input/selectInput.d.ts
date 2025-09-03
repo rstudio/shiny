@@ -1,4 +1,3 @@
-/// <reference types="selectize" />
 import { InputBinding } from "./inputBinding";
 type SelectHTMLElement = HTMLSelectElement & {
     nonempty: boolean;
@@ -10,9 +9,8 @@ type SelectInputReceiveMessageData = {
     url?: string;
     value?: string;
 };
-type SelectizeOptions = Selectize.IOptions<string, unknown>;
 type SelectizeInfo = Selectize.IApi<string, unknown> & {
-    settings: SelectizeOptions;
+    settings: Selectize.IOptions<string, unknown>;
 };
 declare class SelectInputBinding extends InputBinding {
     find(scope: HTMLElement): JQuery<HTMLElement>;
@@ -33,6 +31,7 @@ declare class SelectInputBinding extends InputBinding {
     unsubscribe(el: HTMLElement): void;
     initialize(el: SelectHTMLElement): void;
     protected _selectize(el: SelectHTMLElement, update?: boolean): SelectizeInfo | undefined;
+    private _addShinyRemoveButton;
 }
 export { SelectInputBinding };
 export type { SelectInputReceiveMessageData };

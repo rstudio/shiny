@@ -10,4 +10,4 @@ declare function show({ html, action, deps, duration, id, closeButton, type, }?:
     type?: string | null;
 }): Promise<ReturnType<typeof randomId>>;
 declare function remove(id: string): void;
-export { show as showNotification, remove as removeNotification };
+export { remove as removeNotification, show as showNotification };

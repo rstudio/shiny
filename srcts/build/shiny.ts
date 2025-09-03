@@ -1,6 +1,6 @@
 // This build script must be executed from the root repo directory via
 // ```
-// yarn build
+// npm run build
 // ```
 
 import type { BuildOptions } from "esbuild";
@@ -29,6 +29,7 @@ const opts: BuildOptions = {
 // Make sure all ts files contain jquery import statements before building
 verifyJqueryImport("srcts/src")
   .then(() => {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     Promise.all([
       build({
         ...opts,

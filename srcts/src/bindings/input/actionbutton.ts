@@ -1,15 +1,17 @@
 import $ from "jquery";
+import type { HtmlDep } from "../../shiny/render";
+import { renderContent } from "../../shiny/render";
 import { hasDefinedProperty } from "../../utils";
 import { InputBinding } from "./inputBinding";
 
 type ActionButtonReceiveMessageData = {
-  label?: string;
-  icon?: string | [];
+  label?: { html: string; deps: HtmlDep[] };
+  icon?: { html: string; deps: HtmlDep[] };
   disabled?: boolean;
 };
 
 class ActionButtonInputBinding extends InputBinding {
-  find(scope: HTMLElement): JQuery<HTMLElement> {
+  find(scope: HTMLElement): JQuery {
     return $(scope).find(".action-button");
   }
   getValue(el: HTMLElement): number {
@@ -20,7 +22,7 @@ class ActionButtonInputBinding extends InputBinding {
   }
   getType(el: HTMLElement): string {
     return "shiny.action";
-    el;
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
   subscribe(el: HTMLElement, callback: (x: boolean) => void): void {
     $(el).on(
@@ -33,53 +35,49 @@ class ActionButtonInputBinding extends InputBinding {
         $el.data("val", val + 1);
 
         callback(false);
-      }
+      },
     );
   }
   getState(el: HTMLElement): { value: number } {
     return { value: this.getValue(el) };
   }
-  receiveMessage(el: HTMLElement, data: ActionButtonReceiveMessageData): void {
-    const $el = $(el);
-
-    if (hasDefinedProperty(data, "label") || hasDefinedProperty(data, "icon")) {
-      // retrieve current label and icon
-      let label: string = $el.text();
-      let icon = "";
-
-      // to check (and store) the previous icon, we look for a $el child
-      // object that has an i tag, and some (any) class (this prevents
-      // italicized text - which has an i tag but, usually, no class -
-      // from being mistakenly selected)
-      if ($el.find("i[class]").length > 0) {
-        const iconHtml = $el.find("i[class]")[0];
-
-        if (iconHtml === $el.children()[0]) {
-          // another check for robustness
-          icon = $(iconHtml).prop("outerHTML");
-        }
+  async receiveMessage(
+    el: HTMLElement,
+    data: ActionButtonReceiveMessageData,
+  ): Promise<void> {
+    if (hasDefinedProperty(data, "icon")) {
+      let iconContainer = el.querySelector<HTMLElement>(
+        ":scope > .action-icon",
+      );
+      // If no container exists yet, create one
+      if (!iconContainer) {
+        iconContainer = document.createElement("span");
+        iconContainer.className = "action-icon";
+        el.prepend(iconContainer);
       }
+      await renderContent(iconContainer, data.icon!);
+    }
 
-      // update the requested properties
-      if (hasDefinedProperty(data, "label")) {
-        label = data.label;
+    if (hasDefinedProperty(data, "label")) {
+      let labelContainer = el.querySelector<HTMLElement>(
+        ":scope > .action-label",
+      );
+      if (!labelContainer) {
+        labelContainer = document.createElement("span");
+        labelContainer.className = "action-label";
+        el.appendChild(labelContainer);
       }
-      if (hasDefinedProperty(data, "icon")) {
-        // `data.icon` can be an [] if user gave `character(0)`.
-        icon = Array.isArray(data.icon) ? "" : data.icon ?? "";
-      }
-
-      // produce new html
-      $el.html(icon + " " + label);
+      await renderContent(labelContainer, data.label!);
     }
 
     if (hasDefinedProperty(data, "disabled")) {
       if (data.disabled) {
-        $el.attr("disabled", "");
+        el.setAttribute("disabled", "");
       } else {
-        $el.attr("disabled", null);
+        el.removeAttribute("disabled");
       }
     }
+    return;
   }
 
   unsubscribe(el: HTMLElement): void {

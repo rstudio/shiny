@@ -1,11 +1,11 @@
 import $ from "jquery";
-import { imageOutputBinding } from "../bindings/output/image";
 import type { InputRatePolicy } from "../inputPolicies";
 import { shinySetInputValue } from "../shiny/initedMethods";
 import { Debouncer, Throttler } from "../time";
 import type { Bounds, BoundsCss, BrushOpts } from "./createBrush";
 import { createBrush } from "./createBrush";
 import type { Offset } from "./findbox";
+import { findImageOutputs } from "./imageBindingUtils";
 import type { Coordmap } from "./initCoordmap";
 import type { Panel } from "./initPanelScales";
 
@@ -53,7 +53,7 @@ type NullOutside = Parameters<Coordmap["mouseCoordinateSender"]>[2];
 function createClickHandler(
   inputId: InputId,
   clip: Clip,
-  coordmap: Coordmap
+  coordmap: Coordmap,
 ): CreateHandler {
   const clickInfoSender = coordmap.mouseCoordinateSender(inputId, clip);
 
@@ -79,12 +79,12 @@ function createHoverHandler(
   delayType: string | "throttle",
   clip: Clip,
   nullOutside: NullOutside,
-  coordmap: Coordmap
+  coordmap: Coordmap,
 ): CreateHandler {
   const sendHoverInfo = coordmap.mouseCoordinateSender(
     inputId,
     clip,
-    nullOutside
+    nullOutside,
   );
 
   let hoverInfoSender: InputRatePolicy<typeof sendHoverInfo>;
@@ -127,7 +127,7 @@ function createBrushHandler(
   $el: JQuery<HTMLElement>,
   opts: BrushOpts,
   coordmap: Coordmap,
-  outputId: BrushInfo["outputId"]
+  outputId: BrushInfo["outputId"],
 ): CreateHandler {
   // Parameter: expand the area in which a brush can be started, by this
   // many pixels in all directions. (This should probably be a brush option)
@@ -168,10 +168,10 @@ function createBrushHandler(
       | "nesw-resize"
       | "ns-resize"
       | "nwse-resize"
-      | null
+      | null,
   ) {
     $el.removeClass(
-      "crosshair grabbable grabbing ns-resize ew-resize nesw-resize nwse-resize"
+      "crosshair grabbable grabbing ns-resize ew-resize nesw-resize nwse-resize",
     );
 
     if (style) $el.addClass(style);
@@ -184,27 +184,25 @@ function createBrushHandler(
     if (isNaN(coords.xmin)) {
       shinySetInputValue(inputId, null);
       // Must tell other brushes to clear.
-      imageOutputBinding
-        .find(document.documentElement)
-        .trigger("shiny-internal:brushed", {
+      findImageOutputs(document.documentElement).trigger(
+        "shiny-internal:brushed",
+        {
           brushId: inputId,
           outputId: null,
-        });
+        },
+      );
       return;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const panel = brush.getPanel()!;
 
     // Add the panel (facet) variables, if present
     $.extend(coords, panel.panel_vars);
 
-    // eslint-disable-next-line camelcase
     coords.coords_css = brush.boundsCss();
-    // eslint-disable-next-line camelcase
+
     coords.coords_img = coordmap.scaleCssToImg(coords.coords_css);
 
-    // eslint-disable-next-line camelcase
     coords.img_css_ratio = coordmap.cssToImgScalingRatio();
 
     // Add variable name mappings
@@ -224,9 +222,10 @@ function createBrushHandler(
     shinySetInputValue(inputId, coords);
 
     $el.data("mostRecentBrush", true);
-    imageOutputBinding
-      .find(document.documentElement)
-      .trigger("shiny-internal:brushed", coords);
+    findImageOutputs(document.documentElement).trigger(
+      "shiny-internal:brushed",
+      coords,
+    );
   }
 
   let brushInfoSender:
@@ -265,7 +264,6 @@ function createBrushHandler(
     brush.down(offsetCss);
 
     if (brush.isInResizeArea(offsetCss)) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error; TODO-barret; Remove the variable? it is not used
       brush.startResizing(offsetCss);
 
@@ -439,5 +437,5 @@ function createBrushHandler(
   };
 }
 
-export { createClickHandler, createHoverHandler, createBrushHandler };
+export { createBrushHandler, createClickHandler, createHoverHandler };
 export type { BrushInfo };

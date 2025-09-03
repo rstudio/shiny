@@ -3,22 +3,16 @@
     Code
       df
     Output
-         num                          call                 loc
-      1   68                             A   [test-stacks.R#3]
-      2   67                             B   [test-stacks.R#7]
-      3   66                  <reactive:C>  [test-stacks.R#11]
-      4   44                             C                    
-      5   43                   renderTable  [test-stacks.R#18]
-      6   42                          func                    
-      7   41                         force                    
-      8   40                   withVisible                    
-      9   39           withCallingHandlers                    
-      10  38               domain$wrapSync                    
-      11  37 promises::with_promise_domain                    
-      12  36            captureStackTraces                    
-      13  32                      tryCatch                    
-      14  31                            do                    
-      15  30                  hybrid_chain                    
+        num                call                 loc
+      1  68                   A   [test-stacks.R#3]
+      2  67                   B   [test-stacks.R#7]
+      3  66        <reactive:C>  [test-stacks.R#11]
+      4  44                   C                    
+      5  43         renderTable  [test-stacks.R#18]
+      6  42                func                    
+      7  41               force                    
+      8  40         withVisible                    
+      9  39 withCallingHandlers                    
 
 ---
 

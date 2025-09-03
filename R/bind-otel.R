@@ -164,7 +164,7 @@ barret <- function() {
           #   bindOtel(
           #     label = "Expensive calc"
           #     # # name = "Expensive calc!!",
-          #     # attributes = \() {
+          #     # attributes = function() {
           #     #   list(x = input$x, y = input$y)
           #     # }
           #     # # ,
@@ -210,7 +210,7 @@ barret <- function() {
             # message("x_prom span id: ", x_span_id)
             x_val <- x()
             log_and_msg("x_prom init")
-            promises::promise(\(resolve, reject) {
+            promises::promise(function(resolve, reject) {
               log_and_msg("x_prom 0")
               resolve(x_val)
             }) |>
@@ -218,12 +218,12 @@ barret <- function() {
                 log_and_msg("x_prom 1")
                 log_and_msg("Launching mirai")
                 x_val
-                # mirai_map(seq_len(x_val), \(i) {
+                # mirai_map(seq_len(x_val), function(i) {
                 #   otel::start_local_active_span("slow compute")
                 #   Sys.sleep(i / 10 / 100)
                 #   i
                 # }) |>
-                #   promises::then(\(vals) {
+                #   promises::then(function(vals) {
                 #     max(unlist(vals))
                 #   })
 
@@ -252,7 +252,7 @@ barret <- function() {
             # message("y_prom span id: ", y_span_id)
             y_val <- y()
             log_and_msg("y_prom init")
-            yp <- promises::promise(\(resolve, reject) {
+            yp <- promises::promise(function(resolve, reject) {
               log_and_msg("y_prom 0")
               resolve(y_val)
             })

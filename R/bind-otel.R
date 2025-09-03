@@ -211,41 +211,41 @@ barret <- function() {
             # message("x_prom span id: ", x_span_id)
             x_val <- x()
             log_and_msg("x_prom init")
-            promises::promise(function(resolve, reject) {
+            p <- promises::promise(function(resolve, reject) {
               log_and_msg("x_prom 0")
               resolve(x_val)
-            }) |>
-              promises::then(function(x_val) {
-                log_and_msg("x_prom 1")
-                log_and_msg("Launching mirai")
-                x_val
-                # mirai_map(seq_len(x_val), function(i) {
-                #   otel::start_local_active_span("slow compute")
-                #   Sys.sleep(i / 10 / 100)
-                #   i
-                # }) |>
-                #   promises::then(function(vals) {
-                #     max(unlist(vals))
-                #   })
+            })
+            p <- promises::then(p, function(x_val) {
+              log_and_msg("x_prom 1")
+              log_and_msg("Launching mirai")
+              x_val
+              # mirai_map(seq_len(x_val), function(i) {
+              #   otel::start_local_active_span("slow compute")
+              #   Sys.sleep(i / 10 / 100)
+              #   i
+              # }) |>
+              #   promises::then(function(vals) {
+              #     max(unlist(vals))
+              #   })
 
-                # # mirai(
-                # #   {
-                # #     otel::start_local_active_span("slow compute")
-                # #     # val
-                # #     # Sys.sleep(0.2)
-                # #     val
-                # #   },
-                # #   val = x_val
-                # # )
-              }) |>
-              promises::then(function(x_val) {
-                log_and_msg("x_prom 2")
-                x_val
-              }) |>
-              promises::then(function(x_val) {
-                log_and_msg("x_prom 3")
-                x_val
-              })
+              # # mirai(
+              # #   {
+              # #     otel::start_local_active_span("slow compute")
+              # #     # val
+              # #     # Sys.sleep(0.2)
+              # #     val
+              # #   },
+              # #   val = x_val
+              # # )
+            })
+            p <- promises::then(p, function(x_val) {
+              log_and_msg("x_prom 2")
+              x_val
+            })
+            p <- promises::then(p, function(x_val) {
+              log_and_msg("x_prom 3")
+              x_val
+            })
           })
 
           y_prom <- reactive({
@@ -258,21 +258,18 @@ barret <- function() {
               resolve(y_val)
             })
             message("make y_prom 1")
-            yp <- yp |>
-              promises::then(function(y_val) {
-                log_and_msg("y_prom 1")
-                y_val
-              })
+            yp <- promises::then(yp, function(y_val) {
+              log_and_msg("y_prom 1")
+              y_val
+            })
             message("make y_prom 2")
-            yp <- yp |>
-              promises::then(function(y_val) {
-                log_and_msg("y_prom 2")
-                y_val + calc()
+            yp <- promises::then(yp, function(y_val) {
+              log_and_msg("y_prom 2")
+              y_val + calc()
               })
             message("make y_prom 3")
-            yp <- yp |>
-              promises::then(function(y_val) {
-                log_and_msg("y_prom 3")
+            yp <- promises::then(yp, function(y_val) {
+              log_and_msg("y_prom 3")
                 y_val
               })
 

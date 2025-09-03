@@ -144,10 +144,10 @@
           : doTryCatch
           : tryCatchOne
           : tryCatchList
-          : doTryCatch
-          : tryCatchOne
-          : tryCatchList
           : tryCatch
+          : doWithOneRestart
+          : withOneRestart
+          : withRestarts
           : test_code
           : test_that
           : eval [test-stacks-deep.R#XXX]
@@ -156,10 +156,10 @@
           : doTryCatch
           : tryCatchOne
           : tryCatchList
-          : doTryCatch
-          : tryCatchOne
-          : tryCatchList
           : tryCatch
+          : doWithOneRestart
+          : withOneRestart
+          : withRestarts
           : test_code
           : source_file
           : FUN
@@ -212,10 +212,10 @@
           : doTryCatch
           : tryCatchOne
           : tryCatchList
-          : doTryCatch
-          : tryCatchOne
-          : tryCatchList
           : tryCatch
+          : doWithOneRestart
+          : withOneRestart
+          : withRestarts
           : test_code
           : test_that
           : eval [test-stacks-deep.R#XXX]
@@ -224,10 +224,10 @@
           : doTryCatch
           : tryCatchOne
           : tryCatchList
-          : doTryCatch
-          : tryCatchOne
-          : tryCatchList
           : tryCatch
+          : doWithOneRestart
+          : withOneRestart
+          : withRestarts
           : test_code
           : source_file
           : FUN
@@ -281,10 +281,10 @@
           : doTryCatch
           : tryCatchOne
           : tryCatchList
-          : doTryCatch
-          : tryCatchOne
-          : tryCatchList
           : tryCatch
+          : doWithOneRestart
+          : withOneRestart
+          : withRestarts
           : test_code
           : test_that
           : eval [test-stacks-deep.R#XXX]
@@ -293,10 +293,10 @@
           : doTryCatch
           : tryCatchOne
           : tryCatchList
-          : doTryCatch
-          : tryCatchOne
-          : tryCatchList
           : tryCatch
+          : doWithOneRestart
+          : withOneRestart
+          : withRestarts
           : test_code
           : source_file
           : FUN
@@ -335,10 +335,10 @@
           : doTryCatch
           : tryCatchOne
           : tryCatchList
-          : doTryCatch
-          : tryCatchOne
-          : tryCatchList
           : tryCatch
+          : doWithOneRestart
+          : withOneRestart
+          : withRestarts
           : test_code
           : test_that
           : eval [test-stacks-deep.R#XXX]
@@ -347,10 +347,10 @@
           : doTryCatch
           : tryCatchOne
           : tryCatchList
-          : doTryCatch
-          : tryCatchOne
-          : tryCatchList
           : tryCatch
+          : doWithOneRestart
+          : withOneRestart
+          : withRestarts
           : test_code
           : source_file
           : FUN

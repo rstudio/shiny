@@ -1,17 +1,14 @@
 {
-  "private": true,
-  "homepage": "https://shiny.rstudio.com",
+  "homepage": "https://shiny.posit.co",
   "repository": "github:rstudio/shiny",
-  "name": "@types/rstudio-shiny",
+  "name": "@types/posit-shiny",
   "version": "1.11.1",
   "license": "GPL-3.0-only",
   "main": "",
   "browser": "",
   "types": "srcts/types/extras/globalShiny.d.ts",
   "files": [
-    "DESCRIPTION",
     "LICENSE",
-    "NEWS.md",
     "srcts/types/**/*.d.ts"
   ],
   "engines": {

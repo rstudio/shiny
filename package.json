@@ -1,6 +1,9 @@
 {
   "homepage": "https://shiny.posit.co",
-  "repository": "github:rstudio/shiny",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rstudio/shiny.git"
+  },
   "name": "@types/posit-shiny",
   "version": "1.11.1",
   "license": "GPL-3.0-only",
@@ -26,7 +29,7 @@
   },
   "devDependencies": {
     "@deanc/esbuild-plugin-postcss": "^1.0.2",
-    "@selectize/selectize": "https://github.com/selectize/selectize.js.git#e3f2e0b4aa251375bc21b5fcd8ca7d374a921f08",
+    "@selectize/selectize": "git+https://github.com/selectize/selectize.js.git#e3f2e0b4aa251375bc21b5fcd8ca7d374a921f08",
     "@testing-library/dom": "^7.31.0",
     "@testing-library/jest-dom": "^5.12.0",
     "@testing-library/user-event": "^13.1.9",
@@ -67,7 +70,7 @@
     "ts-node": "^10.9.1",
     "type-coverage": "^2.22.0",
     "typescript": "^4.8.4",
-    "util-inspect": "https://github.com/deecewan/browser-util-inspect#c0b4350df4378ffd743e8c36dd3898ce3992823e"
+    "util-inspect": "git+https://github.com/deecewan/browser-util-inspect.git#c0b4350df4378ffd743e8c36dd3898ce3992823e"
   },
   "scripts": {
     "prepare": "node --eval \"1+1; // help yarn users not install the whole repo; https://github.com/yarnpkg/yarn/issues/2822#issuecomment-847360267\"",

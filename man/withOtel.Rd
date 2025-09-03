@@ -11,10 +11,9 @@ withOtel(expr, ..., bind = "all")
 
 \item{...}{Future parameter expansion.}
 
-\item{bindAll}{If \code{TRUE}, then all reactive objects will be bound to Open Telemetry spans.
-If \code{FALSE}, then only the reactive objects created within the expression
-will be bound to Open Telemetry spans.
-Defaults to \code{TRUE}.}
+\item{bind}{If \code{"all"} (default), then all reactive objects will be bound to Open Telemetry spans.
+If \code{"none"}, then only the reactive objects created within the expression
+will be bound to Open Telemetry spans.}
 }
 \description{
 Set OpenTelemetry options for Shiny reactives

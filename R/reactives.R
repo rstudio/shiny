@@ -627,7 +627,8 @@ reactiveValues <- function(...) {
 
   call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
   if (!is.null(call_srcref)) {
-    .subset2(values, 'impl')$.otelAttrs <- otel_srcref_attributes(call_srcref)
+    impl <- .subset2(values, 'impl')
+    impl$.otelAttrs <- otel_srcref_attributes(call_srcref)
   }
 
   # Use .subset2() instead of [[, to avoid method dispatch

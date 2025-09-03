@@ -71,6 +71,8 @@
   },
   "scripts": {
     "prepare": "node --eval \"1+1; // help yarn users not install the whole repo; https://github.com/yarnpkg/yarn/issues/2822#issuecomment-847360267\"",
+    "prepack": "cp README.md README-orig.md && cp npm-README.md README.md",
+    "postpack": "test -f README-orig.md && cp README-orig.md README.md && rm README-orig.md || true",
     "watch": "yarn run build_shiny --watch",
     "build": "yarn run build_shiny && yarn run bundle_extras && yarn run bundle_external_libs",
     "build_shiny": "yarn run checks && yarn run bundle_shiny",

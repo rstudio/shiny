@@ -53,12 +53,14 @@ Context <- R6Class(
 
       promises::with_promise_domain(reactivePromiseDomain(), {
         withReactiveDomain(.domain, {
-          captureStackTraces({
-            env <- .getReactiveEnvironment()
-            rLog$enter(.reactId, id, .reactType, .domain)
-            on.exit(rLog$exit(.reactId, id, .reactType, .domain), add = TRUE)
-            env$runWith(self, func)
-          })
+          with_reactive_update_ospan_async({
+            captureStackTraces({
+              env <- .getReactiveEnvironment()
+              rLog$enter(.reactId, id, .reactType, .domain)
+              on.exit(rLog$exit(.reactId, id, .reactType, .domain), add = TRUE)
+              env$runWith(self, func)
+            })
+          }, domain = .domain)
         })
       })
     },

@@ -494,8 +494,8 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
   rm(x)
   # Hacky workaround for issue with `%>%` preventing GC:
   # https://github.com/tidyverse/magrittr/issues/229
-  if (exists(".GenericCallEnv") && exists(".", envir = .GenericCallEnv)) {
-    rm(list = ".", envir = .GenericCallEnv)
+  if (exists(".GenericCallEnv") && exists(".", envir = .GenericCallEnv, inherits = FALSE)) {
+    rm(list = ".", envir = .GenericCallEnv, inherits = FALSE)
   }
 
 

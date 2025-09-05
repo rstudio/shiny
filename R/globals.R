@@ -25,3 +25,7 @@ on_load_exprs <- list()
 on_load <- function(expr) {
   on_load_exprs[[length(on_load_exprs) + 1]] <<- substitute(expr)
 }
+
+on_load({
+  IS_SHINY_LOCAL_PKG <- exists(".__DEVTOOLS__")
+})

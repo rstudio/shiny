@@ -70,7 +70,7 @@ getShinyOption <- function(name, default = NULL) {
 #'
 #'   You can customize the file patterns Shiny will monitor by setting the
 #'   shiny.autoreload.pattern option. For example, to monitor only `ui.R`:
-#'   `options(shiny.autoreload.pattern = glob2rx("ui.R"))`. 
+#'   `options(shiny.autoreload.pattern = glob2rx("ui.R"))`.
 #'
 #'   As mentioned above, Shiny no longer polls watched files for changes.
 #'   Instead, using \pkg{watcher}, Shiny is notified of file changes as they
@@ -160,6 +160,18 @@ getShinyOption <- function(name, default = NULL) {
 # '  side devmode features. Currently the primary feature is the client-side
 # '  error console.}
 ### end shiny.client_devmode
+#' \item{shiny.otel.bind (defaults to `"none"`)}{Determines how Shiny will interact with OpenTelemetry.
+#'
+#'   Possible options:
+#'   * `"all"` - Shorthand for recording all supported OpenTelemetry spans and logs.
+#'   * `"none"` - Shorthand for disabling all supported OpenTelemetry spans and logs.
+#'
+#'   This option is useful for debugging and profiling while in production. This
+#'   option will only be useful if the `otelsdk` package is installed.}
+#' \item{shiny.otel.graphlocked (defaults to `FALSE`)}{If `TRUE`, then all reactive expressions and
+#'   observers will be automatically bound to OpenTelemetry spans. This is
+#'   useful for debugging and profiling, but incurs a performance penalty.
+#'   This option should only be used if the `otelsdk` package is installed.}
 #' }
 #'
 #'

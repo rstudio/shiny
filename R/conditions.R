@@ -556,8 +556,9 @@ dropTrivialTestFrames <- function(callnames) {
     "testthat::test_local"
   )
 
-  firstGoodCall <- min(which(!hideable))
-  toRemove <- firstGoodCall - 1L
+  # Remove everything from inception to calling the test
+  # It shouldn't matter how you get there, just that you're finally testing
+  toRemove <- max(which(hideable))
 
   c(
     rep_len(FALSE, toRemove),

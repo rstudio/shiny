@@ -797,8 +797,8 @@ cachedFuncWithFile <- function(dir, file, func, case.sensitive = FALSE) {
   last_autoreload <- 0
 
   function(...) {
-    fname <- if (case.sensitive) { 
-      file.path(dir, file) 
+    fname <- if (case.sensitive) {
+      file.path(dir, file)
     } else {
       file.path.ci(dir, file)
     }

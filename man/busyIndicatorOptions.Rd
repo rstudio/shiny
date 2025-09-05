@@ -83,7 +83,7 @@ instead apply to the entire page, set \code{spinner_selector = 'html'} and
 \code{fade_selector = 'html'}.
 }
 \examples{
-\dontshow{if (rlang::is_interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (rlang::is_interactive()) withAutoprint(\{ # examplesIf}
 
 library(bslib)
 

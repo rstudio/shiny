@@ -46,7 +46,7 @@ session to immediately unblock and carry on with other user interactions.
 }
 
 \examples{
-\dontshow{if (rlang::is_interactive() && rlang::is_installed("mirai")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (rlang::is_interactive() && rlang::is_installed("mirai")) withAutoprint(\{ # examplesIf}
 library(shiny)
 library(bslib)
 library(mirai)

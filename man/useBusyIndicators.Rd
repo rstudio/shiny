@@ -35,7 +35,7 @@ automatically disabled when spinner(s) are active. When both \code{spinners} and
 graying out of recalculating outputs).
 }
 \examples{
-\dontshow{if (rlang::is_interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (rlang::is_interactive()) withAutoprint(\{ # examplesIf}
 
 library(bslib)
 

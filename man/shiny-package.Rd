@@ -38,7 +38,7 @@ Authors:
 
 Other contributors:
 \itemize{
-  \item Posit Software, PBC (03wc8by49) [copyright holder, funder]
+  \item Posit Software, PBC (\href{https://ror.org/03wc8by49}{ROR}) [copyright holder, funder]
   \item  jQuery Foundation (jQuery library and jQuery UI library) [copyright holder]
   \item  jQuery contributors (jQuery library; authors listed in inst/www/shared/jquery-AUTHORS.txt) [contributor, copyright holder]
   \item  jQuery UI contributors (jQuery UI library; authors listed in inst/www/shared/jqueryui/AUTHORS.txt) [contributor, copyright holder]

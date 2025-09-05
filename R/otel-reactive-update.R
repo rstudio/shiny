@@ -86,5 +86,5 @@ with_reactive_update_ospan_async <- function(expr, ..., domain) {
 
   # Given the reactive span is started before and ended when exec count is 0,
   # we only need to wrap the expr in the span context
-  with_ospan_promise_domain(reactive_update_ospan, expr)
+  otel::with_active_span(reactive_update_ospan, {force(expr)})
 }

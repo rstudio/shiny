@@ -8,6 +8,8 @@
 
 * `updateActionButton()`/`updateActionLink()` now correctly renders HTML content passed to the `label` argument. (#4249)
 
+* Fixed an issue where `updateSelectizeInput(options = list(plugins="remove_button"))` could lead to multiple remove buttons. (#4275)
+
 ## Changes
 
 * The return value of `actionButton()`/`actionLink()` changed slightly: `label` and `icon` are wrapped in an additional HTML container element. This allows for: 1. `updateActionButton()`/`updateActionLink()` to distinguish between the `label` and `icon` when making updates and 2. spacing between `label` and `icon` to be more easily customized via CSS. 

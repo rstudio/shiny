@@ -13,9 +13,23 @@ type SelectInputReceiveMessageData = {
   value?: string;
 };
 
-type SelectizeOptions = Selectize.IOptions<string, unknown>;
 type SelectizeInfo = Selectize.IApi<string, unknown> & {
-  settings: SelectizeOptions;
+  settings: Selectize.IOptions<string, unknown>;
+};
+
+type SelectizeOptions = Selectize.IOptions<string, unknown> & {
+  // Provide some stronger typing for the Selectize options
+  labelField: "label";
+  valueField: "value";
+  searchField: ["label"];
+  onItemRemove?: (value: string) => void;
+  onDropdownClose?: () => void;
+};
+
+// Adds a py-shiny specific "option" that makes the
+// input_selectize(remove_button) parameter possible
+type SelectizeShinyOptions = SelectizeOptions & {
+  shinyRemoveButton?: "none" | "true" | "false" | "both";
 };
 
 function getLabelNode(el: SelectHTMLElement): JQuery<HTMLElement> {
@@ -244,13 +258,7 @@ class SelectInputBinding extends InputBinding {
 
     if (config.length === 0) return undefined;
 
-    let options: SelectizeOptions & {
-      labelField: "label";
-      valueField: "value";
-      searchField: ["label"];
-      onItemRemove?: (value: string) => void;
-      onDropdownClose?: () => void;
-    } = $.extend(
+    let options: SelectizeShinyOptions = $.extend(
       {
         labelField: "label",
         valueField: "value",
@@ -258,6 +266,8 @@ class SelectInputBinding extends InputBinding {
       },
       JSON.parse(config.html()),
     );
+
+    options = this._addShinyRemoveButton(options, el.hasAttribute("multiple"));
 
     // selectize created from selectInput()
     if (typeof config.data("nonempty") !== "undefined") {
@@ -304,6 +314,44 @@ class SelectInputBinding extends InputBinding {
     }
 
     return control;
+  }
+
+  // Translate shinyRemoveButton option into selectize plugins
+  private _addShinyRemoveButton(
+    options: SelectizeShinyOptions,
+    multiple: boolean,
+  ): SelectizeOptions {
+    let removeButton = options.shinyRemoveButton;
+    if (removeButton === undefined) {
+      return options;
+    }
+
+    // None really means 'smart default'
+    if (removeButton === "none") {
+      removeButton = multiple ? "true" : "false";
+    }
+
+    if (removeButton === "false") {
+      return options;
+    }
+
+    const plugins = [];
+    if (removeButton === "both") {
+      plugins.push("remove_button", "clear_button");
+    } else if (removeButton === "true") {
+      plugins.push(multiple ? "remove_button" : "clear_button");
+    }
+
+    // Add plugins to existing plugins if not already present
+    return {
+      ...options,
+      plugins: Array.from(
+        new Set([
+          ...(Array.isArray(options.plugins) ? options.plugins : []),
+          ...plugins,
+        ]),
+      ),
+    };
   }
 }
 

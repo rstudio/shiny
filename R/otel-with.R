@@ -5,7 +5,7 @@ has_otel_bind <- function(bind) {
     stopifnot(length(bind) == 1, any(bind == otel_bind_choices))
   }
 
-  is_otel_tracing() &&
+  otel::is_tracing_enabled() &&
     any(bind %in% as_otel_bind(getOption("shiny.otel.bind", "none")))
 }
 

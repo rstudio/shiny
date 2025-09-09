@@ -9,6 +9,7 @@ has_otel_bind <- function(bind) {
     any(bind %in% as_otel_bind(getOption("shiny.otel.bind", "none")))
 }
 
+
 #' Set OpenTelemetry options for Shiny reactives
 #'
 #' @param expr The expression to run with OpenTelemetry spans enabled.
@@ -16,7 +17,7 @@ has_otel_bind <- function(bind) {
 #' @param bind If `"all"` (default), then all reactive objects will be bound to Open Telemetry spans.
 #'   If `"none"`, then only the reactive objects created within the expression
 #'   will be bound to Open Telemetry spans.
-#' @export
+#' @noRd
 #' @examples
 #' # TODO: Make examples!!
 withOtel <- function(expr, ..., bind = "all") {

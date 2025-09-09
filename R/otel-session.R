@@ -54,19 +54,6 @@ with_session_stop_ospan_async <- function(expr, ..., domain) {
 
 # -- Helpers -------------------------------
 
-# otel_session_tracer <- function(domain) {
-#   if (is.null(domain$userData[["_otel_tracer"]])) {
-
-#     domain$userData[["_otel_tracer"]] <-
-#       getOption(
-#         "shiny.otel.tracer",
-#         # TODO: Maybe the name is the folder name, similar to shinyapps.io naming
-#         # Maybe set from a function call somewhere?
-#         otel::get_tracer("Shiny app")
-#       )
-#   }
-#   domain$userData[["_otel_tracer"]]
-# }
 
 otel_session_attrs <- function(domain) {
   attrs <- list(

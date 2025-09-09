@@ -17,7 +17,7 @@ set_reactive_ospan_cleanup <- function(domain) {
 #' @param ... Ignored
 #' @param domain The reactive domain to associate with the span
 #' @return Invisibly returns.
-#' @seealso [`end_reactive_update_ospan()`]
+#' @seealso `end_reactive_update_ospan()`
 #' @noRd
 create_reactive_update_ospan <- function(..., domain) {
   if (!has_otel_bind("reactive_update")) return()
@@ -57,7 +57,7 @@ create_reactive_update_ospan <- function(..., domain) {
 #' @param ... Ignored
 #' @param domain The reactive domain to associate with the span
 #' @return Invisibly returns.
-#' @seealso [`create_reactive_update_ospan()`]
+#' @seealso `create_reactive_update_ospan()`
 #' @noRd
 end_reactive_update_ospan <- function(..., domain) {
 

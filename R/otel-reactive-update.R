@@ -40,6 +40,9 @@ create_reactive_update_ospan <- function(..., domain) {
   reactive_update_ospan <- create_shiny_ospan(
     OSPAN_REACTIVE_UPDATE_NAME,
     ...,
+    # options = list(
+    #   parent = NA # Always start a new root span
+    # ),
     attributes = list(
       # Pairs with session.start and session.end events
       # https://opentelemetry.io/docs/specs/semconv/general/session/

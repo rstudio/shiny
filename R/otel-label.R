@@ -94,8 +94,8 @@ otel_label_upgrade <- function(label, ..., replace_default_with_anonymous = TRUE
   # Replace it with `<anonymous>`
   if (replace_default_with_anonymous && is_default_label(label)) {
     # message("-- replacing label: ", label)
-    # label <- "<anonymous>"
-    label <- sprintf("<anonymous> - %s", label)
+    label <- "<anonymous>"
+    # label <- sprintf("<anonymous> - %s", label)
   }
 
 

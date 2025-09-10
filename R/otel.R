@@ -3,6 +3,7 @@
 #'   end_ospan
 #'   with_ospan_async
 #'   with_ospan_promise_domain
+#'   local_ospan_promise_domain
 NULL
 
 otel_tracer_name <- "co.posit.r-package.shiny"

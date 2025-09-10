@@ -95,7 +95,7 @@ Imports:
     lifecycle (>= 0.2.0),
     mime (>= 0.3),
     otel,
-    promises (>= 1.3.3.9001),
+    promises (>= 1.3.3.9004),
     R6 (>= 2.0),
     rlang (>= 0.4.10),
     sourcetools,

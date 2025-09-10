@@ -98,30 +98,7 @@ runApp <- function(
   # * While this could be done at a lower level, it allows for _anything_ within
   #   shiny's control to allow for the opportunity to have otel active spans be
   #   reactivated upon promise domain restoration
-  print(otel::is_tracing_enabled())
-  with_ospan_promise_domain(
-    runAppImpl(
-      appDir = appDir,
-      port = port,
-      launch.browser = launch.browser,
-      host = host,
-      workerId = workerId,
-      quiet = quiet,
-      display.mode = display.mode,
-      test.mode = test.mode
-    )
-  )
-}
-
-runAppImpl <- function(
-  appDir=getwd(),
-  port=getOption('shiny.port'),
-  launch.browser = getOption('shiny.launch.browser', interactive()),
-  host=getOption('shiny.host', '127.0.0.1'),
-  workerId="", quiet=FALSE,
-  display.mode=c("auto", "normal", "showcase"),
-  test.mode=getOption('shiny.testmode', FALSE)
-) {
+  local_ospan_promise_domain()
 
   on.exit({
     handlerManager$clear()

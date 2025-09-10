@@ -130,16 +130,21 @@ ragg package. See \code{\link[=plotPNG]{plotPNG()}} for more information.}
 Cairo package. See \code{\link[=plotPNG]{plotPNG()}} for more information.}
 \item{shiny.devmode (defaults to \code{NULL})}{Option to enable Shiny Developer Mode. When set,
 different default \code{getOption(key)} values will be returned. See \code{\link[=devmode]{devmode()}} for more details.}
-\item{shiny.otel.bind (defaults to \code{"none"})}{Determines how Shiny will interact with OpenTelemetry.
+\item{shiny.otel.bind (defaults to \code{"all"})}{Determines how Shiny will
+interact with OpenTelemetry.
 
 Possible options:
 \itemize{
-\item \code{"all"} - Shorthand for recording all supported OpenTelemetry spans and logs.
-\item \code{"none"} - Shorthand for disabling all supported OpenTelemetry spans and logs.
+\item \code{"none"} - Shorthand for disabling all supported OpenTelemetry spans and
+logs.
+\item \code{"all"} - Shorthand for recording all supported OpenTelemetry spans and
+logs.
 }
 
 This option is useful for debugging and profiling while in production. This
-option will only be useful if the \code{otelsdk} package is installed.}
+option will only be useful if the \code{otelsdk} package is installed. Please
+have any OpenTelemetry environment variables set before starting your Shiny
+app.}
 \item{shiny.otel.graphlocked (defaults to \code{FALSE})}{If \code{TRUE}, then all reactive expressions and
 observers will be automatically bound to OpenTelemetry spans. This is
 useful for debugging and profiling, but incurs a performance penalty.

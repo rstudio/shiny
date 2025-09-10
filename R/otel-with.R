@@ -1,3 +1,25 @@
+otel_bind_choices <- c(
+  "none",
+  "session",
+  "reactive_update",
+  "reactivity",
+  "all"
+)
+
+otel_bind_is_enabled <- function(impl_level, opt_bind_level = getOption("shiny.otel.bind", "all")) {
+  opt_bind_level <- as_otel_bind(opt_bind_level)
+
+  # if (opt_bind_level == "all") {
+  #   return(TRUE)
+  # }
+  # if (opt_bind_level == "none") {
+  #   return(FALSE)
+  # }
+
+  which(opt_bind_level == otel_bind_choices) >=
+    which(impl_level == otel_bind_choices)
+}
+
 
 has_otel_bind <- function(bind) {
   # Only check pkg author input iff loaded with pkgload
@@ -5,8 +27,7 @@ has_otel_bind <- function(bind) {
     stopifnot(length(bind) == 1, any(bind == otel_bind_choices))
   }
 
-  otel::is_tracing_enabled() &&
-    any(bind %in% as_otel_bind(getOption("shiny.otel.bind", "none")))
+  otel::is_tracing_enabled() && otel_bind_is_enabled(bind)
 }
 
 
@@ -35,38 +56,50 @@ withOtel <- function(expr, ..., bind = "all") {
 
 ## -- Helpers -----------------------------------------------------
 
-otel_bind_choices <-
-  c(
-    "reactiveVal",
-    "reactiveValues",
-    "reactiveExpr",
-    "observe",
-    "output",
-    "reactive_update",
-    "session"
-  )
+# shiny.otel.bind can be:
+# "none"; To do nothing / fully opt-out
+# "session" for session/start events
+# "reactive_update" (includes "session" features) and reactive_update spans
+# "reactivity" (includes "reactive_update" features) and spans for all reactive things
+# "all" - Anything that Shiny can do. (Currently equivalent to the "reactivity" level)
+
+
+# otel_bind_choices <-
+#   c(
+#     "reactiveVal",
+#     "reactiveValues",
+#     "reactiveExpr",
+#     "observe",
+#     "output",
+#     "reactive_update",
+#     "session"
+#   )
 
 as_otel_bind <- function(bind = "all") {
   if (!is.character(bind)) {
     stop("`bind` must be a character vector.")
   }
 
-  # As we get more supported options, we can add more choices
-  # Must update docs in `shiny-options.R` for `shiny.otel.bind`
-  # '   * `"reactiveVal"`, `"reactiveValues"`, `"reactiveExpr"`, `"observe"`, `"output"` - corresponding reactive objects
-  # '   * `"reactive_update"` - Creates an OpenTelemetry span for a reactive
-  # '     update. This corresponds to when Shiny knows of work to be completed (but
-  # '     not necessarily blocking).
-  # '   * `"session"` - Creates an OpenTelemetry span for each of the app's
-  # '     sessions. It is activated for each call to the app's `server()` function.
-  # '     The span is closed when the session is closed.
-  # '
-  # '   Any combination of these values can be provided to automatically track
-  # '   activity within Shiny. If both `"all"` and `"none"` are provided, an error
-  # '   will be thrown. For simpler use cases, `options(shiny.otel.bind =
-  # '   c("session", "reactive_update"))` will suffice as it will create
-  # '   OpenTelemetry spans for each session and their reactive update duration.
-  # '
+  # Only allow for `"all"` or `"none"` for now
+  if (!identical(bind, "all") && !identical(bind, "none")) {
+    stop(
+      "`bind=` must be `\"all\"` or `\"none\"`."
+    )
+  }
+
+  ## When the check above is removed, add docs for shiny.otel.bind in shiny-options.R
+  # '   Possible options:
+  # '   * `"none"` - Shorthand for disabling all supported OpenTelemetry spans and logs.
+  # '   * `"session"` - Adds support for tracing user sessions.
+  # '   * `"reactive_update"` - Includes `"session"`, and adds support for tracing reactive updates.
+  # '   * `"reactivity"` - Includes `"reactive_update"`, and adds support for tracing every reactive operation.
+  # '   * `"all"` - Shorthand for recording all supported OpenTelemetry spans and logs. Currently equivalent to `"reactivity"`.
+
+  # Match to bind enum
+  bind <- match.arg(bind, otel_bind_choices, several.ok = FALSE)
+
+  return(bind)
+
   if (!identical(bind, "all") && !identical(bind, "none")) {
     stop(
       "`bind=` must be `\"all\"` or `\"none\"`."

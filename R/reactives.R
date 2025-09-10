@@ -89,7 +89,7 @@ ReactiveVal <- R6Class(
       private$dependents <- Dependents$new(reactId = private$reactId)
       rLog$define(private$reactId, value, private$label, type = "reactiveVal", getDefaultReactiveDomain())
 
-      .isLoggingOtel <<- has_otel_bind("reactiveVal")
+      .isLoggingOtel <<- has_otel_bind("reactivity")
     },
     get = function() {
       private$dependents$register()
@@ -243,7 +243,7 @@ reactiveVal <- function(value = NULL, label = NULL) {
     .impl = rv
   )
 
-  if (has_otel_bind("reactiveVal")) {
+  if (has_otel_bind("reactivity")) {
     ret <- bindOtel(ret)
   }
 
@@ -372,7 +372,7 @@ ReactiveValues <- R6Class(
       .valuesDeps <<- Dependents$new(reactId = rLog$asListIdStr(.reactId))
       .dedupe <<- dedupe
 
-      .isLoggingOtel <<- has_otel_bind("reactiveValues")
+      .isLoggingOtel <<- has_otel_bind("reactivity")
     },
 
     get = function(key) {
@@ -630,7 +630,7 @@ reactiveValues <- function(...) {
   # Use .subset2() instead of [[, to avoid method dispatch
   .subset2(values, 'impl')$mset(args)
 
-  if (has_otel_bind("reactiveValues")) {
+  if (has_otel_bind("reactivity")) {
     values <- bindOtel(values)
   }
 
@@ -1075,7 +1075,7 @@ reactive <- function(
     class = c("reactiveExpr", "reactive", "function")
   )
 
-  if (has_otel_bind("reactiveExpr")) {
+  if (has_otel_bind("reactivity")) {
     ret <- bindOtel(ret)
   }
 
@@ -1504,7 +1504,7 @@ observe <- function(
     o$.otelAttrs <- otel_srcref_attributes(call_srcref)
   }
 
-  if (has_otel_bind("observe")) {
+  if (has_otel_bind("reactivity")) {
     o <- bindOtel(o)
   }
 

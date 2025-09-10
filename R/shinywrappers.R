@@ -151,7 +151,7 @@ markRenderFunction <- function(
     otelAttrs      = otelAttrs
   )
 
-  if (has_otel_bind("output")) {
+  if (has_otel_bind("reactivity")) {
     ret <- bindOtel(ret)
   }
 

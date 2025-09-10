@@ -228,7 +228,7 @@ bindEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE
 
   class(res) <- c("reactive.event", x_classes)
 
-  if (has_otel_bind("reactiveExpr")) {
+  if (has_otel_bind("reactivity")) {
     res <- bindOtel(res)
   }
 
@@ -313,7 +313,7 @@ bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
   )
 
   class(x) <- c("Observer.event", class(x))
-  if (has_otel_bind("observe")) {
+  if (has_otel_bind("reactivity")) {
     x <- bindOtel(x)
   }
   invisible(x)

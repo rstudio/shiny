@@ -160,14 +160,19 @@ getShinyOption <- function(name, default = NULL) {
 # '  side devmode features. Currently the primary feature is the client-side
 # '  error console.}
 ### end shiny.client_devmode
-#' \item{shiny.otel.bind (defaults to `"none"`)}{Determines how Shiny will interact with OpenTelemetry.
+#' \item{shiny.otel.bind (defaults to `"all"`)}{Determines how Shiny will
+#'   interact with OpenTelemetry.
 #'
 #'   Possible options:
-#'   * `"all"` - Shorthand for recording all supported OpenTelemetry spans and logs.
-#'   * `"none"` - Shorthand for disabling all supported OpenTelemetry spans and logs.
+#'   * `"none"` - Shorthand for disabling all supported OpenTelemetry spans and
+#'     logs.
+#'   * `"all"` - Shorthand for recording all supported OpenTelemetry spans and
+#'     logs.
 #'
 #'   This option is useful for debugging and profiling while in production. This
-#'   option will only be useful if the `otelsdk` package is installed.}
+#'   option will only be useful if the `otelsdk` package is installed. Please
+#'   have any OpenTelemetry environment variables set before starting your Shiny
+#'   app.}
 #' \item{shiny.otel.graphlocked (defaults to `FALSE`)}{If `TRUE`, then all reactive expressions and
 #'   observers will be automatically bound to OpenTelemetry spans. This is
 #'   useful for debugging and profiling, but incurs a performance penalty.

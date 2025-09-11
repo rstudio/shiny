@@ -1057,9 +1057,9 @@ ShinySession <- R6Class(
       }
 
       otel_log_safe(
-        "Fatal error",
+        if (close) "Fatal error" else "Unhandled error",
         severity = if (close) "fatal" else "error",
-        attributes = list(error = e, session.id = self$token)
+        attributes = otel::as_attributes(list(error = e, session.id = self$token))
       )
 
       private$unhandledErrorCallbacks$invoke(e, onError = printError)

@@ -1,5 +1,6 @@
 # Personal debugging function -------------------------------
-# system("air format ./R/bind-otel.R"); devtools::load_all(); barret() |> runApp(port = 8080)
+# system("air format ./R/bind-otel.R")
+# Rscript -e "devtools::load_all(); devtools::load_all(\"~/rstudio/ellmer/ellmer.nosync\"); dev_barret()"
 
 # TODO: Remove this function when done debugging
 dev_barret <- function() {
@@ -72,7 +73,7 @@ dev_barret <- function() {
         )
       )
 
-      client <- ellmer::chat_anthropic()
+      client <- ellmer::chat_anthropic("Be terse.")
       client$register_tool(get_weather_forecast)
 
       ui <- bslib::page_fillable(
@@ -94,6 +95,12 @@ dev_barret <- function() {
           })
         })
 
+        # withOtel(bind = bind_val, {
+        #   output$boom <- renderUI({
+        #     stop("Boom!")
+        #   })
+        # })
+
         withOtel(bind = bind_val, {
           counter <- reactiveVal(1)
           observeEvent(chat_server$last_turn(), {
@@ -110,20 +117,9 @@ dev_barret <- function() {
                 },
                 delay = 1
               )
-              # } else if (counter() == 2) {
-              #   later::later(
-              #     function() {
-              #       chat_server$update_user_input(
-              #         value = "What is the weather in New York, NY?",
-              #         submit = TRUE
-              #       )
-              #     },
-              #     delay = 1
-              #   )
             } else {
               later::later(
                 function() {
-                  message("Stopping session")
                   later::later(
                     function() {
                       message("Stopping app")
@@ -131,6 +127,7 @@ dev_barret <- function() {
                     },
                     delay = 0.5
                   )
+                  message("Stopping session")
                   session$close()
                 },
                 delay = 3

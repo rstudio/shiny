@@ -10,5 +10,5 @@ declare function processHtml(val: string): {
     head: string;
     singletons: typeof knownSingletons;
 };
-export { renderHtml, registerNames };
+export { registerNames, renderHtml };
 export type { WherePosition };

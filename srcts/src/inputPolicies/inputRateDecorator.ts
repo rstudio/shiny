@@ -1,7 +1,7 @@
-import type { InputPolicy, InputPolicyOpts } from "./inputPolicy";
 import { Debouncer, Invoker, Throttler } from "../time";
-import { splitInputNameType } from "./splitInputNameType";
+import type { InputPolicy, InputPolicyOpts } from "./inputPolicy";
 import type { InputRatePolicy } from "./inputRatePolicy";
+import { splitInputNameType } from "./splitInputNameType";
 
 type RatePolicyModes = "debounce" | "direct" | "throttle";
 
@@ -33,7 +33,7 @@ class InputRateDecorator implements InputPolicy {
   setRatePolicy(
     nameType: string,
     mode: RatePolicyModes,
-    millis?: number
+    millis?: number,
   ): void {
     const { name: inputName } = splitInputNameType(nameType);
 
@@ -43,13 +43,13 @@ class InputRateDecorator implements InputPolicy {
       this.inputRatePolicies[inputName] = new Debouncer(
         this,
         this._doSetInput,
-        millis
+        millis,
       );
     } else if (mode === "throttle") {
       this.inputRatePolicies[inputName] = new Throttler(
         this,
         this._doSetInput,
-        millis
+        millis,
       );
     }
   }
@@ -59,12 +59,11 @@ class InputRateDecorator implements InputPolicy {
   private _doSetInput(
     nameType: string,
     value: unknown,
-    opts: InputPolicyOpts
+    opts: InputPolicyOpts,
   ): void {
     this.target.setInput(nameType, value, opts);
   }
 }
 
 export { InputRateDecorator };
-
 export type { RatePolicyModes };

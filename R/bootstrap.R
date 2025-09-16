@@ -172,9 +172,10 @@ setCurrentTheme <- function(theme) {
 
 #' Register a theme dependency
 #'
-#' This function registers a function that returns an [htmlDependency()] or list
-#' of such objects. If `session$setCurrentTheme()` is called, the function will
-#' be re-executed, and the resulting html dependency will be sent to the client.
+#' This function registers a function that returns an
+#' [htmltools::htmlDependency()] or list of such objects. If
+#' `session$setCurrentTheme()` is called, the function will be re-executed, and
+#' the resulting html dependency will be sent to the client.
 #'
 #' Note that `func` should **not** be an anonymous function, or a function which
 #' is defined within the calling function. This is so that,
@@ -532,7 +533,12 @@ wellPanel <- function(...) {
 #' }
 #' @export
 conditionalPanel <- function(condition, ..., ns = NS(NULL)) {
-  div(`data-display-if`=condition, `data-ns-prefix`=ns(""), ...)
+  div(
+    class = "shiny-panel-conditional",
+    `data-display-if` = condition,
+    `data-ns-prefix` = ns(""),
+    ...
+  )
 }
 
 #' Create a help text element
@@ -1107,23 +1113,23 @@ plotOutput <- function(outputId, width = "100%", height="400px",
 #' @rdname renderTable
 #' @export
 tableOutput <- function(outputId) {
-  div(id = outputId, class="shiny-html-output")
+  div(id = outputId, class="shiny-html-output shiny-table-output")
 }
 
 dataTableDependency <- list(
   htmlDependency(
     "datatables",
-    "1.10.5",
+    "1.10.22",
     src = "www/shared/datatables",
     package = "shiny",
     script = "js/jquery.dataTables.min.js"
   ),
   htmlDependency(
     "datatables-bootstrap",
-    "1.10.5",
+    "1.10.22",
     src = "www/shared/datatables",
     package = "shiny",
-    stylesheet = c("css/dataTables.bootstrap.css", "css/dataTables.extra.css"),
+    stylesheet = "css/dataTables.bootstrap.css",
     script = "js/dataTables.bootstrap.js"
   )
 )
@@ -1131,11 +1137,48 @@ dataTableDependency <- list(
 #' @rdname renderDataTable
 #' @export
 dataTableOutput <- function(outputId) {
-  attachDependencies(
-    div(id = outputId, class="shiny-datatable-output"),
-    dataTableDependency
-  )
+  legacy <- useLegacyDataTable(from = "shiny::dataTableOutput()", to = "DT::DTOutput()")
+
+  if (legacy) {
+    attachDependencies(
+      div(id = outputId, class = "shiny-datatable-output"),
+      dataTableDependency
+    )
+  } else {
+    DT::DTOutput(outputId)
+  }
 }
+
+useLegacyDataTable <- function(from, to) {
+  legacy <- getOption("shiny.legacy.datatable")
+
+  # If option has been set, user knows what they're doing
+  if (!is.null(legacy)) {
+    return(legacy)
+  }
+
+  # If not set, use DT if a suitable version is available (and inform either way)
+  hasDT <- is_installed("DT", "0.32.1")
+  details <- NULL
+  if (hasDT) {
+    details <- paste0(c(
+      "Since you have a suitable version of DT (>= v0.32.1), ",
+      from,
+      " will automatically use ",
+      to,
+      " under-the-hood.\n",
+      "If this happens to break your app, set `options(shiny.legacy.datatable = TRUE)` ",
+      "to get the legacy datatable implementation (or `FALSE` to squelch this message).\n"
+    ), collapse = "")
+  }
+
+  details <- paste0(details, "See <https://rstudio.github.io/DT/shiny.html> for more information.")
+
+  shinyDeprecated("1.8.1", from, to, details)
+
+  !hasDT
+}
+
 
 #' Create an HTML output element
 #'
@@ -1233,23 +1276,29 @@ downloadButton <- function(outputId,
                            class=NULL,
                            ...,
                            icon = shiny::icon("download")) {
-  aTag <- tags$a(id=outputId,
-                 class=paste('btn btn-default shiny-download-link', class),
-                 href='',
-                 target='_blank',
-                 download=NA,
-                 validateIcon(icon),
-                 label, ...)
+  tags$a(id=outputId,
+         class='btn btn-default shiny-download-link disabled',
+         class=class,
+         href='',
+         target='_blank',
+         download=NA,
+         "aria-disabled"="true",
+         tabindex="-1",
+         validateIcon(icon),
+         label, ...)
 }
 
 #' @rdname downloadButton
 #' @export
 downloadLink <- function(outputId, label="Download", class=NULL, ...) {
   tags$a(id=outputId,
-         class=paste(c('shiny-download-link', class), collapse=" "),
+         class='shiny-download-link disabled',
+         class=class,
          href='',
          target='_blank',
          download=NA,
+         "aria-disabled"="true",
+         tabindex="-1",
          label, ...)
 }
 

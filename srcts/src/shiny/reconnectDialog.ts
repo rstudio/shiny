@@ -1,6 +1,6 @@
 import $ from "jquery";
 
-import { showNotification, removeNotification } from "./notifications";
+import { removeNotification, showNotification } from "./notifications";
 
 function updateTime(reconnectTime: number): void {
   const $time = $("#shiny-reconnect-time");
@@ -22,7 +22,7 @@ function updateTime(reconnectTime: number): void {
   }, 1000);
 }
 
-function showReconnectDialog(delay: number): void {
+async function showReconnectDialog(delay: number): Promise<void> {
   const reconnectTime = new Date().getTime() + delay;
 
   // If there's already a reconnect dialog, don't add another
@@ -34,7 +34,7 @@ function showReconnectDialog(delay: number): void {
   const action =
     '<a id="shiny-reconnect-now" href="#" onclick="Shiny.shinyapp.reconnect();">Try now</a>';
 
-  showNotification({
+  await showNotification({
     id: "reconnect",
     html: html,
     action: action,
@@ -50,4 +50,4 @@ function hideReconnectDialog(): void {
   removeNotification("reconnect");
 }
 
-export { showReconnectDialog, hideReconnectDialog };
+export { hideReconnectDialog, showReconnectDialog };

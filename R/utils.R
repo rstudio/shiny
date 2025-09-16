@@ -493,7 +493,6 @@ shinyCallingHandlers <- function(expr) {
   )
 }
 
-
 #' Register a function with the debugger (if one is active).
 #'
 #' Call this function after exprToFunction to give any active debugger a hook
@@ -771,22 +770,45 @@ formatNoSci <- function(x) {
   format(x, scientific = FALSE, digits = 15)
 }
 
+# A simple getter/setting to track the last time the auto-reload process
+# updated. This value is used by `cachedFuncWithFile()` when auto-reload is
+# enabled to reload app/ui/server files when watched supporting files change.
+cachedAutoReloadLastChanged <- local({
+  last_update <- 0
+
+  list(
+    set = function() {
+      last_update <<- as.integer(Sys.time())
+      invisible(last_update)
+    },
+    get = function() {
+      last_update
+    }
+  )
+})
+
 # Returns a function that calls the given func and caches the result for
 # subsequent calls, unless the given file's mtime changes.
 cachedFuncWithFile <- function(dir, file, func, case.sensitive = FALSE) {
-  dir <- normalizePath(dir, mustWork=TRUE)
-  mtime <- NA
+  dir <- normalizePath(dir, mustWork = TRUE)
+
   value <- NULL
+  last_mtime_file <- NA
+  last_autoreload <- 0
+
   function(...) {
-    fname <- if (case.sensitive)
-      file.path(dir, file)
-    else
+    fname <- if (case.sensitive) { 
+      file.path(dir, file) 
+    } else {
       file.path.ci(dir, file)
+    }
 
     now <- file.info(fname)$mtime
-    if (!identical(mtime, now)) {
+    autoreload <- last_autoreload < cachedAutoReloadLastChanged$get()
+    if (autoreload || !identical(last_mtime_file, now)) {
       value <<- func(fname, ...)
-      mtime <<- now
+      last_mtime_file <<- now
+      last_autoreload <<- cachedAutoReloadLastChanged$get()
     }
     value
   }
@@ -1093,7 +1115,7 @@ need <- function(expr, message = paste(label, "must be provided"), label) {
 #'
 #' You can use `req(FALSE)` (i.e. no condition) if you've already performed
 #' all the checks you needed to by that point and just want to stop the reactive
-#' chain now. There is no advantange to this, except perhaps ease of readibility
+#' chain now. There is no advantage to this, except perhaps ease of readability
 #' if you have a complicated condition to check for (or perhaps if you'd like to
 #' divide your condition into nested `if` statements).
 #'
@@ -1115,7 +1137,10 @@ need <- function(expr, message = paste(label, "must be provided"), label) {
 #' @param ... Values to check for truthiness.
 #' @param cancelOutput If `TRUE` and an output is being evaluated, stop
 #'   processing as usual but instead of clearing the output, leave it in
-#'   whatever state it happens to be in.
+#'   whatever state it happens to be in. If `"progress"`, do the same as `TRUE`,
+#'   but also keep the output in recalculating state; this is intended for cases
+#'   when an in-progress calculation will not be completed in this reactive
+#'   flush cycle, but is still expected to provide a result in the future.
 #' @return The first value that was passed in.
 #' @export
 #' @examples
@@ -1147,6 +1172,8 @@ req <- function(..., cancelOutput = FALSE) {
     if (!isTruthy(item)) {
       if (isTRUE(cancelOutput)) {
         cancelOutput()
+      } else if (identical(cancelOutput, "progress")) {
+        reactiveStop(class = "shiny.output.progress")
       } else {
         reactiveStop(class = "validation")
       }

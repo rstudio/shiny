@@ -1,6 +1,6 @@
 function disableDrag(
   $el: JQuery<HTMLElement>,
-  $img: JQuery<HTMLElement>
+  $img: JQuery<HTMLElement>,
 ): void {
   // Make image non-draggable (Chrome, Safari)
   $img.css("-webkit-user-drag", "none");

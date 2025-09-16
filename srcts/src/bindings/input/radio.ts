@@ -1,6 +1,6 @@
 import $ from "jquery";
-import { InputBinding } from "./inputBinding";
 import { $escape, hasDefinedProperty, updateLabel } from "../../utils";
+import { InputBinding } from "./inputBinding";
 
 type RadioHTMLElement = HTMLInputElement;
 
@@ -52,11 +52,11 @@ class RadioInputBinding extends InputBinding {
     return $(scope).find(".shiny-input-radiogroup");
   }
   getValue(
-    el: RadioHTMLElement
+    el: RadioHTMLElement,
   ): string[] | number | string | null | undefined {
     // Select the radio objects that have name equal to the grouping div's id
     const checkedItems = $(
-      'input:radio[name="' + $escape(el.id) + '"]:checked'
+      'input:radio[name="' + $escape(el.id) + '"]:checked',
     );
 
     if (checkedItems.length === 0) {
@@ -77,7 +77,7 @@ class RadioInputBinding extends InputBinding {
           $escape(el.id) +
           '"][value="' +
           $escape(value) +
-          '"]'
+          '"]',
       ).prop("checked", true);
     }
   }
@@ -87,7 +87,7 @@ class RadioInputBinding extends InputBinding {
     options: ValueLabelObject[];
   } {
     const $objs = $(
-      'input:radio[name="' + $escape(el.id) + '"]'
+      'input:radio[name="' + $escape(el.id) + '"]',
     ) as JQuery<RadioHTMLElement>;
 
     // Store options in an array of objects, each with with value and label
@@ -103,7 +103,10 @@ class RadioInputBinding extends InputBinding {
       options: options,
     };
   }
-  receiveMessage(el: RadioHTMLElement, data: RadioReceiveMessageData): void {
+  async receiveMessage(
+    el: RadioHTMLElement,
+    data: RadioReceiveMessageData,
+  ): Promise<void> {
     const $el = $(el);
     // This will replace all the options
 
@@ -119,10 +122,10 @@ class RadioInputBinding extends InputBinding {
     }
 
     if (hasDefinedProperty(data, "value")) {
-      this.setValue(el, data.value);
+      this.setValue(el, data.value!);
     }
 
-    updateLabel(data.label, getLabelNode(el));
+    await updateLabel(data.label, getLabelNode(el));
 
     $(el).trigger("change");
   }

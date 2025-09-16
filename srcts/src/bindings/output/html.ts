@@ -1,9 +1,9 @@
 import $ from "jquery";
 
-import { OutputBinding } from "./outputBinding";
 import { shinyUnbindAll } from "../../shiny/initedMethods";
 import { renderContentAsync } from "../../shiny/render";
 import type { ErrorsMessageValue } from "../../shiny/shinyapp";
+import { OutputBinding } from "./outputBinding";
 
 class HtmlOutputBinding extends OutputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
@@ -15,7 +15,7 @@ class HtmlOutputBinding extends OutputBinding {
   }
   override async renderValue(
     el: HTMLElement,
-    data: Parameters<typeof renderContentAsync>[1]
+    data: Parameters<typeof renderContentAsync>[1],
   ): Promise<void> {
     await renderContentAsync(el, data);
   }

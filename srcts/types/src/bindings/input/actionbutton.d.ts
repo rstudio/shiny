@@ -1,10 +1,18 @@
+import type { HtmlDep } from "../../shiny/render";
 import { InputBinding } from "./inputBinding";
 type ActionButtonReceiveMessageData = {
-    label?: string;
-    icon?: string | [];
+    label?: {
+        html: string;
+        deps: HtmlDep[];
+    };
+    icon?: {
+        html: string;
+        deps: HtmlDep[];
+    };
+    disabled?: boolean;
 };
 declare class ActionButtonInputBinding extends InputBinding {
-    find(scope: HTMLElement): JQuery<HTMLElement>;
+    find(scope: HTMLElement): JQuery;
     getValue(el: HTMLElement): number;
     setValue(el: HTMLElement, value: number): void;
     getType(el: HTMLElement): string;
@@ -12,7 +20,7 @@ declare class ActionButtonInputBinding extends InputBinding {
     getState(el: HTMLElement): {
         value: number;
     };
-    receiveMessage(el: HTMLElement, data: ActionButtonReceiveMessageData): void;
+    receiveMessage(el: HTMLElement, data: ActionButtonReceiveMessageData): Promise<void>;
     unsubscribe(el: HTMLElement): void;
 }
 export { ActionButtonInputBinding };

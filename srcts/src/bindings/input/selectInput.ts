@@ -1,9 +1,7 @@
 import $ from "jquery";
-import { InputBinding } from "./inputBinding";
 import { $escape, hasDefinedProperty, updateLabel } from "../../utils";
 import { indirectEval } from "../../utils/eval";
-import { shinyBindAll, shinyUnbindAll } from "../../shiny/initedMethods";
-import type { NotUndefined } from "../../utils/extraTypes";
+import { InputBinding } from "./inputBinding";
 
 type SelectHTMLElement = HTMLSelectElement & { nonempty: boolean };
 
@@ -15,9 +13,23 @@ type SelectInputReceiveMessageData = {
   value?: string;
 };
 
-type SelectizeOptions = Selectize.IOptions<string, unknown>;
 type SelectizeInfo = Selectize.IApi<string, unknown> & {
-  settings: SelectizeOptions;
+  settings: Selectize.IOptions<string, unknown>;
+};
+
+type SelectizeOptions = Selectize.IOptions<string, unknown> & {
+  // Provide some stronger typing for the Selectize options
+  labelField: "label";
+  valueField: "value";
+  searchField: ["label"];
+  onItemRemove?: (value: string) => void;
+  onDropdownClose?: () => void;
+};
+
+// Adds a py-shiny specific "option" that makes the
+// input_selectize(remove_button) parameter possible
+type SelectizeShinyOptions = SelectizeOptions & {
+  shinyRemoveButton?: "none" | "true" | "false" | "both";
 };
 
 function getLabelNode(el: SelectHTMLElement): JQuery<HTMLElement> {
@@ -32,7 +44,7 @@ function getLabelNode(el: SelectHTMLElement): JQuery<HTMLElement> {
     .find('label[for="' + escapedId + '"]');
 }
 // Return true if it's a selectize input, false if it's a regular select input.
-// eslint-disable-next-line camelcase
+
 function isSelectize(el: HTMLElement): boolean {
   const config = $(el)
     .parent()
@@ -62,10 +74,14 @@ class SelectInputBinding extends InputBinding {
   getId(el: SelectHTMLElement): string {
     return InputBinding.prototype.getId.call(this, el) || el.name;
   }
-  getValue(
-    el: HTMLElement
-  ): NotUndefined<ReturnType<JQuery<HTMLElement>["val"]>> {
-    return $(el).val() as NotUndefined<ReturnType<JQuery<HTMLElement>["val"]>>;
+  getValue(el: SelectHTMLElement): any {
+    if (!isSelectize(el)) {
+      return $(el).val();
+    } else {
+      const selectize = this._selectize(el);
+
+      return selectize?.getValue();
+    }
   }
   setValue(el: SelectHTMLElement, value: string): void {
     if (!isSelectize(el)) {
@@ -83,7 +99,7 @@ class SelectInputBinding extends InputBinding {
   } {
     // Store options in an array of objects, each with with value and label
     const options: Array<{ value: string; label: string }> = new Array(
-      el.length
+      el.length,
     );
 
     for (let i = 0; i < el.length; i++) {
@@ -100,10 +116,10 @@ class SelectInputBinding extends InputBinding {
       options: options,
     };
   }
-  receiveMessage(
+  async receiveMessage(
     el: SelectHTMLElement,
-    data: SelectInputReceiveMessageData
-  ): void {
+    data: SelectInputReceiveMessageData,
+  ): Promise<void> {
     const $el = $(el);
 
     // This will replace all the options
@@ -114,7 +130,7 @@ class SelectInputBinding extends InputBinding {
       // selectize will restore the original select
       selectize?.destroy();
       // Clear existing options and add each new one
-      $el.empty().append(data.options);
+      $el.empty().append(data.options!);
       this._selectize(el);
     }
 
@@ -123,7 +139,7 @@ class SelectInputBinding extends InputBinding {
       $el
         .parent()
         .find('script[data-for="' + $escape(el.id) + '"]')
-        .replaceWith(data.config);
+        .replaceWith(data.config!);
       this._selectize(el, true);
     }
 
@@ -140,6 +156,12 @@ class SelectInputBinding extends InputBinding {
         };
       };
 
+      // Calling selectize.clear() first works around https://github.com/selectize/selectize.js/issues/2146
+      // As of selectize.js >= v0.13.1, .clearOptions() clears the selection,
+      // but does NOT remove the previously-selected options. So unless we call
+      // .clear() first, the current selection(s) will remain as (deselected)
+      // options. See #3966 #4142
+      selectize.clear();
       selectize.clearOptions();
       let loaded = false;
 
@@ -193,10 +215,11 @@ class SelectInputBinding extends InputBinding {
         selectize.settings.load.apply(selectize, ["", callback]);
       });
     } else if (hasDefinedProperty(data, "value")) {
+      // @ts-expect-error; data.value is currently a never type
       this.setValue(el, data.value);
     }
 
-    updateLabel(data.label, getLabelNode(el));
+    await updateLabel(data.label, getLabelNode(el));
 
     $(el).trigger("change");
   }
@@ -212,7 +235,7 @@ class SelectInputBinding extends InputBinding {
           return;
         }
         callback(false);
-      }
+      },
     );
   }
   unsubscribe(el: HTMLElement): void {
@@ -223,7 +246,7 @@ class SelectInputBinding extends InputBinding {
   }
   protected _selectize(
     el: SelectHTMLElement,
-    update = false
+    update = false,
   ): SelectizeInfo | undefined {
     // Apps like 008-html do not have the selectize js library
     // Safe-guard against missing the selectize js library
@@ -235,20 +258,16 @@ class SelectInputBinding extends InputBinding {
 
     if (config.length === 0) return undefined;
 
-    let options: SelectizeOptions & {
-      labelField: "label";
-      valueField: "value";
-      searchField: ["label"];
-      onItemRemove?: (value: string) => void;
-      onDropdownClose?: () => void;
-    } = $.extend(
+    let options: SelectizeShinyOptions = $.extend(
       {
         labelField: "label",
         valueField: "value",
         searchField: ["label"],
       },
-      JSON.parse(config.html())
+      JSON.parse(config.html()),
     );
+
+    options = this._addShinyRemoveButton(options, el.hasAttribute("multiple"));
 
     // selectize created from selectInput()
     if (typeof config.data("nonempty") !== "undefined") {
@@ -262,7 +281,7 @@ class SelectInputBinding extends InputBinding {
                 $("<option/>", {
                   value: value,
                   selected: true,
-                })
+                }),
               )
               .trigger("change");
         },
@@ -284,33 +303,55 @@ class SelectInputBinding extends InputBinding {
         // @ts-expect-error; Need to type `options` keys to know exactly which values are accessed.
         options[x] = indirectEval("(" + options[x] + ")");
       });
-
-    let control = this._newSelectize($el, options);
-
+    let control = $el.selectize(options)[0].selectize as SelectizeInfo;
     // .selectize() does not really update settings; must destroy and rebuild
+
     if (update) {
       const settings = $.extend(control.settings, options);
 
       control.destroy();
-      control = this._newSelectize($el, settings);
+      control = $el.selectize(settings)[0].selectize as SelectizeInfo;
     }
 
     return control;
   }
 
-  protected _newSelectize(
-    $el: JQuery<HTMLSelectElement>,
-    options: SelectizeOptions
-  ): SelectizeInfo {
-    // Starting with selectize v0.15.2, $el.selectize() can prune the <select>
-    // element from the DOM, meaning that if we're already bound to it, we'll
-    // lose the binding. So if we are bound, unbind first, then rebind after.
-    // (Note this is quite similar to how Shiny.renderContent() works.)
-    const binding = $el.data("shiny-input-binding");
-    if (binding) shinyUnbindAll($el.parent());
-    const control = $el.selectize(options)[0].selectize as SelectizeInfo;
-    if (binding) shinyBindAll($el.parent());
-    return control;
+  // Translate shinyRemoveButton option into selectize plugins
+  private _addShinyRemoveButton(
+    options: SelectizeShinyOptions,
+    multiple: boolean,
+  ): SelectizeOptions {
+    let removeButton = options.shinyRemoveButton;
+    if (removeButton === undefined) {
+      return options;
+    }
+
+    // None really means 'smart default'
+    if (removeButton === "none") {
+      removeButton = multiple ? "true" : "false";
+    }
+
+    if (removeButton === "false") {
+      return options;
+    }
+
+    const plugins = [];
+    if (removeButton === "both") {
+      plugins.push("remove_button", "clear_button");
+    } else if (removeButton === "true") {
+      plugins.push(multiple ? "remove_button" : "clear_button");
+    }
+
+    // Add plugins to existing plugins if not already present
+    return {
+      ...options,
+      plugins: Array.from(
+        new Set([
+          ...(Array.isArray(options.plugins) ? options.plugins : []),
+          ...plugins,
+        ]),
+      ),
+    };
   }
 }
 

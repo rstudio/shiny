@@ -1,22 +1,12 @@
-import type {
-  BuildFailure,
-  BuildIncremental,
-  BuildOptions,
-  BuildResult,
-  WatchMode,
-} from "esbuild";
-import { build as esbuildBuild } from "esbuild";
+import type { BuildOptions } from "esbuild";
+import esbuild from "esbuild";
 
-import process from "process";
 import { basename } from "path";
+import process from "process";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore; Type definitions are not found. This occurs when `strict: true` in tsconfig.json
 import readcontrol from "readcontrol";
-
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore; Type definitions are not found. This occurs when `strict: true` in tsconfig.json
-import babelPlugin from "esbuild-plugin-babel";
 
 const outDir = "./inst/www/shared/";
 
@@ -25,7 +15,7 @@ const shinyDesc = readcontrol.readSync("./DESCRIPTION") as ShinyDesc;
 
 const bannerTxt = [
   `/*! ${shinyDesc.package} ${shinyDesc.version}`,
-  `(c) 2012-${new Date().getFullYear()} RStudio, PBC.`,
+  `(c) 2012-${new Date().getFullYear()} Posit Software, PBC.`,
   `License: ${shinyDesc.license} */`,
 ].join(" | ");
 const banner = {
@@ -33,9 +23,7 @@ const banner = {
   css: bannerTxt,
 };
 
-async function build(
-  opts: BuildOptions
-): Promise<BuildIncremental | BuildResult> {
+async function build(opts: BuildOptions): Promise<void> {
   const outFileNames = opts.outfile
     ? [basename(opts.outfile)]
     : (opts.entryPoints as string[]).map((entry) => basename(entry));
@@ -52,7 +40,7 @@ async function build(
     }
   }
 
-  const onRebuild = function (error: BuildFailure | null) {
+  const onRebuild = function (error: any | null) {
     if (error) {
       console.error(printNames.join(", "), "watch build failed:\n", error);
     } else {
@@ -63,29 +51,26 @@ async function build(
     return;
   };
 
-  let incremental = false;
-  let watch: WatchMode | false = false;
-
-  if (process.argv.length >= 3 && process.argv[2] == "--watch") {
-    incremental = true;
-    watch = {
-      onRebuild: onRebuild,
-    };
-  }
+  const watch = process.argv.length >= 3 && process.argv[2] == "--watch";
 
   outFileNames.map((outFileName) => {
     console.log("Building " + outFileName);
   });
-  return esbuildBuild({
-    incremental: incremental,
-    watch: watch,
-    target: "es5",
+
+  const ctx = await esbuild.context({
+    target: "es2021",
     preserveSymlinks: true,
     ...opts,
-  }).then((x) => {
-    onRebuild(null);
-    return x;
   });
+
+  if (watch) {
+    await ctx.watch();
+    onRebuild(null);
+  } else {
+    await ctx.rebuild();
+    onRebuild(null);
+    await ctx.dispose();
+  }
 }
 
-export { outDir, build, shinyDesc, banner, babelPlugin };
+export { banner, build, outDir, shinyDesc };

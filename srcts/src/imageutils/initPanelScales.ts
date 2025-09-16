@@ -1,8 +1,8 @@
 // Map a value x from a domain to a range. If clip is true, clip it to the
 
-import type { Offset } from "./findbox";
 import { mapValues } from "../utils";
 import type { Bounds } from "./createBrush";
+import type { Offset } from "./findbox";
 
 // range.
 function mapLinear(
@@ -11,7 +11,7 @@ function mapLinear(
   domainMax: number,
   rangeMin: number,
   rangeMax: number,
-  clip = true
+  clip = true,
 ) {
   // By default, clip to range
   clip = clip || true;
@@ -36,7 +36,7 @@ function scaler1D(
   domainMax: number,
   rangeMin: number,
   rangeMax: number,
-  logbase: number | null
+  logbase: number | null,
 ) {
   return {
     scale: function (val: number, clip?: boolean) {
@@ -107,7 +107,7 @@ function addScaleFuns(panel_: PanelInit): Panel {
   // };
   function scaleDataToImg(
     val: Bounds,
-    clip?: Parameters<typeof xscaler.scale>[1]
+    clip?: Parameters<typeof xscaler.scale>[1],
   ): Bounds {
     return mapValues(val, (value, key) => {
       const prefix = key.substring(0, 1);
@@ -168,5 +168,5 @@ function initPanelScales(panels: PanelInit[]): Panel[] {
   return panels.map((panel) => addScaleFuns(panel));
 }
 
-export type { Panel, PanelInit };
 export { initPanelScales };
+export type { Panel, PanelInit };

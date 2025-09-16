@@ -15,11 +15,14 @@ const animateMs = 400;
 // If the given count is bigger than the number of characters contained by
 // the node and its siblings, returns a null node and the number of
 // characters found.
-function findTextColPoint(node: Node, col: number) {
+function findTextColPoint(
+  node: Node,
+  col: number,
+): { element: Node | null; offset: number } {
   let cols = 0;
 
   if (node.nodeType === 3) {
-    const nchar = node.nodeValue.replace(/\n/g, "").length;
+    const nchar = node.nodeValue?.replace(/\n/g, "").length ?? 0;
 
     if (nchar >= col) {
       return { element: node, offset: col };
@@ -44,7 +47,11 @@ function findTextColPoint(node: Node, col: number) {
 //
 // If the given line and column are not found, returns a null element and
 // the number of lines found.
-function findTextPoint(el: Node, line: number, col: number) {
+function findTextPoint(
+  el: Node,
+  line: number,
+  col: number,
+): { element: Node | null; offset: number } {
   let newlines = 0;
 
   for (let childId = 0; childId < el.childNodes.length; childId++) {
@@ -56,7 +63,7 @@ function findTextPoint(el: Node, line: number, col: number) {
       const newlinere = /\n/g;
       let match: ReturnType<RegExp["exec"]>;
 
-      while ((match = newlinere.exec(child.nodeValue)) !== null) {
+      while ((match = newlinere.exec(child.nodeValue!)) !== null) {
         newlines++;
         // Found the desired line, now find the column.
         if (newlines === line) {
@@ -82,7 +89,7 @@ function findTextPoint(el: Node, line: number, col: number) {
 // refs.
 function highlightSrcref(
   srcref: ShowcaseSrcMessage["srcref"],
-  srcfile: ShowcaseSrcMessage["srcfile"]
+  srcfile: ShowcaseSrcMessage["srcfile"],
 ) {
   // Check to see if the browser supports text ranges (IE8 doesn't)
   if (!document.createRange) return;
@@ -112,7 +119,7 @@ function highlightSrcref(
     // the SPANs.
 
     if (
-      start.element.parentNode.nodeName === "SPAN" &&
+      start.element.parentNode?.nodeName === "SPAN" &&
       start.element !== end.element
     ) {
       range.setStartBefore(start.element.parentNode);
@@ -120,7 +127,7 @@ function highlightSrcref(
       range.setStart(start.element, start.offset);
     }
     if (
-      end.element.parentNode.nodeName === "SPAN" &&
+      end.element.parentNode?.nodeName === "SPAN" &&
       start.element !== end.element
     ) {
       range.setEndAfter(end.element.parentNode);
@@ -136,14 +143,14 @@ function highlightSrcref(
 // If this is the main Shiny window, wire up our custom message handler.
 // TODO-barret, this should work
 
-if (Shiny) {
-  Shiny.addCustomMessageHandler(
+if (window.Shiny) {
+  window.Shiny.addCustomMessageHandler(
     "showcase-src",
     function (message: ShowcaseSrcMessage) {
       if (message.srcref && message.srcfile) {
         highlightSrcref(message.srcref, message.srcfile);
       }
-    }
+    },
   );
 }
 
@@ -174,9 +181,23 @@ const setCodePosition = function (above: boolean, animate: boolean) {
   }
 
   // hide the new element before doing anything to it
+  if (newHostElement === null || currentHostElement === null) {
+    console.warn(
+      "Could not find the host elements for the code tabs. " +
+        "This is likely a bug in the showcase app.",
+    );
+    return;
+  }
   $(newHostElement).hide();
   $(currentHostElement).fadeOut(animateCodeMs, function () {
     const tabs = document.getElementById("showcase-code-tabs");
+
+    if (tabs === null) {
+      console.warn(
+        "Could not find the code tabs element. This is likely a bug in the showcase app.",
+      );
+      return;
+    }
 
     currentHostElement.removeChild(tabs);
     newHostElement.appendChild(tabs);
@@ -185,7 +206,9 @@ const setCodePosition = function (above: boolean, animate: boolean) {
     if (above) {
       setCodeHeightFromDocHeight();
     } else {
-      document.getElementById("showcase-code-content").removeAttribute("style");
+      document
+        .getElementById("showcase-code-content")
+        ?.removeAttribute("style");
     }
 
     $(newHostElement).fadeIn(animateCodeMs);
@@ -194,27 +217,29 @@ const setCodePosition = function (above: boolean, animate: boolean) {
       // scroll smoothly down to the code's new home
       document
         .getElementById("showcase-app-container")
-        .removeAttribute("style");
-      if (animate)
-        $(document.body).animate({
-          scrollTop: $(newHostElement).offset().top,
-        });
+        ?.removeAttribute("style");
+      if (animate) {
+        const top = $(newHostElement).offset()?.top;
+        if (top !== undefined) {
+          $(document.body).animate({ scrollTop: top });
+        }
+      }
     }
     // if there's a readme, move it either alongside the code or beneath
     // the app
     const readme = document.getElementById("readme-md");
 
     if (readme !== null) {
-      readme.parentElement.removeChild(readme);
+      readme.parentElement?.removeChild(readme);
       if (above) {
         currentHostElement.appendChild(readme);
         $(currentHostElement).fadeIn(animateCodeMs);
       } else
-        document.getElementById("showcase-app-metadata").appendChild(readme);
+        document.getElementById("showcase-app-metadata")?.appendChild(readme);
     }
 
     // change the text on the toggle button to reflect the new state
-    document.getElementById("showcase-code-position-toggle").innerHTML = above
+    document.getElementById("showcase-code-position-toggle")!.innerHTML = above
       ? '<i class="fa fa-level-down"></i> show below'
       : '<i class="fa fa-level-up"></i> show with app';
   });
@@ -230,7 +255,7 @@ function setAppCodeSxsWidths(animate: boolean) {
   const appTargetWidth = 960;
   let appWidth = appTargetWidth;
   let zoom = 1.0;
-  const totalWidth = document.getElementById("showcase-app-code").offsetWidth;
+  const totalWidth = document.getElementById("showcase-app-code")!.offsetWidth;
 
   if (totalWidth / 2 > appTargetWidth) {
     // If the app can use only half the available space and still meet its
@@ -246,14 +271,12 @@ function setAppCodeSxsWidths(animate: boolean) {
     appWidth = totalWidth * 0.66;
     zoom = appWidth / appTargetWidth;
   }
-  const app = document.getElementById("showcase-app-container");
-
-  $(app).animate(
+  $("#showcase-app-container").animate(
     {
       width: appWidth + "px",
       zoom: zoom * 100 + "%",
     },
-    animate ? animateMs : 0
+    animate ? animateMs : 0,
   );
 }
 
@@ -272,7 +295,7 @@ const setInitialCodePosition = function () {
 // make the code scrollable to about the height of the browser, less space
 // for the tabs
 function setCodeHeightFromDocHeight() {
-  document.getElementById("showcase-code-content").style.height =
+  document.getElementById("showcase-code-content")!.style.height =
     $(window).height() + "px";
 }
 
@@ -288,7 +311,7 @@ function renderMarkdown() {
     const showdownConverter = (window as any).Showdown
       .converter as showdown.ConverterStatic;
 
-    document.getElementById("readme-md").innerHTML =
+    document.getElementById("readme-md")!.innerHTML =
       new showdownConverter().makeHtml(content);
   }
 }

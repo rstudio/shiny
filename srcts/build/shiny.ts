@@ -1,11 +1,11 @@
 // This build script must be executed from the root repo directory via
 // ```
-// yarn build
+// npm run build
 // ```
 
-import { banner, build, outDir, shinyDesc, babelPlugin } from "./_build";
-import globalsPlugin from "esbuild-plugin-globals";
 import type { BuildOptions } from "esbuild";
+import globalsPlugin from "esbuild-plugin-globals";
+import { banner, build, outDir, shinyDesc } from "./_build";
 import { verifyJqueryImport } from "./_jquery";
 
 const opts: BuildOptions = {
@@ -18,7 +18,6 @@ const opts: BuildOptions = {
       //// Loaded dynamically. MUST use `window.strftime` within code
       // strftime: "window.strftime",
     }),
-    babelPlugin(),
   ],
   define: {
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -30,6 +29,7 @@ const opts: BuildOptions = {
 // Make sure all ts files contain jquery import statements before building
 verifyJqueryImport("srcts/src")
   .then(() => {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     Promise.all([
       build({
         ...opts,

@@ -55,3 +55,42 @@ test_that("Action link accepts class arguments", {
     get_class(make_link("extra extra2")), sub("\"$", " extra extra2\"", act_class)
   )
 })
+
+test_that("Action button allows icon customization", {
+  # No separator between icon and label
+  expect_snapshot(actionButton("foo", "Click me"))
+
+  # Should include separator between icon and label
+  expect_snapshot(
+    actionButton("foo", "Click me", icon = icon("star"))
+  )
+
+  # Warn on a non-HTML icon
+  expect_warning(
+    actionButton("foo", "Click me", icon = "not an icon"),
+    "non-HTML value was provided"
+  )
+
+  # Allows for arbitrary HTML as icon
+  btn <- expect_no_warning(
+    actionButton("foo", "Click me", icon = tags$svg())
+  )
+  btn2 <- expect_no_warning(
+    actionButton("foo", "Click me", icon = tagList(tags$svg()))
+  )
+  btn3 <- expect_no_warning(
+    actionButton("foo", "Click me", icon = list(tags$svg()))
+  )
+  btn4 <- expect_no_warning(
+    actionButton("foo", "Click me", icon = HTML("<svg></svg>"))
+  )
+
+  # Ignore newlines+indentation for comparison
+  as_character <- function(x) {
+    gsub("\\n\\s*", "", as.character(x))
+  }
+
+  expect_equal(as_character(btn), as_character(btn2))
+  expect_equal(as_character(btn2), as_character(btn3))
+  expect_equal(as_character(btn3), as_character(btn4))
+})

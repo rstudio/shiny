@@ -2,16 +2,17 @@
 library(rprojroot)
 library(withr)
 
+# `@selectize/selectize` and `@types/selectize` versions set within package.json
 
 if (!identical(getwd(), find_package_root_file())) {
   stop("This script must be run from the top directory of the shiny package")
 }
 
-if (Sys.which("yarn") == "") {
-  stop("The yarn CLI must be installed and in your PATH")
+if (Sys.which("npm") == "") {
+  stop("The npm CLI must be installed and in your PATH")
 }
 
-system("yarn install")
+system("npm install")
 
 node_dir <- find_package_root_file("node_modules/@selectize/selectize/dist")
 inst_dir <- find_package_root_file("inst/www/shared/selectize")
@@ -20,7 +21,7 @@ unlink(inst_dir, recursive = TRUE)
 
 dir.create(file.path(inst_dir, "js"), recursive = TRUE)
 file.copy(
-  file.path(node_dir, "js", "selectize.min.js"),
+  file.path(node_dir, "js", c("selectize.js", "selectize.min.js")),
   file.path(inst_dir, "js"),
   overwrite = TRUE
 )
@@ -40,7 +41,6 @@ file.copy(
   recursive = TRUE
 )
 
-
 sanitize_scss <- function(f) {
   txt <- readLines(f)
   # Remove the unnecessary imports of Bootstrap from scss files
@@ -53,14 +53,19 @@ lapply(
   sanitize_scss
 )
 
-
 ## -----------------------------------------------------------------
 ## Second, download accessibility plugin
 ## -----------------------------------------------------------------
 
 ally_version <- "927d81e9ea86acac1724d57b2ce9f3c962fd34c4"
-url <- sprintf("https://github.com/SLMNBJ/selectize-plugin-a11y/archive/%s.zip", ally_version)
-dest_file <- file.path(tempdir(), paste0("selectize-plugin-a11y-", ally_version, ".zip"))
+url <- sprintf(
+  "https://github.com/SLMNBJ/selectize-plugin-a11y/archive/%s.zip",
+  ally_version
+)
+dest_file <- file.path(
+  tempdir(),
+  paste0("selectize-plugin-a11y-", ally_version, ".zip")
+)
 download.file(url, dest_file)
 
 unzipped <- tempdir()
@@ -68,11 +73,14 @@ unzip(dest_file, exdir = unzipped)
 
 dir.create(file.path(inst_dir, "accessibility", "js"), recursive = TRUE)
 file.copy(
-  file.path(unzipped, paste0("selectize-plugin-a11y-", ally_version), "selectize-plugin-a11y.js"),
+  file.path(
+    unzipped,
+    paste0("selectize-plugin-a11y-", ally_version),
+    "selectize-plugin-a11y.js"
+  ),
   file.path(inst_dir, "accessibility", "js"),
   overwrite = TRUE
 )
-
 
 # =============================================================================
 # Apply patches
@@ -87,7 +95,10 @@ for (patch in list.files(patch_dir, full.names = TRUE)) {
   tryCatch(
     {
       message(sprintf("Applying %s", basename(patch)))
-      with_dir(find_package_root_file(), system(sprintf("git apply %s --reject", patch)))
+      with_dir(
+        find_package_root_file(),
+        system(sprintf("git apply %s --reject", patch))
+      )
     },
     error = function(e) {
       quit(save = "no", status = 1)
@@ -107,8 +118,7 @@ writeLines(
   find_package_root_file("R", "version_selectize.R")
 )
 
-
 # =============================================================================
 # Generate minified js
 # =============================================================================
-with_dir(find_package_root_file("srcts"), system("yarn build"))
+with_dir(find_package_root_file("srcts"), system("npm run build"))

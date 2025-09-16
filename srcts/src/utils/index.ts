@@ -1,7 +1,9 @@
 import $ from "jquery";
+import type { HtmlDep } from "../shiny/render";
+import { renderContent } from "../shiny/render";
 import { windowDevicePixelRatio } from "../window/pixelRatio";
 import type { MapValuesUnion, MapWithResult } from "./extraTypes";
-import { hasOwnProperty, hasDefinedProperty } from "./object";
+import { asArray, hasDefinedProperty, hasOwnProperty } from "./object";
 
 function escapeHTML(str: string): string {
   /* eslint-disable @typescript-eslint/naming-convention */
@@ -9,11 +11,12 @@ function escapeHTML(str: string): string {
     "&": "&amp;",
     "<": "&lt;",
     ">": "&gt;",
-    // eslint-disable-next-line prettier/prettier
+
     '"': "&quot;",
     "'": "&#039;",
     "/": "&#x2F;",
   };
+  /* eslint-enable @typescript-eslint/naming-convention */
 
   return str.replace(/[&<>'"/]/g, function (m) {
     return escaped[m] as string;
@@ -119,8 +122,8 @@ function makeResizeFilter(
   el: HTMLElement,
   func: (
     width: HTMLElement["offsetWidth"],
-    height: HTMLElement["offsetHeight"]
-  ) => void
+    height: HTMLElement["offsetHeight"],
+  ) => void,
 ): () => void {
   let lastSize: LastSizeInterface = {};
 
@@ -143,11 +146,25 @@ function pixelRatio(): number {
   }
 }
 
+function getBoundingClientSizeBeforeZoom(el: HTMLElement): {
+  width: number;
+  height: number;
+} {
+  const rect = el.getBoundingClientRect();
+  // Cast to any because currentCSSZoom isn't in the type def of HTMLElement
+  // TODO: typescript >= 5.5.2 added this property to the type definition
+  const zoom = (el as any).currentCSSZoom || 1;
+  return {
+    width: rect.width / zoom,
+    height: rect.height / zoom,
+  };
+}
+
 // Takes a string expression and returns a function that takes an argument.
 //
 // When the function is executed, it will evaluate that expression using
 // "with" on the argument value, and return the result.
-function scopeExprToFunc(expr: string): (scope: unknown) => boolean {
+function scopeExprToFunc(expr: string): (scope: unknown) => unknown {
   /*jshint evil: true */
   const exprEscaped = expr
     .replace(/[\\"']/g, "\\$&")
@@ -158,7 +175,7 @@ function scopeExprToFunc(expr: string): (scope: unknown) => boolean {
     // \b has a special meaning; need [\b] to match backspace char.
     .replace(/[\b]/g, "\\b");
 
-  let func: () => boolean;
+  let func: () => unknown;
 
   try {
     // @ts-expect-error; Do not know how to type this _dangerous_ situation
@@ -170,29 +187,23 @@ function scopeExprToFunc(expr: string): (scope: unknown) => boolean {
           console.error('Error evaluating expression: ${exprEscaped}');
           throw e;
         }
-      }`
+      }`,
     );
   } catch (e) {
     console.error("Error parsing expression: " + expr);
     throw e;
   }
 
-  return function (scope: unknown): boolean {
+  return function (scope: unknown): unknown {
     return func.call(scope);
   };
-}
-
-function asArray<T>(value: T | T[] | null | undefined): T[] {
-  if (value === null || value === undefined) return [];
-  if (Array.isArray(value)) return value;
-  return [value];
 }
 
 // We need a stable sorting algorithm for ordering
 // bindings by priority and insertion order.
 function mergeSort<Item>(
   list: Item[],
-  sortfunc: (a: Item, b: Item) => boolean | number
+  sortfunc: (a: Item, b: Item) => boolean | number,
 ): Item[] {
   function merge(a: Item[], b: Item[]) {
     let ia = 0;
@@ -200,7 +211,7 @@ function mergeSort<Item>(
     const sorted = [];
 
     while (ia < a.length && ib < b.length) {
-      if (sortfunc(a[ia], b[ib]) <= 0) {
+      if (Number(sortfunc(a[ia], b[ib])) <= 0) {
         sorted.push(a[ia++]);
       } else {
         sorted.push(b[ib++]);
@@ -241,7 +252,7 @@ function $escape(val: string | undefined): string | undefined {
 // function from lodash.
 function mapValues<T extends { [key: string]: any }, R>(
   obj: T,
-  f: (value: MapValuesUnion<T>, key: string, object: typeof obj) => R
+  f: (value: MapValuesUnion<T>, key: string, object: typeof obj) => R,
 ): MapWithResult<T, R> {
   const newObj = {} as MapWithResult<T, R>;
 
@@ -302,7 +313,7 @@ function equal(...args: unknown[]): boolean {
 const compareVersion = function (
   a: string,
   op: "<" | "<=" | "==" | ">" | ">=",
-  b: string
+  b: string,
 ): boolean {
   function versionParts(ver: string) {
     return (ver + "")
@@ -336,23 +347,27 @@ const compareVersion = function (
   else throw `Unknown operator: ${op}`;
 };
 
-function updateLabel(
-  labelTxt: string | undefined,
-  labelNode: JQuery<HTMLElement>
-): void {
+async function updateLabel(
+  labelContent: string | { html: string; deps: HtmlDep[] } | undefined,
+  labelNode: JQuery<HTMLElement>,
+): Promise<void> {
   // Only update if label was specified in the update method
-  if (typeof labelTxt === "undefined") return;
+  if (typeof labelContent === "undefined") return;
   if (labelNode.length !== 1) {
     throw new Error("labelNode must be of length 1");
   }
 
-  // Should the label be empty?
-  const emptyLabel = Array.isArray(labelTxt) && labelTxt.length === 0;
+  if (typeof labelContent === "string") {
+    labelContent = {
+      html: labelContent,
+      deps: [],
+    };
+  }
 
-  if (emptyLabel) {
+  if (labelContent.html === "") {
     labelNode.addClass("shiny-label-null");
   } else {
-    labelNode.text(labelTxt);
+    await renderContent(labelNode, labelContent);
     labelNode.removeClass("shiny-label-null");
   }
 }
@@ -378,7 +393,6 @@ function getComputedLinkColor(el: HTMLElement): string {
 }
 
 function isBS3(): boolean {
-  // @ts-expect-error; Check if `window.bootstrap` exists
   return !window.bootstrap;
 }
 
@@ -386,30 +400,37 @@ function toLowerCase<T extends string>(str: T): Lowercase<T> {
   return str.toLowerCase() as Lowercase<T>;
 }
 
+function isShinyInDevMode(): boolean {
+  if ("__SHINY_DEV_MODE__" in window) return Boolean(window.__SHINY_DEV_MODE__);
+  return false;
+}
+
 export {
-  escapeHTML,
-  randomId,
-  strToBool,
-  getStyle,
-  padZeros,
-  roundSignif,
-  parseDate,
-  formatDateUTC,
-  makeResizeFilter,
-  pixelRatio,
-  scopeExprToFunc,
-  asArray,
-  mergeSort,
   $escape,
-  mapValues,
-  isnan,
   _equal,
-  equal,
+  asArray,
   compareVersion,
-  updateLabel,
+  equal,
+  escapeHTML,
+  formatDateUTC,
+  getBoundingClientSizeBeforeZoom,
   getComputedLinkColor,
-  hasOwnProperty,
+  getStyle,
   hasDefinedProperty,
+  hasOwnProperty,
   isBS3,
+  isnan,
+  isShinyInDevMode,
+  makeResizeFilter,
+  mapValues,
+  mergeSort,
+  padZeros,
+  parseDate,
+  pixelRatio,
+  randomId,
+  roundSignif,
+  scopeExprToFunc,
+  strToBool,
   toLowerCase,
+  updateLabel,
 };

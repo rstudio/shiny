@@ -1,5 +1,5 @@
-version <- "1.13.2"
-version_types <- "1.12.16"
+version <- "1.14.1"
+version_types <- "1.12.24"
 
 jqui_folder <- rprojroot::find_package_root_file("inst", "www", "shared", "jqueryui")
 
@@ -44,7 +44,7 @@ writeLines(
 withr::with_dir(
   rprojroot::find_package_root_file(),
   {
-    exit_code <- system(paste0("yarn add @types/jqueryui@", version_types))
-    if (exit_code != 0) stop("yarn could not install @types/jqueryui")
+    exit_code <- system(paste0("npm install --save-dev --save-exact @types/jqueryui@", version_types))
+    if (exit_code != 0) stop("npm could not install @types/jqueryui")
   }
 )

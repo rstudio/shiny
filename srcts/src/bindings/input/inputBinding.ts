@@ -1,5 +1,21 @@
+import type { EventPriority } from "../../inputPolicies/inputPolicy";
 import type { RatePolicyModes } from "../../inputPolicies/inputRateDecorator";
 import type { BindScope } from "../../shiny/bind";
+
+type SubscribeEventPriority =
+  | EventPriority
+  | boolean
+  | { priority: EventPriority };
+// Historically, the .subscribe()'s callback value only took a boolean. In this
+// case:
+//   * false: send value immediately (i.e., priority = "immediate")
+//   * true: send value later (i.e., priority = "deferred")
+//     * The input rate policy is also consulted on whether to debounce or
+//       throttle
+// In recent versions, the value can also be "event", meaning that the
+// value should be sent immediately regardless of whether it has changed.
+
+type InputSubscribeCallback = (value: SubscribeEventPriority) => void;
 
 class InputBinding {
   name!: string;
@@ -8,7 +24,7 @@ class InputBinding {
   // descendants of scope that match this binding
   find(scope: BindScope): JQuery<HTMLElement> {
     throw "Not implemented";
-    scope; // unused var
+    scope; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
 
   getId(el: HTMLElement): string {
@@ -19,24 +35,23 @@ class InputBinding {
   // to deserialize the JSON correctly
   getType(el: HTMLElement): string | null {
     return null;
-    el; // unused var
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
   getValue(el: HTMLElement): any {
     throw "Not implemented";
-    el; // unused var
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
 
-  // The callback method takes one argument, whose value is boolean. If true,
-  // allow deferred (debounce or throttle) sending depending on the value of
-  // getRatePolicy. If false, send value immediately. Default behavior is `false`
-  subscribe(el: HTMLElement, callback: (value: boolean) => void): void {
+  subscribe(el: HTMLElement, callback: InputSubscribeCallback): void {
     // empty
-    el; // unused var
-    callback; // unused var
+    return;
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
+    callback; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
   unsubscribe(el: HTMLElement): void {
     // empty
-    el; // unused var
+    return;
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
 
   // This is used for receiving messages that tell the input object to do
@@ -44,21 +59,21 @@ class InputBinding {
   // 'data' should be an object with elements corresponding to value, min,
   // max, etc., as appropriate for the type of input object. It also should
   // trigger a change event.
-  receiveMessage(el: HTMLElement, data: unknown): void {
+  receiveMessage(el: HTMLElement, data: unknown): Promise<void> | void {
     throw "Not implemented";
-    el; // unused var
-    data; // unused var
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
+    data; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
   getState(el: HTMLElement): unknown {
     throw "Not implemented";
-    el; // unused var
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
 
   getRatePolicy(
-    el: HTMLElement
+    el: HTMLElement,
   ): { policy: RatePolicyModes; delay: number } | null {
     return null;
-    el; // unused var
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
 
   // Some input objects need initialization before being bound. This is
@@ -68,13 +83,15 @@ class InputBinding {
   // This is called before the input is bound.
   initialize(el: HTMLElement): void {
     //empty
-    el;
+    return;
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
 
   // This is called after unbinding the output.
   dispose(el: HTMLElement): void {
     //empty
-    el;
+    return;
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
 }
 
@@ -102,3 +119,4 @@ class InputBinding {
 //// END NOTES FOR FUTURE DEV
 
 export { InputBinding };
+export type { InputSubscribeCallback, SubscribeEventPriority };

@@ -1,6 +1,6 @@
 import $ from "jquery";
 
-import { isIE, setIsQt, setIsIE, setIEVersion } from "../utils/browser";
+import { isIE, setIEVersion, setIsIE, setIsQt } from "../utils/browser";
 import { userAgent } from "../utils/userAgent";
 
 function getIEVersion() {
@@ -10,7 +10,7 @@ function getIEVersion() {
     // IE 10 or older => return version number
     return parseInt(
       userAgent.substring(msie + 5, userAgent.indexOf(".", msie)),
-      10
+      10,
     );
   }
   const trident = userAgent.indexOf("Trident/");
@@ -21,7 +21,7 @@ function getIEVersion() {
 
     return parseInt(
       userAgent.substring(rv + 3, userAgent.indexOf(".", rv)),
-      10
+      10,
     );
   }
   return -1;

@@ -14,7 +14,7 @@ export class AsyncQueue<T> {
 
   enqueue(x: T): void {
     if (!this.$resolvers.length) this._add();
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     const resolve = this.$resolvers.shift()!;
 
     resolve(x);
@@ -22,7 +22,7 @@ export class AsyncQueue<T> {
 
   async dequeue(): Promise<T> {
     if (!this.$promises.length) this._add();
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     const promise = this.$promises.shift()!;
 
     return promise;

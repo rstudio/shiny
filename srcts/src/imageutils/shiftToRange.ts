@@ -5,7 +5,7 @@
 function shiftToRange(
   vals: number[] | number,
   min: number,
-  max: number
+  max: number,
 ): number[] {
   if (!(vals instanceof Array)) vals = [vals];
 

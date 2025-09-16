@@ -21,10 +21,11 @@ test_that("Repeated names for selectInput and radioButtons choices", {
 
   # Select input
   x <- selectInput('id','label', choices = c(a='x1', a='x2', b='x3'), selectize = FALSE)
-  expect_true(grepl(fixed = TRUE,
+  expect_match(
+    format(x),
     '<select class="shiny-input-select form-control" id="id"><option value="x1" selected>a</option>\n<option value="x2">a</option>\n<option value="x3">b</option></select>',
-     format(x)
-  ))
+    fixed = TRUE
+  )
 
   # Radio buttons using choices
   x <- radioButtons('id','label', choices = c(a='x1', a='x2', b='x3'))
@@ -248,10 +249,11 @@ test_that("selectInput selects items by default", {
   ))
 
   # Nothing selected when choices=NULL
-  expect_true(grepl(fixed = TRUE,
+  expect_match(
+    format(selectInput('x', NULL, NULL, selectize = FALSE)),
     '<select class="shiny-input-select form-control" id="x"></select>',
-    format(selectInput('x', NULL, NULL, selectize = FALSE))
-  ))
+    fixed = TRUE
+  )
 
   # None specified as selected. With multiple=TRUE, none selected by default.
   expect_true(grepl(fixed = TRUE,

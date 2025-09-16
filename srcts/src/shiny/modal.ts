@@ -71,8 +71,12 @@ function remove(): void {
   // Look for a Bootstrap modal and if present, trigger hide event. This will
   // trigger the hidden.bs.modal callback that we set in show(), which unbinds
   // and removes the element.
-  if ($modal.find(".modal").length > 0) {
-    $modal.find(".modal").modal("hide");
+  const $bsModal = $modal.find(".modal");
+  if ($bsModal.length > 0) {
+    // We both hide the modal when its shown and also immediately; the immediate
+    // version is a no-op in Bootstrap if called before the modal is fully shown
+    $bsModal.on("shown.bs.modal", () => $bsModal.modal("hide"));
+    $bsModal.modal("hide");
   } else {
     // If not a Bootstrap modal dialog, simply unbind and remove it.
     shinyUnbindAll($modal);
@@ -80,4 +84,4 @@ function remove(): void {
   }
 }
 
-export { show as showModal, remove as removeModal };
+export { remove as removeModal, show as showModal };

@@ -1,11 +1,11 @@
 import $ from "jquery";
 
-import { OutputBinding } from "./outputBinding";
 import { shinyUnbindAll } from "../../shiny/initedMethods";
+import type { ErrorsMessageValue } from "../../shiny/shinyapp";
 import { debounce } from "../../time";
 import { escapeHTML } from "../../utils";
 import { indirectEval } from "../../utils/eval";
-import type { ErrorsMessageValue } from "../../shiny/shinyapp";
+import { OutputBinding } from "./outputBinding";
 
 class DatatableOutputBinding extends OutputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
@@ -31,7 +31,7 @@ class DatatableOutputBinding extends OutputBinding {
       evalOptions?: string[];
       callback?: string;
       searchDelay?: number;
-    } | null
+    } | null,
   ): void {
     const $el = $(el).empty();
 
@@ -89,7 +89,9 @@ class DatatableOutputBinding extends OutputBinding {
               url: data.action,
               type: "POST",
               data: function (d: NonNullable<typeof data.options>) {
-                d.search || (d.search = {});
+                if (!d.search) {
+                  d.search = {};
+                }
                 d.search.caseInsensitive = searchCI;
                 // Copy from the R value (`data.escape`) to the escape option
                 // (`d.escape`) similar to `data.options.escape`;
@@ -100,8 +102,8 @@ class DatatableOutputBinding extends OutputBinding {
               },
             },
           },
-          data.options
-        )
+          data.options,
+        ),
       );
     // the table object may need post-processing
 
@@ -120,7 +122,7 @@ class DatatableOutputBinding extends OutputBinding {
       .keyup(
         debounce(data.searchDelay, function (this: HTMLInputElement) {
           oTable.search(this.value).draw();
-        })
+        }),
       );
     const searchInputs = $el.find("tfoot input");
 
@@ -134,7 +136,7 @@ class DatatableOutputBinding extends OutputBinding {
       searchInputs.keyup(
         debounce(data.searchDelay, function (this: HTMLInputElement) {
           oTable.column(searchInputs.index(this)).search(this.value).draw();
-        })
+        }),
       );
     }
     // FIXME: ugly scrollbars in tab panels b/c Bootstrap uses 'visible: auto'

@@ -5,10 +5,10 @@ import type {
 import $ from "jquery";
 // import { NameValueHTMLElement } from ".";
 import {
-  formatDateUTC,
-  updateLabel,
   $escape,
+  formatDateUTC,
   hasDefinedProperty,
+  updateLabel,
 } from "../../utils";
 
 import type { TextHTMLElement } from "./text";
@@ -61,7 +61,7 @@ type Prettify = (num: number) => string;
 function getTypePrettifyer(
   dataType: string,
   timeFormat: string,
-  timezone: string
+  timezone: string,
 ) {
   let timeFormatter: TimeFormatter;
   let prettify: Prettify;
@@ -121,7 +121,7 @@ class SliderInputBinding extends TextInputBindingBase {
     else return null;
   }
   getValue(
-    el: TextHTMLElement
+    el: TextHTMLElement,
   ): number | string | [number | string, number | string] {
     const $el = $(el);
     const result = $(el).data("ionRangeSlider").result as IonRangeSliderEvent;
@@ -153,7 +153,7 @@ class SliderInputBinding extends TextInputBindingBase {
   }
   setValue(
     el: HTMLElement,
-    value: number | string | [number | string, number | string]
+    value: number | string | [number | string, number | string],
   ): void {
     const $el = $(el);
     const slider = $el.data("ionRangeSlider");
@@ -179,7 +179,10 @@ class SliderInputBinding extends TextInputBindingBase {
   unsubscribe(el: HTMLElement): void {
     $(el).off(".sliderInputBinding");
   }
-  receiveMessage(el: HTMLElement, data: SliderReceiveMessageData): void {
+  async receiveMessage(
+    el: HTMLElement,
+    data: SliderReceiveMessageData,
+  ): Promise<void> {
     const $el = $(el);
     const slider = $el.data("ionRangeSlider");
     const msg: {
@@ -226,7 +229,7 @@ class SliderInputBinding extends TextInputBindingBase {
       }
     }
 
-    updateLabel(data.label, getLabelNode(el));
+    await updateLabel(data.label, getLabelNode(el));
 
     // (maybe) update data elements
     const domElements: Array<"data-type" | "time-format" | "timezone"> = [
@@ -239,7 +242,7 @@ class SliderInputBinding extends TextInputBindingBase {
       const elem = domElements[i];
 
       if (hasDefinedProperty(data, elem)) {
-        $el.data(elem, data[elem]);
+        $el.data(elem, data[elem]!);
       }
     }
 
@@ -263,12 +266,13 @@ class SliderInputBinding extends TextInputBindingBase {
       policy: "debounce",
       delay: 250,
     };
-    el;
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
   // TODO-barret Why not implemented?
   getState(el: HTMLInputElement): void {
     // empty
-    el;
+    return;
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
 
   initialize(el: HTMLElement): void {
@@ -294,14 +298,14 @@ class SliderInputBinding extends TextInputBindingBase {
 function formatNumber(
   num: number,
   thousandSep = ",",
-  decimalSep = "."
+  decimalSep = ".",
 ): string {
   const parts = num.toString().split(".");
 
   // Add separators to portion before decimal mark.
   parts[0] = parts[0].replace(
     /(\d{1,3}(?=(?:\d\d\d)+(?!\d)))/g,
-    "$1" + thousandSep
+    "$1" + thousandSep,
   );
 
   if (parts.length === 1) return parts[0];
@@ -372,14 +376,14 @@ $(document).on("click", ".slider-animate-button", function (evt: Event) {
         const val: { from: number; to?: number } = {
           from: Math.min(
             slider.result.max,
-            slider.result.from + slider.options.step
+            slider.result.from + slider.options.step,
           ),
         };
 
         if (slider.options.type === "double")
           val.to = Math.min(
             slider.result.max,
-            slider.result.to + slider.options.step
+            slider.result.to + slider.options.step,
           );
 
         slider.update(val);

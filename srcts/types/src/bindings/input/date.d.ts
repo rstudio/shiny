@@ -1,4 +1,3 @@
-/// <reference types="bootstrap-datepicker" />
 import { InputBinding } from "./inputBinding";
 declare global {
     interface JQuery {
@@ -52,7 +51,7 @@ declare class DateInputBinding extends DateInputBindingBase {
         format: string;
         startview: DatepickerViewModes;
     };
-    receiveMessage(el: HTMLElement, data: DateReceiveMessageData): void;
+    receiveMessage(el: HTMLElement, data: DateReceiveMessageData): Promise<void>;
 }
 export { DateInputBinding, DateInputBindingBase };
 export type { DateReceiveMessageData };

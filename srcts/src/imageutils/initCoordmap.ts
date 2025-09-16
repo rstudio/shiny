@@ -1,8 +1,8 @@
 import $ from "jquery";
 import { shinySetInputValue } from "../shiny/initedMethods";
 import { mapValues } from "../utils";
-import type { Offset } from "./findbox";
 import type { Bounds } from "./createBrush";
+import type { Offset } from "./findbox";
 import type { Panel, PanelInit } from "./initPanelScales";
 import { initPanelScales } from "./initPanelScales";
 
@@ -16,15 +16,13 @@ function findScalingRatio($el: JQuery<HTMLElement>) {
   const boundingRect = $el[0].getBoundingClientRect();
 
   return {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     x: boundingRect.width / $el.outerWidth()!,
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     y: boundingRect.height / $el.outerHeight()!,
   };
 }
 
 function findOrigin($el: JQuery<HTMLElement>): Offset {
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const offset = $el.offset()!;
   const scalingRatio = findScalingRatio($el);
 
@@ -53,9 +51,8 @@ function findDims($el: JQuery<HTMLElement>) {
   // If there's any padding/border, we need to find the ratio of the actual
   // element content compared to the element plus padding and border.
   const contentRatio = {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     x: $el.width()! / $el.outerWidth()!,
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     y: $el.height()! / $el.outerHeight()!,
   };
 
@@ -125,7 +122,7 @@ type Coordmap = {
   mouseCoordinateSender: (
     inputId: string,
     clip?: boolean,
-    nullOutside?: boolean
+    nullOutside?: boolean,
   ) => (e: JQuery.MouseDownEvent | JQuery.MouseMoveEvent | null) => void;
 };
 
@@ -150,7 +147,7 @@ type Coordmap = {
 //    than the other two, because there can be multiple panels (as in facets).
 function initCoordmap(
   $el: JQuery<HTMLElement>,
-  coordmap_: CoordmapInit
+  coordmap_: CoordmapInit,
 ): Coordmap {
   const $img = $el.find("img");
   const img = $img[0];
@@ -162,8 +159,8 @@ function initCoordmap(
     const bounds = {
       top: 0,
       left: 0,
-      right: img.clientWidth - 1,
-      bottom: img.clientHeight - 1,
+      right: img.naturalWidth - 1,
+      bottom: img.naturalHeight - 1,
     };
 
     coordmap_.panels[0] = {
@@ -290,11 +287,10 @@ function initCoordmap(
 
     const matches = []; // Panels that match
     const dists = []; // Distance of offset to each matching panel
-    let b;
     let i;
 
     for (i = 0; i < coordmap.panels.length; i++) {
-      b = coordmap.panels[i].range;
+      const b = coordmap.panels[i].range;
 
       if (
         x <= b.right + expandImg.x &&
@@ -351,7 +347,7 @@ function initCoordmap(
   coordmap.mouseCoordinateSender = function (
     inputId,
     clip = true,
-    nullOutside = false
+    nullOutside = false,
   ) {
     return function (e) {
       if (e === null) {
@@ -378,7 +374,7 @@ function initCoordmap(
         shinySetInputValue(inputId, coords, { priority: "event" });
         return;
       }
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
       const panel = coordmap.getPanelCss(coordsCss)!;
 
       const coordsImg = coordmap.scaleCssToImg(coordsCss);
@@ -413,5 +409,5 @@ function initCoordmap(
   return coordmap;
 }
 
+export { findOrigin, initCoordmap };
 export type { Coordmap, CoordmapInit };
-export { initCoordmap, findOrigin };

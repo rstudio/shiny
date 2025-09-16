@@ -1,7 +1,5 @@
 {
   "search.exclude": {
-    "**/.yarn": true,
-    "**/.pnp.*": true
   },
   "prettier.prettierPath": "./node_modules/prettier",
   "typescript.enablePromptUseWorkspaceTsdk": true,
@@ -15,4 +13,10 @@
     "files.trimTrailingWhitespace": true,
     "files.insertFinalNewline": true,
   },
+  "[json]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+},
 }

@@ -3,8 +3,7 @@ import $ from "jquery";
 import { $escape, randomId } from "../utils";
 import { shinyUnbindAll } from "./initedMethods";
 import type { HtmlDep } from "./render";
-import { renderDependenciesAsync } from "./render";
-import { renderContentAsync } from "./render";
+import { renderContentAsync, renderDependenciesAsync } from "./render";
 
 // Milliseconds to fade in or out
 const fadeDuration = 250;
@@ -146,7 +145,7 @@ function create(id: string): JQuery<HTMLElement> {
       `<div id="shiny-notification-${id}" class="shiny-notification">` +
         '<div class="shiny-notification-close">&times;</div>' +
         '<div class="shiny-notification-content"></div>' +
-        "</div>"
+        "</div>",
     );
 
     $notification.find(".shiny-notification-close").on("click", (e) => {
@@ -186,4 +185,4 @@ function clearRemovalCallback(id: string) {
   }
 }
 
-export { show as showNotification, remove as removeNotification };
+export { remove as removeNotification, show as showNotification };

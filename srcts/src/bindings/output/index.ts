@@ -1,9 +1,9 @@
-import { TextOutputBinding } from "./text";
 import { BindingRegistry } from "../registry";
-import { DownloadLinkOutputBinding } from "./downloadlink";
 import { DatatableOutputBinding } from "./datatable";
+import { DownloadLinkOutputBinding } from "./downloadlink";
 import { HtmlOutputBinding } from "./html";
 import { imageOutputBinding } from "./image";
+import { TextOutputBinding } from "./text";
 
 import { OutputBinding } from "./outputBinding";
 
@@ -16,11 +16,11 @@ function initOutputBindings(): InitOutputBindings {
   outputBindings.register(new TextOutputBinding(), "shiny.textOutput");
   outputBindings.register(
     new DownloadLinkOutputBinding(),
-    "shiny.downloadLink"
+    "shiny.downloadLink",
   );
   outputBindings.register(
     new DatatableOutputBinding(),
-    "shiny.datatableOutput"
+    "shiny.datatableOutput",
   );
   outputBindings.register(new HtmlOutputBinding(), "shiny.htmlOutput");
   outputBindings.register(imageOutputBinding, "shiny.imageOutput");
@@ -28,4 +28,4 @@ function initOutputBindings(): InitOutputBindings {
   return { outputBindings };
 }
 
-export { OutputBinding, initOutputBindings };
+export { initOutputBindings, OutputBinding };

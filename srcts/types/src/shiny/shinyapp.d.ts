@@ -1,6 +1,7 @@
 import type { OutputBindingAdapter } from "../bindings/outputAdapter";
-import type { UploadInitValue, UploadEndValue } from "../file/fileProcessor";
+import type { UploadEndValue, UploadInitValue } from "../file/fileProcessor";
 import { AsyncQueue } from "../utils/asyncQueue";
+import { OutputProgressReporter } from "./outputProgress";
 type ResponseValue = UploadEndValue | UploadInitValue;
 type Handler = (message: any) => Promise<void> | void;
 type ShinyWebSocket = WebSocket & {
@@ -18,6 +19,9 @@ type InputValues = {
 };
 type MessageValue = Parameters<WebSocket["send"]>[0];
 declare function addCustomMessageHandler(type: string, handler: Handler): void;
+/**
+ * The ShinyApp class handles the communication with the Shiny Server.
+ */
 declare class ShinyApp {
     $socket: ShinyWebSocket | null;
     taskQueue: AsyncQueue<() => Promise<void> | void>;
@@ -30,6 +34,7 @@ declare class ShinyApp {
     $bindings: {
         [key: string]: OutputBindingAdapter;
     };
+    $outputProgress: OutputProgressReporter;
     $values: {
         [key: string]: any;
     };
@@ -61,23 +66,25 @@ declare class ShinyApp {
         next: () => number;
         reset: () => void;
     };
-    onDisconnected(): void;
+    onDisconnected(reloading?: boolean): void;
     onConnected(): void;
     makeRequest(method: string, args: unknown[], onSuccess: OnSuccessRequest, onError: OnErrorRequest, blobs: Array<ArrayBuffer | Blob | string> | undefined): void;
     $sendMsg(msg: MessageValue): void;
     receiveError(name: string, error: ErrorsMessageValue): void;
     receiveOutput<T>(name: string, value: T): Promise<T | undefined>;
-    bindOutput(id: string, binding: OutputBindingAdapter): OutputBindingAdapter;
+    bindOutput(id: string, binding: OutputBindingAdapter): Promise<OutputBindingAdapter>;
     unbindOutput(id: string, binding: OutputBindingAdapter): boolean;
     private _narrowScopeComponent;
     private _narrowScope;
     $updateConditionals(): void;
     dispatchMessage(data: ArrayBufferLike | string): Promise<void>;
     private _sendMessagesToHandlers;
+    private _updateProgress;
     private _init;
     progressHandlers: {
         binding: (this: ShinyApp, message: {
             id: string;
+            persistent: boolean;
         }) => void;
         open: (message: {
             style: "notification" | "old";
@@ -86,9 +93,9 @@ declare class ShinyApp {
         update: (message: {
             style: "notification" | "old";
             id: string;
-            message?: string | undefined;
-            detail?: string | undefined;
-            value?: number | undefined;
+            message?: string;
+            detail?: string;
+            value?: number;
         }) => void;
         close: (message: {
             style: "notification";
@@ -99,5 +106,5 @@ declare class ShinyApp {
         fullUrl?: boolean | undefined;
     }): string;
 }
-export { ShinyApp, addCustomMessageHandler };
-export type { Handler, ErrorsMessageValue };
+export { addCustomMessageHandler, ShinyApp };
+export type { ErrorsMessageValue, Handler, ShinyWebSocket };

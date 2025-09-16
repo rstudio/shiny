@@ -7,6 +7,8 @@
 #' @param label The contents of the button or link--usually a text label, but
 #'   you could also use any other HTML, like an image.
 #' @param icon An optional [icon()] to appear on the button.
+#' @param disabled If `TRUE`, the button will not be clickable. Use
+#'   [updateActionButton()] to dynamically enable/disable the button.
 #' @param ... Named attributes to be applied to the button or link.
 #'
 #' @family input elements
@@ -49,16 +51,29 @@
 #'   * Event handlers (e.g., [observeEvent()], [eventReactive()]) won't execute on initial load.
 #'   * Input validation (e.g., [req()], [need()]) will fail on initial load.
 #' @export
-actionButton <- function(inputId, label, icon = NULL, width = NULL, ...) {
+actionButton <- function(inputId, label, icon = NULL, width = NULL,
+  disabled = FALSE, ...) {
 
   value <- restoreInput(id = inputId, default = NULL)
 
-  tags$button(id=inputId,
+  icon <- validateIcon(icon)
+
+  if (!is.null(icon)) {
+    icon <- span(icon, class = "action-icon")
+  }
+
+  if (!is.null(label)) {
+    label <- span(label, class = "action-label")
+  }
+
+  tags$button(
+    id = inputId,
     style = css(width = validateCssUnit(width)),
-    type="button",
-    class="btn btn-default action-button",
+    type = "button",
+    class = "btn btn-default action-button",
     `data-val` = value,
-    list(validateIcon(icon), label),
+    disabled = if (isTRUE(disabled)) NA else NULL,
+    icon, label,
     ...
   )
 }
@@ -68,30 +83,40 @@ actionButton <- function(inputId, label, icon = NULL, width = NULL, ...) {
 actionLink <- function(inputId, label, icon = NULL, ...) {
   value <- restoreInput(id = inputId, default = NULL)
 
-  tags$a(id=inputId,
-    href="#",
-    class="action-button",
+  icon <- validateIcon(icon)
+
+  if (!is.null(icon)) {
+    icon <- span(icon, class = "action-icon")
+  }
+
+  if (!is.null(label)) {
+    label <- span(label, class = "action-label")
+  }
+
+  tags$a(
+    id = inputId,
+    href = "#",
+    class = "action-button action-link",
     `data-val` = value,
-    list(validateIcon(icon), label),
+    icon, label,
     ...
   )
 }
 
 
-# Check that the icon parameter is valid:
-# 1) Check  if the user wants to actually add an icon:
-#    -- if icon=NULL, it means leave the icon unchanged
-#    -- if icon=character(0), it means don't add an icon or, more usefully,
-#       remove the previous icon
-# 2) If so, check that the icon has the right format (this does not check whether
-# it is a *real* icon - currently that would require a massive cross reference
-# with the "font-awesome" and the "glyphicon" libraries)
+# Throw an informative warning if icon isn't html-ish
 validateIcon <- function(icon) {
-  if (is.null(icon) || identical(icon, character(0))) {
+  if (length(icon) == 0) {
     return(icon)
-  } else if (inherits(icon, "shiny.tag") && icon$name == "i") {
-    return(icon)
-  } else {
-    stop("Invalid icon. Use Shiny's 'icon()' function to generate a valid icon")
   }
+  if (!isTagLike(icon)) {
+    rlang::warn(
+      c(
+        "It appears that a non-HTML value was provided to `icon`.",
+        i = "Try using a `shiny::icon()` (or an equivalent) to get an icon."
+      ),
+      class = "shiny-validate-icon"
+    )
+  }
+  icon
 }

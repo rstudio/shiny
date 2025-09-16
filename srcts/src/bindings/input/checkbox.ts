@@ -1,11 +1,16 @@
 import $ from "jquery";
-import { InputBinding } from "./inputBinding";
+import type { HtmlDep } from "../../shiny/render";
+import { renderContent } from "../../shiny/render";
 import { hasDefinedProperty } from "../../utils";
+import { InputBinding } from "./inputBinding";
 
 type CheckedHTMLElement = HTMLInputElement;
 
 type CheckboxChecked = CheckedHTMLElement["checked"];
-type CheckboxReceiveMessageData = { value?: CheckboxChecked; label?: string };
+type CheckboxReceiveMessageData = {
+  value?: CheckboxChecked;
+  label?: { html: string; deps: HtmlDep[] };
+};
 
 class CheckboxInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
@@ -32,18 +37,19 @@ class CheckboxInputBinding extends InputBinding {
       value: el.checked,
     };
   }
-  receiveMessage(
+  async receiveMessage(
     el: CheckedHTMLElement,
-    data: CheckboxReceiveMessageData
-  ): void {
+    data: CheckboxReceiveMessageData,
+  ): Promise<void> {
     if (hasDefinedProperty(data, "value")) {
-      el.checked = data.value;
+      el.checked = data.value!;
     }
 
     // checkboxInput()'s label works different from other
     // input labels...the label container should always exist
     if (hasDefinedProperty(data, "label")) {
-      $(el).parent().find("span").text(data.label);
+      const labelSpan = $(el).parent().find("span");
+      await renderContent(labelSpan, data.label!);
     }
 
     $(el).trigger("change");
@@ -51,4 +57,4 @@ class CheckboxInputBinding extends InputBinding {
 }
 
 export { CheckboxInputBinding };
-export type { CheckedHTMLElement, CheckboxReceiveMessageData };
+export type { CheckboxReceiveMessageData, CheckedHTMLElement };

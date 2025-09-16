@@ -241,11 +241,8 @@ selectizeDependencyFunc <- function(theme) {
     return(selectizeStaticDependency(version_selectize))
   }
 
-  selectizeDir <- system_file(package = "shiny", "www/shared/selectize/")
   bs_version <- bslib::theme_version(theme)
-  stylesheet <- file.path(
-    selectizeDir, "scss", paste0("selectize.bootstrap", bs_version, ".scss")
-  )
+
   # It'd be cleaner to ship the JS in a separate, href-based,
   # HTML dependency (which we currently do for other themable widgets),
   # but DT, crosstalk, and maybe other pkgs include selectize JS/CSS
@@ -253,17 +250,25 @@ selectizeDependencyFunc <- function(theme) {
   # name, the JS/CSS would be loaded/included twice, which leads to
   # strange issues, especially since we now include a 3rd party
   # accessibility plugin https://github.com/rstudio/shiny/pull/3153
-  script <- file.path(
-    selectizeDir, c("js/selectize.min.js", "accessibility/js/selectize-plugin-a11y.min.js")
-  )
+  selectizeDir <- system_file(package = "shiny", "www/shared/selectize/")
+  script <- file.path(selectizeDir, selectizeScripts())
+
   bslib::bs_dependency(
-    input = sass::sass_file(stylesheet),
+    input = selectizeSass(bs_version),
     theme = theme,
     name = "selectize",
     version = version_selectize,
     cache_key_extra = get_package_version("shiny"),
     .dep_args = list(script = script)
   )
+}
+
+selectizeSass <- function(bs_version) {
+  selectizeDir <- system_file(package = "shiny", "www/shared/selectize/")
+  stylesheet <- file.path(
+    selectizeDir, "scss", paste0("selectize.bootstrap", bs_version, ".scss")
+  )
+  sass::sass_file(stylesheet)
 }
 
 selectizeStaticDependency <- function(version) {
@@ -273,10 +278,18 @@ selectizeStaticDependency <- function(version) {
     src = "www/shared/selectize",
     package = "shiny",
     stylesheet = "css/selectize.bootstrap3.css",
-    script = c(
-      "js/selectize.min.js",
-      "accessibility/js/selectize-plugin-a11y.min.js"
-    )
+    script = selectizeScripts()
+  )
+}
+
+selectizeScripts <- function() {
+  isMinified <- isTRUE(get_devmode_option("shiny.minified", TRUE))
+  paste0(
+    c(
+      "js/selectize",
+      "accessibility/js/selectize-plugin-a11y"
+    ),
+    if (isMinified) ".min.js" else ".js"
   )
 }
 

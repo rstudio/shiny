@@ -1,11 +1,11 @@
 // This build script must be executed from the root repo directory via
 // ```
-// yarn build
+// npm run build
 // ```
 
-import { build, outDir } from "./_build";
-import { readdir, unlink, writeFile } from "fs/promises";
 import globalsPlugin from "esbuild-plugin-globals";
+import { readdir, unlink, writeFile } from "fs/promises";
+import { build, outDir } from "./_build";
 
 const opts = {
   bundle: false,
@@ -53,6 +53,14 @@ build({
   entryPoints: [outDir + "ionrangeslider/js/ion.rangeSlider.js"],
   outfile: outDir + "ionrangeslider/js/ion.rangeSlider.min.js",
   minify: true,
+});
+
+build({
+  ...opts,
+  entryPoints: [outDir + "selectize/js/selectize.js"],
+  outfile: outDir + "selectize/js/selectize.min.js",
+  minify: true,
+  target: "es6",
 });
 
 build({

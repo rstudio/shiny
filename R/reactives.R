@@ -398,8 +398,6 @@ ReactiveValues <- R6Class(
       # invalidate all deps of `key`
 
       domain <- getDefaultReactiveDomain()
-      hidden <- substr(key, 1, 1) == "."
-
       key_exists <- .values$containsKey(key)
 
       if (key_exists && !isTRUE(force) && .dedupe && identical(.values$get(key), value)) {
@@ -420,26 +418,15 @@ ReactiveValues <- R6Class(
         .dependents$get(key)$invalidate()
       }
 
-      # only invalidate if there are deps
-      if (!key_exists && isTRUE(.hasRetrieved$names)) {
-        rLog$valueChangeNames(.reactId, .values$keys(), domain)
-        .namesDeps$invalidate()
+      # invalidate names() or toList() if needed
+      if (!key_exists) {
+        private$invalidateNames(domain)
       }
 
-      if (hidden) {
-        if (isTRUE(.hasRetrieved$asListAll)) {
-          rLog$valueChangeAsListAll(.reactId, .values$values(), domain)
-          .allValuesDeps$invalidate()
-        }
-      } else {
-        if (isTRUE(.hasRetrieved$asList)) {
-          react_vals <- .values$values()
-          react_vals <- react_vals[!grepl("^\\.", base::names(react_vals))]
-          # leave as is. both object would be registered to the listening object
-          rLog$valueChangeAsList(.reactId, react_vals, domain)
-          .valuesDeps$invalidate()
-        }
-      }
+      private$invalidateAsListAny(
+        all.names = substr(key, 1, 1) == ".",
+        domain = domain
+      )
 
       invisible()
     },
@@ -449,6 +436,21 @@ ReactiveValues <- R6Class(
              function(name) {
                self$set(name, lst[[name]])
              })
+    },
+
+    remove = function(key) {
+      stopifnot(rlang::is_string(key))
+
+      if (!self$.values$containsKey(key)) {
+        return(invisible())
+      }
+
+      value <- self$.values$get(key)
+      self$.values$remove(key)
+      self$.nameOrder <- setdiff(self$.nameOrder, key)
+      self$invalidateNames()
+      self$invalidateAsListAny(all.names = substr(key, 1, 1) == ".")
+      invisible(value)
     },
 
     names = function() {
@@ -529,7 +531,47 @@ ReactiveValues <- R6Class(
 
       return(listValue)
     }
+  ),
+  private = list(
+    invalidateNames = function(domain = getDefaultReactiveDomain()) {
+      if (!isTRUE(self$.hasRetrieved$names)) {
+        return(invisible())
+      }
+      rLog$valueChangeNames(self$.reactId, self$.values$keys(), domain)
+      self$.namesDeps$invalidate()
+    },
 
+    invalidateAsListAny = function(
+      all.names,
+      domain = getDefaultReactiveDomain()
+    ) {
+      if (isTRUE(all.names)) {
+        private$invalidateAsListAll(domain)
+      } else {
+        private$invalidateAsList(domain)
+      }
+    },
+
+    invalidateAsListAll = function(domain = getDefaultReactiveDomain()) {
+      if (!isTRUE(self$.hasRetrieved$asListAll)) {
+        return(invisible())
+      }
+
+      rLog$valueChangeAsListAll(self$.reactId, self$.values$values(), domain)
+      self$.allValuesDeps$invalidate()
+    },
+
+    invalidateAsList = function(domain = getDefaultReactiveDomain()) {
+      if (!isTRUE(self$.hasRetrieved$asList)) {
+        return(invisible())
+      }
+
+      react_vals <- self$.values$values()
+      react_vals <- react_vals[!grepl("^\\.", base::names(react_vals))]
+      # leave as is. both object would be registered to the listening object
+      rLog$valueChangeAsList(self$.reactId, react_vals, domain)
+      self$.valuesDeps$invalidate()
+    }
   )
 )
 

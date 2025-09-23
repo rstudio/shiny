@@ -2159,6 +2159,19 @@ ShinySession <- R6Class(
         self$cycleStartAction(doManageInputs)
       }
     },
+    removeInputs = function(inputIds) {
+      is_clientdata <- grepl("^.clientdata_", inputIds)
+      if (any(is_clientdata)) {
+        abort(
+          "Cannot remove clientData inputs: ",
+          paste(inputIds[is_clientdata], collapse = ", ")
+        )
+      }
+      
+      for (inputId in inputIds) {
+        private$.input$remove(inputId)
+      }
+    },
     outputOptions = function(name, ...) {
       # If no name supplied, return the list of options for all outputs
       if (is.null(name))

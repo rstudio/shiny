@@ -369,6 +369,29 @@ MockShinySession <- R6Class(
       })
       private$flush()
     },
+    
+    #' @description Removes inputs from the `session$inputs` object and flushes
+    #'   the reactives.
+    #' @param inputIds Character vector of input ids to remove.
+    #' @examples
+    #' \dontrun{
+    #' session$setInputs(x=1, y=2)
+    #' session$removeInputs("x")
+    #' }
+    removeInputs = function(inputIds) {
+      is_clientdata <- grepl("^.clientdata_", inputIds)
+      if (any(is_clientdata)) {
+        abort(
+          "Cannot remove clientData inputs: ",
+          paste(inputIds[is_clientdata], collapse = ", ")
+        )
+      }
+      
+      for (inputId in inputIds) {
+        private$.input$remove(inputId)
+      }
+      private$flush()
+    },
 
     #' @description An internal method which shouldn't be used by others.
     #'   Schedules `callback` for execution after some number of `millis`

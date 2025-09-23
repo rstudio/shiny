@@ -448,8 +448,8 @@ ReactiveValues <- R6Class(
       value <- self$.values$get(key)
       self$.values$remove(key)
       self$.nameOrder <- setdiff(self$.nameOrder, key)
-      self$invalidateNames()
-      self$invalidateAsListAny(all.names = substr(key, 1, 1) == ".")
+      private$invalidateNames()
+      private$invalidateAsListAny(all.names = substr(key, 1, 1) == ".")
       invisible(value)
     },
 
@@ -641,14 +641,15 @@ checkName <- function(x) {
 # @param ns A namespace function (either `identity` or `NS(namespace)`)
 .createReactiveValues <- function(values = NULL, readonly = FALSE,
   ns = identity) {
-
+  
   structure(
     list(
       impl = values,
       readonly = readonly,
       ns = ns
     ),
-    class='reactivevalues'
+    class='reactivevalues',
+    remove = function(key) values$remove(key)
   )
 }
 

@@ -38,7 +38,13 @@ toJSON <- function(x, ...,  dataframe = "columns", null = "null", na = "null",
   # https://github.com/jeroen/jsonlite/commit/728efa9
   digits = getOption("shiny.json.digits", I(16)), use_signif = is(digits, "AsIs"),
   force = TRUE, POSIXt = "ISO8601", UTC = TRUE,
-  rownames = FALSE, keep_vec_names = TRUE, strict_atomic = TRUE) {
+  rownames = FALSE, keep_vec_names = TRUE, strict_atomic = TRUE, fix_vec_names = TRUE) {
+
+  # jsonlite complains about named _vectors_, so we'll force all
+  # named-vectors to be named-lists
+  if (fix_vec_names) {
+    x <- lapply(x, function(L) if (is.null(names(L))) L else as.list(L))
+  }
 
   if (strict_atomic) {
     x <- I(x)

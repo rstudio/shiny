@@ -44,17 +44,28 @@ testthat__is_testing <- function() {
   otel::log(msg, ..., severity = severity, logger = logger)
 }
 
+otel_is_tracing_enabled <- function(tracer = get_tracer()) {
+  # bench marks: https://github.com/rstudio/promises/blob/a187fca5b24bd2235f15ccc0760de449c381d4ea/R/otel.R#L292-L299
+  !.subset2(tracer, "is_enabled")()
+}
 
-# Bench mark for
-# * otel::get_tracer()
-# * local scope get_tracer()
-# * environment based get_tracer(), like httr2:::get_tracer()
-# A tibble: 3 × 13
-#   expression            min  median `itr/sec` mem_alloc `gc/sec` n_itr  n_gc total_time result     memory     time
-#   <bch:expr>        <bch:t> <bch:t>     <dbl> <bch:byt>    <dbl> <int> <dbl>   <bch:tm> <list>     <list>     <list>
-# 1 otel::get_tracer…  35.8µs  39.6µs    24238.      560B     12.1  9995     5   412.37ms <otl_trcr> <Rprofmem> <bench_tm>
-# 2 get_tracer()        205ns   328ns  3044386.      560B      0   10000     0     3.29ms <otl_trcr> <Rprofmem> <bench_tm>
-# 3 get_tracer_env()    328ns 451.1ns  2072708.      560B      0   10000     0     4.83ms <otl_trcr> <Rprofmem> <bench_tm>
+get_ospan_logger <- local({
+  logger <- NULL
+  function() {
+    if (!is.null(logger)) {
+      return(logger)
+    }
+    if (testthat__is_testing()) {
+      # Don't cache the logger in unit tests. It interferes with logger provider
+      # injection in otelsdk::with_otel_record().
+      return(otel::get_logger())
+    }
+    logger <<- otel::get_logger()
+    logger
+  }
+})
+
+
 
 # Inspired by httr2:::get_tracer().
 # Using local scope avoids an environment object lookup on each call.

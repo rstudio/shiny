@@ -27,7 +27,7 @@ has_otel_bind <- function(bind) {
     stopifnot(length(bind) == 1, any(bind == otel_bind_choices))
   }
 
-  otel::is_tracing_enabled() && otel_bind_is_enabled(bind)
+  otel_is_tracing_enabled() && otel_bind_is_enabled(bind)
 }
 
 

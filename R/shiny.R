@@ -1056,7 +1056,7 @@ ShinySession <- R6Class(
         class(e) <- c("shiny.error.fatal", class(e))
       }
 
-      otel_log_safe(
+      otel_log(
         if (close) "Fatal error" else "Unhandled error",
         severity = if (close) "fatal" else "error",
         attributes = otel::as_attributes(list(error = e, session.id = self$token))

@@ -23,7 +23,6 @@ create_shiny_ospan <- function(name, ...) {
 # -- Helpers --------------------------------------------------------------
 
 
-otel_log_safe <- function(
 is_ospan <- function(x) {
   inherits(x, "otel_span")
 }
@@ -32,15 +31,13 @@ testthat__is_testing <- function() {
   # testthat::is_testing()
   identical(Sys.getenv("TESTTHAT"), "true")
 }
+
+otel_log <- function(
   msg,
   ...,
   severity = "info",
-  logger = NULL
+  logger = get_ospan_logger()
 ) {
-  if (!otel::is_tracing_enabled()) return()
-  # Use `"{msg}"` instead of `msg` to prevent otel from doing glue processing on the message
-  # otel::log("{msg}", ..., severity = severity, logger = logger)
-  # TODO: What happened to the processing?
   otel::log(msg, ..., severity = severity, logger = logger)
 }
 

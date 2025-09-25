@@ -195,8 +195,7 @@ dev_barret_kitchen <- function() {
     message(msg)
     # otel::log_info(msg, tracer = session$userData[["_otel_tracer"]])
     # TODO: Remove the logger param once function is removed from Shiny package
-    otel_log_safe(msg, logger = otel_logger)
-    # otel_log_safe(msg)
+    otel_log(msg, logger = otel_logger)
   }
 
   app <- shinyApp(

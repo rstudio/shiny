@@ -107,7 +107,7 @@ ReactiveVal <- R6Class(
       domain <- getDefaultReactiveDomain()
       if ((!is.null(domain)) && .isLoggingOtel) {
         # [mymod] Set reactiveVal: x
-        otel_log_safe(
+        otel_log(
           otel_label_set_reactive_val(private$label, domain = domain),
           severity = "info",
           attributes = private$.otelAttrs
@@ -438,7 +438,7 @@ ReactiveValues <- R6Class(
         # Do not include updates to input or clientData unless _some_ reactivity has occured
         if (has_reactive_ospan_cleanup(domain) || !(.label == "input" || .label == "clientData")) {
           # [mymod] Set reactiveValues: x$key
-          otel_log_safe(
+          otel_log(
             otel_label_set_reactive_values(.label, key, domain = domain),
             severity = "info",
             attributes = .otelAttrs

@@ -1,6 +1,4 @@
 #' @importFrom promises
-#'   create_ospan
-#'   end_ospan
 #'   with_ospan_async
 #'   with_ospan_promise_domain
 #'   local_ospan_promise_domain
@@ -12,8 +10,8 @@ with_shiny_ospan_async <- function(name, expr, ..., attributes = NULL) {
   with_ospan_async(name, expr, ..., attributes = attributes, tracer = get_tracer())
 }
 
-create_shiny_ospan <- function(name, ..., attributes = NULL) {
-  create_ospan(name, ..., attributes = attributes, tracer = get_tracer())
+create_shiny_ospan <- function(name, ...) {
+  otel::start_span(name, ..., tracer = get_tracer())
 }
 
 
@@ -26,6 +24,14 @@ create_shiny_ospan <- function(name, ..., attributes = NULL) {
 
 
 otel_log_safe <- function(
+is_ospan <- function(x) {
+  inherits(x, "otel_span")
+}
+
+testthat__is_testing <- function() {
+  # testthat::is_testing()
+  identical(Sys.getenv("TESTTHAT"), "true")
+}
   msg,
   ...,
   severity = "info",
@@ -58,7 +64,7 @@ get_tracer <- local({
     if (!is.null(tracer)) {
       return(tracer)
     }
-    if (testthat::is_testing()) {
+    if (testthat__is_testing()) {
       # Don't cache the tracer in unit tests. It interferes with tracer provider
       # injection in otelsdk::with_otel_record().
       return(otel::get_tracer())

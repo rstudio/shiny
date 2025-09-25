@@ -324,6 +324,7 @@ bindOtel.shiny.render.function <- function(x, ...) {
   ospan_attrs <- attr(x, "otelAttrs")
 
   renderFunc <- function(...) {
+    # Dynamically determine the span label given the current reactive domain
     if (is.null(span_label)) {
       span_label <<-
         ospan_label_render_function(domain = getDefaultReactiveDomain())

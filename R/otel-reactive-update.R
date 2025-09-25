@@ -4,7 +4,7 @@ OSPAN_REACTIVE_UPDATE_NAME <- "reactive_update"
 # * `session$userData[["_otel_has_reactive_cleanup"]]` - Whether the reactive span cleanup has been set
 
 has_reactive_ospan_cleanup <- function(domain) {
-  !is.null(domain$userData[["_otel_has_reactive_cleanup"]])
+  is_ospan(domain$userData[["_otel_has_reactive_cleanup"]])
 }
 set_reactive_ospan_cleanup <- function(domain) {
   domain$userData[["_otel_has_reactive_cleanup"]] <- TRUE
@@ -33,7 +33,7 @@ create_reactive_update_ospan <- function(..., domain) {
   }
 
   prev_ospan <- domain$userData[["_otel_reactive_update_ospan"]]
-  if (!is.null(prev_ospan)) {
+  if (is_ospan(prev_ospan)) {
     stop("Reactive update span already exists")
   }
 
@@ -65,8 +65,8 @@ create_reactive_update_ospan <- function(..., domain) {
 end_reactive_update_ospan <- function(..., domain) {
 
   reactive_update_ospan <- domain$userData[["_otel_reactive_update_ospan"]]
-  if (!is.null(reactive_update_ospan)) {
-    end_ospan(reactive_update_ospan)
+  if (is_ospan(reactive_update_ospan)) {
+    otel::end_span(reactive_update_ospan)
     domain$userData[["_otel_reactive_update_ospan"]] <- NULL
   }
 }
@@ -83,7 +83,7 @@ end_reactive_update_ospan <- function(..., domain) {
 with_reactive_update_ospan_async <- function(expr, ..., domain) {
   reactive_update_ospan <- domain$userData[["_otel_reactive_update_ospan"]]
 
-  if (is.null(reactive_update_ospan)) {
+  if (!is_ospan(reactive_update_ospan)) {
     return(force(expr))
   }
 

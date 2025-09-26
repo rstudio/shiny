@@ -221,7 +221,11 @@ ReactiveVal <- R6Class(
 reactiveVal <- function(value = NULL, label = NULL) {
   call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
   if (missing(label)) {
-    label <- rvalSrcrefToLabel(call_srcref)
+    label <- rassignSrcrefToLabel(
+      call_srcref,
+      defaultLabel = paste0("reactiveVal", createUniqueId(4)),
+      fnName = "reactiveVal"
+    )
   }
 
   rv <- ReactiveVal$new(value, label)
@@ -286,8 +290,11 @@ format.reactiveVal <- function(x, ...) {
 # assigned to (e.g. for `a <- reactiveVal()`, the result should be "a"). This
 # is a fragile, error-prone operation, so we default to a random label if
 # necessary.
-rvalSrcrefToLabel <- function(srcref,
-  defaultLabel = paste0("reactiveVal", createUniqueId(4))) {
+rassignSrcrefToLabel <- function(
+  srcref,
+  defaultLabel,
+  fnName
+) {
 
   if (is.null(srcref))
     return(defaultLabel)
@@ -311,7 +318,10 @@ rvalSrcrefToLabel <- function(srcref,
 
   firstLine <- substring(lines[srcref[1]], srcref[2] - 1)
 
-  m <- regexec("\\s*([^[:space:]]+)\\s*(<-|=)\\s*reactiveVal\\b", firstLine)
+  m <- regexec(
+    paste0("\\s*([^[:space:]]+)\\s*(<-|=)\\s*", fnName, "\\b"),
+    firstLine
+  )
   if (m[[1]][1] == -1) {
     return(defaultLabel)
   }
@@ -624,6 +634,13 @@ reactiveValues <- function(...) {
   call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
   if (!is.null(call_srcref)) {
     impl <- .subset2(values, 'impl')
+    impl$.label <- rassignSrcrefToLabel(
+      call_srcref,
+      # Pass through the random default label created in ReactiveValues$new()
+      defaultLabel = impl$.label,
+      fnName = "reactiveValues"
+    )
+
     impl$.otelAttrs <- otel_srcref_attributes(call_srcref)
   }
 

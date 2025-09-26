@@ -10,9 +10,11 @@
 
 * Fixed an issue where `updateSelectizeInput(options = list(plugins="remove_button"))` could lead to multiple remove buttons. (#4275)
 
+* The default label for `reactiveValues()` will not attempt to retrieve the assigned name if the srcref is available. If a value can not easily be produced, the default label (`reactiveValuesXXXX`) will be used instead. (#4269)
+
 ## Changes
 
-* The return value of `actionButton()`/`actionLink()` changed slightly: `label` and `icon` are wrapped in an additional HTML container element. This allows for: 1. `updateActionButton()`/`updateActionLink()` to distinguish between the `label` and `icon` when making updates and 2. spacing between `label` and `icon` to be more easily customized via CSS. 
+* The return value of `actionButton()`/`actionLink()` changed slightly: `label` and `icon` are wrapped in an additional HTML container element. This allows for: 1. `updateActionButton()`/`updateActionLink()` to distinguish between the `label` and `icon` when making updates and 2. spacing between `label` and `icon` to be more easily customized via CSS.
 
 # shiny 1.11.1
 

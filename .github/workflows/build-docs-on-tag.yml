@@ -17,11 +17,9 @@ jobs:
         with:
           github-token: ${{ secrets.SHINY_DEV_CENTER_GITHUB_TOKEN }}
           script: |
-            const result = await github.rest.repos.createDispatchEvent({
+            await github.rest.repos.createDispatchEvent({
               owner: 'rstudio',
               repo: 'shiny-dev-center',
               event_type: 'build-r-reference',
               client_payload: {}
             });
-
-            console.log('Repository dispatch sent successfully');

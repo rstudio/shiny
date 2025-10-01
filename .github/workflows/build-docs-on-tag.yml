@@ -10,9 +10,10 @@ on:
 jobs:
   trigger-build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Send repository dispatch event
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.SHINY_DEV_CENTER_GITHUB_TOKEN }}
           script: |

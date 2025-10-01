@@ -11,16 +11,16 @@ jobs:
   trigger-build:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger build-r-reference workflow
+      - name: Send repository dispatch event
         uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.SHINY_DEV_CENTER_GITHUB_TOKEN }}
           script: |
-            const result = await github.rest.actions.createWorkflowDispatch({
+            const result = await github.rest.repos.createDispatchEvent({
               owner: 'rstudio',
               repo: 'shiny-dev-center',
-              workflow_id: 'build-r-reference.yml',
-              ref: 'main'
+              event_type: 'build-r-reference',
+              client_payload: {}
             });
 
-            console.log('Workflow dispatch result:', result.status);
+            console.log('Repository dispatch sent successfully');

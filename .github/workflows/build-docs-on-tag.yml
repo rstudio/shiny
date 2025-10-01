@@ -1,0 +1,26 @@
+name: Update website docs given new release tag
+
+on:
+  push:
+    branches:
+      - build_docs
+    tags:
+      - "v*"
+
+jobs:
+  trigger-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger build-r-reference workflow
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const result = await github.rest.actions.createWorkflowDispatch({
+              owner: 'rstudio',
+              repo: 'shiny-dev-center',
+              workflow_id: 'build-r-reference.yml',
+              ref: 'main'
+            });
+
+            console.log('Workflow dispatch result:', result.status);

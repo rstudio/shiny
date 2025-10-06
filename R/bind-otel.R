@@ -1,26 +1,26 @@
 # - Goals -----------------------------------
 # * Integration locations:
-#   * Server:
-#     * √ Start reactive_update when reactive busy count > 0
-#     * √ End reactive_update when reactive busy count == 0
-#   * Reactives: val, values, expr, render fn, observe
+#   * √ Server:
+#     * Start reactive_update when reactive busy count > 0
+#     * End reactive_update when reactive busy count == 0
+#   * √ Reactives: val, values, expr, render fn, observe
 #   * Combinations:
-#     * debounce() / throttle()
+#     * √ debounce() / throttle()
 #     * bindCache()
 #     * √ bindEvent()
-#     * bindProgress()?
+#     * X - bindProgress()
 #   * Special functions:
 #     * ExtendedTask()
 #       * Extended task links to submission reactive
 #       * Reactive update that gets result links to the extended task
-#     * observeEvent()
-#     * eventReactive()
+#     * √ observeEvent()
+#     * √ eventReactive()
 #       * TODO: Not recording updates within the span!!
 #  * Maybe enhance all `withReactiveDomain()` calls?
 # * Global options:
 #   * √ shiny.otel.bind:
 #     * "all", "none" - all or nothing
-#     * Currently non-public options:
+#     * Current non-public options:
 #       * "session" - Adds session start/end events
 #       * "reactive_update" - Spans for any reactive update. (Includes `"session"` features).
 #       * "reactivity" - Spans for all reactive things. (Includes `"reactive_update"` features).
@@ -29,40 +29,21 @@
 #     * Note: When adding otel to an object, prepend a class of `FOO.otel`. Then add a dispatch method for `bindOtel.FOO.otel()` that declares the object already has been bound.
 #   * without_otel_bind(expr) - Will not bind any reactives created within `expr` to OpenTelemetry spans.
 
-# - TODO -----------------------------------
-# * √ Nerf bind options to just `"all"` and `"none"`
-# * √ Labels `reactive_update`
-# * √ Value `reactive-update` -> `reactive_update`
-# * √ Labels: (apply to others accordingly)
-#   * observe mymod:<anonymous>
-#   * observe <anonymous>
-#   * observe mylabel (edited)
-# * √ Add code file/line markers when we are able discover the name from the srcinfo
-# * Session
-#   * √ Move Session span to a log start and log end: https://opentelemetry.io/docs/specs/semconv/registry/attributes/session/
-#     * Added session_start and session_end spans to encapsulate the session.start (also includes the `server()` initialization) and session.end events
-#   * √ Add `session.id` with the token to attrs
-# * √ Delay init input/clientData reactive value logs
+# - TODO: -----------------------------------
+# * Span status for success/failure (render function and regular reactive exprs?)
+# * Error handling is not an "exception" for fatal logs
 # * Connect `user.id` to be their user name: https://opentelemetry.io/docs/specs/semconv/registry/attributes/user/
-# * √ bindOtel() should no-op when binding an already bound object (where as currently it throws)
 # * Tests with otel recording
-# * √ Errors should happen in the final span only
 
-`_ignore` <- function() {
-  otelsdk::with_otel_record
-}
 
 
 # - Questions -----------------------------------
 # Add error handling for every otel. Use withCallingHandlers similar to https://github.com/r-lib/mirai/pull/395/files#diff-9e809582679952a93b9f34755bb38207471945eb36cedb9e2aa755125449f531R214-R215
 # TODO: log events for bookmark?
-# Ans: Seems possibly excessive in amount
+  # Ans: Seems possibly excessive in amount
 # TODO: log events like fatal errors? / onUnhandledError
-# Good idea!
+  # Good idea!
 
-# TODO: Add spans for session callbacks? onRestore/onRestored, onSessionEnded, onUnhandledError, on any callback for the session
-# Ans: It is the user's responsiblity to add spans for these methods
-# TODO: freeze / thaw? - log restart event?
 # TODO: reactiveTimer / invalidateLater / reactivePoll / reactiveFileReader
 # TODO: Extended Tasks are linked from parent span. Maybe use an envvar for span context? It is allowed for child process can end much later than the parent process. Take inspiration from callr PR (copying of the span context to the child process).
 

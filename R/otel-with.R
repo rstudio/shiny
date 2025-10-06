@@ -6,15 +6,11 @@ otel_bind_choices <- c(
   "all"
 )
 
-otel_bind_is_enabled <- function(impl_level, opt_bind_level = getOption("shiny.otel.bind", "all")) {
+otel_bind_is_enabled <- function(
+  impl_level,
+  opt_bind_level = getOption("shiny.otel.bind", "all")
+) {
   opt_bind_level <- as_otel_bind(opt_bind_level)
-
-  # if (opt_bind_level == "all") {
-  #   return(TRUE)
-  # }
-  # if (opt_bind_level == "none") {
-  #   return(FALSE)
-  # }
 
   which(opt_bind_level == otel_bind_choices) >=
     which(impl_level == otel_bind_choices)
@@ -38,9 +34,7 @@ has_otel_bind <- function(bind) {
 #   bind
 # ) {
 #   rlang::check_dots_empty()
-
 #   bind <- as_otel_bind(bind)
-
 #   withr::with_options(
 #     list(
 #       shiny.otel.bind = bind
@@ -59,7 +53,6 @@ without_otel_bind <- function(expr) {
 }
 
 
-
 ## -- Helpers -----------------------------------------------------
 
 # shiny.otel.bind can be:
@@ -68,18 +61,6 @@ without_otel_bind <- function(expr) {
 # "reactive_update" (includes "session" features) and reactive_update spans
 # "reactivity" (includes "reactive_update" features) and spans for all reactive things
 # "all" - Anything that Shiny can do. (Currently equivalent to the "reactivity" level)
-
-
-# otel_bind_choices <-
-#   c(
-#     "reactiveVal",
-#     "reactiveValues",
-#     "reactiveExpr",
-#     "observe",
-#     "output",
-#     "reactive_update",
-#     "session"
-#   )
 
 as_otel_bind <- function(bind = "all") {
   if (!is.character(bind)) {

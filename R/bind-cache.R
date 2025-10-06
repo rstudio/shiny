@@ -478,7 +478,7 @@ bindCache.default <- function(x, ...) {
 bindCache.reactiveExpr <- function(x, ..., cache = "app") {
   check_dots_unnamed()
 
-  label <- exprToLabel(substitute(key), "cachedReactive")
+  label <- exprToLabel(substitute(x), "cachedReactive")
   domain <- reactive_get_domain(x)
 
   # Convert the ... to a function that returns their evaluated values.

@@ -173,8 +173,8 @@ dev_barret <- function() {
 # - Kitchen sink app ---------------------------------
 
 dev_barret_kitchen <- function() {
-  # library(mirai)
-  # daemons(2)
+  library(mirai)
+  mirai::daemons(2)
 
   # Inspiration from
   # * https://github.com/r-lib/otel/commit/a2ef493ae4b97701e4e178ac527f313580539080
@@ -220,7 +220,7 @@ dev_barret_kitchen <- function() {
             # session$close()
             # httpuv::stopAllServers()
             stopApp()
-            # mirai::daemons(0)
+            mirai::daemons(0)
           },
           delay = 100 / 1000
         )
@@ -311,24 +311,24 @@ dev_barret_kitchen <- function() {
               log_and_msg("x_prom 1")
               log_and_msg("Launching mirai")
               x_val
-              # mirai_map(seq_len(x_val), function(i) {
-              #   otel::start_local_active_span("slow compute")
-              #   Sys.sleep(i / 10 / 100)
-              #   i
-              # }) |>
-              #   promises::then(function(vals) {
-              #     max(unlist(vals))
-              #   })
+              mirai_map(seq_len(x_val), function(i) {
+                otel::start_local_active_span("slow compute")
+                Sys.sleep(i / 10 / 1000)
+                i
+              }) |>
+                promises::then(function(vals) {
+                  max(unlist(vals))
+                })
 
-              # # mirai(
-              # #   {
-              # #     otel::start_local_active_span("slow compute")
-              # #     # val
-              # #     # Sys.sleep(0.2)
-              # #     val
-              # #   },
-              # #   val = x_val
-              # # )
+              # mirai(
+              #   {
+              #     otel::start_local_active_span("slow compute")
+              #     # val
+              #     # Sys.sleep(0.2)
+              #     val
+              #   },
+              #   val = x_val
+              # )
             })
             p <- promises::then(p, function(x_val) {
               log_and_msg("x_prom 2")

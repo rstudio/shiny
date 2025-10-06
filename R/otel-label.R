@@ -20,7 +20,7 @@ ospan_label_reactive <- function(x, ..., domain) {
   sprintf(
     "%s %s",
     fn_name,
-    otel_label_upgrade(label, domain = domain, replace_default_with_anonymous = FALSE)
+    otel_label_upgrade(label, domain = domain)
   )
 }
 
@@ -88,12 +88,12 @@ otel_label_set_reactive_values <- function(label, key, ..., domain) {
 # Prefix:
 # "" -> ""
 # "my-nested-mod-" -> "my-nested-mod"
-otel_label_upgrade <- function(label, ..., replace_default_with_anonymous = TRUE, domain) {
-  # By default, observe() sets the label to `observe(CODE)`
+otel_label_upgrade <- function(label, ..., domain) {
+  # By default, `observe()` sets the label to `observe(CODE)`
   # This label is too big and inconsistent.
   # Replace it with `<anonymous>`
-  if (replace_default_with_anonymous && is_default_label(label)) {
-    # message("-- replacing label: ", label)
+  # (Similar with `eventReactive()` and `observeEvent()`)
+  if (is_default_label(label) && grepl("(", label, fixed = TRUE)) {
     label <- "<anonymous>"
     # label <- sprintf("<anonymous> - %s", label)
   }

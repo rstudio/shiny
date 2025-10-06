@@ -1961,7 +1961,7 @@ reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
 
     cookie(checkFunc())
     invalidateLater(intervalMillis(), session)
-  })
+  }, label = "reactivePoll cleanup")
 
   re <- reactive(label = "reactivePoll value", {
     # Take a dependency on the cookie, so that when it changes, this

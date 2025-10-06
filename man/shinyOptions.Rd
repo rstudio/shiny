@@ -142,13 +142,9 @@ logs.
 }
 
 This option is useful for debugging and profiling while in production. This
-option will only be useful if the \code{otelsdk} package is installed. Please
-have any OpenTelemetry environment variables set before starting your Shiny
-app.}
-\item{shiny.otel.graphlocked (defaults to \code{FALSE})}{If \code{TRUE}, then all reactive expressions and
-observers will be automatically bound to OpenTelemetry spans. This is
-useful for debugging and profiling, but incurs a performance penalty.
-This option should only be used if the \code{otelsdk} package is installed.}
+option will only be useful if the \code{otelsdk} package is installed and
+\code{otel::is_tracing_enabled()} returns \code{TRUE}. Please have any OpenTelemetry
+environment variables set before starting your Shiny app.}
 }
 }
 

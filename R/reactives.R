@@ -251,7 +251,7 @@ reactiveVal <- function(value = NULL, label = NULL) {
   )
 
   if (has_otel_bind("reactivity")) {
-    ret <- bindOtel(ret)
+    ret <- bind_otel_reactive_val(ret)
   }
 
   ret
@@ -650,7 +650,7 @@ reactiveValues <- function(...) {
   }
 
   if (has_otel_bind("reactivity")) {
-    values <- bindOtel(values)
+    values <- bind_otel_reactive_values(values)
   }
 
   values
@@ -1111,7 +1111,7 @@ reactive <- function(
   )
 
   if (has_otel_bind("reactivity")) {
-    ret <- bindOtel(ret)
+    ret <- bind_otel_reactive_expr(ret)
   }
 
   ret
@@ -1549,7 +1549,7 @@ observe <- function(
   }
 
   if (has_otel_bind("reactivity")) {
-    o <- bindOtel(o)
+    o <- bind_otel_observe(o)
   }
 
   invisible(o)

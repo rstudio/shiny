@@ -1,14 +1,9 @@
 # - Goals -----------------------------------
 # * Integration locations:
 #   * Server:
-#     * √ Start when reactive busy count > 0
-#     * √ Close when reactive busy count == 0
-#   * Reactives:
-#     * √ Reactive value - `reactiveVal`
-#     * √ Reactive values - `reactiveValues`
-#     * √ Reactive expression - `reactive`
-#     * √ Render function - `shiny.render.function`
-#     * √ Observer - `observe`
+#     * √ Start reactive_update when reactive busy count > 0
+#     * √ End reactive_update when reactive busy count == 0
+#   * Reactives: val, values, expr, render fn, observe
 #   * Combinations:
 #     * debounce() / throttle()
 #     * bindCache()
@@ -23,18 +18,16 @@
 #       * TODO: Not recording updates within the span!!
 #  * Maybe enhance all `withReactiveDomain()` calls?
 # * Global options:
-#   * √ shiny.otel.graphlocked: TRUE/FALSE - whether to lock the graph for
-#     OpenTelemetry spans, so that they are not modified while being traced.
 #   * √ shiny.otel.bind:
 #     * "all", "none" - all or nothing
 #     * Currently non-public options:
-#       * "reactiveVal", "reactiveValues", "reactiveExpr", "observe", "output" - corresponding reactive objects
-#       * "reactive_update" - Surrounds a reactive update. Shiny is "busy"
-#       * "session" - Surrounds the app `server()` function
-# * Methods:
-#   * bindOtel() - S3 method that binds the reactive object to OpenTelemetry spans
+#       * "session" - Adds session start/end events
+#       * "reactive_update" - Spans for any reactive update. (Includes `"session"` features).
+#       * "reactivity" - Spans for all reactive things. (Includes `"reactive_update"` features).
+# * Private methods:
+#   * bind_otel_*() - Methods that binds the reactive object to OpenTelemetry spans
 #     * Note: When adding otel to an object, prepend a class of `FOO.otel`. Then add a dispatch method for `bindOtel.FOO.otel()` that declares the object already has been bound.
-#   * withOtel(expr, ..., bind) - runs the expression with OpenTelemetry spans enabled
+#   * without_otel_bind(expr) - Will not bind any reactives created within `expr` to OpenTelemetry spans.
 
 # - TODO -----------------------------------
 # * √ Nerf bind options to just `"all"` and `"none"`
@@ -126,22 +119,10 @@
 #' @param x The object to add caching to.
 #' @param ... Future parameter expansion.
 #' @seealso [bindCache()] and [bindEvent()] for other ways to bind to your reactives.
-#' @export
-bindOtel <- function(x, ...) {
-  UseMethod("bindOtel")
-}
+#' @noRd
+NULL
 
-#' @export
-bindOtel.default <- function(x, ...) {
-  stop(
-    "Don't know how to handle object with class ",
-    paste(class(x), collapse = ", ")
-  )
-}
-
-#' @export
-bindOtel.reactiveVal <- function(x, ...) {
-  rlang::check_dots_empty()
+bind_otel_reactive_val <- function(x) {
 
   impl <- attr(x, ".impl", exact = TRUE)
   # Set flag for otel logging when setting the value
@@ -152,9 +133,7 @@ bindOtel.reactiveVal <- function(x, ...) {
   x
 }
 
-#' @export
-bindOtel.reactivevalues <- function(x, ...) {
-  rlang::check_dots_empty()
+bind_otel_reactive_values <- function(x) {
 
   impl <- attr(x, ".impl", exact = TRUE)
   # Set flag for otel logging when setting values
@@ -165,9 +144,7 @@ bindOtel.reactivevalues <- function(x, ...) {
   x
 }
 
-#' @export
-bindOtel.reactiveExpr <- function(x, ...) {
-  rlang::check_dots_empty()
+bind_otel_reactive_expr <- function(x) {
 
   domain <- reactive_get_domain(x)
 
@@ -181,9 +158,21 @@ bindOtel.reactiveExpr <- function(x, ...) {
   x
 }
 
-#' @export
-bindOtel.shiny.render.function <- function(x, ...) {
-  rlang::check_dots_empty()
+bind_otel_observe <- function(x) {
+  x$.isRecordingOtel <- TRUE
+  x$.otelLabel <- ospan_label_observer(x, domain = x$.domain)
+
+  class(x) <- c("Observer.otel", class(x))
+  invisible(x)
+}
+
+
+
+bind_otel_shiny_render_function <- function(x) {
+  if (inherits(x, "shiny.render.function.otel")) {
+    # Already bound
+    return(x)
+  }
 
   valueFunc <- x
   span_label <- NULL
@@ -211,53 +200,11 @@ bindOtel.shiny.render.function <- function(x, ...) {
 }
 
 
-#' @export
-bindOtel.Observer <- function(x, ...) {
-  rlang::check_dots_empty()
 
-  x$.isRecordingOtel <- TRUE
-  x$.otelLabel <- ospan_label_observer(x, domain = x$.domain)
-
-  class(x) <- c("Observer.otel", class(x))
-  invisible(x)
-}
-
-
-#' @export
-bindEvent.reactive.otel <- function(x, ...) {
-  NextMethod()
-}
-
-#' @export
-bindOtel.reactive.event <- function(x, ...) {
-  NextMethod()
-}
-
-
-#' @export
-bindOtel.function <- function(x, ...) {
-  cli::cli_abort(paste0(
-    "Don't know how to add Open Telemetry recording to a plain function. ",
-    "If this is a {.code render*()} function for Shiny, it may need to be updated. ",
-    "Please see {.help shiny::bindOtel} for more information."
-  ))
-}
-
-
-# - Double binding checks -----------------------------
-
-#' @export
-bindOtel.reactive.otel <- function(x, ...) {
-  # Don't double bind. Return as is
-  x
-}
-#' @export
-bindOtel.reactiveVal.otel <- bindOtel.reactive.otel
-#' @export
-bindOtel.reactivevalues.otel <- bindOtel.reactive.otel
-#' @export
-bindOtel.shiny.render.function.otel <- bindOtel.reactive.otel
-#' @export
-bindOtel.shiny.render.function.event <- bindOtel.reactive.event
-#' @export
-bindOtel.Observer.otel <- bindOtel.reactive.otel
+# bindOtel.function <- function(x, ...) {
+#   cli::cli_abort(paste0(
+#     "Don't know how to add Open Telemetry recording to a plain function. ",
+#     "If this is a {.code render*()} function for Shiny, it may need to be updated. ",
+#     "Please see {.help shiny::bindOtel} for more information."
+#   ))
+# }

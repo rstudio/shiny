@@ -206,7 +206,7 @@ bindEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE
 
   initialized <- FALSE
 
-  withOtel(bind = "none", {
+  without_otel_bind({
     res <- reactive(label = label, domain = domain, ..stacktraceon = FALSE, {
       hybrid_chain(
         {
@@ -229,7 +229,7 @@ bindEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE
   class(res) <- c("reactive.event", x_classes)
 
   if (has_otel_bind("reactivity")) {
-    res <- bindOtel(res)
+    res <- bind_otel_reactive_expr(res)
   }
 
   res
@@ -314,7 +314,7 @@ bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
 
   class(x) <- c("Observer.event", class(x))
   if (has_otel_bind("reactivity")) {
-    x <- bindOtel(x)
+    x <- bind_otel_observe(x)
   }
   invisible(x)
 }

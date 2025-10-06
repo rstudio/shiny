@@ -86,22 +86,22 @@ dev_barret <- function() {
         )
       )
       server <- function(input, output, session) {
-        withOtel(bind = bind_val, {
+        without_otel_bind({
           chat_server <- shinychat::chat_mod_server("chat", client, session)
         })
-        withOtel(bind = bind_val, {
+        without_otel_bind({
           observeEvent(input$close_btn, {
             stopApp()
           })
         })
 
-        # withOtel(bind = bind_val, {
+        # without_otel_bind({
         #   output$boom <- renderUI({
         #     stop("Boom!")
         #   })
         # })
 
-        withOtel(bind = bind_val, {
+        without_otel_bind({
           counter <- reactiveVal(1)
           observeEvent(chat_server$last_turn(), {
             counter(counter() + 1)

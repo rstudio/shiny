@@ -170,13 +170,9 @@ getShinyOption <- function(name, default = NULL) {
 #'     logs.
 #'
 #'   This option is useful for debugging and profiling while in production. This
-#'   option will only be useful if the `otelsdk` package is installed. Please
-#'   have any OpenTelemetry environment variables set before starting your Shiny
-#'   app.}
-#' \item{shiny.otel.graphlocked (defaults to `FALSE`)}{If `TRUE`, then all reactive expressions and
-#'   observers will be automatically bound to OpenTelemetry spans. This is
-#'   useful for debugging and profiling, but incurs a performance penalty.
-#'   This option should only be used if the `otelsdk` package is installed.}
+#'   option will only be useful if the `otelsdk` package is installed and
+#'   `otel::is_tracing_enabled()` returns `TRUE`. Please have any OpenTelemetry
+#'   environment variables set before starting your Shiny app.}
 #' }
 #'
 #'

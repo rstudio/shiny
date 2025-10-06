@@ -1941,7 +1941,10 @@ coerceToFunc <- function(x) {
 reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
   intervalMillis <- coerceToFunc(intervalMillis)
 
-  rv <- reactiveValues(cookie = isolate(checkFunc()))
+  cookie <- reactiveVal(
+    isolate(checkFunc()),
+    label = "reactivePoll cookie"
+  )
 
   re_finalized <- FALSE
   env <- environment()
@@ -1956,17 +1959,17 @@ reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
       return()
     }
 
-    rv$cookie <- checkFunc()
+    cookie(checkFunc())
     invalidateLater(intervalMillis(), session)
   })
 
-  # TODO: what to use for a label?
-  re <- reactive({
-    rv$cookie
+  re <- reactive(label = "reactivePoll value", {
+    # Take a dependency on the cookie, so that when it changes, this
+    # reactive expression is invalidated.
+    cookie()
 
     valueFunc()
-
-  }, label = NULL)
+  })
 
   reg.finalizer(attr(re, "observable"), function(e) {
     re_finalized <<- TRUE
@@ -2409,7 +2412,7 @@ observeEvent <- function(eventExpr, handlerExpr,
   handlerQ <- exprToQuo(handlerExpr, handler.env, handler.quoted)
   label <- quoToLabel(eventQ, "observeEvent", label)
 
-  withOtel(bind = "none", {
+  without_otel_bind({
     handler <- inject(observe(
       !!handlerQ,
       label = label,
@@ -2452,7 +2455,7 @@ eventReactive <- function(eventExpr, valueExpr,
   userEventExpr <- fn_body(func)
   label <- exprToLabel(userEventExpr, "eventReactive", label)
 
-  withOtel(bind = "none", {
+  without_otel_bind({
     value_r <- inject(reactive(!!valueQ, domain = domain, label = label))
   })
 
@@ -2588,52 +2591,66 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
     millis <- function() origMillis
   }
 
-  v <- reactiveValues(
-    trigger = NULL,
-    when = NULL # the deadline for the timer to fire; NULL if not scheduled
-  )
+  trigger <- reactiveVal(NULL, label = "debounce trigger")
+  # the deadline for the timer to fire; NULL if not scheduled
+  when <- reactiveVal(NULL, label = "debounce when")
 
   # Responsible for tracking when r() changes.
   firstRun <- TRUE
-  observe({
-    if (firstRun) {
-      # During the first run we don't want to set v$when, as this will kick off
-      # the timer. We only want to do that when we see r() change.
-      firstRun <<- FALSE
+  observe(
+    label = "debounce tracker",
+    domain = domain,
+    priority = priority,
+    {
+      if (firstRun) {
+        # During the first run we don't want to set `when`, as this will kick
+        # off the timer. We only want to do that when we see `r()` change.
+        firstRun <<- FALSE
 
-      # Ensure r() is called only after setting firstRun to FALSE since r()
-      # may throw an error
+        # Ensure r() is called only after setting firstRun to FALSE since r()
+        # may throw an error
+        try(r(), silent = TRUE)
+        return()
+      }
+      # This ensures r() is still tracked after firstRun
       try(r(), silent = TRUE)
-      return()
+
+      # The value (or possibly millis) changed. Start or reset the timer.
+      when(
+        getDomainTimeMs(domain) + millis()
+      )
     }
-    # This ensures r() is still tracked after firstRun
-    try(r(), silent = TRUE)
+  )
 
-    # The value (or possibly millis) changed. Start or reset the timer.
-    v$when <- getDomainTimeMs(domain) + millis()
-  }, label = "debounce tracker", domain = domain, priority = priority)
+  # This observer is the timer. It rests until `when` elapses, then touches
+  # `trigger`.
+  observe(
+    label = "debounce timer",
+    domain = domain,
+    priority = priority,
+    {
+      if (is.null(when()))
+        return()
 
-  # This observer is the timer. It rests until v$when elapses, then touches
-  # v$trigger.
-  observe({
-    if (is.null(v$when))
-      return()
-
-    now <- getDomainTimeMs(domain)
-    if (now >= v$when) {
-      # Mod by 999999999 to get predictable overflow behavior
-      v$trigger <- isolate(v$trigger %||% 0) %% 999999999 + 1
-      v$when <- NULL
-    } else {
-      invalidateLater(v$when - now)
+      now <- getDomainTimeMs(domain)
+      if (now >= when()) {
+        # Mod by 999999999 to get predictable overflow behavior
+        trigger(
+          isolate(trigger() %||% 0) %% 999999999 + 1
+        )
+        when(NULL)
+      } else {
+        invalidateLater(when() - now)
+      }
     }
-  }, label = "debounce timer", domain = domain, priority = priority)
+  )
 
   # This is the actual reactive that is returned to the user. It returns the
-  # value of r(), but only invalidates/updates when v$trigger is touched.
-  er <- eventReactive(v$trigger, {
-    r()
-  }, label = "debounce result", ignoreNULL = FALSE, domain = domain)
+  # value of r(), but only invalidates/updates when `trigger` is touched.
+  er <- eventReactive(
+    {trigger()}, {r()},
+    label = "debounce result", ignoreNULL = FALSE, domain = domain
+  )
 
   # Force the value of er to be immediately cached upon creation. It's very hard
   # to explain why this observer is needed, but if you want to understand, try
@@ -2660,44 +2677,44 @@ throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
     millis <- function() origMillis
   }
 
-  v <- reactiveValues(
-    trigger = 0,
-    lastTriggeredAt = NULL, # Last time we fired; NULL if never
-    pending = FALSE # If TRUE, trigger again when timer elapses
-  )
+  trigger <- reactiveVal(0, label = "throttle trigger")
+  # Last time we fired; NULL if never
+  lastTriggeredAt <- reactiveVal(NULL, label = "throttle last triggered at")
+  # If TRUE, trigger again when timer elapses
+  pending <- reactiveVal(FALSE, label = "throttle pending")
 
   blackoutMillisLeft <- function() {
-    if (is.null(v$lastTriggeredAt)) {
+    if (is.null(lastTriggeredAt())) {
       0
     } else {
-      max(0, v$lastTriggeredAt + millis() - getDomainTimeMs(domain))
+      max(0, lastTriggeredAt() + millis() - getDomainTimeMs(domain))
     }
   }
 
-  trigger <- function() {
-    v$lastTriggeredAt <- getDomainTimeMs(domain)
+  update_trigger <- function() {
+    lastTriggeredAt(getDomainTimeMs(domain))
     # Mod by 999999999 to get predictable overflow behavior
-    v$trigger <- isolate(v$trigger) %% 999999999 + 1
-    v$pending <- FALSE
+    trigger(isolate(trigger()) %% 999999999 + 1)
+    pending(FALSE)
   }
 
   # Responsible for tracking when f() changes.
   observeEvent(try(r(), silent = TRUE), {
-    if (v$pending) {
+    if (pending()) {
       # In a blackout period and someone already scheduled; do nothing
     } else if (blackoutMillisLeft() > 0) {
       # In a blackout period but this is the first change in that period; set
-      # v$pending so that a trigger will be scheduled at the end of the period
-      v$pending <- TRUE
+      # pending so that a trigger will be scheduled at the end of the period
+      pending(TRUE)
     } else {
       # Not in a blackout period. Trigger, which will start a new blackout
       # period.
-      trigger()
+      update_trigger()
     }
   }, label = "throttle tracker", ignoreNULL = FALSE, priority = priority, domain = domain)
 
   observe({
-    if (!v$pending) {
+    if (!pending()) {
       return()
     }
 
@@ -2705,13 +2722,13 @@ throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
     if (timeout > 0) {
       invalidateLater(timeout)
     } else {
-      trigger()
+      update_trigger()
     }
-  }, priority = priority, domain = domain, label = "throttle trigger")
+  }, label = "throttle trigger", priority = priority, domain = domain)
 
   # This is the actual reactive that is returned to the user. It returns the
-  # value of r(), but only invalidates/updates when v$trigger is touched.
-  eventReactive(v$trigger, {
+  # value of r(), but only invalidates/updates when trigger is touched.
+  eventReactive({trigger()}, {
     r()
   }, label = "throttle result", ignoreNULL = FALSE, domain = domain)
 }

@@ -152,7 +152,7 @@ markRenderFunction <- function(
   )
 
   if (has_otel_bind("reactivity")) {
-    ret <- bindOtel(ret)
+    ret <- bind_otel_shiny_render_function(ret)
   }
 
   ret

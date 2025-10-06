@@ -42,8 +42,7 @@ otel_log <- function(
 }
 
 otel_is_tracing_enabled <- function(tracer = get_tracer()) {
-  # bench marks: https://github.com/rstudio/promises/blob/a187fca5b24bd2235f15ccc0760de449c381d4ea/R/otel.R#L292-L299
-  !.subset2(tracer, "is_enabled")()
+  otel::is_tracing_enabled(tracer)
 }
 
 get_ospan_logger <- local({

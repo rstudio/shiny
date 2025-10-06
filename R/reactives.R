@@ -79,17 +79,20 @@ ReactiveVal <- R6Class(
     dependents = NULL
   ),
   public = list(
-    .isLoggingOtel = FALSE, # needs to be accessed/set within Shiny
+    .isRecordingOtel = FALSE, # needs to be accessed/set within Shiny
+    .otelLabel = NULL,
     .otelAttrs = NULL, # needs to be accessed/set within Shiny
+
     initialize = function(value, label = NULL) {
       reactId <- nextGlobalReactId()
       private$reactId <- reactId
       private$value <- value
       private$label <- label
       private$dependents <- Dependents$new(reactId = private$reactId)
-      rLog$define(private$reactId, value, private$label, type = "reactiveVal", getDefaultReactiveDomain())
 
-      .isLoggingOtel <<- has_otel_bind("reactivity")
+      domain <- getDefaultReactiveDomain()
+      rLog$define(private$reactId, value, private$label, type = "reactiveVal", domain)
+      .otelLabel <<- otel_label_set_reactive_val(private$label, domain = domain)
     },
     get = function() {
       private$dependents$register()
@@ -105,10 +108,10 @@ ReactiveVal <- R6Class(
       }
 
       domain <- getDefaultReactiveDomain()
-      if ((!is.null(domain)) && .isLoggingOtel) {
+      if ((!is.null(domain)) && .isRecordingOtel) {
         # [mymod] Set reactiveVal: x
         otel_log(
-          otel_label_set_reactive_val(private$label, domain = domain),
+          .otelLabel,
           severity = "info",
           attributes = private$.otelAttrs
         )
@@ -363,8 +366,9 @@ ReactiveValues <- R6Class(
     # All names, in insertion order. The names are also stored in the .values
     # object, but it does not preserve order.
     .nameOrder = character(0),
-    .isLoggingOtel = FALSE,
-    .otelAttrs = NULL,
+
+    .isRecordingOtel = FALSE, # Needs to be set by Shiny
+    .otelAttrs = NULL, # Needs to be set by Shiny
 
 
     initialize = function(
@@ -381,8 +385,6 @@ ReactiveValues <- R6Class(
       .allValuesDeps <<- Dependents$new(reactId = rLog$asListAllIdStr(.reactId))
       .valuesDeps <<- Dependents$new(reactId = rLog$asListIdStr(.reactId))
       .dedupe <<- dedupe
-
-      .isLoggingOtel <<- has_otel_bind("reactivity")
     },
 
     get = function(key) {
@@ -444,7 +446,7 @@ ReactiveValues <- R6Class(
         return(invisible())
       }
 
-      if ((!is.null(domain)) && .isLoggingOtel) {
+      if ((!is.null(domain)) && .isRecordingOtel) {
         # Do not include updates to input or clientData unless _some_ reactivity has occured
         if (has_reactive_ospan_cleanup(domain) || !(.label == "input" || .label == "clientData")) {
           # [mymod] Set reactiveValues: x$key
@@ -631,9 +633,12 @@ reactiveValues <- function(...) {
 
   values <- .createReactiveValues(ReactiveValues$new())
 
+  # Use .subset2() instead of [[, to avoid method dispatch
+  impl <- .subset2(values, 'impl')
+  impl$mset(args)
+
   call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
   if (!is.null(call_srcref)) {
-    impl <- .subset2(values, 'impl')
     impl$.label <- rassignSrcrefToLabel(
       call_srcref,
       # Pass through the random default label created in ReactiveValues$new()
@@ -643,9 +648,6 @@ reactiveValues <- function(...) {
 
     impl$.otelAttrs <- otel_srcref_attributes(call_srcref)
   }
-
-  # Use .subset2() instead of [[, to avoid method dispatch
-  .subset2(values, 'impl')$mset(args)
 
   if (has_otel_bind("reactivity")) {
     values <- bindOtel(values)
@@ -899,6 +901,10 @@ Observable <- R6Class(
     .mostRecentCtxId = character(0),
     .ctx = 'Context',
 
+    .isRecordingOtel = FALSE, # Needs to be set by Shiny
+    .otelLabel = NULL, # Needs to be set by Shiny
+    .otelAttrs = NULL, # Needs to be set by Shiny
+
     initialize = function(func, label = deparse(substitute(func)),
                           domain = getDefaultReactiveDomain(),
                           ..stacktraceon = TRUE) {
@@ -957,6 +963,12 @@ Observable <- R6Class(
                          prevId = .mostRecentCtxId, reactId = .reactId,
                          weak = TRUE)
       .mostRecentCtxId <<- ctx$id
+
+      ctx$setOspanInfo(
+        isRecordingOtel = .isRecordingOtel,
+        otelLabel = .otelLabel,
+        otelAttrs = .otelAttrs
+      )
 
       # A Dependency object will have a weak reference to the context, which
       # doesn't prevent it from being GC'd. However, as long as this
@@ -1085,6 +1097,12 @@ reactive <- function(
   label <- exprToLabel(userExpr, "reactive", label)
 
   o <- Observable$new(func, label, domain, ..stacktraceon = ..stacktraceon)
+
+  call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
+  if (!is.null(call_srcref)) {
+    o$.otelAttrs <- otel_srcref_attributes(call_srcref)
+  }
+
   ret <- structure(
     o$getValue,
     observable = o,
@@ -1200,7 +1218,10 @@ Observer <- R6Class(
     .destroyed = logical(0),
     .prevId = character(0),
     .ctx = NULL,
-    .otelAttrs = NULL,
+
+    .isRecordingOtel = FALSE, # Needs to be set by Shiny
+    .otelLabel = NULL, # Needs to be set by Shiny
+    .otelAttrs = NULL, # Needs to be set by Shiny
 
     initialize = function(observerFunc, label, suspended = FALSE, priority = 0,
                           domain = getDefaultReactiveDomain(),
@@ -1250,6 +1271,12 @@ Observer <- R6Class(
       # reactive is invalidated, which may not happen immediately or at all.
       # This can lead to a memory leak (#1253).
       .ctx <<- ctx
+
+      ctx$setOspanInfo(
+        isRecordingOtel = .isRecordingOtel,
+        otelLabel = .otelLabel,
+        otelAttrs = .otelAttrs
+      )
 
       ctx$onInvalidate(function() {
         # Context is invalidated, so we don't need to store a reference to it
@@ -2101,6 +2128,8 @@ isolate <- function(expr) {
   } else {
     reactId <- rLog$noReactId
   }
+
+  # Do not track ospans for `isolate()`
   ctx <- Context$new(getDefaultReactiveDomain(), '[isolate]', type='isolate', reactId = reactId)
   on.exit(ctx$invalidate())
   # Matching ..stacktraceon../..stacktraceoff.. pair

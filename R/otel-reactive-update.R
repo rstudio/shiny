@@ -10,6 +10,17 @@ set_reactive_ospan_cleanup <- function(domain) {
   domain$userData[["_otel_has_reactive_cleanup"]] <- TRUE
 }
 
+
+reactive_update_ospan_is_active <- function(domain) {
+  isTRUE(domain$userData[["_otel_reactive_update_is_active"]])
+}
+set_reactive_ospan_is_active <- function(domain) {
+  domain$userData[["_otel_reactive_update_is_active"]] <- TRUE
+}
+clear_reactive_ospan_is_active <- function(domain) {
+  domain$userData[["_otel_reactive_update_is_active"]] <- NULL
+}
+
 #' Create a `reactive_update` OpenTelemetry span
 #'
 #' Used when a reactive expression is updated
@@ -80,7 +91,7 @@ end_reactive_update_ospan <- function(..., domain) {
 #' @param ... Ignored
 #' @param domain The reactive domain to associate with the span
 #' @noRd
-with_reactive_update_ospan_async <- function(expr, ..., domain) {
+with_reactive_update_active_ospan <- function(expr, ..., domain) {
   reactive_update_ospan <- domain$userData[["_otel_reactive_update_ospan"]]
 
   if (!is_ospan(reactive_update_ospan)) {

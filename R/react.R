@@ -33,6 +33,10 @@ Context <- R6Class(
     .pid = NULL,
     .weak = NULL,
 
+    .isRecordingOtel = FALSE,
+    .otelLabel = NULL,
+    .otelAttrs = NULL,
+
     initialize = function(
       domain, label='', type='other', prevId='',
       reactId = rLog$noReactId,
@@ -53,15 +57,39 @@ Context <- R6Class(
 
       promises::with_promise_domain(reactivePromiseDomain(), {
         withReactiveDomain(.domain, {
-          with_reactive_update_ospan_async({
+          withCtxOspans(domain = .domain, {
             captureStackTraces({
               env <- .getReactiveEnvironment()
               rLog$enter(.reactId, id, .reactType, .domain)
               on.exit(rLog$exit(.reactId, id, .reactType, .domain), add = TRUE)
               env$runWith(self, func)
             })
-          }, domain = .domain)
+          })
         })
+      })
+    },
+    setOspanInfo = function(isRecordingOtel, otelLabel, otelAttrs) {
+      self$.isRecordingOtel <- isRecordingOtel
+      if (isRecordingOtel) {
+        self$.otelLabel <- otelLabel
+        self$.otelAttrs <- otelAttrs
+      }
+      invisible(self)
+    },
+    withCtxOspans = function(expr, domain) {
+      if (!otel_is_tracing_enabled()) {
+        return(force(expr))
+      }
+
+      # Always set the reactive update span as active
+      # This ensures that any spans created within the reactive context
+      # are at least children of the reactive update span
+      with_reactive_update_active_ospan(domain = domain, {
+        if (.isRecordingOtel) {
+          with_shiny_ospan_async(.otelLabel, expr, attributes = .otelAttrs)
+        } else {
+          force(expr)
+        }
       })
     },
     invalidate = function() {

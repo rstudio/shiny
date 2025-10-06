@@ -63,21 +63,25 @@
 # - Questions -----------------------------------
 # Add error handling for every otel. Use withCallingHandlers similar to https://github.com/r-lib/mirai/pull/395/files#diff-9e809582679952a93b9f34755bb38207471945eb36cedb9e2aa755125449f531R214-R215
 # TODO: log events for bookmark?
-  # Ans: Seems possibly excessive in amount
+# Ans: Seems possibly excessive in amount
 # TODO: log events like fatal errors? / onUnhandledError
-  # Good idea!
+# Good idea!
 
 # TODO: Add spans for session callbacks? onRestore/onRestored, onSessionEnded, onUnhandledError, on any callback for the session
-  # Ans: It is the user's responsiblity to add spans for these methods
+# Ans: It is the user's responsiblity to add spans for these methods
 # TODO: freeze / thaw? - log restart event?
 # TODO: reactiveTimer / invalidateLater / reactivePoll / reactiveFileReader
 # TODO: Extended Tasks are linked from parent span. Maybe use an envvar for span context? It is allowed for child process can end much later than the parent process. Take inspiration from callr PR (copying of the span context to the child process).
 
-
-
 # ------------------------------------------
 
-utils::globalVariables(".GenericCallEnv", add = TRUE)
+# # Approach
+# Use flags on the reactive object to indicate whether to record OpenTelemetry spans.
+#
+# Cadence:
+# * `$.isRecordingOtel` - Whether to record OpenTelemetry spans for this reactive object
+# * `$.otelLabel` - The label to use for the OpenTelemetry span
+# * `$.otelAttrs` - Additional attributes to add to the OpenTelemetry span
 
 
 #' Add Open Telemetry for reactivity to an object
@@ -122,98 +126,6 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #' @param x The object to add caching to.
 #' @param ... Future parameter expansion.
 #' @seealso [bindCache()] and [bindEvent()] for other ways to bind to your reactives.
-#'
-#' @examples
-#' # TODO: Update examples!!
-#' \dontrun{
-#' rc <- bindCache(
-#'   x = reactive({
-#'     Sys.sleep(2) # Pretend this is expensive
-#'     input$x * 100
-#'   }),
-#'   input$x
-#' )
-#'
-#' # Can make it prettier with the %>% operator
-#' library(magrittr)
-#'
-#' rc <- reactive({
-#'   Sys.sleep(2)
-#'   input$x * 100
-#' }) %>%
-#'   bindCache(input$x)
-#' }
-#'
-#' ## Only run app examples in interactive R sessions
-#' if (interactive()) {
-#'   # Basic example
-#'   shinyApp(
-#'     ui = fluidPage(
-#'       sliderInput("x", "x", 1, 10, 5),
-#'       sliderInput("y", "y", 1, 10, 5),
-#'       div("x * y: "),
-#'       verbatimTextOutput("txt")
-#'     ),
-#'     server = function(input, output) {
-#'       r <- reactive({
-#'         # The value expression is an _expensive_ computation
-#'         message("Doing expensive computation...")
-#'         Sys.sleep(2)
-#'         input$x * input$y
-#'       }) %>%
-#'         bindCache(input$x, input$y)
-#'
-#'       output$txt <- renderText(r())
-#'     }
-#'   )
-#'
-#'
-#'   # Caching renderText
-#'   shinyApp(
-#'     ui = fluidPage(
-#'       sliderInput("x", "x", 1, 10, 5),
-#'       sliderInput("y", "y", 1, 10, 5),
-#'       div("x * y: "),
-#'       verbatimTextOutput("txt")
-#'     ),
-#'     server = function(input, output) {
-#'       output$txt <- renderText({
-#'         message("Doing expensive computation...")
-#'         Sys.sleep(2)
-#'         input$x * input$y
-#'       }) %>%
-#'         bindCache(input$x, input$y)
-#'     }
-#'   )
-#'
-#'
-#'   # Demo of using events and caching with an actionButton
-#'   shinyApp(
-#'     ui = fluidPage(
-#'       sliderInput("x", "x", 1, 10, 5),
-#'       sliderInput("y", "y", 1, 10, 5),
-#'       actionButton("go", "Go"),
-#'       div("x * y: "),
-#'       verbatimTextOutput("txt")
-#'     ),
-#'     server = function(input, output) {
-#'       r <- reactive({
-#'         message("Doing expensive computation...")
-#'         Sys.sleep(2)
-#'         input$x * input$y
-#'       }) %>%
-#'         bindCache(input$x, input$y) %>%
-#'         bindEvent(input$go)
-#'       # The cached, eventified reactive takes a reactive dependency on
-#'       # input$go, but doesn't use it for the cache key. It uses input$x and
-#'       # input$y for the cache key, but doesn't take a reactive dependency on
-#'       # them, because the reactive dependency is superseded by addEvent().
-#'
-#'       output$txt <- renderText(r())
-#'     }
-#'   )
-#' }
-#'
 #' @export
 bindOtel <- function(x, ...) {
   UseMethod("bindOtel")
@@ -233,7 +145,7 @@ bindOtel.reactiveVal <- function(x, ...) {
 
   impl <- attr(x, ".impl", exact = TRUE)
   # Set flag for otel logging when setting the value
-  impl$.isLoggingOtel <- TRUE
+  impl$.isRecordingOtel <- TRUE
 
   class(x) <- c("reactiveVal.otel", class(x))
 
@@ -246,7 +158,7 @@ bindOtel.reactivevalues <- function(x, ...) {
 
   impl <- attr(x, ".impl", exact = TRUE)
   # Set flag for otel logging when setting values
-  impl$.isLoggingOtel <- TRUE
+  impl$.isRecordingOtel <- TRUE
 
   class(x) <- c("reactivevalues.otel", class(x))
 
@@ -259,60 +171,14 @@ bindOtel.reactiveExpr <- function(x, ...) {
 
   domain <- reactive_get_domain(x)
 
-  x_label <- attr(x, "observable", exact = TRUE)[[".label"]]
+  impl <- attr(x, "observable", exact = TRUE)
+  impl$.isRecordingOtel <- TRUE
+  # Covers both reactive and reactive.event
+  impl$.otelLabel <- ospan_label_reactive(x, domain = impl$.domain)
 
-  span_label <- ospan_label_reactive(x, domain = domain)
+  class(x) <- c("reactiveExpr.otel", class(x))
 
-  valueFunc <- reactive_get_value_func(x)
-  origFunc <- valueFunc
-  ospan_attrs <- otel_srcref_attributes(origFunc)
-  valueFunc <- wrapFunctionLabel(
-    valueFunc,
-    # TODO: Better name
-    "otelReactiveValueFunc",
-    ..stacktraceon = TRUE
-  )
-  x_classes <- class(x)
-
-  # Don't hold on to the reference for x, so that it can be GC'd
-  rm(x)
-  # Hacky workaround for issue with `%>%` preventing GC:
-  # https://github.com/tidyverse/magrittr/issues/229
-  if (
-    exists(".GenericCallEnv") &&
-      exists(".", envir = .GenericCallEnv, inherits = FALSE)
-  ) {
-    rm(list = ".", envir = .GenericCallEnv, inherits = FALSE)
-  }
-
-  # Turn off binding all otel, so that we don't recursively bind forever
-  # `withOtel()` does not virally enable/disable binding all otel,
-  # only in "this" tick
-  withOtel(bind = "none", {
-    res <- reactive(label = x_label, domain = domain, {
-      # Force all `{shiny}` spans to be under `{shiny}` tracer, not the app's tracer
-      # with_shiny_ospan_async(span_label, {
-      with_shiny_ospan_async(
-        span_label,
-        {
-          # TODO: Need `otel::with_tracer(tracer, CODE)`
-          # Set the app's tracer to be the default when running the expression
-          # with_app_tracer(domain = domain, {
-          valueFunc()
-          # })
-        },
-        attributes = ospan_attrs
-      )
-    })
-  })
-
-  # Set the original function as an attribute for later introspection
-  internal_observable <- attr(res, "observable", exact = TRUE)
-  internal_observable$.origFunc <- origFunc
-
-  # Pass through the original classes
-  class(res) <- c("reactive.otel", x_classes)
-  res
+  x
 }
 
 #' @export
@@ -346,43 +212,11 @@ bindOtel.shiny.render.function <- function(x, ...) {
 
 
 #' @export
-bindOtel.reactive.event <- function(x, ...) {
-  stop(
-    "Can't call bindOtel() after calling bindEvent() on an object. Maybe you wanted to call bindEvent() after bindOtel()?"
-  )
-}
-
-
-#' @export
 bindOtel.Observer <- function(x, ...) {
   rlang::check_dots_empty()
 
-  if (x$.execCount > 0) {
-    stop(
-      "Cannot call bindOtel() on an Observer that has already been executed."
-    )
-  }
-
-  obsFunc <- x$.func
-  origFunc <- attr(x$.func, "wrappedFunc")
-  ospan_attrs <- x$.otelAttrs
-
-  span_label <- ospan_label_observer(x, domain = x$.domain)
-
-  x$.func <- wrapFunctionLabel(
-    name = span_label,
-    ..stacktraceon = FALSE,
-    func = function() {
-      with_shiny_ospan_async(
-        span_label,
-        {
-          obsFunc()
-        },
-        attributes = ospan_attrs
-      )
-    }
-  )
-  # attr(x$.func, "wrappedFunc") <- origFunc
+  x$.isRecordingOtel <- TRUE
+  x$.otelLabel <- ospan_label_observer(x, domain = x$.domain)
 
   class(x) <- c("Observer.otel", class(x))
   invisible(x)

@@ -4,6 +4,8 @@
 
 * The `icon` argument of `updateActionButton()`/`updateActionLink()` nows allows values other than `shiny::icon()` (e.g., `fontawesome::fa()`, `bsicons::bs_icon()`, etc). (#4249)
 
+* The `size` argument of `modalDialog` now supports `full` to create full-screen modals. (#4297)
+
 ## Bug fixes
 
 * `updateActionButton()`/`updateActionLink()` now correctly renders HTML content passed to the `label` argument. (#4249)
@@ -12,7 +14,7 @@
 
 ## Changes
 
-* The return value of `actionButton()`/`actionLink()` changed slightly: `label` and `icon` are wrapped in an additional HTML container element. This allows for: 1. `updateActionButton()`/`updateActionLink()` to distinguish between the `label` and `icon` when making updates and 2. spacing between `label` and `icon` to be more easily customized via CSS. 
+* The return value of `actionButton()`/`actionLink()` changed slightly: `label` and `icon` are wrapped in an additional HTML container element. This allows for: 1. `updateActionButton()`/`updateActionLink()` to distinguish between the `label` and `icon` when making updates and 2. spacing between `label` and `icon` to be more easily customized via CSS.
 
 # shiny 1.11.1
 

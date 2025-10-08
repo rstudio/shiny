@@ -192,7 +192,7 @@ dev_barret_kitchen <- function() {
 
   log_and_msg <- function(..., .envir = parent.frame()) {
     msg <- paste(...)
-    message(msg)
+    message("  -- ", msg)
     # otel::log_info(msg, tracer = session$userData[["_otel_tracer"]])
     # TODO: Remove the logger param once function is removed from Shiny package
     otel_log(msg, logger = otel_logger)
@@ -234,71 +234,37 @@ dev_barret_kitchen <- function() {
 
           log_and_msg("Shiny module")
 
-          # x_raw <- reactive({
-          x <- reactive({
+          x_raw <- reactive({
             x_val <- xVal()
             req(x_val)
             log_and_msg(sprintf("X Val: %s", x_val))
-            # Sys.sleep(0.5)
             x_val
           })
-          # x <- debounce(x_raw, 100)
-          y <- reactive({
+          x <- debounce(x_raw, 100)
+          y_raw <- reactive({
             y_val <- input$y
             log_and_msg(sprintf("Y Val: %s", y_val))
             # Sys.sleep(0.5)
             y_val
-          })
+          }) |> bindCache(input$y)
+          y <- throttle(y_raw, 100)
 
           calc <- reactive(label = "barret_calc", {
-            message("Doing expensive computation...")
+            log_and_msg("Doing expensive computation...")
             x() * y()
           })
-          #  |>
-          #   bindOtel(
-          #     label = "Expensive calc"
-          #     # # name = "Expensive calc!!",
-          #     # attributes = function() {
-          #     #   list(x = input$x, y = input$y)
-          #     # }
-          #     # # ,
-          #     # name_x = {input$x},
-          #     # name_y = {input$y}
-          #   )
-          #  |>
-          #   bindOtel()
-          # Q: Automatically sets x = isolate(input$x), y = isolate(input$y) as otel attributes?
-          # * Ans: No. Values could be HUGE, so we don't want to do that.
-          # Q: Manually accept reactive expressions to isolate on during otel span creation?
-          # * Ans: Maybe? Let's leave a door open for that via `bindOtel(...)`.
 
-          # observe(label = "barret_observe", {
           observe({
-            message("x: ", x())
+            log_and_msg("x: ", x())
           })
-
-          observe(message("longer message. y: ", y()))
 
           output$txt <- renderText({
-            # lapply(1:10, function(i) {
-            #   otel::start_local_active_span("my_span")
-            #   Sys.sleep(0.1)
-            #   otel::log_info("Extra info: {q()}")
-            #   my_val <- "q()"
-            #   otel::log_info("Extra info: {my_val}")
-            # })
-
-            # my_val <- 42
-            # otel::log_info("Extra info: {my_val}")
-
-            # this_span <- otel::get_active_span_context()$current_span()
-            # this_span$set_attribute("key", val)
-
-            # otel::start_local_active_span("output(mymod-txt)", attributes = otel::as_attributes(list(session = getDefaultReactiveDomain(()), file = "bind-otel.R", file_line = 164)))
             calc()
-          })
+          }) |>
+            bindCache(x(), y())
 
           x_prom <- reactive({
+            # t0
             x_span_id <- force(otel::get_active_span_context()$get_span_id())
             # message("x_prom span id: ", x_span_id)
             x_val <- x()
@@ -311,16 +277,16 @@ dev_barret_kitchen <- function() {
               log_and_msg("x_prom 1")
               log_and_msg("Launching mirai")
               x_val
-              mirai_map(seq_len(x_val), function(i) {
-                otel::start_local_active_span("slow compute")
-                Sys.sleep(i / 10 / 1000)
-                i
-              }) |>
-                promises::then(function(vals) {
-                  max(unlist(vals))
-                })
+              # mirai::mirai_map(seq_len(x_val), function(i) {
+              #   otel::start_local_active_span("slow compute")
+              #   Sys.sleep(i / 10 / 1000)
+              #   i
+              # }) |>
+              #   promises::then(function(vals) {
+              #     max(unlist(vals))
+              #   })
 
-              # mirai(
+              # mirai::mirai(
               #   {
               #     otel::start_local_active_span("slow compute")
               #     # val
@@ -349,23 +315,23 @@ dev_barret_kitchen <- function() {
               log_and_msg("y_prom 0")
               resolve(y_val)
             })
-            message("make y_prom 1")
+            log_and_msg("make y_prom 1")
             yp <- promises::then(yp, function(y_val) {
               log_and_msg("y_prom 1")
               y_val
             })
-            message("make y_prom 2")
+            log_and_msg("make y_prom 2")
             yp <- promises::then(yp, function(y_val) {
               log_and_msg("y_prom 2")
               y_val + calc()
             })
-            message("make y_prom 3")
+            log_and_msg("make y_prom 3")
             yp <- promises::then(yp, function(y_val) {
               log_and_msg("y_prom 3")
               y_val
             })
 
-            message(
+            log_and_msg(
               "done y_prom - ",
               getCurrentContext()$id,
               " - ",
@@ -380,8 +346,8 @@ dev_barret_kitchen <- function() {
               y_prom()
             )
             p <- promises::then(p, function(vals) {
-              message("Vals[1]: ", vals[[1]])
-              message("Vals[2]: ", vals[[2]])
+              log_and_msg("Vals[1]: ", vals[[1]])
+              log_and_msg("Vals[2]: ", vals[[2]])
 
               # cat(force)
 
@@ -396,7 +362,7 @@ dev_barret_kitchen <- function() {
                 shutdown()
               }
             })
-            message(
+            log_and_msg(
               "done proms_observer - ",
               getCurrentContext()$id,
               " - ",
@@ -415,7 +381,8 @@ dev_barret_kitchen <- function() {
             },
             {
               rv$x <- input$x
-            }
+            },
+            label = "singleObserveEvent"
           )
 
           tmp_val <- reactiveVal(NULL)

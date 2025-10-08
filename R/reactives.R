@@ -2586,19 +2586,26 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
   force(r)
   force(millis)
 
+  call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
+  label <- rassignSrcrefToLabel(
+    call_srcref,
+    defaultLabel = "<anonymous>",
+    fnName = "debounce"
+  )
+
   if (!is.function(millis)) {
     origMillis <- millis
     millis <- function() origMillis
   }
 
-  trigger <- reactiveVal(NULL, label = "debounce trigger")
+  trigger <- reactiveVal(NULL, label = sprintf("debounce %s trigger", label))
   # the deadline for the timer to fire; NULL if not scheduled
-  when <- reactiveVal(NULL, label = "debounce when")
+  when <- reactiveVal(NULL, label = sprintf("debounce %s when", label))
 
   # Responsible for tracking when r() changes.
   firstRun <- TRUE
   observe(
-    label = "debounce tracker",
+    label = sprintf("debounce %s tracker", label),
     domain = domain,
     priority = priority,
     {
@@ -2625,7 +2632,7 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
   # This observer is the timer. It rests until `when` elapses, then touches
   # `trigger`.
   observe(
-    label = "debounce timer",
+    label = sprintf("debounce %s timer", label),
     domain = domain,
     priority = priority,
     {
@@ -2649,7 +2656,7 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
   # value of r(), but only invalidates/updates when `trigger` is touched.
   er <- eventReactive(
     {trigger()}, {r()},
-    label = "debounce result", ignoreNULL = FALSE, domain = domain
+    label = sprintf("debounce %s result", label), ignoreNULL = FALSE, domain = domain
   )
 
   # Force the value of er to be immediately cached upon creation. It's very hard
@@ -2658,7 +2665,7 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
   primer <- observe({
     primer$destroy()
     try(er(), silent = TRUE)
-  }, label = "debounce primer", domain = domain, priority = priority)
+  }, label = sprintf("debounce %s primer", label), domain = domain, priority = priority)
 
   er
 }
@@ -2672,17 +2679,24 @@ throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
   force(r)
   force(millis)
 
+
+  call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
+  label <- rassignSrcrefToLabel(
+    call_srcref,
+    defaultLabel = "<anonymous>",
+    fnName = "throttle"
+  )
+
   if (!is.function(millis)) {
     origMillis <- millis
     millis <- function() origMillis
   }
 
-  trigger <- reactiveVal(0, label = "throttle trigger")
+  trigger <- reactiveVal(0, label = sprintf("throttle %s trigger", label))
   # Last time we fired; NULL if never
-  lastTriggeredAt <- reactiveVal(NULL, label = "throttle last triggered at")
+  lastTriggeredAt <- reactiveVal(NULL, label = sprintf("throttle %s last triggered at", label))
   # If TRUE, trigger again when timer elapses
-  pending <- reactiveVal(FALSE, label = "throttle pending")
-
+  pending <- reactiveVal(FALSE, label = sprintf("throttle %s pending", label))
   blackoutMillisLeft <- function() {
     if (is.null(lastTriggeredAt())) {
       0
@@ -2711,7 +2725,7 @@ throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
       # period.
       update_trigger()
     }
-  }, label = "throttle tracker", ignoreNULL = FALSE, priority = priority, domain = domain)
+  }, label = sprintf("throttle %s tracker", label), ignoreNULL = FALSE, priority = priority, domain = domain)
 
   observe({
     if (!pending()) {
@@ -2724,11 +2738,11 @@ throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
     } else {
       update_trigger()
     }
-  }, label = "throttle trigger", priority = priority, domain = domain)
+  }, label = sprintf("throttle %s trigger", label), priority = priority, domain = domain)
 
   # This is the actual reactive that is returned to the user. It returns the
   # value of r(), but only invalidates/updates when trigger is touched.
   eventReactive({trigger()}, {
     r()
-  }, label = "throttle result", ignoreNULL = FALSE, domain = domain)
+  }, label = sprintf("throttle %s result", label), ignoreNULL = FALSE, domain = domain)
 }

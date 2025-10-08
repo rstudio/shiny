@@ -80,7 +80,7 @@ ReactiveVal <- R6Class(
   ),
   public = list(
     .isRecordingOtel = FALSE, # needs to be accessed/set within Shiny
-    .otelLabel = NULL,
+    .otelLabel = NULL, # Lazily set during `$set()`
     .otelAttrs = NULL, # needs to be accessed/set within Shiny
 
     initialize = function(value, label = NULL) {
@@ -109,6 +109,9 @@ ReactiveVal <- R6Class(
 
       domain <- getDefaultReactiveDomain()
       if ((!is.null(domain)) && .isRecordingOtel) {
+        if (is.null(.otelLabel)) {
+          .otelLabel <<- otel_label_set_reactive_val(private$label, domain = domain)
+        }
         # [mymod] Set reactiveVal: x
         otel_log(
           .otelLabel,
@@ -631,11 +634,10 @@ reactiveValues <- function(...) {
   if ((length(args) > 0) && (is.null(names(args)) || any(names(args) == "")))
     rlang::abort("All arguments passed to reactiveValues() must be named.")
 
-  values <- .createReactiveValues(ReactiveValues$new())
+  values <- .createReactiveValues(ReactiveValues$new(), withOtel = FALSE)
 
   # Use .subset2() instead of [[, to avoid method dispatch
   impl <- .subset2(values, 'impl')
-  impl$mset(args)
 
   call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
   if (!is.null(call_srcref)) {
@@ -649,9 +651,11 @@ reactiveValues <- function(...) {
     impl$.otelAttrs <- otel_srcref_attributes(call_srcref)
   }
 
-  if (has_otel_bind("reactivity")) {
-    values <- bind_otel_reactive_values(values)
-  }
+  impl$mset(args)
+
+  # Add otel binding after `$mset()` so that we don't log the initial values
+  # Add otel binding after `.label` so that any logging uses the correct label
+  values <- maybeAddReactiveValuesOtel(values)
 
   values
 }
@@ -667,10 +671,11 @@ checkName <- function(x) {
 # @param values A ReactiveValues object
 # @param readonly Should this object be read-only?
 # @param ns A namespace function (either `identity` or `NS(namespace)`)
+# @param withOtel Should otel binding be attempted?
 .createReactiveValues <- function(values = NULL, readonly = FALSE,
-  ns = identity) {
+  ns = identity, withOtel = TRUE) {
 
-  structure(
+  ret <- structure(
     list(
       impl = values,
       readonly = readonly,
@@ -678,6 +683,20 @@ checkName <- function(x) {
     ),
     class='reactivevalues'
   )
+
+  if (withOtel) {
+    ret <- maybeAddReactiveValuesOtel(ret)
+  }
+
+  ret
+}
+
+maybeAddReactiveValuesOtel <- function(x) {
+  if (!has_otel_bind("reactivity")) {
+    return(x)
+  }
+
+  bind_otel_reactive_values(x)
 }
 
 #' @export

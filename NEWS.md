@@ -1,5 +1,24 @@
 # shiny (development version)
 
+## OpenTelemetry support (#4269)
+
+* Added support for [OpenTelemetry](https://opentelemetry.io/) tracing. By default, if `otel::is_tracing_enabled()` returns `TRUE`, then `{shiny}` will record all spans. To disable adjust the default `{shiny}` behavior, set the option `shiny.otel.bind` to `"none"` (or environment variable to `SHINY_OTEL_BIND=none`).
+
+* Spans are recorded for:
+  * `session_start`: Wraps the calling of the `server()` function.
+  * `session_end`: Wraps the calling of the `onSessionEnded()` handlers.
+  * `reactive_update`: Signals the start of when Shiny knows something is to be calculated. This span ends when there are no more reactive updates (promises or synchronous) to be calculated.
+  * `reactive`, `observe`, `output`: Captures the calculation of a reactive expression (`reactive()`), an observer (`observe()`), or an output render function (`render*()`).
+
+* OpenTelemetry Logs are recorded for:
+  * `session.start` - When a user session starts. Also contains HTTP request within the attributes
+  * `session.end` - When a user session ends.
+  * `Set reactiveVal <name>` - When a `reactiveVal()` is set
+  * `Set reactiveValues <name>$<key>` - When a `reactiveValues()` element is set
+  * Fatal or unhandled errors - When an error occurs that causes the session to end, or when an unhandled error occurs in a reactive context. Contains the error within the attributes. To unsantize the error message being collected, set `options(shiny.otel.sanitize.errors = FALSE)`.
+
+* All logs and spans contain the `session.id` attribute.
+
 ## New features
 
 * The `icon` argument of `updateActionButton()`/`updateActionLink()` nows allows values other than `shiny::icon()` (e.g., `fontawesome::fa()`, `bsicons::bs_icon()`, etc). (#4249)

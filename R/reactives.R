@@ -92,7 +92,6 @@ ReactiveVal <- R6Class(
 
       domain <- getDefaultReactiveDomain()
       rLog$define(private$reactId, value, private$label, type = "reactiveVal", domain)
-      .otelLabel <<- otel_label_set_reactive_val(private$label, domain = domain)
     },
     get = function() {
       private$dependents$register()
@@ -116,7 +115,7 @@ ReactiveVal <- R6Class(
         otel_log(
           .otelLabel,
           severity = "info",
-          attributes = private$.otelAttrs
+          attributes = c(private$.otelAttrs, otel_session_id_attrs(domain))
         )
       }
       rLog$valueChange(private$reactId, value, domain)
@@ -456,7 +455,7 @@ ReactiveValues <- R6Class(
           otel_log(
             otel_label_set_reactive_values(.label, key, domain = domain),
             severity = "info",
-            attributes = .otelAttrs
+            attributes = c(.otelAttrs, otel_session_id_attrs(domain))
           )
         }
       }
@@ -986,7 +985,7 @@ Observable <- R6Class(
       ctx$setOspanInfo(
         isRecordingOtel = .isRecordingOtel,
         otelLabel = .otelLabel,
-        otelAttrs = .otelAttrs
+        otelAttrs = c(.otelAttrs, otel_session_id_attrs(.domain))
       )
 
       # A Dependency object will have a weak reference to the context, which
@@ -1294,7 +1293,7 @@ Observer <- R6Class(
       ctx$setOspanInfo(
         isRecordingOtel = .isRecordingOtel,
         otelLabel = .otelLabel,
-        otelAttrs = .otelAttrs
+        otelAttrs = c(.otelAttrs, otel_session_id_attrs(.domain))
       )
 
       ctx$onInvalidate(function() {
@@ -2472,7 +2471,15 @@ eventReactive <- function(eventExpr, valueExpr,
   func <- installExprFunction(eventExpr, "func", event.env, event.quoted, wrappedWithLabel = FALSE)
   # Attach a label and a reference to the original user source for debugging
   userEventExpr <- fn_body(func)
-  label <- exprToLabel(userEventExpr, "eventReactive", label)
+
+  call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
+  if (is.null(label)) {
+    label <- rassignSrcrefToLabel(
+      call_srcref,
+      defaultLabel = exprToLabel(userEventExpr, "eventReactive", label),
+      fnName = "eventReactive"
+    )
+  }
 
   without_otel_bind({
     value_r <- inject(reactive(!!valueQ, domain = domain, label = label))

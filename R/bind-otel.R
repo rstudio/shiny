@@ -1,4 +1,4 @@
-# - Open Telemetry -----------------------------------
+# - OpenTelemetry -----------------------------------
 # * Integration locations:
 #   * √ Server:
 #     * Start reactive_update when reactive busy count > 0
@@ -58,19 +58,19 @@
 # * `$.otelAttrs` - Additional attributes to add to the OpenTelemetry span
 
 
-#' Add Open Telemetry for reactivity to an object
+#' Add OpenTelemetry for reactivity to an object
 #'
 #' @description
 #'
-#' `bindOtel()` adds Open Telemetry for [reactive()] expressions and `render*`
+#' `bindOtel()` adds OpenTelemetry for [reactive()] expressions and `render*`
 #' functions (like [renderText()], [renderTable()], ...).
 #'
-#' Wrapper to creating an active reactive Open Telemetry span that closes when
+#' Wrapper to creating an active reactive OpenTelemetry span that closes when
 #' the reactive expression is done computing. Typically this is when the
 #' reactive expression finishes (synchronous) or when the returned promise is
 #' done computing (asynchronous).
 
-#' @section Async with Open Telemetry:
+#' @section Async with OpenTelemetry:
 #'
 #'   With a reactive expression, the key and/or value expression can be
 #'   _asynchronous_. In other words, they can be promises --- not regular R
@@ -82,9 +82,9 @@
 #'
 #'   When reactive expressions are being calculated in parallel (by having
 #'   another reactive promise compute in the main process), the currently active
-#'   Open Telemetry span will be dynamically swapped out according to the
+#'   OpenTelemetry span will be dynamically swapped out according to the
 #'   currently active reactive expression. This means that as long as a promise
-#'   was `then()`ed or `catch()`ed with an active Open Telemetry span, the span
+#'   was `then()`ed or `catch()`ed with an active OpenTelemetry span, the span
 #'   will be correctly propagated to the next step (and subsequently other
 #'   steps) in the promise chain.
 #'
@@ -94,7 +94,7 @@
 #'   is executed, it **must** be active for the duration of the expression, and
 #'   it **must** not be closed until the reactive expression is done executing.
 #'   This is not easily achieved with a single function call, so we provide a
-#'   way to create a reactive expression that is bound to an Open Telemetry
+#'   way to create a reactive expression that is bound to an OpenTelemetry
 #'   span.
 #'
 #' @param x The object to add caching to.
@@ -184,7 +184,7 @@ bind_otel_shiny_render_function <- function(x) {
 
 # bindOtel.function <- function(x, ...) {
 #   cli::cli_abort(paste0(
-#     "Don't know how to add Open Telemetry recording to a plain function. ",
+#     "Don't know how to add OpenTelemetry recording to a plain function. ",
 #     "If this is a {.code render*()} function for Shiny, it may need to be updated. ",
 #     "Please see {.help shiny::bindOtel} for more information."
 #   ))

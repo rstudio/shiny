@@ -163,11 +163,6 @@ reference:
       - registerInputHandler
       - removeInputHandler
       - markRenderFunction
-  - title: Open Telemetry
-    desc: Functions for binding OpenTelemetry to Shiny applications.
-    contents:
-      - bindOtel
-      - withOtel
   - title: Utility functions
     desc: Miscellaneous utilities that may be useful to advanced users or when extending Shiny.
     contents:

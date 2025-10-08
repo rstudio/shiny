@@ -116,7 +116,7 @@ bind_otel_reactive_val <- function(x) {
 
 bind_otel_reactive_values <- function(x) {
 
-  impl <- attr(x, ".impl", exact = TRUE)
+  impl <- .subset2(x, "impl")
   # Set flag for otel logging when setting values
   impl$.isRecordingOtel <- TRUE
 

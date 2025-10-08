@@ -130,7 +130,7 @@ ragg package. See \code{\link[=plotPNG]{plotPNG()}} for more information.}
 Cairo package. See \code{\link[=plotPNG]{plotPNG()}} for more information.}
 \item{shiny.devmode (defaults to \code{NULL})}{Option to enable Shiny Developer Mode. When set,
 different default \code{getOption(key)} values will be returned. See \code{\link[=devmode]{devmode()}} for more details.}
-\item{shiny.otel.bind (defaults to \code{"all"})}{Determines how Shiny will
+\item{shiny.otel.bind (defaults to \code{Sys.getenv("SHINY_OTEL_BIND", "all")})}{Determines how Shiny will
 interact with OpenTelemetry.
 
 Possible options:
@@ -145,6 +145,7 @@ This option is useful for debugging and profiling while in production. This
 option will only be useful if the \code{otelsdk} package is installed and
 \code{otel::is_tracing_enabled()} returns \code{TRUE}. Please have any OpenTelemetry
 environment variables set before starting your Shiny app.}
+\item{shiny.otel.sanitize.errors (defaults to \code{TRUE})}{If \code{TRUE}, fatal and unhandled errors will be sanitized before being sent to the OpenTelemetry backend. The default value of \code{TRUE} is set to avoid potentially sending sensitive information to the OpenTelemetry backend. If you want the full error message and stack trace to be sent to the OpenTelemetry backend, set this option to \code{FALSE} or use \code{safeError(e)}.}
 }
 }
 

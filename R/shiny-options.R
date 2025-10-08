@@ -160,7 +160,7 @@ getShinyOption <- function(name, default = NULL) {
 # '  side devmode features. Currently the primary feature is the client-side
 # '  error console.}
 ### end shiny.client_devmode
-#' \item{shiny.otel.bind (defaults to `"all"`)}{Determines how Shiny will
+#' \item{shiny.otel.bind (defaults to `Sys.getenv("SHINY_OTEL_BIND", "all")`)}{Determines how Shiny will
 #'   interact with OpenTelemetry.
 #'
 #'   Possible options:
@@ -173,6 +173,7 @@ getShinyOption <- function(name, default = NULL) {
 #'   option will only be useful if the `otelsdk` package is installed and
 #'   `otel::is_tracing_enabled()` returns `TRUE`. Please have any OpenTelemetry
 #'   environment variables set before starting your Shiny app.}
+#' \item{shiny.otel.sanitize.errors (defaults to `TRUE`)}{If `TRUE`, fatal and unhandled errors will be sanitized before being sent to the OpenTelemetry backend. The default value of `TRUE` is set to avoid potentially sending sensitive information to the OpenTelemetry backend. If you want the full error message and stack trace to be sent to the OpenTelemetry backend, set this option to `FALSE` or use `safeError(e)`.}
 #' }
 #'
 #'

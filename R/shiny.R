@@ -1059,7 +1059,16 @@ ShinySession <- R6Class(
       otel_log(
         if (close) "Fatal error" else "Unhandled error",
         severity = if (close) "fatal" else "error",
-        attributes = otel::as_attributes(list(error = e, session.id = self$token))
+        attributes = otel::as_attributes(list(
+          session.id = self$token,
+          error =
+            # Do not expose errors to otel if sanitization is enabled
+            if (getOption("shiny.otel.sanitize.errors", TRUE)) {
+              sanitized_error()
+            } else {
+              e
+            }
+        ))
       )
 
       private$unhandledErrorCallbacks$invoke(e, onError = printError)
@@ -1192,9 +1201,7 @@ ShinySession <- R6Class(
                 } else {
                   if (isTRUE(getOption("show.error.messages"))) printError(cond)
                   if (getOption("shiny.sanitize.errors", FALSE)) {
-                    cond <- simpleError(paste("An error has occurred. Check your",
-                      "logs or contact the app author for",
-                      "clarification."))
+                    cond <- sanitized_error()
                   }
                   self$unhandledError(cond, close = FALSE)
                   invisible(structure(list(), class = "try-error", condition = cond))
@@ -2739,4 +2746,11 @@ validate_session_object <- function(session, label = as.character(sys.call(sys.p
       )
     )
   }
+}
+
+
+sanitized_error <- function() {
+  simpleError(paste("An error has occurred. Check your",
+    "logs or contact the app author for",
+    "clarification."))
 }

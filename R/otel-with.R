@@ -6,9 +6,11 @@ otel_bind_choices <- c(
   "all"
 )
 
+# Check if the bind level is sufficient
 otel_bind_is_enabled <- function(
   impl_level,
-  opt_bind_level = getOption("shiny.otel.bind", "all")
+  # Listen to option and fall back to the env var
+  opt_bind_level = getOption("shiny.otel.bind", Sys.getenv("SHINY_OTEL_BIND", "all"))
 ) {
   opt_bind_level <- as_otel_bind(opt_bind_level)
 
@@ -16,7 +18,7 @@ otel_bind_is_enabled <- function(
     which(impl_level == otel_bind_choices)
 }
 
-
+# Check if tracing is enabled and if the bind level is sufficient
 has_otel_bind <- function(bind) {
   # Only check pkg author input iff loaded with pkgload
   if (IS_SHINY_LOCAL_PKG) {
@@ -43,6 +45,7 @@ has_otel_bind <- function(bind) {
 #   )
 # }
 
+# Run expr with otel binding disabled
 without_otel_bind <- function(expr) {
   withr::with_options(
     list(
@@ -86,27 +89,4 @@ as_otel_bind <- function(bind = "all") {
   bind <- match.arg(bind, otel_bind_choices, several.ok = FALSE)
 
   return(bind)
-
-  if (!identical(bind, "all") && !identical(bind, "none")) {
-    stop(
-      "`bind=` must be `\"all\"` or `\"none\"`."
-    )
-  }
-
-  has_all <- any("all" == bind)
-  has_none <- any("none" == bind)
-
-  if (has_all && has_none) {
-    stop("`bind` can not contain both 'all' and 'none'.")
-  }
-
-  if (has_all) {
-    return(otel_bind_choices)
-  }
-
-  if (has_none) {
-    return("none")
-  }
-
-  match.arg(bind, otel_bind_choices, several.ok = TRUE)
 }

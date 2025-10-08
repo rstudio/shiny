@@ -4,7 +4,7 @@ OSPAN_REACTIVE_UPDATE_NAME <- "reactive_update"
 # * `session$userData[["_otel_has_reactive_cleanup"]]` - Whether the reactive span cleanup has been set
 
 has_reactive_ospan_cleanup <- function(domain) {
-  is_ospan(domain$userData[["_otel_has_reactive_cleanup"]])
+  isTRUE(domain$userData[["_otel_has_reactive_cleanup"]])
 }
 set_reactive_ospan_cleanup <- function(domain) {
   domain$userData[["_otel_has_reactive_cleanup"]] <- TRUE

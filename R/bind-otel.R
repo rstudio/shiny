@@ -1,4 +1,4 @@
-# - Goals -----------------------------------
+# - Open Telemetry -----------------------------------
 # * Integration locations:
 #   * √ Server:
 #     * Start reactive_update when reactive busy count > 0
@@ -163,7 +163,7 @@ bind_otel_shiny_render_function <- function(x) {
     # Dynamically determine the span label given the current reactive domain
     if (is.null(span_label)) {
       span_label <<-
-        ospan_label_render_function(domain = getDefaultReactiveDomain())
+        ospan_label_render_function(x, domain = getDefaultReactiveDomain())
     }
 
     with_shiny_ospan_async(

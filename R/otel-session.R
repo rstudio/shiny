@@ -17,38 +17,39 @@ use_session_start_ospan_async <- function(expr, ..., domain) {
     return(force(expr))
   }
 
-  with_shiny_ospan_async("session_start", {
-    local({
-      # session_start
-      spn <- otel::get_active_span()
-      spn$add_event("session.start", attributes = list(
-        session.id = domain$token
-      ))
-    })
+  id_attrs <- otel_session_id_attrs(domain)
 
-    domain$onSessionEnded(function() {
-      # session_end ospan
-      spn <- otel::get_active_span()
-      # On close, add session.end event
-      spn$add_event("session.end", attributes = list(
-        session.id = domain$token
+  domain$onSessionEnded(function() {
+    # On close, add session.end event
+    otel_log("session.end", attributes = id_attrs, severity = "info")
+  })
+
+  # Wrap the server initialization
+  with_shiny_ospan_async("session_start", attributes = id_attrs, {
+    otel_log(
+      "session.start",
+      severity = "info",
+      attributes = otel::as_attributes(c(
+        id_attrs,
+        otel_session_attrs(domain)
       ))
-    })
+    )
 
     force(expr)
   })
 }
 
 
-with_session_stop_ospan_async <- function(expr, ..., domain) {
+with_session_end_ospan_async <- function(expr, ..., domain) {
   if (!has_otel_bind("session")) {
     return(force(expr))
   }
 
+  id_attrs <- otel_session_id_attrs(domain)
   with_shiny_ospan_async(
-    "session_stop",
-    attributes = list(session.id = domain$token),
-    expr
+    "session_end",
+    expr,
+    attributes = id_attrs
   )
 }
 
@@ -57,7 +58,11 @@ with_session_stop_ospan_async <- function(expr, ..., domain) {
 
 otel_session_attrs <- function(domain) {
   attrs <- list(
-    PATH_INFO = domain[["request"]][["PATH_INFO"]] %||% "",
+    PATH_INFO =
+      sub(
+        "/websocket/$", "/",
+        domain[["request"]][["PATH_INFO"]] %||% ""
+      ),
     HTTP_HOST = domain[["request"]][["HTTP_HOST"]] %||% "",
     HTTP_ORIGIN = domain[["request"]][["HTTP_ORIGIN"]] %||% "",
     QUERY_STRING = domain[["request"]][["QUERY_STRING"]] %||% "",
@@ -67,4 +72,14 @@ otel_session_attrs <- function(domain) {
     attrs[["SERVER_PORT"]] <- as.integer(attrs[["SERVER_PORT"]])
   })
   attrs
+}
+
+otel_session_id_attrs <- function(domain) {
+  list(
+    # Convention for client-side with session.start and session.end events
+    # https://opentelemetry.io/docs/specs/semconv/general/session/
+    #
+    # Since we are the server, we'll just log a `session.start` and `session.end` event with the session id
+    session.id = domain$token
+  )
 }

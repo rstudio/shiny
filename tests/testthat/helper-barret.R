@@ -203,7 +203,9 @@ dev_barret_kitchen <- function() {
       sliderInput("mymod-x", "x", 1, 10, 5),
       sliderInput("mymod-y", "y", 1, 10, 5),
       div("x * y: "),
-      verbatimTextOutput("mymod-txt")
+      verbatimTextOutput("mymod-txt"),
+      # bslib::input_task_button("recalculate", "Recalculate"),
+      verbatimTextOutput("task_result")
     ),
     server = function(input, output, session) {
       log_and_msg("Start new Shiny session")
@@ -262,6 +264,44 @@ dev_barret_kitchen <- function() {
             calc()
           }) |>
             bindCache(x(), y())
+
+          rand_task <- ExtendedTask$new(function() {
+            mirai::mirai(
+              {
+                # Slow operation goes here
+                Sys.sleep(100 / 1000)
+                sample(1:100, 1)
+              }
+            )
+          })
+
+          # # Make button state reflect task.
+          # # If using R >=4.1, you can do this instead:
+          # # rand_task <- ExtendedTask$new(...) |> bind_task_button("recalculate")
+          # bslib::bind_task_button(rand_task, "recalculate")
+
+          observeEvent(input$x, {
+            # Invoke the extended in an observer
+            rand_task$invoke()
+          }, label = "invoke_rand_task")
+
+          output$task_result <- renderText({
+            # React to updated results when the task completes
+            number <- rand_task$result()
+            paste0("Your number is ", number, ".")
+          })
+
+          myfile <- reactivePoll(
+            1000,
+            session,
+            checkFunc = function() {
+              Sys.time()
+            },
+            # This function returns the content of log_file
+            valueFunc = function() {
+              read.dcf(system.file("DESCRIPTION", package = "shiny"))
+            }
+          )
 
           x_prom <- reactive({
             # t0

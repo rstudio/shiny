@@ -116,10 +116,30 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
     #'   read reactive inputs and pass them as arguments.
     initialize = function(func) {
       private$func <- func
+
       private$rv_status <- reactiveVal("initial")
       private$rv_value <- reactiveVal(NULL)
       private$rv_error <- reactiveVal(NULL)
       private$invocation_queue <- fastmap::fastqueue()
+
+      # Set a label for the reactive values for easier debugging
+      # Go up an extra sys.call() to get the user's call to ExtendedTask$new()
+      # The first sys.call() is to `initialize(...)`
+      call_srcref <- attr(sys.call(-1), "srcref", exact = TRUE)
+      label <- rassignSrcrefToLabel(
+        call_srcref,
+        defaultLabel = "<anonymous>",
+        fnName = "ExtendedTask\\$new"
+      )
+      private$label <- sprintf("ExtendedTask %s", label)
+
+      set_label <- function(rv, suffix) {
+        impl <- attr(rv, ".impl", exact = TRUE)
+        impl$.otelLabel <- sprintf("Set %s %s", private$label, suffix)
+      }
+      set_label(private$rv_status, "status")
+      set_label(private$rv_value, "value")
+      set_label(private$rv_error, "error")
     },
     #' @description
     #' Starts executing the long-running operation. If this `ExtendedTask` is
@@ -139,8 +159,27 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
         isolate(private$rv_status()) == "running" ||
           private$invocation_queue$size() > 0
       ) {
+        otel_log(
+          sprintf("%s add to queue", private$label),
+          severity = "info",
+          attributes = c(
+            otel_session_id_attrs(getDefaultReactiveDomain()),
+            list(
+              queue_size = private$invocation_queue$size() + 1L
+            )
+          )
+        )
         private$invocation_queue$add(list(args = args, call = call))
       } else {
+
+        if (has_otel_bind("reactivity")) {
+          private$ospan <- create_shiny_ospan(
+            private$label,
+            attributes = otel_session_id_attrs(getDefaultReactiveDomain())
+          )
+          otel::local_active_span(private$ospan)
+        }
+
         private$do_invoke(args, call = call)
       }
       invisible(NULL)
@@ -207,6 +246,8 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
     rv_value = NULL,
     rv_error = NULL,
     invocation_queue = NULL,
+    label = NULL,
+    ospan = NULL,
 
     do_invoke = function(args, call = NULL) {
       private$rv_status("running")
@@ -220,9 +261,17 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
       p <- promises::then(
         p,
         onFulfilled = function(value, .visible) {
+          if (is_ospan(private$ospan)) {
+            private$ospan$end(status_code = "ok")
+            private$ospan <- NULL
+          }
           private$on_success(list(value = value, visible = .visible))
         },
         onRejected = function(error) {
+          if (is_ospan(private$ospan)) {
+            private$ospan$end(status_code = "error")
+            private$ospan <- NULL
+          }
           private$on_error(error, call = call)
         }
       )

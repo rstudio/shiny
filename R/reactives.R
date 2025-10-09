@@ -1959,9 +1959,16 @@ coerceToFunc <- function(x) {
 reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
   intervalMillis <- coerceToFunc(intervalMillis)
 
+  call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
+  label <- rassignSrcrefToLabel(
+    call_srcref,
+    defaultLabel = "<anonymous>",
+    fnName = "reactivePoll"
+  )
+
   cookie <- reactiveVal(
     isolate(checkFunc()),
-    label = "reactivePoll cookie"
+    label = sprintf("reactivePoll %s cookie", label)
   )
 
   re_finalized <- FALSE
@@ -1979,9 +1986,9 @@ reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
 
     cookie(checkFunc())
     invalidateLater(intervalMillis(), session)
-  }, label = "reactivePoll cleanup")
+  }, label = sprintf("reactivePoll %s cleanup", label))
 
-  re <- reactive(label = "reactivePoll value", {
+  re <- reactive(label = sprintf("reactivePoll %s value", label), {
     # Take a dependency on the cookie, so that when it changes, this
     # reactive expression is invalidated.
     cookie()

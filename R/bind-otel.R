@@ -39,12 +39,7 @@
 
 # - Questions -----------------------------------
 # Add error handling for every otel. Use withCallingHandlers similar to https://github.com/r-lib/mirai/pull/395/files#diff-9e809582679952a93b9f34755bb38207471945eb36cedb9e2aa755125449f531R214-R215
-# TODO: log events for bookmark?
-  # Ans: Seems possibly excessive in amount
-# TODO: log events like fatal errors? / onUnhandledError
-  # Good idea!
 
-# TODO: reactiveTimer / invalidateLater / reactivePoll / reactiveFileReader
 # TODO: Extended Tasks are linked from parent span. Maybe use an envvar for span context? It is allowed for child process can end much later than the parent process. Take inspiration from callr PR (copying of the span context to the child process).
 
 # ------------------------------------------

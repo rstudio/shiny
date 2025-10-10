@@ -54,13 +54,7 @@ create_reactive_update_ospan <- function(..., domain) {
     # options = list(
     #   parent = NA # Always start a new root span
     # ),
-    attributes = list(
-      # Pairs with session.start and session.end events
-      # https://opentelemetry.io/docs/specs/semconv/general/session/
-      # Since this encapsulates all reactive calculations elements,
-      # the session.id isn't needed to be present in all lower spans
-      session.id = domain$token
-    )
+    attributes = otel_session_id_attrs(domain)
   )
 
   domain$userData[["_otel_reactive_update_ospan"]] <- reactive_update_ospan

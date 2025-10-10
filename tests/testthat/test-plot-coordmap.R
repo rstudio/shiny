@@ -348,12 +348,20 @@ test_that("ggplot coordmap with various scales and coords", {
     sortList(list(left=10, right=20, bottom=0, top=5))
   )
 
+  coord_transform_universal <- function(...) {
+    if (packageVersion("ggplot2") >= "4.0.0") {
+      coord_transform(...)
+    } else {
+      coord_trans(...)
+    }
+  }
+
   # Log scales and log coord transformations
   dat <- data.frame(xvar = c(10^-1, 10^3), yvar = c(2^-2, 2^4))
   p <- ggplot(dat, aes(xvar, yvar)) + geom_point() +
     scale_x_log10(expand = c(0 ,0)) +
     scale_y_continuous(expand = c(0, 0)) +
-    coord_trans(y = "log2")
+    coord_transform_universal(y = "log2")
   png(tmpfile)
   m <- getGgplotCoordmap(print(p), 500, 400, 72)
   dev.off()

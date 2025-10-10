@@ -70,7 +70,7 @@
     "coverage_detailed": "npx --yes type-check --detail",
     "coverage": "type-coverage -p tsconfig.json --at-least 90",
     "circular": "npx --yes dpdm --transform ./srcts/src/index.ts",
-    "prepack": "cp README.md README-orig.md && cp npm-README.md README.md",
+    "prepack": "cp README.md README-orig.md && cp README-npm.md README.md",
     "postpack": "test -f README-orig.md && cp README-orig.md README.md && rm README-orig.md"
   },
   "prettier": {

@@ -2,7 +2,7 @@
 
 ## OpenTelemetry support (#4269)
 
-* Added support for [OpenTelemetry](https://opentelemetry.io/) tracing via [`{otel}`](https://otel.r-lib.org/index.html). By default, if `otel::is_tracing_enabled()` returns `TRUE`, then `{shiny}` will record all OpenTelemetery spans. To disable adjust the default `{shiny}` behavior, set the option `shiny.otel.bind` to `"none"` (or environment variable to `SHINY_OTEL_BIND=none`). See [`{otelsdk}`'s Collecting Telemetry Data](https://otelsdk.r-lib.org/reference/collecting.html) for more details on configuring OpenTelemetry.
+* Added support for [OpenTelemetry](https://opentelemetry.io/) tracing via [`{otel}`](https://otel.r-lib.org/index.html). By default, if `otel::is_tracing_enabled()` returns `TRUE`, then `{shiny}` will record all OpenTelemetery spans. To adjust the default `{shiny}` behavior, set the option `shiny.otel.bind` to `"none"` (or environment variable to `SHINY_OTEL_BIND=none`). See [`{otelsdk}`'s Collecting Telemetry Data](https://otelsdk.r-lib.org/reference/collecting.html) for more details on configuring OpenTelemetry.
 
 * Spans are recorded for:
   * `session_start`: Wraps the calling of the `server()` function. Also contains HTTP request within the attributes.

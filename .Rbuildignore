@@ -32,3 +32,4 @@
 ^eslint\.config\.mjs$
 ^_dev$
 ^.claude$
+^npm-README\.md$

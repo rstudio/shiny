@@ -63,6 +63,8 @@ This is a patch release primarily for addressing the bugs introduced in v1.11.0.
 
 * Updated jQuery UI from 1.13.2 to 1.14.1. (#4175)
 
+* Shiny better truncates stack traces when errors occur (@olivroy #4186).
+
 ## Bug fixes
 
 * The Shiny Client Console (enabled with `shiny::devmode()`) no longer displays duplicate warning or error message. (#4177)

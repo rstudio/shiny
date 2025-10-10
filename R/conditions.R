@@ -527,7 +527,7 @@ dropTrivialFrames <- function(callnames) {
   # the calls--they don't add any helpful information. But only remove
   # the last *contiguous* block of them, and then, only if they are the
   # last thing in the calls list.
-  hideable <- callnames %in% c(".handleSimpleError", "h", "base$wrapOnFulfilled")
+  hideable <- callnames %in% c(".handleSimpleError", "h", "base$wrapOnFulfilled", "signal_abort", "handlers[[1L]]", "signalCondition", "rlang::abort", "abort", "cli::cli_abort", "cli_abort")
   # What's the last that *didn't* match stop/.handleSimpleError/h?
   lastGoodCall <- max(which(!hideable))
   toRemove <- length(callnames) - lastGoodCall

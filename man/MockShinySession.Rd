@@ -28,6 +28,15 @@ of \code{\link[=testServer]{testServer()}}.
 \dontrun{
 session$setInputs(x=1, y=2)
 }
+
+## ------------------------------------------------
+## Method `MockShinySession$removeInputs`
+## ------------------------------------------------
+
+\dontrun{
+session$setInputs(x=1, y=2)
+session$removeInputs("x")
+}
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
@@ -95,6 +104,7 @@ user. Always \code{NULL} for a \code{MockShinySesion}.}
 \item \href{#method-MockShinySession-cycleStartAction}{\code{MockShinySession$cycleStartAction()}}
 \item \href{#method-MockShinySession-fileUrl}{\code{MockShinySession$fileUrl()}}
 \item \href{#method-MockShinySession-setInputs}{\code{MockShinySession$setInputs()}}
+\item \href{#method-MockShinySession-removeInputs}{\code{MockShinySession$removeInputs()}}
 \item \href{#method-MockShinySession-.scheduleTask}{\code{MockShinySession$.scheduleTask()}}
 \item \href{#method-MockShinySession-elapse}{\code{MockShinySession$elapse()}}
 \item \href{#method-MockShinySession-.now}{\code{MockShinySession$.now()}}
@@ -273,6 +283,35 @@ may not be duplicated.}
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
 session$setInputs(x=1, y=2)
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MockShinySession-removeInputs"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-removeInputs}{}}}
+\subsection{Method \code{removeInputs()}}{
+Removes inputs from the \code{session$inputs} object and flushes
+the reactives.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$removeInputs(inputIds)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{inputIds}}{Character vector of input ids to remove.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+session$setInputs(x=1, y=2)
+session$removeInputs("x")
 }
 }
 \if{html}{\out{</div>}}

@@ -198,6 +198,8 @@ dev_barret_kitchen <- function() {
     otel_log(msg, logger = otel_logger)
   }
 
+  my_global_reactive <- reactiveVal(0)
+
   app <- shinyApp(
     ui = fluidPage(
       sliderInput("mymod-x", "x", 1, 10, 5),
@@ -237,6 +239,10 @@ dev_barret_kitchen <- function() {
           log_and_msg("Shiny module")
 
           x_raw <- reactive({
+            isolate({
+              my_global_reactive(my_global_reactive() + 1)
+            })
+
             x_val <- xVal()
             req(x_val)
             log_and_msg(sprintf("X Val: %s", x_val))

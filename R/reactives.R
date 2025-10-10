@@ -79,9 +79,9 @@ ReactiveVal <- R6Class(
     dependents = NULL
   ),
   public = list(
-    .isRecordingOtel = FALSE, # needs to be accessed/set within Shiny
-    .otelLabel = NULL, # Lazily set during `$set()`
-    .otelAttrs = NULL, # needs to be accessed/set within Shiny
+    .isRecordingOtel = FALSE, # Needs to be set by Shiny
+    .otelLabel = NULL, # Needs to be set by Shiny
+    .otelAttrs = NULL, # Needs to be set by Shiny
 
     initialize = function(value, label = NULL) {
       reactId <- nextGlobalReactId()
@@ -92,6 +92,7 @@ ReactiveVal <- R6Class(
 
       domain <- getDefaultReactiveDomain()
       rLog$define(private$reactId, value, private$label, type = "reactiveVal", domain)
+      .otelLabel <<- otel_label_set_reactive_val(private$label, domain = domain)
     },
     get = function() {
       private$dependents$register()
@@ -108,10 +109,6 @@ ReactiveVal <- R6Class(
 
       domain <- getDefaultReactiveDomain()
       if ((!is.null(domain)) && .isRecordingOtel) {
-        if (is.null(.otelLabel)) {
-          .otelLabel <<- otel_label_set_reactive_val(private$label, domain = domain)
-        }
-        # [mymod] Set reactiveVal: x
         otel_log(
           .otelLabel,
           severity = "info",
@@ -451,7 +448,6 @@ ReactiveValues <- R6Class(
       if ((!is.null(domain)) && .isRecordingOtel) {
         # Do not include updates to input or clientData unless _some_ reactivity has occured
         if (has_reactive_ospan_cleanup(domain) || !(.label == "input" || .label == "clientData")) {
-          # [mymod] Set reactiveValues: x$key
           otel_log(
             otel_label_set_reactive_values(.label, key, domain = domain),
             severity = "info",

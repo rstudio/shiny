@@ -81,6 +81,28 @@ otel_label_set_reactive_values <- function(label, key, ..., domain) {
   )
 }
 
+# -- ExtendedTask -------------------------------------------------------------
+
+otel_label_extended_task <- function(label, suffix = NULL, ..., domain) {
+  sprintf(
+    "ExtendedTask %s",
+    otel_label_upgrade(label, domain = domain)
+  )
+}
+otel_label_extended_task_add_to_queue <- function(label, ..., domain) {
+  sprintf(
+    "%s add to queue",
+    otel_label_extended_task(label, domain = domain)
+  )
+}
+otel_label_extended_task_set_reactive_val <- function(label, name, ..., domain) {
+  sprintf(
+    "Set %s %s",
+    otel_label_extended_task(label, domain = domain),
+    name
+  )
+}
+
 
 # -- Helpers --------------------------------------------------------------
 

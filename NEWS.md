@@ -8,7 +8,8 @@
   * `session_start`: Wraps the calling of the `server()` function.
   * `session_end`: Wraps the calling of the `onSessionEnded()` handlers.
   * `reactive_update`: Signals the start of when Shiny knows something is to be calculated. This span ends when there are no more reactive updates (promises or synchronous) to be calculated.
-  * `reactive`, `observe`, `output`: Captures the calculation of a reactive expression (`reactive()`), an observer (`observe()`), or an output render function (`render*()`).
+  * `reactive`, `observe`, `output`: Captures the calculation (including any async promise chains) of a reactive expression (`reactive()`), an observer (`observe()`), or an output render function (`render*()`).
+  * `ExtendedTask`: Captures the calculation (including any async promise chains) of an `ExtendedTask`.
 
 * OpenTelemetry Logs are recorded for:
   * `session.start` - When a user session starts. Also contains HTTP request within the attributes
@@ -16,6 +17,8 @@
   * `Set reactiveVal <name>` - When a `reactiveVal()` is set
   * `Set reactiveValues <name>$<key>` - When a `reactiveValues()` element is set
   * Fatal or unhandled errors - When an error occurs that causes the session to end, or when an unhandled error occurs in a reactive context. Contains the error within the attributes. To unsantize the error message being collected, set `options(shiny.otel.sanitize.errors = FALSE)`.
+  * `Set ExtendedTask <name> <value>` - When an `ExtendedTask`'s respective reactive value (e.g., `status`, `value`, and `error`) is set.
+  * `<ExtendedTask name> add to queue` - When an `ExtendedTask` is added to the task queue.
 
 * All logs and spans contain the `session.id` attribute.
 

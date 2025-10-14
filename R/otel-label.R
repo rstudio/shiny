@@ -103,6 +103,21 @@ otel_label_extended_task_set_reactive_val <- function(label, name, ..., domain) 
   )
 }
 
+# -- Debounce / Throttle -------------------------------------------------------
+
+otel_label_debounce <- function(label, ..., domain) {
+  sprintf(
+    "reactive debounce %s",
+    otel_label_upgrade(label, domain = domain)
+  )
+}
+
+otel_label_throttle <- function(label, ..., domain) {
+  sprintf(
+    "reactive throttle %s",
+    otel_label_upgrade(label, domain = domain)
+  )
+}
 
 # -- Helpers --------------------------------------------------------------
 

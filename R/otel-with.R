@@ -46,7 +46,7 @@ has_otel_bind <- function(bind) {
 # }
 
 # Run expr with otel binding disabled
-without_otel_bind <- function(expr) {
+with_no_otel_bind <- function(expr) {
   withr::with_options(
     list(
       shiny.otel.bind = "none"

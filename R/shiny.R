@@ -1160,7 +1160,7 @@ ShinySession <- R6Class(
         attr(label, "srcfile") <- srcfile
 
         # Do not bind this `observe()` call
-        obs <- without_otel_bind(observe(..stacktraceon = FALSE, {
+        obs <- with_no_otel_bind(observe(..stacktraceon = FALSE, {
 
           private$sendMessage(recalculating = list(
             name = name, status = 'recalculating'

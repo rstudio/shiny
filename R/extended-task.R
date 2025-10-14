@@ -117,9 +117,13 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
     initialize = function(func) {
       private$func <- func
 
-      private$rv_status <- reactiveVal("initial")
-      private$rv_value <- reactiveVal(NULL)
-      private$rv_error <- reactiveVal(NULL)
+      # Do not show these private reactive values in otel spans
+      with_no_otel_bind({
+        private$rv_status <- reactiveVal("initial")
+        private$rv_value <- reactiveVal(NULL)
+        private$rv_error <- reactiveVal(NULL)
+      })
+
       private$invocation_queue <- fastmap::fastqueue()
 
       domain <- getDefaultReactiveDomain()

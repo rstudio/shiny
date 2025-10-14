@@ -86,22 +86,22 @@ dev_barret <- function() {
         )
       )
       server <- function(input, output, session) {
-        without_otel_bind({
+        with_no_otel_bind({
           chat_server <- shinychat::chat_mod_server("chat", client, session)
         })
-        without_otel_bind({
+        with_no_otel_bind({
           observeEvent(input$close_btn, {
             stopApp()
           })
         })
 
-        # without_otel_bind({
+        # with_no_otel_bind({
         #   output$boom <- renderUI({
         #     stop("Boom!")
         #   })
         # })
 
-        without_otel_bind({
+        with_no_otel_bind({
           counter <- reactiveVal(1)
           observeEvent(chat_server$last_turn(), {
             counter(counter() + 1)
@@ -297,6 +297,16 @@ dev_barret_kitchen <- function() {
             paste0("Your number is ", number, ".")
           })
 
+          mydesc <- reactiveFileReader(
+            1000,
+            session,
+            filePath = system.file("DESCRIPTION", package = "shiny"),
+            readFunc = read.dcf
+          )
+          observe({
+            mydesc()
+          })
+
           myfile <- reactivePoll(
             1000,
             session,
@@ -308,6 +318,10 @@ dev_barret_kitchen <- function() {
               read.dcf(system.file("DESCRIPTION", package = "shiny"))
             }
           )
+
+          observe({
+            myfile()
+          })
 
           x_prom <- reactive({
             # t0

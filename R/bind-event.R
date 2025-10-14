@@ -206,7 +206,7 @@ bindEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE
 
   initialized <- FALSE
 
-  without_otel_bind({
+  with_no_otel_bind({
     res <- reactive(label = label, domain = domain, ..stacktraceon = FALSE, {
       hybrid_chain(
         {

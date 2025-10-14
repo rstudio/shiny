@@ -1955,36 +1955,55 @@ coerceToFunc <- function(x) {
 reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
   intervalMillis <- coerceToFunc(intervalMillis)
 
-  call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
-  label <- rassignSrcrefToLabel(
-    call_srcref,
-    defaultLabel = "<anonymous>",
-    fnName = "reactivePoll"
-  )
+  label <- "<anonymous>"
+  try(silent = TRUE, {
+    reactiveFileReader_call_srcref <- attr(sys.call(-1), "srcref", exact = TRUE)
+    fnName <- "reactiveFileReader"
+    label <- rassignSrcrefToLabel(
+      reactiveFileReader_call_srcref,
+      defaultLabel = "<anonymous>",
+      fnName = fnName
+    )
+  })
 
-  cookie <- reactiveVal(
-    isolate(checkFunc()),
-    label = sprintf("reactivePoll %s cookie", label)
-  )
+  if (label == "<anonymous>") {
+    # If reactiveFileReader couldn't figure out a label,
+    # try reactivePoll instead.
+    call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
+    fnName <- "reactivePoll"
+    label <- rassignSrcrefToLabel(
+      call_srcref,
+      defaultLabel = "<anonymous>",
+      fnName = fnName
+    )
+  }
 
   re_finalized <- FALSE
   env <- environment()
 
-  o <- observe({
-    # When no one holds a reference to the reactive returned from
-    # reactivePoll, destroy and remove the observer so that it doesn't keep
-    # firing and hold onto resources.
-    if (re_finalized) {
-      o$destroy()
-      rm(o, envir = env)
-      return()
-    }
+  with_no_otel_bind({
+    cookie <- reactiveVal(
+      isolate(checkFunc()),
+      label = sprintf("%s %s cookie", fnName, label)
+    )
 
-    cookie(checkFunc())
-    invalidateLater(intervalMillis(), session)
-  }, label = sprintf("reactivePoll %s cleanup", label))
+    o <- observe({
+      # When no one holds a reference to the reactive returned from
+      # reactivePoll, destroy and remove the observer so that it doesn't keep
+      # firing and hold onto resources.
+      if (re_finalized) {
+        o$destroy()
+        rm(o, envir = env)
+        return()
+      }
 
-  re <- reactive(label = sprintf("reactivePoll %s value", label), {
+      cookie(checkFunc())
+      invalidateLater(intervalMillis(), session)
+    }, label = sprintf("%s %s cleanup", fnName, label))
+  })
+
+
+  re <- reactive(label = sprintf("%s %s", fnName, label), {
     # Take a dependency on the cookie, so that when it changes, this
     # reactive expression is invalidated.
     cookie()
@@ -2433,7 +2452,7 @@ observeEvent <- function(eventExpr, handlerExpr,
   handlerQ <- exprToQuo(handlerExpr, handler.env, handler.quoted)
   label <- quoToLabel(eventQ, "observeEvent", label)
 
-  without_otel_bind({
+  with_no_otel_bind({
     handler <- inject(observe(
       !!handlerQ,
       label = label,
@@ -2484,7 +2503,7 @@ eventReactive <- function(eventExpr, valueExpr,
     )
   }
 
-  without_otel_bind({
+  with_no_otel_bind({
     value_r <- inject(reactive(!!valueQ, domain = domain, label = label))
   })
 
@@ -2609,8 +2628,8 @@ isNullEvent <- function(value) {
 #'
 #' @export
 debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomain()) {
-
-  # TODO: make a nice label for the observer(s)
+  # Do not bind OpenTelemetry spans for debounce reactivity internals,
+  # except for the eventReactive that is returned.
 
   force(r)
   force(millis)
@@ -2627,74 +2646,85 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
     millis <- function() origMillis
   }
 
-  trigger <- reactiveVal(NULL, label = sprintf("debounce %s trigger", label))
-  # the deadline for the timer to fire; NULL if not scheduled
-  when <- reactiveVal(NULL, label = sprintf("debounce %s when", label))
+  with_no_otel_bind({
+    trigger <- reactiveVal(NULL, label = sprintf("debounce %s trigger", label))
+    # the deadline for the timer to fire; NULL if not scheduled
+    when <- reactiveVal(NULL, label = sprintf("debounce %s when", label))
 
-  # Responsible for tracking when r() changes.
-  firstRun <- TRUE
-  observe(
-    label = sprintf("debounce %s tracker", label),
-    domain = domain,
-    priority = priority,
-    {
-      if (firstRun) {
-        # During the first run we don't want to set `when`, as this will kick
-        # off the timer. We only want to do that when we see `r()` change.
-        firstRun <<- FALSE
+    # Responsible for tracking when r() changes.
+    firstRun <- TRUE
+    observe(
+      label = sprintf("debounce %s tracker", label),
+      domain = domain,
+      priority = priority,
+      {
+        if (firstRun) {
+          # During the first run we don't want to set `when`, as this will kick
+          # off the timer. We only want to do that when we see `r()` change.
+          firstRun <<- FALSE
 
-        # Ensure r() is called only after setting firstRun to FALSE since r()
-        # may throw an error
+          # Ensure r() is called only after setting firstRun to FALSE since r()
+          # may throw an error
+          try(r(), silent = TRUE)
+          return()
+        }
+        # This ensures r() is still tracked after firstRun
         try(r(), silent = TRUE)
-        return()
-      }
-      # This ensures r() is still tracked after firstRun
-      try(r(), silent = TRUE)
 
-      # The value (or possibly millis) changed. Start or reset the timer.
-      when(
-        getDomainTimeMs(domain) + millis()
-      )
-    }
-  )
-
-  # This observer is the timer. It rests until `when` elapses, then touches
-  # `trigger`.
-  observe(
-    label = sprintf("debounce %s timer", label),
-    domain = domain,
-    priority = priority,
-    {
-      if (is.null(when()))
-        return()
-
-      now <- getDomainTimeMs(domain)
-      if (now >= when()) {
-        # Mod by 999999999 to get predictable overflow behavior
-        trigger(
-          isolate(trigger() %||% 0) %% 999999999 + 1
+        # The value (or possibly millis) changed. Start or reset the timer.
+        when(
+          getDomainTimeMs(domain) + millis()
         )
-        when(NULL)
-      } else {
-        invalidateLater(when() - now)
       }
-    }
-  )
+    )
+
+    # This observer is the timer. It rests until `when` elapses, then touches
+    # `trigger`.
+    observe(
+      label = sprintf("debounce %s timer", label),
+      domain = domain,
+      priority = priority,
+      {
+        if (is.null(when()))
+          return()
+
+        now <- getDomainTimeMs(domain)
+        if (now >= when()) {
+          # Mod by 999999999 to get predictable overflow behavior
+          trigger(
+            isolate(trigger() %||% 0) %% 999999999 + 1
+          )
+          when(NULL)
+        } else {
+          invalidateLater(when() - now)
+        }
+      }
+    )
+
+  })
 
   # This is the actual reactive that is returned to the user. It returns the
   # value of r(), but only invalidates/updates when `trigger` is touched.
   er <- eventReactive(
     {trigger()}, {r()},
-    label = sprintf("debounce %s result", label), ignoreNULL = FALSE, domain = domain
+    label = sprintf("debounce %s", label), ignoreNULL = FALSE, domain = domain
   )
 
-  # Force the value of er to be immediately cached upon creation. It's very hard
-  # to explain why this observer is needed, but if you want to understand, try
-  # commenting it out and studying the unit test failure that results.
-  primer <- observe({
-    primer$destroy()
-    try(er(), silent = TRUE)
-  }, label = sprintf("debounce %s primer", label), domain = domain, priority = priority)
+  # Update the otel label
+  local({
+    er_impl <- attr(er, "observable", exact = TRUE)
+    er_impl$.otelLabel <- otel_label_debounce(label, domain = domain)
+  })
+
+  with_no_otel_bind({
+    # Force the value of er to be immediately cached upon creation. It's very hard
+    # to explain why this observer is needed, but if you want to understand, try
+    # commenting it out and studying the unit test failure that results.
+    primer <- observe({
+      primer$destroy()
+      try(er(), silent = TRUE)
+    }, label = sprintf("debounce %s primer", label), domain = domain, priority = priority)
+  })
 
   er
 }
@@ -2702,12 +2732,11 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
 #' @rdname debounce
 #' @export
 throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomain()) {
-
-  # TODO: make a nice label for the observer(s)
+  # Do not bind OpenTelemetry spans for throttle reactivity internals,
+  # except for the eventReactive that is returned.
 
   force(r)
   force(millis)
-
 
   call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
   label <- rassignSrcrefToLabel(
@@ -2721,11 +2750,14 @@ throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
     millis <- function() origMillis
   }
 
-  trigger <- reactiveVal(0, label = sprintf("throttle %s trigger", label))
-  # Last time we fired; NULL if never
-  lastTriggeredAt <- reactiveVal(NULL, label = sprintf("throttle %s last triggered at", label))
-  # If TRUE, trigger again when timer elapses
-  pending <- reactiveVal(FALSE, label = sprintf("throttle %s pending", label))
+  with_no_otel_bind({
+    trigger <- reactiveVal(0, label = sprintf("throttle %s trigger", label))
+    # Last time we fired; NULL if never
+    lastTriggeredAt <- reactiveVal(NULL, label = sprintf("throttle %s last triggered at", label))
+    # If TRUE, trigger again when timer elapses
+    pending <- reactiveVal(FALSE, label = sprintf("throttle %s pending", label))
+  })
+
   blackoutMillisLeft <- function() {
     if (is.null(lastTriggeredAt())) {
       0
@@ -2741,37 +2773,47 @@ throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
     pending(FALSE)
   }
 
-  # Responsible for tracking when f() changes.
-  observeEvent(try(r(), silent = TRUE), {
-    if (pending()) {
-      # In a blackout period and someone already scheduled; do nothing
-    } else if (blackoutMillisLeft() > 0) {
-      # In a blackout period but this is the first change in that period; set
-      # pending so that a trigger will be scheduled at the end of the period
-      pending(TRUE)
-    } else {
-      # Not in a blackout period. Trigger, which will start a new blackout
-      # period.
-      update_trigger()
-    }
-  }, label = sprintf("throttle %s tracker", label), ignoreNULL = FALSE, priority = priority, domain = domain)
+  with_no_otel_bind({
+    # Responsible for tracking when f() changes.
+    observeEvent(try(r(), silent = TRUE), {
+      if (pending()) {
+        # In a blackout period and someone already scheduled; do nothing
+      } else if (blackoutMillisLeft() > 0) {
+        # In a blackout period but this is the first change in that period; set
+        # pending so that a trigger will be scheduled at the end of the period
+        pending(TRUE)
+      } else {
+        # Not in a blackout period. Trigger, which will start a new blackout
+        # period.
+        update_trigger()
+      }
+    }, label = sprintf("throttle %s tracker", label), ignoreNULL = FALSE, priority = priority, domain = domain)
 
-  observe({
-    if (!pending()) {
-      return()
-    }
+    observe({
+      if (!pending()) {
+        return()
+      }
 
-    timeout <- blackoutMillisLeft()
-    if (timeout > 0) {
-      invalidateLater(timeout)
-    } else {
-      update_trigger()
-    }
-  }, label = sprintf("throttle %s trigger", label), priority = priority, domain = domain)
+      timeout <- blackoutMillisLeft()
+      if (timeout > 0) {
+        invalidateLater(timeout)
+      } else {
+        update_trigger()
+      }
+    }, label = sprintf("throttle %s trigger", label), priority = priority, domain = domain)
+  })
 
   # This is the actual reactive that is returned to the user. It returns the
   # value of r(), but only invalidates/updates when trigger is touched.
-  eventReactive({trigger()}, {
+  er <- eventReactive({trigger()}, {
     r()
   }, label = sprintf("throttle %s result", label), ignoreNULL = FALSE, domain = domain)
+
+  # Update the otel label
+  local({
+    er_impl <- attr(er, "observable", exact = TRUE)
+    er_impl$.otelLabel <- otel_label_throttle(label, domain = domain)
+  })
+
+  er
 }

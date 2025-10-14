@@ -9,6 +9,7 @@
   * `session_end`: Wraps the calling of the `onSessionEnded()` handlers.
   * `reactive_update`: Signals the start of when Shiny knows something is to be calculated. This span ends when there are no more reactive updates (promises or synchronous) to be calculated.
   * `reactive`, `observe`, `output`: Captures the calculation (including any async promise chains) of a reactive expression (`reactive()`), an observer (`observe()`), or an output render function (`render*()`).
+  * `reactive debounce`, `reactive throttle`: Captures the calculation (including any async promise chains) of a `debounce()`d or `throttle()`d reactive expression.
   * `ExtendedTask`: Captures the calculation (including any async promise chains) of an `ExtendedTask`.
 
 * OpenTelemetry Logs are recorded for:
@@ -30,7 +31,7 @@
 
 * Fixed an issue where `updateSelectizeInput(options = list(plugins="remove_button"))` could lead to multiple remove buttons. (#4275)
 
-* The default label for `reactiveValues()` will not attempt to retrieve the assigned name if the srcref is available. If a value can not easily be produced, the default label (`reactiveValuesXXXX`) will be used instead. (#4269)
+* The default label for `reactiveValues()`, `reactivePoll()`, `reactiveFileReader()`, `debounce()`, and `throttle()` will now attempt to retrieve the assigned name if the srcref is available. If a value can not easily be produced, a default label will be used instead. (#4269)
 
 ## Changes
 

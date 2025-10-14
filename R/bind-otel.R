@@ -27,7 +27,7 @@
 # * Private methods:
 #   * bind_otel_*() - Methods that binds the reactive object to OpenTelemetry spans
 #     * Note: When adding otel to an object, prepend a class of `FOO.otel`. Then add a dispatch method for `bindOtel.FOO.otel()` that declares the object already has been bound.
-#   * without_otel_bind(expr) - Will not bind any reactives created within `expr` to OpenTelemetry spans.
+#   * with_no_otel_bind(expr) - Will not bind any reactives created within `expr` to OpenTelemetry spans.
 
 # - TODO: -----------------------------------
 # * Span status for success/failure (render function and regular reactive exprs?)

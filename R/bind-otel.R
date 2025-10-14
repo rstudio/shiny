@@ -145,10 +145,6 @@ bind_otel_observe <- function(x) {
 
 
 bind_otel_shiny_render_function <- function(x) {
-  if (inherits(x, "shiny.render.function.otel")) {
-    # Already bound
-    return(x)
-  }
 
   valueFunc <- x
   span_label <- NULL
@@ -176,7 +172,7 @@ bind_otel_shiny_render_function <- function(x) {
 }
 
 
-
+# ## If we ever expose a S3 function, I'd like to add this method.
 # bindOtel.function <- function(x, ...) {
 #   cli::cli_abort(paste0(
 #     "Don't know how to add OpenTelemetry recording to a plain function. ",

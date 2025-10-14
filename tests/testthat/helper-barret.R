@@ -2,145 +2,147 @@
 # system("air format ./R/bind-otel.R")
 # Rscript -e "devtools::load_all(); devtools::load_all(\"~/rstudio/ellmer/ellmer.nosync\"); dev_barret()"
 
-# TODO: Remove this function when done debugging
-dev_barret <- function() {
-  ## Ospan pkgs
-  # pak::pak("cran::mirai", upgrade = TRUE)
-  # pak::pak("r-lib/httr2#729")
-  # pak::pak("tidyverse/ellmer#526")
-  ## Prettier tool calls
-  # pak::pak("rstudio/shinychat/pkg-r")
+# # TODO: Remove this function when done debugging
+# dev_barret <- function() {
+#   ## Ospan pkgs
+#   # pak::pak("cran::mirai", upgrade = TRUE)
+#   # pak::pak("r-lib/httr2#729")
+#   # pak::pak("tidyverse/ellmer#526")
+#   ## Prettier tool calls
+#   # pak::pak("rstudio/shinychat/pkg-r")
 
-  withr::with_options(
-    list(
-      OTEL_TRACES_EXPORTER = Sys.getenv("LOGFIRE_OTEL_TRACES_EXPORTER"),
-      OTEL_EXPORTER_OTLP_ENDPOINT = Sys.getenv(
-        "LOGFIRE_OTEL_EXPORTER_OTLP_ENDPOINT"
-      ),
-      OTEL_EXPORTER_OTLP_HEADERS = Sys.getenv(
-        "LOGFIRE_OTEL_EXPORTER_OTLP_HEADERS"
-      ),
-      OTEL_LOGS_EXPORTER = Sys.getenv("LOGFIRE_OTEL_LOGS_EXPORTER"),
-      OTEL_LOG_LEVEL = Sys.getenv("LOGFIRE_OTEL_LOG_LEVEL"),
-      OTEL_METRICS_EXPORTER = Sys.getenv("LOGFIRE_OTEL_METRICS_EXPORTER")
-    ),
-    {
-      mirai::daemons(1)
+#   withr::with_options(
+#     list(
+#       OTEL_TRACES_EXPORTER = Sys.getenv("LOGFIRE_OTEL_TRACES_EXPORTER"),
+#       OTEL_EXPORTER_OTLP_ENDPOINT = Sys.getenv(
+#         "LOGFIRE_OTEL_EXPORTER_OTLP_ENDPOINT"
+#       ),
+#       OTEL_EXPORTER_OTLP_HEADERS = Sys.getenv(
+#         "LOGFIRE_OTEL_EXPORTER_OTLP_HEADERS"
+#       ),
+#       OTEL_LOGS_EXPORTER = Sys.getenv("LOGFIRE_OTEL_LOGS_EXPORTER"),
+#       OTEL_LOG_LEVEL = Sys.getenv("LOGFIRE_OTEL_LOG_LEVEL"),
+#       OTEL_METRICS_EXPORTER = Sys.getenv("LOGFIRE_OTEL_METRICS_EXPORTER")
+#     ),
+#     {
+#       mirai::daemons(1)
 
-      bind_val <- "none"
-      # bind_val <- "all"
+#       bind_val <- "none"
+#       # bind_val <- "all"
 
-      # Enhanced from: https://posit-dev.github.io/shinychat/r/articles/tool-ui.html#alternative-html-display
-      get_weather_forecast <- ellmer::tool(
-        function(lat, lon, location_name) {
-          mirai::mirai(
-            {
-              otel::log_info(
-                "Getting weather forecast",
-                logger = otel::get_logger("weather-app")
-              )
-              forecast_data <- weathR::point_tomorrow(lat, lon, short = FALSE)
-              forecast_table <- gt::as_raw_html(gt::gt(forecast_data))
-              list(data = forecast_data, table = forecast_table)
-            },
-            lat = lat,
-            lon = lon
-          ) |>
-            promises::then(function(forecast_info) {
-              ellmer::ContentToolResult(
-                forecast_info$data,
-                extra = list(
-                  display = list(
-                    html = forecast_info$table,
-                    title = paste("Weather Forecast for", location_name)
-                  )
-                )
-              )
-            })
-        },
-        name = "get_weather_forecast",
-        description = "Get the weather forecast for a location.",
-        arguments = list(
-          lat = ellmer::type_number("Latitude"),
-          lon = ellmer::type_number("Longitude"),
-          location_name = ellmer::type_string(
-            "Name of the location for display to the user"
-          )
-        ),
-        annotations = ellmer::tool_annotations(
-          title = "Weather Forecast",
-          icon = bsicons::bs_icon("cloud-sun")
-        )
-      )
+#       # Enhanced from: https://posit-dev.github.io/shinychat/r/articles/tool-ui.html#alternative-html-display
+#       get_weather_forecast <- ellmer::tool(
+#         function(lat, lon, location_name) {
+#           mirai::mirai(
+#             {
+#               otel::log_info(
+#                 "Getting weather forecast",
+#                 logger = otel::get_logger("weather-app")
+#               )
+#               forecast_data <- weathR::point_tomorrow(lat, lon, short = FALSE)
+#               forecast_table <- gt::as_raw_html(gt::gt(forecast_data))
+#               list(data = forecast_data, table = forecast_table)
+#             },
+#             lat = lat,
+#             lon = lon
+#           ) |>
+#             promises::then(function(forecast_info) {
+#               ellmer::ContentToolResult(
+#                 forecast_info$data,
+#                 extra = list(
+#                   display = list(
+#                     html = forecast_info$table,
+#                     title = paste("Weather Forecast for", location_name)
+#                   )
+#                 )
+#               )
+#             })
+#         },
+#         name = "get_weather_forecast",
+#         description = "Get the weather forecast for a location.",
+#         arguments = list(
+#           lat = ellmer::type_number("Latitude"),
+#           lon = ellmer::type_number("Longitude"),
+#           location_name = ellmer::type_string(
+#             "Name of the location for display to the user"
+#           )
+#         ),
+#         annotations = ellmer::tool_annotations(
+#           title = "Weather Forecast",
+#           icon = bsicons::bs_icon("cloud-sun")
+#         )
+#       )
 
-      client <- ellmer::chat_anthropic("Be terse.")
-      client$register_tool(get_weather_forecast)
+#       client <- ellmer::chat_anthropic("Be terse.")
+#       client$register_tool(get_weather_forecast)
 
-      ui <- bslib::page_fillable(
-        shinychat::chat_mod_ui("chat", height = "100%"),
-        actionButton(
-          "close_btn",
-          label = "",
-          class = "btn-close",
-          style = "position: fixed; top: 6px; right: 6px;"
-        )
-      )
-      server <- function(input, output, session) {
-        with_no_otel_bind({
-          chat_server <- shinychat::chat_mod_server("chat", client, session)
-        })
-        with_no_otel_bind({
-          observeEvent(input$close_btn, {
-            stopApp()
-          })
-        })
+#       ui <- bslib::page_fillable(
+#         shinychat::chat_mod_ui("chat", height = "100%"),
+#         actionButton(
+#           "close_btn",
+#           label = "",
+#           class = "btn-close",
+#           style = "position: fixed; top: 6px; right: 6px;"
+#         )
+#       )
+#       server <- function(input, output, session) {
+#         with_no_otel_bind({
+#           chat_server <- shinychat::chat_mod_server("chat", client, session)
+#         })
+#         with_no_otel_bind({
+#           observeEvent(input$close_btn, {
+#             stopApp()
+#           })
+#         })
 
-        # with_no_otel_bind({
-        #   output$boom <- renderUI({
-        #     stop("Boom!")
-        #   })
-        # })
+#         # with_no_otel_bind({
+#         #   output$boom <- renderUI({
+#         #     stop("Boom!")
+#         #   })
+#         # })
 
-        with_no_otel_bind({
-          counter <- reactiveVal(1)
-          observeEvent(chat_server$last_turn(), {
-            counter(counter() + 1)
-          })
-          observeEvent(counter(), label = "barret_is_lazy", {
-            if (counter() == 1) {
-              later::later(
-                function() {
-                  chat_server$update_user_input(
-                    value = "What is the weather in Atlanta, GA?",
-                    submit = TRUE
-                  )
-                },
-                delay = 1
-              )
-            } else {
-              later::later(
-                function() {
-                  later::later(
-                    function() {
-                      message("Stopping app")
-                      stopApp()
-                    },
-                    delay = 0.5
-                  )
-                  message("Stopping session")
-                  session$close()
-                },
-                delay = 3
-              )
-            }
-          })
-        })
-      }
-      app <- shinyApp(ui, server)
-      runApp(app, port = 8080, launch.browser = TRUE)
-    }
-  )
-}
+#         with_no_otel_bind({
+#           counter <- reactiveVal(1)
+#           observeEvent(chat_server$last_turn(), {
+#             counter(counter() + 1)
+#           })
+#           observeEvent(counter(), label = "barret_is_lazy", {
+#             if (counter() == 1) {
+#               later::later(
+#                 function() {
+#                   chat_server$update_user_input(
+#                     value = "What is the weather in Atlanta, GA?",
+#                     submit = TRUE
+#                   )
+#                 },
+#                 delay = 1
+#               )
+#             } else {
+#               later::later(
+#                 function() {
+#                   later::later(
+#                     function() {
+#                       message("Stopping app")
+#                       stopApp()
+#                     },
+#                     delay = 0.5
+#                   )
+#                   message("Stopping session")
+#                   session$close()
+#                 },
+#                 delay = 3
+#               )
+#             }
+#           })
+#         })
+#       }
+#       app <- shinyApp(ui, server)
+#       runApp(app, port = 8080, launch.browser = TRUE)
+#     }
+#   )
+# }
+
+# -------------------------------------------------------------------
 
 #
 #

@@ -194,7 +194,6 @@ Collate:
     'otel-label.R'
     'otel-reactive-update.R'
     'otel-session.R'
-    'otel-with.R'
     'otel.R'
     'priorityqueue.R'
     'progress.R'

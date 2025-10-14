@@ -20,10 +20,9 @@
 # * Global options:
 #   * √ shiny.otel.bind:
 #     * "all", "none" - all or nothing
-#     * Current non-public options:
-#       * "session" - Adds session start/end events
-#       * "reactive_update" - Spans for any reactive update. (Includes `"session"` features).
-#       * "reactivity" - Spans for all reactive things. (Includes `"reactive_update"` features).
+#     * "session" - Adds session start/end events
+#     * "reactive_update" - Spans for any reactive update. (Includes `"session"` features).
+#     * "reactivity" - Spans for all reactive things. (Includes `"reactive_update"` features).
 # * Private methods:
 #   * bind_otel_*() - Methods that binds the reactive object to OpenTelemetry spans
 #     * Note: When adding otel to an object, prepend a class of `FOO.otel`. Then add a dispatch method for `bindOtel.FOO.otel()` that declares the object already has been bound.
@@ -34,13 +33,6 @@
 # * Error handling is not an "exception" for fatal logs
 # * Connect `user.id` to be their user name: https://opentelemetry.io/docs/specs/semconv/registry/attributes/user/
 # * Tests with otel recording
-
-
-
-# - Questions -----------------------------------
-# Add error handling for every otel. Use withCallingHandlers similar to https://github.com/r-lib/mirai/pull/395/files#diff-9e809582679952a93b9f34755bb38207471945eb36cedb9e2aa755125449f531R214-R215
-
-# TODO: Extended Tasks are linked from parent span. Maybe use an envvar for span context? It is allowed for child process can end much later than the parent process. Take inspiration from callr PR (copying of the span context to the child process).
 
 # ------------------------------------------
 
@@ -57,8 +49,8 @@
 #'
 #' @description
 #'
-#' `bindOtel()` adds OpenTelemetry for [reactive()] expressions and `render*`
-#' functions (like [renderText()], [renderTable()], ...).
+#' `bind_otel_*()` methods add OpenTelemetry flags for [reactive()] expressions
+#' and `render*` functions (like [renderText()], [renderTable()], ...).
 #'
 #' Wrapper to creating an active reactive OpenTelemetry span that closes when
 #' the reactive expression is done computing. Typically this is when the
@@ -92,9 +84,56 @@
 #'   way to create a reactive expression that is bound to an OpenTelemetry
 #'   span.
 #'
+#' @section Span management and performance:
+#'
+#' Dev note - Barret 2025-10:
+#' Typically, an OpenTelemetry span (ospan) will inherit from the parent span.
+#' This works well and we can think of the hierarchy as a tree. With
+#' `options("shiny.otel.bind" = <value>)`, we are able to control with a sliding
+#' dial how much of the tree we are interested in: "none", "session",
+#' "reactive_update", "reactivity", and finally "all".
+#'
+#' Leveraging this hierarchy, we can avoid creating spans that are not needed.
+#' The act of making a noop span takes on the order of 10microsec. Handling of
+#' the opspan is also in the 10s of microsecond range. We should avoid this when
+#' we **know** that we're not interested in the span.  Therefore, manually
+#' handling spans should be considered for Shiny.
+#'
+#' * Q:
+#'   * But what about app author who want the current span? Is there any
+#'     guarantee that the current span is expected `reactive()` span?
+#' * A:
+#'   * No. The current span is whatever the current span is. If the app author
+#'     wants a specific span, they should create it themselves.
+#' * Proof:
+#'   ```r
+#'   noop <- otel::get_active_span()
+#'   noop$get_context()$get_span_id()
+#'   #> [1] "0000000000000000"
+#'   ignore <- otelsdk::with_otel_record({
+#'     a <- otel::start_local_active_span("a")
+#'     a$get_context()$get_span_id() |> str()
+#'     otel::with_active_span(noop, {
+#'       otel::get_active_span()$get_context()$get_span_id() |> str()
+#'     })
+#'   })
+#'   #> chr "2645e95715841e75"
+#'   #> chr "2645e95715841e75"
+#'   # ## It is reasonable to expect the second id to be `0000000000000000`, but it's not.
+#'   ```
+#'   Therefore, the app author has no guarantee that the current span is the
+#'   span they're expecting. If the app author wants a specific span, they should
+#'   create it themselves and let natural inheritance take over.
+#'
+#' Given this, I will imagine that app authors will set
+#' `options("shiny.otel.bind" = "reactive_update")` as their default behavior.
+#' Enough to know things are happening, but not overwhelming from **everything**
+#' that is reactive.
+#'
+#' To _light up_ a specific area, users can call `withr::with_options(list("shiny.otel.bind" = "all"), { ... })`.
+#'
 #' @param x The object to add caching to.
 #' @param ... Future parameter expansion.
-#' @seealso [bindCache()] and [bindEvent()] for other ways to bind to your reactives.
 #' @noRd
 NULL
 

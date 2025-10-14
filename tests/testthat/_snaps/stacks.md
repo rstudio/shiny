@@ -37,7 +37,7 @@
       15  57            promises::with_promise_domain                    
       16  56                       captureStackTraces                    
       17  55                                    force                    
-      18  54         with_reactive_update_ospan_async                    
+      18  54                 with_context_ospan_async                    
       19  53                                    force                    
       20  52                          domain$wrapSync                    
       21  51            promises::with_promise_domain                    
@@ -72,7 +72,7 @@
       50  22            promises::with_promise_domain                    
       51  21                       captureStackTraces                    
       52  20                                    force                    
-      53  19         with_reactive_update_ospan_async                    
+      53  19                 with_context_ospan_async                    
       54  18                                    force                    
       55  17                          domain$wrapSync                    
       56  16            promises::with_promise_domain                    

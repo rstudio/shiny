@@ -166,8 +166,13 @@ getShinyOption <- function(name, default = NULL) {
 #'   Possible options:
 #'   * `"none"` - Shorthand for disabling all supported OpenTelemetry spans and
 #'     logs.
+#'   * `"session"` - Adds support for tracing user sessions.
+#'   * `"reactive_update"` - Includes `"session"` features, and adds support for
+#'     tracing reactive updates.
+#'   * `"reactivity"` - Includes `"reactive_update"` features, and adds support
+#'     for tracing every reactive operation.
 #'   * `"all"` - Shorthand for recording all supported OpenTelemetry spans and
-#'     logs.
+#'     logs. Currently equivalent to `"reactivity"`.
 #'
 #'   This option is useful for debugging and profiling while in production. This
 #'   option will only be useful if the `otelsdk` package is installed and

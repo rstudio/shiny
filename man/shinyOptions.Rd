@@ -137,8 +137,13 @@ Possible options:
 \itemize{
 \item \code{"none"} - Shorthand for disabling all supported OpenTelemetry spans and
 logs.
+\item \code{"session"} - Adds support for tracing user sessions.
+\item \code{"reactive_update"} - Includes \code{"session"} features, and adds support for
+tracing reactive updates.
+\item \code{"reactivity"} - Includes \code{"reactive_update"} features, and adds support
+for tracing every reactive operation.
 \item \code{"all"} - Shorthand for recording all supported OpenTelemetry spans and
-logs.
+logs. Currently equivalent to \code{"reactivity"}.
 }
 
 This option is useful for debugging and profiling while in production. This

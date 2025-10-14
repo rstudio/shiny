@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.11.1.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.11.1.9001</span>
       </span>
     </div>
 
@@ -50,6 +50,51 @@
     <div class="section level2">
 <h2 class="page-header" data-toc-text="development version" id="shiny-development-version">shiny (development version)<a class="anchor" aria-label="anchor" href="#shiny-development-version"></a></h2>
 <div class="section level3">
+<h3 id="opentelemetry-support-development-version">OpenTelemetry support (<a href="https://github.com/rstudio/shiny/issues/4269" class="external-link">#4269</a>)<a class="anchor" aria-label="anchor" href="#opentelemetry-support-development-version"></a></h3>
+<ul><li><p>Added support for <a href="https://opentelemetry.io/" class="external-link">OpenTelemetry</a> via <a href="https://otel.r-lib.org/index.html" class="external-link"><code>{otel}</code></a>. By default, if <code><a href="https://otel.r-lib.org/reference/is_tracing_enabled.html" class="external-link">otel::is_tracing_enabled()</a></code> returns <code>TRUE</code>, then <a href="https://shiny.posit.co/" class="external-link">shiny</a> will record all OpenTelemetery spans. See <a href="https://otelsdk.r-lib.org/reference/collecting.html" class="external-link"><code>{otelsdk}</code>’s Collecting Telemetry Data</a> for more details on configuring OpenTelemetry.</p></li>
+<li>
+<p>Supported values for <code>options(shiny.otel.bind)</code> (or <code>Sys.getenv("SHINY_OTEL_BIND")</code>):</p>
+<ul><li>
+<code>"none"</code> - No Shiny OpenTelemetry tracing.</li>
+<li>
+<code>"session"</code> - Adds session start/end spans.</li>
+<li>
+<code>"reactive_update"</code> - Spans for any synchronous/asynchronous reactive update. (Includes <code>"session"</code> features).</li>
+<li>
+<code>"reactivity"</code> - Spans for all reactive expressions. (Includes <code>"reactive_update"</code> features).</li>
+<li>
+<code>"all"</code> [default] - All Shiny OpenTelemetry tracing. Currently equivalent to <code>"reactivity"</code>.</li>
+</ul></li>
+<li>
+<p>Spans are recorded for:</p>
+<ul><li>
+<code>session_start</code>: Wraps the calling of the <code>server()</code> function. Also contains HTTP request within the attributes.</li>
+<li>
+<code>session_end</code>: Wraps the calling of the <code><a href="../reference/onFlush.html">onSessionEnded()</a></code> handlers.</li>
+<li>
+<code>reactive_update</code>: Signals the start of when Shiny knows something is to be calculated. This span ends when there are no more reactive updates (promises or synchronous) to be calculated.</li>
+<li>
+<code>reactive</code>, <code>observe</code>, <code>output</code>: Captures the calculation (including any async promise chains) of a reactive expression (<code><a href="../reference/reactive.html">reactive()</a></code>), an observer (<code><a href="../reference/observe.html">observe()</a></code>), or an output render function (<code>render*()</code>).</li>
+<li>
+<code>reactive debounce</code>, <code>reactive throttle</code>: Captures the calculation (including any async promise chains) of a <code><a href="../reference/debounce.html">debounce()</a></code>d or <code><a href="../reference/debounce.html">throttle()</a></code>d reactive expression.</li>
+<li>
+<code>ExtendedTask</code>: Captures the calculation (including any async promise chains) of an <code>ExtendedTask</code>.</li>
+</ul></li>
+<li>
+<p>OpenTelemetry Logs are recorded for:</p>
+<ul><li>
+<code>Set reactiveVal &lt;name&gt;</code> - When a <code><a href="../reference/reactiveVal.html">reactiveVal()</a></code> is set</li>
+<li>
+<code>Set reactiveValues &lt;name&gt;$&lt;key&gt;</code> - When a <code><a href="../reference/reactiveValues.html">reactiveValues()</a></code> element is set</li>
+<li>Fatal or unhandled errors - When an error occurs that causes the session to end, or when an unhandled error occurs in a reactive context. Contains the error within the attributes. To unsantize the error message being collected, set <code>options(shiny.otel.sanitize.errors = FALSE)</code>.</li>
+<li>
+<code>Set ExtendedTask &lt;name&gt; &lt;value&gt;</code> - When an <code>ExtendedTask</code>’s respective reactive value (e.g., <code>status</code>, <code>value</code>, and <code>error</code>) is set.</li>
+<li>
+<code>&lt;ExtendedTask name&gt; add to queue</code> - When an <code>ExtendedTask</code> is added to the task queue.</li>
+</ul></li>
+<li><p>All logs and spans contain the <code>session.id</code> attribute.</p></li>
+</ul></div>
+<div class="section level3">
 <h3 id="new-features-development-version">New features<a class="anchor" aria-label="anchor" href="#new-features-development-version"></a></h3>
 <ul><li>The <code>icon</code> argument of <code><a href="../reference/updateActionButton.html">updateActionButton()</a></code>/<code><a href="../reference/updateActionButton.html">updateActionLink()</a></code> nows allows values other than <code><a href="../reference/icon.html">shiny::icon()</a></code> (e.g., <code><a href="https://rstudio.github.io/fontawesome/reference/fa.html" class="external-link">fontawesome::fa()</a></code>, <code>bsicons::bs_icon()</code>, etc). (<a href="https://github.com/rstudio/shiny/issues/4249" class="external-link">#4249</a>)</li>
 </ul></div>
@@ -57,6 +102,7 @@
 <h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>
 <ul><li><p><code><a href="../reference/updateActionButton.html">updateActionButton()</a></code>/<code><a href="../reference/updateActionButton.html">updateActionLink()</a></code> now correctly renders HTML content passed to the <code>label</code> argument. (<a href="https://github.com/rstudio/shiny/issues/4249" class="external-link">#4249</a>)</p></li>
 <li><p>Fixed an issue where <code>updateSelectizeInput(options = list(plugins="remove_button"))</code> could lead to multiple remove buttons. (<a href="https://github.com/rstudio/shiny/issues/4275" class="external-link">#4275</a>)</p></li>
+<li><p>The default label for <code><a href="../reference/reactiveValues.html">reactiveValues()</a></code>, <code><a href="../reference/reactivePoll.html">reactivePoll()</a></code>, <code><a href="../reference/reactiveFileReader.html">reactiveFileReader()</a></code>, <code><a href="../reference/debounce.html">debounce()</a></code>, and <code><a href="../reference/debounce.html">throttle()</a></code> will now attempt to retrieve the assigned name if the srcref is available. If a value can not easily be produced, a default label will be used instead. (<a href="https://github.com/rstudio/shiny/issues/4269" class="external-link">#4269</a>)</p></li>
 </ul></div>
 <div class="section level3">
 <h3 id="changes-development-version">Changes<a class="anchor" aria-label="anchor" href="#changes-development-version"></a></h3>

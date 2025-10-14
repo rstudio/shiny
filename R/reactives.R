@@ -973,16 +973,20 @@ Observable <- R6Class(
       simpleExprToFunction(fn_body(.origFunc), "reactive")
     },
     .updateValue = function() {
-      ctx <- Context$new(.domain, .label, type = 'observable',
-                         prevId = .mostRecentCtxId, reactId = .reactId,
-                         weak = TRUE)
-      .mostRecentCtxId <<- ctx$id
-
-      ctx$setOspanInfo(
-        isRecordingOtel = .isRecordingOtel,
-        otelLabel = .otelLabel,
-        otelAttrs = c(.otelAttrs, otel_session_id_attrs(.domain))
+      ctx <- Context$new(
+        .domain,
+        .label,
+        type = 'observable',
+        prevId = .mostRecentCtxId,
+        reactId = .reactId,
+        weak = TRUE,
+        otel_info = ctx_otel_info_obj(
+          isRecordingOtel = .isRecordingOtel,
+          otelLabel = .otelLabel,
+          otelAttrs = c(.otelAttrs, otel_session_id_attrs(.domain))
+        )
       )
+      .mostRecentCtxId <<- ctx$id
 
       # A Dependency object will have a weak reference to the context, which
       # doesn't prevent it from being GC'd. However, as long as this
@@ -1271,7 +1275,18 @@ Observer <- R6Class(
       .createContext()$invalidate()
     },
     .createContext = function() {
-      ctx <- Context$new(.domain, .label, type='observer', prevId=.prevId, reactId = .reactId)
+      ctx <- Context$new(
+        .domain,
+        .label,
+        type = 'observer',
+        prevId = .prevId,
+        reactId = .reactId,
+        otel_info = ctx_otel_info_obj(
+          isRecordingOtel = .isRecordingOtel,
+          otelLabel = .otelLabel,
+          otelAttrs = c(.otelAttrs, otel_session_id_attrs(.domain))
+        )
+      )
       .prevId <<- ctx$id
 
       if (!is.null(.ctx)) {
@@ -1285,12 +1300,6 @@ Observer <- R6Class(
       # reactive is invalidated, which may not happen immediately or at all.
       # This can lead to a memory leak (#1253).
       .ctx <<- ctx
-
-      ctx$setOspanInfo(
-        isRecordingOtel = .isRecordingOtel,
-        otelLabel = .otelLabel,
-        otelAttrs = c(.otelAttrs, otel_session_id_attrs(.domain))
-      )
 
       ctx$onInvalidate(function() {
         # Context is invalidated, so we don't need to store a reference to it

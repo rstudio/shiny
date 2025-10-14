@@ -16,6 +16,20 @@ processId <- local({
   }
 })
 
+ctx_otel_info_obj <- function(
+  isRecordingOtel = FALSE,
+  otelLabel = "<unknown>",
+  otelAttrs = NULL) {
+  structure(
+    list(
+      isRecordingOtel = isRecordingOtel,
+      otelLabel = otelLabel,
+      otelAttrs = otelAttrs
+    ),
+    class = "ctx_otel_info"
+  )
+}
+
 #' @include graph.R
 Context <- R6Class(
   'Context',
@@ -33,15 +47,14 @@ Context <- R6Class(
     .pid = NULL,
     .weak = NULL,
 
-    .isRecordingOtel = FALSE,
-    .otelLabel = NULL,
-    .otelAttrs = NULL,
+    .otel_info = NULL,
 
     initialize = function(
       domain, label='', type='other', prevId='',
       reactId = rLog$noReactId,
       id = .getReactiveEnvironment()$nextId(), # For dummy context
-      weak = FALSE
+      weak = FALSE,
+      otel_info = ctx_otel_info_obj()
     ) {
       id <<- id
       .label <<- label
@@ -51,6 +64,12 @@ Context <- R6Class(
       .reactType <<- type
       .weak <<- weak
       rLog$createContext(id, label, type, prevId, domain)
+      if (!is.null(otel_info)) {
+        if (IS_SHINY_LOCAL_PKG) {
+          stopifnot(inherits(otel_info, "ctx_otel_info"))
+        }
+        .otel_info <<- otel_info
+      }
     },
     run = function(func) {
       "Run the provided function under this context."
@@ -68,14 +87,6 @@ Context <- R6Class(
         })
       })
     },
-    setOspanInfo = function(isRecordingOtel, otelLabel, otelAttrs) {
-      self$.isRecordingOtel <- isRecordingOtel
-      if (isRecordingOtel) {
-        self$.otelLabel <- otelLabel
-        self$.otelAttrs <- otelAttrs
-      }
-      invisible(self)
-    },
     withCtxOspans = function(expr, domain) {
       if (!otel_is_tracing_enabled()) {
         return(force(expr))
@@ -85,8 +96,12 @@ Context <- R6Class(
       # This ensures that any spans created within the reactive context
       # are at least children of the reactive update span
       with_reactive_update_active_ospan(domain = domain, {
-        if (.isRecordingOtel) {
-          with_shiny_ospan_async(.otelLabel, expr, attributes = .otelAttrs)
+        if (.otel_info$isRecordingOtel) {
+          with_shiny_ospan_async(
+            .otel_info$otelLabel,
+            expr,
+            attributes = .otel_info$otelAttrs
+          )
         } else {
           force(expr)
         }

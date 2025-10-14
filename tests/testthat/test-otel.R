@@ -108,3 +108,35 @@ test_that("otel_bind_is_enabled defaults to 'all' when no option or env var", {
   expect_true(otel_bind_is_enabled("reactivity"))
   expect_true(otel_bind_is_enabled("none"))
 })
+
+# Tests for as_otel_bind()
+test_that("as_otel_bind validates and returns valid bind levels", {
+  expect_equal(as_otel_bind("none"), "none")
+  expect_equal(as_otel_bind("session"), "session")
+  expect_equal(as_otel_bind("reactive_update"), "reactive_update")
+  expect_equal(as_otel_bind("reactivity"), "reactivity")
+  expect_equal(as_otel_bind("all"), "all")
+})
+
+test_that("as_otel_bind uses default value", {
+  expect_equal(as_otel_bind(), "all")
+})
+
+test_that("as_otel_bind errors on invalid input types", {
+  expect_error(as_otel_bind(123), "`bind` must be a character vector.")
+  expect_error(as_otel_bind(NULL), "`bind` must be a character vector.")
+  expect_error(as_otel_bind(TRUE), "`bind` must be a character vector.")
+  expect_error(as_otel_bind(list("all")), "`bind` must be a character vector.")
+})
+
+test_that("as_otel_bind errors on invalid bind levels", {
+  expect_error(as_otel_bind("invalid"), "'arg' should be one of")
+  expect_error(as_otel_bind("unknown"), "'arg' should be one of")
+  expect_error(as_otel_bind(""), "'arg' should be one of")
+})
+
+test_that("as_otel_bind errors on multiple values", {
+  # match.arg with several.ok = FALSE should error on multiple values
+  expect_error(as_otel_bind(c("all", "none")), "'arg' must be of length 1")
+  expect_error(as_otel_bind(c("session", "reactivity")), "'arg' must be of length 1")
+})

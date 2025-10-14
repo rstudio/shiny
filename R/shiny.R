@@ -1056,6 +1056,21 @@ ShinySession <- R6Class(
         class(e) <- c("shiny.error.fatal", class(e))
       }
 
+      otel_log(
+        if (close) "Fatal error" else "Unhandled error",
+        severity = if (close) "fatal" else "error",
+        attributes = otel::as_attributes(list(
+          session.id = self$token,
+          error =
+            # Do not expose errors to otel if sanitization is enabled
+            if (getOption("shiny.otel.sanitize.errors", TRUE)) {
+              sanitized_error()
+            } else {
+              e
+            }
+        ))
+      )
+
       private$unhandledErrorCallbacks$invoke(e, onError = printError)
       .globals$onUnhandledErrorCallbacks$invoke(e, onError = printError)
 
@@ -1073,7 +1088,9 @@ ShinySession <- R6Class(
       }
       # ..stacktraceon matches with the top-level ..stacktraceoff..
       withReactiveDomain(self, {
-        private$closedCallbacks$invoke(onError = printError, ..stacktraceon = TRUE)
+        with_session_end_ospan_async(domain = self, {
+          private$closedCallbacks$invoke(onError = printError, ..stacktraceon = TRUE)
+        })
       })
     },
     isClosed = function() {
@@ -1142,7 +1159,8 @@ ShinySession <- R6Class(
         attr(label, "srcref") <- srcref
         attr(label, "srcfile") <- srcfile
 
-        obs <- observe(..stacktraceon = FALSE, {
+        # Do not bind this `observe()` call
+        obs <- with_no_otel_bind(observe(..stacktraceon = FALSE, {
 
           private$sendMessage(recalculating = list(
             name = name, status = 'recalculating'
@@ -1151,10 +1169,14 @@ ShinySession <- R6Class(
           # This shinyCallingHandlers should maybe be at a higher level,
           # to include the $then/$catch calls below?
           hybrid_chain(
+            # TODO: Move ospan wrapper here to capture return value
             hybrid_chain(
               {
                 private$withCurrentOutput(name, {
-                  shinyCallingHandlers(func())
+                  # TODO: Error handling must be done within ospan methods to get the proper status value. There is currently no way to access a already closed span from within `func()`.
+                  with_reactive_update_active_ospan({
+                    shinyCallingHandlers(func())
+                  }, domain = self)
                 })
               },
               catch = function(cond) {
@@ -1179,9 +1201,7 @@ ShinySession <- R6Class(
                 } else {
                   if (isTRUE(getOption("show.error.messages"))) printError(cond)
                   if (getOption("shiny.sanitize.errors", FALSE)) {
-                    cond <- simpleError(paste("An error has occurred. Check your",
-                      "logs or contact the app author for",
-                      "clarification."))
+                    cond <- sanitized_error()
                   }
                   self$unhandledError(cond, close = FALSE)
                   invisible(structure(list(), class = "try-error", condition = cond))
@@ -1245,7 +1265,7 @@ ShinySession <- R6Class(
                 private$invalidatedOutputValues$set(name, value)
             }
           )
-        }, suspended=private$shouldSuspend(name), label=label)
+        }, suspended=private$shouldSuspend(name), label=label))
 
         # If any output attributes were added to the render function attach
         # them to observer.
@@ -2195,6 +2215,8 @@ ShinySession <- R6Class(
       if (private$busyCount == 0L) {
         rLog$asyncStart(domain = self)
         private$sendMessage(busy = "busy")
+
+        create_reactive_update_ospan(domain = self)
       }
       private$busyCount <- private$busyCount + 1L
     },
@@ -2216,6 +2238,8 @@ ShinySession <- R6Class(
             private$startCycle()
           }
         })
+
+        end_reactive_update_ospan(domain = self)
       }
     }
   )
@@ -2722,4 +2746,11 @@ validate_session_object <- function(session, label = as.character(sys.call(sys.p
       )
     )
   }
+}
+
+
+sanitized_error <- function() {
+  simpleError(paste("An error has occurred. Check your",
+    "logs or contact the app author for",
+    "clarification."))
 }

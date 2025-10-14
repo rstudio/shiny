@@ -1,5 +1,33 @@
 # shiny (development version)
 
+## OpenTelemetry support (#4269)
+
+* Added support for [OpenTelemetry](https://opentelemetry.io/) via [`{otel}`](https://otel.r-lib.org/index.html). By default, if `otel::is_tracing_enabled()` returns `TRUE`, then `{shiny}` will record all OpenTelemetery spans. See [`{otelsdk}`'s Collecting Telemetry Data](https://otelsdk.r-lib.org/reference/collecting.html) for more details on configuring OpenTelemetry.
+
+* Supported values for `options(shiny.otel.bind)` (or `Sys.getenv("SHINY_OTEL_BIND")`):
+  * `"none"` - No Shiny OpenTelemetry tracing.
+  * `"session"` - Adds session start/end spans.
+  * `"reactive_update"` - Spans for any synchronous/asynchronous reactive update. (Includes `"session"` features).
+  * `"reactivity"` - Spans for all reactive expressions. (Includes `"reactive_update"` features).
+  * `"all"` [default] - All Shiny OpenTelemetry tracing. Currently equivalent to `"reactivity"`.
+
+* Spans are recorded for:
+  * `session_start`: Wraps the calling of the `server()` function. Also contains HTTP request within the attributes.
+  * `session_end`: Wraps the calling of the `onSessionEnded()` handlers.
+  * `reactive_update`: Signals the start of when Shiny knows something is to be calculated. This span ends when there are no more reactive updates (promises or synchronous) to be calculated.
+  * `reactive`, `observe`, `output`: Captures the calculation (including any async promise chains) of a reactive expression (`reactive()`), an observer (`observe()`), or an output render function (`render*()`).
+  * `reactive debounce`, `reactive throttle`: Captures the calculation (including any async promise chains) of a `debounce()`d or `throttle()`d reactive expression.
+  * `ExtendedTask`: Captures the calculation (including any async promise chains) of an `ExtendedTask`.
+
+* OpenTelemetry Logs are recorded for:
+  * `Set reactiveVal <name>` - When a `reactiveVal()` is set
+  * `Set reactiveValues <name>$<key>` - When a `reactiveValues()` element is set
+  * Fatal or unhandled errors - When an error occurs that causes the session to end, or when an unhandled error occurs in a reactive context. Contains the error within the attributes. To unsantize the error message being collected, set `options(shiny.otel.sanitize.errors = FALSE)`.
+  * `Set ExtendedTask <name> <value>` - When an `ExtendedTask`'s respective reactive value (e.g., `status`, `value`, and `error`) is set.
+  * `<ExtendedTask name> add to queue` - When an `ExtendedTask` is added to the task queue.
+
+* All logs and spans contain the `session.id` attribute.
+
 ## New features
 
 * The `icon` argument of `updateActionButton()`/`updateActionLink()` nows allows values other than `shiny::icon()` (e.g., `fontawesome::fa()`, `bsicons::bs_icon()`, etc). (#4249)
@@ -10,9 +38,11 @@
 
 * Fixed an issue where `updateSelectizeInput(options = list(plugins="remove_button"))` could lead to multiple remove buttons. (#4275)
 
+* The default label for `reactiveValues()`, `reactivePoll()`, `reactiveFileReader()`, `debounce()`, and `throttle()` will now attempt to retrieve the assigned name if the srcref is available. If a value can not easily be produced, a default label will be used instead. (#4269)
+
 ## Changes
 
-* The return value of `actionButton()`/`actionLink()` changed slightly: `label` and `icon` are wrapped in an additional HTML container element. This allows for: 1. `updateActionButton()`/`updateActionLink()` to distinguish between the `label` and `icon` when making updates and 2. spacing between `label` and `icon` to be more easily customized via CSS. 
+* The return value of `actionButton()`/`actionLink()` changed slightly: `label` and `icon` are wrapped in an additional HTML container element. This allows for: 1. `updateActionButton()`/`updateActionLink()` to distinguish between the `label` and `icon` when making updates and 2. spacing between `label` and `icon` to be more easily customized via CSS.
 
 # shiny 1.11.1
 

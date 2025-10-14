@@ -70,7 +70,7 @@ getShinyOption <- function(name, default = NULL) {
 #'
 #'   You can customize the file patterns Shiny will monitor by setting the
 #'   shiny.autoreload.pattern option. For example, to monitor only `ui.R`:
-#'   `options(shiny.autoreload.pattern = glob2rx("ui.R"))`. 
+#'   `options(shiny.autoreload.pattern = glob2rx("ui.R"))`.
 #'
 #'   As mentioned above, Shiny no longer polls watched files for changes.
 #'   Instead, using \pkg{watcher}, Shiny is notified of file changes as they
@@ -160,6 +160,21 @@ getShinyOption <- function(name, default = NULL) {
 # '  side devmode features. Currently the primary feature is the client-side
 # '  error console.}
 ### end shiny.client_devmode
+#' \item{shiny.otel.bind (defaults to `Sys.getenv("SHINY_OTEL_BIND", "all")`)}{Determines how Shiny will
+#'   interact with OpenTelemetry.
+#'
+#'   Supported values:
+#'   * `"none"` - No Shiny OpenTelemetry tracing.
+#'   * `"session"` - Adds session start/end spans.
+#'   * `"reactive_update"` - Spans for any synchronous/asynchronous reactive update. (Includes `"session"` features).
+#'   * `"reactivity"` - Spans for all reactive expressions. (Includes `"reactive_update"` features).
+#'   * `"all"` - All Shiny OpenTelemetry tracing. Currently equivalent to `"reactivity"`.
+#'
+#'   This option is useful for debugging and profiling while in production. This
+#'   option will only be useful if the `otelsdk` package is installed and
+#'   `otel::is_tracing_enabled()` returns `TRUE`. Please have any OpenTelemetry
+#'   environment variables set before starting your Shiny app.}
+#' \item{shiny.otel.sanitize.errors (defaults to `TRUE`)}{If `TRUE`, fatal and unhandled errors will be sanitized before being sent to the OpenTelemetry backend. The default value of `TRUE` is set to avoid potentially sending sensitive information to the OpenTelemetry backend. If you want the full error message and stack trace to be sent to the OpenTelemetry backend, set this option to `FALSE` or use `safeError(e)`.}
 #' }
 #'
 #'

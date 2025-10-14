@@ -208,8 +208,10 @@ exprToLabel <- function(expr, function_name, label = NULL) {
   if (is.null(label)) {
     label <- rexprSrcrefToLabel(
       srcref[[1]],
-      simpleExprToFunction(expr, function_name)
+      simpleExprToFunction(expr, function_name),
+      function_name
     )
+    label <- as_default_label(label)
   }
   if (length(srcref) >= 2) attr(label, "srcref") <- srcref[[2]]
   attr(label, "srcfile") <- srcFileOfRef(srcref[[1]])
@@ -229,10 +231,12 @@ funcToLabelBody <- function(func) {
 funcToLabel <- function(func, functionLabel, label = NULL) {
   if (!is.null(label)) return(label)
 
-  sprintf(
-    '%s(%s)',
-    functionLabel,
-    funcToLabelBody(func)
+  as_default_label(
+    sprintf(
+      '%s(%s)',
+      functionLabel,
+      funcToLabelBody(func)
+    )
   )
 }
 quoToLabelBody <- function(q) {
@@ -241,9 +245,19 @@ quoToLabelBody <- function(q) {
 quoToLabel <- function(q, functionLabel, label = NULL) {
   if (!is.null(label)) return(label)
 
-  sprintf(
-    '%s(%s)',
-    functionLabel,
-    quoToLabelBody(q)
+  as_default_label(
+    sprintf(
+      '%s(%s)',
+      functionLabel,
+      quoToLabelBody(q)
+    )
   )
+}
+
+as_default_label <- function(x) {
+  class(x) <- c("default_label", class(x))
+  x
+}
+is_default_label <- function(x) {
+  inherits(x, "default_label")
 }

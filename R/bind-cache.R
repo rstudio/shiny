@@ -478,7 +478,7 @@ bindCache.default <- function(x, ...) {
 bindCache.reactiveExpr <- function(x, ..., cache = "app") {
   check_dots_unnamed()
 
-  label <- exprToLabel(substitute(key), "cachedReactive")
+  label <- exprToLabel(substitute(x), "cachedReactive")
   domain <- reactive_get_domain(x)
 
   # Convert the ... to a function that returns their evaluated values.
@@ -494,8 +494,8 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
   rm(x)
   # Hacky workaround for issue with `%>%` preventing GC:
   # https://github.com/tidyverse/magrittr/issues/229
-  if (exists(".GenericCallEnv") && exists(".", envir = .GenericCallEnv)) {
-    rm(list = ".", envir = .GenericCallEnv)
+  if (exists(".GenericCallEnv") && exists(".", envir = .GenericCallEnv, inherits = FALSE)) {
+    rm(list = ".", envir = .GenericCallEnv, inherits = FALSE)
   }
 
 

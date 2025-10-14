@@ -84,13 +84,22 @@
 #'   runApp(app)
 #' }
 #' @export
-runApp <- function(appDir=getwd(),
-                   port=getOption('shiny.port'),
-                   launch.browser = getOption('shiny.launch.browser', interactive()),
-                   host=getOption('shiny.host', '127.0.0.1'),
-                   workerId="", quiet=FALSE,
-                   display.mode=c("auto", "normal", "showcase"),
-                   test.mode=getOption('shiny.testmode', FALSE)) {
+runApp <- function(
+  appDir=getwd(),
+  port=getOption('shiny.port'),
+  launch.browser = getOption('shiny.launch.browser', interactive()),
+  host=getOption('shiny.host', '127.0.0.1'),
+  workerId="", quiet=FALSE,
+  display.mode=c("auto", "normal", "showcase"),
+  test.mode=getOption('shiny.testmode', FALSE)
+) {
+
+  # * Wrap **all** execution of the app inside the otel promise domain
+  # * While this could be done at a lower level, it allows for _anything_ within
+  #   shiny's control to allow for the opportunity to have otel active spans be
+  #   reactivated upon promise domain restoration
+  local_ospan_promise_domain()
+
   on.exit({
     handlerManager$clear()
   }, add = TRUE)

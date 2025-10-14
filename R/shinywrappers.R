@@ -134,7 +134,12 @@ markRenderFunction <- function(
     else renderFunc(...)
   }
 
-  structure(
+  otelAttrs <-
+    otel_srcref_attributes(
+      attr(renderFunc, "wrappedFunc", exact = TRUE)
+    )
+
+  ret <- structure(
     wrappedRenderFunc,
     class          = c("shiny.render.function", "function"),
     outputFunc     = uiFunc,
@@ -142,8 +147,15 @@ markRenderFunction <- function(
     hasExecuted    = hasExecuted,
     cacheHint      = cacheHint,
     cacheWriteHook = cacheWriteHook,
-    cacheReadHook  = cacheReadHook
+    cacheReadHook  = cacheReadHook,
+    otelAttrs      = otelAttrs
   )
+
+  if (has_otel_bind("reactivity")) {
+    ret <- bind_otel_shiny_render_function(ret)
+  }
+
+  ret
 }
 
 #' @export
@@ -271,9 +283,7 @@ createRenderFunction <- function(
   # Hoist func's wrappedFunc attribute into renderFunc, so that when we pass
   # renderFunc on to markRenderFunction, it is able to find the original user
   # function.
-  if (identical(cacheHint, "auto")) {
-    attr(renderFunc, "wrappedFunc") <- attr(func, "wrappedFunc", exact = TRUE)
-  }
+  attr(renderFunc, "wrappedFunc") <- attr(func, "wrappedFunc", exact = TRUE)
 
   markRenderFunction(outputFunc, renderFunc, outputArgs, cacheHint,
                      cacheWriteHook, cacheReadHook)
@@ -321,7 +331,7 @@ as.tags.shiny.render.function <- function(x, ..., inline = FALSE) {
 
 # Get relevant attributes from a render function object.
 renderFunctionAttributes <- function(x) {
-  attrs <- c("outputFunc", "outputArgs", "hasExecuted", "cacheHint")
+  attrs <- c("outputFunc", "outputArgs", "hasExecuted", "cacheHint", "otelAttrs")
   names(attrs) <- attrs
   lapply(attrs, function(name) attr(x, name, exact = TRUE))
 }
@@ -383,7 +393,7 @@ markOutputAttrs <- function(renderFunc, snapshotExclude = NULL,
 #' The corresponding HTML output tag should be `div` or `img` and have
 #' the CSS class name `shiny-image-output`.
 #'
-#' @seealso 
+#' @seealso
 #' * For more details on how the images are generated, and how to control
 #'   the output, see [plotPNG()].
 #' * Use [outputOptions()] to set general output options for an image output.
@@ -815,9 +825,9 @@ renderUI <- function(expr, env = parent.frame(), quoted = FALSE,
 #'
 #' @seealso
 #' * The download handler, like other outputs, is suspended (disabled) by
-#'   default for download buttons and links that are hidden. Use 
-#'   [outputOptions()] to control this behavior, e.g. to set 
-#'   `suspendWhenHidden = FALSE` if the download is initiated by 
+#'   default for download buttons and links that are hidden. Use
+#'   [outputOptions()] to control this behavior, e.g. to set
+#'   `suspendWhenHidden = FALSE` if the download is initiated by
 #'   programmatically clicking on the download button using JavaScript.
 #' @export
 downloadHandler <- function(filename, content, contentType=NULL, outputArgs=list()) {

@@ -16,6 +16,49 @@ processId <- local({
   }
 })
 
+ctx_otel_info_obj <- function(
+  isRecordingOtel = FALSE,
+  otelLabel = "<unknown>",
+  otelAttrs = NULL) {
+  structure(
+    list(
+      isRecordingOtel = isRecordingOtel,
+      otelLabel = otelLabel,
+      otelAttrs = otelAttrs
+    ),
+    class = "ctx_otel_info"
+  )
+}
+
+with_context_ospan_async <- function(otel_info, expr, domain) {
+  if (!otel_is_tracing_enabled()) {
+    return(force(expr))
+  }
+
+  isRecordingOtel <- .subset2(otel_info, "isRecordingOtel")
+  otelLabel <- .subset2(otel_info, "otelLabel")
+  otelAttrs <- .subset2(otel_info, "otelAttrs")
+
+  # Always set the reactive update span as active
+  # This ensures that any spans created within the reactive context
+  # are at least children of the reactive update span
+  with_reactive_update_active_ospan(domain = domain, {
+    if (isRecordingOtel) {
+      with_shiny_ospan_async(
+        otelLabel,
+        expr,
+        attributes = otelAttrs
+      )
+    } else {
+      force(expr)
+    }
+  })
+
+}
+
+
+
+
 #' @include graph.R
 Context <- R6Class(
   'Context',
@@ -33,11 +76,14 @@ Context <- R6Class(
     .pid = NULL,
     .weak = NULL,
 
+    .otel_info = NULL,
+
     initialize = function(
       domain, label='', type='other', prevId='',
       reactId = rLog$noReactId,
       id = .getReactiveEnvironment()$nextId(), # For dummy context
-      weak = FALSE
+      weak = FALSE,
+      otel_info = ctx_otel_info_obj()
     ) {
       id <<- id
       .label <<- label
@@ -47,17 +93,25 @@ Context <- R6Class(
       .reactType <<- type
       .weak <<- weak
       rLog$createContext(id, label, type, prevId, domain)
+      if (!is.null(otel_info)) {
+        if (IS_SHINY_LOCAL_PKG) {
+          stopifnot(inherits(otel_info, "ctx_otel_info"))
+        }
+        .otel_info <<- otel_info
+      }
     },
     run = function(func) {
       "Run the provided function under this context."
 
       promises::with_promise_domain(reactivePromiseDomain(), {
         withReactiveDomain(.domain, {
-          captureStackTraces({
-            env <- .getReactiveEnvironment()
-            rLog$enter(.reactId, id, .reactType, .domain)
-            on.exit(rLog$exit(.reactId, id, .reactType, .domain), add = TRUE)
-            env$runWith(self, func)
+          with_context_ospan_async(.otel_info, domain = .domain, {
+            captureStackTraces({
+              env <- .getReactiveEnvironment()
+              rLog$enter(.reactId, id, .reactType, .domain)
+              on.exit(rLog$exit(.reactId, id, .reactType, .domain), add = TRUE)
+              env$runWith(self, func)
+            })
           })
         })
       })

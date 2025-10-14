@@ -116,10 +116,41 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
     #'   read reactive inputs and pass them as arguments.
     initialize = function(func) {
       private$func <- func
-      private$rv_status <- reactiveVal("initial")
-      private$rv_value <- reactiveVal(NULL)
-      private$rv_error <- reactiveVal(NULL)
+
+      # Do not show these private reactive values in otel spans
+      with_no_otel_bind({
+        private$rv_status <- reactiveVal("initial")
+        private$rv_value <- reactiveVal(NULL)
+        private$rv_error <- reactiveVal(NULL)
+      })
+
       private$invocation_queue <- fastmap::fastqueue()
+
+      domain <- getDefaultReactiveDomain()
+
+      # Set a label for the reactive values for easier debugging
+      # Go up an extra sys.call() to get the user's call to ExtendedTask$new()
+      # The first sys.call() is to `initialize(...)`
+      call_srcref <- attr(sys.call(-1), "srcref", exact = TRUE)
+      label <- rassignSrcrefToLabel(
+        call_srcref,
+        defaultLabel = "<anonymous>",
+        fnName = "ExtendedTask\\$new"
+      )
+      private$otel_label <- otel_label_extended_task(label, domain = domain)
+      private$otel_label_add_to_queue <- otel_label_extended_task_add_to_queue(label, domain = domain)
+
+      set_rv_label <- function(rv, suffix) {
+        impl <- attr(rv, ".impl", exact = TRUE)
+        impl$.otelLabel <- otel_label_extended_task_set_reactive_val(
+          label,
+          suffix,
+          domain = domain
+        )
+      }
+      set_rv_label(private$rv_status, "status")
+      set_rv_label(private$rv_value, "value")
+      set_rv_label(private$rv_error, "error")
     },
     #' @description
     #' Starts executing the long-running operation. If this `ExtendedTask` is
@@ -139,8 +170,27 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
         isolate(private$rv_status()) == "running" ||
           private$invocation_queue$size() > 0
       ) {
+        otel_log(
+          private$otel_label_add_to_queue,
+          severity = "debug",
+          attributes = c(
+            otel_session_id_attrs(getDefaultReactiveDomain()),
+            list(
+              queue_size = private$invocation_queue$size() + 1L
+            )
+          )
+        )
         private$invocation_queue$add(list(args = args, call = call))
       } else {
+
+        if (has_otel_bind("reactivity")) {
+          private$ospan <- create_shiny_ospan(
+            private$otel_label,
+            attributes = otel_session_id_attrs(getDefaultReactiveDomain())
+          )
+          otel::local_active_span(private$ospan)
+        }
+
         private$do_invoke(args, call = call)
       }
       invisible(NULL)
@@ -188,7 +238,7 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
     #' invalidation will be ignored.
     result = function() {
       switch (private$rv_status(),
-        running = req(FALSE, cancelOutput="progress"),
+        running = req(FALSE, cancelOutput = "progress"),
         success = if (private$rv_value()$visible) {
           private$rv_value()$value
         } else {
@@ -207,6 +257,9 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
     rv_value = NULL,
     rv_error = NULL,
     invocation_queue = NULL,
+    otel_label = NULL,
+    otel_label_add_to_queue = NULL,
+    ospan = NULL,
 
     do_invoke = function(args, call = NULL) {
       private$rv_status("running")
@@ -220,9 +273,17 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
       p <- promises::then(
         p,
         onFulfilled = function(value, .visible) {
+          if (is_ospan(private$ospan)) {
+            private$ospan$end(status_code = "ok")
+            private$ospan <- NULL
+          }
           private$on_success(list(value = value, visible = .visible))
         },
         onRejected = function(error) {
+          if (is_ospan(private$ospan)) {
+            private$ospan$end(status_code = "error")
+            private$ospan <- NULL
+          }
           private$on_error(error, call = call)
         }
       )

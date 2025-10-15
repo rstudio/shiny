@@ -37,29 +37,43 @@
 #'
 #'
 #' # Testing a module --------------------------------------------------------
-#' myModuleServer <- function(id, multiplier = 2, prefix = "I am ") {
+#' # Testing the server function doesn't require a UI, but we've included it
+#' # here for completeness. In this simple app, a user clicks a button to
+#' # multiply a value by the module's multiplier argument. In the tests below,
+#' # we'll make sure the value is 1, 2, 4, etc. with each button click.
+#' multModuleUI <- function(id) {
+#'   ns <- NS(id)
+#'   tagList(
+#'     textOutput(ns("txt")),
+#'     actionButton(ns("multiply_it"), "Multiply It")
+#'   )
+#' }
+#'
+#' multModuleServer <- function(id, multiplier = 2) {
 #'   moduleServer(id, function(input, output, session) {
-#'     myreactive <- reactive({
-#'       input$x * multiplier
+#'     the_value <- reactive({
+#'       max(input$multiply_it * multiplier, 1)
 #'     })
 #'     output$txt <- renderText({
-#'       paste0(prefix, myreactive())
+#'       paste("The value is", the_value())
 #'     })
 #'   })
 #' }
 #'
-#' testServer(myModuleServer, args = list(multiplier = 2), {
-#'   session$setInputs(x = 1)
-#'   # You're also free to use third-party
-#'   # testing packages like testthat:
-#'   #   expect_equal(myreactive(), 2)
-#'   stopifnot(myreactive() == 2)
-#'   stopifnot(output$txt == "I am 2")
+#' testServer(multModuleServer, args = list(multiplier = 2), {
+#'   # Set the initial button value to 0
+#'   session$setInputs(multiply_it = 0)
+#'   stopifnot(the_value() == 1)
+#'   stopifnot(output$txt == "The value is 1")
 #'
-#'   session$setInputs(x = 2)
-#'   stopifnot(myreactive() == 4)
-#'   stopifnot(output$txt == "I am 4")
-#'   # Any additional arguments, below, are passed along to the module.
+#'   # Simulate two button clicks
+#'   session$setInputs(multiply_it = 2)
+#'   stopifnot(the_value() == 4)
+#'   stopifnot(output$txt == "The value is 4")
+#'
+#'   # Note: you're also free to use third-party
+#'   # testing packages like testthat:
+#'   #   expect_equal(myreactive(), 1)
 #' })
 #' @export
 testServer <- function(app = NULL, expr, args = list(), session = MockShinySession$new()) {

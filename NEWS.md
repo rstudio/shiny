@@ -38,7 +38,10 @@
 
 * Fixed an issue where `updateSelectizeInput(options = list(plugins="remove_button"))` could lead to multiple remove buttons. (#4275)
 
-* The default label for `reactiveValues()`, `reactivePoll()`, `reactiveFileReader()`, `debounce()`, and `throttle()` will now attempt to retrieve the assigned name if the srcref is available. If a value can not easily be produced, a default label will be used instead. (#4269)
+* The default label for items described below will now attempt to retrieve the assigned name if the srcref is available. If a value can not easily be produced, a default label will be used instead. This should improve the OpenTelemetry span labels and the reactlog experience. (#4269, #4300)
+  * `reactiveValues()`, `reactivePoll()`, `reactiveFileReader()`, `debounce()`, `throttle()`, `observe()`
+  * Combinations of `bindEvent()` and `reactive()` / `observe()`
+  * Combination of `bindCache()` and `reactive()`
 
 ## Changes
 

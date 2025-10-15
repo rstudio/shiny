@@ -44,6 +44,12 @@ otel_log <- function(
 otel_is_tracing_enabled <- function(tracer = get_tracer()) {
   otel::is_tracing_enabled(tracer)
 }
+otel_get_logger <- function() {
+  otel::get_logger()
+}
+otel_get_tracer <- function() {
+  otel::get_tracer()
+}
 
 get_ospan_logger <- local({
   logger <- NULL
@@ -54,9 +60,9 @@ get_ospan_logger <- local({
     if (testthat__is_testing()) {
       # Don't cache the logger in unit tests. It interferes with logger provider
       # injection in otelsdk::with_otel_record().
-      return(otel::get_logger())
+      return(otel_get_logger())
     }
-    logger <<- otel::get_logger()
+    logger <<- otel_get_logger()
     logger
   }
 })
@@ -74,9 +80,9 @@ get_tracer <- local({
     if (testthat__is_testing()) {
       # Don't cache the tracer in unit tests. It interferes with tracer provider
       # injection in otelsdk::with_otel_record().
-      return(otel::get_tracer())
+      return(otel_get_tracer())
     }
-    tracer <<- otel::get_tracer()
+    tracer <<- otel_get_tracer()
     tracer
   }
 })

@@ -61,11 +61,16 @@ otel_session_attrs <- function(domain) {
     HTTP_HOST = domain[["request"]][["HTTP_HOST"]] %||% "",
     HTTP_ORIGIN = domain[["request"]][["HTTP_ORIGIN"]] %||% "",
     QUERY_STRING = domain[["request"]][["QUERY_STRING"]] %||% "",
-    SERVER_PORT = domain[["request"]][["SERVER_PORT"]] %||% ""
+    SERVER_PORT = domain[["request"]][["SERVER_PORT"]] %||% NA_integer_
   )
-  try({
-    attrs[["SERVER_PORT"]] <- as.integer(attrs[["SERVER_PORT"]])
-  })
+  # Safely convert SERVER_PORT to integer
+  # If conversion fails, leave as-is (string or empty)
+  # This avoids warnings/errors if SERVER_PORT is not a valid integer
+  server_port <- suppressWarnings(as.integer(attrs$SERVER_PORT))
+  if (!is.na(server_port)) {
+    attrs$SERVER_PORT <- server_port
+  }
+
   attrs
 }
 

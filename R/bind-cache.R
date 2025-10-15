@@ -478,7 +478,13 @@ bindCache.default <- function(x, ...) {
 bindCache.reactiveExpr <- function(x, ..., cache = "app") {
   check_dots_unnamed()
 
-  label <- exprToLabel(substitute(x), "cachedReactive")
+  call_srcref <- attr(sys.call(-1), "srcref", exact = TRUE)
+  label <- rassignSrcrefToLabel(
+    call_srcref,
+    defaultLabel = exprToLabel(substitute(x), "cachedReactive"),
+    fnName = "bindCache"
+  )
+
   domain <- reactive_get_domain(x)
 
   # Convert the ... to a function that returns their evaluated values.
@@ -497,7 +503,6 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
   if (exists(".GenericCallEnv") && exists(".", envir = .GenericCallEnv, inherits = FALSE)) {
     rm(list = ".", envir = .GenericCallEnv, inherits = FALSE)
   }
-
 
   res <- reactive(label = label, domain = domain, {
     cache <- resolve_cache_object(cache, domain)
@@ -585,7 +590,7 @@ bindCache.shiny.renderPlot <- function(x, ...,
 
     observe({
       doResizeCheck()
-    })
+    }, label = "plot-resize")
     # TODO: Make sure this observer gets GC'd if output$foo is replaced.
     # Currently, if you reassign output$foo, the observer persists until the
     # session ends. This is generally bad programming practice and should be

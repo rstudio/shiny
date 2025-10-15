@@ -196,8 +196,18 @@ bindEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE
   valueFunc <- reactive_get_value_func(x)
   valueFunc <- wrapFunctionLabel(valueFunc, "eventReactiveValueFunc", ..stacktraceon = TRUE)
 
-  label <- label %||%
-    sprintf('bindEvent(%s, %s)', attr(x, "observable", exact = TRUE)$.label, quos_to_label(qs))
+  if (is.null(label)) {
+    call_srcref <- attr(sys.call(-1), "srcref", exact = TRUE)
+    label <- rassignSrcrefToLabel(
+      call_srcref,
+      defaultLabel = sprintf(
+        'bindEvent(%s, %s)',
+        attr(x, "observable", exact = TRUE)$.label,
+        quos_to_label(qs)
+      ),
+      fnName = "bindEvent"
+    )
+  }
 
   x_classes <- class(x)
 
@@ -280,7 +290,16 @@ bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
 
   # Note that because the observer will already have been logged by this point,
   # this updated label won't show up in the reactlog.
-  x$.label <- label %||% sprintf('bindEvent(%s, %s)', x$.label, quos_to_label(qs))
+  if (is.null(label)) {
+    call_srcref <- attr(sys.call(-1), "srcref", exact = TRUE)
+    x$.label <- rassignSrcrefToLabel(
+      call_srcref,
+      defaultLabel = sprintf('bindEvent(%s, %s)', x$.label, quos_to_label(qs)),
+      fnName = "bindEvent"
+    )
+  } else {
+    x$.label <- label
+  }
 
   initialized <- FALSE
 

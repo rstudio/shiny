@@ -1555,7 +1555,15 @@ observe <- function(
   check_dots_empty()
 
   func <- installExprFunction(x, "func", env, quoted)
-  label <- funcToLabel(func, "observe", label)
+
+  call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
+  if (is.null(label)) {
+    label <- rassignSrcrefToLabel(
+      call_srcref,
+      defaultLabel = funcToLabel(func, "observe", label),
+      fnName = "observe"
+    )
+  }
 
   o <- Observer$new(
     func,

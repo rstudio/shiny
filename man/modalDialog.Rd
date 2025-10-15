@@ -9,7 +9,7 @@ modalDialog(
   ...,
   title = NULL,
   footer = modalButton("Dismiss"),
-  size = c("m", "s", "l", "xl"),
+  size = c("m", "s", "l", "xl", "full"),
   easyClose = FALSE,
   fade = TRUE
 )
@@ -24,8 +24,9 @@ modalButton(label, icon = NULL)
 \item{footer}{UI for footer. Use \code{NULL} for no footer.}
 
 \item{size}{One of \code{"s"} for small, \code{"m"} (the default) for medium,
-\code{"l"} for large, or \code{"xl"} for extra large. Note that \code{"xl"} only
-works with Bootstrap 4 and above (to opt-in to Bootstrap 4+,
+\code{"l"} for large, \code{"xl"} for extra large, or \code{"full"} for full screen.
+Note that \code{"xl"} only works with Bootstrap >=4 and \code{"full"}
+only works with Bootstrap >=5.(to opt-in to Bootstrap 4+ or Bootstrap 5+,
 pass \code{\link[bslib:bs_theme]{bslib::bs_theme()}} to the \code{theme} argument of a page container
 like \code{\link[=fluidPage]{fluidPage()}}).}
 

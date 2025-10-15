@@ -32,6 +32,8 @@
 
 * The `icon` argument of `updateActionButton()`/`updateActionLink()` nows allows values other than `shiny::icon()` (e.g., `fontawesome::fa()`, `bsicons::bs_icon()`, etc). (#4249)
 
+* The `size` argument of `modalDialog` now supports `full` to create full-screen modals. (#4297)
+
 ## Bug fixes
 
 * `updateActionButton()`/`updateActionLink()` now correctly renders HTML content passed to the `label` argument. (#4249)

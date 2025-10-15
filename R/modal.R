@@ -43,9 +43,10 @@ removeModal <- function(session = getDefaultReactiveDomain()) {
 #' @param title An optional title for the dialog.
 #' @param footer UI for footer. Use `NULL` for no footer.
 #' @param size One of `"s"` for small, `"m"` (the default) for medium,
-#'   `"l"` for large, or `"xl"` for extra large. Note that `"xl"` only 
-#'    works with Bootstrap 4 and above (to opt-in to Bootstrap 4+, 
-#'    pass [bslib::bs_theme()] to the `theme` argument of a page container 
+#'   `"l"` for large, `"xl"` for extra large, or `"full"` for full screen.
+#'    Note that `"xl"` only works with Bootstrap >=4 and `"full"`
+#'    only works with Bootstrap >=5.(to opt-in to Bootstrap 4+ or Bootstrap 5+,
+#'    pass [bslib::bs_theme()] to the `theme` argument of a page container
 #'    like [fluidPage()]).
 #' @param easyClose If `TRUE`, the modal dialog can be dismissed by
 #'   clicking outside the dialog box, or be pressing the Escape key. If
@@ -154,7 +155,7 @@ removeModal <- function(session = getDefaultReactiveDomain()) {
 #' }
 #' @export
 modalDialog <- function(..., title = NULL, footer = modalButton("Dismiss"),
-  size = c("m", "s", "l", "xl"), easyClose = FALSE, fade = TRUE) {
+  size = c("m", "s", "l", "xl", "full"), easyClose = FALSE, fade = TRUE) {
 
   size <- match.arg(size)
 
@@ -172,7 +173,7 @@ modalDialog <- function(..., title = NULL, footer = modalButton("Dismiss"),
 
     div(
       class = "modal-dialog",
-      class = switch(size, s = "modal-sm", m = NULL, l = "modal-lg", xl = "modal-xl"),
+      class = switch(size, s = "modal-sm", m = NULL, l = "modal-lg", xl = "modal-xl", full = "modal-fullscreen"),
       div(class = "modal-content",
         if (!is.null(title)) div(class = "modal-header",
           tags$h4(class = "modal-title", title)

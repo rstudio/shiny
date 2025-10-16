@@ -743,7 +743,7 @@ ShinySession <- R6Class(
       private$.outputOptions <- list()
 
       # Copy app-level options
-      self$options <- getCurrentAppState()$options
+      self$options <- getCurrentAppStateOptions()
 
       self$cache <- cachem::cache_mem(max_size = 200 * 1024^2)
 

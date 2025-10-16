@@ -1136,6 +1136,8 @@ test_that("Custom render functions that call installExprFunction", {
 
 
 test_that("cacheWriteHook and cacheReadHook for render functions", {
+  testthat::skip_if(get_tracer()$is_enabled(), "Skipping stack trace tests when OpenTelemetry is already enabled")
+
   write_hook_n <- 0
   read_hook_n  <- 0
 

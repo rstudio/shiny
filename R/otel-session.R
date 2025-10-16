@@ -75,6 +75,11 @@ otel_session_attrs <- function(domain) {
 }
 
 otel_session_id_attrs <- function(domain) {
+  token <- domain$token
+  if (is.null(token)) {
+    return(list())
+  }
+
   list(
     # Convention for client-side with session.start and session.end events
     # https://opentelemetry.io/docs/specs/semconv/general/session/
@@ -82,6 +87,6 @@ otel_session_id_attrs <- function(domain) {
     # Since we are the server, we'll add them as an attribute to _every_ span
     # within the session as we don't know exactly when they will be called.
     # Given it's only a single attribute, the cost should be minimal, but it ties every reactive calculation together.
-    session.id = domain$token
+    session.id = token
   )
 }

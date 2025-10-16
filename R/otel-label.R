@@ -43,10 +43,8 @@ ospan_label_render_function <- function(x, ..., domain) {
     event_class = "shiny.render.function.event"
   )
 
-  ospan_label <- otel_label_upgrade(
-    getCurrentOutputInfo(session = domain)$name,
-    domain = domain
-  )
+  label <- getCurrentOutputInfo(session = domain)$name %||% "<unknown>"
+  ospan_label <- otel_label_upgrade(label, domain = domain)
 
   sprintf("%s %s", fn_name, ospan_label)
 }

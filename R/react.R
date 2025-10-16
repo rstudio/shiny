@@ -19,7 +19,8 @@ processId <- local({
 ctx_otel_info_obj <- function(
   isRecordingOtel = FALSE,
   otelLabel = "<unknown>",
-  otelAttrs = NULL) {
+  otelAttrs = list()
+) {
   structure(
     list(
       isRecordingOtel = isRecordingOtel,

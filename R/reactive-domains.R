@@ -45,6 +45,8 @@ createMockDomain <- function() {
   callbacks <- Callbacks$new()
   ended <- FALSE
   domain <- new.env(parent = emptyenv())
+  domain$ns <- function(id) id
+  domain$token <- "mock-domain"
   domain$onEnded <- function(callback) {
     return(callbacks$register(callback))
   }

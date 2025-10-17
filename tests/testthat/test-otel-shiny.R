@@ -11,7 +11,7 @@ create_mock_otel_span <- function() {
 # Helper function to create a mock tracer
 create_mock_tracer <- function() {
   structure(
-    list(name = "mock_tracer"),
+    list(name = "mock_tracer", is_enabled = function() TRUE),
     class = "otel_tracer"
   )
 }
@@ -210,7 +210,9 @@ test_that("get_ospan_logger caches logger in non-test environment", {
   get_logger_call_count <- 0
 
   fn_env <- environment(get_ospan_logger)
-  assign("logger", NULL, envir = fn_env)  # Reset cached logger
+  # Reset cached logger now and when test ends
+  fn_env$reset_logger()
+  withr::defer({ fn_env$reset_logger() })
 
   local_mocked_bindings(
     otel_get_logger = function() {
@@ -256,7 +258,9 @@ test_that("get_tracer caches tracer in non-test environment", {
   get_tracer_call_count <- 0
 
   fn_env <- environment(get_tracer)
-  assign("tracer", NULL, envir = fn_env)  # Reset cached tracer
+  # Reset cached tracer now and when test ends
+  fn_env$reset_tracer()
+  withr::defer({ fn_env$reset_tracer() })
 
   local_mocked_bindings(
     otel_get_tracer = function() {
@@ -302,7 +306,9 @@ test_that("integration test - with_shiny_ospan_async uses cached tracer", {
   with_ospan_async_called <- FALSE
 
   fn_env <- environment(get_tracer)
-  assign("tracer", NULL, envir = fn_env)  # Reset cached tracer
+  # Reset cached tracer now and when test ends
+  fn_env$reset_tracer()
+  withr::defer({ fn_env$reset_tracer() })
 
   local_mocked_bindings(
     otel_get_tracer = function() {

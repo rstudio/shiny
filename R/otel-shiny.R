@@ -53,16 +53,25 @@ otel_get_tracer <- function() {
 
 get_ospan_logger <- local({
   logger <- NULL
+
+  # For internal testing purposes only
+  reset_logger <- function() {
+    logger <<- NULL
+  }
+
   function() {
     if (!is.null(logger)) {
       return(logger)
     }
+
+    this_logger <- otel_get_logger()
+
     if (testthat__is_testing()) {
       # Don't cache the logger in unit tests. It interferes with logger provider
       # injection in otelsdk::with_otel_record().
-      return(otel_get_logger())
+      return(this_logger)
     }
-    logger <<- otel_get_logger()
+    logger <<- this_logger
     logger
   }
 })
@@ -73,16 +82,26 @@ get_ospan_logger <- local({
 # Using local scope avoids an environment object lookup on each call.
 get_tracer <- local({
   tracer <- NULL
+
+  # For internal testing purposes only
+  reset_tracer <- function() {
+    tracer <<- NULL
+  }
+
   function() {
     if (!is.null(tracer)) {
       return(tracer)
     }
+
+    this_tracer <- otel_get_tracer()
+
     if (testthat__is_testing()) {
       # Don't cache the tracer in unit tests. It interferes with tracer provider
       # injection in otelsdk::with_otel_record().
-      return(otel_get_tracer())
+      return(this_tracer)
     }
-    tracer <<- otel_get_tracer()
+
+    tracer <<- this_tracer
     tracer
   }
 })

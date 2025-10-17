@@ -436,34 +436,36 @@ MockShinySession <- R6Class(
       if (!is.function(func))
         stop(paste("Unexpected", class(func), "output for", name))
 
-      obs <- observe({
-        # We could just stash the promise, but we get an "unhandled promise error". This bypasses
-        prom <- NULL
-        tryCatch({
-          v <- private$withCurrentOutput(name, func(self, name))
-          if (!promises::is.promise(v)){
-            # Make our sync value into a promise
-            prom <- promises::promise(function(resolve, reject){ resolve(v) })
-          } else {
-            prom <- v
-          }
-        }, error=function(e){
-          # Error running value()
-          prom <<- promises::promise(function(resolve, reject){ reject(e) })
-        })
-
-        private$outs[[name]]$promise <- hybrid_chain(
-          prom,
-          function(v){
-            list(val = v, err = NULL)
-          }, catch=function(e){
-            if (
-              !inherits(e, c("shiny.custom.error", "shiny.output.cancel", "shiny.output.progress", "shiny.silent.error"))
-            ) {
-              self$unhandledError(e, close = FALSE)
+      with_no_otel_bind({
+        obs <- observe({
+          # We could just stash the promise, but we get an "unhandled promise error". This bypasses
+          prom <- NULL
+          tryCatch({
+            v <- private$withCurrentOutput(name, func(self, name))
+            if (!promises::is.promise(v)){
+              # Make our sync value into a promise
+              prom <- promises::promise(function(resolve, reject){ resolve(v) })
+            } else {
+              prom <- v
             }
-            list(val = NULL, err = e)
+          }, error=function(e){
+            # Error running value()
+            prom <<- promises::promise(function(resolve, reject){ reject(e) })
           })
+
+          private$outs[[name]]$promise <- hybrid_chain(
+            prom,
+            function(v){
+              list(val = v, err = NULL)
+            }, catch=function(e){
+              if (
+                !inherits(e, c("shiny.custom.error", "shiny.output.cancel", "shiny.output.progress", "shiny.silent.error"))
+              ) {
+                self$unhandledError(e, close = FALSE)
+              }
+              list(val = NULL, err = e)
+            })
+        })
       })
       private$outs[[name]] <- list(obs = obs, func = func, promise = NULL)
     },

@@ -118,6 +118,12 @@ dumpTests <- function(df) {
 }
 
 test_that("integration tests", {
+  if (get_tracer()$is_enabled()) {
+    announce_snapshot_file(name = "stacks.md")
+
+    skip("Skipping stack trace tests when OpenTelemetry is already enabled")
+  }
+
   # The expected call stack can be changed by other packages (namely, promises).
   # If promises changes its internals, it can break this test on CRAN. Because
   # CRAN package releases are generally not synchronized (that is, promises and

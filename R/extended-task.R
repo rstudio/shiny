@@ -140,6 +140,12 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
       private$otel_label <- otel_label_extended_task(label, domain = domain)
       private$otel_label_add_to_queue <- otel_label_extended_task_add_to_queue(label, domain = domain)
 
+      call_srcref <- attr(sys.call(-1), "srcref", exact = TRUE)
+      private$otel_attrs <- c(
+        otel_srcref_attributes(call_srcref),
+        otel_session_id_attrs(domain)
+      ) %||% list()
+
       set_rv_label <- function(rv, suffix) {
         impl <- attr(rv, ".impl", exact = TRUE)
         impl$.otelLabel <- otel_label_extended_task_set_reactive_val(
@@ -174,7 +180,7 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
           private$otel_label_add_to_queue,
           severity = "debug",
           attributes = c(
-            otel_session_id_attrs(getDefaultReactiveDomain()),
+            private$otel_attrs,
             list(
               queue_size = private$invocation_queue$size() + 1L
             )
@@ -186,7 +192,7 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
         if (has_otel_bind("reactivity")) {
           private$ospan <- create_shiny_ospan(
             private$otel_label,
-            attributes = otel_session_id_attrs(getDefaultReactiveDomain())
+            attributes = private$otel_attrs
           )
           otel::local_active_span(private$ospan)
         }
@@ -257,7 +263,9 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
     rv_value = NULL,
     rv_error = NULL,
     invocation_queue = NULL,
+
     otel_label = NULL,
+    otel_attrs = list(),
     otel_label_add_to_queue = NULL,
     ospan = NULL,
 

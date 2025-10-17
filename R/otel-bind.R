@@ -249,15 +249,20 @@ bind_otel_observe <- function(x) {
 
 bind_otel_shiny_render_function <- function(x) {
 
-  valueFunc <- x
+  valueFunc <- force(x)
   span_label <- NULL
-  ospan_attrs <- attr(x, "otelAttrs")
+  ospan_attrs <- NULL
 
   renderFunc <- function(...) {
     # Dynamically determine the span label given the current reactive domain
     if (is.null(span_label)) {
+      domain <- getDefaultReactiveDomain()
       span_label <<-
-        ospan_label_render_function(x, domain = getDefaultReactiveDomain())
+        ospan_label_render_function(x, domain = domain)
+      ospan_attrs <<- c(
+        attr(x, "otelAttrs"),
+        otel_session_id_attrs(domain)
+      )
     }
 
     with_shiny_ospan_async(

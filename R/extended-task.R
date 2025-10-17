@@ -119,9 +119,9 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
 
       # Do not show these private reactive values in otel spans
       with_no_otel_bind({
-        private$rv_status <- reactiveVal("initial")
-        private$rv_value <- reactiveVal(NULL)
-        private$rv_error <- reactiveVal(NULL)
+        private$rv_status <- reactiveVal("initial", label = "ExtendedTask$private$status")
+        private$rv_value <- reactiveVal(NULL, label = "ExtendedTask$private$value")
+        private$rv_error <- reactiveVal(NULL, label = "ExtendedTask$private$error")
       })
 
       private$invocation_queue <- fastmap::fastqueue()

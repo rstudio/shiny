@@ -299,20 +299,18 @@ function setCodeHeightFromDocHeight() {
     $(window).height() + "px";
 }
 
-// if there's a block of markdown content, render it to HTML
-function renderMarkdown() {
-  const mdContent = document.getElementById("showcase-markdown-content");
+// Move server-rendered markdown from template into the readme container
+function insertMarkdownContent() {
+  const template = document.getElementById(
+    "showcase-markdown-content",
+  ) as HTMLTemplateElement | null;
 
-  if (mdContent !== null) {
-    // IE8 puts the content of <script> tags into innerHTML but
-    // not innerText
-    const content = mdContent.innerText || mdContent.innerHTML;
-
-    const showdownConverter = (window as any).Showdown
-      .converter as showdown.ConverterStatic;
-
-    document.getElementById("readme-md")!.innerHTML =
-      new showdownConverter().makeHtml(content);
+  if (template !== null) {
+    const readmeContainer = document.getElementById("readme-md");
+    if (readmeContainer !== null) {
+      const content = template.content.cloneNode(true);
+      readmeContainer.appendChild(content);
+    }
   }
 }
 
@@ -331,7 +329,7 @@ declare global {
 window.toggleCodePosition = toggleCodePosition;
 
 $(window).on("load", setInitialCodePosition);
-$(window).on("load", renderMarkdown);
+$(window).on("load", insertMarkdownContent);
 
 if (window.hljs) window.hljs.initHighlightingOnLoad();
 

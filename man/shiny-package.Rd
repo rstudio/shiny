@@ -59,8 +59,6 @@ Other contributors:
   \item Denis Ineshin (ion.rangeSlider library) [contributor, copyright holder]
   \item Sami Samhuri (Javascript strftime library) [contributor, copyright holder]
   \item  SpryMedia Limited (DataTables library) [contributor, copyright holder]
-  \item John Fraser (showdown.js library) [contributor, copyright holder]
-  \item John Gruber (showdown.js library) [contributor, copyright holder]
   \item Ivan Sagalaev (highlight.js library) [contributor, copyright holder]
   \item R Core Team (tar implementation from R) [contributor, copyright holder]
 }

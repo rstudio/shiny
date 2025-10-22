@@ -34,13 +34,6 @@ showcaseHead <- function() {
   deps  <- list(
     jqueryuiDependency(),
     htmlDependency(
-      "showdown",
-      "0.3.1",
-      src = "www/shared/showdown/compressed",
-      package="shiny",
-      script = "showdown.js"
-    ),
-    htmlDependency(
       "highlight.js",
       "6.2",
       src = "www/shared/highlight",
@@ -61,10 +54,11 @@ showcaseHead <- function() {
 
   mdfile <- file.path.ci(getwd(), 'Readme.md')
   html <- tagList(
-    if (file.exists(mdfile))
-      tags$script(type="text/markdown", id="showcase-markdown-content",
-        paste(readUTF8(mdfile), collapse="\n"))
-    else ""
+    if (file.exists(mdfile)) {
+      md_content <- paste(readUTF8(mdfile), collapse="\n")
+      md_html <- commonmark::markdown_html(md_content, extensions = TRUE)
+      tags$template(id="showcase-markdown-content", HTML(md_html))
+    } else ""
   )
 
   return(attachDependencies(html, deps))

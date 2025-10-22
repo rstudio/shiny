@@ -18,11 +18,6 @@ use_session_start_ospan_async <- function(expr, ..., domain) {
 
   id_attrs <- otel_session_id_attrs(domain)
 
-  domain$onSessionEnded(function() {
-    # On close, add session.end event
-    otel_log("session.end", attributes = id_attrs, severity = "info")
-  })
-
   # Wrap the server initialization
   with_shiny_ospan_async(
     "session_start",

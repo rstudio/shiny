@@ -225,8 +225,7 @@ reactiveVal <- function(value = NULL, label = NULL) {
   if (missing(label)) {
     label <- rassignSrcrefToLabel(
       call_srcref,
-      defaultLabel = paste0("reactiveVal", createUniqueId(4)),
-      fnName = "reactiveVal"
+      defaultLabel = paste0("reactiveVal", createUniqueId(4))
     )
   }
 
@@ -295,7 +294,7 @@ format.reactiveVal <- function(x, ...) {
 rassignSrcrefToLabel <- function(
   srcref,
   defaultLabel,
-  fnName
+  fnName = "([a-zA-Z0-9_.]+)"
 ) {
 
   if (is.null(srcref))
@@ -639,8 +638,7 @@ reactiveValues <- function(...) {
     impl$.label <- rassignSrcrefToLabel(
       call_srcref,
       # Pass through the random default label created in ReactiveValues$new()
-      defaultLabel = impl$.label,
-      fnName = "reactiveValues"
+      defaultLabel = impl$.label
     )
 
     impl$.otelAttrs <- otel_srcref_attributes(call_srcref)
@@ -1560,8 +1558,7 @@ observe <- function(
   if (is.null(label)) {
     label <- rassignSrcrefToLabel(
       call_srcref,
-      defaultLabel = funcToLabel(func, "observe", label),
-      fnName = "observe"
+      defaultLabel = funcToLabel(func, "observe", label)
     )
   }
 
@@ -2515,8 +2512,7 @@ eventReactive <- function(eventExpr, valueExpr,
   if (is.null(label)) {
     label <- rassignSrcrefToLabel(
       call_srcref,
-      defaultLabel = exprToLabel(userEventExpr, "eventReactive", label),
-      fnName = "eventReactive"
+      defaultLabel = exprToLabel(userEventExpr, "eventReactive", label)
     )
   }
 
@@ -2654,8 +2650,7 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
   call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
   label <- rassignSrcrefToLabel(
     call_srcref,
-    defaultLabel = "<anonymous>",
-    fnName = "debounce"
+    defaultLabel = "<anonymous>"
   )
 
   if (!is.function(millis)) {
@@ -2758,8 +2753,7 @@ throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
   call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
   label <- rassignSrcrefToLabel(
     call_srcref,
-    defaultLabel = "<anonymous>",
-    fnName = "throttle"
+    defaultLabel = "<anonymous>"
   )
 
   if (!is.function(millis)) {

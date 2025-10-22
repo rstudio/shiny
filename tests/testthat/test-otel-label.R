@@ -15,8 +15,23 @@ test_that("ospan_label_reactive generates correct labels", {
   result <- ospan_label_reactive(x_reactive_cache, domain = NULL)
   expect_equal(result, "reactive cache x_reactive_cache")
 
+  x_reactive_cache <- x_reactive |> bindCache({"cacheKey"})
+  result <- ospan_label_reactive(x_reactive_cache, domain = NULL)
+  expect_equal(result, "reactive cache x_reactive_cache")
+  x_reactive_cache <- reactive({42}) |> bindCache({"cacheKey"})
+  result <- ospan_label_reactive(x_reactive_cache, domain = NULL)
+  expect_equal(result, "reactive cache x_reactive_cache")
+
   # Test with event class
   x_reactive_event <- bindEvent(x_reactive, {"eventKey"})
+  result <- ospan_label_reactive(x_reactive_event, domain = NULL)
+  expect_equal(result, "reactive event x_reactive_event")
+  x_reactive_event <- x_reactive |> bindEvent({"eventKey"})
+  result <- ospan_label_reactive(x_reactive_event, domain = NULL)
+  expect_equal(result, "reactive event x_reactive_event")
+  result <- ospan_label_reactive(x_reactive |> bindEvent({"eventKey"}), domain = NULL)
+  expect_equal(result, "reactive event <anonymous>")
+  x_reactive_event <- reactive({42}) |> bindEvent({"eventKey"})
   result <- ospan_label_reactive(x_reactive_event, domain = NULL)
   expect_equal(result, "reactive event x_reactive_event")
 
@@ -130,6 +145,38 @@ test_that("ospan_label_observer generates correct labels", {
   x_observe_event <- bindEvent(x_observe, {"eventKey"})
   result <- ospan_label_observer(x_observe_event, domain = NULL)
   expect_equal(result, "observe event x_observe_event")
+
+  x_observe_event <- observe({ 42 }, label = "test_observer" ) |> bindEvent({"eventKey"})
+  result <- ospan_label_observer(x_observe_event, domain = NULL)
+  expect_equal(result, "observe event x_observe_event")
+
+  result <- ospan_label_observer(observe({ 42 }, label = "test_observer" ) |> bindEvent({"eventKey"}), domain = NULL)
+  expect_equal(result, "observe event <anonymous>")
+
+  x_observe <- observe({ 42 }, label = "test_observer" )
+  x_observe_event <- x_observe |> bindEvent({"eventKey"})
+  result <- ospan_label_observer(x_observe_event, domain = NULL)
+  expect_equal(result, "observe event x_observe_event")
+})
+
+test_that("throttle ospan label is correct", {
+  x_reactive <- reactive({ 42 })
+  x_throttled1 <- throttle(x_reactive, 1000)
+  x_throttled2 <- x_reactive |> throttle(1000)
+  x_throttled3 <- reactive({ 42 }) |> throttle(1000)
+
+  expect_equal(
+    as.character(attr(x_throttled1, "observable")$.label),
+    "throttle x_throttled1 result"
+  )
+  expect_equal(
+    as.character(attr(x_throttled2, "observable")$.label),
+    "throttle x_throttled2 result"
+  )
+  expect_equal(
+    as.character(attr(x_throttled3, "observable")$.label),
+    "throttle x_throttled3 result"
+  )
 })
 
 test_that("ospan_label_observer handles module namespacing", {

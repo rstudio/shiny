@@ -200,12 +200,11 @@ bindEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE
     call_srcref <- attr(sys.call(-1), "srcref", exact = TRUE)
     label <- rassignSrcrefToLabel(
       call_srcref,
-      defaultLabel = sprintf(
+      defaultLabel = as_default_label(sprintf(
         'bindEvent(%s, %s)',
         attr(x, "observable", exact = TRUE)$.label,
         quos_to_label(qs)
-      ),
-      fnName = "bindEvent"
+      ))
     )
   }
 
@@ -294,8 +293,9 @@ bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
     call_srcref <- attr(sys.call(-1), "srcref", exact = TRUE)
     x$.label <- rassignSrcrefToLabel(
       call_srcref,
-      defaultLabel = sprintf('bindEvent(%s, %s)', x$.label, quos_to_label(qs)),
-      fnName = "bindEvent"
+      defaultLabel = as_default_label(
+        sprintf('bindEvent(%s, %s)', x$.label, quos_to_label(qs))
+      )
     )
   } else {
     x$.label <- label

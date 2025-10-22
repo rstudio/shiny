@@ -256,7 +256,7 @@ dev_barret_kitchen <- function() {
             log_and_msg(sprintf("Y Val: %s", y_val))
             # Sys.sleep(0.5)
             y_val
-          }) |> bindCache(input$y)
+          }) |> bindCache(input$y) |> bindEvent(input$y)
           y <- throttle(y_raw, 100)
 
           calc <- reactive(label = "barret_calc", {
@@ -271,7 +271,8 @@ dev_barret_kitchen <- function() {
           output$txt <- renderText({
             calc()
           }) |>
-            bindCache(x(), y())
+            bindCache(x(), y()) |>
+            bindEvent(list(x(), y()))
 
           rand_task <- ExtendedTask$new(function() {
             mirai::mirai(

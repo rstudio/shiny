@@ -134,13 +134,11 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
       call_srcref <- attr(sys.call(-1), "srcref", exact = TRUE)
       label <- rassignSrcrefToLabel(
         call_srcref,
-        defaultLabel = "<anonymous>",
-        fnName = "ExtendedTask\\$new"
+        defaultLabel = "<anonymous>"
       )
       private$otel_label <- otel_label_extended_task(label, domain = domain)
       private$otel_label_add_to_queue <- otel_label_extended_task_add_to_queue(label, domain = domain)
 
-      call_srcref <- attr(sys.call(-1), "srcref", exact = TRUE)
       private$otel_attrs <- c(
         otel_srcref_attributes(call_srcref),
         otel_session_id_attrs(domain)

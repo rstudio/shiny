@@ -481,8 +481,7 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
   call_srcref <- attr(sys.call(-1), "srcref", exact = TRUE)
   label <- rassignSrcrefToLabel(
     call_srcref,
-    defaultLabel = exprToLabel(substitute(x), "cachedReactive"),
-    fnName = "bindCache"
+    defaultLabel = exprToLabel(substitute(x), "cachedReactive")
   )
 
   domain <- reactive_get_domain(x)

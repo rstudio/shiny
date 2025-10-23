@@ -46,6 +46,7 @@ with_session_end_ospan_async <- function(expr, ..., domain) {
 # -- Helpers -------------------------------
 
 
+# Occurs when the websocket connection is established
 otel_session_attrs <- function(domain) {
   attrs <- list(
     PATH_INFO =
@@ -55,7 +56,9 @@ otel_session_attrs <- function(domain) {
       ),
     HTTP_HOST = domain[["request"]][["HTTP_HOST"]] %||% "",
     HTTP_ORIGIN = domain[["request"]][["HTTP_ORIGIN"]] %||% "",
-    QUERY_STRING = domain[["request"]][["QUERY_STRING"]] %||% "",
+    ## Currently, Shiny does not expose QUERY_STRING when connecting the websocket
+    # so we do not provide it here.
+    # QUERY_STRING = domain[["request"]][["QUERY_STRING"]] %||% "",
     SERVER_PORT = domain[["request"]][["SERVER_PORT"]] %||% NA_integer_
   )
   # Safely convert SERVER_PORT to integer

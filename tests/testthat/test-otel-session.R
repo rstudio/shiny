@@ -155,7 +155,6 @@ test_that("otel_session_attrs extracts request attributes correctly", {
       PATH_INFO = "/myapp/page",
       HTTP_HOST = "example.com",
       HTTP_ORIGIN = "https://example.com",
-      QUERY_STRING = "param=value",
       SERVER_PORT = "8080"
     )
   )
@@ -165,7 +164,6 @@ test_that("otel_session_attrs extracts request attributes correctly", {
   expect_equal(attrs$PATH_INFO, "/myapp/page")
   expect_equal(attrs$HTTP_HOST, "example.com")
   expect_equal(attrs$HTTP_ORIGIN, "https://example.com")
-  expect_equal(attrs$QUERY_STRING, "param=value")
   expect_equal(attrs$SERVER_PORT, 8080L)  # Should be converted to integer
 })
 
@@ -196,7 +194,6 @@ test_that("otel_session_attrs handles missing request fields", {
   expect_equal(attrs$PATH_INFO, "")
   expect_equal(attrs$HTTP_HOST, "localhost")
   expect_equal(attrs$HTTP_ORIGIN, "")
-  expect_equal(attrs$QUERY_STRING, "")
   expect_equal(attrs$SERVER_PORT, NA_integer_)
 })
 
@@ -208,7 +205,6 @@ test_that("otel_session_attrs handles empty request", {
   expect_equal(attrs$PATH_INFO, "")
   expect_equal(attrs$HTTP_HOST, "")
   expect_equal(attrs$HTTP_ORIGIN, "")
-  expect_equal(attrs$QUERY_STRING, "")
   expect_equal(attrs$SERVER_PORT, NA_integer_)
 })
 
@@ -248,7 +244,6 @@ test_that("integration test - session start with full request", {
       PATH_INFO = "/dashboard/",
       HTTP_HOST = "shiny.example.com",
       HTTP_ORIGIN = "https://shiny.example.com",
-      QUERY_STRING = "tab=overview",
       SERVER_PORT = "3838"
     )
   )
@@ -287,7 +282,6 @@ test_that("integration test - session start with full request", {
       expect_equal(span_attributes[["session.id"]], "integration-test-session")
       expect_equal(span_attributes[["PATH_INFO"]], "/dashboard/")
       expect_equal(span_attributes[["HTTP_HOST"]], "shiny.example.com")
-      expect_equal(span_attributes[["QUERY_STRING"]], "tab=overview")
       expect_equal(span_attributes[["SERVER_PORT"]], 3838L)
     }
   )

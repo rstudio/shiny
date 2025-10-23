@@ -27,6 +27,17 @@ get_reactive_objects <- function() {
   o2a <- observe({ 44 }) |> bindEvent({"key"})
   o2b <- bindEvent(observe({ 47 }), {"key"})
 
+  # Debounce and throttle
+  r_debounce <- reactive({ 48 }) |> debounce(1000)
+  r_throttle <- reactive({ 49 }) |> throttle(1000)
+
+  # ExtendedTask
+  ext_task <- ExtendedTask$new(function() { promises::promise_resolve(50) })
+
+  # Reactive with explicit label
+  r_labeled <- reactive({ 51 }, label = "my_reactive")
+  o_labeled <- observe({ 52 }, label = "my_observer")
+
   list(
     reactive = r,
     reactiveVal = rv,
@@ -48,7 +59,12 @@ get_reactive_objects <- function() {
     renderEventB = rt2b,
     renderCacheEventB = rt3b,
     observeEventA = o2a,
-    observeEventB = o2b
+    observeEventB = o2b,
+    debounce = r_debounce,
+    throttle = r_throttle,
+    extendedTask = ext_task,
+    reactiveLabeled = r_labeled,
+    observeLabeled = o_labeled
   )
 }
 
@@ -470,3 +486,132 @@ test_that(
     expect_gt(attrs[["code.lineno"]], 12)
   }
 )
+
+# Tests for debounce/throttle
+test_that("debounce() creates new reactive with otel attributes", {
+  x <- get_reactive_objects()$debounce
+  attrs <- attr(x, "observable")$.otelAttrs
+
+  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
+  expect_gt(attrs[["code.lineno"]], 12)
+})
+
+test_that("throttle() creates new reactive with otel attributes", {
+  x <- get_reactive_objects()$throttle
+  attrs <- attr(x, "observable")$.otelAttrs
+
+  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
+  expect_gt(attrs[["code.lineno"]], 12)
+})
+
+# Tests for ExtendedTask
+test_that("ExtendedTask is created and is an R6 object", {
+  x <- get_reactive_objects()$extendedTask
+  expect_s3_class(x, "ExtendedTask")
+  expect_s3_class(x, "R6")
+
+  attrs <- .subset2(x, ".__enclos_env__")$private$otel_attrs
+
+  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
+  expect_gt(attrs[["code.lineno"]], 12)
+})
+
+# Tests for explicit labels
+test_that("reactive() with explicit label still captures otel attributes", {
+  x <- get_reactive_objects()$reactiveLabeled
+  attrs <- attr(x, "observable")$.otelAttrs
+
+  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
+  expect_equal(attrs[["code.lineno"]], 38)
+  expect_equal(attrs[["code.column"]], 3)
+
+  # Verify label is preserved
+  label <- attr(x, "observable")$.label
+  expect_equal(as.character(label), "my_reactive")
+})
+
+test_that("observe() with explicit label still captures otel attributes", {
+  x <- get_reactive_objects()$observeLabeled
+  attrs <- x$.otelAttrs
+
+  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
+  expect_equal(attrs[["code.lineno"]], 39)
+  expect_equal(attrs[["code.column"]], 3)
+
+  # Verify label is preserved
+  expect_equal(x$.label, "my_observer")
+})
+
+# Edge case tests
+test_that("reactive created inside function captures function srcref", {
+  create_reactive <- function() {
+    reactive({ 100 })
+  }
+
+  r <- create_reactive()
+  attrs <- attr(r, "observable")$.otelAttrs
+
+  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
+  # Line number should point to where reactive() is called inside the function
+  expect_true(is.numeric(attrs[["code.lineno"]]))
+  expect_true(is.numeric(attrs[["code.column"]]))
+})
+
+test_that("observe created inside function captures function srcref", {
+  create_observer <- function() {
+    observe({ 101 })
+  }
+
+  o <- create_observer()
+  attrs <- o$.otelAttrs
+
+  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
+  expect_true(is.numeric(attrs[["code.lineno"]]))
+  expect_true(is.numeric(attrs[["code.column"]]))
+})
+
+test_that("reactive returned from function preserves srcref", {
+  make_counter <- function(initial = 0) {
+    reactive({ initial + 1 })
+  }
+
+  counter <- make_counter(42)
+  attrs <- attr(counter, "observable")$.otelAttrs
+
+  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
+  expect_true(is.numeric(attrs[["code.lineno"]]))
+})
+
+test_that("reactiveVal created in function captures srcref", {
+  create_val <- function() {
+    reactiveVal("initial")
+  }
+
+  rv <- create_val()
+  attrs <- attr(rv, ".impl")$.otelAttrs
+
+  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
+  expect_true(is.numeric(attrs[["code.lineno"]]))
+})
+
+test_that("nested reactive expressions preserve individual srcrefs", {
+  outer_reactive <- reactive({
+    inner_reactive <- reactive({ 200 })
+    inner_reactive
+  })
+
+  outer_attrs <- attr(outer_reactive, "observable")$.otelAttrs
+  expect_equal(outer_attrs[["code.filepath"]], "test-otel-attr-srcref.R")
+  expect_true(is.numeric(outer_attrs[["code.lineno"]]))
+
+  # Get the inner reactive by executing outer
+  withReactiveDomain(MockShinySession$new(), {
+    inner_reactive <- isolate(outer_reactive())
+    inner_attrs <- attr(inner_reactive, "observable")$.otelAttrs
+
+    expect_equal(inner_attrs[["code.filepath"]], "test-otel-attr-srcref.R")
+    expect_true(is.numeric(inner_attrs[["code.lineno"]]))
+    # Inner should have different line number than outer
+    expect_false(inner_attrs[["code.lineno"]] == outer_attrs[["code.lineno"]])
+  })
+})

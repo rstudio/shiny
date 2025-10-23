@@ -2751,6 +2751,9 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
   local({
     er_impl <- attr(er, "observable", exact = TRUE)
     er_impl$.otelLabel <- otel_label_debounce(label, domain = domain)
+    if (!is.null(call_srcref)) {
+      er_impl$.otelAttrs <- otel_srcref_attributes(call_srcref)
+    }
   })
 
   with_no_otel_bind({
@@ -2849,6 +2852,9 @@ throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
   local({
     er_impl <- attr(er, "observable", exact = TRUE)
     er_impl$.otelLabel <- otel_label_throttle(label, domain = domain)
+    if (!is.null(call_srcref)) {
+      er_impl$.otelAttrs <- otel_srcref_attributes(call_srcref)
+    }
   })
 
   er

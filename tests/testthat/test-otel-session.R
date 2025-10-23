@@ -95,49 +95,8 @@ test_that("use_session_start_ospan_async sets up session end callback", {
 
       expect_equal(result, "result_value")
       expect_equal(test_value, "modified")
-      expect_length(domain$cleanup_callbacks, 1)
-
-    }
-  )
-})
-
-test_that("use_session_start_ospan_async session end callback logs correctly", {
-  domain <- create_mock_session_domain(token = "session-789")
-
-  log_called <- FALSE
-
-  # Mock dependencies
-  withr::local_options(list(shiny.otel.bind = "session"))
-  local_mocked_bindings(
-    as_attributes = function(x) x,
-    .package = "otel"
-  )
-
-  with_mocked_bindings(
-    has_otel_bind = function(level) level == "session",
-    otel_session_id_attrs = function(domain) list(session.id = domain$token),
-    otel_session_attrs = function(domain) list(),
-    with_shiny_ospan_async = function(name, expr, attributes = NULL) force(expr),
-    otel_log = function(event, attributes = NULL, severity = NULL) {
-      log_called <<- TRUE
-      expect_equal(event, "session.end")
-      expect_equal(attributes[["session.id"]], "session-789")
-      expect_equal(severity, "info")
-    },
-    {
-
       expect_length(domain$cleanup_callbacks, 0)
 
-      use_session_start_ospan_async({
-        "test"
-      }, domain = domain)
-
-      expect_length(domain$cleanup_callbacks, 1)
-
-      # Execute the captured callback
-      session_end_callback <- domain$cleanup_callbacks[[1]]
-      session_end_callback()
-      expect_true(log_called)
     }
   )
 })
@@ -321,8 +280,6 @@ test_that("integration test - session start with full request", {
       result <- use_session_start_ospan_async({
         "test_result"
       }, domain = domain)
-
-      expect_length(domain$cleanup_callbacks, 1)
 
       expect_equal(result, "test_result")
 

@@ -207,7 +207,9 @@ dev_barret_kitchen <- function() {
       sliderInput("mymod-x", "x", 1, 10, 5),
       sliderInput("mymod-y", "y", 1, 10, 5),
       div("x * y: "),
-      verbatimTextOutput("mymod-txt"),
+      verbatimTextOutput("mymod-txt1"),
+      verbatimTextOutput("mymod-txt2"),
+      verbatimTextOutput("mymod-txt3"),
       # bslib::input_task_button("recalculate", "Recalculate"),
       verbatimTextOutput("task_result")
     ),
@@ -268,7 +270,15 @@ dev_barret_kitchen <- function() {
             log_and_msg("x: ", x())
           })
 
-          output$txt <- renderText({
+          output$txt1 <- renderText({
+            calc()
+          }) |>
+            bindCache(x(), y())
+          output$txt2 <- renderText({
+            calc()
+          }) |>
+            bindEvent(list(x(), y()))
+          output$txt3 <- renderText({
             calc()
           }) |>
             bindCache(x(), y()) |>

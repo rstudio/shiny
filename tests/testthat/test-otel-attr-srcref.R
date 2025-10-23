@@ -6,13 +6,49 @@ get_reactive_objects <- function() {
   rvs <- reactiveValues(a = 1)
   o <- observe({ 43 })
   rt <- renderText({ "text" })
+  oe <- observeEvent({"key"}, { 45 })
+  er <- eventReactive({"key"}, { 46 })
+
+  # Values below this line are to test file location, not file line
+  r1a <- reactive({ 1 }) |> bindCache({"key"})
+  r2a <- reactive({ 2 }) |> bindEvent({"key"})
+  r3a <- reactive({ 3 }) |> bindCache({"key1"}) |> bindEvent({"key2"})
+  r1b <- bindCache(reactive({ 1 }), {"key"})
+  r2b <- bindEvent(reactive({ 2 }), {"key"})
+  r3b <- bindEvent(bindCache(reactive({ 3 }), {"key1"}), {"key2"})
+
+  rt1a <- renderText({"text"}) |> bindCache({"key"})
+  rt2a <- renderText({"text"}) |> bindEvent({"key"})
+  rt3a <- renderText({"text"}) |> bindCache({"key1"}) |> bindEvent({"key2"})
+  rt1b <- bindCache(renderText({"text"}), {"key"})
+  rt2b <- bindEvent(renderText({"text"}), {"key"})
+  rt3b <- bindEvent(bindCache(renderText({"text"}), {"key1"}), {"key2"})
+
+  o2a <- observe({ 44 }) |> bindEvent({"key"})
+  o2b <- bindEvent(observe({ 47 }), {"key"})
 
   list(
     reactive = r,
     reactiveVal = rv,
     reactiveValues = rvs,
     observe = o,
-    renderText = rt
+    renderText = rt,
+    observeEvent = oe,
+    eventReactive = er,
+    reactiveCacheA = r1a,
+    reactiveEventA = r2a,
+    reactiveCacheEventA = r3a,
+    reactiveCacheB = r1b,
+    reactiveEventB = r2b,
+    reactiveCacheEventB = r3b,
+    renderCacheA = rt1a,
+    renderEventA = rt2a,
+    renderCacheEventA = rt3a,
+    renderCacheB = rt1b,
+    renderEventB = rt2b,
+    renderCacheEventB = rt3b,
+    observeEventA = o2a,
+    observeEventB = o2b
   )
 }
 
@@ -203,6 +239,15 @@ test_that("otel attributes integration with render functions", {
   expect_equal(attrs[["code.column"]], 20)
 })
 
+test_that("observeEvent() captures otel attributes from source reference", {
+  x <- get_reactive_objects()$observeEvent
+  attrs <- x$.otelAttrs
+
+  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
+  expect_equal(attrs[["code.lineno"]], 9)
+  expect_equal(attrs[["code.column"]], 3)
+})
+
 test_that("otel attributes follow OpenTelemetry semantic conventions", {
   # Test that the attribute names follow the official OpenTelemetry conventions
   # https://opentelemetry.io/docs/specs/semconv/registry/attributes/code/
@@ -292,3 +337,136 @@ test_that("otel attributes are combined with session attributes", {
   expect_equal(combined_attrs[["code.lineno"]], 15L)
   expect_equal(combined_attrs[["session.id"]], "test-session-123")
 })
+
+test_that("eventReactive() captures otel attributes from source reference", {
+  x <- get_reactive_objects()$eventReactive
+  attrs <- attr(x, "observable")$.otelAttrs
+
+  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
+  expect_equal(attrs[["code.lineno"]], 10)
+  expect_equal(attrs[["code.column"]], 3)
+})
+
+test_that("renderText() with bindCache() captures otel attributes", {
+  x <- get_reactive_objects()$renderCacheA
+  attrs <- attr(x, "otelAttrs")
+
+  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
+  expect_gt(attrs[["code.lineno"]], 12)
+})
+
+test_that("renderText() with bindEvent() captures otel attributes", {
+  x <- get_reactive_objects()$renderEventA
+  attrs <- attr(x, "otelAttrs")
+
+  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
+  expect_gt(attrs[["code.lineno"]], 12)
+})
+
+test_that(
+  "renderText() with bindCache() |> bindEvent() captures otel attributes",
+  {
+    x <- get_reactive_objects()$renderCacheEventA
+    attrs <- attr(x, "otelAttrs")
+
+    expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
+    expect_gt(attrs[["code.lineno"]], 12)
+  }
+)
+
+test_that("bindCache() wrapping renderText() captures otel attributes", {
+  x <- get_reactive_objects()$renderCacheB
+  attrs <- attr(x, "otelAttrs")
+
+  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
+  expect_gt(attrs[["code.lineno"]], 12)
+})
+
+test_that("bindEvent() wrapping renderText() captures otel attributes", {
+  x <- get_reactive_objects()$renderEventB
+  attrs <- attr(x, "otelAttrs")
+
+  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
+  expect_gt(attrs[["code.lineno"]], 12)
+})
+
+test_that(
+  "bindEvent() wrapping bindCache(renderText()) captures otel attributes",
+  {
+    x <- get_reactive_objects()$renderCacheEventB
+    attrs <- attr(x, "otelAttrs")
+
+    expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
+    expect_gt(attrs[["code.lineno"]], 12)
+  }
+)
+
+test_that("observe() with bindEvent() captures otel attributes", {
+  x <- get_reactive_objects()$observeEventA
+  attrs <- x$.otelAttrs
+
+  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
+  expect_gt(attrs[["code.lineno"]], 12)
+})
+
+test_that("bindEvent() wrapping observe() captures otel attributes", {
+  x <- get_reactive_objects()$observeEventB
+  attrs <- x$.otelAttrs
+
+  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
+  expect_gt(attrs[["code.lineno"]], 12)
+})
+
+test_that("reactive() with bindCache() captures otel attributes", {
+  x <- get_reactive_objects()$reactiveCacheA
+  attrs <- attr(x, "observable")$.otelAttrs
+
+  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
+  expect_gt(attrs[["code.lineno"]], 12)
+})
+
+test_that("reactive() with bindEvent() captures otel attributes", {
+  x <- get_reactive_objects()$reactiveEventA
+  attrs <- attr(x, "observable")$.otelAttrs
+
+  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
+  expect_gt(attrs[["code.lineno"]], 12)
+})
+
+test_that(
+  "reactive() with bindCache() |> bindEvent() captures otel attributes",
+  {
+    x <- get_reactive_objects()$reactiveCacheEventA
+    attrs <- attr(x, "observable")$.otelAttrs
+
+    expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
+    expect_gt(attrs[["code.lineno"]], 12)
+  }
+)
+
+test_that("bindCache() wrapping reactive() captures otel attributes", {
+  x <- get_reactive_objects()$reactiveCacheB
+  attrs <- attr(x, "observable")$.otelAttrs
+
+  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
+  expect_gt(attrs[["code.lineno"]], 12)
+})
+
+test_that("bindEvent() wrapping reactive() captures otel attributes", {
+  x <- get_reactive_objects()$reactiveEventB
+  attrs <- attr(x, "observable")$.otelAttrs
+
+  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
+  expect_gt(attrs[["code.lineno"]], 12)
+})
+
+test_that(
+  "bindEvent() wrapping bindCache(reactive()) captures otel attributes",
+  {
+    x <- get_reactive_objects()$reactiveCacheEventB
+    attrs <- attr(x, "observable")$.otelAttrs
+
+    expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
+    expect_gt(attrs[["code.lineno"]], 12)
+  }
+)

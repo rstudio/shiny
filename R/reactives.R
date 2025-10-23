@@ -2464,7 +2464,14 @@ observeEvent <- function(eventExpr, handlerExpr,
 
   eventQ <- exprToQuo(eventExpr, event.env, event.quoted)
   handlerQ <- exprToQuo(handlerExpr, handler.env, handler.quoted)
-  label <- quoToLabel(eventQ, "observeEvent", label)
+
+  call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
+  if (is.null(label)) {
+    label <- rassignSrcrefToLabel(
+      call_srcref,
+      defaultLabel = quoToLabel(eventQ, "observeEvent", label)
+    )
+  }
 
   with_no_otel_bind({
     handler <- inject(observe(
@@ -2476,16 +2483,23 @@ observeEvent <- function(eventExpr, handlerExpr,
       autoDestroy = TRUE,
       ..stacktraceon = TRUE
     ))
+
+    o <- inject(bindEvent(
+      ignoreNULL = ignoreNULL,
+      ignoreInit = ignoreInit,
+      once = once,
+      label = label,
+      !!eventQ,
+      x = handler
+    ))
   })
 
-  o <- inject(bindEvent(
-    ignoreNULL = ignoreNULL,
-    ignoreInit = ignoreInit,
-    once = once,
-    label = label,
-    !!eventQ,
-    x = handler
-  ))
+  if (!is.null(call_srcref)) {
+    o$.otelAttrs <- otel_srcref_attributes(call_srcref)
+  }
+  if (has_otel_bind("reactivity")) {
+    o <- bind_otel_observe(o)
+  }
 
   invisible(o)
 }
@@ -2518,15 +2532,26 @@ eventReactive <- function(eventExpr, valueExpr,
 
   with_no_otel_bind({
     value_r <- inject(reactive(!!valueQ, domain = domain, label = label))
+
+    r <- inject(bindEvent(
+      ignoreNULL = ignoreNULL,
+      ignoreInit = ignoreInit,
+      label = label,
+      !!eventQ,
+      x = value_r
+    ))
   })
 
-  invisible(inject(bindEvent(
-    ignoreNULL = ignoreNULL,
-    ignoreInit = ignoreInit,
-    label = label,
-    !!eventQ,
-    x = value_r
-  )))
+  if (!is.null(call_srcref)) {
+    impl <- attr(r, "observable", exact = TRUE)
+    impl$.otelAttrs <- otel_srcref_attributes(call_srcref)
+  }
+  if (has_otel_bind("reactivity")) {
+    r <- bind_otel_reactive_expr(r)
+  }
+
+
+  return(r)
 }
 
 isNullEvent <- function(value) {

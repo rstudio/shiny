@@ -495,6 +495,9 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
   cacheHint <- rlang::hash(extractCacheHint(x))
   valueFunc <- wrapFunctionLabel(valueFunc, "cachedReactiveValueFunc", ..stacktraceon = TRUE)
 
+  x_classes <- class(x)
+  x_otel_attrs <- attr(x, "observable", exact = TRUE)$.otelAttrs
+
   # Don't hold on to the reference for x, so that it can be GC'd
   rm(x)
   # Hacky workaround for issue with `%>%` preventing GC:
@@ -503,15 +506,27 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
     rm(list = ".", envir = .GenericCallEnv, inherits = FALSE)
   }
 
-  res <- reactive(label = label, domain = domain, {
-    cache <- resolve_cache_object(cache, domain)
-    hybrid_chain(
-      keyFunc(),
-      generateCacheFun(valueFunc, cache, cacheHint, cacheReadHook = identity, cacheWriteHook = identity)
-    )
+  with_no_otel_bind({
+    res <- reactive(label = label, domain = domain, {
+      cache <- resolve_cache_object(cache, domain)
+      hybrid_chain(
+        keyFunc(),
+        generateCacheFun(valueFunc, cache, cacheHint, cacheReadHook = identity, cacheWriteHook = identity)
+      )
+    })
   })
 
   class(res) <- c("reactive.cache", class(res))
+
+  impl <- attr(res, "observable", exact = TRUE)
+  impl$.otelAttrs <- x_otel_attrs
+  if (!is.null(call_srcref)) {
+    otelAttrs <- otel_srcref_attributes(call_srcref)
+    impl$.otelAttrs[names(otelAttrs)] <- otelAttrs
+  }
+  if (has_otel_bind("reactivity")) {
+    res <- bind_otel_reactive_expr(res)
+  }
   res
 }
 
@@ -538,6 +553,7 @@ bindCache.shiny.render.function <- function(x, ..., cache = "app") {
     )
   }
 
+  # Passes over the otelAttrs from valueFunc to renderFunc
   renderFunc <- addAttributes(renderFunc, renderFunctionAttributes(valueFunc))
   class(renderFunc) <- c("shiny.render.function.cache", class(valueFunc))
   renderFunc

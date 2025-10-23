@@ -196,8 +196,8 @@ bindEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE
   valueFunc <- reactive_get_value_func(x)
   valueFunc <- wrapFunctionLabel(valueFunc, "eventReactiveValueFunc", ..stacktraceon = TRUE)
 
+  call_srcref <- attr(sys.call(-1), "srcref", exact = TRUE)
   if (is.null(label)) {
-    call_srcref <- attr(sys.call(-1), "srcref", exact = TRUE)
     label <- rassignSrcrefToLabel(
       call_srcref,
       defaultLabel = as_default_label(sprintf(
@@ -209,6 +209,7 @@ bindEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE
   }
 
   x_classes <- class(x)
+  x_otel_attrs <- attr(x, "observable", exact = TRUE)$.otelAttrs
 
   # Don't hold on to the reference for x, so that it can be GC'd
   rm(x)
@@ -237,6 +238,14 @@ bindEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE
 
   class(res) <- c("reactive.event", x_classes)
 
+  impl <- attr(res, "observable", exact = TRUE)
+  impl$.otelAttrs <- x_otel_attrs
+  if (!is.null(call_srcref)) {
+    otelAttrs <- otel_srcref_attributes(call_srcref)
+    # Overwrite any existing attributes with these new ones
+    # (such as code.filepath, code.lineno, code.column)
+    impl$.otelAttrs[names(otelAttrs)] <- otelAttrs
+  }
   if (has_otel_bind("reactivity")) {
     res <- bind_otel_reactive_expr(res)
   }
@@ -269,6 +278,7 @@ bindEvent.shiny.render.function <- function(x, ..., ignoreNULL = TRUE, ignoreIni
     )
   }
 
+  # Passes over the otelAttrs from valueFunc to renderFunc
   renderFunc <- addAttributes(renderFunc, renderFunctionAttributes(valueFunc))
   class(renderFunc) <- c("shiny.render.function.event", class(valueFunc))
   renderFunc
@@ -332,9 +342,17 @@ bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
   )
 
   class(x) <- c("Observer.event", class(x))
+  call_srcref <- attr(sys.call(-1), "srcref", exact = TRUE)
+  if (!is.null(call_srcref)) {
+    otelAttrs <- otel_srcref_attributes(call_srcref)
+    # Overwrite any existing attributes with these new ones
+    # (such as code.filepath, code.lineno, code.column)
+    x$.otelAttrs[names(otelAttrs)] <- otelAttrs
+  }
   if (has_otel_bind("reactivity")) {
     x <- bind_otel_observe(x)
   }
+
   invisible(x)
 }
 

@@ -1,3 +1,4 @@
+skip_on_cran()
 skip_if_not_installed("otelsdk")
 
 withr::local_options(list(shiny.otel.enabled = "all"))

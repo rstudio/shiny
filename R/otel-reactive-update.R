@@ -96,3 +96,25 @@ with_reactive_update_active_ospan <- function(expr, ..., domain) {
   # we only need to wrap the expr in the span context
   otel::with_active_span(reactive_update_ospan, {force(expr)})
 }
+
+
+maybe_with_reactive_update_active_ospan <- function(expr, ..., domain) {
+  if (!reactive_update_ospan_is_active(domain)) {
+    set_reactive_ospan_is_active(domain)
+
+    promises::hybrid_then(
+      {
+        with_reactive_update_active_ospan(domain = domain, expr)
+      },
+      on_success = function(value) {
+        clear_reactive_ospan_is_active(domain)
+      },
+      on_failure = function(e) {
+        clear_reactive_ospan_is_active(domain)
+      },
+      tee = TRUE
+    )
+  } else {
+    expr
+  }
+}

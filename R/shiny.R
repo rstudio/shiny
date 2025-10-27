@@ -1174,7 +1174,7 @@ ShinySession <- R6Class(
               {
                 private$withCurrentOutput(name, {
                   # TODO: Error handling must be done within ospan methods to get the proper status value. There is currently no way to access a already closed span from within `func()`.
-                  with_reactive_update_active_ospan({
+                  maybe_with_reactive_update_active_ospan({
                     shinyCallingHandlers(func())
                   }, domain = self)
                 })

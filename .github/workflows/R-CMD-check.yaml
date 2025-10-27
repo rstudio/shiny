@@ -6,7 +6,7 @@ on:
   push:
     branches: [main, rc-**]
   pull_request:
-    branches: [main]
+    branches:
   schedule:
     - cron: "0 5 * * 1" # every monday
 

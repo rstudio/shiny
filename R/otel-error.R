@@ -48,7 +48,7 @@ set_ospan_error_status <- function(cnd) {
 
 get_otel_error_obj <- function(e) {
   # Do not expose errors to otel if sanitization is enabled
-  if (getOption("shiny.otel.sanitize.errors", FALSE)) {
+  if (getOption("shiny.otel.sanitize.errors", TRUE)) {
     sanitized_error()
   } else {
     e

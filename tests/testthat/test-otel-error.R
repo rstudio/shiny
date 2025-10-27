@@ -19,16 +19,33 @@ expect_session_warning <- function(session, warning) {
   )
 }
 
-test_server_with_otel <- function(session, server, expr, bind = "all", args = list()) {
+exception_trace_events <- function(traces) {
+  unlist(lapply(traces, function(trace) {
+    if (is.null(trace$events)) return(list())
+    events <- Filter(function(event) {
+      !is.null(event$attributes) &&
+        !is.null(event$attributes[["exception.message"]])
+    }, trace$events)
+    events
+  }), recursive = FALSE)
+}
+
+test_server_with_otel <- function(session, server, expr, sanitize = FALSE, args = list()) {
   stopifnot(inherits(session, "MockShinySession"))
   stopifnot(is.function(server))
 
-  withr::with_options(list(shiny.otel.bind = bind), {
-    info <- otelsdk::with_otel_record({
-      # rlang quosure magic to capture and pass through `expr`
-      testServer(server, {{ expr }}, args = args, session = session)
-    })
-  })
+  withr::with_options(
+    list(
+      shiny.otel.bind = "all",
+      shiny.otel.sanitize.errors = sanitize
+    ),
+    {
+      info <- otelsdk::with_otel_record({
+        # rlang quosure magic to capture and pass through `expr`
+        testServer(server, {{ expr }}, args = args, session = session)
+      })
+    }
+  )
 
   info$traces
 }
@@ -64,6 +81,7 @@ test_that("has_seen_ospan_error() detects marked errors", {
   expect_true(has_seen_ospan_error(cnd))
 })
 
+
 test_that("set_ospan_error_status() records exception only once in reactive context", {
   server <- function(input, output, session) {
     r1 <- reactive(label = "r1", {
@@ -80,7 +98,41 @@ test_that("set_ospan_error_status() records exception only once in reactive cont
   }
 
   session <- create_mock_session()
-  traces <- test_server_with_otel(session, server, bind = "all", {
+  traces <- test_server_with_otel(
+    sanitize = TRUE,
+    session, server, {
+    # Expect an error to be thrown as warning
+    expect_session_warning(session, "test error in r1")
+  })
+
+  # Find traces with exception events (should only be one)
+  exception_events <- exception_trace_events(traces)
+
+  # Exception should be recorded only once at the original point of failure
+  expect_equal(length(exception_events), 1)
+  expect_match(
+    exception_events[[1]]$attributes[["exception.message"]],
+    "Check your logs or contact the app author for clarification."
+  )
+})
+
+test_that("set_ospan_error_status() records exception only once in reactive context", {
+  server <- function(input, output, session) {
+    r1 <- reactive(label = "r1", {
+      stop("test error in r1")
+    })
+
+    r2 <- reactive(label = "r2", {
+      r1()
+    })
+
+    observe(label = "obs", {
+      r2()
+    })
+  }
+
+  session <- create_mock_session()
+  traces <- test_server_with_otel(session, server, {
     # Expect an error to be thrown as warning
     expect_session_warning(session, "test error in r1")
   })
@@ -91,18 +143,14 @@ test_that("set_ospan_error_status() records exception only once in reactive cont
   }
 
   # Find traces with exception events (should only be one)
-  exception_events <- unlist(lapply(traces, function(trace) {
-    if (is.null(trace$events)) return(list())
-    events <- Filter(function(event) {
-      !is.null(event$attributes) &&
-        !is.null(event$attributes[["exception.message"]]) &&
-        grepl("test error in r1", event$attributes[["exception.message"]])
-    }, trace$events)
-    events
-  }), recursive = FALSE)
+  exception_events <- exception_trace_events(traces)
 
   # Exception should be recorded only once at the original point of failure
   expect_equal(length(exception_events), 1)
+  expect_match(
+    exception_events[[1]]$attributes[["exception.message"]],
+    "test error in r1"
+  )
 })
 
 test_that("set_ospan_error_status() records exception for multiple independent errors", {
@@ -125,20 +173,13 @@ test_that("set_ospan_error_status() records exception for multiple independent e
   }
 
   session <- create_mock_session()
-  traces <- test_server_with_otel(session, server, bind = "all", {
+  traces <- test_server_with_otel(session, server, {
     # Both observers should error
     expect_session_warning(session, "error in r1")
   })
 
   # Find traces with exception events
-  exception_events <- unlist(lapply(traces, function(trace) {
-    if (is.null(trace$events)) return(list())
-    events <- Filter(function(event) {
-      !is.null(event$attributes) &&
-        !is.null(event$attributes[["exception.message"]])
-    }, trace$events)
-    events
-  }), recursive = FALSE)
+  exception_events <- exception_trace_events(traces)
 
   # Each unique error should be recorded once
   expect_gte(length(exception_events), 1)
@@ -158,7 +199,7 @@ test_that("set_ospan_error_status() does not record shiny.custom.error", {
   }
 
   session <- create_mock_session()
-  traces <- test_server_with_otel(session, server, bind = "all", {
+  traces <- test_server_with_otel(session, server, {
     expect_session_warning(session, "custom error")
   })
 
@@ -182,7 +223,7 @@ test_that("set_ospan_error_status() does not record shiny.silent.error", {
   }
 
   session <- create_mock_session()
-  traces <- test_server_with_otel(session, server, bind = "all", {
+  traces <- test_server_with_otel(session, server, {
     expect_no_error(session$flushReact())
   })
 

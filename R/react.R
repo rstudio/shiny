@@ -47,7 +47,17 @@ with_context_ospan_async <- function(otel_info, expr, domain) {
     if (isRecordingOtel) {
       with_shiny_ospan_async(
         otelLabel,
-        expr,
+        {
+          # Works with both sync and async expressions
+          # Needed for both observer and reactive contexts
+          promises::hybrid_then(
+            expr,
+            on_failure = set_ospan_error_status_and_throw,
+            # Must upgrade the error object
+            tee = FALSE
+          )
+        },
+        # expr,
         attributes = otelAttrs
       )
     } else {

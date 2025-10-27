@@ -1056,20 +1056,18 @@ ShinySession <- R6Class(
         class(e) <- c("shiny.error.fatal", class(e))
       }
 
-      otel_log(
-        if (close) "Fatal error" else "Unhandled error",
-        severity = if (close) "fatal" else "error",
-        attributes = otel::as_attributes(list(
-          session.id = self$token,
-          error =
-            # Do not expose errors to otel if sanitization is enabled
-            if (getOption("shiny.otel.sanitize.errors", TRUE)) {
-              sanitized_error()
-            } else {
-              e
-            }
-        ))
-      )
+      # For fatal errors, always log.
+      # For non-fatal errors, only log if we haven't seen this error before.
+      if (close || !has_seen_ospan_error(e)) {
+        otel_log(
+          if (close) "Fatal error" else "Unhandled error",
+          severity = if (close) "fatal" else "error",
+          attributes = otel::as_attributes(list(
+            session.id = self$token,
+            error = get_otel_error_obj(e)
+          ))
+        )
+      }
 
       private$unhandledErrorCallbacks$invoke(e, onError = printError)
       .globals$onUnhandledErrorCallbacks$invoke(e, onError = printError)
@@ -1173,7 +1171,6 @@ ShinySession <- R6Class(
             hybrid_chain(
               {
                 private$withCurrentOutput(name, {
-                  # TODO: Error handling must be done within ospan methods to get the proper status value. There is currently no way to access a already closed span from within `func()`.
                   maybe_with_reactive_update_active_ospan({
                     shinyCallingHandlers(func())
                   }, domain = self)

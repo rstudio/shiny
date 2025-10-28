@@ -177,6 +177,34 @@ test_that("throttle ospan label is correct", {
     as.character(attr(x_throttled3, "observable")$.label),
     "throttle x_throttled3 result"
   )
+
+  expect_equal(attr(x_throttled1, "observable")$.otelLabel, "throttle x_throttled1")
+  expect_equal(attr(x_throttled2, "observable")$.otelLabel, "throttle x_throttled2")
+  expect_equal(attr(x_throttled3, "observable")$.otelLabel, "throttle x_throttled3")
+})
+
+test_that("debounce ospan label is correct", {
+  x_reactive <- reactive({ 42 })
+  x_debounced1 <- debounce(x_reactive, 1000)
+  x_debounced2 <- x_reactive |> debounce(1000)
+  x_debounced3 <- reactive({ 42 }) |> debounce(1000)
+
+  expect_equal(
+    as.character(attr(x_debounced1, "observable")$.label),
+    "debounce x_debounced1 result"
+  )
+  expect_equal(
+    as.character(attr(x_debounced2, "observable")$.label),
+    "debounce x_debounced2 result"
+  )
+  expect_equal(
+    as.character(attr(x_debounced3, "observable")$.label),
+    "debounce x_debounced3 result"
+  )
+
+  expect_equal(attr(x_debounced1, "observable")$.otelLabel, "debounce x_debounced1")
+  expect_equal(attr(x_debounced2, "observable")$.otelLabel, "debounce x_debounced2")
+  expect_equal(attr(x_debounced3, "observable")$.otelLabel, "debounce x_debounced3")
 })
 
 test_that("ospan_label_observer handles module namespacing", {

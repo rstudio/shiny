@@ -2028,7 +2028,6 @@ reactive_poll_impl <- function(
     }, label = sprintf("%s %s cleanup", fnName, label))
   })
 
-
   re <- reactive(label = sprintf("%s %s", fnName, label), {
     # Take a dependency on the cookie, so that when it changes, this
     # reactive expression is invalidated.
@@ -2044,6 +2043,16 @@ reactive_poll_impl <- function(
   # So that the observer and finalizer function don't (indirectly) hold onto a
   # reference to `re` and thus prevent it from getting GC'd.
   on.exit(rm(re))
+
+  local({
+    impl <- attr(re, "observable", exact = TRUE)
+    impl$.otelLabel <-
+      if (fnName == "reactivePoll")
+        otel_label_reactive_poll(label, domain = impl$.domain)
+      else if (fnName == "reactiveFileReader")
+        otel_label_reactive_file_reader(label, domain = impl$.domain)
+    impl$.otelAttrs <- append_otel_srcref_attrs(impl$.otelAttrs, call_srcref)
+  })
 
   return(re)
 }
@@ -2758,7 +2767,7 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
   # value of r(), but only invalidates/updates when `trigger` is touched.
   er <- eventReactive(
     {trigger()}, {r()},
-    label = sprintf("debounce %s", label), ignoreNULL = FALSE, domain = domain
+    label = sprintf("debounce %s result", label), ignoreNULL = FALSE, domain = domain
   )
 
   # Update the otel label

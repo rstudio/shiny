@@ -38,6 +38,10 @@ get_reactive_objects <- function() {
   r_labeled <- reactive({ 51 }, label = "my_reactive")
   o_labeled <- observe({ 52 }, label = "my_observer")
 
+  # Poll and File
+  r_poll <- reactivePoll(1000, NULL, checkFunc = function() { TRUE}, valueFunc = function() { 53 })
+  r_file <- reactiveFileReader(1000, NULL, filePath = "path/to/file")
+
   list(
     reactive = r,
     reactiveVal = rv,
@@ -64,7 +68,9 @@ get_reactive_objects <- function() {
     throttle = r_throttle,
     extendedTask = ext_task,
     reactiveLabeled = r_labeled,
-    observeLabeled = o_labeled
+    observeLabeled = o_labeled,
+    reactivePoll = r_poll,
+    reactiveFileReader = r_file
   )
 }
 
@@ -511,6 +517,32 @@ test_that("ExtendedTask is created and is an R6 object", {
   expect_s3_class(x, "R6")
 
   attrs <- .subset2(x, ".__enclos_env__")$private$otel_attrs
+
+  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
+  expect_gt(attrs[["code.lineno"]], 12)
+})
+
+# Tests for reactivePoll
+test_that("reactivePoll() captures otel attributes from source reference", {
+  x <- get_reactive_objects()$reactivePoll
+  impl <- attr(x, "observable", exact = TRUE)
+  attrs <- impl$.otelAttrs
+  otelLabel <- impl$.otelLabel
+
+  expect_equal(as.character(otelLabel), "reactivePoll r_poll")
+
+  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
+  expect_gt(attrs[["code.lineno"]], 12)
+})
+
+# Tests for reactiveFileReader
+test_that("reactiveFileReader() captures otel attributes from source reference", {
+  x <- get_reactive_objects()$reactiveFileReader
+  impl <- attr(x, "observable", exact = TRUE)
+  attrs <- impl$.otelAttrs
+  otelLabel <- impl$.otelLabel
+
+  expect_equal(as.character(otelLabel), "reactiveFileReader r_file")
 
   expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
   expect_gt(attrs[["code.lineno"]], 12)

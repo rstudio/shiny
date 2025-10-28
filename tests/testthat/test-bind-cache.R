@@ -943,21 +943,25 @@ test_that("bindCache reactive visibility - async", {
     })
   })
 
-  flushReact()
-  for (i in 1:3) later::run_now()
+  flush_and_run_later <- function(k) {
+    flushReact()
+    for (i in 1:k) later::run_now()
+  }
+
+  flush_and_run_later(4)
   expect_identical(res, list(value = 0, visible = FALSE))
+
   k(1)
-  flushReact()
-  for (i in 1:3) later::run_now()
+  flush_and_run_later(4)
   expect_identical(res, list(value = 1, visible = TRUE))
+
   # Now fetch from cache
   k(0)
-  flushReact()
-  for (i in 1:3) later::run_now()
+  flush_and_run_later(4)
   expect_identical(res, list(value = 0, visible = FALSE))
+
   k(1)
-  flushReact()
-  for (i in 1:3) later::run_now()
+  flush_and_run_later(4)
   expect_identical(res, list(value = 1, visible = TRUE))
 })
 
@@ -1136,6 +1140,8 @@ test_that("Custom render functions that call installExprFunction", {
 
 
 test_that("cacheWriteHook and cacheReadHook for render functions", {
+  testthat::skip_if(get_tracer()$is_enabled(), "Skipping stack trace tests when OpenTelemetry is already enabled")
+
   write_hook_n <- 0
   read_hook_n  <- 0
 

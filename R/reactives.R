@@ -221,12 +221,11 @@ ReactiveVal <- R6Class(
 #'
 #' @export
 reactiveVal <- function(value = NULL, label = NULL) {
-  call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
+  call_srcref <- get_call_srcref()
   if (missing(label)) {
     label <- rassignSrcrefToLabel(
       call_srcref,
-      defaultLabel = paste0("reactiveVal", createUniqueId(4)),
-      fnName = "reactiveVal"
+      defaultLabel = paste0("reactiveVal", createUniqueId(4))
     )
   }
 
@@ -295,7 +294,7 @@ format.reactiveVal <- function(x, ...) {
 rassignSrcrefToLabel <- function(
   srcref,
   defaultLabel,
-  fnName
+  fnName = "([a-zA-Z0-9_.]+)"
 ) {
 
   if (is.null(srcref))
@@ -321,7 +320,8 @@ rassignSrcrefToLabel <- function(
   firstLine <- substring(lines[srcref[1]], srcref[2] - 1)
 
   m <- regexec(
-    paste0("\\s*([^[:space:]]+)\\s*(<-|=)\\s*", fnName, "\\b"),
+    # Require the first assignment within the line
+    paste0("^\\s*([^[:space:]]+)\\s*(<<-|<-|=)\\s*", fnName, "\\b"),
     firstLine
   )
   if (m[[1]][1] == -1) {
@@ -634,13 +634,12 @@ reactiveValues <- function(...) {
   # Use .subset2() instead of [[, to avoid method dispatch
   impl <- .subset2(values, 'impl')
 
-  call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
+  call_srcref <- get_call_srcref()
   if (!is.null(call_srcref)) {
     impl$.label <- rassignSrcrefToLabel(
       call_srcref,
       # Pass through the random default label created in ReactiveValues$new()
-      defaultLabel = impl$.label,
-      fnName = "reactiveValues"
+      defaultLabel = impl$.label
     )
 
     impl$.otelAttrs <- otel_srcref_attributes(call_srcref)
@@ -1018,6 +1017,15 @@ Observable <- R6Class(
           },
 
           error = function(cond) {
+            if (.isRecordingOtel) {
+              # `cond` is too early in the stack to be updated by `ctx`'s
+              # `with_context_ospan_async()` where it calls
+              # `set_ospan_error_status_and_throw()` on eval error.
+              # So we mark it as seen here.
+              # When the error is re-thrown later, it won't be a _new_ error
+              cond <- set_ospan_error_as_seen(cond)
+            }
+
             # If an error occurs, we want to propagate the error, but we also
             # want to save a copy of it, so future callers of this reactive will
             # get the same error (i.e. the error is cached).
@@ -1116,7 +1124,7 @@ reactive <- function(
 
   o <- Observable$new(func, label, domain, ..stacktraceon = ..stacktraceon)
 
-  call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
+  call_srcref <- get_call_srcref()
   if (!is.null(call_srcref)) {
     o$.otelAttrs <- otel_srcref_attributes(call_srcref)
   }
@@ -1163,7 +1171,8 @@ rexprSrcrefToLabel <- function(srcref, defaultLabel, fnName) {
 
   firstLine <- substring(lines[srcref[1]], 1, srcref[2] - 1)
 
-  m <- regexec(paste0("(.*)(<-|=)\\s*", fnName, "\\s*\\($"), firstLine)
+  # Require the assignment to be parsed from the start
+  m <- regexec(paste0("^(.*)(<<-|<-|=)\\s*", fnName, "\\s*\\($"), firstLine)
   if (m[[1]][1] == -1) {
     return(defaultLabel)
   }
@@ -1555,7 +1564,14 @@ observe <- function(
   check_dots_empty()
 
   func <- installExprFunction(x, "func", env, quoted)
-  label <- funcToLabel(func, "observe", label)
+
+  call_srcref <- get_call_srcref()
+  if (is.null(label)) {
+    label <- rassignSrcrefToLabel(
+      call_srcref,
+      defaultLabel = funcToLabel(func, "observe", label)
+    )
+  }
 
   o <- Observer$new(
     func,
@@ -1566,7 +1582,6 @@ observe <- function(
     autoDestroy = autoDestroy,
     ..stacktraceon = ..stacktraceon
   )
-  call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
   if (!is.null(call_srcref)) {
     o$.otelAttrs <- otel_srcref_attributes(call_srcref)
   }
@@ -1962,30 +1977,32 @@ coerceToFunc <- function(x) {
 #' }
 #' @export
 reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
+  reactive_poll_impl(
+    fnName = "reactivePoll",
+    intervalMillis = intervalMillis,
+    session = session,
+    checkFunc = checkFunc,
+    valueFunc = valueFunc
+  )
+}
+
+reactive_poll_impl <- function(
+  fnName,
+  intervalMillis,
+  session,
+  checkFunc,
+  valueFunc
+) {
   intervalMillis <- coerceToFunc(intervalMillis)
 
-  label <- "<anonymous>"
-  try(silent = TRUE, {
-    reactiveFileReader_call_srcref <- attr(sys.call(-1), "srcref", exact = TRUE)
-    fnName <- "reactiveFileReader"
-    label <- rassignSrcrefToLabel(
-      reactiveFileReader_call_srcref,
-      defaultLabel = "<anonymous>",
-      fnName = fnName
-    )
-  })
+  fnName <- match.arg(fnName, c("reactivePoll", "reactiveFileReader"), several.ok = FALSE)
 
-  if (label == "<anonymous>") {
-    # If reactiveFileReader couldn't figure out a label,
-    # try reactivePoll instead.
-    call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
-    fnName <- "reactivePoll"
-    label <- rassignSrcrefToLabel(
-      call_srcref,
-      defaultLabel = "<anonymous>",
-      fnName = fnName
-    )
-  }
+  call_srcref <- get_call_srcref(-1)
+  label <- rassignSrcrefToLabel(
+    call_srcref,
+    defaultLabel = "<anonymous>",
+    fnName = fnName
+  )
 
   re_finalized <- FALSE
   env <- environment()
@@ -2011,7 +2028,6 @@ reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
     }, label = sprintf("%s %s cleanup", fnName, label))
   })
 
-
   re <- reactive(label = sprintf("%s %s", fnName, label), {
     # Take a dependency on the cookie, so that when it changes, this
     # reactive expression is invalidated.
@@ -2027,6 +2043,16 @@ reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
   # So that the observer and finalizer function don't (indirectly) hold onto a
   # reference to `re` and thus prevent it from getting GC'd.
   on.exit(rm(re))
+
+  local({
+    impl <- attr(re, "observable", exact = TRUE)
+    impl$.otelLabel <-
+      if (fnName == "reactivePoll")
+        otel_label_reactive_poll(label, domain = impl$.domain)
+      else if (fnName == "reactiveFileReader")
+        otel_label_reactive_file_reader(label, domain = impl$.domain)
+    impl$.otelAttrs <- append_otel_srcref_attrs(impl$.otelAttrs, call_srcref)
+  })
 
   return(re)
 }
@@ -2091,14 +2117,16 @@ reactiveFileReader <- function(intervalMillis, session, filePath, readFunc, ...)
   filePath <- coerceToFunc(filePath)
   extraArgs <- list2(...)
 
-  reactivePoll(
-    intervalMillis, session,
-    function() {
+  reactive_poll_impl(
+    fnName = "reactiveFileReader",
+    intervalMillis = intervalMillis,
+    session = session,
+    checkFunc = function() {
       path <- filePath()
       info <- file.info(path)
       return(paste(path, info$mtime, info$size))
     },
-    function() {
+    valueFunc = function() {
       do.call(readFunc, c(filePath(), extraArgs))
     }
   )
@@ -2459,7 +2487,14 @@ observeEvent <- function(eventExpr, handlerExpr,
 
   eventQ <- exprToQuo(eventExpr, event.env, event.quoted)
   handlerQ <- exprToQuo(handlerExpr, handler.env, handler.quoted)
-  label <- quoToLabel(eventQ, "observeEvent", label)
+
+  call_srcref <- get_call_srcref()
+  if (is.null(label)) {
+    label <- rassignSrcrefToLabel(
+      call_srcref,
+      defaultLabel = quoToLabel(eventQ, "observeEvent", label)
+    )
+  }
 
   with_no_otel_bind({
     handler <- inject(observe(
@@ -2471,16 +2506,23 @@ observeEvent <- function(eventExpr, handlerExpr,
       autoDestroy = TRUE,
       ..stacktraceon = TRUE
     ))
+
+    o <- inject(bindEvent(
+      ignoreNULL = ignoreNULL,
+      ignoreInit = ignoreInit,
+      once = once,
+      label = label,
+      !!eventQ,
+      x = handler
+    ))
   })
 
-  o <- inject(bindEvent(
-    ignoreNULL = ignoreNULL,
-    ignoreInit = ignoreInit,
-    once = once,
-    label = label,
-    !!eventQ,
-    x = handler
-  ))
+  if (!is.null(call_srcref)) {
+    o$.otelAttrs <- otel_srcref_attributes(call_srcref)
+  }
+  if (has_otel_bind("reactivity")) {
+    o <- bind_otel_observe(o)
+  }
 
   invisible(o)
 }
@@ -2503,26 +2545,36 @@ eventReactive <- function(eventExpr, valueExpr,
   # Attach a label and a reference to the original user source for debugging
   userEventExpr <- fn_body(func)
 
-  call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
+  call_srcref <- get_call_srcref()
   if (is.null(label)) {
     label <- rassignSrcrefToLabel(
       call_srcref,
-      defaultLabel = exprToLabel(userEventExpr, "eventReactive", label),
-      fnName = "eventReactive"
+      defaultLabel = exprToLabel(userEventExpr, "eventReactive", label)
     )
   }
 
   with_no_otel_bind({
     value_r <- inject(reactive(!!valueQ, domain = domain, label = label))
+
+    r <- inject(bindEvent(
+      ignoreNULL = ignoreNULL,
+      ignoreInit = ignoreInit,
+      label = label,
+      !!eventQ,
+      x = value_r
+    ))
   })
 
-  invisible(inject(bindEvent(
-    ignoreNULL = ignoreNULL,
-    ignoreInit = ignoreInit,
-    label = label,
-    !!eventQ,
-    x = value_r
-  )))
+  if (!is.null(call_srcref)) {
+    impl <- attr(r, "observable", exact = TRUE)
+    impl$.otelAttrs <- otel_srcref_attributes(call_srcref)
+  }
+  if (has_otel_bind("reactivity")) {
+    r <- bind_otel_reactive_expr(r)
+  }
+
+
+  return(r)
 }
 
 isNullEvent <- function(value) {
@@ -2643,11 +2695,10 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
   force(r)
   force(millis)
 
-  call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
+  call_srcref <- get_call_srcref()
   label <- rassignSrcrefToLabel(
     call_srcref,
-    defaultLabel = "<anonymous>",
-    fnName = "debounce"
+    defaultLabel = "<anonymous>"
   )
 
   if (!is.function(millis)) {
@@ -2716,13 +2767,14 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
   # value of r(), but only invalidates/updates when `trigger` is touched.
   er <- eventReactive(
     {trigger()}, {r()},
-    label = sprintf("debounce %s", label), ignoreNULL = FALSE, domain = domain
+    label = sprintf("debounce %s result", label), ignoreNULL = FALSE, domain = domain
   )
 
   # Update the otel label
   local({
     er_impl <- attr(er, "observable", exact = TRUE)
     er_impl$.otelLabel <- otel_label_debounce(label, domain = domain)
+    er_impl$.otelAttrs <- append_otel_srcref_attrs(er_impl$.otelAttrs, call_srcref)
   })
 
   with_no_otel_bind({
@@ -2747,11 +2799,10 @@ throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
   force(r)
   force(millis)
 
-  call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
+  call_srcref <- get_call_srcref()
   label <- rassignSrcrefToLabel(
     call_srcref,
-    defaultLabel = "<anonymous>",
-    fnName = "throttle"
+    defaultLabel = "<anonymous>"
   )
 
   if (!is.function(millis)) {
@@ -2822,6 +2873,7 @@ throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
   local({
     er_impl <- attr(er, "observable", exact = TRUE)
     er_impl$.otelLabel <- otel_label_throttle(label, domain = domain)
+    er_impl$.otelAttrs <- append_otel_srcref_attrs(er_impl$.otelAttrs, call_srcref)
   })
 
   er

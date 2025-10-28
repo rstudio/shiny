@@ -478,7 +478,12 @@ bindCache.default <- function(x, ...) {
 bindCache.reactiveExpr <- function(x, ..., cache = "app") {
   check_dots_unnamed()
 
-  label <- exprToLabel(substitute(x), "cachedReactive")
+  call_srcref <- get_call_srcref(-1)
+  label <- rassignSrcrefToLabel(
+    call_srcref,
+    defaultLabel = exprToLabel(substitute(x), "cachedReactive")
+  )
+
   domain <- reactive_get_domain(x)
 
   # Convert the ... to a function that returns their evaluated values.
@@ -490,6 +495,9 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
   cacheHint <- rlang::hash(extractCacheHint(x))
   valueFunc <- wrapFunctionLabel(valueFunc, "cachedReactiveValueFunc", ..stacktraceon = TRUE)
 
+  x_classes <- class(x)
+  x_otel_attrs <- attr(x, "observable", exact = TRUE)$.otelAttrs
+
   # Don't hold on to the reference for x, so that it can be GC'd
   rm(x)
   # Hacky workaround for issue with `%>%` preventing GC:
@@ -498,16 +506,27 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
     rm(list = ".", envir = .GenericCallEnv, inherits = FALSE)
   }
 
-
-  res <- reactive(label = label, domain = domain, {
-    cache <- resolve_cache_object(cache, domain)
-    hybrid_chain(
-      keyFunc(),
-      generateCacheFun(valueFunc, cache, cacheHint, cacheReadHook = identity, cacheWriteHook = identity)
-    )
+  with_no_otel_bind({
+    res <- reactive(label = label, domain = domain, {
+      cache <- resolve_cache_object(cache, domain)
+      hybrid_chain(
+        keyFunc(),
+        generateCacheFun(valueFunc, cache, cacheHint, cacheReadHook = identity, cacheWriteHook = identity)
+      )
+    })
   })
 
   class(res) <- c("reactive.cache", class(res))
+
+  local({
+    impl <- attr(res, "observable", exact = TRUE)
+    impl$.otelAttrs <- x_otel_attrs
+    impl$.otelAttrs <- append_otel_srcref_attrs(impl$.otelAttrs, call_srcref)
+  })
+
+  if (has_otel_bind("reactivity")) {
+    res <- bind_otel_reactive_expr(res)
+  }
   res
 }
 
@@ -534,6 +553,7 @@ bindCache.shiny.render.function <- function(x, ..., cache = "app") {
     )
   }
 
+  # Passes over the otelAttrs from valueFunc to renderFunc
   renderFunc <- addAttributes(renderFunc, renderFunctionAttributes(valueFunc))
   class(renderFunc) <- c("shiny.render.function.cache", class(valueFunc))
   renderFunc
@@ -585,7 +605,7 @@ bindCache.shiny.renderPlot <- function(x, ...,
 
     observe({
       doResizeCheck()
-    })
+    }, label = "plot-resize")
     # TODO: Make sure this observer gets GC'd if output$foo is replaced.
     # Currently, if you reassign output$foo, the observer persists until the
     # session ends. This is generally bad programming practice and should be

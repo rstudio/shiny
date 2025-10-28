@@ -36,6 +36,70 @@
 
 # ------------------------------------------
 
+otel_bind_choices <- c(
+  "none",
+  "session",
+  "reactive_update",
+  "reactivity",
+  "all"
+)
+
+# Check if the bind level is sufficient
+otel_bind_is_enabled <- function(
+  impl_level,
+  # Listen to option and fall back to the env var
+  opt_bind_level = getOption("shiny.otel.bind", Sys.getenv("SHINY_OTEL_BIND", "all"))
+) {
+  opt_bind_level <- as_otel_bind(opt_bind_level)
+
+  which(opt_bind_level == otel_bind_choices) >=
+    which(impl_level == otel_bind_choices)
+}
+
+# Check if tracing is enabled and if the bind level is sufficient
+has_otel_bind <- function(bind) {
+  # Only check pkg author input iff loaded with pkgload
+  if (IS_SHINY_LOCAL_PKG) {
+    stopifnot(length(bind) == 1, any(bind == otel_bind_choices))
+  }
+
+  otel_is_tracing_enabled() && otel_bind_is_enabled(bind)
+}
+
+# Run expr with otel binding disabled
+with_no_otel_bind <- function(expr) {
+  withr::with_options(
+    list(
+      shiny.otel.bind = "none"
+    ),
+    expr
+  )
+}
+
+
+## -- Helpers -----------------------------------------------------
+
+# shiny.otel.bind can be:
+# "none"; To do nothing / fully opt-out
+# "session" for session/start events
+# "reactive_update" (includes "session" features) and reactive_update spans
+# "reactivity" (includes "reactive_update" features) and spans for all reactive things
+# "all" - Anything that Shiny can do. (Currently equivalent to the "reactivity" level)
+
+as_otel_bind <- function(bind = "all") {
+  if (!is.character(bind)) {
+    stop("`bind` must be a character vector.")
+  }
+
+  # Match to bind enum
+  bind <- match.arg(bind, otel_bind_choices, several.ok = FALSE)
+
+  return(bind)
+}
+
+
+# ------------------------------------------
+
 # # Approach
 # Use flags on the reactive object to indicate whether to record OpenTelemetry spans.
 #
@@ -185,21 +249,31 @@ bind_otel_observe <- function(x) {
 
 bind_otel_shiny_render_function <- function(x) {
 
-  valueFunc <- x
+  valueFunc <- force(x)
   span_label <- NULL
-  ospan_attrs <- attr(x, "otelAttrs")
+  ospan_attrs <- NULL
 
   renderFunc <- function(...) {
     # Dynamically determine the span label given the current reactive domain
     if (is.null(span_label)) {
+      domain <- getDefaultReactiveDomain()
       span_label <<-
-        ospan_label_render_function(x, domain = getDefaultReactiveDomain())
+        ospan_label_render_function(x, domain = domain)
+      ospan_attrs <<- c(
+        attr(x, "otelAttrs"),
+        otel_session_id_attrs(domain)
+      )
     }
 
     with_shiny_ospan_async(
       span_label,
       {
-        valueFunc(...)
+        promises::hybrid_then(
+          valueFunc(...),
+          on_failure = set_ospan_error_status_and_throw,
+          # Must save the error object
+          tee = FALSE
+        )
       },
       attributes = ospan_attrs
     )

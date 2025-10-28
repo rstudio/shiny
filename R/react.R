@@ -19,7 +19,8 @@ processId <- local({
 ctx_otel_info_obj <- function(
   isRecordingOtel = FALSE,
   otelLabel = "<unknown>",
-  otelAttrs = NULL) {
+  otelAttrs = list()
+) {
   structure(
     list(
       isRecordingOtel = isRecordingOtel,
@@ -42,11 +43,21 @@ with_context_ospan_async <- function(otel_info, expr, domain) {
   # Always set the reactive update span as active
   # This ensures that any spans created within the reactive context
   # are at least children of the reactive update span
-  with_reactive_update_active_ospan(domain = domain, {
+  maybe_with_reactive_update_active_ospan(domain = domain, {
     if (isRecordingOtel) {
       with_shiny_ospan_async(
         otelLabel,
-        expr,
+        {
+          # Works with both sync and async expressions
+          # Needed for both observer and reactive contexts
+          promises::hybrid_then(
+            expr,
+            on_failure = set_ospan_error_status_and_throw,
+            # Must upgrade the error object
+            tee = FALSE
+          )
+        },
+        # expr,
         attributes = otelAttrs
       )
     } else {

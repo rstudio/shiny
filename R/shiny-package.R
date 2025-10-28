@@ -8,6 +8,7 @@
 #' @importFrom promises %...>%
 #' @importFrom promises
 #'    promise promise_resolve promise_reject is.promising
+#'    then
 #'    as.promise
 #' @importFrom rlang
 #'    quo enquo enquo0 as_function get_expr get_env new_function enquos

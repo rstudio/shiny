@@ -43,10 +43,8 @@ ospan_label_render_function <- function(x, ..., domain) {
     event_class = "shiny.render.function.event"
   )
 
-  ospan_label <- otel_label_upgrade(
-    getCurrentOutputInfo(session = domain)$name,
-    domain = domain
-  )
+  label <- getCurrentOutputInfo(session = domain)$name %||% "<unknown>"
+  ospan_label <- otel_label_upgrade(label, domain = domain)
 
   sprintf("%s %s", fn_name, ospan_label)
 }
@@ -107,14 +105,28 @@ otel_label_extended_task_set_reactive_val <- function(label, name, ..., domain) 
 
 otel_label_debounce <- function(label, ..., domain) {
   sprintf(
-    "reactive debounce %s",
+    "debounce %s",
     otel_label_upgrade(label, domain = domain)
   )
 }
 
 otel_label_throttle <- function(label, ..., domain) {
   sprintf(
-    "reactive throttle %s",
+    "throttle %s",
+    otel_label_upgrade(label, domain = domain)
+  )
+}
+
+# ---- Reactive Poll / File Reader -----------------------------------------------
+otel_label_reactive_poll <- function(label, ..., domain) {
+  sprintf(
+    "reactivePoll %s",
+    otel_label_upgrade(label, domain = domain)
+  )
+}
+otel_label_reactive_file_reader <- function(label, ..., domain) {
+  sprintf(
+    "reactiveFileReader %s",
     otel_label_upgrade(label, domain = domain)
   )
 }

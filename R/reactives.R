@@ -1978,30 +1978,32 @@ coerceToFunc <- function(x) {
 #' }
 #' @export
 reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
+  reactive_poll_impl(
+    fnName = "reactivePoll",
+    intervalMillis = intervalMillis,
+    session = session,
+    checkFunc = checkFunc,
+    valueFunc = valueFunc
+  )
+}
+
+reactive_poll_impl <- function(
+  fnName,
+  intervalMillis,
+  session,
+  checkFunc,
+  valueFunc
+) {
   intervalMillis <- coerceToFunc(intervalMillis)
 
-  label <- "<anonymous>"
-  try(silent = TRUE, {
-    reactiveFileReader_call_srcref <- attr(sys.call(-1), "srcref", exact = TRUE)
-    fnName <- "reactiveFileReader"
-    label <- rassignSrcrefToLabel(
-      reactiveFileReader_call_srcref,
-      defaultLabel = "<anonymous>",
-      fnName = fnName
-    )
-  })
+  fnName <- match.arg(fnName, c("reactivePoll", "reactiveFileReader"), several.ok = FALSE)
 
-  if (label == "<anonymous>") {
-    # If reactiveFileReader couldn't figure out a label,
-    # try reactivePoll instead.
-    call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
-    fnName <- "reactivePoll"
-    label <- rassignSrcrefToLabel(
-      call_srcref,
-      defaultLabel = "<anonymous>",
-      fnName = fnName
-    )
-  }
+  call_srcref <- attr(sys.call(-1), "srcref", exact = TRUE)
+  label <- rassignSrcrefToLabel(
+    call_srcref,
+    defaultLabel = "<anonymous>",
+    fnName = fnName
+  )
 
   re_finalized <- FALSE
   env <- environment()
@@ -2107,14 +2109,16 @@ reactiveFileReader <- function(intervalMillis, session, filePath, readFunc, ...)
   filePath <- coerceToFunc(filePath)
   extraArgs <- list2(...)
 
-  reactivePoll(
-    intervalMillis, session,
-    function() {
+  reactive_poll_impl(
+    fnName = "reactiveFileReader",
+    intervalMillis = intervalMillis,
+    session = session,
+    checkFunc = function() {
       path <- filePath()
       info <- file.info(path)
       return(paste(path, info$mtime, info$size))
     },
-    function() {
+    valueFunc = function() {
       do.call(readFunc, c(filePath(), extraArgs))
     }
   )

@@ -102,7 +102,16 @@
 <h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>
 <ul><li><p><code><a href="../reference/updateActionButton.html">updateActionButton()</a></code>/<code><a href="../reference/updateActionButton.html">updateActionLink()</a></code> now correctly renders HTML content passed to the <code>label</code> argument. (<a href="https://github.com/rstudio/shiny/issues/4249" class="external-link">#4249</a>)</p></li>
 <li><p>Fixed an issue where <code>updateSelectizeInput(options = list(plugins="remove_button"))</code> could lead to multiple remove buttons. (<a href="https://github.com/rstudio/shiny/issues/4275" class="external-link">#4275</a>)</p></li>
-<li><p>The default label for <code><a href="../reference/reactiveValues.html">reactiveValues()</a></code>, <code><a href="../reference/reactivePoll.html">reactivePoll()</a></code>, <code><a href="../reference/reactiveFileReader.html">reactiveFileReader()</a></code>, <code><a href="../reference/debounce.html">debounce()</a></code>, and <code><a href="../reference/debounce.html">throttle()</a></code> will now attempt to retrieve the assigned name if the srcref is available. If a value can not easily be produced, a default label will be used instead. (<a href="https://github.com/rstudio/shiny/issues/4269" class="external-link">#4269</a>)</p></li>
+<li>
+<p>The default label for items described below will now attempt to retrieve the assigned name if the srcref is available. If a value can not easily be produced, a default label will be used instead. This should improve the OpenTelemetry span labels and the reactlog experience. (<a href="https://github.com/rstudio/shiny/issues/4269" class="external-link">#4269</a>, <a href="https://github.com/rstudio/shiny/issues/4300" class="external-link">#4300</a>)</p>
+<ul><li>
+<code><a href="../reference/reactiveValues.html">reactiveValues()</a></code>, <code><a href="../reference/reactivePoll.html">reactivePoll()</a></code>, <code><a href="../reference/reactiveFileReader.html">reactiveFileReader()</a></code>, <code><a href="../reference/debounce.html">debounce()</a></code>, <code><a href="../reference/debounce.html">throttle()</a></code>, <code><a href="../reference/observe.html">observe()</a></code>
+</li>
+<li>Combinations of <code><a href="../reference/bindEvent.html">bindEvent()</a></code> and <code><a href="../reference/reactive.html">reactive()</a></code> / <code><a href="../reference/observe.html">observe()</a></code>
+</li>
+<li>Combination of <code><a href="../reference/bindCache.html">bindCache()</a></code> and <code><a href="../reference/reactive.html">reactive()</a></code>
+</li>
+</ul></li>
 </ul></div>
 <div class="section level3">
 <h3 id="changes-development-version">Changes<a class="anchor" aria-label="anchor" href="#changes-development-version"></a></h3>

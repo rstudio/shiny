@@ -320,7 +320,8 @@ rassignSrcrefToLabel <- function(
   firstLine <- substring(lines[srcref[1]], srcref[2] - 1)
 
   m <- regexec(
-    paste0("\\s*([^[:space:]]+)\\s*(<-|=)\\s*", fnName, "\\b"),
+    # Require the first assignment within the line
+    paste0("^\\s*([^[:space:]]+)\\s*(<<-|<-|=)\\s*", fnName, "\\b"),
     firstLine
   )
   if (m[[1]][1] == -1) {
@@ -1170,7 +1171,8 @@ rexprSrcrefToLabel <- function(srcref, defaultLabel, fnName) {
 
   firstLine <- substring(lines[srcref[1]], 1, srcref[2] - 1)
 
-  m <- regexec(paste0("(.*)(<-|=)\\s*", fnName, "\\s*\\($"), firstLine)
+  # Require the assignment to be parsed from the start
+  m <- regexec(paste0("^(.*)(<<-|<-|=)\\s*", fnName, "\\s*\\($"), firstLine)
   if (m[[1]][1] == -1) {
     return(defaultLabel)
   }

@@ -131,7 +131,7 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
       # Set a label for the reactive values for easier debugging
       # Go up an extra sys.call() to get the user's call to ExtendedTask$new()
       # The first sys.call() is to `initialize(...)`
-      call_srcref <- attr(sys.call(-1), "srcref", exact = TRUE)
+      call_srcref <- get_call_srcref(-1)
       label <- rassignSrcrefToLabel(
         call_srcref,
         defaultLabel = "<anonymous>"

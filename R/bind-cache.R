@@ -478,7 +478,7 @@ bindCache.default <- function(x, ...) {
 bindCache.reactiveExpr <- function(x, ..., cache = "app") {
   check_dots_unnamed()
 
-  call_srcref <- attr(sys.call(-1), "srcref", exact = TRUE)
+  call_srcref <- get_call_srcref(-1)
   label <- rassignSrcrefToLabel(
     call_srcref,
     defaultLabel = exprToLabel(substitute(x), "cachedReactive")
@@ -518,12 +518,12 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
 
   class(res) <- c("reactive.cache", class(res))
 
-  impl <- attr(res, "observable", exact = TRUE)
-  impl$.otelAttrs <- x_otel_attrs
-  if (!is.null(call_srcref)) {
-    otelAttrs <- otel_srcref_attributes(call_srcref)
-    impl$.otelAttrs[names(otelAttrs)] <- otelAttrs
-  }
+  local({
+    impl <- attr(res, "observable", exact = TRUE)
+    impl$.otelAttrs <- x_otel_attrs
+    impl$.otelAttrs <- append_otel_srcref_attrs(impl$.otelAttrs, call_srcref)
+  })
+
   if (has_otel_bind("reactivity")) {
     res <- bind_otel_reactive_expr(res)
   }

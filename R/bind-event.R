@@ -196,7 +196,7 @@ bindEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE
   valueFunc <- reactive_get_value_func(x)
   valueFunc <- wrapFunctionLabel(valueFunc, "eventReactiveValueFunc", ..stacktraceon = TRUE)
 
-  call_srcref <- attr(sys.call(-1), "srcref", exact = TRUE)
+  call_srcref <- get_call_srcref(-1)
   if (is.null(label)) {
     label <- rassignSrcrefToLabel(
       call_srcref,
@@ -238,14 +238,13 @@ bindEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE
 
   class(res) <- c("reactive.event", x_classes)
 
-  impl <- attr(res, "observable", exact = TRUE)
-  impl$.otelAttrs <- x_otel_attrs
-  if (!is.null(call_srcref)) {
-    otelAttrs <- otel_srcref_attributes(call_srcref)
-    # Overwrite any existing attributes with these new ones
-    # (such as code.filepath, code.lineno, code.column)
-    impl$.otelAttrs[names(otelAttrs)] <- otelAttrs
-  }
+  local({
+    impl <- attr(res, "observable", exact = TRUE)
+    impl$.otelAttrs <- x_otel_attrs
+    impl$.otelAttrs <- append_otel_srcref_attrs(impl$.otelAttrs, call_srcref)
+  })
+
+
   if (has_otel_bind("reactivity")) {
     res <- bind_otel_reactive_expr(res)
   }
@@ -300,7 +299,7 @@ bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
   # Note that because the observer will already have been logged by this point,
   # this updated label won't show up in the reactlog.
   if (is.null(label)) {
-    call_srcref <- attr(sys.call(-1), "srcref", exact = TRUE)
+    call_srcref <- get_call_srcref(-1)
     x$.label <- rassignSrcrefToLabel(
       call_srcref,
       defaultLabel = as_default_label(
@@ -342,13 +341,9 @@ bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
   )
 
   class(x) <- c("Observer.event", class(x))
-  call_srcref <- attr(sys.call(-1), "srcref", exact = TRUE)
-  if (!is.null(call_srcref)) {
-    otelAttrs <- otel_srcref_attributes(call_srcref)
-    # Overwrite any existing attributes with these new ones
-    # (such as code.filepath, code.lineno, code.column)
-    x$.otelAttrs[names(otelAttrs)] <- otelAttrs
-  }
+  call_srcref <- get_call_srcref(-1)
+  x$.otelAttrs <- append_otel_srcref_attrs(x$.otelAttrs, call_srcref)
+
   if (has_otel_bind("reactivity")) {
     x <- bind_otel_observe(x)
   }

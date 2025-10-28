@@ -221,7 +221,7 @@ ReactiveVal <- R6Class(
 #'
 #' @export
 reactiveVal <- function(value = NULL, label = NULL) {
-  call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
+  call_srcref <- get_call_srcref()
   if (missing(label)) {
     label <- rassignSrcrefToLabel(
       call_srcref,
@@ -634,7 +634,7 @@ reactiveValues <- function(...) {
   # Use .subset2() instead of [[, to avoid method dispatch
   impl <- .subset2(values, 'impl')
 
-  call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
+  call_srcref <- get_call_srcref()
   if (!is.null(call_srcref)) {
     impl$.label <- rassignSrcrefToLabel(
       call_srcref,
@@ -1124,7 +1124,7 @@ reactive <- function(
 
   o <- Observable$new(func, label, domain, ..stacktraceon = ..stacktraceon)
 
-  call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
+  call_srcref <- get_call_srcref()
   if (!is.null(call_srcref)) {
     o$.otelAttrs <- otel_srcref_attributes(call_srcref)
   }
@@ -1565,7 +1565,7 @@ observe <- function(
 
   func <- installExprFunction(x, "func", env, quoted)
 
-  call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
+  call_srcref <- get_call_srcref()
   if (is.null(label)) {
     label <- rassignSrcrefToLabel(
       call_srcref,
@@ -1582,7 +1582,6 @@ observe <- function(
     autoDestroy = autoDestroy,
     ..stacktraceon = ..stacktraceon
   )
-  call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
   if (!is.null(call_srcref)) {
     o$.otelAttrs <- otel_srcref_attributes(call_srcref)
   }
@@ -1998,7 +1997,7 @@ reactive_poll_impl <- function(
 
   fnName <- match.arg(fnName, c("reactivePoll", "reactiveFileReader"), several.ok = FALSE)
 
-  call_srcref <- attr(sys.call(-1), "srcref", exact = TRUE)
+  call_srcref <- get_call_srcref(-1)
   label <- rassignSrcrefToLabel(
     call_srcref,
     defaultLabel = "<anonymous>",
@@ -2480,7 +2479,7 @@ observeEvent <- function(eventExpr, handlerExpr,
   eventQ <- exprToQuo(eventExpr, event.env, event.quoted)
   handlerQ <- exprToQuo(handlerExpr, handler.env, handler.quoted)
 
-  call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
+  call_srcref <- get_call_srcref()
   if (is.null(label)) {
     label <- rassignSrcrefToLabel(
       call_srcref,
@@ -2537,7 +2536,7 @@ eventReactive <- function(eventExpr, valueExpr,
   # Attach a label and a reference to the original user source for debugging
   userEventExpr <- fn_body(func)
 
-  call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
+  call_srcref <- get_call_srcref()
   if (is.null(label)) {
     label <- rassignSrcrefToLabel(
       call_srcref,
@@ -2687,7 +2686,7 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
   force(r)
   force(millis)
 
-  call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
+  call_srcref <- get_call_srcref()
   label <- rassignSrcrefToLabel(
     call_srcref,
     defaultLabel = "<anonymous>"
@@ -2766,9 +2765,7 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
   local({
     er_impl <- attr(er, "observable", exact = TRUE)
     er_impl$.otelLabel <- otel_label_debounce(label, domain = domain)
-    if (!is.null(call_srcref)) {
-      er_impl$.otelAttrs <- otel_srcref_attributes(call_srcref)
-    }
+    er_impl$.otelAttrs <- append_otel_srcref_attrs(er_impl$.otelAttrs, call_srcref)
   })
 
   with_no_otel_bind({
@@ -2793,7 +2790,7 @@ throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
   force(r)
   force(millis)
 
-  call_srcref <- attr(sys.call(), "srcref", exact = TRUE)
+  call_srcref <- get_call_srcref()
   label <- rassignSrcrefToLabel(
     call_srcref,
     defaultLabel = "<anonymous>"
@@ -2867,9 +2864,7 @@ throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
   local({
     er_impl <- attr(er, "observable", exact = TRUE)
     er_impl$.otelLabel <- otel_label_throttle(label, domain = domain)
-    if (!is.null(call_srcref)) {
-      er_impl$.otelAttrs <- otel_srcref_attributes(call_srcref)
-    }
+    er_impl$.otelAttrs <- append_otel_srcref_attrs(er_impl$.otelAttrs, call_srcref)
   })
 
   er

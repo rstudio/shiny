@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.11.1.9001</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.12.0</span>
       </span>
     </div>
 
@@ -48,9 +48,9 @@
     </div>
 
     <div class="section level2">
-<h2 class="page-header" data-toc-text="development version" id="shiny-development-version">shiny (development version)<a class="anchor" aria-label="anchor" href="#shiny-development-version"></a></h2>
+<h2 class="page-header" data-toc-text="1.12.0" id="shiny-1120">shiny 1.12.0<a class="anchor" aria-label="anchor" href="#shiny-1120"></a></h2>
 <div class="section level3">
-<h3 id="opentelemetry-support-development-version">OpenTelemetry support<a class="anchor" aria-label="anchor" href="#opentelemetry-support-development-version"></a></h3>
+<h3 id="opentelemetry-support-1-12-0">OpenTelemetry support<a class="anchor" aria-label="anchor" href="#opentelemetry-support-1-12-0"></a></h3>
 <ul><li><p>Shiny now supports <a href="https://opentelemetry.io/" class="external-link">OpenTelemetry</a> via <a href="https://otel.r-lib.org/index.html" class="external-link"><code>{otel}</code></a>. By default, if <code><a href="https://otel.r-lib.org/reference/is_tracing_enabled.html" class="external-link">otel::is_tracing_enabled()</a></code> returns <code>TRUE</code>, then <a href="https://shiny.posit.co/" class="external-link">shiny</a> records all OpenTelemetry spans. See <a href="https://otelsdk.r-lib.org/reference/collecting.html" class="external-link"><code>{otelsdk}</code>’s Collecting Telemetry Data</a> for more details on configuring OpenTelemetry. (<a href="https://github.com/rstudio/shiny/issues/4269" class="external-link">#4269</a>, <a href="https://github.com/rstudio/shiny/issues/4300" class="external-link">#4300</a>)</p></li>
 <li>
 <p>Supported values for <code>options(shiny.otel.bind)</code> (which defaults to <code>Sys.getenv("SHINY_OTEL_BIND")</code> if set) are:</p>
@@ -97,12 +97,12 @@
 <li><p>All OpenTelemetry logs and spans will contain a <code>session.id</code> attribute containing the active session ID.</p></li>
 </ul></div>
 <div class="section level3">
-<h3 id="new-features-development-version">New features<a class="anchor" aria-label="anchor" href="#new-features-development-version"></a></h3>
+<h3 id="new-features-1-12-0">New features<a class="anchor" aria-label="anchor" href="#new-features-1-12-0"></a></h3>
 <ul><li>
 <code><a href="../reference/updateActionButton.html">updateActionButton()</a></code> and <code><a href="../reference/updateActionButton.html">updateActionLink()</a></code> now accept values other than <code><a href="../reference/icon.html">shiny::icon()</a></code> for the <code>icon</code> argument (e.g., <code><a href="https://rstudio.github.io/fontawesome/reference/fa.html" class="external-link">fontawesome::fa()</a></code>, <code>bsicons::bs_icon()</code>, etc). (<a href="https://github.com/rstudio/shiny/issues/4249" class="external-link">#4249</a>)</li>
 </ul></div>
 <div class="section level3">
-<h3 id="bug-fixes-and-minor-improvements-development-version">Bug fixes and minor improvements<a class="anchor" aria-label="anchor" href="#bug-fixes-and-minor-improvements-development-version"></a></h3>
+<h3 id="bug-fixes-and-minor-improvements-1-12-0">Bug fixes and minor improvements<a class="anchor" aria-label="anchor" href="#bug-fixes-and-minor-improvements-1-12-0"></a></h3>
 <ul><li><p>Showcase mode now uses server-side markdown rendering with the <a href="https://docs.ropensci.org/commonmark/" class="external-link">commonmark</a> package, providing support for GitHub Flavored Markdown features (tables, strikethrough, autolinks, task lists). While most existing README.md files should continue to work as expected, some minor rendering differences may occur due to the change in markdown processor. (<a href="https://github.com/rstudio/shiny/issues/4202" class="external-link">#4202</a>, <a href="https://github.com/rstudio/shiny/issues/4201" class="external-link">#4201</a>)</p></li>
 <li><p><code><a href="../reference/debounce.html">debounce()</a></code>, <code><a href="../reference/reactiveFileReader.html">reactiveFileReader()</a></code>, <code><a href="../reference/reactivePoll.html">reactivePoll()</a></code>, <code><a href="../reference/reactiveValues.html">reactiveValues()</a></code>, and <code><a href="../reference/debounce.html">throttle()</a></code> now attempt to retrieve the assigned name for the default label if the srcref is available. If a value cannot easily be produced, a default label is used instead. (<a href="https://github.com/rstudio/shiny/issues/4269" class="external-link">#4269</a>, <a href="https://github.com/rstudio/shiny/issues/4300" class="external-link">#4300</a>)</p></li>
 <li>
@@ -119,7 +119,7 @@
 <li><p><code><a href="../reference/updateSelectInput.html">updateSelectizeInput()</a></code> no longer creates multiple remove buttons when <code>options = list(plugins="remove_button")</code> is used. (<a href="https://github.com/rstudio/shiny/issues/4275" class="external-link">#4275</a>)</p></li>
 </ul></div>
 <div class="section level3">
-<h3 id="breaking-changes-development-version">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-development-version"></a></h3>
+<h3 id="breaking-changes-1-12-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-1-12-0"></a></h3>
 <ul><li>The return value of <code><a href="../reference/actionButton.html">actionButton()</a></code> and <code><a href="../reference/actionButton.html">actionLink()</a></code> now wraps <code>label</code> and <code>icon</code> in an additional HTML container element. This allows <code><a href="../reference/updateActionButton.html">updateActionButton()</a></code> and <code><a href="../reference/updateActionButton.html">updateActionLink()</a></code> to distinguish between the <code>label</code> and <code>icon</code> when making updates, and allows spacing between <code>label</code> and <code>icon</code> to be more easily customized via CSS.</li>
 </ul></div>
 </div>
@@ -651,7 +651,7 @@
 </ul></div>
 <div class="section level4">
 <h4 id="minor-new-features-and-improvements-1-2-0">Minor new features and improvements<a class="anchor" aria-label="anchor" href="#minor-new-features-and-improvements-1-2-0"></a></h4>
-<ul><li><p>Upgrade FontAwesome from 4.7.0 to 5.3.1 and made <code>icon</code> tags browsable, which means they will display in a web browser or RStudio viewer by default (<a href="https://github.com/rstudio/shiny/issues/2186" class="external-link">#2186</a>). Note that if your application or library depends on FontAwesome directly using custom CSS, you may need to make some or all of the changes recommended in <a href="https://fontawesome.com/how-to-use/on-the-web/setup/upgrading-from-version-4" class="external-link">Upgrade from Version 4</a>. Font Awesome icons can also now be used in static R Markdown documents.</p></li>
+<ul><li><p>Upgrade FontAwesome from 4.7.0 to 5.3.1 and made <code>icon</code> tags browsable, which means they will display in a web browser or RStudio viewer by default (<a href="https://github.com/rstudio/shiny/issues/2186" class="external-link">#2186</a>). Note that if your application or library depends on FontAwesome directly using custom CSS, you may need to make some or all of the changes recommended in <a href="https://docs.fontawesome.com/v5/web/setup/upgrade-from-v4" class="external-link">Upgrade from Version 4</a>. Font Awesome icons can also now be used in static R Markdown documents.</p></li>
 <li><p>Address <a href="https://github.com/rstudio/shiny/issues/174" class="external-link">#174</a>: Added <code>datesdisabled</code> and <code>daysofweekdisabled</code> as new parameters to <code><a href="../reference/dateInput.html">dateInput()</a></code>. This resolves <a href="https://github.com/rstudio/shiny/issues/174" class="external-link">#174</a> and exposes the underlying arguments of <a href="http://bootstrap-datepicker.readthedocs.io/en/latest/options.html#datesdisabled" class="external-link">Bootstrap Datepicker</a>. <code>datesdisabled</code> expects a character vector with values in <code>yyyy/mm/dd</code> format and <code>daysofweekdisabled</code> expects an integer vector with day interger ids (Sunday=0, Saturday=6). The default value for both is <code>NULL</code>, which leaves all days selectable. Thanks, <a href="https://github.com/nathancday" class="external-link">@nathancday</a>! (<a href="https://github.com/rstudio/shiny/issues/2147" class="external-link">#2147</a>)</p></li>
 <li><p>Support for selecting variables of a data frame with the output values to be used within tidy evaluation. Added functions: <code>varSelectInput</code>, <code>varSelectizeInput</code>, <code>updateVarSelectInput</code>, <code>updateVarSelectizeInput</code>. (<a href="https://github.com/rstudio/shiny/issues/2091" class="external-link">#2091</a>)</p></li>
 <li><p>Addressed <a href="https://github.com/rstudio/shiny/issues/2042" class="external-link">#2042</a>: dates outside of <code>min</code>/<code>max</code> date range are now a lighter shade of grey to highlight the allowed range. (<a href="https://github.com/rstudio/shiny/issues/2087" class="external-link">#2087</a>)</p></li>

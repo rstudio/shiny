@@ -28,7 +28,7 @@ test_that("otel_tracer_name constant is correct", {
   expect_equal(otel_tracer_name, "co.posit.r-package.shiny")
 })
 
-test_that("with_shiny_ospan_async calls with_ospan_async with correct parameters", {
+test_that("with_hybrid_shiny_ospan calls with_ospan_async with correct parameters", {
   mock_tracer <- create_mock_tracer()
   with_ospan_async_called <- FALSE
   test_value <- "initial"
@@ -43,7 +43,7 @@ test_that("with_shiny_ospan_async calls with_ospan_async with correct parameters
       force(expr)
     },
     {
-      result <- with_shiny_ospan_async(
+      result <- with_hybrid_shiny_ospan(
         "test_span",
         {
           test_value <- "modified"
@@ -300,7 +300,7 @@ test_that("shiny_otel_tracer caches tracer in non-test environment", {
   )
 })
 
-test_that("integration test - with_shiny_ospan_async uses cached tracer", {
+test_that("integration test - with_hybrid_shiny_ospan uses cached tracer", {
   mock_tracer <- create_mock_tracer()
   get_tracer_call_count <- 0
   with_ospan_async_called <- FALSE
@@ -325,15 +325,15 @@ test_that("integration test - with_shiny_ospan_async uses cached tracer", {
       force(expr)
     },
     {
-      # First call to with_shiny_ospan_async
-      with_shiny_ospan_async("span1", { "result1" })
+      # First call to with_hybrid_shiny_ospan
+      with_hybrid_shiny_ospan("span1", { "result1" })
       expect_equal(get_tracer_call_count, 1)
       expect_true(with_ospan_async_called)
 
       with_ospan_async_called <- FALSE
 
       # Second call should use cached tracer
-      with_shiny_ospan_async("span2", { "result2" })
+      with_hybrid_shiny_ospan("span2", { "result2" })
       expect_equal(get_tracer_call_count, 1)  # Still 1, tracer was cached
       expect_true(with_ospan_async_called)
     }

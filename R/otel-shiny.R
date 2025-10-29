@@ -17,7 +17,8 @@ otel_tracer_name <- "co.posit.r-package.shiny"
 #' @param attributes Optional span attributes
 #' @return The result of evaluating `expr`
 #' @noRd
-with_shiny_ospan_async <- function(name, expr, ..., attributes = NULL) {
+with_hybrid_shiny_ospan <- function(name, expr, ..., attributes = NULL) {
+  # Call promises::with_ospan_async with shiny's otel tracer
   with_ospan_async(name, expr, ..., attributes = attributes, tracer = shiny_otel_tracer())
 }
 

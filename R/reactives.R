@@ -1023,7 +1023,7 @@ Observable <- R6Class(
           error = function(cond) {
             if (.isRecordingOtel) {
               # `cond` is too early in the stack to be updated by `ctx`'s
-              # `with_context_ospan_async()` where it calls
+              # `with_hybrid_context_ospan()` where it calls
               # `set_ospan_error_status_and_throw()` on eval error.
               # So we mark it as seen here.
               # When the error is re-thrown later, it won't be a _new_ error

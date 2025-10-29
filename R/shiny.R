@@ -1086,7 +1086,7 @@ ShinySession <- R6Class(
       }
       # ..stacktraceon matches with the top-level ..stacktraceoff..
       withReactiveDomain(self, {
-        with_session_end_ospan_async(domain = self, {
+        with_hybrid_session_end_ospan(domain = self, {
           private$closedCallbacks$invoke(onError = printError, ..stacktraceon = TRUE)
         })
       })

@@ -31,7 +31,7 @@ ctx_otel_info_obj <- function(
   )
 }
 
-with_context_ospan_async <- function(otel_info, expr, domain) {
+with_hybrid_context_ospan <- function(otel_info, expr, domain) {
   if (!otel_is_tracing_enabled()) {
     return(force(expr))
   }
@@ -45,7 +45,7 @@ with_context_ospan_async <- function(otel_info, expr, domain) {
   # are at least children of the reactive update span
   maybe_with_existing_reactive_update_ospan(domain = domain, {
     if (isRecordingOtel) {
-      with_shiny_ospan_async(
+      with_hybrid_shiny_ospan(
         otelLabel,
         {
           # Works with both sync and async expressions
@@ -116,7 +116,7 @@ Context <- R6Class(
 
       promises::with_promise_domain(reactivePromiseDomain(), {
         withReactiveDomain(.domain, {
-          with_context_ospan_async(.otel_info, domain = .domain, {
+          with_hybrid_context_ospan(.otel_info, domain = .domain, {
             captureStackTraces({
               env <- .getReactiveEnvironment()
               rLog$enter(.reactId, id, .reactType, .domain)

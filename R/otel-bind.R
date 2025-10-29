@@ -265,7 +265,7 @@ bind_otel_shiny_render_function <- function(x) {
       )
     }
 
-    with_shiny_ospan_async(
+    with_hybrid_shiny_ospan(
       span_label,
       {
         hybrid_then(

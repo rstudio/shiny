@@ -40,14 +40,14 @@ create_mock_session_domain <- function(
   domain
 }
 
-test_that("use_session_start_ospan_async returns early when otel not enabled", {
+test_that("with_hybrid_session_start_ospan returns early when otel not enabled", {
   domain <- create_mock_session_domain()
   test_value <- "initial"
 
   # Mock has_otel_bind to return FALSE
   withr::local_options(list(shiny.otel.bind = "none"))
 
-  result <- use_session_start_ospan_async({
+  result <- with_hybrid_session_start_ospan({
     test_value <- "modified"
     "result_value"
   }, domain = domain)
@@ -58,7 +58,7 @@ test_that("use_session_start_ospan_async returns early when otel not enabled", {
   expect_length(domain$cleanup_callbacks, 0)
 })
 
-test_that("use_session_start_ospan_async sets up session end callback", {
+test_that("with_hybrid_session_start_ospan sets up session end callback", {
   domain <- create_mock_session_domain(
     token = "session-456",
     request = list(PATH_INFO = "/app", HTTP_HOST = "localhost")
@@ -78,7 +78,7 @@ test_that("use_session_start_ospan_async sets up session end callback", {
     has_otel_bind = function(level) level == "session",
     otel_session_id_attrs = function(domain) list(session.id = domain$token),
     otel_session_attrs = function(domain) list(PATH_INFO = "/app"),
-    with_shiny_ospan_async = function(name, expr, attributes = NULL) {
+    with_hybrid_shiny_ospan = function(name, expr, attributes = NULL) {
       expect_equal(name, "session_start")
       expect_true("session.id" %in% names(attributes))
       expect_equal(attributes[["session.id"]], "session-456")
@@ -88,7 +88,7 @@ test_that("use_session_start_ospan_async sets up session end callback", {
 
       expect_length(domain$cleanup_callbacks, 0)
 
-      result <- use_session_start_ospan_async({
+      result <- with_hybrid_session_start_ospan({
         test_value <- "modified"
         "result_value"
       }, domain = domain)
@@ -101,14 +101,14 @@ test_that("use_session_start_ospan_async sets up session end callback", {
   )
 })
 
-test_that("with_session_end_ospan_async returns early when otel not enabled", {
+test_that("with_hybrid_session_end_ospan returns early when otel not enabled", {
   domain <- create_mock_session_domain()
   test_value <- "initial"
 
   # Mock has_otel_bind to return FALSE
   withr::local_options(list(shiny.otel.bind = "none"))
 
-  result <- with_session_end_ospan_async({
+  result <- with_hybrid_session_end_ospan({
     test_value <- "modified"
     "result_value"
   }, domain = domain)
@@ -117,7 +117,7 @@ test_that("with_session_end_ospan_async returns early when otel not enabled", {
   expect_equal(test_value, "modified")
 })
 
-test_that("with_session_end_ospan_async creates span when enabled", {
+test_that("with_hybrid_session_end_ospan creates span when enabled", {
   domain <- create_mock_session_domain(token = "session-end-test")
 
   span_created <- FALSE
@@ -129,14 +129,14 @@ test_that("with_session_end_ospan_async creates span when enabled", {
   with_mocked_bindings(
     has_otel_bind = function(level) level == "session",
     otel_session_id_attrs = function(domain) list(session.id = domain$token),
-    with_shiny_ospan_async = function(name, expr, attributes = NULL) {
+    with_hybrid_shiny_ospan = function(name, expr, attributes = NULL) {
       span_created <<- TRUE
       expect_equal(name, "session_end")
       expect_equal(attributes[["session.id"]], "session-end-test")
       force(expr)
     },
     {
-      result <- with_session_end_ospan_async({
+      result <- with_hybrid_session_end_ospan({
         test_value <- "modified"
         "result_value"
       }, domain = domain)
@@ -263,7 +263,7 @@ test_that("integration test - session start with full request", {
     has_otel_bind = function(level) level == "session",
     otel_session_id_attrs = otel_session_id_attrs,  # Use real function
     otel_session_attrs = otel_session_attrs,        # Use real function
-    with_shiny_ospan_async = function(name, expr, attributes = NULL) {
+    with_hybrid_shiny_ospan = function(name, expr, attributes = NULL) {
       span_attributes <<- attributes
       force(expr)
     },
@@ -272,7 +272,7 @@ test_that("integration test - session start with full request", {
 
       expect_length(domain$cleanup_callbacks, 0)
 
-      result <- use_session_start_ospan_async({
+      result <- with_hybrid_session_start_ospan({
         "test_result"
       }, domain = domain)
 

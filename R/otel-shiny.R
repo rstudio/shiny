@@ -7,11 +7,11 @@ NULL
 otel_tracer_name <- "co.posit.r-package.shiny"
 
 with_shiny_ospan_async <- function(name, expr, ..., attributes = NULL) {
-  with_ospan_async(name, expr, ..., attributes = attributes, tracer = get_tracer())
+  with_ospan_async(name, expr, ..., attributes = attributes, tracer = shiny_otel_tracer())
 }
 
 create_shiny_ospan <- function(name, ...) {
-  otel::start_span(name, ..., tracer = get_tracer())
+  otel::start_span(name, ..., tracer = shiny_otel_tracer())
 }
 
 
@@ -41,7 +41,7 @@ otel_log <- function(
   otel::log(msg, ..., severity = severity, logger = logger)
 }
 
-otel_is_tracing_enabled <- function(tracer = get_tracer()) {
+otel_is_tracing_enabled <- function(tracer = shiny_otel_tracer()) {
   otel::is_tracing_enabled(tracer)
 }
 otel_get_logger <- function() {
@@ -80,7 +80,7 @@ get_ospan_logger <- local({
 
 # Inspired by httr2:::get_tracer().
 # Using local scope avoids an environment object lookup on each call.
-get_tracer <- local({
+shiny_otel_tracer <- local({
   tracer <- NULL
 
   # For internal testing purposes only

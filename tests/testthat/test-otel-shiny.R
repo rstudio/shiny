@@ -34,7 +34,7 @@ test_that("with_shiny_ospan_async calls with_ospan_async with correct parameters
   test_value <- "initial"
 
   with_mocked_bindings(
-    get_tracer = function() mock_tracer,
+    shiny_otel_tracer = function() mock_tracer,
     with_ospan_async = function(name, expr, ..., attributes = NULL, tracer = NULL) {
       with_ospan_async_called <<- TRUE
       expect_equal(name, "test_span")
@@ -75,7 +75,7 @@ test_that("create_shiny_ospan calls otel::start_span with correct parameters", {
   )
 
   with_mocked_bindings(
-    get_tracer = function() mock_tracer,
+    shiny_otel_tracer = function() mock_tracer,
     {
       result <- create_shiny_ospan("test_span", extra_param = "value")
 
@@ -178,7 +178,7 @@ test_that("otel_is_tracing_enabled calls otel::is_tracing_enabled", {
   )
 
   with_mocked_bindings(
-    get_tracer = function() mock_tracer,
+    shiny_otel_tracer = function() mock_tracer,
     {
       result <- otel_is_tracing_enabled()
       expect_true(is_tracing_called)
@@ -253,11 +253,11 @@ test_that("get_ospan_logger caches logger in non-test environment", {
 })
 
 
-test_that("get_tracer caches tracer in non-test environment", {
+test_that("shiny_otel_tracer caches tracer in non-test environment", {
   mock_tracer <- create_mock_tracer()
   get_tracer_call_count <- 0
 
-  fn_env <- environment(get_tracer)
+  fn_env <- environment(shiny_otel_tracer)
   # Reset cached tracer now and when test ends
   fn_env$reset_tracer()
   withr::defer({ fn_env$reset_tracer() })
@@ -273,12 +273,12 @@ test_that("get_tracer caches tracer in non-test environment", {
     testthat__is_testing = function() TRUE,
     {
       # First call
-      tracer1 <- get_tracer()
+      tracer1 <- shiny_otel_tracer()
       expect_equal(tracer1, mock_tracer)
       expect_equal(get_tracer_call_count, 1)
 
       # Second call should call otel::get_tracer again (no caching in tests)
-      tracer2 <- get_tracer()
+      tracer2 <- shiny_otel_tracer()
       expect_equal(tracer2, mock_tracer)
       expect_equal(get_tracer_call_count, 2)  # Incremented
     }
@@ -288,12 +288,12 @@ test_that("get_tracer caches tracer in non-test environment", {
     testthat__is_testing = function() FALSE,
     {
       # First call should call otel::get_tracer
-      tracer1 <- get_tracer()
+      tracer1 <- shiny_otel_tracer()
       expect_equal(tracer1, mock_tracer)
       expect_equal(get_tracer_call_count, 3)
 
       # Second call should use cached tracer
-      tracer2 <- get_tracer()
+      tracer2 <- shiny_otel_tracer()
       expect_equal(tracer2, mock_tracer)
       expect_equal(get_tracer_call_count, 3)  # Still 3, not incremented
     }
@@ -305,7 +305,7 @@ test_that("integration test - with_shiny_ospan_async uses cached tracer", {
   get_tracer_call_count <- 0
   with_ospan_async_called <- FALSE
 
-  fn_env <- environment(get_tracer)
+  fn_env <- environment(shiny_otel_tracer)
   # Reset cached tracer now and when test ends
   fn_env$reset_tracer()
   withr::defer({ fn_env$reset_tracer() })
@@ -358,7 +358,7 @@ test_that("integration test - create_shiny_ospan with custom parameters", {
   )
 
   with_mocked_bindings(
-    get_tracer = function() mock_tracer,
+    shiny_otel_tracer = function() mock_tracer,
     {
       result <- create_shiny_ospan(
         "custom_span",

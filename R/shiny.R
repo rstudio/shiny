@@ -2213,7 +2213,7 @@ ShinySession <- R6Class(
         rLog$asyncStart(domain = self)
         private$sendMessage(busy = "busy")
 
-        create_reactive_update_ospan(domain = self)
+        start_and_store_reactive_update_ospan(domain = self)
       }
       private$busyCount <- private$busyCount + 1L
     },
@@ -2236,7 +2236,7 @@ ShinySession <- R6Class(
           }
         })
 
-        end_reactive_update_ospan(domain = self)
+        end_and_clear_reactive_update_ospan(domain = self)
       }
     }
   )

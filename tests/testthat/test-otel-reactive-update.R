@@ -71,19 +71,19 @@ test_that("clear_reactive_ospan_is_active clears flag correctly", {
   expect_false(reactive_update_ospan_is_active(domain))
 })
 
-test_that("create_reactive_update_ospan returns early when otel not enabled", {
+test_that("start_and_store_reactive_update_ospan returns early when otel not enabled", {
   domain <- MockShinySession$new()
 
   # Mock has_otel_bind to return FALSE
   withr::local_options(list(shiny.otel.bind = "none"))
 
   # Should return early without creating span
-  result <- create_reactive_update_ospan(domain = domain)
+  result <- start_and_store_reactive_update_ospan(domain = domain)
   expect_null(result)
   expect_null(domain$userData[["_otel_reactive_update_ospan"]])
 })
 
-test_that("create_reactive_update_ospan sets up session cleanup on first call", {
+test_that("start_and_store_reactive_update_ospan sets up session cleanup on first call", {
   callback_added <- FALSE
   TestMockShinySession <- R6::R6Class(
     "TestMockShinySession",
@@ -109,7 +109,7 @@ test_that("create_reactive_update_ospan sets up session cleanup on first call", 
     start_shiny_ospan = function(name, ..., attributes = NULL) create_mock_ospan(name, attributes = attributes),
     otel_session_id_attrs = function(domain) list(session_id = "mock-session-id"),
     {
-      create_reactive_update_ospan(domain = domain)
+      start_and_store_reactive_update_ospan(domain = domain)
 
       expect_true(callback_added)
       expect_true(has_reactive_ospan_cleanup(domain))
@@ -118,7 +118,7 @@ test_that("create_reactive_update_ospan sets up session cleanup on first call", 
   )
 })
 
-test_that("create_reactive_update_ospan errors when span already exists", {
+test_that("start_and_store_reactive_update_ospan errors when span already exists", {
   domain <- MockShinySession$new()
   domain$token <- "mock-session-token"
 
@@ -132,14 +132,14 @@ test_that("create_reactive_update_ospan errors when span already exists", {
     is_ospan = function(x) inherits(x, "mock_ospan"),
     {
       expect_error(
-        create_reactive_update_ospan(domain = domain),
+        start_and_store_reactive_update_ospan(domain = domain),
         "Reactive update span already exists"
       )
     }
   )
 })
 
-test_that("create_reactive_update_ospan doesn't setup cleanup twice", {
+test_that("start_and_store_reactive_update_ospan doesn't setup cleanup twice", {
   TestMockShinySession <- R6::R6Class(
     "TestMockShinySession",
     inherit = MockShinySession,
@@ -166,7 +166,7 @@ test_that("create_reactive_update_ospan doesn't setup cleanup twice", {
     has_otel_bind = function(level) level == "reactive_update",
     start_shiny_ospan = function(...) mock_ospan,
     {
-      create_reactive_update_ospan(domain = domain)
+      start_and_store_reactive_update_ospan(domain = domain)
 
       # Should not have called onSessionEnded since cleanup was already set
       expect_equal(domain$callback_count, 0)
@@ -174,7 +174,7 @@ test_that("create_reactive_update_ospan doesn't setup cleanup twice", {
   )
 })
 
-test_that("end_reactive_update_ospan ends span when it exists", {
+test_that("end_and_clear_reactive_update_ospan ends span when it exists", {
   domain <- MockShinySession$new()
   mock_ospan <- create_mock_ospan("reactive_update")
   domain$userData[["_otel_reactive_update_ospan"]] <- mock_ospan
@@ -191,7 +191,7 @@ test_that("end_reactive_update_ospan ends span when it exists", {
       with_mocked_bindings(
         is_ospan = function(x) inherits(x, "mock_ospan") && !isTRUE(x$ended),
         {
-          end_reactive_update_ospan(domain = domain)
+          end_and_clear_reactive_update_ospan(domain = domain)
 
           expect_true(span_ended)
           expect_null(domain$userData[["_otel_reactive_update_ospan"]])
@@ -201,7 +201,7 @@ test_that("end_reactive_update_ospan ends span when it exists", {
   )
 })
 
-test_that("end_reactive_update_ospan handles missing span gracefully", {
+test_that("end_and_clear_reactive_update_ospan handles missing span gracefully", {
   domain <- MockShinySession$new()
 
   # No span exists
@@ -211,7 +211,7 @@ test_that("end_reactive_update_ospan handles missing span gracefully", {
     is_ospan = function(x) FALSE,
     {
       # Should not error
-      expect_no_error(end_reactive_update_ospan(domain = domain))
+      expect_no_error(end_and_clear_reactive_update_ospan(domain = domain))
     }
   )
 })
@@ -290,7 +290,7 @@ test_that("session cleanup callback works correctly", {
     start_shiny_ospan = function(...) mock_ospan,
     otel_session_id_attrs = function(domain) list(session_id = "test"),
     {
-      create_reactive_update_ospan(domain = domain)
+      start_and_store_reactive_update_ospan(domain = domain)
     }
   )
 
@@ -305,7 +305,7 @@ test_that("session cleanup callback works correctly", {
 
   with_mocked_bindings(
     has_reactive_ospan_cleanup = function(d) identical(d, domain),
-    end_reactive_update_ospan = function(domain = NULL) {
+    end_and_clear_reactive_update_ospan = function(domain = NULL) {
       span_ended <<- TRUE
     },
     {

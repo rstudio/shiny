@@ -21,28 +21,29 @@ clear_reactive_ospan_is_active <- function(domain) {
   domain$userData[["_otel_reactive_update_is_active"]] <- NULL
 }
 
-#' Create a `reactive_update` OpenTelemetry span
+#' Start a `reactive_update` OpenTelemetry span and store it
 #'
 #' Used when a reactive expression is updated
 #' Will only start the span iff the otel tracing is enabled
 #' @param ... Ignored
 #' @param domain The reactive domain to associate with the span
 #' @return Invisibly returns.
-#' @seealso `end_reactive_update_ospan()`
+#' @seealso `end_and_clear_reactive_update_ospan()`
 #' @noRd
-create_reactive_update_ospan <- function(..., domain) {
+start_and_store_reactive_update_ospan <- function(..., domain) {
   if (!has_otel_bind("reactive_update")) return()
 
   if (!has_reactive_ospan_cleanup(domain)) {
-    # Clean up any dangling reactive span
+    # Clean up any dangling reactive spans on an unplanned exit
     domain$onSessionEnded(function() {
       if (has_reactive_ospan_cleanup(domain)) {
-        end_reactive_update_ospan(domain = domain)
+        end_and_clear_reactive_update_ospan(domain = domain)
       }
     })
     set_reactive_ospan_cleanup(domain)
   }
 
+  # Safety check
   prev_ospan <- domain$userData[["_otel_reactive_update_ospan"]]
   if (is_ospan(prev_ospan)) {
     stop("Reactive update span already exists")
@@ -51,9 +52,6 @@ create_reactive_update_ospan <- function(..., domain) {
   reactive_update_ospan <- start_shiny_ospan(
     OSPAN_REACTIVE_UPDATE_NAME,
     ...,
-    # options = list(
-    #   parent = NA # Always start a new root span
-    # ),
     attributes = otel_session_id_attrs(domain)
   )
 
@@ -61,13 +59,13 @@ create_reactive_update_ospan <- function(..., domain) {
   return(invisible())
 }
 
-#' End a `reactive_update` OpenTelemetry span
+#' End a `reactive_update` OpenTelemetry span and remove it from the session
 #' @param ... Ignored
 #' @param domain The reactive domain to associate with the span
 #' @return Invisibly returns.
-#' @seealso `create_reactive_update_ospan()`
+#' @seealso `start_and_store_reactive_update_ospan()`
 #' @noRd
-end_reactive_update_ospan <- function(..., domain) {
+end_and_clear_reactive_update_ospan <- function(..., domain) {
 
   reactive_update_ospan <- domain$userData[["_otel_reactive_update_ospan"]]
   if (is_ospan(reactive_update_ospan)) {

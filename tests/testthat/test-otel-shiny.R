@@ -59,7 +59,7 @@ test_that("with_shiny_ospan_async calls with_ospan_async with correct parameters
   )
 })
 
-test_that("create_shiny_ospan calls otel::start_span with correct parameters", {
+test_that("start_shiny_ospan calls otel::start_span with correct parameters", {
   mock_tracer <- create_mock_tracer()
   mock_span <- create_mock_otel_span()
   start_span_called <- FALSE
@@ -77,7 +77,7 @@ test_that("create_shiny_ospan calls otel::start_span with correct parameters", {
   with_mocked_bindings(
     shiny_otel_tracer = function() mock_tracer,
     {
-      result <- create_shiny_ospan("test_span", extra_param = "value")
+      result <- start_shiny_ospan("test_span", extra_param = "value")
 
       expect_true(start_span_called)
       expect_equal(result, mock_span)
@@ -340,7 +340,7 @@ test_that("integration test - with_shiny_ospan_async uses cached tracer", {
   )
 })
 
-test_that("integration test - create_shiny_ospan with custom parameters", {
+test_that("integration test - start_shiny_ospan with custom parameters", {
   mock_tracer <- create_mock_tracer()
   mock_span <- create_mock_otel_span()
   start_span_params <- list()
@@ -360,7 +360,7 @@ test_that("integration test - create_shiny_ospan with custom parameters", {
   with_mocked_bindings(
     shiny_otel_tracer = function() mock_tracer,
     {
-      result <- create_shiny_ospan(
+      result <- start_shiny_ospan(
         "custom_span",
         attributes = list(key = "value"),
         parent = "parent_span"

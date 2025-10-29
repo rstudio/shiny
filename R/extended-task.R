@@ -188,7 +188,7 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
       } else {
 
         if (has_otel_bind("reactivity")) {
-          private$ospan <- create_shiny_ospan(
+          private$ospan <- start_shiny_ospan(
             private$otel_label,
             attributes = private$otel_attrs
           )

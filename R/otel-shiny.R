@@ -6,11 +6,27 @@ NULL
 
 otel_tracer_name <- "co.posit.r-package.shiny"
 
+#' Create and use a Shiny OpenTelemetry span
+#'
+#' If otel is disabled, the span will not be created,
+#' however the expression will still be evaluated.
+#' @param name Span name
+#' @param expr Expression to evaluate within the span
+#' @param ... Ignored
+#' @param attributes Optional span attributes
+#' @return The result of evaluating `expr`
+#' @noRd
 with_shiny_ospan_async <- function(name, expr, ..., attributes = NULL) {
   with_ospan_async(name, expr, ..., attributes = attributes, tracer = shiny_otel_tracer())
 }
 
-create_shiny_ospan <- function(name, ...) {
+#' Start a Shiny OpenTelemetry span
+#'
+#' @param name Span name
+#' @param ... Additional arguments passed to `otel::start_span()`
+#' @return An OpenTelemetry span
+#' @noRd
+start_shiny_ospan <- function(name, ...) {
   otel::start_span(name, ..., tracer = shiny_otel_tracer())
 }
 

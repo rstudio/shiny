@@ -48,7 +48,7 @@ create_reactive_update_ospan <- function(..., domain) {
     stop("Reactive update span already exists")
   }
 
-  reactive_update_ospan <- create_shiny_ospan(
+  reactive_update_ospan <- start_shiny_ospan(
     OSPAN_REACTIVE_UPDATE_NAME,
     ...,
     # options = list(

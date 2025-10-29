@@ -106,7 +106,7 @@ test_that("create_reactive_update_ospan sets up session cleanup on first call", 
 
   with_mocked_bindings(
     has_otel_bind = function(level) level == "reactive_update",
-    create_shiny_ospan = function(name, ..., attributes = NULL) create_mock_ospan(name, attributes = attributes),
+    start_shiny_ospan = function(name, ..., attributes = NULL) create_mock_ospan(name, attributes = attributes),
     otel_session_id_attrs = function(domain) list(session_id = "mock-session-id"),
     {
       create_reactive_update_ospan(domain = domain)
@@ -164,7 +164,7 @@ test_that("create_reactive_update_ospan doesn't setup cleanup twice", {
 
   with_mocked_bindings(
     has_otel_bind = function(level) level == "reactive_update",
-    create_shiny_ospan = function(...) mock_ospan,
+    start_shiny_ospan = function(...) mock_ospan,
     {
       create_reactive_update_ospan(domain = domain)
 
@@ -287,7 +287,7 @@ test_that("session cleanup callback works correctly", {
 
   with_mocked_bindings(
     has_otel_bind = function(level) level == "reactive_update",
-    create_shiny_ospan = function(...) mock_ospan,
+    start_shiny_ospan = function(...) mock_ospan,
     otel_session_id_attrs = function(domain) list(session_id = "test"),
     {
       create_reactive_update_ospan(domain = domain)

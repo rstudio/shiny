@@ -36,7 +36,7 @@ otel_log <- function(
   msg,
   ...,
   severity = "info",
-  logger = get_ospan_logger()
+  logger = shiny_otel_logger()
 ) {
   otel::log(msg, ..., severity = severity, logger = logger)
 }
@@ -51,7 +51,7 @@ otel_get_tracer <- function() {
   otel::get_tracer()
 }
 
-get_ospan_logger <- local({
+shiny_otel_logger <- local({
   logger <- NULL
 
   # For internal testing purposes only

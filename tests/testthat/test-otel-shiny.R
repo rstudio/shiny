@@ -133,7 +133,7 @@ test_that("otel_log calls otel::log with correct parameters", {
   )
 
   with_mocked_bindings(
-    get_ospan_logger = function() mock_logger,
+    shiny_otel_logger = function() mock_logger,
     {
       otel_log("test message", severity = "warn")
       expect_true(log_called)
@@ -156,7 +156,7 @@ test_that("otel_log uses default severity and logger", {
   )
 
   with_mocked_bindings(
-    get_ospan_logger = function() mock_logger,
+    shiny_otel_logger = function() mock_logger,
     {
       otel_log("default test")
       expect_true(log_called)
@@ -205,11 +205,11 @@ test_that("otel_is_tracing_enabled accepts custom tracer", {
   expect_false(result)
 })
 
-test_that("get_ospan_logger caches logger in non-test environment", {
+test_that("shiny_otel_logger caches logger in non-test environment", {
   mock_logger <- create_mock_logger()
   get_logger_call_count <- 0
 
-  fn_env <- environment(get_ospan_logger)
+  fn_env <- environment(shiny_otel_logger)
   # Reset cached logger now and when test ends
   fn_env$reset_logger()
   withr::defer({ fn_env$reset_logger() })
@@ -225,12 +225,12 @@ test_that("get_ospan_logger caches logger in non-test environment", {
     testthat__is_testing = function() TRUE,
     {
       # First call
-      logger1 <- get_ospan_logger()
+      logger1 <- shiny_otel_logger()
       expect_equal(logger1, mock_logger)
       expect_equal(get_logger_call_count, 1)
 
       # Second call should call otel::get_logger again (no caching in tests)
-      logger2 <- get_ospan_logger()
+      logger2 <- shiny_otel_logger()
       expect_equal(logger2, mock_logger)
       expect_equal(get_logger_call_count, 2)  # Incremented
     }
@@ -240,12 +240,12 @@ test_that("get_ospan_logger caches logger in non-test environment", {
     testthat__is_testing = function() FALSE,
     {
       # First call should call otel::get_logger
-      logger1 <- get_ospan_logger()
+      logger1 <- shiny_otel_logger()
       expect_equal(logger1, mock_logger)
       expect_equal(get_logger_call_count, 3)
 
       # Second call should use cached logger
-      logger2 <- get_ospan_logger()
+      logger2 <- shiny_otel_logger()
       expect_equal(logger2, mock_logger)
       expect_equal(get_logger_call_count, 3)  # Still 3, not incremented
     }

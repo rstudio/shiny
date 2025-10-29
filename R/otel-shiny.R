@@ -1,4 +1,5 @@
 #' @importFrom promises
+#'   hybrid_then
 #'   with_ospan_async
 #'   with_ospan_promise_domain
 #'   local_ospan_promise_domain

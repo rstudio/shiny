@@ -1171,7 +1171,7 @@ ShinySession <- R6Class(
             hybrid_chain(
               {
                 private$withCurrentOutput(name, {
-                  maybe_with_reactive_update_active_ospan({
+                  maybe_with_existing_reactive_update_ospan({
                     shinyCallingHandlers(func())
                   }, domain = self)
                 })

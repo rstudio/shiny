@@ -13,63 +13,6 @@ is_ospan <- function(x) {
   inherits(x, "mock_ospan") && !isTRUE(x$ended)
 }
 
-test_that("has_reactive_ospan_cleanup works correctly", {
-  domain <- MockShinySession$new()
-
-  # Initially should be FALSE
-  expect_false(has_reactive_ospan_cleanup(domain))
-
-  # After setting, should be TRUE
-  domain$userData[["_otel_has_reactive_cleanup"]] <- TRUE
-  expect_true(has_reactive_ospan_cleanup(domain))
-
-  # With FALSE value, should be FALSE
-  domain$userData[["_otel_has_reactive_cleanup"]] <- FALSE
-  expect_false(has_reactive_ospan_cleanup(domain))
-})
-
-test_that("set_reactive_ospan_cleanup sets flag correctly", {
-  domain <- MockShinySession$new()
-
-  expect_false(has_reactive_ospan_cleanup(domain))
-  set_reactive_ospan_cleanup(domain)
-  expect_true(has_reactive_ospan_cleanup(domain))
-})
-
-test_that("reactive_update_ospan_is_active works correctly", {
-  domain <- MockShinySession$new()
-
-  # Initially should be FALSE
-  expect_false(reactive_update_ospan_is_active(domain))
-
-  # After setting, should be TRUE
-  domain$userData[["_otel_reactive_update_is_active"]] <- TRUE
-  expect_true(reactive_update_ospan_is_active(domain))
-
-  # With FALSE value, should be FALSE
-  domain$userData[["_otel_reactive_update_is_active"]] <- FALSE
-  expect_false(reactive_update_ospan_is_active(domain))
-})
-
-test_that("set_reactive_ospan_is_active sets flag correctly", {
-  domain <- MockShinySession$new()
-
-  expect_false(reactive_update_ospan_is_active(domain))
-  set_reactive_ospan_is_active(domain)
-  expect_true(reactive_update_ospan_is_active(domain))
-})
-
-test_that("clear_reactive_ospan_is_active clears flag correctly", {
-  domain <- MockShinySession$new()
-
-  # Set the flag first
-  set_reactive_ospan_is_active(domain)
-  expect_true(reactive_update_ospan_is_active(domain))
-
-  # Clear it
-  clear_reactive_ospan_is_active(domain)
-  expect_false(reactive_update_ospan_is_active(domain))
-})
 
 test_that("start_and_store_reactive_update_ospan returns early when otel not enabled", {
   domain <- MockShinySession$new()
@@ -112,7 +55,7 @@ test_that("start_and_store_reactive_update_ospan sets up session cleanup on firs
       start_and_store_reactive_update_ospan(domain = domain)
 
       expect_true(callback_added)
-      expect_true(has_reactive_ospan_cleanup(domain))
+      expect_true(domain$userData[["_otel_has_reactive_cleanup"]])
       expect_equal(domain$userData[["_otel_reactive_update_ospan"]], create_mock_ospan("reactive_update", attributes = list(session_id = "mock-session-id")))
     }
   )
@@ -157,7 +100,7 @@ test_that("start_and_store_reactive_update_ospan doesn't setup cleanup twice", {
   domain <- TestMockShinySession$new()
 
   # Set cleanup flag manually
-  set_reactive_ospan_cleanup(domain)
+  domain$userData[["_otel_has_reactive_cleanup"]] <- TRUE
 
   # Mock dependencies
   mock_ospan <- create_mock_ospan("reactive_update")
@@ -216,7 +159,7 @@ test_that("end_and_clear_reactive_update_ospan handles missing span gracefully",
   )
 })
 
-test_that("with_reactive_update_active_ospan executes expr without span", {
+test_that("with_existing_reactive_update_ospan executes expr without span", {
   domain <- MockShinySession$new()
 
   # No span exists
@@ -225,7 +168,7 @@ test_that("with_reactive_update_active_ospan executes expr without span", {
   with_mocked_bindings(
     is_ospan = function(x) FALSE,
     {
-      result <- with_reactive_update_active_ospan({
+      result <- with_existing_reactive_update_ospan({
         test_value <- "modified"
         "result_value"
       }, domain = domain)
@@ -236,7 +179,7 @@ test_that("with_reactive_update_active_ospan executes expr without span", {
   )
 })
 
-test_that("with_reactive_update_active_ospan executes expr with active span", {
+test_that("with_existing_reactive_update_ospan executes expr with active span", {
   domain <- MockShinySession$new()
   mock_ospan <- create_mock_ospan("reactive_update")
   domain$userData[["_otel_reactive_update_ospan"]] <- mock_ospan
@@ -256,7 +199,7 @@ test_that("with_reactive_update_active_ospan executes expr with active span", {
     is_ospan = function(x) inherits(x, "mock_ospan") && !isTRUE(x$ended)
   )
 
-  result <- with_reactive_update_active_ospan({
+  result <- with_existing_reactive_update_ospan({
     test_value <- "modified"
     "result_value"
   }, domain = domain)
@@ -299,12 +242,11 @@ test_that("session cleanup callback works correctly", {
 
   # Set up span and test cleanup
   domain$userData[["_otel_reactive_update_ospan"]] <- mock_ospan
-  set_reactive_ospan_cleanup(domain)
+  domain$userData[["_otel_has_reactive_cleanup"]] <- TRUE
 
   span_ended <- FALSE
 
   with_mocked_bindings(
-    has_reactive_ospan_cleanup = function(d) identical(d, domain),
     end_and_clear_reactive_update_ospan = function(domain = NULL) {
       span_ended <<- TRUE
     },

@@ -268,7 +268,7 @@ bind_otel_shiny_render_function <- function(x) {
     with_shiny_ospan_async(
       span_label,
       {
-        promises::hybrid_then(
+        hybrid_then(
           valueFunc(...),
           on_failure = set_ospan_error_status_and_throw,
           # Must save the error object

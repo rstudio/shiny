@@ -446,8 +446,12 @@ ReactiveValues <- R6Class(
       }
 
       if ((!is.null(domain)) && .isRecordingOtel) {
-        # Do not include updates to input or clientData unless _some_ reactivity has occured
-        if (has_reactive_ospan_cleanup(domain) || !(.label == "input" || .label == "clientData")) {
+        if (
+          # Any reactiveValues (other than input or clientData) are fair game
+          !(.label == "input" || .label == "clientData") ||
+          # Do not include updates to input or clientData unless _some_ reactivity has occured
+          !is.null(domain$userData[["_otel_has_reactive_cleanup"]])
+        ) {
           otel_log(
             otel_label_set_reactive_values(.label, key, domain = domain),
             severity = "info",

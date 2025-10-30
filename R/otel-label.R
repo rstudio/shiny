@@ -1,6 +1,6 @@
 # observe mymod:<anonymous>
 # observe <anonymous>
-# observe mylabel (edited)
+# observe mylabel
 
 # -- Reactives --------------------------------------------------------------
 

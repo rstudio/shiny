@@ -29,10 +29,7 @@
 #   * with_no_otel_bind(expr) - Will not bind any reactives created within `expr` to OpenTelemetry spans.
 
 # - TODO: -----------------------------------
-# * Span status for success/failure (render function and regular reactive exprs?)
-# * Error handling is not an "exception" for fatal logs
 # * Connect `user.id` to be their user name: https://opentelemetry.io/docs/specs/semconv/registry/attributes/user/
-# * Tests with otel recording
 
 # ------------------------------------------
 

@@ -54,19 +54,6 @@ test_server_with_otel_error <- function(session, server, expr, sanitize = FALSE,
 }
 
 
-test_that("has_seen_ospan_error() returns FALSE for unseen errors", {
-  cnd <- simpleError("test error")
-  expect_false(has_seen_ospan_error(cnd))
-})
-
-test_that("set_ospan_error_as_seen() marks error as seen", {
-  cnd <- simpleError("test error")
-  expect_false(has_seen_ospan_error(cnd))
-
-  cnd <- set_ospan_error_as_seen(cnd)
-  expect_true(has_seen_ospan_error(cnd))
-})
-
 test_that("set_ospan_error_as_seen() returns modified condition", {
   cnd <- simpleError("test error")
   result <- set_ospan_error_as_seen(cnd)
@@ -74,13 +61,14 @@ test_that("set_ospan_error_as_seen() returns modified condition", {
   expect_true(inherits(result, "error"))
   expect_true(inherits(result, "condition"))
   expect_equal(conditionMessage(result), "test error")
-  expect_true(isTRUE(result$.shiny_error_seen))
+  expect_true(isTRUE(result$.shiny_ospan_error))
 })
 
-test_that("has_seen_ospan_error() detects marked errors", {
+test_that("set_ospan_error_as_seen() marks error as seen", {
   cnd <- simpleError("test error")
-  cnd$.shiny_error_seen <- TRUE
+  expect_false(has_seen_ospan_error(cnd))
 
+  cnd <- set_ospan_error_as_seen(cnd)
   expect_true(has_seen_ospan_error(cnd))
 })
 

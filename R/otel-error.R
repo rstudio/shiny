@@ -1,10 +1,10 @@
 
 has_seen_ospan_error <- function(cnd) {
-  isTRUE(cnd$.shiny_error_seen)
+  !is.null(cnd$.shiny_ospan_error)
 }
 
 set_ospan_error_as_seen <- function(cnd) {
-  cnd$.shiny_error_seen <- TRUE
+  cnd$.shiny_ospan_error <- TRUE
   cnd
 }
 

@@ -91,7 +91,7 @@ Imports:
     lifecycle (>= 0.2.0),
     mime (>= 0.3),
     otel,
-    promises (>= 1.4.0),
+    promises (>= 1.4.0.9001),
     R6 (>= 2.0),
     rlang (>= 0.4.10),
     sourcetools,
@@ -120,6 +120,8 @@ Suggests:
     testthat (>= 3.2.1),
     watcher,
     yaml
+Remotes: 
+    rstudio/promises#198
 Config/Needs/check: shinytest2
 Config/testthat/edition: 3
 Encoding: UTF-8

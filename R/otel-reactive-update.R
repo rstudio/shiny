@@ -1,4 +1,4 @@
-# * `session$userData[["_otel_reactive_update_ospan"]]` - The active reactive update span (or `NULL`)
+# * `session$userData[["_otel_span_reactive_update"]]` - The active reactive update span (or `NULL`)
 
 
 #' Start a `reactive_update` OpenTelemetry span and store it
@@ -8,9 +8,10 @@
 #' @param ... Ignored
 #' @param domain The reactive domain to associate with the span
 #' @return Invisibly returns.
-#' @seealso `end_and_clear_reactive_update_ospan()`
+#' @seealso `otel_span_reactive_update_teardown()`
 #' @noRd
-start_and_store_reactive_update_ospan <- function(..., domain) {
+otel_span_reactive_update_init <- function(..., domain) {
+
   if (!has_otel_bind("reactive_update")) return()
 
   # Ensure cleanup is registered only once per session
@@ -19,39 +20,42 @@ start_and_store_reactive_update_ospan <- function(..., domain) {
 
     # Clean up any dangling reactive spans on an unplanned exit
     domain$onSessionEnded(function() {
-      end_and_clear_reactive_update_ospan(domain = domain)
+      otel_span_reactive_update_teardown(domain = domain)
     })
   }
 
   # Safety check
-  prev_ospan <- domain$userData[["_otel_reactive_update_ospan"]]
-  if (is_ospan(prev_ospan)) {
+  prev_otel_span <- domain$userData[["_otel_span_reactive_update"]]
+  if (is_otel_span(prev_otel_span)) {
     stop("Reactive update span already exists")
   }
 
-  reactive_update_ospan <- start_shiny_ospan(
+  reactive_update_otel_span <- start_otel_span(
     "reactive_update",
     ...,
     attributes = otel_session_id_attrs(domain)
   )
 
-  domain$userData[["_otel_reactive_update_ospan"]] <- reactive_update_ospan
-  return(invisible())
+  domain$userData[["_otel_span_reactive_update"]] <- reactive_update_otel_span
+
+  invisible()
 }
 
 #' End a `reactive_update` OpenTelemetry span and remove it from the session
 #' @param ... Ignored
 #' @param domain The reactive domain to associate with the span
 #' @return Invisibly returns.
-#' @seealso `start_and_store_reactive_update_ospan()`
+#' @seealso `otel_span_reactive_update_init()`
 #' @noRd
-end_and_clear_reactive_update_ospan <- function(..., domain) {
+otel_span_reactive_update_teardown <- function(..., domain) {
+  reactive_update_otel_span <- domain$userData[["_otel_span_reactive_update"]]
 
-  reactive_update_ospan <- domain$userData[["_otel_reactive_update_ospan"]]
-  if (is_ospan(reactive_update_ospan)) {
-    otel::end_span(reactive_update_ospan)
-    domain$userData[["_otel_reactive_update_ospan"]] <- NULL
+  if (is_otel_span(reactive_update_otel_span)) {
+    otel::end_span(reactive_update_otel_span)
+    domain$userData[["_otel_span_reactive_update"]] <- NULL
   }
+
+  invisible()
 }
 
 
@@ -63,23 +67,23 @@ end_and_clear_reactive_update_ospan <- function(..., domain) {
 #' @param ... Ignored
 #' @param domain The reactive domain to associate with the span
 #' @noRd
-with_existing_reactive_update_ospan <- function(expr, ..., domain) {
-  reactive_update_ospan <- domain$userData[["_otel_reactive_update_ospan"]]
+with_otel_span_reactive_update <- function(expr, ..., domain) {
+  reactive_update_otel_span <- domain$userData[["_otel_span_reactive_update"]]
 
-  if (!is_ospan(reactive_update_ospan)) {
+  if (!is_otel_span(reactive_update_otel_span)) {
     return(force(expr))
   }
 
   # Given the reactive span is started before and ended when exec count is 0,
   # we only need to wrap the expr in the span context
-  otel::with_active_span(reactive_update_ospan, {force(expr)})
+  otel::with_active_span(reactive_update_otel_span, {force(expr)})
 }
 
 
-#' Run expr within `reactive_update` ospan if not already active
+#' Run expr within `reactive_update` otel span if not already active
 #'
-#' If the reactive update ospan is not already active, run the expression
-#' within the reactive update ospan context. This ensures that nested calls
+#' If the reactive update otel span is not already active, run the expression
+#' within the reactive update otel span context. This ensures that nested calls
 #' to reactive expressions do not attempt to re-enter the same span.
 #'
 #' This method is used within Context `run()` and running an Output's observer
@@ -88,14 +92,14 @@ with_existing_reactive_update_ospan <- function(expr, ..., domain) {
 #' @param ... Ignored
 #' @param domain The reactive domain to associate with the span
 #' @noRd
-maybe_with_existing_reactive_update_ospan <- function(expr, ..., domain) {
+maybe_with_otel_span_reactive_update <- function(expr, ..., domain) {
   if (is.null(domain$userData[["_otel_reactive_update_is_active"]])) {
     domain$userData[["_otel_reactive_update_is_active"]] <- TRUE
 
     # When the expression is done promising, clear the active flag
     hybrid_then(
       {
-        with_existing_reactive_update_ospan(domain = domain, expr)
+        with_otel_span_reactive_update(domain = domain, expr)
       },
       on_success = function(value) {
         domain$userData[["_otel_reactive_update_is_active"]] <- NULL

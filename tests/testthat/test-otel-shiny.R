@@ -1,9 +1,13 @@
 # Tests for otel-shiny.R functions
 
 # Helper function to create a mock otel span
-create_mock_otel_span <- function() {
+create_mock_otel_span <- function(name = "test_span") {
   structure(
-    list(name = "test_span"),
+    list(
+      name = name,
+      activate = function(...) NULL,
+      end = function(...) NULL
+    ),
     class = "otel_span"
   )
 }
@@ -11,7 +15,11 @@ create_mock_otel_span <- function() {
 # Helper function to create a mock tracer
 create_mock_tracer <- function() {
   structure(
-    list(name = "mock_tracer", is_enabled = function() TRUE),
+    list(
+      name = "mock_tracer",
+      is_enabled = function() TRUE,
+      start_span = function(name, ...) create_mock_otel_span(name)
+    ),
     class = "otel_tracer"
   )
 }
@@ -28,38 +36,8 @@ test_that("otel_tracer_name constant is correct", {
   expect_equal(otel_tracer_name, "co.posit.r-package.shiny")
 })
 
-test_that("with_hybrid_shiny_ospan calls with_ospan_async with correct parameters", {
-  mock_tracer <- create_mock_tracer()
-  with_ospan_async_called <- FALSE
-  test_value <- "initial"
 
-  with_mocked_bindings(
-    shiny_otel_tracer = function() mock_tracer,
-    with_ospan_async = function(name, expr, ..., attributes = NULL, tracer = NULL) {
-      with_ospan_async_called <<- TRUE
-      expect_equal(name, "test_span")
-      expect_equal(tracer, mock_tracer)
-      expect_equal(attributes, list(key = "value"))
-      force(expr)
-    },
-    {
-      result <- with_hybrid_shiny_ospan(
-        "test_span",
-        {
-          test_value <- "modified"
-          "result_value"
-        },
-        attributes = list(key = "value")
-      )
-
-      expect_true(with_ospan_async_called)
-      expect_equal(result, "result_value")
-      expect_equal(test_value, "modified")
-    }
-  )
-})
-
-test_that("start_shiny_ospan calls otel::start_span with correct parameters", {
+test_that("start_otel_span calls otel::start_span with correct parameters", {
   mock_tracer <- create_mock_tracer()
   mock_span <- create_mock_otel_span()
   start_span_called <- FALSE
@@ -73,49 +51,51 @@ test_that("start_shiny_ospan calls otel::start_span with correct parameters", {
     },
     .package = "otel"
   )
-
-  with_mocked_bindings(
+  local_mocked_bindings(
     shiny_otel_tracer = function() mock_tracer,
-    {
-      result <- start_shiny_ospan("test_span", extra_param = "value")
-
-      expect_true(start_span_called)
-      expect_equal(result, mock_span)
-    }
   )
+
+  result <- start_otel_span("test_span", extra_param = "value")
+
+  expect_true(start_span_called)
+  expect_equal(result, mock_span)
 })
 
-test_that("is_ospan correctly identifies otel spans", {
+test_that("is_otel_span correctly identifies otel spans", {
   # Test with otel_span object
   otel_span <- create_mock_otel_span()
-  expect_true(is_ospan(otel_span))
+  expect_true(is_otel_span(otel_span))
 
   # Test with non-otel objects
-  expect_false(is_ospan("string"))
-  expect_false(is_ospan(123))
-  expect_false(is_ospan(list()))
-  expect_false(is_ospan(NULL))
+  expect_false(is_otel_span("string"))
+  expect_false(is_otel_span(123))
+  expect_false(is_otel_span(list()))
+  expect_false(is_otel_span(NULL))
 
   # Test with object that has different class
   other_obj <- structure(list(), class = "other_class")
-  expect_false(is_ospan(other_obj))
+  expect_false(is_otel_span(other_obj))
 })
 
 test_that("testthat__is_testing detects testing environment", {
   # Test when TESTTHAT env var is set to "true"
-  withr::local_envvar(list(TESTTHAT = "true"))
-  expect_true(testthat__is_testing())
+  withr::with_envvar(list(TESTTHAT = "true"), {
+    expect_true(testthat__is_testing())
+  })
 
   # Test when TESTTHAT env var is not set
-  withr::local_envvar(list(TESTTHAT = NA))
-  expect_false(testthat__is_testing())
+  withr::with_envvar(list(TESTTHAT = NA), {
+    expect_false(testthat__is_testing())
+  })
 
   # Test when TESTTHAT env var is set to other values
-  withr::local_envvar(list(TESTTHAT = "false"))
-  expect_false(testthat__is_testing())
+  withr::with_envvar(list(TESTTHAT = "false"), {
+    expect_false(testthat__is_testing())
+  })
 
-  withr::local_envvar(list(TESTTHAT = ""))
-  expect_false(testthat__is_testing())
+  withr::with_envvar(list(TESTTHAT = ""), {
+    expect_false(testthat__is_testing())
+  })
 })
 
 test_that("otel_log calls otel::log with correct parameters", {
@@ -131,14 +111,12 @@ test_that("otel_log calls otel::log with correct parameters", {
     },
     .package = "otel"
   )
-
-  with_mocked_bindings(
+  local_mocked_bindings(
     shiny_otel_logger = function() mock_logger,
-    {
-      otel_log("test message", severity = "warn")
-      expect_true(log_called)
-    }
   )
+
+  otel_log("test message", severity = "warn")
+  expect_true(log_called)
 })
 
 test_that("otel_log uses default severity and logger", {
@@ -154,14 +132,12 @@ test_that("otel_log uses default severity and logger", {
     },
     .package = "otel"
   )
-
-  with_mocked_bindings(
+  local_mocked_bindings(
     shiny_otel_logger = function() mock_logger,
-    {
-      otel_log("default test")
-      expect_true(log_called)
-    }
   )
+
+  otel_log("default test")
+  expect_true(log_called)
 })
 
 test_that("otel_is_tracing_enabled calls otel::is_tracing_enabled", {
@@ -176,15 +152,13 @@ test_that("otel_is_tracing_enabled calls otel::is_tracing_enabled", {
     },
     .package = "otel"
   )
-
-  with_mocked_bindings(
+  local_mocked_bindings(
     shiny_otel_tracer = function() mock_tracer,
-    {
-      result <- otel_is_tracing_enabled()
-      expect_true(is_tracing_called)
-      expect_true(result)
-    }
   )
+
+  result <- otel_is_tracing_enabled()
+  expect_true(is_tracing_called)
+  expect_true(result)
 })
 
 test_that("otel_is_tracing_enabled accepts custom tracer", {
@@ -300,10 +274,9 @@ test_that("shiny_otel_tracer caches tracer in non-test environment", {
   )
 })
 
-test_that("integration test - with_hybrid_shiny_ospan uses cached tracer", {
+test_that("integration test - with_otel_span uses cached tracer", {
   mock_tracer <- create_mock_tracer()
   get_tracer_call_count <- 0
-  with_ospan_async_called <- FALSE
 
   fn_env <- environment(shiny_otel_tracer)
   # Reset cached tracer now and when test ends
@@ -311,36 +284,26 @@ test_that("integration test - with_hybrid_shiny_ospan uses cached tracer", {
   withr::defer({ fn_env$reset_tracer() })
 
   local_mocked_bindings(
-    otel_get_tracer = function() {
+    get_tracer = function() {
       get_tracer_call_count <<- get_tracer_call_count + 1
       mock_tracer
-    }
-  )
-
-  with_mocked_bindings(
-    testthat__is_testing = function() FALSE,
-    with_ospan_async = function(name, expr, ..., attributes = NULL, tracer = NULL) {
-      with_ospan_async_called <<- TRUE
-      expect_equal(tracer, mock_tracer)
-      force(expr)
     },
-    {
-      # First call to with_hybrid_shiny_ospan
-      with_hybrid_shiny_ospan("span1", { "result1" })
-      expect_equal(get_tracer_call_count, 1)
-      expect_true(with_ospan_async_called)
-
-      with_ospan_async_called <- FALSE
-
-      # Second call should use cached tracer
-      with_hybrid_shiny_ospan("span2", { "result2" })
-      expect_equal(get_tracer_call_count, 1)  # Still 1, tracer was cached
-      expect_true(with_ospan_async_called)
-    }
+    .package = "otel"
   )
+  local_mocked_bindings(
+    testthat__is_testing = function() FALSE,
+  )
+
+  # First call to with_otel_span
+  with_otel_span("span1", { "result1" })
+  expect_equal(get_tracer_call_count, 1)
+
+  # Second call should use cached tracer
+  with_otel_span("span2", { "result2" })
+  expect_equal(get_tracer_call_count, 1)  # Still 1, tracer was cached
 })
 
-test_that("integration test - start_shiny_ospan with custom parameters", {
+test_that("integration test - start_otel_span with custom parameters", {
   mock_tracer <- create_mock_tracer()
   mock_span <- create_mock_otel_span()
   start_span_params <- list()
@@ -356,21 +319,19 @@ test_that("integration test - start_shiny_ospan with custom parameters", {
     },
     .package = "otel"
   )
-
-  with_mocked_bindings(
+  local_mocked_bindings(
     shiny_otel_tracer = function() mock_tracer,
-    {
-      result <- start_shiny_ospan(
-        "custom_span",
-        attributes = list(key = "value"),
-        parent = "parent_span"
-      )
-
-      expect_equal(result, mock_span)
-      expect_equal(start_span_params$name, "custom_span")
-      expect_equal(start_span_params$tracer, mock_tracer)
-      expect_equal(start_span_params$extra_args$attributes, list(key = "value"))
-      expect_equal(start_span_params$extra_args$parent, "parent_span")
-    }
   )
+
+  result <- start_otel_span(
+    "custom_span",
+    attributes = list(key = "value"),
+    parent = "parent_span"
+  )
+
+  expect_equal(result, mock_span)
+  expect_equal(start_span_params$name, "custom_span")
+  expect_equal(start_span_params$tracer, mock_tracer)
+  expect_equal(start_span_params$extra_args$attributes, list(key = "value"))
+  expect_equal(start_span_params$extra_args$parent, "parent_span")
 })

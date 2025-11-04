@@ -274,7 +274,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
                 args <- argsForServerFunc(serverFunc, shinysession)
 
                 withReactiveDomain(shinysession, {
-                  with_hybrid_session_start_ospan(domain = shinysession, {
+                  otel_span_session_start(domain = shinysession, {
 
                     do.call(
                       # No corresponding ..stacktraceoff; the server func is pure

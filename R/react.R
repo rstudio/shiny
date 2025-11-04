@@ -31,7 +31,7 @@ ctx_otel_info_obj <- function(
   )
 }
 
-with_hybrid_context_ospan <- function(otel_info, expr, domain) {
+with_otel_span_context <- function(otel_info, expr, domain) {
   if (!otel_is_tracing_enabled()) {
     return(force(expr))
   }
@@ -43,16 +43,16 @@ with_hybrid_context_ospan <- function(otel_info, expr, domain) {
   # Always set the reactive update span as active
   # This ensures that any spans created within the reactive context
   # are at least children of the reactive update span
-  maybe_with_existing_reactive_update_ospan(domain = domain, {
+  maybe_with_otel_span_reactive_update(domain = domain, {
     if (isRecordingOtel) {
-      with_hybrid_shiny_ospan(
+      with_otel_span(
         otelLabel,
         {
           # Works with both sync and async expressions
           # Needed for both observer and reactive contexts
           hybrid_then(
             expr,
-            on_failure = set_ospan_error_status_and_throw,
+            on_failure = set_otel_exception_status_and_throw,
             # Must upgrade the error object
             tee = FALSE
           )
@@ -116,7 +116,7 @@ Context <- R6Class(
 
       promises::with_promise_domain(reactivePromiseDomain(), {
         withReactiveDomain(.domain, {
-          with_hybrid_context_ospan(.otel_info, domain = .domain, {
+          with_otel_span_context(.otel_info, domain = .domain, {
             captureStackTraces({
               env <- .getReactiveEnvironment()
               rLog$enter(.reactId, id, .reactType, .domain)

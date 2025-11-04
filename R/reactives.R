@@ -92,7 +92,7 @@ ReactiveVal <- R6Class(
 
       domain <- getDefaultReactiveDomain()
       rLog$define(private$reactId, value, private$label, type = "reactiveVal", domain)
-      .otelLabel <<- otel_label_set_reactive_val(private$label, domain = domain)
+      .otelLabel <<- otel_log_label_set_reactive_val(private$label, domain = domain)
     },
     get = function() {
       private$dependents$register()
@@ -453,7 +453,7 @@ ReactiveValues <- R6Class(
           !is.null(domain$userData[["_otel_has_reactive_cleanup"]])
         ) {
           otel_log(
-            otel_label_set_reactive_values(.label, key, domain = domain),
+            otel_log_label_set_reactive_values(.label, key, domain = domain),
             severity = "info",
             attributes = c(.otelAttrs, otel_session_id_attrs(domain))
           )
@@ -1023,11 +1023,11 @@ Observable <- R6Class(
           error = function(cond) {
             if (.isRecordingOtel) {
               # `cond` is too early in the stack to be updated by `ctx`'s
-              # `with_hybrid_context_ospan()` where it calls
-              # `set_ospan_error_status_and_throw()` on eval error.
+              # `with_otel_span_context()` where it calls
+              # `set_otel_exception_status_and_throw()` on eval error.
               # So we mark it as seen here.
               # When the error is re-thrown later, it won't be a _new_ error
-              cond <- set_ospan_error_as_seen(cond)
+              cond <- mark_otel_exception_as_seen(cond)
             }
 
             # If an error occurs, we want to propagate the error, but we also
@@ -2213,7 +2213,7 @@ isolate <- function(expr) {
     reactId <- rLog$noReactId
   }
 
-  # Do not track ospans for `isolate()`
+  # Do not track otel spans for `isolate()`
   ctx <- Context$new(getDefaultReactiveDomain(), '[isolate]', type='isolate', reactId = reactId)
   on.exit(ctx$invalidate())
   # Matching ..stacktraceon../..stacktraceoff.. pair

@@ -1,9 +1,3 @@
-#' @importFrom promises
-#'   hybrid_then
-#'   with_ospan_async
-#'   with_ospan_promise_domain
-#'   local_ospan_promise_domain
-NULL
 
 otel_tracer_name <- "co.posit.r-package.shiny"
 
@@ -17,10 +11,10 @@ otel_tracer_name <- "co.posit.r-package.shiny"
 #' @param attributes Optional span attributes
 #' @return The result of evaluating `expr`
 #' @noRd
-with_hybrid_shiny_ospan <- function(name, expr, ..., attributes = NULL) {
-  # Call promises::with_ospan_async with shiny's otel tracer
-  with_ospan_async(name, expr, ..., attributes = attributes, tracer = shiny_otel_tracer())
+with_otel_span <- function(name, expr, ..., attributes = NULL) {
+  promises::with_otel_span(name, expr, ..., attributes = attributes, tracer = shiny_otel_tracer())
 }
+
 
 #' Start a Shiny OpenTelemetry span
 #'
@@ -28,20 +22,20 @@ with_hybrid_shiny_ospan <- function(name, expr, ..., attributes = NULL) {
 #' @param ... Additional arguments passed to `otel::start_span()`
 #' @return An OpenTelemetry span
 #' @noRd
-start_shiny_ospan <- function(name, ...) {
+start_otel_span <- function(name, ...) {
   otel::start_span(name, ..., tracer = shiny_otel_tracer())
 }
 
 
 # # TODO: Set attributes on the current active span
 # # 5. Set attributes on the current active span
-# set_ospan_attrs(status = 200L)
+# set_otel_span_attrs(status = 200L)
 
 
 # -- Helpers --------------------------------------------------------------
 
 
-is_ospan <- function(x) {
+is_otel_span <- function(x) {
   inherits(x, "otel_span")
 }
 

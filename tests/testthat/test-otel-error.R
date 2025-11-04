@@ -54,26 +54,26 @@ test_server_with_otel_error <- function(session, server, expr, sanitize = FALSE,
 }
 
 
-test_that("set_ospan_error_as_seen() returns modified condition", {
+test_that("mark_otel_exception_as_seen() returns modified condition", {
   cnd <- simpleError("test error")
-  result <- set_ospan_error_as_seen(cnd)
+  result <- mark_otel_exception_as_seen(cnd)
 
   expect_true(inherits(result, "error"))
   expect_true(inherits(result, "condition"))
   expect_equal(conditionMessage(result), "test error")
-  expect_true(isTRUE(result$.shiny_ospan_error))
+  expect_true(isTRUE(result$.shiny_otel_exception))
 })
 
-test_that("set_ospan_error_as_seen() marks error as seen", {
+test_that("mark_otel_exception_as_seen() marks error as seen", {
   cnd <- simpleError("test error")
-  expect_false(has_seen_ospan_error(cnd))
+  expect_false(has_seen_otel_exception(cnd))
 
-  cnd <- set_ospan_error_as_seen(cnd)
-  expect_true(has_seen_ospan_error(cnd))
+  cnd <- mark_otel_exception_as_seen(cnd)
+  expect_true(has_seen_otel_exception(cnd))
 })
 
 
-test_that("set_ospan_error_status() records sanitized errors by default", {
+test_that("set_otel_exception_status() records sanitized errors by default", {
   server <- function(input, output, session) {
     r1 <- reactive(label = "r1", {
       stop("test error in r1")
@@ -113,7 +113,7 @@ test_that("set_ospan_error_status() records sanitized errors by default", {
   )
 })
 
-test_that("set_ospan_error_status() records exception only once in reactive context", {
+test_that("set_otel_exception_status() records exception only once in reactive context", {
   server <- function(input, output, session) {
     r1 <- reactive(label = "r1", {
       stop("test error in r1")
@@ -150,7 +150,7 @@ test_that("set_ospan_error_status() records exception only once in reactive cont
   )
 })
 
-test_that("set_ospan_error_status() records exception for multiple independent errors", {
+test_that("set_otel_exception_status() records exception for multiple independent errors", {
   server <- function(input, output, session) {
     r1 <- reactive(label = "r1", {
       stop("error in r1")
@@ -182,7 +182,7 @@ test_that("set_ospan_error_status() records exception for multiple independent e
   expect_gte(length(exception_events), 1)
 })
 
-test_that("set_ospan_error_status() does not record shiny.custom.error", {
+test_that("set_otel_exception_status() does not record shiny.custom.error", {
   server <- function(input, output, session) {
     r <- reactive(label = "r", {
       cnd <- simpleError("custom error")
@@ -206,7 +206,7 @@ test_that("set_ospan_error_status() does not record shiny.custom.error", {
   }
 })
 
-test_that("set_ospan_error_status() does not record shiny.silent.error", {
+test_that("set_otel_exception_status() does not record shiny.silent.error", {
   server <- function(input, output, session) {
     r <- reactive(label = "r", {
       cnd <- simpleError("silent error")

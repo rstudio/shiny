@@ -21,7 +21,7 @@
 #' @noRd
 NULL
 
-ospan_label_reactive <- function(x, ..., domain) {
+otel_span_label_reactive <- function(x, ..., domain) {
   fn_name <- otel_label_with_modifiers(
     x,
     "reactive",
@@ -30,12 +30,12 @@ ospan_label_reactive <- function(x, ..., domain) {
   )
 
   label <- attr(x, "observable", exact = TRUE)[[".label"]]
-  ospan_label <- otel_label_upgrade(label, domain = domain)
+  otel_span_label <- otel_label_upgrade(label, domain = domain)
 
-  sprintf("%s %s", fn_name, ospan_label)
+  sprintf("%s %s", fn_name, otel_span_label)
 }
 
-ospan_label_render_function <- function(x, ..., domain) {
+otel_span_label_render_function <- function(x, ..., domain) {
   fn_name <- otel_label_with_modifiers(
     x,
     "output",
@@ -44,12 +44,12 @@ ospan_label_render_function <- function(x, ..., domain) {
   )
 
   label <- getCurrentOutputInfo(session = domain)$name %||% "<unknown>"
-  ospan_label <- otel_label_upgrade(label, domain = domain)
+  otel_span_label <- otel_label_upgrade(label, domain = domain)
 
-  sprintf("%s %s", fn_name, ospan_label)
+  sprintf("%s %s", fn_name, otel_span_label)
 }
 
-ospan_label_observer <- function(x, ..., domain) {
+otel_span_label_observer <- function(x, ..., domain) {
   fn_name <- otel_label_with_modifiers(
     x,
     "observe",
@@ -57,21 +57,21 @@ ospan_label_observer <- function(x, ..., domain) {
     event_class = "Observer.event"
   )
 
-  ospan_label <- otel_label_upgrade(x$.label, domain = domain)
+  otel_span_label <- otel_label_upgrade(x$.label, domain = domain)
 
-  sprintf("%s %s", fn_name, ospan_label)
+  sprintf("%s %s", fn_name, otel_span_label)
 }
 
 # -- Set reactive value(s) ----------------------------------------------------
 
-otel_label_set_reactive_val <- function(label, ..., domain) {
+otel_log_label_set_reactive_val <- function(label, ..., domain) {
   sprintf(
     "Set reactiveVal %s",
     otel_label_upgrade(label, domain = domain)
   )
 }
 
-otel_label_set_reactive_values <- function(label, key, ..., domain) {
+otel_log_label_set_reactive_values <- function(label, key, ..., domain) {
   sprintf(
     "Set reactiveValues %s$%s",
     otel_label_upgrade(label, domain = domain),
@@ -81,23 +81,16 @@ otel_label_set_reactive_values <- function(label, key, ..., domain) {
 
 # -- ExtendedTask -------------------------------------------------------------
 
-otel_label_extended_task <- function(label, suffix = NULL, ..., domain) {
+otel_span_label_extended_task <- function(label, suffix = NULL, ..., domain) {
   sprintf(
     "ExtendedTask %s",
     otel_label_upgrade(label, domain = domain)
   )
 }
-otel_label_extended_task_add_to_queue <- function(label, ..., domain) {
+otel_log_label_extended_task_add_to_queue <- function(label, ..., domain) {
   sprintf(
-    "%s add to queue",
-    otel_label_extended_task(label, domain = domain)
-  )
-}
-otel_label_extended_task_set_reactive_val <- function(label, name, ..., domain) {
-  sprintf(
-    "Set %s %s",
-    otel_label_extended_task(label, domain = domain),
-    name
+    "ExtendedTask %s add to queue",
+    otel_label_upgrade(label, domain = domain)
   )
 }
 

@@ -1058,7 +1058,7 @@ ShinySession <- R6Class(
 
       # For fatal errors, always log.
       # For non-fatal errors, only log if we haven't seen this error before.
-      if (close || !has_seen_ospan_error(e)) {
+      if (close || !has_seen_otel_exception(e)) {
         otel_log(
           if (close) "Fatal error" else "Unhandled error",
           severity = if (close) "fatal" else "error",
@@ -1086,7 +1086,7 @@ ShinySession <- R6Class(
       }
       # ..stacktraceon matches with the top-level ..stacktraceoff..
       withReactiveDomain(self, {
-        with_hybrid_session_end_ospan(domain = self, {
+        otel_span_session_end(domain = self, {
           private$closedCallbacks$invoke(onError = printError, ..stacktraceon = TRUE)
         })
       })
@@ -1167,11 +1167,10 @@ ShinySession <- R6Class(
           # This shinyCallingHandlers should maybe be at a higher level,
           # to include the $then/$catch calls below?
           hybrid_chain(
-            # TODO: Move ospan wrapper here to capture return value
             hybrid_chain(
               {
                 private$withCurrentOutput(name, {
-                  maybe_with_existing_reactive_update_ospan({
+                  maybe_with_otel_span_reactive_update({
                     shinyCallingHandlers(func())
                   }, domain = self)
                 })
@@ -2213,7 +2212,7 @@ ShinySession <- R6Class(
         rLog$asyncStart(domain = self)
         private$sendMessage(busy = "busy")
 
-        start_and_store_reactive_update_ospan(domain = self)
+        otel_span_reactive_update_init(domain = self)
       }
       private$busyCount <- private$busyCount + 1L
     },
@@ -2236,7 +2235,7 @@ ShinySession <- R6Class(
           }
         })
 
-        end_and_clear_reactive_update_ospan(domain = self)
+        otel_span_reactive_update_teardown(domain = self)
       }
     }
   )

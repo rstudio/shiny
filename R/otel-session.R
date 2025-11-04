@@ -10,14 +10,14 @@
 #' @param ... Ignored
 #' @param domain The reactive domain
 #' @noRd
-with_hybrid_session_start_ospan <- function(expr, ..., domain) {
+otel_span_session_start <- function(expr, ..., domain) {
 
   if (!has_otel_bind("session")) {
     return(force(expr))
   }
 
   # Wrap the server initialization
-  with_hybrid_shiny_ospan(
+  with_otel_span(
     "session_start",
     expr,
     attributes = otel::as_attributes(c(
@@ -28,13 +28,13 @@ with_hybrid_session_start_ospan <- function(expr, ..., domain) {
 }
 
 
-with_hybrid_session_end_ospan <- function(expr, ..., domain) {
+otel_span_session_end <- function(expr, ..., domain) {
   if (!has_otel_bind("session")) {
     return(force(expr))
   }
 
   id_attrs <- otel_session_id_attrs(domain)
-  with_hybrid_shiny_ospan(
+  with_otel_span(
     "session_end",
     expr,
     attributes = id_attrs

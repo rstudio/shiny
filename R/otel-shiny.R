@@ -1,4 +1,7 @@
 
+# Used by otel to identify the tracer and logger for this package
+# https://otel.r-lib.org/reference/default_tracer_name.html#setting-the-tracer-name
+# DO NOT CHANGE THIS VALUE without understanding the implications for existing telemetry data!
 otel_tracer_name <- "co.posit.r-package.shiny"
 
 #' Create and use a Shiny OpenTelemetry span

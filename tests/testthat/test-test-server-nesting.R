@@ -1,6 +1,3 @@
-library(shiny)
-library(testthat)
-
 test_that("Nested modules", {
   child <- function(id) {
     moduleServer(id, function(input, output, session) {

@@ -1,6 +1,6 @@
 
 # Used by otel to identify the tracer and logger for this package
-# https://otel.r-lib.org/reference/default_tracer_name.html#setting-the-tracer-name
+# https://github.com/r-lib/otel/blob/afc31bc1f4bd177870d44b051ada1d9e4e685346/R/tracer-name.R#L33-L49
 # DO NOT CHANGE THIS VALUE without understanding the implications for existing telemetry data!
 otel_tracer_name <- "co.posit.r-package.shiny"
 
@@ -47,6 +47,14 @@ testthat__is_testing <- function() {
   identical(Sys.getenv("TESTTHAT"), "true")
 }
 
+#' Log a message using the Shiny OpenTelemetry logger
+#'
+#' @param msg The log message
+#' @param ... Additional attributes to add to the log record
+#' @param severity The log severity level (default: "info")
+#' @param logger The OpenTelemetry logger to use (default: Shiny otel logger)
+#' @return Invisibly returns.
+#' @noRd
 otel_log <- function(
   msg,
   ...,
@@ -56,16 +64,20 @@ otel_log <- function(
   otel::log(msg, ..., severity = severity, logger = logger)
 }
 
+#' Check if OpenTelemetry tracing is enabled
+#'
+#' @param tracer The OpenTelemetry tracer to check (default: Shiny otel tracer)
+#' @return `TRUE` if tracing is enabled, `FALSE` otherwise
+#' @noRd
 otel_is_tracing_enabled <- function(tracer = shiny_otel_tracer()) {
   otel::is_tracing_enabled(tracer)
 }
-otel_get_logger <- function() {
-  otel::get_logger()
-}
-otel_get_tracer <- function() {
-  otel::get_tracer()
-}
 
+#' Shiny OpenTelemetry logger
+#'
+#' Used for logging OpenTelemetry events via `otel_log()`
+#' @return An OpenTelemetry logger
+#' @noRd
 shiny_otel_logger <- local({
   logger <- NULL
 
@@ -79,7 +91,7 @@ shiny_otel_logger <- local({
       return(logger)
     }
 
-    this_logger <- otel_get_logger()
+    this_logger <- otel::get_logger()
 
     if (testthat__is_testing()) {
       # Don't cache the logger in unit tests. It interferes with logger provider
@@ -93,9 +105,17 @@ shiny_otel_logger <- local({
 
 
 
-# Inspired by httr2:::get_tracer().
-# Using local scope avoids an environment object lookup on each call.
+#' Shiny OpenTelemetry tracer
+#'
+#' Used for creating OpenTelemetry spans via `with_otel_span()` and
+#' `start_otel_span()`
+#'
+#' Inspired by httr2:::get_tracer().
+#' @return An OpenTelemetry tracer
+#' @noRd
 shiny_otel_tracer <- local({
+  # Using local scope avoids an environment object lookup on each call.
+
   tracer <- NULL
 
   # For internal testing purposes only
@@ -108,7 +128,7 @@ shiny_otel_tracer <- local({
       return(tracer)
     }
 
-    this_tracer <- otel_get_tracer()
+    this_tracer <- otel::get_tracer()
 
     if (testthat__is_testing()) {
       # Don't cache the tracer in unit tests. It interferes with tracer provider

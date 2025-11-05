@@ -189,10 +189,11 @@ test_that("shiny_otel_logger caches logger in non-test environment", {
   withr::defer({ fn_env$reset_logger() })
 
   local_mocked_bindings(
-    otel_get_logger = function() {
+    get_logger = function(...) {
       get_logger_call_count <<- get_logger_call_count + 1
       mock_logger
-    }
+    },
+    .package = "otel"
   )
 
   with_mocked_bindings(
@@ -237,10 +238,11 @@ test_that("shiny_otel_tracer caches tracer in non-test environment", {
   withr::defer({ fn_env$reset_tracer() })
 
   local_mocked_bindings(
-    otel_get_tracer = function() {
+    get_tracer = function(...) {
       get_tracer_call_count <<- get_tracer_call_count + 1
       mock_tracer
-    }
+    },
+    .package = "otel"
   )
 
   with_mocked_bindings(

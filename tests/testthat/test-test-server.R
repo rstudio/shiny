@@ -1,7 +1,5 @@
-library(shiny)
-library(testthat)
+skip_if_not_installed("future")
 library(future, warn.conflicts = FALSE)
-library(promises)
 
 test_that("handles observers", {
   server <- function(input, output, session) {

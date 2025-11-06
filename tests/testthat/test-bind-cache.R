@@ -930,7 +930,7 @@ test_that("bindCache reactive visibility - async", {
   k <- reactiveVal(0)
   res <- NULL
   r <- reactive({
-    promise(function(resolve, reject) {
+    promises::promise(function(resolve, reject) {
       if (k() == 0) resolve(invisible(k()))
       else          resolve(k())
     })
@@ -1140,7 +1140,7 @@ test_that("Custom render functions that call installExprFunction", {
 
 
 test_that("cacheWriteHook and cacheReadHook for render functions", {
-  testthat::skip_if(get_tracer()$is_enabled(), "Skipping stack trace tests when OpenTelemetry is already enabled")
+  testthat::skip_if(shiny_otel_tracer()$is_enabled(), "Skipping stack trace tests when OpenTelemetry is already enabled")
 
   write_hook_n <- 0
   read_hook_n  <- 0

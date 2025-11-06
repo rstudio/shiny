@@ -1,41 +1,3 @@
-# - OpenTelemetry -----------------------------------
-# * Integration locations:
-#   * √ Server:
-#     * Start reactive_update when reactive busy count > 0
-#     * End reactive_update when reactive busy count == 0
-#   * √ Reactives: val, values, expr, render fn, observe
-#   * Combinations:
-#     * √ debounce() / throttle()
-#     * bindCache()
-#     * √ bindEvent()
-#     * X - bindProgress()
-#   * Special functions:
-#     * ExtendedTask()
-#       * Extended task links to submission reactive
-#       * Reactive update that gets result links to the extended task
-#     * √ observeEvent()
-#     * √ eventReactive()
-#       * TODO: Not recording updates within the span!!
-#  * Maybe enhance all `withReactiveDomain()` calls?
-# * Global options:
-#   * √ shiny.otel.bind:
-#     * "all", "none" - all or nothing
-#     * "session" - Adds session start/end events
-#     * "reactive_update" - Spans for any reactive update. (Includes `"session"` features).
-#     * "reactivity" - Spans for all reactive things. (Includes `"reactive_update"` features).
-# * Private methods:
-#   * bind_otel_*() - Methods that binds the reactive object to OpenTelemetry spans
-#     * Note: When adding otel to an object, prepend a class of `FOO.otel`. Then add a dispatch method for `bindOtel.FOO.otel()` that declares the object already has been bound.
-#   * with_no_otel_bind(expr) - Will not bind any reactives created within `expr` to OpenTelemetry spans.
-
-# - TODO: -----------------------------------
-# * Span status for success/failure (render function and regular reactive exprs?)
-# * Error handling is not an "exception" for fatal logs
-# * Connect `user.id` to be their user name: https://opentelemetry.io/docs/specs/semconv/registry/attributes/user/
-# * Tests with otel recording
-
-# ------------------------------------------
-
 otel_bind_choices <- c(
   "none",
   "session",
@@ -151,8 +113,8 @@ as_otel_bind <- function(bind = "all") {
 #' @section Span management and performance:
 #'
 #' Dev note - Barret 2025-10:
-#' Typically, an OpenTelemetry span (ospan) will inherit from the parent span.
-#' This works well and we can think of the hierarchy as a tree. With
+#' Typically, an OpenTelemetry span (`otel_span`) will inherit from the parent
+#' span. This works well and we can think of the hierarchy as a tree. With
 #' `options("shiny.otel.bind" = <value>)`, we are able to control with a sliding
 #' dial how much of the tree we are interested in: "none", "session",
 #' "reactive_update", "reactivity", and finally "all".
@@ -230,7 +192,7 @@ bind_otel_reactive_expr <- function(x) {
   impl <- attr(x, "observable", exact = TRUE)
   impl$.isRecordingOtel <- TRUE
   # Covers both reactive and reactive.event
-  impl$.otelLabel <- ospan_label_reactive(x, domain = impl$.domain)
+  impl$.otelLabel <- otel_span_label_reactive(x, domain = impl$.domain)
 
   class(x) <- c("reactiveExpr.otel", class(x))
 
@@ -239,7 +201,7 @@ bind_otel_reactive_expr <- function(x) {
 
 bind_otel_observe <- function(x) {
   x$.isRecordingOtel <- TRUE
-  x$.otelLabel <- ospan_label_observer(x, domain = x$.domain)
+  x$.otelLabel <- otel_span_label_observer(x, domain = x$.domain)
 
   class(x) <- c("Observer.otel", class(x))
   invisible(x)
@@ -250,32 +212,32 @@ bind_otel_observe <- function(x) {
 bind_otel_shiny_render_function <- function(x) {
 
   valueFunc <- force(x)
-  span_label <- NULL
-  ospan_attrs <- NULL
+  otel_span_label <- NULL
+  otel_span_attrs <- NULL
 
   renderFunc <- function(...) {
     # Dynamically determine the span label given the current reactive domain
-    if (is.null(span_label)) {
+    if (is.null(otel_span_label)) {
       domain <- getDefaultReactiveDomain()
-      span_label <<-
-        ospan_label_render_function(x, domain = domain)
-      ospan_attrs <<- c(
+      otel_span_label <<-
+        otel_span_label_render_function(x, domain = domain)
+      otel_span_attrs <<- c(
         attr(x, "otelAttrs"),
         otel_session_id_attrs(domain)
       )
     }
 
-    with_shiny_ospan_async(
-      span_label,
+    with_otel_span(
+      otel_span_label,
       {
-        promises::hybrid_then(
+        hybrid_then(
           valueFunc(...),
-          on_failure = set_ospan_error_status_and_throw,
+          on_failure = set_otel_exception_status_and_throw,
           # Must save the error object
           tee = FALSE
         )
       },
-      attributes = ospan_attrs
+      attributes = otel_span_attrs
     )
   }
 

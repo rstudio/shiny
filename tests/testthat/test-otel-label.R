@@ -1,5 +1,5 @@
 # Tests for label methods used in otel-bind.R
-test_that("ospan_label_reactive generates correct labels", {
+test_that("otel_span_label_reactive generates correct labels", {
   # Create mock reactive with observable attribute
   x_reactive <- reactive({ 42 })
 
@@ -7,40 +7,40 @@ test_that("ospan_label_reactive generates correct labels", {
   x_observe <- observe({ 42 })
 
   # Test without domain
-  result <- ospan_label_reactive(x_reactive, domain = MockShinySession$new())
+  result <- otel_span_label_reactive(x_reactive, domain = MockShinySession$new())
   expect_equal(result, "reactive mock-session:x_reactive")
 
   # Test with cache class
   x_reactive_cache <- bindCache(x_reactive, {"cacheKey"})
-  result <- ospan_label_reactive(x_reactive_cache, domain = NULL)
+  result <- otel_span_label_reactive(x_reactive_cache, domain = NULL)
   expect_equal(result, "reactive cache x_reactive_cache")
 
   x_reactive_cache <- x_reactive |> bindCache({"cacheKey"})
-  result <- ospan_label_reactive(x_reactive_cache, domain = NULL)
+  result <- otel_span_label_reactive(x_reactive_cache, domain = NULL)
   expect_equal(result, "reactive cache x_reactive_cache")
   x_reactive_cache <- reactive({42}) |> bindCache({"cacheKey"})
-  result <- ospan_label_reactive(x_reactive_cache, domain = NULL)
+  result <- otel_span_label_reactive(x_reactive_cache, domain = NULL)
   expect_equal(result, "reactive cache x_reactive_cache")
 
   # Test with event class
   x_reactive_event <- bindEvent(x_reactive, {"eventKey"})
-  result <- ospan_label_reactive(x_reactive_event, domain = NULL)
+  result <- otel_span_label_reactive(x_reactive_event, domain = NULL)
   expect_equal(result, "reactive event x_reactive_event")
   x_reactive_event <- x_reactive |> bindEvent({"eventKey"})
-  result <- ospan_label_reactive(x_reactive_event, domain = NULL)
+  result <- otel_span_label_reactive(x_reactive_event, domain = NULL)
   expect_equal(result, "reactive event x_reactive_event")
-  result <- ospan_label_reactive(x_reactive |> bindEvent({"eventKey"}), domain = NULL)
+  result <- otel_span_label_reactive(x_reactive |> bindEvent({"eventKey"}), domain = NULL)
   expect_equal(result, "reactive event <anonymous>")
   x_reactive_event <- reactive({42}) |> bindEvent({"eventKey"})
-  result <- ospan_label_reactive(x_reactive_event, domain = NULL)
+  result <- otel_span_label_reactive(x_reactive_event, domain = NULL)
   expect_equal(result, "reactive event x_reactive_event")
 
   # x_reactive_both <- bindCache(bindEvent(x_reactive, {"eventKey"}), {"cacheKey"})
-  # result <- ospan_label_reactive(x_reactive_both, domain = NULL)
+  # result <- otel_span_label_reactive(x_reactive_both, domain = NULL)
   # expect_equal(result, "reactive event cache x_reactive_both")
 
   x_reactive_both2 <- bindEvent(bindCache(x_reactive, {"cacheKey"}), {"eventKey"})
-  result <- ospan_label_reactive(x_reactive_both2, domain = NULL)
+  result <- otel_span_label_reactive(x_reactive_both2, domain = NULL)
   expect_equal(result, "reactive cache event x_reactive_both2")
 })
 
@@ -62,7 +62,7 @@ test_that("reactive bindCache labels are created", {
     "cachedReactive(x_reactive)"
   )
   expect_equal(
-    ospan_label_reactive(x_reactive_cache, domain = NULL),
+    otel_span_label_reactive(x_reactive_cache, domain = NULL),
     "reactive cache <anonymous>"
   )
 })
@@ -106,24 +106,24 @@ test_that("ExtendedTask otel labels are created", {
 })
 
 
-test_that("ospan_label_reactive with pre-defined label", {
+test_that("otel_span_label_reactive with pre-defined label", {
   x_reactive <- reactive({ 42 }, label = "counter")
 
-  result <- ospan_label_reactive(x_reactive, domain = MockShinySession$new())
+  result <- otel_span_label_reactive(x_reactive, domain = MockShinySession$new())
   expect_equal(result, "reactive mock-session:counter")
 
-  result <- ospan_label_reactive(x_reactive, domain = NULL)
+  result <- otel_span_label_reactive(x_reactive, domain = NULL)
   expect_equal(result, "reactive counter")
 })
 
 test_that("observer labels are preserved", {
   x_observe <- observe({ 42 }, label = "my_observer")
   expect_equal(x_observe$.label, "my_observer")
-  expect_equal(ospan_label_observer(x_observe, domain = NULL), "observe my_observer")
+  expect_equal(otel_span_label_observer(x_observe, domain = NULL), "observe my_observer")
 
   x_observe <- observe({ 42 })
   expect_equal(x_observe$.label, "x_observe")
-  expect_equal(ospan_label_observer(x_observe, domain = NULL), "observe x_observe")
+  expect_equal(otel_span_label_observer(x_observe, domain = NULL), "observe x_observe")
 
   f <- function() {
     observe({ 42 })
@@ -131,35 +131,35 @@ test_that("observer labels are preserved", {
 
   x_observe <- f()
   expect_equal(x_observe$.label, as_default_label("observe({\n    42\n})"))
-  expect_equal(ospan_label_observer(x_observe, domain = NULL), "observe <anonymous>")
+  expect_equal(otel_span_label_observer(x_observe, domain = NULL), "observe <anonymous>")
 })
 
-test_that("ospan_label_observer generates correct labels", {
+test_that("otel_span_label_observer generates correct labels", {
   x_observe <- observe({ 42 }, label = "test_observer" )
 
-  result <- ospan_label_observer(x_observe, domain = MockShinySession$new())
+  result <- otel_span_label_observer(x_observe, domain = MockShinySession$new())
   expect_equal(result, "observe mock-session:test_observer")
-  result <- ospan_label_observer(x_observe, domain = NULL)
+  result <- otel_span_label_observer(x_observe, domain = NULL)
   expect_equal(result, "observe test_observer")
 
   x_observe_event <- bindEvent(x_observe, {"eventKey"})
-  result <- ospan_label_observer(x_observe_event, domain = NULL)
+  result <- otel_span_label_observer(x_observe_event, domain = NULL)
   expect_equal(result, "observe event x_observe_event")
 
   x_observe_event <- observe({ 42 }, label = "test_observer" ) |> bindEvent({"eventKey"})
-  result <- ospan_label_observer(x_observe_event, domain = NULL)
+  result <- otel_span_label_observer(x_observe_event, domain = NULL)
   expect_equal(result, "observe event x_observe_event")
 
-  result <- ospan_label_observer(observe({ 42 }, label = "test_observer" ) |> bindEvent({"eventKey"}), domain = NULL)
+  result <- otel_span_label_observer(observe({ 42 }, label = "test_observer" ) |> bindEvent({"eventKey"}), domain = NULL)
   expect_equal(result, "observe event <anonymous>")
 
   x_observe <- observe({ 42 }, label = "test_observer" )
   x_observe_event <- x_observe |> bindEvent({"eventKey"})
-  result <- ospan_label_observer(x_observe_event, domain = NULL)
+  result <- otel_span_label_observer(x_observe_event, domain = NULL)
   expect_equal(result, "observe event x_observe_event")
 })
 
-test_that("throttle ospan label is correct", {
+test_that("throttle otel span label is correct", {
   x_reactive <- reactive({ 42 })
   x_throttled1 <- throttle(x_reactive, 1000)
   x_throttled2 <- x_reactive |> throttle(1000)
@@ -183,7 +183,7 @@ test_that("throttle ospan label is correct", {
   expect_equal(attr(x_throttled3, "observable")$.otelLabel, "throttle x_throttled3")
 })
 
-test_that("debounce ospan label is correct", {
+test_that("debounce otel span label is correct", {
   x_reactive <- reactive({ 42 })
   x_debounced1 <- debounce(x_reactive, 1000)
   x_debounced2 <- x_reactive |> debounce(1000)
@@ -207,13 +207,13 @@ test_that("debounce ospan label is correct", {
   expect_equal(attr(x_debounced3, "observable")$.otelLabel, "debounce x_debounced3")
 })
 
-test_that("ospan_label_observer handles module namespacing", {
+test_that("otel_span_label_observer handles module namespacing", {
   x_observe <- observe({ 42 }, label = "clicks" )
-  result <- ospan_label_observer(x_observe, domain = MockShinySession$new())
+  result <- otel_span_label_observer(x_observe, domain = MockShinySession$new())
   expect_equal(result, "observe mock-session:clicks")
 })
 
-test_that("ospan_label_render_function generates correct labels", {
+test_that("otel_span_label_render_function generates correct labels", {
   x_render <- renderText({ "Hello" })
   mock_domain <- MockShinySession$new()
 
@@ -223,27 +223,27 @@ test_that("ospan_label_render_function generates correct labels", {
     }
   )
 
-  result <- ospan_label_render_function(x_render, domain = NULL)
+  result <- otel_span_label_render_function(x_render, domain = NULL)
   expect_equal(result, "output plot1")
 
-  result <- ospan_label_render_function(x_render, domain = mock_domain)
+  result <- otel_span_label_render_function(x_render, domain = mock_domain)
   expect_equal(result, "output mock-session:plot1")
 
   x_render_event <- bindEvent(x_render, {"eventKey"})
-  result <- ospan_label_render_function(x_render_event, domain = mock_domain)
+  result <- otel_span_label_render_function(x_render_event, domain = mock_domain)
   expect_equal(result, "output event mock-session:plot1")
 
   x_render_cache <- bindCache(x_render, {"cacheKey"})
-  result <- ospan_label_render_function(x_render_cache, domain = mock_domain)
+  result <- otel_span_label_render_function(x_render_cache, domain = mock_domain)
   expect_equal(result, "output cache mock-session:plot1")
 
   x_render_both <- bindEvent(bindCache(x_render, {"cacheKey"}), {"eventKey"})
-  result <- ospan_label_render_function(x_render_both, domain = mock_domain)
+  result <- otel_span_label_render_function(x_render_both, domain = mock_domain)
   expect_equal(result, "output cache event mock-session:plot1")
 })
 
 
-test_that("ospan_label_render_function handles cache and event classes", {
+test_that("otel_span_label_render_function handles cache and event classes", {
   testthat::local_mocked_bindings(
     getCurrentOutputInfo = function(session) {
       list(name = "table1")
@@ -256,19 +256,19 @@ test_that("ospan_label_render_function handles cache and event classes", {
   x_render_both <- bindEvent(bindCache(x_render, {"cacheKey"}), {"eventKey"})
   mock_domain <- MockShinySession$new()
 
-  result <- ospan_label_render_function(x_render, domain = NULL)
+  result <- otel_span_label_render_function(x_render, domain = NULL)
   expect_equal(result, "output table1")
 
-  result <- ospan_label_render_function(x_render, domain = mock_domain)
+  result <- otel_span_label_render_function(x_render, domain = mock_domain)
   expect_equal(result, "output mock-session:table1")
 
-  result <- ospan_label_render_function(x_render_event, domain = mock_domain)
+  result <- otel_span_label_render_function(x_render_event, domain = mock_domain)
   expect_equal(result, "output event mock-session:table1")
 
-  result <- ospan_label_render_function(x_render_cache, domain = mock_domain)
+  result <- otel_span_label_render_function(x_render_cache, domain = mock_domain)
   expect_equal(result, "output cache mock-session:table1")
 
-  result <- ospan_label_render_function(x_render_both, domain = mock_domain)
+  result <- otel_span_label_render_function(x_render_both, domain = mock_domain)
   expect_equal(result, "output cache event mock-session:table1")
 })
 

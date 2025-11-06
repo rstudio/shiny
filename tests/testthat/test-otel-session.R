@@ -40,14 +40,14 @@ create_mock_session_domain <- function(
   domain
 }
 
-test_that("use_session_start_ospan_async returns early when otel not enabled", {
+test_that("otel_span_session_start returns early when otel not enabled", {
   domain <- create_mock_session_domain()
   test_value <- "initial"
 
   # Mock has_otel_bind to return FALSE
   withr::local_options(list(shiny.otel.bind = "none"))
 
-  result <- use_session_start_ospan_async({
+  result <- otel_span_session_start({
     test_value <- "modified"
     "result_value"
   }, domain = domain)
@@ -58,7 +58,7 @@ test_that("use_session_start_ospan_async returns early when otel not enabled", {
   expect_length(domain$cleanup_callbacks, 0)
 })
 
-test_that("use_session_start_ospan_async sets up session end callback", {
+test_that("otel_span_session_start sets up session end callback", {
   domain <- create_mock_session_domain(
     token = "session-456",
     request = list(PATH_INFO = "/app", HTTP_HOST = "localhost")
@@ -78,7 +78,7 @@ test_that("use_session_start_ospan_async sets up session end callback", {
     has_otel_bind = function(level) level == "session",
     otel_session_id_attrs = function(domain) list(session.id = domain$token),
     otel_session_attrs = function(domain) list(PATH_INFO = "/app"),
-    with_shiny_ospan_async = function(name, expr, attributes = NULL) {
+    with_otel_span = function(name, expr, attributes = NULL) {
       expect_equal(name, "session_start")
       expect_true("session.id" %in% names(attributes))
       expect_equal(attributes[["session.id"]], "session-456")
@@ -88,7 +88,7 @@ test_that("use_session_start_ospan_async sets up session end callback", {
 
       expect_length(domain$cleanup_callbacks, 0)
 
-      result <- use_session_start_ospan_async({
+      result <- otel_span_session_start({
         test_value <- "modified"
         "result_value"
       }, domain = domain)
@@ -101,14 +101,14 @@ test_that("use_session_start_ospan_async sets up session end callback", {
   )
 })
 
-test_that("with_session_end_ospan_async returns early when otel not enabled", {
+test_that("otel_span_session_end returns early when otel not enabled", {
   domain <- create_mock_session_domain()
   test_value <- "initial"
 
   # Mock has_otel_bind to return FALSE
   withr::local_options(list(shiny.otel.bind = "none"))
 
-  result <- with_session_end_ospan_async({
+  result <- otel_span_session_end({
     test_value <- "modified"
     "result_value"
   }, domain = domain)
@@ -117,7 +117,7 @@ test_that("with_session_end_ospan_async returns early when otel not enabled", {
   expect_equal(test_value, "modified")
 })
 
-test_that("with_session_end_ospan_async creates span when enabled", {
+test_that("otel_span_session_end creates span when enabled", {
   domain <- create_mock_session_domain(token = "session-end-test")
 
   span_created <- FALSE
@@ -129,14 +129,14 @@ test_that("with_session_end_ospan_async creates span when enabled", {
   with_mocked_bindings(
     has_otel_bind = function(level) level == "session",
     otel_session_id_attrs = function(domain) list(session.id = domain$token),
-    with_shiny_ospan_async = function(name, expr, attributes = NULL) {
+    with_otel_span = function(name, expr, attributes = NULL) {
       span_created <<- TRUE
       expect_equal(name, "session_end")
       expect_equal(attributes[["session.id"]], "session-end-test")
       force(expr)
     },
     {
-      result <- with_session_end_ospan_async({
+      result <- otel_span_session_end({
         test_value <- "modified"
         "result_value"
       }, domain = domain)
@@ -161,10 +161,10 @@ test_that("otel_session_attrs extracts request attributes correctly", {
 
   attrs <- otel_session_attrs(domain)
 
-  expect_equal(attrs$PATH_INFO, "/myapp/page")
-  expect_equal(attrs$HTTP_HOST, "example.com")
-  expect_equal(attrs$HTTP_ORIGIN, "https://example.com")
-  expect_equal(attrs$SERVER_PORT, 8080L)  # Should be converted to integer
+  expect_equal(attrs$server.path, "/myapp/page")
+  expect_equal(attrs$server.address, "example.com")
+  expect_equal(attrs$server.origin, "https://example.com")
+  expect_equal(attrs$server.port, 8080L)  # Should be converted to integer
 })
 
 test_that("otel_session_attrs handles websocket PATH_INFO", {
@@ -178,7 +178,7 @@ test_that("otel_session_attrs handles websocket PATH_INFO", {
   attrs <- otel_session_attrs(domain)
 
   # Should strip websocket suffix
-  expect_equal(attrs$PATH_INFO, "/myapp/")
+  expect_equal(attrs$server.path, "/myapp/")
 })
 
 test_that("otel_session_attrs handles missing request fields", {
@@ -191,10 +191,10 @@ test_that("otel_session_attrs handles missing request fields", {
 
   attrs <- otel_session_attrs(domain)
 
-  expect_equal(attrs$PATH_INFO, "")
-  expect_equal(attrs$HTTP_HOST, "localhost")
-  expect_equal(attrs$HTTP_ORIGIN, "")
-  expect_equal(attrs$SERVER_PORT, NA_integer_)
+  expect_equal(attrs$server.path, "")
+  expect_equal(attrs$server.address, "localhost")
+  expect_equal(attrs$server.origin, "")
+  expect_equal(attrs$server.port, NA_integer_)
 })
 
 test_that("otel_session_attrs handles empty request", {
@@ -202,10 +202,10 @@ test_that("otel_session_attrs handles empty request", {
 
   attrs <- otel_session_attrs(domain)
 
-  expect_equal(attrs$PATH_INFO, "")
-  expect_equal(attrs$HTTP_HOST, "")
-  expect_equal(attrs$HTTP_ORIGIN, "")
-  expect_equal(attrs$SERVER_PORT, NA_integer_)
+  expect_equal(attrs$server.path, "")
+  expect_equal(attrs$server.address, "")
+  expect_equal(attrs$server.origin, "")
+  expect_equal(attrs$server.port, NA_integer_)
 })
 
 test_that("otel_session_attrs handles invalid SERVER_PORT gracefully", {
@@ -217,7 +217,7 @@ test_that("otel_session_attrs handles invalid SERVER_PORT gracefully", {
   attrs <- otel_session_attrs(domain)
 
   # Should remain as string if conversion fails
-  expect_equal(attrs$SERVER_PORT, "invalid")
+  expect_equal(attrs$server.port, "invalid")
 })
 
 test_that("otel_session_id_attrs returns correct session ID", {
@@ -263,7 +263,7 @@ test_that("integration test - session start with full request", {
     has_otel_bind = function(level) level == "session",
     otel_session_id_attrs = otel_session_id_attrs,  # Use real function
     otel_session_attrs = otel_session_attrs,        # Use real function
-    with_shiny_ospan_async = function(name, expr, attributes = NULL) {
+    with_otel_span = function(name, expr, attributes = NULL) {
       span_attributes <<- attributes
       force(expr)
     },
@@ -272,7 +272,7 @@ test_that("integration test - session start with full request", {
 
       expect_length(domain$cleanup_callbacks, 0)
 
-      result <- use_session_start_ospan_async({
+      result <- otel_span_session_start({
         "test_result"
       }, domain = domain)
 
@@ -280,9 +280,9 @@ test_that("integration test - session start with full request", {
 
       # Check span attributes include both session ID and request info
       expect_equal(span_attributes[["session.id"]], "integration-test-session")
-      expect_equal(span_attributes[["PATH_INFO"]], "/dashboard/")
-      expect_equal(span_attributes[["HTTP_HOST"]], "shiny.example.com")
-      expect_equal(span_attributes[["SERVER_PORT"]], 3838L)
+      expect_equal(span_attributes[["server.path"]], "/dashboard/")
+      expect_equal(span_attributes[["server.address"]], "shiny.example.com")
+      expect_equal(span_attributes[["server.port"]], 3838L)
     }
   )
 })

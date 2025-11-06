@@ -442,15 +442,15 @@ MockShinySession <- R6Class(
           prom <- NULL
           tryCatch({
             v <- private$withCurrentOutput(name, func(self, name))
-            if (!promises::is.promise(v)){
+            if (!is.promise(v)){
               # Make our sync value into a promise
-              prom <- promises::promise(function(resolve, reject){ resolve(v) })
+              prom <- promise_resolve(v)
             } else {
               prom <- v
             }
           }, error=function(e){
             # Error running value()
-            prom <<- promises::promise(function(resolve, reject){ reject(e) })
+            prom <<- promise_reject(e)
           })
 
           private$outs[[name]]$promise <- hybrid_chain(
@@ -718,7 +718,7 @@ MockShinySession <- R6Class(
         stop("Nested calls to withCurrentOutput() are not allowed.")
       }
 
-      promises::with_promise_domain(
+      with_promise_domain(
         createVarPromiseDomain(private, "currentOutputName", name),
         expr
       )

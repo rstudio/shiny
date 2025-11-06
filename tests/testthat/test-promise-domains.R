@@ -1,6 +1,6 @@
 with_several_promise_domains <- function(expr) {
   withReactiveDomain(MockShinySession$new(), {
-    promises::with_promise_domain(reactivePromiseDomain(), {
+    with_promise_domain(reactivePromiseDomain(), {
       captureStackTraces({
         expr
       })

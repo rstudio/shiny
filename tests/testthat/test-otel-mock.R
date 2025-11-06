@@ -163,7 +163,7 @@ for (bind in c("all", "reactivity")) {
   test_that(paste0("bind='", bind, "' extended tasks are supported"), {
     server <- function(input, output, session) {
       rand_task <- ExtendedTask$new(function() {
-        promise_resolve(42) |> then(function(value) {
+        promise_resolve(42) |> promises::then(function(value) {
           value
         })
       })

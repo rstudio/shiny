@@ -136,25 +136,13 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
         call_srcref,
         defaultLabel = "<anonymous>"
       )
-      private$otel_label <- otel_label_extended_task(label, domain = domain)
-      private$otel_label_add_to_queue <- otel_label_extended_task_add_to_queue(label, domain = domain)
+      private$otel_span_label <- otel_span_label_extended_task(label, domain = domain)
+      private$otel_log_label_add_to_queue <- otel_log_label_extended_task_add_to_queue(label, domain = domain)
 
       private$otel_attrs <- c(
         otel_srcref_attributes(call_srcref),
         otel_session_id_attrs(domain)
       ) %||% list()
-
-      set_rv_label <- function(rv, suffix) {
-        impl <- attr(rv, ".impl", exact = TRUE)
-        impl$.otelLabel <- otel_label_extended_task_set_reactive_val(
-          label,
-          suffix,
-          domain = domain
-        )
-      }
-      set_rv_label(private$rv_status, "status")
-      set_rv_label(private$rv_value, "value")
-      set_rv_label(private$rv_error, "error")
     },
     #' @description
     #' Starts executing the long-running operation. If this `ExtendedTask` is
@@ -175,7 +163,7 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
           private$invocation_queue$size() > 0
       ) {
         otel_log(
-          private$otel_label_add_to_queue,
+          private$otel_log_add_to_queue_label,
           severity = "debug",
           attributes = c(
             private$otel_attrs,
@@ -188,11 +176,11 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
       } else {
 
         if (has_otel_bind("reactivity")) {
-          private$ospan <- create_shiny_ospan(
-            private$otel_label,
+          private$otel_span <- start_otel_span(
+            private$otel_span_label,
             attributes = private$otel_attrs
           )
-          otel::local_active_span(private$ospan)
+          otel::local_active_span(private$otel_span)
         }
 
         private$do_invoke(args, call = call)
@@ -262,33 +250,34 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
     rv_error = NULL,
     invocation_queue = NULL,
 
-    otel_label = NULL,
+    otel_span_label = NULL,
+    otel_log_label_add_to_queue = NULL,
     otel_attrs = list(),
-    otel_label_add_to_queue = NULL,
-    ospan = NULL,
+    otel_span = NULL,
 
     do_invoke = function(args, call = NULL) {
       private$rv_status("running")
       private$rv_value(NULL)
       private$rv_error(NULL)
 
-      p <- promises::promise_resolve(
+      p <- promise_resolve(
         maskReactiveContext(do.call(private$func, args))
       )
 
       p <- promises::then(
         p,
         onFulfilled = function(value, .visible) {
-          if (is_ospan(private$ospan)) {
-            private$ospan$end(status_code = "ok")
-            private$ospan <- NULL
+          if (is_otel_span(private$otel_span)) {
+
+            private$otel_span$end(status_code = "ok")
+            private$otel_span <- NULL
           }
           private$on_success(list(value = value, visible = .visible))
         },
         onRejected = function(error) {
-          if (is_ospan(private$ospan)) {
-            private$ospan$end(status_code = "error")
-            private$ospan <- NULL
+          if (is_otel_span(private$otel_span)) {
+            private$otel_span$end(status_code = "error")
+            private$otel_span <- NULL
           }
           private$on_error(error, call = call)
         }

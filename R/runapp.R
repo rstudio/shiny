@@ -98,7 +98,7 @@ runApp <- function(
   # * While this could be done at a lower level, it allows for _anything_ within
   #   shiny's control to allow for the opportunity to have otel active spans be
   #   reactivated upon promise domain restoration
-  local_ospan_promise_domain()
+  promises::local_otel_promise_domain()
 
   on.exit({
     handlerManager$clear()

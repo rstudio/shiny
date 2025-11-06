@@ -41,23 +41,17 @@ get_call_srcref <- function(which_offset = 0) {
 }
 
 
-append_otel_attrs <- function(attrs, new_attrs) {
-  if (is.null(new_attrs)) {
-    return(attrs)
-  }
-
-  attrs[names(new_attrs)] <- new_attrs
-
-  attrs
-}
-
 append_otel_srcref_attrs <- function(attrs, call_srcref) {
   if (is.null(call_srcref)) {
     return(attrs)
   }
 
   srcref_attrs <- otel_srcref_attributes(call_srcref)
-  attrs <- append_otel_attrs(attrs, srcref_attrs)
+  if (is.null(srcref_attrs)) {
+    return(attrs)
+  }
+
+  attrs[names(srcref_attrs)] <- srcref_attrs
 
   attrs
 }

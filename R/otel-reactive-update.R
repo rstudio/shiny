@@ -25,18 +25,16 @@ otel_span_reactive_update_init <- function(..., domain) {
   }
 
   # Safety check
-  prev_otel_span <- domain$userData[["_otel_span_reactive_update"]]
-  if (is_otel_span(prev_otel_span)) {
+  if (is_otel_span(domain$userData[["_otel_span_reactive_update"]])) {
     stop("Reactive update span already exists")
   }
 
-  reactive_update_otel_span <- start_otel_span(
-    "reactive_update",
-    ...,
-    attributes = otel_session_id_attrs(domain)
-  )
-
-  domain$userData[["_otel_span_reactive_update"]] <- reactive_update_otel_span
+  domain$userData[["_otel_span_reactive_update"]] <-
+    start_otel_span(
+      "reactive_update",
+      ...,
+      attributes = otel_session_id_attrs(domain)
+    )
 
   invisible()
 }
@@ -48,10 +46,10 @@ otel_span_reactive_update_init <- function(..., domain) {
 #' @seealso `otel_span_reactive_update_init()`
 #' @noRd
 otel_span_reactive_update_teardown <- function(..., domain) {
-  reactive_update_otel_span <- domain$userData[["_otel_span_reactive_update"]]
+  ospan <- domain$userData[["_otel_span_reactive_update"]]
 
-  if (is_otel_span(reactive_update_otel_span)) {
-    otel::end_span(reactive_update_otel_span)
+  if (is_otel_span(ospan)) {
+    otel::end_span(ospan)
     domain$userData[["_otel_span_reactive_update"]] <- NULL
   }
 
@@ -68,15 +66,15 @@ otel_span_reactive_update_teardown <- function(..., domain) {
 #' @param domain The reactive domain to associate with the span
 #' @noRd
 with_otel_span_reactive_update <- function(expr, ..., domain) {
-  reactive_update_otel_span <- domain$userData[["_otel_span_reactive_update"]]
+  ospan <- domain$userData[["_otel_span_reactive_update"]]
 
-  if (!is_otel_span(reactive_update_otel_span)) {
+  if (!is_otel_span(ospan)) {
     return(force(expr))
   }
 
-  # Given the reactive span is started before and ended when exec count is 0,
-  # we only need to wrap the expr in the span context
-  otel::with_active_span(reactive_update_otel_span, {force(expr)})
+  # Given the reactive update span is started before and ended when exec count
+  # is 0, we only need to wrap the expr in the span context
+  otel::with_active_span(ospan, {force(expr)})
 }
 
 

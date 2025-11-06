@@ -1,38 +1,3 @@
-# - OpenTelemetry -----------------------------------
-# * Integration locations:
-#   * √ Server:
-#     * Start reactive_update when reactive busy count > 0
-#     * End reactive_update when reactive busy count == 0
-#   * √ Reactives: val, values, expr, render fn, observe
-#   * Combinations:
-#     * √ debounce() / throttle()
-#     * bindCache()
-#     * √ bindEvent()
-#     * X - bindProgress()
-#   * Special functions:
-#     * ExtendedTask()
-#       * Extended task links to submission reactive
-#       * Reactive update that gets result links to the extended task
-#     * √ observeEvent()
-#     * √ eventReactive()
-#       * TODO: Not recording updates within the span!!
-#  * Maybe enhance all `withReactiveDomain()` calls?
-# * Global options:
-#   * √ shiny.otel.bind:
-#     * "all", "none" - all or nothing
-#     * "session" - Adds session start/end events
-#     * "reactive_update" - Spans for any reactive update. (Includes `"session"` features).
-#     * "reactivity" - Spans for all reactive things. (Includes `"reactive_update"` features).
-# * Private methods:
-#   * bind_otel_*() - Methods that binds the reactive object to OpenTelemetry spans
-#     * Note: When adding otel to an object, prepend a class of `FOO.otel`. Then add a dispatch method for `bindOtel.FOO.otel()` that declares the object already has been bound.
-#   * with_no_otel_bind(expr) - Will not bind any reactives created within `expr` to OpenTelemetry spans.
-
-# - TODO: -----------------------------------
-# * Connect `user.id` to be their user name: https://opentelemetry.io/docs/specs/semconv/registry/attributes/user/
-
-# ------------------------------------------
-
 otel_bind_choices <- c(
   "none",
   "session",

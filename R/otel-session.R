@@ -46,6 +46,14 @@ otel_span_session_end <- function(expr, ..., domain) {
 
 # Occurs when the websocket connection is established
 otel_session_attrs <- function(domain) {
+  # TODO: Future: Posit Connect integration
+  # > we are still trying to identify all of the information we want to track/expose
+  #
+  # * `POSIT_PRODUCT` (Fallback to RSTUDIO_PRODUCT) for host environment
+  # * `CONNECT_SERVER` envvar to get the `session.address`.
+  # * `CONNECT_CONTENT_GUID` for the consistent app distinguisher
+  # * Maybe `CONNECT_CONTENT_JOB_KEY`?
+  # * Maybe `user.id` to be their user name: https://opentelemetry.io/docs/specs/semconv/registry/attributes/user/
   attrs <- list(
     server.path =
       sub(

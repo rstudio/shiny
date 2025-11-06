@@ -100,7 +100,7 @@ plotPNG <- function(func, filename=tempfile(fileext='.png'),
 createGraphicsDevicePromiseDomain <- function(which = dev.cur()) {
   force(which)
 
-  promises::new_promise_domain(
+  new_promise_domain(
     wrapOnFulfilled = function(onFulfilled) {
       force(onFulfilled)
       function(...) {

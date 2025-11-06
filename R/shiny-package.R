@@ -6,9 +6,10 @@
 #' @importFrom fastmap fastmap
 #' @importFrom promises
 #'     %...!% %...>%
-#'    as.promise is.promising
-#'    promise promise_resolve promise_reject
-#'    then hybrid_then
+#'    as.promise is.promising is.promise
+#'    promise_resolve promise_reject
+#'    hybrid_then
+#'    with_promise_domain new_promise_domain
 #' @importFrom rlang
 #'    quo enquo enquo0 as_function get_expr get_env new_function enquos
 #'    eval_tidy expr pairlist2 new_quosure enexpr as_quosure is_quosure inject

@@ -744,7 +744,7 @@ test_that("promise chains evaluate in correct order", {
 
   server <- function(input, output, session) {
     r1 <- reactive({
-      promise(function(resolve, reject) {
+      promises::promise(function(resolve, reject) {
         pushMessage("promise 1")
         resolve(input$go)
       })$then(function(value) {
@@ -753,7 +753,7 @@ test_that("promise chains evaluate in correct order", {
       })
     })
     r2 <- reactive({
-      promise(function(resolve, reject) {
+      promises::promise(function(resolve, reject) {
         pushMessage("promise 2")
         resolve(input$go)
       })$then(function(value) {

@@ -626,7 +626,7 @@ renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
     domain <- createRenderPrintPromiseDomain(width)
     hybrid_chain(
       {
-        promises::with_promise_domain(domain, func())
+        with_promise_domain(domain, func())
       },
       function(value) {
         res <- withVisible(value)
@@ -655,7 +655,7 @@ renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
 createRenderPrintPromiseDomain <- function(width) {
   f <- file()
 
-  promises::new_promise_domain(
+  new_promise_domain(
     wrapOnFulfilled = function(onFulfilled) {
       force(onFulfilled)
       function(...) {

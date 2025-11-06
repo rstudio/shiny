@@ -97,9 +97,11 @@ getDefaultReactiveDomain <- function() {
 #' @rdname domains
 #' @export
 withReactiveDomain <- function(domain, expr) {
-  # TODO: Integrate `promises:::with_otel_active_span_promise_domain(expr)`
-
-  promises::with_promise_domain(createVarPromiseDomain(.globals, "domain", domain), expr)
+  # Use `promises::` as it shows up in the stack trace
+  promises::with_promise_domain(
+    createVarPromiseDomain(.globals, "domain", domain),
+    expr
+  )
 }
 
 #

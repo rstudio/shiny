@@ -134,7 +134,9 @@ getCallCategories <- function(calls) {
 #' @rdname stacktrace
 #' @export
 captureStackTraces <- function(expr) {
-  promises::with_promise_domain(createStackTracePromiseDomain(),
+  # Use `promises::` as it shows up in the stack trace
+  promises::with_promise_domain(
+    createStackTracePromiseDomain(),
     expr
   )
 }
@@ -184,7 +186,7 @@ createStackTracePromiseDomain <- function() {
   # These are actually stateless, we wouldn't have to create a new one each time
   # if we didn't want to. They're pretty cheap though.
 
-  d <- promises::new_promise_domain(
+  d <- new_promise_domain(
     wrapOnFulfilled = function(onFulfilled) {
       force(onFulfilled)
       # Subscription time
@@ -278,7 +280,7 @@ withLogErrors <- function(expr,
       result <- captureStackTraces(expr)
 
       # Handle expr being an async operation
-      if (promises::is.promise(result)) {
+      if (is.promise(result)) {
         result <- promises::catch(result, function(cond) {
           # Don't print shiny.silent.error (i.e. validation errors)
           if (cnd_inherits(cond, "shiny.silent.error")) {

@@ -428,7 +428,7 @@ ShinySession <- R6Class(
         stop("Nested calls to withCurrentOutput() are not allowed.")
       }
 
-      promises::with_promise_domain(
+      with_promise_domain(
         createVarPromiseDomain(private, "currentOutputName", name),
         expr
       )
@@ -2039,7 +2039,7 @@ ShinySession <- R6Class(
           ext <- paste(".", ext, sep = "")
         tmpdata <- tempfile(fileext = ext)
         return(Context$new(getDefaultReactiveDomain(), '[download]')$run(function() {
-          promises::with_promise_domain(reactivePromiseDomain(), {
+          with_promise_domain(reactivePromiseDomain(), {
             captureStackTraces({
               self$incrementBusyCount()
               hybrid_chain(

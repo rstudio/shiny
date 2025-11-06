@@ -114,6 +114,7 @@ Context <- R6Class(
     run = function(func) {
       "Run the provided function under this context."
 
+      # Use `promises::` as it shows up in the stack trace
       promises::with_promise_domain(reactivePromiseDomain(), {
         withReactiveDomain(.domain, {
           with_otel_span_context(.otel_info, domain = .domain, {
@@ -296,7 +297,7 @@ wrapForContext <- function(func, ctx) {
 }
 
 reactivePromiseDomain <- function() {
-  promises::new_promise_domain(
+  new_promise_domain(
     wrapOnFulfilled = function(onFulfilled) {
       force(onFulfilled)
 

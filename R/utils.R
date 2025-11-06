@@ -1525,7 +1525,7 @@ promise_chain <- function(promise, ..., catch = NULL, finally = NULL,
   }
 
   if (!is.null(domain)) {
-    promises::with_promise_domain(domain, do(), replace = replace)
+    with_promise_domain(domain, do(), replace = replace)
   } else {
     do()
   }
@@ -1542,7 +1542,7 @@ hybrid_chain <- function(expr, ..., catch = NULL, finally = NULL,
       {
         captureStackTraces({
           result <- withVisible(force(expr))
-          if (promises::is.promising(result$value)) {
+          if (is.promising(result$value)) {
             # Purposefully NOT including domain (nor replace), as we're already in
             # the domain at this point
             p <- promise_chain(valueWithVisible(result), ..., catch = catch, finally = finally)
@@ -1576,7 +1576,7 @@ hybrid_chain <- function(expr, ..., catch = NULL, finally = NULL,
   }
 
   if (!is.null(domain)) {
-    promises::with_promise_domain(domain, do(), replace = replace)
+    with_promise_domain(domain, do(), replace = replace)
   } else {
     do()
   }
@@ -1594,7 +1594,7 @@ createVarPromiseDomain <- function(env, name, value) {
   force(name)
   force(value)
 
-  promises::new_promise_domain(
+  new_promise_domain(
     wrapOnFulfilled = function(onFulfilled) {
       function(...) {
         orig <- env[[name]]

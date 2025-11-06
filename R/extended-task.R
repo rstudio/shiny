@@ -260,7 +260,7 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
       private$rv_value(NULL)
       private$rv_error(NULL)
 
-      p <- promises::promise_resolve(
+      p <- promise_resolve(
         maskReactiveContext(do.call(private$func, args))
       )
 

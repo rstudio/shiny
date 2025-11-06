@@ -930,7 +930,7 @@ test_that("bindCache reactive visibility - async", {
   k <- reactiveVal(0)
   res <- NULL
   r <- reactive({
-    promise(function(resolve, reject) {
+    promises::promise(function(resolve, reject) {
       if (k() == 0) resolve(invisible(k()))
       else          resolve(k())
     })

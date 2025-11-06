@@ -1,6 +1,3 @@
-library(shiny)
-library(testthat)
-
 test_that("testServer works with dir app", {
   # app.R
   testServer(test_path("..", "test-modules", "06_tabsets"), {

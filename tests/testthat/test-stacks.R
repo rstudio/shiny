@@ -118,7 +118,7 @@ dumpTests <- function(df) {
 }
 
 test_that("integration tests", {
-  if (get_tracer()$is_enabled()) {
+  if (shiny_otel_tracer()$is_enabled()) {
     announce_snapshot_file(name = "stacks.md")
 
     skip("Skipping stack trace tests when OpenTelemetry is already enabled")

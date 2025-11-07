@@ -42,9 +42,3 @@ release_bullets <- function() {
     "Update static imports: `staticimports::import()`"
   )
 }
-
-
-# To get around R CMD check lint
-`_ignore` <- function() {
-  otelsdk::with_otel_record
-}

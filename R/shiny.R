@@ -2215,9 +2215,24 @@ ShinySession <- R6Class(
         otel_span_reactive_update_init(domain = self)
       }
       private$busyCount <- private$busyCount + 1L
+
+      otel::up_down_counter_add(
+        "reactive_update_busy_count",
+        value = 1L,
+        attributes = list(
+          session_token = self$token
+        )
+      )
     },
     decrementBusyCount = function() {
       private$busyCount <- private$busyCount - 1L
+      otel::up_down_counter_add(
+        "reactive_update_busy_count",
+        value = -1L,
+        attributes = list(
+          session_token = self$token
+        )
+      )
       if (private$busyCount == 0L) {
         rLog$asyncStop(domain = self)
         private$sendMessage(busy = "idle")

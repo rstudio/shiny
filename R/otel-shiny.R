@@ -37,7 +37,7 @@ with_shiny_otel_record <- function(expr) {
 #' @return `TRUE` if tracing is enabled, `FALSE` otherwise
 #' @noRd
 otel_is_tracing_enabled <- function() {
-  .subset2(.globals, "otel_is_tracing_enabled")
+  .globals[["otel_is_tracing_enabled"]]
 }
 
 #' Shiny OpenTelemetry logger
@@ -46,7 +46,7 @@ otel_is_tracing_enabled <- function() {
 #' @return An OpenTelemetry logger
 #' @noRd
 shiny_otel_logger <- function() {
-  .subset2(.globals, "otel_logger")
+  .globals[["otel_logger"]]
 }
 
 
@@ -60,7 +60,7 @@ shiny_otel_logger <- function() {
 #' @return An OpenTelemetry tracer
 #' @noRd
 shiny_otel_tracer <- function() {
-  .subset2(.globals, "otel_tracer")
+  .globals[["otel_tracer"]]
 }
 
 

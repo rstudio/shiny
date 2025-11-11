@@ -34,7 +34,7 @@ test_server_with_otel_error <- function(session, server, expr, sanitize = FALSE,
   stopifnot(inherits(session, "MockShinySession"))
   stopifnot(is.function(server))
 
-  traces <- otelsdk::with_otel_record({ 42 })$traces
+  traces <- with_shiny_otel_record({ 42 })$traces
   expect_length(traces, 0)
 
   withr::with_options(
@@ -43,7 +43,7 @@ test_server_with_otel_error <- function(session, server, expr, sanitize = FALSE,
       shiny.otel.sanitize.errors = sanitize
     ),
     {
-      info <- otelsdk::with_otel_record({
+      info <- with_shiny_otel_record({
         # rlang quosure magic to capture and pass through `expr`
         testServer(server, {{ expr }}, args = args, session = session)
       })

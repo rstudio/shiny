@@ -47,7 +47,7 @@ test_server_with_otel <- function(session, server, expr, bind = "all", args = li
   stopifnot(is.function(server))
 
   withr::with_options(list(shiny.otel.bind = bind), {
-    info <- otelsdk::with_otel_record({
+    info <- with_shiny_otel_record({
       # rlang quosure magic to capture and pass through `expr`
       testServer(server, {{ expr }}, args = args, session = session)
     })

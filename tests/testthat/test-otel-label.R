@@ -70,7 +70,7 @@ test_that("reactive bindCache labels are created", {
 test_that("ExtendedTask otel labels are created", {
   ex_task <- ExtendedTask$new(function() { promises::then(promises::promise_resolve(42), force) })
 
-  info <- otelsdk::with_otel_record({
+  info <- with_shiny_otel_record({
     ex_task$invoke()
     while(!later::loop_empty()) {
       later::run_now()
@@ -88,7 +88,7 @@ test_that("ExtendedTask otel labels are created", {
   withReactiveDomain(MockShinySession$new(), {
     ex2_task <- ExtendedTask$new(function() { promises::then(promises::promise_resolve(42), force) })
 
-    info <- otelsdk::with_otel_record({
+    info <- with_shiny_otel_record({
       ex2_task$invoke()
       while(!later::loop_empty()) {
         later::run_now()

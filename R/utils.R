@@ -1438,16 +1438,15 @@ dateYMD <- function(date = NULL, argName = "value") {
     } else {
       res <- format(as.Date(date), "%Y-%m-%d")
     }
-    if (any(is.na(res))) stop()
-    date <- res
-  },
-  error = function(e) {
-    warning(
-      "Couldn't coerce the `", argName,
-      "` argument to a date string with format yyyy-mm-dd",
-      call. = FALSE
-    )
-  }
+      if (any(is.na(res))) stop()
+      date <- res
+    },
+    error = function(e) {
+      warning(
+        "Couldn't coerce the `", argName,
+        "` argument to a date string with format yyyy-mm-dd",
+        call. = FALSE
+      )
   )
   date
 }

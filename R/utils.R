@@ -1447,7 +1447,9 @@ dateYMD <- function(date = NULL, argName = "value") {
         "` argument to a date string with format yyyy-mm-dd",
         call. = FALSE
       )
-  )
+    )
+  }
+)
   date
 }
 

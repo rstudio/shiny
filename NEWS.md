@@ -44,6 +44,7 @@
   * Combination of `bindCache()` and `reactive()`
 
 ## Changes
+* Resolved [#2519](https://github.com/rstudio/shiny/issues/2519): While running the app in showcase mode, clicking the `AuthorUrl` provided in the metadata will now open the window in a new tab instead of navigating away from the application.
 
 * Markdown rendering in showcase mode now uses server-side rendering with the `{commonmark}` package, providing support for GitHub Flavored Markdown features (tables, strikethrough, autolinks, task lists). While most existing README.md files should continue to work as expected, some minor rendering differences may occur due to the change in markdown processor. (#4202, #4201)
 

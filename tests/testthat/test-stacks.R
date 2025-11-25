@@ -84,11 +84,17 @@ extractStackTrace <- function(calls,
     score[callnames == "..stacktraceon.."] <- 1
     toShow <- (1 + cumsum(score)) > 0 & !(callnames %in% c("..stacktraceon..", "..stacktraceoff..", "..stacktracefloor.."))
 
-    # doTryCatch, tryCatchOne, and tryCatchList are not informative--they're
-    # just internals for tryCatch
-    toShow <- toShow & !(callnames %in% c("doTryCatch", "tryCatchOne", "tryCatchList"))
+    toShow <-
+      toShow &
+      # doTryCatch, tryCatchOne, and tryCatchList are not informative--they're
+      # just internals for tryCatch
+      !(callnames %in% c("doTryCatch", "tryCatchOne", "tryCatchList")) &
+      # doWithOneRestart and withOneRestart are not informative--they're
+      # just internals for withRestarts
+      !(callnames %in% c("withOneRestart", "doWithOneRestart"))
   }
   calls <- calls[toShow]
+
 
   calls <- rev(calls) # Show in traceback() order
   index <- rev(which(toShow))

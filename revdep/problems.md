@@ -1,3 +1,135 @@
+# biodosetools
+
+<details>
+
+* Version: 3.7.1
+* GitHub: https://github.com/biodosetools-team/biodosetools
+* Source code: https://github.com/cran/biodosetools
+* Date/Publication: 2025-10-22 08:10:02 UTC
+* Number of recursive dependencies: 132
+
+Run `revdepcheck::cloud_details(, "biodosetools")` for more info
+
+</details>
+
+## Newly broken
+
+*   checking tests ... ERROR
+    ```
+      Running ‘testthat.R’
+    Running the tests in ‘tests/testthat.R’ failed.
+    Complete output:
+      > library(testthat)
+      > library(biodosetools)
+      Loading required package: shiny
+      Loading required package: golem
+      > 
+      > test_check("biodosetools")
+      ! Problem with `glm()` -> constraint ML optimization will be used instead
+    ...
+      
+      lines(actual) vs lines(expected)
+      - "<button id=\"go_filter\" type=\"button\" class=\"btn btn-default action-button\" style=\"display: none;\">"
+      - "  <span class=\"action-label\">go</span>"
+      - "</button>"
+      + "<button id=\"go_filter\" type=\"button\" class=\"btn btn-default action-button\" style=\"display: none;\">go</button>"
+      
+      [ FAIL 2 | WARN 1 | SKIP 1 | PASS 455 ]
+      Error: Test failures
+      Execution halted
+    ```
+
+# inshiny
+
+<details>
+
+* Version: 0.1.0
+* GitHub: https://github.com/nicholasdavies/inshiny
+* Source code: https://github.com/cran/inshiny
+* Date/Publication: 2025-09-09 14:00:13 UTC
+* Number of recursive dependencies: 53
+
+Run `revdepcheck::cloud_details(, "inshiny")` for more info
+
+</details>
+
+## Newly broken
+
+*   checking examples ... ERROR
+    ```
+    Running examples in ‘inshiny-Ex.R’ failed
+    The error most likely occurred in:
+    
+    > ### Name: inline_button
+    > ### Title: Inline action button
+    > ### Aliases: inline_button
+    > 
+    > ### ** Examples
+    > 
+    > ui <- bslib::page_fixed(
+    ...
+    +             label = shiny::span(style = "font-style:italic", "button"),
+    +             icon = shiny::icon("play"),
+    +             meaning = "Update button", accent = "success"),
+    +         "."
+    +     )
+    + )
+    Error in check_tags(widget, shiny::tags$button(), "shiny::actionButton()") : 
+      Unexpected tag structure from shiny::actionButton(). Please contact the package maintainer.
+    Calls: <Anonymous> ... div -> dots_list -> inline -> inline_button -> check_tags
+    Execution halted
+    ```
+
+*   checking tests ... ERROR
+    ```
+      Running ‘testthat.R’
+    Running the tests in ‘tests/testthat.R’ failed.
+    Complete output:
+      > # This file is part of the standard setup for testthat.
+      > # It is recommended that you do not modify it.
+      > #
+      > # Where should you do additional test configuration?
+      > # Learn more about the roles of various files in:
+      > # * https://r-pkgs.org/testing-design.html#sec-tests-files-overview
+      > # * https://testthat.r-lib.org/articles/special-files.html
+    ...
+      ── Error ('test-action.R:8:5'): button is stable ───────────────────────────────
+      Error in `check_tags(widget, shiny::tags$button(), "shiny::actionButton()")`: Unexpected tag structure from shiny::actionButton(). Please contact the package maintainer.
+      Backtrace:
+          ▆
+       1. └─testthat::expect_snapshot(...) at test-action.R:8:5
+       2.   └─rlang::cnd_signal(state$error)
+      
+      [ FAIL 2 | WARN 0 | SKIP 9 | PASS 24 ]
+      Error: Test failures
+      Execution halted
+    ```
+
+*   checking re-building of vignette outputs ... ERROR
+    ```
+    Error(s) in re-building vignettes:
+    --- re-building ‘inshiny.Rmd’ using rmarkdown
+    
+    Quitting from inshiny.Rmd:64-86 [unnamed-chunk-3]
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    <error/rlang_error>
+    Error in `check_tags()`:
+    ! Unexpected tag structure from shiny::actionButton(). Please contact the package maintainer.
+    ---
+    Backtrace:
+    ...
+    
+    Error: processing vignette 'inshiny.Rmd' failed with diagnostics:
+    Unexpected tag structure from shiny::actionButton(). Please contact the package maintainer.
+    --- failed re-building ‘inshiny.Rmd’
+    
+    SUMMARY: processing the following file failed:
+      ‘inshiny.Rmd’
+    
+    Error: Vignette re-building failed.
+    Execution halted
+    ```
+
 # omicsTools
 
 <details>
@@ -6,7 +138,7 @@
 * GitHub: https://github.com/YaoxiangLi/omicsTools
 * Source code: https://github.com/cran/omicsTools
 * Date/Publication: 2023-07-03 16:20:02 UTC
-* Number of recursive dependencies: 87
+* Number of recursive dependencies: 88
 
 Run `revdepcheck::cloud_details(, "omicsTools")` for more info
 
@@ -39,31 +171,6 @@ Run `revdepcheck::cloud_details(, "omicsTools")` for more info
       Execution halted
     ```
 
-# PopED
-
-<details>
-
-* Version: 0.7.0
-* GitHub: https://github.com/andrewhooker/PopED
-* Source code: https://github.com/cran/PopED
-* Date/Publication: 2024-10-07 19:30:02 UTC
-* Number of recursive dependencies: 139
-
-Run `revdepcheck::cloud_details(, "PopED")` for more info
-
-</details>
-
-## Newly broken
-
-*   checking installed package size ... NOTE
-    ```
-      installed size is  5.5Mb
-      sub-directories of 1Mb or more:
-        R      1.5Mb
-        doc    1.4Mb
-        test   1.1Mb
-    ```
-
 # shinyGovstyle
 
 <details>
@@ -72,7 +179,7 @@ Run `revdepcheck::cloud_details(, "PopED")` for more info
 * GitHub: https://github.com/moj-analytical-services/shinyGovstyle
 * Source code: https://github.com/cran/shinyGovstyle
 * Date/Publication: 2024-09-12 14:40:02 UTC
-* Number of recursive dependencies: 48
+* Number of recursive dependencies: 49
 
 Run `revdepcheck::cloud_details(, "shinyGovstyle")` for more info
 
@@ -109,7 +216,7 @@ Run `revdepcheck::cloud_details(, "shinyGovstyle")` for more info
 * GitHub: NA
 * Source code: https://github.com/cran/ShinyLink
 * Date/Publication: 2023-01-18 11:40:05 UTC
-* Number of recursive dependencies: 129
+* Number of recursive dependencies: 128
 
 Run `revdepcheck::cloud_details(, "ShinyLink")` for more info
 
@@ -150,7 +257,7 @@ Run `revdepcheck::cloud_details(, "ShinyLink")` for more info
 * GitHub: https://github.com/Jo-Theo/shinySbm
 * Source code: https://github.com/cran/shinySbm
 * Date/Publication: 2023-09-07 21:50:02 UTC
-* Number of recursive dependencies: 134
+* Number of recursive dependencies: 133
 
 Run `revdepcheck::cloud_details(, "shinySbm")` for more info
 

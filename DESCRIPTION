@@ -185,6 +185,7 @@ Collate:
     'notifications.R'
     'otel-attr-srcref.R'
     'otel-collect.R'
+    'otel-enable.R'
     'otel-error.R'
     'otel-label.R'
     'otel-reactive-update.R'

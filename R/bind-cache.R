@@ -506,7 +506,7 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
     rm(list = ".", envir = .GenericCallEnv, inherits = FALSE)
   }
 
-  with_no_otel_bind({
+  with_no_otel_collect({
     res <- reactive(label = label, domain = domain, {
       cache <- resolve_cache_object(cache, domain)
       hybrid_chain(
@@ -523,8 +523,8 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
     impl$.otelAttrs <- append_otel_srcref_attrs(x_otel_attrs, call_srcref)
   })
 
-  if (has_otel_bind("reactivity")) {
-    res <- bind_otel_reactive_expr(res)
+  if (has_otel_collect("reactivity")) {
+    res <- enable_otel_reactive_expr(res)
   }
   res
 }

@@ -1,4 +1,4 @@
-# Tests for label methods used in otel-bind.R
+# Tests for label methods used in otel-collect.R
 test_that("otel_span_label_reactive generates correct labels", {
   # Create mock reactive with observable attribute
   x_reactive <- reactive({ 42 })

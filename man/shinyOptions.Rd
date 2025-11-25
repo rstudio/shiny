@@ -130,7 +130,7 @@ ragg package. See \code{\link[=plotPNG]{plotPNG()}} for more information.}
 Cairo package. See \code{\link[=plotPNG]{plotPNG()}} for more information.}
 \item{shiny.devmode (defaults to \code{NULL})}{Option to enable Shiny Developer Mode. When set,
 different default \code{getOption(key)} values will be returned. See \code{\link[=devmode]{devmode()}} for more details.}
-\item{shiny.otel.bind (defaults to \code{Sys.getenv("SHINY_OTEL_BIND", "all")})}{Determines how Shiny will
+\item{shiny.otel.collect (defaults to \code{Sys.getenv("SHINY_OTEL_COLLECT", "all")})}{Determines how Shiny will
 interact with OpenTelemetry.
 
 Supported values:

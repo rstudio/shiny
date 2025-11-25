@@ -9,8 +9,8 @@
   Data](https://otelsdk.r-lib.org/reference/collecting.html) for more details
   on configuring OpenTelemetry. (#4269, #4300)
 
-* Supported values for `options(shiny.otel.bind)` (which defaults to
-  `Sys.getenv("SHINY_OTEL_BIND")` if set) are:
+* Supported values for `options(shiny.otel.collect)` (or 
+  `Sys.getenv("SHINY_OTEL_COLLECT")`):
   * `"none"` - No Shiny OpenTelemetry tracing.
   * `"session"` - Adds session start/end spans.
   * `"reactive_update"` - Spans for any synchronous/asynchronous reactive

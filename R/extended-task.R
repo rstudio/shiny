@@ -118,7 +118,7 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
       private$func <- func
 
       # Do not show these private reactive values in otel spans
-      with_no_otel_bind({
+      with_no_otel_collect({
         private$rv_status <- reactiveVal("initial", label = "ExtendedTask$private$status")
         private$rv_value <- reactiveVal(NULL, label = "ExtendedTask$private$value")
         private$rv_error <- reactiveVal(NULL, label = "ExtendedTask$private$error")
@@ -175,7 +175,7 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
         private$invocation_queue$add(list(args = args, call = call))
       } else {
 
-        if (has_otel_bind("reactivity")) {
+        if (has_otel_collect("reactivity")) {
           private$otel_span <- start_otel_span(
             private$otel_span_label,
             attributes = private$otel_attrs

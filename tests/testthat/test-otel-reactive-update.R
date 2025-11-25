@@ -11,8 +11,8 @@ create_mock_otel_span <- function(name, attributes = NULL, ended = FALSE) {
 test_that("otel_span_reactive_update_init returns early when otel not enabled", {
   domain <- MockShinySession$new()
 
-  # Convince has_otel_bind to return FALSE
-  withr::local_options(list(shiny.otel.bind = "none"))
+  # Convince has_otel_collect to return FALSE
+  withr::local_options(list(shiny.otel.collect = "none"))
 
   # Should return early without creating span
   result <- otel_span_reactive_update_init(domain = domain)
@@ -37,10 +37,10 @@ test_that("otel_span_reactive_update_init sets up session cleanup on first call"
   )
   domain <- TestMockShinySession$new()
 
-  withr::local_options(list(shiny.otel.bind = "reactive_update"))
+  withr::local_options(list(shiny.otel.collect = "reactive_update"))
 
   local_mocked_bindings(
-    has_otel_bind = function(level) level == "reactive_update",
+    has_otel_collect = function(level) level == "reactive_update",
     start_otel_span = function(name, ..., attributes = NULL) create_mock_otel_span(name, attributes = attributes),
     otel_session_id_attrs = function(domain) list(session_id = "mock-session-id")
   )
@@ -64,7 +64,7 @@ test_that("otel_span_reactive_update_init errors when span already exists", {
   domain$userData[["_otel_span_reactive_update"]] <- existing_otel_span
 
   local_mocked_bindings(
-    has_otel_bind = function(level) level == "reactive_update"
+    has_otel_collect = function(level) level == "reactive_update"
   )
 
   expect_error(
@@ -94,7 +94,7 @@ test_that("otel_span_reactive_update_init doesn't setup cleanup twice", {
   domain$userData[["_otel_has_reactive_cleanup"]] <- TRUE
 
   local_mocked_bindings(
-    has_otel_bind = function(level) level == "reactive_update",
+    has_otel_collect = function(level) level == "reactive_update",
     start_otel_span = function(...) create_mock_otel_span("reactive_update")
   )
 
@@ -199,7 +199,7 @@ test_that("session cleanup callback works correctly", {
   mock_otel_span <- create_mock_otel_span("reactive_update")
 
   with_mocked_bindings(
-    has_otel_bind = function(level) level == "reactive_update",
+    has_otel_collect = function(level) level == "reactive_update",
     start_otel_span = function(...) mock_otel_span,
     otel_session_id_attrs = function(domain) list(session_id = "test"),
     {

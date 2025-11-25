@@ -216,7 +216,7 @@ bindEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE
 
   initialized <- FALSE
 
-  with_no_otel_bind({
+  with_no_otel_collect({
     res <- reactive(label = label, domain = domain, ..stacktraceon = FALSE, {
       hybrid_chain(
         {
@@ -244,8 +244,8 @@ bindEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE
   })
 
 
-  if (has_otel_bind("reactivity")) {
-    res <- bind_otel_reactive_expr(res)
+  if (has_otel_collect("reactivity")) {
+    res <- enable_otel_reactive_expr(res)
   }
 
   res
@@ -343,8 +343,8 @@ bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
   call_srcref <- get_call_srcref(-1)
   x$.otelAttrs <- append_otel_srcref_attrs(x$.otelAttrs, call_srcref)
 
-  if (has_otel_bind("reactivity")) {
-    x <- bind_otel_observe(x)
+  if (has_otel_collect("reactivity")) {
+    x <- enable_otel_observe(x)
   }
 
   invisible(x)

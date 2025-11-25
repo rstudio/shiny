@@ -39,7 +39,7 @@ test_server_with_otel_error <- function(session, server, expr, sanitize = FALSE,
 
   withr::with_options(
     list(
-      shiny.otel.bind = "all",
+      shiny.otel.collect = "all",
       shiny.otel.sanitize.errors = sanitize
     ),
     {

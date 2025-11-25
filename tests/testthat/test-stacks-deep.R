@@ -91,6 +91,8 @@ describe("deep stack trace filtering", {
 })
 
 test_that("deep stack capturing", {
+  skip_if_not_installed("testthat", "3.3.0")
+
   `%...>%` <- promises::`%...>%`
   `%...!%` <- promises::`%...!%`
   finally <- promises::finally

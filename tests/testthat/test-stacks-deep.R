@@ -91,6 +91,8 @@ describe("deep stack trace filtering", {
 })
 
 test_that("deep stack capturing", {
+  # base::tryCatch internals changed in 4.5.2
+  skip_unless_r(">= 4.5.2")
   skip_if_not_installed("testthat", "3.3.0")
 
   `%...>%` <- promises::`%...>%`

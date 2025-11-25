@@ -436,7 +436,7 @@ MockShinySession <- R6Class(
       if (!is.function(func))
         stop(paste("Unexpected", class(func), "output for", name))
 
-      with_no_otel_bind({
+      with_no_otel_collect({
         obs <- observe({
           # We could just stash the promise, but we get an "unhandled promise error". This bypasses
           prom <- NULL

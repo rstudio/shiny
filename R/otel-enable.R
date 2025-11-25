@@ -1,67 +1,3 @@
-otel_bind_choices <- c(
-  "none",
-  "session",
-  "reactive_update",
-  "reactivity",
-  "all"
-)
-
-# Check if the bind level is sufficient
-otel_bind_is_enabled <- function(
-  impl_level,
-  # Listen to option and fall back to the env var
-  opt_bind_level = getOption("shiny.otel.bind", Sys.getenv("SHINY_OTEL_BIND", "all"))
-) {
-  opt_bind_level <- as_otel_bind(opt_bind_level)
-
-  which(opt_bind_level == otel_bind_choices) >=
-    which(impl_level == otel_bind_choices)
-}
-
-# Check if tracing is enabled and if the bind level is sufficient
-has_otel_bind <- function(bind) {
-  # Only check pkg author input iff loaded with pkgload
-  if (IS_SHINY_LOCAL_PKG) {
-    stopifnot(length(bind) == 1, any(bind == otel_bind_choices))
-  }
-
-  otel_is_tracing_enabled() && otel_bind_is_enabled(bind)
-}
-
-# Run expr with otel binding disabled
-with_no_otel_bind <- function(expr) {
-  withr::with_options(
-    list(
-      shiny.otel.bind = "none"
-    ),
-    expr
-  )
-}
-
-
-## -- Helpers -----------------------------------------------------
-
-# shiny.otel.bind can be:
-# "none"; To do nothing / fully opt-out
-# "session" for session/start events
-# "reactive_update" (includes "session" features) and reactive_update spans
-# "reactivity" (includes "reactive_update" features) and spans for all reactive things
-# "all" - Anything that Shiny can do. (Currently equivalent to the "reactivity" level)
-
-as_otel_bind <- function(bind = "all") {
-  if (!is.character(bind)) {
-    stop("`bind` must be a character vector.")
-  }
-
-  # Match to bind enum
-  bind <- match.arg(bind, otel_bind_choices, several.ok = FALSE)
-
-  return(bind)
-}
-
-
-# ------------------------------------------
-
 # # Approach
 # Use flags on the reactive object to indicate whether to record OpenTelemetry spans.
 #
@@ -75,7 +11,7 @@ as_otel_bind <- function(bind = "all") {
 #'
 #' @description
 #'
-#' `bind_otel_*()` methods add OpenTelemetry flags for [reactive()] expressions
+#' `enable_otel_*()` methods add OpenTelemetry flags for [reactive()] expressions
 #' and `render*` functions (like [renderText()], [renderTable()], ...).
 #'
 #' Wrapper to creating an active reactive OpenTelemetry span that closes when
@@ -115,7 +51,7 @@ as_otel_bind <- function(bind = "all") {
 #' Dev note - Barret 2025-10:
 #' Typically, an OpenTelemetry span (`otel_span`) will inherit from the parent
 #' span. This works well and we can think of the hierarchy as a tree. With
-#' `options("shiny.otel.bind" = <value>)`, we are able to control with a sliding
+#' `options("shiny.otel.collect" = <value>)`, we are able to control with a sliding
 #' dial how much of the tree we are interested in: "none", "session",
 #' "reactive_update", "reactivity", and finally "all".
 #'
@@ -152,18 +88,19 @@ as_otel_bind <- function(bind = "all") {
 #'   create it themselves and let natural inheritance take over.
 #'
 #' Given this, I will imagine that app authors will set
-#' `options("shiny.otel.bind" = "reactive_update")` as their default behavior.
+#' `options("shiny.otel.collect" = "reactive_update")` as their default behavior.
 #' Enough to know things are happening, but not overwhelming from **everything**
 #' that is reactive.
 #'
-#' To _light up_ a specific area, users can call `withr::with_options(list("shiny.otel.bind" = "all"), { ... })`.
+#' To _light up_ a specific area, users can call `withr::with_options(list("shiny.otel.collect" = "all"), { ... })`.
 #'
 #' @param x The object to add caching to.
 #' @param ... Future parameter expansion.
 #' @noRd
 NULL
 
-bind_otel_reactive_val <- function(x) {
+
+enable_otel_reactive_val <- function(x) {
 
   impl <- attr(x, ".impl", exact = TRUE)
   # Set flag for otel logging when setting the value
@@ -174,7 +111,7 @@ bind_otel_reactive_val <- function(x) {
   x
 }
 
-bind_otel_reactive_values <- function(x) {
+enable_otel_reactive_values <- function(x) {
 
   impl <- .subset2(x, "impl")
   # Set flag for otel logging when setting values
@@ -185,7 +122,7 @@ bind_otel_reactive_values <- function(x) {
   x
 }
 
-bind_otel_reactive_expr <- function(x) {
+enable_otel_reactive_expr <- function(x) {
 
   domain <- reactive_get_domain(x)
 
@@ -199,7 +136,7 @@ bind_otel_reactive_expr <- function(x) {
   x
 }
 
-bind_otel_observe <- function(x) {
+enable_otel_observe <- function(x) {
   x$.isRecordingOtel <- TRUE
   x$.otelLabel <- otel_span_label_observer(x, domain = x$.domain)
 
@@ -209,7 +146,7 @@ bind_otel_observe <- function(x) {
 
 
 
-bind_otel_shiny_render_function <- function(x) {
+enable_otel_shiny_render_function <- function(x) {
 
   valueFunc <- force(x)
   otel_span_label <- NULL

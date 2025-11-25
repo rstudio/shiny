@@ -44,8 +44,8 @@ test_that("otel_span_session_start returns early when otel not enabled", {
   domain <- create_mock_session_domain()
   test_value <- "initial"
 
-  # Mock has_otel_bind to return FALSE
-  withr::local_options(list(shiny.otel.bind = "none"))
+  # Mock has_otel_collect to return FALSE
+  withr::local_options(list(shiny.otel.collect = "none"))
 
   result <- otel_span_session_start({
     test_value <- "modified"
@@ -67,7 +67,7 @@ test_that("otel_span_session_start sets up session end callback", {
   test_value <- "initial"
 
   # Mock dependencies
-  withr::local_options(list(shiny.otel.bind = "session"))
+  withr::local_options(list(shiny.otel.collect = "session"))
 
   local_mocked_bindings(
     as_attributes = function(x) x,
@@ -75,7 +75,7 @@ test_that("otel_span_session_start sets up session end callback", {
   )
 
   with_mocked_bindings(
-    has_otel_bind = function(level) level == "session",
+    has_otel_collect = function(level) level == "session",
     otel_session_id_attrs = function(domain) list(session.id = domain$token),
     otel_session_attrs = function(domain) list(PATH_INFO = "/app"),
     with_otel_span = function(name, expr, attributes = NULL) {
@@ -105,8 +105,8 @@ test_that("otel_span_session_end returns early when otel not enabled", {
   domain <- create_mock_session_domain()
   test_value <- "initial"
 
-  # Mock has_otel_bind to return FALSE
-  withr::local_options(list(shiny.otel.bind = "none"))
+  # Mock has_otel_collect to return FALSE
+  withr::local_options(list(shiny.otel.collect = "none"))
 
   result <- otel_span_session_end({
     test_value <- "modified"
@@ -124,10 +124,10 @@ test_that("otel_span_session_end creates span when enabled", {
   test_value <- "initial"
 
   # Mock dependencies
-  withr::local_options(list(shiny.otel.bind = "session"))
+  withr::local_options(list(shiny.otel.collect = "session"))
 
   with_mocked_bindings(
-    has_otel_bind = function(level) level == "session",
+    has_otel_collect = function(level) level == "session",
     otel_session_id_attrs = function(domain) list(session.id = domain$token),
     with_otel_span = function(name, expr, attributes = NULL) {
       span_created <<- TRUE
@@ -252,7 +252,7 @@ test_that("integration test - session start with full request", {
   span_attributes <- NULL
 
   # Mock dependencies
-  withr::local_options(list(shiny.otel.bind = "session"))
+  withr::local_options(list(shiny.otel.collect = "session"))
 
   local_mocked_bindings(
     as_attributes = function(x) x,
@@ -260,7 +260,7 @@ test_that("integration test - session start with full request", {
   )
 
   with_mocked_bindings(
-    has_otel_bind = function(level) level == "session",
+    has_otel_collect = function(level) level == "session",
     otel_session_id_attrs = otel_session_id_attrs,  # Use real function
     otel_session_attrs = otel_session_attrs,        # Use real function
     with_otel_span = function(name, expr, attributes = NULL) {

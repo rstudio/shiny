@@ -248,7 +248,7 @@ reactiveVal <- function(value = NULL, label = NULL) {
     .impl = rv
   )
 
-  if (has_otel_bind("reactivity")) {
+  if (has_otel_collect("reactivity")) {
     ret <- bind_otel_reactive_val(ret)
   }
 
@@ -651,8 +651,8 @@ reactiveValues <- function(...) {
 
   impl$mset(args)
 
-  # Add otel binding after `$mset()` so that we don't log the initial values
-  # Add otel binding after `.label` so that any logging uses the correct label
+  # Add otel collection after `$mset()` so that we don't log the initial values
+  # Add otel collection after `.label` so that any logging uses the correct label
   values <- maybeAddReactiveValuesOtel(values)
 
   values
@@ -669,7 +669,7 @@ checkName <- function(x) {
 # @param values A ReactiveValues object
 # @param readonly Should this object be read-only?
 # @param ns A namespace function (either `identity` or `NS(namespace)`)
-# @param withOtel Should otel binding be attempted?
+# @param withOtel Should otel collection be attempted?
 .createReactiveValues <- function(values = NULL, readonly = FALSE,
   ns = identity, withOtel = TRUE) {
 
@@ -690,7 +690,7 @@ checkName <- function(x) {
 }
 
 maybeAddReactiveValuesOtel <- function(x) {
-  if (!has_otel_bind("reactivity")) {
+  if (!has_otel_collect("reactivity")) {
     return(x)
   }
 
@@ -1140,7 +1140,7 @@ reactive <- function(
     class = c("reactiveExpr", "reactive", "function")
   )
 
-  if (has_otel_bind("reactivity")) {
+  if (has_otel_collect("reactivity")) {
     ret <- bind_otel_reactive_expr(ret)
   }
 
@@ -1590,7 +1590,7 @@ observe <- function(
     o$.otelAttrs <- otel_srcref_attributes(call_srcref)
   }
 
-  if (has_otel_bind("reactivity")) {
+  if (has_otel_collect("reactivity")) {
     o <- bind_otel_observe(o)
   }
 
@@ -2011,7 +2011,7 @@ reactive_poll_impl <- function(
   re_finalized <- FALSE
   env <- environment()
 
-  with_no_otel_bind({
+  with_no_otel_collect({
     cookie <- reactiveVal(
       isolate(checkFunc()),
       label = sprintf("%s %s cookie", fnName, label)
@@ -2500,7 +2500,7 @@ observeEvent <- function(eventExpr, handlerExpr,
     )
   }
 
-  with_no_otel_bind({
+  with_no_otel_collect({
     handler <- inject(observe(
       !!handlerQ,
       label = label,
@@ -2524,7 +2524,7 @@ observeEvent <- function(eventExpr, handlerExpr,
   if (!is.null(call_srcref)) {
     o$.otelAttrs <- otel_srcref_attributes(call_srcref)
   }
-  if (has_otel_bind("reactivity")) {
+  if (has_otel_collect("reactivity")) {
     o <- bind_otel_observe(o)
   }
 
@@ -2557,7 +2557,7 @@ eventReactive <- function(eventExpr, valueExpr,
     )
   }
 
-  with_no_otel_bind({
+  with_no_otel_collect({
     value_r <- inject(reactive(!!valueQ, domain = domain, label = label))
 
     r <- inject(bindEvent(
@@ -2573,7 +2573,7 @@ eventReactive <- function(eventExpr, valueExpr,
     impl <- attr(r, "observable", exact = TRUE)
     impl$.otelAttrs <- otel_srcref_attributes(call_srcref)
   }
-  if (has_otel_bind("reactivity")) {
+  if (has_otel_collect("reactivity")) {
     r <- bind_otel_reactive_expr(r)
   }
 
@@ -2710,7 +2710,7 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
     millis <- function() origMillis
   }
 
-  with_no_otel_bind({
+  with_no_otel_collect({
     trigger <- reactiveVal(NULL, label = sprintf("debounce %s trigger", label))
     # the deadline for the timer to fire; NULL if not scheduled
     when <- reactiveVal(NULL, label = sprintf("debounce %s when", label))
@@ -2781,7 +2781,7 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
     er_impl$.otelAttrs <- append_otel_srcref_attrs(er_impl$.otelAttrs, call_srcref)
   })
 
-  with_no_otel_bind({
+  with_no_otel_collect({
     # Force the value of er to be immediately cached upon creation. It's very hard
     # to explain why this observer is needed, but if you want to understand, try
     # commenting it out and studying the unit test failure that results.
@@ -2814,7 +2814,7 @@ throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
     millis <- function() origMillis
   }
 
-  with_no_otel_bind({
+  with_no_otel_collect({
     trigger <- reactiveVal(0, label = sprintf("throttle %s trigger", label))
     # Last time we fired; NULL if never
     lastTriggeredAt <- reactiveVal(NULL, label = sprintf("throttle %s last triggered at", label))
@@ -2837,7 +2837,7 @@ throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
     pending(FALSE)
   }
 
-  with_no_otel_bind({
+  with_no_otel_collect({
     # Responsible for tracking when f() changes.
     observeEvent(try(r(), silent = TRUE), {
       if (pending()) {

@@ -12,7 +12,7 @@
 #' @noRd
 otel_span_reactive_update_init <- function(..., domain) {
 
-  if (!has_otel_bind("reactive_update")) return()
+  if (!has_otel_collect("reactive_update")) return()
 
   # Ensure cleanup is registered only once per session
   if (is.null(domain$userData[["_otel_has_reactive_cleanup"]])) {

@@ -1,4 +1,4 @@
-otel_bind_choices <- c(
+otel_collect_choices <- c(
   "none",
   "session",
   "reactive_update",
@@ -6,33 +6,33 @@ otel_bind_choices <- c(
   "all"
 )
 
-# Check if the bind level is sufficient
-otel_bind_is_enabled <- function(
+# Check if the collect level is sufficient
+otel_collect_is_enabled <- function(
   impl_level,
   # Listen to option and fall back to the env var
-  opt_bind_level = getOption("shiny.otel.bind", Sys.getenv("SHINY_OTEL_BIND", "all"))
+  opt_collect_level = getOption("shiny.otel.collect", Sys.getenv("SHINY_OTEL_COLLECT", "all"))
 ) {
-  opt_bind_level <- as_otel_bind(opt_bind_level)
+  opt_collect_level <- as_otel_collect(opt_collect_level)
 
-  which(opt_bind_level == otel_bind_choices) >=
-    which(impl_level == otel_bind_choices)
+  which(opt_collect_level == otel_collect_choices) >=
+    which(impl_level == otel_collect_choices)
 }
 
-# Check if tracing is enabled and if the bind level is sufficient
-has_otel_bind <- function(bind) {
+# Check if tracing is enabled and if the collect level is sufficient
+has_otel_collect <- function(collect) {
   # Only check pkg author input iff loaded with pkgload
   if (IS_SHINY_LOCAL_PKG) {
-    stopifnot(length(bind) == 1, any(bind == otel_bind_choices))
+    stopifnot(length(collect) == 1, any(collect == otel_collect_choices))
   }
 
-  otel_is_tracing_enabled() && otel_bind_is_enabled(bind)
+  otel_is_tracing_enabled() && otel_collect_is_enabled(collect)
 }
 
-# Run expr with otel binding disabled
-with_no_otel_bind <- function(expr) {
+# Run expr with otel collection disabled
+with_no_otel_collect <- function(expr) {
   withr::with_options(
     list(
-      shiny.otel.bind = "none"
+      shiny.otel.collect = "none"
     ),
     expr
   )
@@ -41,22 +41,22 @@ with_no_otel_bind <- function(expr) {
 
 ## -- Helpers -----------------------------------------------------
 
-# shiny.otel.bind can be:
+# shiny.otel.collect can be:
 # "none"; To do nothing / fully opt-out
 # "session" for session/start events
 # "reactive_update" (includes "session" features) and reactive_update spans
 # "reactivity" (includes "reactive_update" features) and spans for all reactive things
 # "all" - Anything that Shiny can do. (Currently equivalent to the "reactivity" level)
 
-as_otel_bind <- function(bind = "all") {
-  if (!is.character(bind)) {
-    stop("`bind` must be a character vector.")
+as_otel_collect <- function(collect = "all") {
+  if (!is.character(collect)) {
+    stop("`collect` must be a character vector.")
   }
 
-  # Match to bind enum
-  bind <- match.arg(bind, otel_bind_choices, several.ok = FALSE)
+  # Match to collect enum
+  collect <- match.arg(collect, otel_collect_choices, several.ok = FALSE)
 
-  return(bind)
+  return(collect)
 }
 
 
@@ -115,7 +115,7 @@ as_otel_bind <- function(bind = "all") {
 #' Dev note - Barret 2025-10:
 #' Typically, an OpenTelemetry span (`otel_span`) will inherit from the parent
 #' span. This works well and we can think of the hierarchy as a tree. With
-#' `options("shiny.otel.bind" = <value>)`, we are able to control with a sliding
+#' `options("shiny.otel.collect" = <value>)`, we are able to control with a sliding
 #' dial how much of the tree we are interested in: "none", "session",
 #' "reactive_update", "reactivity", and finally "all".
 #'
@@ -152,11 +152,11 @@ as_otel_bind <- function(bind = "all") {
 #'   create it themselves and let natural inheritance take over.
 #'
 #' Given this, I will imagine that app authors will set
-#' `options("shiny.otel.bind" = "reactive_update")` as their default behavior.
+#' `options("shiny.otel.collect" = "reactive_update")` as their default behavior.
 #' Enough to know things are happening, but not overwhelming from **everything**
 #' that is reactive.
 #'
-#' To _light up_ a specific area, users can call `withr::with_options(list("shiny.otel.bind" = "all"), { ... })`.
+#' To _light up_ a specific area, users can call `withr::with_options(list("shiny.otel.collect" = "all"), { ... })`.
 #'
 #' @param x The object to add caching to.
 #' @param ... Future parameter expansion.

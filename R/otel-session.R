@@ -12,7 +12,7 @@
 #' @noRd
 otel_span_session_start <- function(expr, ..., domain) {
 
-  if (!has_otel_bind("session")) {
+  if (!has_otel_collect("session")) {
     return(force(expr))
   }
 
@@ -29,7 +29,7 @@ otel_span_session_start <- function(expr, ..., domain) {
 
 
 otel_span_session_end <- function(expr, ..., domain) {
-  if (!has_otel_bind("session")) {
+  if (!has_otel_collect("session")) {
     return(force(expr))
   }
 

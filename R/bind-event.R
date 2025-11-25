@@ -245,7 +245,7 @@ bindEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE
 
 
   if (has_otel_collect("reactivity")) {
-    res <- bind_otel_reactive_expr(res)
+    res <- enable_otel_reactive_expr(res)
   }
 
   res
@@ -344,7 +344,7 @@ bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
   x$.otelAttrs <- append_otel_srcref_attrs(x$.otelAttrs, call_srcref)
 
   if (has_otel_collect("reactivity")) {
-    x <- bind_otel_observe(x)
+    x <- enable_otel_observe(x)
   }
 
   invisible(x)

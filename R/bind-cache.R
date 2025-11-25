@@ -524,7 +524,7 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
   })
 
   if (has_otel_collect("reactivity")) {
-    res <- bind_otel_reactive_expr(res)
+    res <- enable_otel_reactive_expr(res)
   }
   res
 }

@@ -249,7 +249,7 @@ reactiveVal <- function(value = NULL, label = NULL) {
   )
 
   if (has_otel_collect("reactivity")) {
-    ret <- bind_otel_reactive_val(ret)
+    ret <- enable_otel_reactive_val(ret)
   }
 
   ret
@@ -694,7 +694,7 @@ maybeAddReactiveValuesOtel <- function(x) {
     return(x)
   }
 
-  bind_otel_reactive_values(x)
+  enable_otel_reactive_values(x)
 }
 
 #' @export
@@ -1141,7 +1141,7 @@ reactive <- function(
   )
 
   if (has_otel_collect("reactivity")) {
-    ret <- bind_otel_reactive_expr(ret)
+    ret <- enable_otel_reactive_expr(ret)
   }
 
   ret
@@ -1591,7 +1591,7 @@ observe <- function(
   }
 
   if (has_otel_collect("reactivity")) {
-    o <- bind_otel_observe(o)
+    o <- enable_otel_observe(o)
   }
 
   invisible(o)
@@ -2525,7 +2525,7 @@ observeEvent <- function(eventExpr, handlerExpr,
     o$.otelAttrs <- otel_srcref_attributes(call_srcref)
   }
   if (has_otel_collect("reactivity")) {
-    o <- bind_otel_observe(o)
+    o <- enable_otel_observe(o)
   }
 
   invisible(o)
@@ -2574,7 +2574,7 @@ eventReactive <- function(eventExpr, valueExpr,
     impl$.otelAttrs <- otel_srcref_attributes(call_srcref)
   }
   if (has_otel_collect("reactivity")) {
-    r <- bind_otel_reactive_expr(r)
+    r <- enable_otel_reactive_expr(r)
   }
 
 

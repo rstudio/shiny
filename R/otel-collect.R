@@ -75,7 +75,7 @@ as_otel_collect <- function(collect = "all") {
 #'
 #' @description
 #'
-#' `bind_otel_*()` methods add OpenTelemetry flags for [reactive()] expressions
+#' `enable_otel_*()` methods add OpenTelemetry flags for [reactive()] expressions
 #' and `render*` functions (like [renderText()], [renderTable()], ...).
 #'
 #' Wrapper to creating an active reactive OpenTelemetry span that closes when
@@ -163,7 +163,8 @@ as_otel_collect <- function(collect = "all") {
 #' @noRd
 NULL
 
-bind_otel_reactive_val <- function(x) {
+
+enable_otel_reactive_val <- function(x) {
 
   impl <- attr(x, ".impl", exact = TRUE)
   # Set flag for otel logging when setting the value
@@ -174,7 +175,7 @@ bind_otel_reactive_val <- function(x) {
   x
 }
 
-bind_otel_reactive_values <- function(x) {
+enable_otel_reactive_values <- function(x) {
 
   impl <- .subset2(x, "impl")
   # Set flag for otel logging when setting values
@@ -185,7 +186,7 @@ bind_otel_reactive_values <- function(x) {
   x
 }
 
-bind_otel_reactive_expr <- function(x) {
+enable_otel_reactive_expr <- function(x) {
 
   domain <- reactive_get_domain(x)
 
@@ -199,7 +200,7 @@ bind_otel_reactive_expr <- function(x) {
   x
 }
 
-bind_otel_observe <- function(x) {
+enable_otel_observe <- function(x) {
   x$.isRecordingOtel <- TRUE
   x$.otelLabel <- otel_span_label_observer(x, domain = x$.domain)
 
@@ -209,7 +210,7 @@ bind_otel_observe <- function(x) {
 
 
 
-bind_otel_shiny_render_function <- function(x) {
+enable_otel_shiny_render_function <- function(x) {
 
   valueFunc <- force(x)
   otel_span_label <- NULL

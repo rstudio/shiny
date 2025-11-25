@@ -43,6 +43,8 @@
   * Combinations of `bindEvent()` and `reactive()` / `observe()`
   * Combination of `bindCache()` and `reactive()`
 
+* `dateRangeInput()`/`updateDateRangeInput()` now correctly handles date-time objects (POSIXct) passed to the `start`, `end`, `min` and `max` arguments. (#4318)
+
 ## Changes
 
 * Markdown rendering in showcase mode now uses server-side rendering with the `{commonmark}` package, providing support for GitHub Flavored Markdown features (tables, strikethrough, autolinks, task lists). While most existing README.md files should continue to work as expected, some minor rendering differences may occur due to the change in markdown processor. (#4202, #4201)

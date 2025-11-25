@@ -1433,7 +1433,11 @@ URLencode <- function(value, reserved = FALSE) {
 dateYMD <- function(date = NULL, argName = "value") {
   if (!length(date)) return(NULL)
   tryCatch({
-      res <- format(as.Date(date), "%Y-%m-%d")
+      if (inherits(date, "POSIXt")) {
+        res <- format(date, "%Y-%m-%d")
+      } else {
+        res <- format(as.Date(date), "%Y-%m-%d")
+      }
       if (any(is.na(res))) stop()
       date <- res
     },

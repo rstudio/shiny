@@ -239,6 +239,10 @@ test_that("dateYMD works", {
     dateYMD(c("2020/01/14", "2019/11/05")),
     c("2020-01-14", "2019-11-05")
   )
+  expect_identical(
+    dateYMD(as.POSIXct("2025-11-09 00:01:59", tz = "Asia/Tokyo")),
+    "2025-11-09"
+  )
 
   expect_warning(val <- dateYMD(""))
   expect_identical(val, "")

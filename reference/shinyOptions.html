@@ -29,7 +29,7 @@ internal use only.'><meta property="og:image" content="/logo.png"><!-- mathjax -
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.11.1.9001</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.12.0</span>
       </span>
     </div>
 
@@ -56,7 +56,7 @@ internal use only.'><meta property="og:image" content="/logo.png"><!-- mathjax -
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Get or set Shiny options</h1>
-    <small class="dont-index">Source: <a href="https://github.com/rstudio/shiny/blob/main/R/shiny-options.R" class="external-link"><code>R/shiny-options.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/rstudio/shiny/blob/rc-v1.12.0/R/shiny-options.R" class="external-link"><code>R/shiny-options.R</code></a></small>
     <div class="hidden name"><code>shinyOptions.Rd</code></div>
     </div>
 
@@ -239,7 +239,7 @@ Cairo package. See <code><a href="plotPNG.html">plotPNG()</a></code> for more in
 <dd><p>Option to enable Shiny Developer Mode. When set,
 different default <code>getOption(key)</code> values will be returned. See <code><a href="devmode.html">devmode()</a></code> for more details.</p></dd>
 
-<dt>shiny.otel.bind (defaults to <code>Sys.getenv("SHINY_OTEL_BIND", "all")</code>)</dt>
+<dt>shiny.otel.collect (defaults to <code>Sys.getenv("SHINY_OTEL_COLLECT", "all")</code>)</dt>
 <dd><p>Determines how Shiny will
 interact with OpenTelemetry.</p>
 <p>Supported values:</p><ul><li><p><code>"none"</code> - No Shiny OpenTelemetry tracing.</p></li>

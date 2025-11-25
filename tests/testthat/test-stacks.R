@@ -26,8 +26,8 @@ causeError <- function(full) {
   suppressMessages(df <- extractStackTrace(conditionStackTrace(cond), full = full))
   df$loc <- cleanLocs(df$loc)
   # Compensate for this test being called from different call sites;
-  # whack the
-  df <- head(df, -sys.nframe())
+  # whack the top n frames off using the `num` frame column
+  df <- df[df$num >= sys.nframe(), ]
   df$num <- df$num - sys.nframe()
   df
 }

@@ -9,7 +9,7 @@
   Data](https://otelsdk.r-lib.org/reference/collecting.html) for more details
   on configuring OpenTelemetry. (#4269, #4300)
 
-* Supported values for `options(shiny.otel.collect)` (or 
+* Supported values for `options(shiny.otel.collect)` (or
   `Sys.getenv("SHINY_OTEL_COLLECT")`):
   * `"none"` - No Shiny OpenTelemetry tracing.
   * `"session"` - Adds session start/end spans.
@@ -75,8 +75,12 @@
   label if the srcref is available. If a value cannot easily be produced, a
   default label is used instead. (#4269, #4300)
 
-* The default label for items described below will now attempt to retrieve the assigned name if the srcref is available. If a value can not easily be produced, a default label will be used instead. This should improve the OpenTelemetry span labels and the reactlog experience. (#4269, #4300)
-  * `reactiveValues()`, `reactivePoll()`, `reactiveFileReader()`, `debounce()`, `throttle()`, `observe()`
+* The default label for items described below will now attempt to retrieve the
+  assigned name if the srcref is available. If a value can not easily be
+  produced, a default label will be used instead. This should improve the
+  OpenTelemetry span labels and the reactlog experience. (#4269, #4300)
+  * `reactiveValues()`, `reactivePoll()`, `reactiveFileReader()`, `debounce()`,
+    `throttle()`, `observe()`
   * Combinations of `bindEvent()` and `reactive()` / `observe()`
   * Combination of `bindCache()` and `reactive()`
 
@@ -86,7 +90,9 @@
 * `updateSelectizeInput()` no longer creates multiple remove buttons when
   `options = list(plugins="remove_button")` is used. (#4275)
 
-* `dateRangeInput()`/`updateDateRangeInput()` now correctly considers the time zones of date-time objects (POSIXct) passed to the `start`, `end`, `min` and `max` arguments. (thanks @ismirsehregal, #4318)
+* `dateRangeInput()`/`updateDateRangeInput()` now correctly considers the time
+  zones of date-time objects (POSIXct) passed to the `start`, `end`, `min` and
+  `max` arguments. (thanks @ismirsehregal, #4318)
 
 ## Breaking changes
 

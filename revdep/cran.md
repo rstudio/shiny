@@ -1,9 +1,9 @@
 ## revdepcheck results
 
-We checked 1386 reverse dependencies (1380 from CRAN + 6 from Bioconductor), comparing R CMD check results across CRAN and dev versions of this package.
+We checked 1395 reverse dependencies (1388 from CRAN + 7 from Bioconductor), comparing R CMD check results across CRAN and dev versions of this package.
 
- * We saw 6 new problems
- * We failed to check 17 packages
+ * We saw 7 new problems
+ * We failed to check 21 packages
 
 Issues with CRAN packages are summarised below.
 
@@ -30,9 +30,12 @@ Issues with CRAN packages are summarised below.
 * shinySbm
   checking tests ... ERROR
 
+* SouthParkRshiny
+  checking installed package size ... NOTE
+
 ### Failed to check
 
-* cocktailApp       (NA)
+* boinet            (NA)
 * ctsem             (NA)
 * FAfA              (NA)
 * fio               (NA)
@@ -40,12 +43,16 @@ Issues with CRAN packages are summarised below.
 * GDINA             (NA)
 * ggsem             (NA)
 * grandR            (NA)
+* hbsaems           (NA)
 * lavaan.shiny      (NA)
 * lcsm              (NA)
+* linkspotter       (NA)
 * loon.shiny        (NA)
+* MOsemiind         (NA)
+* MVN               (NA)
+* RCTrep            (NA)
 * rstanarm          (NA)
 * semdrw            (NA)
 * sphereML          (NA)
 * SurprisalAnalysis (NA)
 * TestAnaAPP        (NA)
-* tricolore         (NA)

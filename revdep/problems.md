@@ -27,15 +27,15 @@ Run `revdepcheck::cloud_details(, "biodosetools")` for more info
       > test_check("biodosetools")
       ! Problem with `glm()` -> constraint ML optimization will be used instead
     ...
-      
-      lines(actual) vs lines(expected)
       - "<button id=\"go_filter\" type=\"button\" class=\"btn btn-default action-button\" style=\"display: none;\">"
       - "  <span class=\"action-label\">go</span>"
       - "</button>"
       + "<button id=\"go_filter\" type=\"button\" class=\"btn btn-default action-button\" style=\"display: none;\">go</button>"
       
+      
       [ FAIL 2 | WARN 1 | SKIP 1 | PASS 455 ]
-      Error: Test failures
+      Error:
+      ! Test failures.
       Execution halted
     ```
 
@@ -93,15 +93,15 @@ Run `revdepcheck::cloud_details(, "inshiny")` for more info
       > # * https://r-pkgs.org/testing-design.html#sec-tests-files-overview
       > # * https://testthat.r-lib.org/articles/special-files.html
     ...
-      ── Error ('test-action.R:8:5'): button is stable ───────────────────────────────
-      Error in `check_tags(widget, shiny::tags$button(), "shiny::actionButton()")`: Unexpected tag structure from shiny::actionButton(). Please contact the package maintainer.
-      Backtrace:
           ▆
-       1. └─testthat::expect_snapshot(...) at test-action.R:8:5
-       2.   └─rlang::cnd_signal(state$error)
+       1. ├─inshiny:::cc(...)
+       2. │ └─base::cat(as.character(x)) at ./helper.R:2:5
+       3. └─inshiny::inline_button(...)
+       4.   └─inshiny:::check_tags(widget, shiny::tags$button(), "shiny::actionButton()")
       
       [ FAIL 2 | WARN 0 | SKIP 9 | PASS 24 ]
-      Error: Test failures
+      Error:
+      ! Test failures.
       Execution halted
     ```
 
@@ -159,15 +159,15 @@ Run `revdepcheck::cloud_details(, "omicsTools")` for more info
       > # Learn more about the roles of various files in:
       > # * https://r-pkgs.org/tests.html
     ...
-      
-      lines(actual) vs lines(expected)
       - "<button id=\"go_filter\" type=\"button\" class=\"btn btn-default action-button\" style=\"display: none;\">"
       - "  <span class=\"action-label\">go</span>"
       - "</button>"
       + "<button id=\"go_filter\" type=\"button\" class=\"btn btn-default action-button\" style=\"display: none;\">go</button>"
       
+      
       [ FAIL 2 | WARN 0 | SKIP 1 | PASS 94 ]
-      Error: Test failures
+      Error:
+      ! Test failures.
       Execution halted
     ```
 
@@ -196,15 +196,19 @@ Run `revdepcheck::cloud_details(, "shinyGovstyle")` for more info
       > library(shinyGovstyle)
       > 
       > test_check("shinyGovstyle")
+      Saving _problems/test-backlink_Input-7.R
       [ FAIL 1 | WARN 0 | SKIP 0 | PASS 125 ]
       
+    ...
       ══ Failed tests ════════════════════════════════════════════════════════════════
       ── Failure ('test-backlink_Input.R:4:3'): backlink works ───────────────────────
-      backlink_check$children[[1]][[2]] not identical to "Back".
+      Expected `backlink_check$children[[1]][[2]]` to be identical to "Back".
+      Differences:
       target is NULL, current is character
       
       [ FAIL 1 | WARN 0 | SKIP 0 | PASS 125 ]
-      Error: Test failures
+      Error:
+      ! Test failures.
       Execution halted
     ```
 
@@ -237,15 +241,15 @@ Run `revdepcheck::cloud_details(, "ShinyLink")` for more info
       > # Learn more about the roles of various files in:
       > # * https://r-pkgs.org/tests.html
     ...
-      
-      lines(actual) vs lines(expected)
       - "<button id=\"go_filter\" type=\"button\" class=\"btn btn-default action-button\" style=\"display: none;\">"
       - "  <span class=\"action-label\">go</span>"
       - "</button>"
       + "<button id=\"go_filter\" type=\"button\" class=\"btn btn-default action-button\" style=\"display: none;\">go</button>"
       
+      
       [ FAIL 2 | WARN 0 | SKIP 1 | PASS 145 ]
-      Error: Test failures
+      Error:
+      ! Test failures.
       Execution halted
     ```
 
@@ -257,7 +261,7 @@ Run `revdepcheck::cloud_details(, "ShinyLink")` for more info
 * GitHub: https://github.com/Jo-Theo/shinySbm
 * Source code: https://github.com/cran/shinySbm
 * Date/Publication: 2023-09-07 21:50:02 UTC
-* Number of recursive dependencies: 133
+* Number of recursive dependencies: 134
 
 Run `revdepcheck::cloud_details(, "shinySbm")` for more info
 
@@ -278,15 +282,15 @@ Run `revdepcheck::cloud_details(, "shinySbm")` for more info
       > # Learn more about the roles of various files in:
       > # * https://r-pkgs.org/tests.html
     ...
-      
-      lines(actual) vs lines(expected)
       - "<button id=\"go_filter\" type=\"button\" class=\"btn btn-default action-button\" style=\"display: none;\">"
       - "  <span class=\"action-label\">go</span>"
       - "</button>"
       + "<button id=\"go_filter\" type=\"button\" class=\"btn btn-default action-button\" style=\"display: none;\">go</button>"
       
+      
       [ FAIL 2 | WARN 0 | SKIP 1 | PASS 141 ]
-      Error: Test failures
+      Error:
+      ! Test failures.
       Execution halted
     ```
 
@@ -315,5 +319,35 @@ Run `revdepcheck::cloud_details(, "shinySbm")` for more info
     checkRd: (-1) visSbm.default.Rd:49: Lost braces in \itemize; meant \describe ?
     checkRd: (-1) visSbm.default.Rd:50: Lost braces in \itemize; meant \describe ?
     checkRd: (-1) visSbm.default.Rd:51: Lost braces in \itemize; meant \describe ?
+    ```
+
+# SouthParkRshiny
+
+<details>
+
+* Version: 1.0.0
+* GitHub: https://github.com/Amalan-ConStat/SouthParkRshiny
+* Source code: https://github.com/cran/SouthParkRshiny
+* Date/Publication: 2024-03-09 11:10:08 UTC
+* Number of recursive dependencies: 112
+
+Run `revdepcheck::cloud_details(, "SouthParkRshiny")` for more info
+
+</details>
+
+## Newly broken
+
+*   checking installed package size ... NOTE
+    ```
+      installed size is  8.6Mb
+      sub-directories of 1Mb or more:
+        data   8.0Mb
+    ```
+
+## In both
+
+*   checking data for non-ASCII characters ... NOTE
+    ```
+      Note: found 1562 marked UTF-8 strings
     ```
 

@@ -43,7 +43,7 @@
   * Combinations of `bindEvent()` and `reactive()` / `observe()`
   * Combination of `bindCache()` and `reactive()`
 
-* `dateRangeInput()`/`updateDateRangeInput()` now correctly considers the time zones of date-time objects (POSIXct) passed to the `start`, `end`, `min` and `max` arguments. (#4318)
+* `dateRangeInput()`/`updateDateRangeInput()` now correctly considers the time zones of date-time objects (POSIXct) passed to the `start`, `end`, `min` and `max` arguments. (thanks @ismirsehregal, #4318)
 
 ## Changes
 

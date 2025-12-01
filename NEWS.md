@@ -86,6 +86,8 @@
 * `updateSelectizeInput()` no longer creates multiple remove buttons when
   `options = list(plugins="remove_button")` is used. (#4275)
 
+* `dateRangeInput()`/`updateDateRangeInput()` now correctly considers the time zones of date-time objects (POSIXct) passed to the `start`, `end`, `min` and `max` arguments. (thanks @ismirsehregal, #4318)
+
 ## Breaking changes
 
 * The return value of `actionButton()` and `actionLink()` now wraps `label`

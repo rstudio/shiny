@@ -33,3 +33,4 @@
 ^_dev$
 ^.claude$
 ^README-npm\.md$
+^CRAN-SUBMISSION$

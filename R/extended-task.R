@@ -140,7 +140,7 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
       private$otel_log_label_add_to_queue <- otel_log_label_extended_task_add_to_queue(label, domain = domain)
 
       private$otel_attrs <- c(
-        otel_srcref_attributes(call_srcref),
+        otel_srcref_attributes(call_srcref, "ExtendedTask"),
         otel_session_id_attrs(domain)
       ) %||% list()
     },

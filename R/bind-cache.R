@@ -520,7 +520,7 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
 
   local({
     impl <- attr(res, "observable", exact = TRUE)
-    impl$.otelAttrs <- append_otel_srcref_attrs(x_otel_attrs, call_srcref)
+    impl$.otelAttrs <- append_otel_srcref_attrs(x_otel_attrs, call_srcref, fn_name = "bindCache")
   })
 
   if (has_otel_collect("reactivity")) {

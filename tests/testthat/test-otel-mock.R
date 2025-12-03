@@ -1,13 +1,46 @@
 skip_on_cran()
 skip_if_not_installed("otelsdk")
 
-expect_code_attrs <- function(trace) {
+expect_code_attrs <- function(trace, expected_fn_name = NULL) {
   testthat::expect_true(!is.null(trace))
   testthat::expect_true(is.list(trace$attributes))
+
+  # Check preferred attribute names
+  testthat::expect_true(is.character(trace$attributes[["code.file.path"]]))
+  testthat::expect_equal(trace$attributes[["code.file.path"]], "test-otel-mock.R")
+  testthat::expect_true(is.numeric(trace$attributes[["code.line.number"]]))
+  testthat::expect_true(is.numeric(trace$attributes[["code.column.number"]]))
+
+  # Check deprecated attribute names (for backward compatibility)
   testthat::expect_true(is.character(trace$attributes[["code.filepath"]]))
   testthat::expect_equal(trace$attributes[["code.filepath"]], "test-otel-mock.R")
   testthat::expect_true(is.numeric(trace$attributes[["code.lineno"]]))
   testthat::expect_true(is.numeric(trace$attributes[["code.column"]]))
+
+  # Verify deprecated names match preferred names
+  testthat::expect_equal(
+    trace$attributes[["code.file.path"]],
+    trace$attributes[["code.filepath"]]
+  )
+  testthat::expect_equal(
+    trace$attributes[["code.line.number"]],
+    trace$attributes[["code.lineno"]]
+  )
+  testthat::expect_equal(
+    trace$attributes[["code.column.number"]],
+    trace$attributes[["code.column"]]
+  )
+
+  # Check code.function.name if expected
+  if (!is.null(expected_fn_name)) {
+    testthat::expect_true(
+      is.character(trace$attributes[["code.function.name"]])
+    )
+    testthat::expect_equal(
+      trace$attributes[["code.function.name"]],
+      expected_fn_name
+    )
+  }
 
   invisible(trace)
 }
@@ -21,7 +54,7 @@ expect_session_id <- function(trace) {
   invisible(trace)
 }
 
-expect_trace <- function(traces, name, pos = 1) {
+expect_trace <- function(traces, name, pos = 1, expected_fn_name = NULL) {
   # Filter to traces with the given name
   trace_set <- traces[which(names(traces) == name)]
   testthat::expect_gte(length(trace_set), pos)
@@ -30,7 +63,7 @@ expect_trace <- function(traces, name, pos = 1) {
   trace <- trace_set[[pos]]
   testthat::expect_true(is.list(trace))
 
-  expect_code_attrs(trace)
+  expect_code_attrs(trace, expected_fn_name = expected_fn_name)
   expect_session_id(trace)
 
   trace
@@ -78,9 +111,9 @@ for (bind in c("all", "reactivity")) {
       session$flushReact()
     })
 
-    expect_trace(traces, "observe mock-session:<anonymous>")
-    expect_trace(traces, "observe mock-session:my_observe")
-    expect_trace(traces, "observe mock-session:labeled observer")
+    expect_trace(traces, "observe mock-session:<anonymous>", 1, "observe")
+    expect_trace(traces, "observe mock-session:my_observe", 1, "observe")
+    expect_trace(traces, "observe mock-session:labeled observer", 1, "observe")
   })
 
   test_that(paste0("bind='", bind, "' handles reactiveVal / reactiveValues"), {
@@ -104,7 +137,7 @@ for (bind in c("all", "reactivity")) {
       expect_equal(rv(), 1)
     })
 
-    expect_trace(traces, "observe mock-session:<anonymous>")
+    expect_trace(traces, "observe mock-session:<anonymous>", 1, "observe")
 
     # TODO-future: Add tests to see the `Set reactiveVal mock-session:rv` logs
     # Requires: https://github.com/r-lib/otelsdk/issues/21
@@ -131,10 +164,16 @@ for (bind in c("all", "reactivity")) {
       expect_equal(r3(), 42)
     })
 
-    observe_trace <- expect_trace(traces, "observe mock-session:obs_r3")
-    r_trace <- expect_trace(traces, "reactive mock-session:r")
-    r2_trace <- expect_trace(traces, "reactive mock-session:<anonymous>")
-    r3_trace <- expect_trace(traces, "reactive mock-session:labeled_rv")
+    observe_trace <- expect_trace(
+      traces, "observe mock-session:obs_r3", 1, "observe"
+    )
+    r_trace <- expect_trace(traces, "reactive mock-session:r", 1, "reactive")
+    r2_trace <- expect_trace(
+      traces, "reactive mock-session:<anonymous>", 1, "reactive"
+    )
+    r3_trace <- expect_trace(
+      traces, "reactive mock-session:labeled_rv", 1, "reactive"
+    )
 
     expect_equal(r_trace$parent, r2_trace$span_id)
     expect_equal(r2_trace$parent, r3_trace$span_id)
@@ -157,7 +196,9 @@ for (bind in c("all", "reactivity")) {
       expect_equal(output$txt, "Hello, world!")
     })
 
-    expect_trace(traces, "output mock-session:txt")
+    # Outputs (render functions) should NOT have code.function.name
+    trace <- expect_trace(traces, "output mock-session:txt", 1, NULL)
+    expect_false("code.function.name" %in% names(trace$attributes))
   })
 
   test_that(paste0("bind='", bind, "' extended tasks are supported"), {
@@ -183,18 +224,28 @@ for (bind in c("all", "reactivity")) {
     traces <- test_server_with_otel(session, server, bind = bind, {
       session$flushReact()
 
-      while(!later::loop_empty()) {
+      while (!later::loop_empty()) {
         later::run_now()
         session$flushReact()
       }
       session$flushReact()
     })
 
-    invoke_obs <- expect_trace(traces, "observe mock-session:invoke task")
-    render1_trace <- expect_trace(traces, "output mock-session:result")
-    ex_task_trace <- expect_trace(traces, "ExtendedTask mock-session:rand_task")
+    invoke_obs <- expect_trace(
+      traces, "observe mock-session:invoke task", 1, "observe"
+    )
+    # Render functions should NOT have code.function.name
+    render1_trace <- expect_trace(traces, "output mock-session:result", 1, NULL)
+    expect_false("code.function.name" %in% names(render1_trace$attributes))
 
-    render2_trace <- expect_trace(traces, "output mock-session:result", pos = 2)
+    ex_task_trace <- expect_trace(
+      traces, "ExtendedTask mock-session:rand_task", 1, "ExtendedTask"
+    )
+
+    render2_trace <- expect_trace(
+      traces, "output mock-session:result", pos = 2, NULL
+    )
+    expect_false("code.function.name" %in% names(render2_trace$attributes))
 
     expect_equal(invoke_obs$span_id, ex_task_trace$parent)
   })
@@ -222,9 +273,11 @@ test_that("bind = 'reactivity' traces reactive components", {
   })
 
   # Should trace reactive components (equivalent to "all")
-  expect_trace(traces, "observe mock-session:test_obs")
-  expect_trace(traces, "reactive mock-session:r")
-  expect_trace(traces, "output mock-session:txt")
+  expect_trace(traces, "observe mock-session:test_obs", 1, "observe")
+  expect_trace(traces, "reactive mock-session:r", 1, "reactive")
+  # Render functions should NOT have code.function.name
+  txt_trace <- expect_trace(traces, "output mock-session:txt", 1, NULL)
+  expect_false("code.function.name" %in% names(txt_trace$attributes))
 })
 
 

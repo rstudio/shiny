@@ -240,7 +240,7 @@ bindEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE
 
   local({
     impl <- attr(res, "observable", exact = TRUE)
-    impl$.otelAttrs <- append_otel_srcref_attrs(x_otel_attrs, call_srcref)
+    impl$.otelAttrs <- append_otel_srcref_attrs(x_otel_attrs, call_srcref, fn_name = "bindEvent")
   })
 
 
@@ -341,7 +341,7 @@ bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
 
   class(x) <- c("Observer.event", class(x))
   call_srcref <- get_call_srcref(-1)
-  x$.otelAttrs <- append_otel_srcref_attrs(x$.otelAttrs, call_srcref)
+  x$.otelAttrs <- append_otel_srcref_attrs(x$.otelAttrs, call_srcref, fn_name = "bindEvent")
 
   if (has_otel_collect("reactivity")) {
     x <- enable_otel_observe(x)

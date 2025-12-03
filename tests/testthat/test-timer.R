@@ -1,3 +1,8 @@
+# Dev CRAN had some issues with comparisons between integer(0) and character(0)
+# Skipping tests on CRAN as CI is enough to verify functionality
+# Related: https://github.com/rstudio/shiny/issues/4326
+skip_on_cran()
+
 test_that("Scheduling works", {
   ran <- FALSE
   fun <- function() {
@@ -32,8 +37,13 @@ test_that("Unscheduling works", {
   # Unregister
   taskHandle()
 
-  expect_identical(timerCallbacks$.times, origTimes)
-  expect_identical(timerCallbacks$.funcs$keys(), origFuncKeys)
+  # Split into two sections to avoid `expect_equal(integer(0), character(0))` comparison on dev CRAN
+  if (length(origTimes) == 0) {
+    expect_equal(0, length(timerCallbacks$.times))
+  } else {
+    expect_equal(timerCallbacks$.times, origTimes)
+  }
+  expect_equal(timerCallbacks$.funcs$keys(), origFuncKeys)
 })
 
 test_that("Vectorized unscheduling works", {

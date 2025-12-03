@@ -4,10 +4,10 @@ skip_if_not_installed("otelsdk")
 expect_code_attrs <- function(trace) {
   testthat::expect_true(!is.null(trace))
   testthat::expect_true(is.list(trace$attributes))
-  testthat::expect_true(is.character(trace$attributes[["code.filepath"]]))
-  testthat::expect_equal(trace$attributes[["code.filepath"]], "test-otel-mock.R")
-  testthat::expect_true(is.numeric(trace$attributes[["code.lineno"]]))
-  testthat::expect_true(is.numeric(trace$attributes[["code.column"]]))
+  testthat::expect_true(is.character(trace$attributes[["code.file.path"]]))
+  testthat::expect_equal(trace$attributes[["code.file.path"]], "test-otel-mock.R")
+  testthat::expect_true(is.numeric(trace$attributes[["code.line.number"]]))
+  testthat::expect_true(is.numeric(trace$attributes[["code.column.number"]]))
 
   invisible(trace)
 }

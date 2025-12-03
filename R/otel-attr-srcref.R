@@ -22,7 +22,12 @@ otel_srcref_attributes <- function(srcref, fn_name = NULL) {
     # Location attrs
     "code.file.path" = filename,
     "code.line.number" = srcref[1],
-    "code.column.number" = srcref[2]
+    "code.column.number" = srcref[2],
+    # Remove these deprecated location names once Logfire supports the preferred names
+    # https://github.com/pydantic/logfire/issues/1559
+    "code.filepath" = filename,
+    "code.lineno" = srcref[1],
+    "code.column" = srcref[2]
   ))
 }
 

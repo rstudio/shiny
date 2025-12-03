@@ -4,10 +4,32 @@ skip_if_not_installed("otelsdk")
 expect_code_attrs <- function(trace, expected_fn_name = NULL) {
   testthat::expect_true(!is.null(trace))
   testthat::expect_true(is.list(trace$attributes))
+
+  # Check preferred attribute names
   testthat::expect_true(is.character(trace$attributes[["code.file.path"]]))
   testthat::expect_equal(trace$attributes[["code.file.path"]], "test-otel-mock.R")
   testthat::expect_true(is.numeric(trace$attributes[["code.line.number"]]))
   testthat::expect_true(is.numeric(trace$attributes[["code.column.number"]]))
+
+  # Check deprecated attribute names (for backward compatibility)
+  testthat::expect_true(is.character(trace$attributes[["code.filepath"]]))
+  testthat::expect_equal(trace$attributes[["code.filepath"]], "test-otel-mock.R")
+  testthat::expect_true(is.numeric(trace$attributes[["code.lineno"]]))
+  testthat::expect_true(is.numeric(trace$attributes[["code.column"]]))
+
+  # Verify deprecated names match preferred names
+  testthat::expect_equal(
+    trace$attributes[["code.file.path"]],
+    trace$attributes[["code.filepath"]]
+  )
+  testthat::expect_equal(
+    trace$attributes[["code.line.number"]],
+    trace$attributes[["code.lineno"]]
+  )
+  testthat::expect_equal(
+    trace$attributes[["code.column.number"]],
+    trace$attributes[["code.column"]]
+  )
 
   # Check code.function.name if expected
   if (!is.null(expected_fn_name)) {

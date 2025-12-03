@@ -101,18 +101,30 @@ test_that("otel_srcref_attributes extracts attributes from srcref object", {
 
   attrs <- otel_srcref_attributes(srcref)
 
+  # Preferred attribute names
   expect_equal(attrs[["code.file.path"]], "/path/to/myfile.R")
   expect_equal(attrs[["code.line.number"]], 15)
   expect_equal(attrs[["code.column.number"]], 8)
   expect_false("code.function.name" %in% names(attrs))
 
+  # Deprecated attribute names (for backward compatibility)
+  expect_equal(attrs[["code.filepath"]], "/path/to/myfile.R")
+  expect_equal(attrs[["code.lineno"]], 15)
+  expect_equal(attrs[["code.column"]], 8)
+
   # Test with function name
   attrs_with_fn <- otel_srcref_attributes(srcref, fn_name = "myFunction")
 
+  # Preferred names
   expect_equal(attrs_with_fn[["code.file.path"]], "/path/to/myfile.R")
   expect_equal(attrs_with_fn[["code.line.number"]], 15)
   expect_equal(attrs_with_fn[["code.column.number"]], 8)
   expect_equal(attrs_with_fn[["code.function.name"]], "myFunction")
+
+  # Deprecated names
+  expect_equal(attrs_with_fn[["code.filepath"]], "/path/to/myfile.R")
+  expect_equal(attrs_with_fn[["code.lineno"]], 15)
+  expect_equal(attrs_with_fn[["code.column"]], 8)
 })
 
 test_that("otel_srcref_attributes handles NULL srcref", {
@@ -207,21 +219,26 @@ test_that("otel_srcref_attributes drops NULL values", {
 
   attrs <- otel_srcref_attributes(srcref)
 
-  # Should only contain lineno and column, not filepath
-  expect_equal(length(attrs), 2)
+  # Should only contain lineno and column (both preferred and deprecated)
+  expect_equal(length(attrs), 4)  # 2 preferred + 2 deprecated
+  # Preferred names
   expect_equal(attrs[["code.line.number"]], 10)
   expect_equal(attrs[["code.column.number"]], 5)
   expect_false("code.file.path" %in% names(attrs))
   expect_false("code.function.name" %in% names(attrs))
+  # Deprecated names
+  expect_equal(attrs[["code.lineno"]], 10)
+  expect_equal(attrs[["code.column"]], 5)
+  expect_false("code.filepath" %in% names(attrs))
 
   # Test with function name - NULL fn_name should still be dropped
   attrs_with_null_fn <- otel_srcref_attributes(srcref, fn_name = NULL)
-  expect_equal(length(attrs_with_null_fn), 2)
+  expect_equal(length(attrs_with_null_fn), 4)
   expect_false("code.function.name" %in% names(attrs_with_null_fn))
 
   # Test with function name provided
   attrs_with_fn <- otel_srcref_attributes(srcref, fn_name = "testFunc")
-  expect_equal(length(attrs_with_fn), 3)
+  expect_equal(length(attrs_with_fn), 5)  # 4 location + 1 function name
   expect_equal(attrs_with_fn[["code.function.name"]], "testFunc")
 })
 
@@ -234,11 +251,16 @@ test_that("otel_srcref_attributes handles missing srcfile", {
 
   attrs <- otel_srcref_attributes(srcref)
 
-  # Should only contain lineno and column
-  expect_equal(length(attrs), 2)
+  # Should only contain lineno and column (both preferred and deprecated)
+  expect_equal(length(attrs), 4)  # 2 preferred + 2 deprecated
+  # Preferred names
   expect_equal(attrs[["code.line.number"]], 10)
   expect_equal(attrs[["code.column.number"]], 5)
   expect_false("code.file.path" %in% names(attrs))
+  # Deprecated names
+  expect_equal(attrs[["code.lineno"]], 10)
+  expect_equal(attrs[["code.column"]], 5)
+  expect_false("code.filepath" %in% names(attrs))
 })
 
 # Integration tests with reactive functions
@@ -321,16 +343,26 @@ test_that("otel attributes follow OpenTelemetry semantic conventions", {
 
   attrs <- otel_srcref_attributes(srcref)
 
-  # Check that attribute names follow the convention
+  # Check that preferred attribute names follow the convention
   expect_true("code.file.path" %in% names(attrs))
   expect_true("code.line.number" %in% names(attrs))
   expect_true("code.column.number" %in% names(attrs))
   expect_false("code.function.name" %in% names(attrs))
 
-  # Check that values are of correct types
+  # Check that deprecated names are also present
+  expect_true("code.filepath" %in% names(attrs))
+  expect_true("code.lineno" %in% names(attrs))
+  expect_true("code.column" %in% names(attrs))
+
+  # Check that values are of correct types (preferred names)
   expect_true(is.character(attrs[["code.file.path"]]))
   expect_true(is.numeric(attrs[["code.line.number"]]))
   expect_true(is.numeric(attrs[["code.column.number"]]))
+
+  # Check that deprecated names have same values
+  expect_equal(attrs[["code.file.path"]], attrs[["code.filepath"]])
+  expect_equal(attrs[["code.line.number"]], attrs[["code.lineno"]])
+  expect_equal(attrs[["code.column.number"]], attrs[["code.column"]])
 
   # Test with function name
   attrs_with_fn <- otel_srcref_attributes(srcref, fn_name = "myFunc")
@@ -349,7 +381,7 @@ test_that("dropNulls helper works correctly in otel_srcref_attributes", {
   )
 
   attrs <- otel_srcref_attributes(srcref)
-  expect_equal(length(attrs), 3)
+  expect_equal(length(attrs), 6)  # 3 preferred + 3 deprecated
 
   # Test with missing filename (NULL)
   srcref_no_file <- structure(
@@ -359,8 +391,9 @@ test_that("dropNulls helper works correctly in otel_srcref_attributes", {
   attr(srcref_no_file, "srcfile") <- list(filename = NULL)
 
   attrs_no_file <- otel_srcref_attributes(srcref_no_file)
-  expect_equal(length(attrs_no_file), 2)
+  expect_equal(length(attrs_no_file), 4)  # 2 preferred + 2 deprecated
   expect_false("code.file.path" %in% names(attrs_no_file))
+  expect_false("code.filepath" %in% names(attrs_no_file))
 })
 
 test_that("otel attributes are used in reactive context execution", {

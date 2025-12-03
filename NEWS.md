@@ -1,4 +1,4 @@
-# shiny (development version)
+# shiny 1.12.1
 
 # shiny 1.12.0
 

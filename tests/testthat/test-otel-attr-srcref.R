@@ -104,6 +104,15 @@ test_that("otel_srcref_attributes extracts attributes from srcref object", {
   expect_equal(attrs[["code.file.path"]], "/path/to/myfile.R")
   expect_equal(attrs[["code.line.number"]], 15)
   expect_equal(attrs[["code.column.number"]], 8)
+  expect_false("code.function.name" %in% names(attrs))
+
+  # Test with function name
+  attrs_with_fn <- otel_srcref_attributes(srcref, fn_name = "myFunction")
+
+  expect_equal(attrs_with_fn[["code.file.path"]], "/path/to/myfile.R")
+  expect_equal(attrs_with_fn[["code.line.number"]], 15)
+  expect_equal(attrs_with_fn[["code.column.number"]], 8)
+  expect_equal(attrs_with_fn[["code.function.name"]], "myFunction")
 })
 
 test_that("otel_srcref_attributes handles NULL srcref", {
@@ -130,6 +139,18 @@ test_that("otel_srcref_attributes extracts from function with srcref", {
       expect_equal(attrs[["code.file.path"]], "function_file.R")
       expect_equal(attrs[["code.line.number"]], 42)
       expect_equal(attrs[["code.column.number"]], 12)
+      expect_false("code.function.name" %in% names(attrs))
+
+      # Test with function name
+      attrs_with_fn <- otel_srcref_attributes(
+        mock_func,
+        fn_name = "testFunction"
+      )
+
+      expect_equal(attrs_with_fn[["code.file.path"]], "function_file.R")
+      expect_equal(attrs_with_fn[["code.line.number"]], 42)
+      expect_equal(attrs_with_fn[["code.column.number"]], 12)
+      expect_equal(attrs_with_fn[["code.function.name"]], "testFunction")
     }
   )
 })
@@ -191,6 +212,17 @@ test_that("otel_srcref_attributes drops NULL values", {
   expect_equal(attrs[["code.line.number"]], 10)
   expect_equal(attrs[["code.column.number"]], 5)
   expect_false("code.file.path" %in% names(attrs))
+  expect_false("code.function.name" %in% names(attrs))
+
+  # Test with function name - NULL fn_name should still be dropped
+  attrs_with_null_fn <- otel_srcref_attributes(srcref, fn_name = NULL)
+  expect_equal(length(attrs_with_null_fn), 2)
+  expect_false("code.function.name" %in% names(attrs_with_null_fn))
+
+  # Test with function name provided
+  attrs_with_fn <- otel_srcref_attributes(srcref, fn_name = "testFunc")
+  expect_equal(length(attrs_with_fn), 3)
+  expect_equal(attrs_with_fn[["code.function.name"]], "testFunc")
 })
 
 test_that("otel_srcref_attributes handles missing srcfile", {
@@ -220,6 +252,7 @@ test_that("reactive() captures otel attributes from source reference", {
   expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
   expect_equal(attrs[["code.line.number"]], 4)
   expect_equal(attrs[["code.column.number"]], 3)
+  expect_equal(attrs[["code.function.name"]], "reactive")
 })
 
 test_that("reactiveVal() captures otel attributes from source reference", {
@@ -231,6 +264,7 @@ test_that("reactiveVal() captures otel attributes from source reference", {
   expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
   expect_equal(attrs[["code.line.number"]], 5)
   expect_equal(attrs[["code.column.number"]], 3)
+  expect_equal(attrs[["code.function.name"]], "reactiveVal")
 })
 
 test_that("reactiveValues() captures otel attributes from source reference", {
@@ -241,6 +275,7 @@ test_that("reactiveValues() captures otel attributes from source reference", {
   expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
   expect_equal(attrs[["code.line.number"]], 6)
   expect_equal(attrs[["code.column.number"]], 3)
+  expect_equal(attrs[["code.function.name"]], "reactiveValues")
 })
 
 test_that("observe() captures otel attributes from source reference", {
@@ -250,6 +285,7 @@ test_that("observe() captures otel attributes from source reference", {
   expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
   expect_equal(attrs[["code.line.number"]], 7)
   expect_equal(attrs[["code.column.number"]], 3)
+  expect_equal(attrs[["code.function.name"]], "observe")
 })
 
 test_that("otel attributes integration with render functions", {
@@ -259,6 +295,8 @@ test_that("otel attributes integration with render functions", {
   expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
   expect_equal(attrs[["code.line.number"]], 8)
   expect_equal(attrs[["code.column.number"]], 20)
+  # Render functions should NOT have code.function.name
+  expect_false("code.function.name" %in% names(attrs))
 })
 
 test_that("observeEvent() captures otel attributes from source reference", {
@@ -268,6 +306,7 @@ test_that("observeEvent() captures otel attributes from source reference", {
   expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
   expect_equal(attrs[["code.line.number"]], 9)
   expect_equal(attrs[["code.column.number"]], 3)
+  expect_equal(attrs[["code.function.name"]], "observeEvent")
 })
 
 test_that("otel attributes follow OpenTelemetry semantic conventions", {
@@ -286,11 +325,19 @@ test_that("otel attributes follow OpenTelemetry semantic conventions", {
   expect_true("code.file.path" %in% names(attrs))
   expect_true("code.line.number" %in% names(attrs))
   expect_true("code.column.number" %in% names(attrs))
+  expect_false("code.function.name" %in% names(attrs))
 
   # Check that values are of correct types
   expect_true(is.character(attrs[["code.file.path"]]))
   expect_true(is.numeric(attrs[["code.line.number"]]))
   expect_true(is.numeric(attrs[["code.column.number"]]))
+
+  # Test with function name
+  attrs_with_fn <- otel_srcref_attributes(srcref, fn_name = "myFunc")
+
+  expect_true("code.function.name" %in% names(attrs_with_fn))
+  expect_true(is.character(attrs_with_fn[["code.function.name"]]))
+  expect_equal(attrs_with_fn[["code.function.name"]], "myFunc")
 })
 
 test_that("dropNulls helper works correctly in otel_srcref_attributes", {
@@ -367,6 +414,7 @@ test_that("eventReactive() captures otel attributes from source reference", {
   expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
   expect_equal(attrs[["code.line.number"]], 10)
   expect_equal(attrs[["code.column.number"]], 3)
+  expect_equal(attrs[["code.function.name"]], "eventReactive")
 })
 
 test_that("renderText() with bindCache() captures otel attributes", {
@@ -375,6 +423,7 @@ test_that("renderText() with bindCache() captures otel attributes", {
 
   expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
   expect_gt(attrs[["code.line.number"]], 12)
+  expect_false("code.function.name" %in% names(attrs))
 })
 
 test_that("renderText() with bindEvent() captures otel attributes", {
@@ -383,6 +432,7 @@ test_that("renderText() with bindEvent() captures otel attributes", {
 
   expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
   expect_gt(attrs[["code.line.number"]], 12)
+  expect_false("code.function.name" %in% names(attrs))
 })
 
 test_that(
@@ -393,6 +443,7 @@ test_that(
 
     expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
     expect_gt(attrs[["code.line.number"]], 12)
+    expect_false("code.function.name" %in% names(attrs))
   }
 )
 
@@ -402,6 +453,7 @@ test_that("bindCache() wrapping renderText() captures otel attributes", {
 
   expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
   expect_gt(attrs[["code.line.number"]], 12)
+  expect_false("code.function.name" %in% names(attrs))
 })
 
 test_that("bindEvent() wrapping renderText() captures otel attributes", {
@@ -410,6 +462,7 @@ test_that("bindEvent() wrapping renderText() captures otel attributes", {
 
   expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
   expect_gt(attrs[["code.line.number"]], 12)
+  expect_false("code.function.name" %in% names(attrs))
 })
 
 test_that(
@@ -420,6 +473,7 @@ test_that(
 
     expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
     expect_gt(attrs[["code.line.number"]], 12)
+    expect_false("code.function.name" %in% names(attrs))
   }
 )
 
@@ -429,6 +483,7 @@ test_that("observe() with bindEvent() captures otel attributes", {
 
   expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
   expect_gt(attrs[["code.line.number"]], 12)
+  expect_equal(attrs[["code.function.name"]], "bindEvent")
 })
 
 test_that("bindEvent() wrapping observe() captures otel attributes", {
@@ -437,6 +492,7 @@ test_that("bindEvent() wrapping observe() captures otel attributes", {
 
   expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
   expect_gt(attrs[["code.line.number"]], 12)
+  expect_equal(attrs[["code.function.name"]], "bindEvent")
 })
 
 test_that("reactive() with bindCache() captures otel attributes", {
@@ -445,6 +501,7 @@ test_that("reactive() with bindCache() captures otel attributes", {
 
   expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
   expect_gt(attrs[["code.line.number"]], 12)
+  expect_equal(attrs[["code.function.name"]], "bindCache")
 })
 
 test_that("reactive() with bindEvent() captures otel attributes", {
@@ -453,6 +510,7 @@ test_that("reactive() with bindEvent() captures otel attributes", {
 
   expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
   expect_gt(attrs[["code.line.number"]], 12)
+  expect_equal(attrs[["code.function.name"]], "bindEvent")
 })
 
 test_that(
@@ -463,6 +521,7 @@ test_that(
 
     expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
     expect_gt(attrs[["code.line.number"]], 12)
+    expect_equal(attrs[["code.function.name"]], "bindEvent")
   }
 )
 
@@ -472,6 +531,7 @@ test_that("bindCache() wrapping reactive() captures otel attributes", {
 
   expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
   expect_gt(attrs[["code.line.number"]], 12)
+  expect_equal(attrs[["code.function.name"]], "bindCache")
 })
 
 test_that("bindEvent() wrapping reactive() captures otel attributes", {
@@ -480,6 +540,7 @@ test_that("bindEvent() wrapping reactive() captures otel attributes", {
 
   expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
   expect_gt(attrs[["code.line.number"]], 12)
+  expect_equal(attrs[["code.function.name"]], "bindEvent")
 })
 
 test_that(
@@ -490,6 +551,7 @@ test_that(
 
     expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
     expect_gt(attrs[["code.line.number"]], 12)
+    expect_equal(attrs[["code.function.name"]], "bindEvent")
   }
 )
 
@@ -500,6 +562,7 @@ test_that("debounce() creates new reactive with otel attributes", {
 
   expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
   expect_gt(attrs[["code.line.number"]], 12)
+  expect_equal(attrs[["code.function.name"]], "debounce")
 })
 
 test_that("throttle() creates new reactive with otel attributes", {
@@ -508,6 +571,7 @@ test_that("throttle() creates new reactive with otel attributes", {
 
   expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
   expect_gt(attrs[["code.line.number"]], 12)
+  expect_equal(attrs[["code.function.name"]], "throttle")
 })
 
 # Tests for ExtendedTask
@@ -520,6 +584,7 @@ test_that("ExtendedTask is created and is an R6 object", {
 
   expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
   expect_gt(attrs[["code.line.number"]], 12)
+  expect_equal(attrs[["code.function.name"]], "ExtendedTask")
 })
 
 # Tests for reactivePoll
@@ -533,6 +598,7 @@ test_that("reactivePoll() captures otel attributes from source reference", {
 
   expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
   expect_gt(attrs[["code.line.number"]], 12)
+  expect_equal(attrs[["code.function.name"]], "reactivePoll")
 })
 
 # Tests for reactiveFileReader
@@ -546,6 +612,7 @@ test_that("reactiveFileReader() captures otel attributes from source reference",
 
   expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
   expect_gt(attrs[["code.line.number"]], 12)
+  expect_equal(attrs[["code.function.name"]], "reactiveFileReader")
 })
 
 # Tests for explicit labels
@@ -556,6 +623,7 @@ test_that("reactive() with explicit label still captures otel attributes", {
   expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
   expect_equal(attrs[["code.line.number"]], 38)
   expect_equal(attrs[["code.column.number"]], 3)
+  expect_equal(attrs[["code.function.name"]], "reactive")
 
   # Verify label is preserved
   label <- attr(x, "observable")$.label
@@ -569,6 +637,7 @@ test_that("observe() with explicit label still captures otel attributes", {
   expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
   expect_equal(attrs[["code.line.number"]], 39)
   expect_equal(attrs[["code.column.number"]], 3)
+  expect_equal(attrs[["code.function.name"]], "observe")
 
   # Verify label is preserved
   expect_equal(x$.label, "my_observer")

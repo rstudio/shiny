@@ -1,20 +1,25 @@
 ## revdepcheck results
 
-We checked 1349 reverse dependencies (1345 from CRAN + 4 from Bioconductor), comparing R CMD check results across CRAN and dev versions of this package.
+We checked 1395 reverse dependencies (1388 from CRAN + 7 from Bioconductor), comparing R CMD check results across CRAN and dev versions of this package.
 
- * We saw 5 new problems
- * We failed to check 8 packages
+ * We saw 7 new problems
+ * We failed to check 21 packages
 
 Issues with CRAN packages are summarised below.
 
 ### New problems
 (This reports the first line of each new failure)
 
-* omicsTools
+* biodosetools
   checking tests ... ERROR
 
-* PopED
-  checking installed package size ... NOTE
+* inshiny
+  checking examples ... ERROR
+  checking tests ... ERROR
+  checking re-building of vignette outputs ... ERROR
+
+* omicsTools
+  checking tests ... ERROR
 
 * shinyGovstyle
   checking tests ... ERROR
@@ -25,13 +30,29 @@ Issues with CRAN packages are summarised below.
 * shinySbm
   checking tests ... ERROR
 
+* SouthParkRshiny
+  checking installed package size ... NOTE
+
 ### Failed to check
 
-* FAfA         (NA)
-* fio          (NA)
-* GDINA        (NA)
-* lavaan.shiny (NA)
-* loon.shiny   (NA)
-* rstanarm     (NA)
-* sphereML     (NA)
-* TestAnaAPP   (NA)
+* boinet            (NA)
+* ctsem             (NA)
+* FAfA              (NA)
+* fio               (NA)
+* FossilSimShiny    (NA)
+* GDINA             (NA)
+* ggsem             (NA)
+* grandR            (NA)
+* hbsaems           (NA)
+* lavaan.shiny      (NA)
+* lcsm              (NA)
+* linkspotter       (NA)
+* loon.shiny        (NA)
+* MOsemiind         (NA)
+* MVN               (NA)
+* RCTrep            (NA)
+* rstanarm          (NA)
+* semdrw            (NA)
+* sphereML          (NA)
+* SurprisalAnalysis (NA)
+* TestAnaAPP        (NA)

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.12.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.12.1</span>
       </span>
     </div>
 
@@ -44,14 +44,17 @@
   <div class="col-md-9 contents">
     <div class="page-header">
       <h1 data-toc-skip>Changelog <small></small></h1>
-      <small>Source: <a href="https://github.com/rstudio/shiny/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/rstudio/shiny/blob/rc-v1.12.1/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
     <div class="section level2">
-<h2 class="page-header" data-toc-text="development version" id="shiny-development-version">shiny (development version)<a class="anchor" aria-label="anchor" href="#shiny-development-version"></a></h2>
-<ul><li>OpenTelemetry code attributes now include both preferred (<code>code.file.path</code>, <code>code.line.number</code>, <code>code.column.number</code>) and deprecated (<code>code.filepath</code>, <code>code.lineno</code>, <code>code.column</code>) attribute names to follow OpenTelemetry semantic conventions while maintaining backward compatibility. The deprecated names will be removed in a future release after Logfire supports the preferred names. (<a href="https://github.com/rstudio/shiny/issues/4325" class="external-link">#4325</a>)</li>
-<li>Timer tests are now skipped on CRAN. (<a href="https://github.com/rstudio/shiny/issues/4327" class="external-link">#4327</a>)</li>
+<h2 class="page-header" data-toc-text="1.12.1" id="shiny-1121">shiny 1.12.1<a class="anchor" aria-label="anchor" href="#shiny-1121"></a></h2>
+<div class="section level3">
+<h3 id="bug-fixes-and-minor-improvements-1-12-1">Bug fixes and minor improvements<a class="anchor" aria-label="anchor" href="#bug-fixes-and-minor-improvements-1-12-1"></a></h3>
+<ul><li><p>OpenTelemetry code attributes now include both the preferred attribute names (<code>code.file.path</code>, <code>code.line.number</code>, <code>code.column.number</code>) and the deprecated names (<code>code.filepath</code>, <code>code.lineno</code>, <code>code.column</code>) to follow OpenTelemetry semantic conventions while maintaining backward compatibility. The deprecated names will be removed in a future release after Logfire supports the preferred names. (<a href="https://github.com/rstudio/shiny/issues/4325" class="external-link">#4325</a>)</p></li>
+<li><p>Timer tests are now skipped on CRAN. (<a href="https://github.com/rstudio/shiny/issues/4327" class="external-link">#4327</a>)</p></li>
 </ul></div>
+</div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.12.0" id="shiny-1120">shiny 1.12.0<a class="anchor" aria-label="anchor" href="#shiny-1120"></a></h2>
 <div class="section level3">

@@ -231,7 +231,7 @@ reactiveVal <- function(value = NULL, label = NULL) {
 
   rv <- ReactiveVal$new(value, label)
   if (!is.null(call_srcref)) {
-    rv$.otelAttrs <- otel_srcref_attributes(call_srcref)
+    rv$.otelAttrs <- otel_srcref_attributes(call_srcref, fn_name = "reactiveVal")
   }
 
   ret <- structure(
@@ -646,7 +646,7 @@ reactiveValues <- function(...) {
       defaultLabel = impl$.label
     )
 
-    impl$.otelAttrs <- otel_srcref_attributes(call_srcref)
+    impl$.otelAttrs <- otel_srcref_attributes(call_srcref, fn_name = "reactiveValues")
   }
 
   impl$mset(args)
@@ -1130,7 +1130,7 @@ reactive <- function(
 
   call_srcref <- get_call_srcref()
   if (!is.null(call_srcref)) {
-    o$.otelAttrs <- otel_srcref_attributes(call_srcref)
+    o$.otelAttrs <- otel_srcref_attributes(call_srcref, fn_name = "reactive")
   }
 
   ret <- structure(
@@ -1587,7 +1587,7 @@ observe <- function(
     ..stacktraceon = ..stacktraceon
   )
   if (!is.null(call_srcref)) {
-    o$.otelAttrs <- otel_srcref_attributes(call_srcref)
+    o$.otelAttrs <- otel_srcref_attributes(call_srcref, fn_name = "observe")
   }
 
   if (has_otel_collect("reactivity")) {
@@ -2055,7 +2055,7 @@ reactive_poll_impl <- function(
         otel_label_reactive_poll(label, domain = impl$.domain)
       else if (fnName == "reactiveFileReader")
         otel_label_reactive_file_reader(label, domain = impl$.domain)
-    impl$.otelAttrs <- append_otel_srcref_attrs(impl$.otelAttrs, call_srcref)
+    impl$.otelAttrs <- append_otel_srcref_attrs(impl$.otelAttrs, call_srcref, fn_name = fnName)
   })
 
   return(re)
@@ -2522,7 +2522,7 @@ observeEvent <- function(eventExpr, handlerExpr,
   })
 
   if (!is.null(call_srcref)) {
-    o$.otelAttrs <- otel_srcref_attributes(call_srcref)
+    o$.otelAttrs <- otel_srcref_attributes(call_srcref, fn_name = "observeEvent")
   }
   if (has_otel_collect("reactivity")) {
     o <- enable_otel_observe(o)
@@ -2571,7 +2571,7 @@ eventReactive <- function(eventExpr, valueExpr,
 
   if (!is.null(call_srcref)) {
     impl <- attr(r, "observable", exact = TRUE)
-    impl$.otelAttrs <- otel_srcref_attributes(call_srcref)
+    impl$.otelAttrs <- otel_srcref_attributes(call_srcref, fn_name = "eventReactive")
   }
   if (has_otel_collect("reactivity")) {
     r <- enable_otel_reactive_expr(r)
@@ -2778,7 +2778,7 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
   local({
     er_impl <- attr(er, "observable", exact = TRUE)
     er_impl$.otelLabel <- otel_label_debounce(label, domain = domain)
-    er_impl$.otelAttrs <- append_otel_srcref_attrs(er_impl$.otelAttrs, call_srcref)
+    er_impl$.otelAttrs <- append_otel_srcref_attrs(er_impl$.otelAttrs, call_srcref, fn_name = "debounce")
   })
 
   with_no_otel_collect({
@@ -2877,7 +2877,7 @@ throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
   local({
     er_impl <- attr(er, "observable", exact = TRUE)
     er_impl$.otelLabel <- otel_label_throttle(label, domain = domain)
-    er_impl$.otelAttrs <- append_otel_srcref_attrs(er_impl$.otelAttrs, call_srcref)
+    er_impl$.otelAttrs <- append_otel_srcref_attrs(er_impl$.otelAttrs, call_srcref, fn_name = "throttle")
   })
 
   er

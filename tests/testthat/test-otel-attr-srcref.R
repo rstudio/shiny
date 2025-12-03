@@ -101,9 +101,30 @@ test_that("otel_srcref_attributes extracts attributes from srcref object", {
 
   attrs <- otel_srcref_attributes(srcref)
 
+  # Preferred attribute names
+  expect_equal(attrs[["code.file.path"]], "/path/to/myfile.R")
+  expect_equal(attrs[["code.line.number"]], 15)
+  expect_equal(attrs[["code.column.number"]], 8)
+  expect_false("code.function.name" %in% names(attrs))
+
+  # Deprecated attribute names (for backward compatibility)
   expect_equal(attrs[["code.filepath"]], "/path/to/myfile.R")
   expect_equal(attrs[["code.lineno"]], 15)
   expect_equal(attrs[["code.column"]], 8)
+
+  # Test with function name
+  attrs_with_fn <- otel_srcref_attributes(srcref, fn_name = "myFunction")
+
+  # Preferred names
+  expect_equal(attrs_with_fn[["code.file.path"]], "/path/to/myfile.R")
+  expect_equal(attrs_with_fn[["code.line.number"]], 15)
+  expect_equal(attrs_with_fn[["code.column.number"]], 8)
+  expect_equal(attrs_with_fn[["code.function.name"]], "myFunction")
+
+  # Deprecated names
+  expect_equal(attrs_with_fn[["code.filepath"]], "/path/to/myfile.R")
+  expect_equal(attrs_with_fn[["code.lineno"]], 15)
+  expect_equal(attrs_with_fn[["code.column"]], 8)
 })
 
 test_that("otel_srcref_attributes handles NULL srcref", {
@@ -127,9 +148,21 @@ test_that("otel_srcref_attributes extracts from function with srcref", {
     {
       attrs <- otel_srcref_attributes(mock_func)
 
-      expect_equal(attrs[["code.filepath"]], "function_file.R")
-      expect_equal(attrs[["code.lineno"]], 42)
-      expect_equal(attrs[["code.column"]], 12)
+      expect_equal(attrs[["code.file.path"]], "function_file.R")
+      expect_equal(attrs[["code.line.number"]], 42)
+      expect_equal(attrs[["code.column.number"]], 12)
+      expect_false("code.function.name" %in% names(attrs))
+
+      # Test with function name
+      attrs_with_fn <- otel_srcref_attributes(
+        mock_func,
+        fn_name = "testFunction"
+      )
+
+      expect_equal(attrs_with_fn[["code.file.path"]], "function_file.R")
+      expect_equal(attrs_with_fn[["code.line.number"]], 42)
+      expect_equal(attrs_with_fn[["code.column.number"]], 12)
+      expect_equal(attrs_with_fn[["code.function.name"]], "testFunction")
     }
   )
 })
@@ -186,11 +219,27 @@ test_that("otel_srcref_attributes drops NULL values", {
 
   attrs <- otel_srcref_attributes(srcref)
 
-  # Should only contain lineno and column, not filepath
-  expect_equal(length(attrs), 2)
+  # Should only contain lineno and column (both preferred and deprecated)
+  expect_equal(length(attrs), 4)  # 2 preferred + 2 deprecated
+  # Preferred names
+  expect_equal(attrs[["code.line.number"]], 10)
+  expect_equal(attrs[["code.column.number"]], 5)
+  expect_false("code.file.path" %in% names(attrs))
+  expect_false("code.function.name" %in% names(attrs))
+  # Deprecated names
   expect_equal(attrs[["code.lineno"]], 10)
   expect_equal(attrs[["code.column"]], 5)
   expect_false("code.filepath" %in% names(attrs))
+
+  # Test with function name - NULL fn_name should still be dropped
+  attrs_with_null_fn <- otel_srcref_attributes(srcref, fn_name = NULL)
+  expect_equal(length(attrs_with_null_fn), 4)
+  expect_false("code.function.name" %in% names(attrs_with_null_fn))
+
+  # Test with function name provided
+  attrs_with_fn <- otel_srcref_attributes(srcref, fn_name = "testFunc")
+  expect_equal(length(attrs_with_fn), 5)  # 4 location + 1 function name
+  expect_equal(attrs_with_fn[["code.function.name"]], "testFunc")
 })
 
 test_that("otel_srcref_attributes handles missing srcfile", {
@@ -202,8 +251,13 @@ test_that("otel_srcref_attributes handles missing srcfile", {
 
   attrs <- otel_srcref_attributes(srcref)
 
-  # Should only contain lineno and column
-  expect_equal(length(attrs), 2)
+  # Should only contain lineno and column (both preferred and deprecated)
+  expect_equal(length(attrs), 4)  # 2 preferred + 2 deprecated
+  # Preferred names
+  expect_equal(attrs[["code.line.number"]], 10)
+  expect_equal(attrs[["code.column.number"]], 5)
+  expect_false("code.file.path" %in% names(attrs))
+  # Deprecated names
   expect_equal(attrs[["code.lineno"]], 10)
   expect_equal(attrs[["code.column"]], 5)
   expect_false("code.filepath" %in% names(attrs))
@@ -217,9 +271,10 @@ test_that("reactive() captures otel attributes from source reference", {
   x <- get_reactive_objects()$reactive
   attrs <- attr(x, "observable")$.otelAttrs
 
-  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
-  expect_equal(attrs[["code.lineno"]], 4)
-  expect_equal(attrs[["code.column"]], 3)
+  expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+  expect_equal(attrs[["code.line.number"]], 4)
+  expect_equal(attrs[["code.column.number"]], 3)
+  expect_equal(attrs[["code.function.name"]], "reactive")
 })
 
 test_that("reactiveVal() captures otel attributes from source reference", {
@@ -228,9 +283,10 @@ test_that("reactiveVal() captures otel attributes from source reference", {
   # Test the attribute extraction that would be used in reactiveVal
   attrs <- attr(x, ".impl")$.otelAttrs
 
-  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
-  expect_equal(attrs[["code.lineno"]], 5)
-  expect_equal(attrs[["code.column"]], 3)
+  expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+  expect_equal(attrs[["code.line.number"]], 5)
+  expect_equal(attrs[["code.column.number"]], 3)
+  expect_equal(attrs[["code.function.name"]], "reactiveVal")
 })
 
 test_that("reactiveValues() captures otel attributes from source reference", {
@@ -238,36 +294,41 @@ test_that("reactiveValues() captures otel attributes from source reference", {
 
   attrs <- .subset2(x, "impl")$.otelAttrs
 
-  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
-  expect_equal(attrs[["code.lineno"]], 6)
-  expect_equal(attrs[["code.column"]], 3)
+  expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+  expect_equal(attrs[["code.line.number"]], 6)
+  expect_equal(attrs[["code.column.number"]], 3)
+  expect_equal(attrs[["code.function.name"]], "reactiveValues")
 })
 
 test_that("observe() captures otel attributes from source reference", {
   x <- get_reactive_objects()$observe
   attrs <- x$.otelAttrs
 
-  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
-  expect_equal(attrs[["code.lineno"]], 7)
-  expect_equal(attrs[["code.column"]], 3)
+  expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+  expect_equal(attrs[["code.line.number"]], 7)
+  expect_equal(attrs[["code.column.number"]], 3)
+  expect_equal(attrs[["code.function.name"]], "observe")
 })
 
 test_that("otel attributes integration with render functions", {
   x <- get_reactive_objects()$renderText
   attrs <- attr(x, "otelAttrs")
 
-  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
-  expect_equal(attrs[["code.lineno"]], 8)
-  expect_equal(attrs[["code.column"]], 20)
+  expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+  expect_equal(attrs[["code.line.number"]], 8)
+  expect_equal(attrs[["code.column.number"]], 20)
+  # Render functions should NOT have code.function.name
+  expect_false("code.function.name" %in% names(attrs))
 })
 
 test_that("observeEvent() captures otel attributes from source reference", {
   x <- get_reactive_objects()$observeEvent
   attrs <- x$.otelAttrs
 
-  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
-  expect_equal(attrs[["code.lineno"]], 9)
-  expect_equal(attrs[["code.column"]], 3)
+  expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+  expect_equal(attrs[["code.line.number"]], 9)
+  expect_equal(attrs[["code.column.number"]], 3)
+  expect_equal(attrs[["code.function.name"]], "observeEvent")
 })
 
 test_that("otel attributes follow OpenTelemetry semantic conventions", {
@@ -282,15 +343,33 @@ test_that("otel attributes follow OpenTelemetry semantic conventions", {
 
   attrs <- otel_srcref_attributes(srcref)
 
-  # Check that attribute names follow the convention
+  # Check that preferred attribute names follow the convention
+  expect_true("code.file.path" %in% names(attrs))
+  expect_true("code.line.number" %in% names(attrs))
+  expect_true("code.column.number" %in% names(attrs))
+  expect_false("code.function.name" %in% names(attrs))
+
+  # Check that deprecated names are also present
   expect_true("code.filepath" %in% names(attrs))
   expect_true("code.lineno" %in% names(attrs))
   expect_true("code.column" %in% names(attrs))
 
-  # Check that values are of correct types
-  expect_true(is.character(attrs[["code.filepath"]]))
-  expect_true(is.numeric(attrs[["code.lineno"]]))
-  expect_true(is.numeric(attrs[["code.column"]]))
+  # Check that values are of correct types (preferred names)
+  expect_true(is.character(attrs[["code.file.path"]]))
+  expect_true(is.numeric(attrs[["code.line.number"]]))
+  expect_true(is.numeric(attrs[["code.column.number"]]))
+
+  # Check that deprecated names have same values
+  expect_equal(attrs[["code.file.path"]], attrs[["code.filepath"]])
+  expect_equal(attrs[["code.line.number"]], attrs[["code.lineno"]])
+  expect_equal(attrs[["code.column.number"]], attrs[["code.column"]])
+
+  # Test with function name
+  attrs_with_fn <- otel_srcref_attributes(srcref, fn_name = "myFunc")
+
+  expect_true("code.function.name" %in% names(attrs_with_fn))
+  expect_true(is.character(attrs_with_fn[["code.function.name"]]))
+  expect_equal(attrs_with_fn[["code.function.name"]], "myFunc")
 })
 
 test_that("dropNulls helper works correctly in otel_srcref_attributes", {
@@ -302,7 +381,7 @@ test_that("dropNulls helper works correctly in otel_srcref_attributes", {
   )
 
   attrs <- otel_srcref_attributes(srcref)
-  expect_equal(length(attrs), 3)
+  expect_equal(length(attrs), 6)  # 3 preferred + 3 deprecated
 
   # Test with missing filename (NULL)
   srcref_no_file <- structure(
@@ -312,16 +391,17 @@ test_that("dropNulls helper works correctly in otel_srcref_attributes", {
   attr(srcref_no_file, "srcfile") <- list(filename = NULL)
 
   attrs_no_file <- otel_srcref_attributes(srcref_no_file)
-  expect_equal(length(attrs_no_file), 2)
+  expect_equal(length(attrs_no_file), 4)  # 2 preferred + 2 deprecated
+  expect_false("code.file.path" %in% names(attrs_no_file))
   expect_false("code.filepath" %in% names(attrs_no_file))
 })
 
 test_that("otel attributes are used in reactive context execution", {
   # Test that otel attributes are properly passed through to spans
   mock_attrs <- list(
-    "code.filepath" = "context_test.R",
-    "code.lineno" = 42L,
-    "code.column" = 8L
+    "code.file.path" = "context_test.R",
+    "code.line.number" = 42L,
+    "code.column.number" = 8L
   )
 
   # Test the context info structure used in react.R
@@ -342,9 +422,9 @@ test_that("otel attributes are combined with session attributes", {
   # as happens in the reactive system
 
   srcref_attrs <- list(
-    "code.filepath" = "session_test.R",
-    "code.lineno" = 15L,
-    "code.column" = 5L
+    "code.file.path" = "session_test.R",
+    "code.line.number" = 15L,
+    "code.column.number" = 5L
   )
 
   session_attrs <- list(
@@ -355,8 +435,8 @@ test_that("otel attributes are combined with session attributes", {
   combined_attrs <- c(srcref_attrs, session_attrs)
 
   expect_equal(length(combined_attrs), 4)
-  expect_equal(combined_attrs[["code.filepath"]], "session_test.R")
-  expect_equal(combined_attrs[["code.lineno"]], 15L)
+  expect_equal(combined_attrs[["code.file.path"]], "session_test.R")
+  expect_equal(combined_attrs[["code.line.number"]], 15L)
   expect_equal(combined_attrs[["session.id"]], "test-session-123")
 })
 
@@ -364,25 +444,28 @@ test_that("eventReactive() captures otel attributes from source reference", {
   x <- get_reactive_objects()$eventReactive
   attrs <- attr(x, "observable")$.otelAttrs
 
-  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
-  expect_equal(attrs[["code.lineno"]], 10)
-  expect_equal(attrs[["code.column"]], 3)
+  expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+  expect_equal(attrs[["code.line.number"]], 10)
+  expect_equal(attrs[["code.column.number"]], 3)
+  expect_equal(attrs[["code.function.name"]], "eventReactive")
 })
 
 test_that("renderText() with bindCache() captures otel attributes", {
   x <- get_reactive_objects()$renderCacheA
   attrs <- attr(x, "otelAttrs")
 
-  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
-  expect_gt(attrs[["code.lineno"]], 12)
+  expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+  expect_gt(attrs[["code.line.number"]], 12)
+  expect_false("code.function.name" %in% names(attrs))
 })
 
 test_that("renderText() with bindEvent() captures otel attributes", {
   x <- get_reactive_objects()$renderEventA
   attrs <- attr(x, "otelAttrs")
 
-  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
-  expect_gt(attrs[["code.lineno"]], 12)
+  expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+  expect_gt(attrs[["code.line.number"]], 12)
+  expect_false("code.function.name" %in% names(attrs))
 })
 
 test_that(
@@ -391,8 +474,9 @@ test_that(
     x <- get_reactive_objects()$renderCacheEventA
     attrs <- attr(x, "otelAttrs")
 
-    expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
-    expect_gt(attrs[["code.lineno"]], 12)
+    expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+    expect_gt(attrs[["code.line.number"]], 12)
+    expect_false("code.function.name" %in% names(attrs))
   }
 )
 
@@ -400,16 +484,18 @@ test_that("bindCache() wrapping renderText() captures otel attributes", {
   x <- get_reactive_objects()$renderCacheB
   attrs <- attr(x, "otelAttrs")
 
-  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
-  expect_gt(attrs[["code.lineno"]], 12)
+  expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+  expect_gt(attrs[["code.line.number"]], 12)
+  expect_false("code.function.name" %in% names(attrs))
 })
 
 test_that("bindEvent() wrapping renderText() captures otel attributes", {
   x <- get_reactive_objects()$renderEventB
   attrs <- attr(x, "otelAttrs")
 
-  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
-  expect_gt(attrs[["code.lineno"]], 12)
+  expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+  expect_gt(attrs[["code.line.number"]], 12)
+  expect_false("code.function.name" %in% names(attrs))
 })
 
 test_that(
@@ -418,8 +504,9 @@ test_that(
     x <- get_reactive_objects()$renderCacheEventB
     attrs <- attr(x, "otelAttrs")
 
-    expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
-    expect_gt(attrs[["code.lineno"]], 12)
+    expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+    expect_gt(attrs[["code.line.number"]], 12)
+    expect_false("code.function.name" %in% names(attrs))
   }
 )
 
@@ -427,32 +514,36 @@ test_that("observe() with bindEvent() captures otel attributes", {
   x <- get_reactive_objects()$observeEventA
   attrs <- x$.otelAttrs
 
-  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
-  expect_gt(attrs[["code.lineno"]], 12)
+  expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+  expect_gt(attrs[["code.line.number"]], 12)
+  expect_equal(attrs[["code.function.name"]], "bindEvent")
 })
 
 test_that("bindEvent() wrapping observe() captures otel attributes", {
   x <- get_reactive_objects()$observeEventB
   attrs <- x$.otelAttrs
 
-  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
-  expect_gt(attrs[["code.lineno"]], 12)
+  expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+  expect_gt(attrs[["code.line.number"]], 12)
+  expect_equal(attrs[["code.function.name"]], "bindEvent")
 })
 
 test_that("reactive() with bindCache() captures otel attributes", {
   x <- get_reactive_objects()$reactiveCacheA
   attrs <- attr(x, "observable")$.otelAttrs
 
-  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
-  expect_gt(attrs[["code.lineno"]], 12)
+  expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+  expect_gt(attrs[["code.line.number"]], 12)
+  expect_equal(attrs[["code.function.name"]], "bindCache")
 })
 
 test_that("reactive() with bindEvent() captures otel attributes", {
   x <- get_reactive_objects()$reactiveEventA
   attrs <- attr(x, "observable")$.otelAttrs
 
-  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
-  expect_gt(attrs[["code.lineno"]], 12)
+  expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+  expect_gt(attrs[["code.line.number"]], 12)
+  expect_equal(attrs[["code.function.name"]], "bindEvent")
 })
 
 test_that(
@@ -461,8 +552,9 @@ test_that(
     x <- get_reactive_objects()$reactiveCacheEventA
     attrs <- attr(x, "observable")$.otelAttrs
 
-    expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
-    expect_gt(attrs[["code.lineno"]], 12)
+    expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+    expect_gt(attrs[["code.line.number"]], 12)
+    expect_equal(attrs[["code.function.name"]], "bindEvent")
   }
 )
 
@@ -470,16 +562,18 @@ test_that("bindCache() wrapping reactive() captures otel attributes", {
   x <- get_reactive_objects()$reactiveCacheB
   attrs <- attr(x, "observable")$.otelAttrs
 
-  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
-  expect_gt(attrs[["code.lineno"]], 12)
+  expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+  expect_gt(attrs[["code.line.number"]], 12)
+  expect_equal(attrs[["code.function.name"]], "bindCache")
 })
 
 test_that("bindEvent() wrapping reactive() captures otel attributes", {
   x <- get_reactive_objects()$reactiveEventB
   attrs <- attr(x, "observable")$.otelAttrs
 
-  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
-  expect_gt(attrs[["code.lineno"]], 12)
+  expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+  expect_gt(attrs[["code.line.number"]], 12)
+  expect_equal(attrs[["code.function.name"]], "bindEvent")
 })
 
 test_that(
@@ -488,8 +582,9 @@ test_that(
     x <- get_reactive_objects()$reactiveCacheEventB
     attrs <- attr(x, "observable")$.otelAttrs
 
-    expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
-    expect_gt(attrs[["code.lineno"]], 12)
+    expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+    expect_gt(attrs[["code.line.number"]], 12)
+    expect_equal(attrs[["code.function.name"]], "bindEvent")
   }
 )
 
@@ -498,16 +593,18 @@ test_that("debounce() creates new reactive with otel attributes", {
   x <- get_reactive_objects()$debounce
   attrs <- attr(x, "observable")$.otelAttrs
 
-  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
-  expect_gt(attrs[["code.lineno"]], 12)
+  expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+  expect_gt(attrs[["code.line.number"]], 12)
+  expect_equal(attrs[["code.function.name"]], "debounce")
 })
 
 test_that("throttle() creates new reactive with otel attributes", {
   x <- get_reactive_objects()$throttle
   attrs <- attr(x, "observable")$.otelAttrs
 
-  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
-  expect_gt(attrs[["code.lineno"]], 12)
+  expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+  expect_gt(attrs[["code.line.number"]], 12)
+  expect_equal(attrs[["code.function.name"]], "throttle")
 })
 
 # Tests for ExtendedTask
@@ -518,8 +615,9 @@ test_that("ExtendedTask is created and is an R6 object", {
 
   attrs <- .subset2(x, ".__enclos_env__")$private$otel_attrs
 
-  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
-  expect_gt(attrs[["code.lineno"]], 12)
+  expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+  expect_gt(attrs[["code.line.number"]], 12)
+  expect_equal(attrs[["code.function.name"]], "ExtendedTask")
 })
 
 # Tests for reactivePoll
@@ -531,8 +629,9 @@ test_that("reactivePoll() captures otel attributes from source reference", {
 
   expect_equal(as.character(otelLabel), "reactivePoll r_poll")
 
-  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
-  expect_gt(attrs[["code.lineno"]], 12)
+  expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+  expect_gt(attrs[["code.line.number"]], 12)
+  expect_equal(attrs[["code.function.name"]], "reactivePoll")
 })
 
 # Tests for reactiveFileReader
@@ -544,8 +643,9 @@ test_that("reactiveFileReader() captures otel attributes from source reference",
 
   expect_equal(as.character(otelLabel), "reactiveFileReader r_file")
 
-  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
-  expect_gt(attrs[["code.lineno"]], 12)
+  expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+  expect_gt(attrs[["code.line.number"]], 12)
+  expect_equal(attrs[["code.function.name"]], "reactiveFileReader")
 })
 
 # Tests for explicit labels
@@ -553,9 +653,10 @@ test_that("reactive() with explicit label still captures otel attributes", {
   x <- get_reactive_objects()$reactiveLabeled
   attrs <- attr(x, "observable")$.otelAttrs
 
-  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
-  expect_equal(attrs[["code.lineno"]], 38)
-  expect_equal(attrs[["code.column"]], 3)
+  expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+  expect_equal(attrs[["code.line.number"]], 38)
+  expect_equal(attrs[["code.column.number"]], 3)
+  expect_equal(attrs[["code.function.name"]], "reactive")
 
   # Verify label is preserved
   label <- attr(x, "observable")$.label
@@ -566,9 +667,10 @@ test_that("observe() with explicit label still captures otel attributes", {
   x <- get_reactive_objects()$observeLabeled
   attrs <- x$.otelAttrs
 
-  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
-  expect_equal(attrs[["code.lineno"]], 39)
-  expect_equal(attrs[["code.column"]], 3)
+  expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+  expect_equal(attrs[["code.line.number"]], 39)
+  expect_equal(attrs[["code.column.number"]], 3)
+  expect_equal(attrs[["code.function.name"]], "observe")
 
   # Verify label is preserved
   expect_equal(x$.label, "my_observer")
@@ -583,10 +685,10 @@ test_that("reactive created inside function captures function srcref", {
   r <- create_reactive()
   attrs <- attr(r, "observable")$.otelAttrs
 
-  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
+  expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
   # Line number should point to where reactive() is called inside the function
-  expect_true(is.numeric(attrs[["code.lineno"]]))
-  expect_true(is.numeric(attrs[["code.column"]]))
+  expect_true(is.numeric(attrs[["code.line.number"]]))
+  expect_true(is.numeric(attrs[["code.column.number"]]))
 })
 
 test_that("observe created inside function captures function srcref", {
@@ -597,9 +699,9 @@ test_that("observe created inside function captures function srcref", {
   o <- create_observer()
   attrs <- o$.otelAttrs
 
-  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
-  expect_true(is.numeric(attrs[["code.lineno"]]))
-  expect_true(is.numeric(attrs[["code.column"]]))
+  expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+  expect_true(is.numeric(attrs[["code.line.number"]]))
+  expect_true(is.numeric(attrs[["code.column.number"]]))
 })
 
 test_that("reactive returned from function preserves srcref", {
@@ -610,8 +712,8 @@ test_that("reactive returned from function preserves srcref", {
   counter <- make_counter(42)
   attrs <- attr(counter, "observable")$.otelAttrs
 
-  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
-  expect_true(is.numeric(attrs[["code.lineno"]]))
+  expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+  expect_true(is.numeric(attrs[["code.line.number"]]))
 })
 
 test_that("reactiveVal created in function captures srcref", {
@@ -622,8 +724,8 @@ test_that("reactiveVal created in function captures srcref", {
   rv <- create_val()
   attrs <- attr(rv, ".impl")$.otelAttrs
 
-  expect_equal(attrs[["code.filepath"]], "test-otel-attr-srcref.R")
-  expect_true(is.numeric(attrs[["code.lineno"]]))
+  expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+  expect_true(is.numeric(attrs[["code.line.number"]]))
 })
 
 test_that("nested reactive expressions preserve individual srcrefs", {
@@ -633,17 +735,17 @@ test_that("nested reactive expressions preserve individual srcrefs", {
   })
 
   outer_attrs <- attr(outer_reactive, "observable")$.otelAttrs
-  expect_equal(outer_attrs[["code.filepath"]], "test-otel-attr-srcref.R")
-  expect_true(is.numeric(outer_attrs[["code.lineno"]]))
+  expect_equal(outer_attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+  expect_true(is.numeric(outer_attrs[["code.line.number"]]))
 
   # Get the inner reactive by executing outer
   withReactiveDomain(MockShinySession$new(), {
     inner_reactive <- isolate(outer_reactive())
     inner_attrs <- attr(inner_reactive, "observable")$.otelAttrs
 
-    expect_equal(inner_attrs[["code.filepath"]], "test-otel-attr-srcref.R")
-    expect_true(is.numeric(inner_attrs[["code.lineno"]]))
+    expect_equal(inner_attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+    expect_true(is.numeric(inner_attrs[["code.line.number"]]))
     # Inner should have different line number than outer
-    expect_false(inner_attrs[["code.lineno"]] == outer_attrs[["code.lineno"]])
+    expect_false(inner_attrs[["code.line.number"]] == outer_attrs[["code.line.number"]])
   })
 })

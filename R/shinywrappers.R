@@ -136,7 +136,9 @@ markRenderFunction <- function(
 
   otelAttrs <-
     otel_srcref_attributes(
-      attr(renderFunc, "wrappedFunc", exact = TRUE)
+      attr(renderFunc, "wrappedFunc", exact = TRUE),
+      # Can't retrieve the render function used at this point, so just use NULL
+      fn_name = NULL
     )
 
   ret <- structure(

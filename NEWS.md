@@ -1,5 +1,7 @@
 # shiny 1.12.1
 
+* Timer tests are now skipped on CRAN. (#4327)
+
 # shiny 1.12.0
 
 ## OpenTelemetry support

@@ -41,6 +41,8 @@ removeModal <- function(session = getDefaultReactiveDomain()) {
 #' @inheritParams actionButton
 #' @param ... UI elements for the body of the modal dialog box.
 #' @param title An optional title for the dialog.
+#` @param title_level An optional header level (between 1 and 6) for the title. 
+#'   Defaults to 4 (h4 element).
 #' @param footer UI for footer. Use `NULL` for no footer.
 #' @param size One of `"s"` for small, `"m"` (the default) for medium,
 #'   `"l"` for large, or `"xl"` for extra large. Note that `"xl"` only 
@@ -153,8 +155,20 @@ removeModal <- function(session = getDefaultReactiveDomain()) {
 #' )
 #' }
 #' @export
-modalDialog <- function(..., title = NULL, footer = modalButton("Dismiss"),
+modalDialog <- function(..., title = NULL, title_level = 4, footer = modalButton("Dismiss"),
   size = c("m", "s", "l", "xl"), easyClose = FALSE, fade = TRUE) {
+
+if (!is.numeric(title_level) || length(title_level) != 1 || is.na(title_level)) {
+  stop("`title_level` must be a single numeric value between 1 and 6.")
+}
+
+if (title_level %% 1 != 0) {
+  stop("`title_level` must be an integer between 1 and 6.")
+}
+
+if (title_level < 1 || title_level > 6) {
+  stop("`title_level` must be a value 1 through 6.")
+}
 
   size <- match.arg(size)
 
@@ -175,7 +189,8 @@ modalDialog <- function(..., title = NULL, footer = modalButton("Dismiss"),
       class = switch(size, s = "modal-sm", m = NULL, l = "modal-lg", xl = "modal-xl"),
       div(class = "modal-content",
         if (!is.null(title)) div(class = "modal-header",
-          tags$h4(class = "modal-title", title)
+          tag_fun = htmltools::tags[[paste0("h", title_level)]] #NOW, GRAB HEADER LEVEL ACCORDING TO USER SPEC
+          tag_fun(class = "modal-title", title)
         ),
         div(class = "modal-body", ...),
         if (!is.null(footer)) div(class = "modal-footer", footer)

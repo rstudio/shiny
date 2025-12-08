@@ -21,11 +21,48 @@ test_that("ExtendedTask captures otel collection state at initialization", {
   expect_true(task$.__enclos_env__$private$is_recording_otel)
 })
 
+test_that("ExtendedTask sets is_recording_otel to FALSE when otel disabled", {
+  # Enable otel tracing
+  local_mocked_bindings(
+    otel_is_tracing_enabled = function() FALSE
+  )
+
+  # Test with all level
+  withr::with_options(list(shiny.otel.collect = "all"), {
+    task1 <- ex_task_42()
+    expect_false(task1$.__enclos_env__$private$is_recording_otel)
+  })
+
+  # Test with reactivity level
+  withr::with_options(list(shiny.otel.collect = "reactivity"), {
+    task1 <- ex_task_42()
+    expect_false(task1$.__enclos_env__$private$is_recording_otel)
+  })
+
+  # Test with session level (should be FALSE)
+  withr::with_options(list(shiny.otel.collect = "session"), {
+    task2 <- ex_task_42()
+    expect_false(task2$.__enclos_env__$private$is_recording_otel)
+  })
+
+  # Test with none level (should be FALSE)
+  withr::with_options(list(shiny.otel.collect = "none"), {
+    task3 <- ex_task_42()
+    expect_false(task3$.__enclos_env__$private$is_recording_otel)
+  })
+})
+
 test_that("ExtendedTask sets is_recording_otel based on has_otel_collect at init", {
   # Enable otel tracing
   local_mocked_bindings(
     otel_is_tracing_enabled = function() TRUE
   )
+
+  # Test with all level
+  withr::with_options(list(shiny.otel.collect = "all"), {
+    task1 <- ex_task_42()
+    expect_true(task1$.__enclos_env__$private$is_recording_otel)
+  })
 
   # Test with reactivity level
   withr::with_options(list(shiny.otel.collect = "reactivity"), {
@@ -129,7 +166,10 @@ test_that("ExtendedTask does not create span when is_recording_otel is FALSE", {
   span_created <- FALSE
 
   local_mocked_bindings(
-    start_otel_span = function(...) create_mock_otel_span("extended_task")
+    start_otel_span = function(...) {
+      span_created <<- TRUE
+      create_mock_otel_span("extended_task")
+    }
   )
 
   withReactiveDomain(MockShinySession$new(), {

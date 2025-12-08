@@ -37,9 +37,9 @@
 #'
 #' @section Pipe Usage (Not Recommended):
 #'
-#' While these functions technically work with pipes, this usage is **not
-#' recommended** because the reactive expression has already been created by the
-#' time the pipe executes, so the telemetry settings have no effect:
+#' While using `withOtelCollect()` as a pipe-able method, it is not recommended due to the use case where the reactive object is created before the `withOtelCollect()` call. In such cases, the reactive object will not inherit the intended OpenTelemetry settings.
+#'
+#' Therefore, to avoid this hard-to-debug situation, we recommend that you only create your reactive objects within the `withOtelCollect()` call or after setting the local collection level with `localOtelCollect()`.
 #'
 #' ```r
 #' # Technically works, but not recommended
@@ -50,19 +50,16 @@
 #'
 #' # Does NOT work as intended
 #' x <- reactive({ ... })
-#' # `x` was created outside of `withOtelCollect()`, so OTel settings are not applied
+#' # `x` was created outside of `withOtelCollect()`,
+#' # therefore no OTel settings are applied
 #' x_no_otel <- withOtelCollect("all", x)
 #'
-#' # Best practice is to create the reactive object inside the withOtelCollect() call
+#' # Best practice: Create the reactive object within `expr=`
 #' withOtelCollect("all", {
 #'   x_with_otel <- reactive({ ... })
 #'   y_with_otel <- reactive({ ... })
 #' })
 #' ```
-#'
-#' The correct approach is to create the reactive expression **inside** the
-#' `withOtelCollect()` call or **after** setting the local collection level with
-#' `localOtelCollect()`.
 #'
 #' @param collect Character string specifying the OpenTelemetry collection level.
 #'   Must be one of `"none"`, `"reactivity"`, or `"all"`.

@@ -140,7 +140,7 @@ test_that("ExtendedTask creates span only when is_recording_otel is TRUE", {
     otel_is_tracing_enabled = function() TRUE
   )
 
-  ignore <- otelsdk::with_otel_record({
+  with_shiny_otel_record({
     withReactiveDomain(MockShinySession$new(), {
       task <- ex_task_42()
 

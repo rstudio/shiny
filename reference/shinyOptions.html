@@ -29,7 +29,7 @@ internal use only.'><meta property="og:image" content="/logo.png"><!-- mathjax -
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.12.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.12.0.9000</span>
       </span>
     </div>
 
@@ -56,7 +56,7 @@ internal use only.'><meta property="og:image" content="/logo.png"><!-- mathjax -
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Get or set Shiny options</h1>
-    <small class="dont-index">Source: <a href="https://github.com/rstudio/shiny/blob/rc-v1.12.1/R/shiny-options.R" class="external-link"><code>R/shiny-options.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/rstudio/shiny/blob/main/R/shiny-options.R" class="external-link"><code>R/shiny-options.R</code></a></small>
     <div class="hidden name"><code>shinyOptions.Rd</code></div>
     </div>
 
@@ -240,17 +240,25 @@ Cairo package. See <code><a href="plotPNG.html">plotPNG()</a></code> for more in
 different default <code>getOption(key)</code> values will be returned. See <code><a href="devmode.html">devmode()</a></code> for more details.</p></dd>
 
 <dt>shiny.otel.collect (defaults to <code>Sys.getenv("SHINY_OTEL_COLLECT", "all")</code>)</dt>
-<dd><p>Determines how Shiny will
-interact with OpenTelemetry.</p>
+<dd><p>Determines how Shiny will interact with OpenTelemetry.</p>
 <p>Supported values:</p><ul><li><p><code>"none"</code> - No Shiny OpenTelemetry tracing.</p></li>
 <li><p><code>"session"</code> - Adds session start/end spans.</p></li>
-<li><p><code>"reactive_update"</code> - Spans for any synchronous/asynchronous reactive update. (Includes <code>"session"</code> features).</p></li>
-<li><p><code>"reactivity"</code> - Spans for all reactive expressions. (Includes <code>"reactive_update"</code> features).</p></li>
-<li><p><code>"all"</code> - All Shiny OpenTelemetry tracing. Currently equivalent to <code>"reactivity"</code>.</p></li>
+<li><p><code>"reactive_update"</code> - Spans for any synchronous/asynchronous reactive
+update. (Includes <code>"session"</code> features).</p></li>
+<li><p><code>"reactivity"</code> - Spans for all reactive expressions and logs for setting
+reactive vals and values. (Includes <code>"reactive_update"</code> features). This
+option must be set when creating any reactive objects that should record
+OpenTelemetry spans / logs. See <code><a href="withOtelCollect.html">withOtelCollect()</a></code> and
+<code><a href="withOtelCollect.html">localOtelCollect()</a></code> for ways to set this option locally when creating
+your reactive expressions.</p></li>
+<li><p><code>"all"</code> - All Shiny OpenTelemetry tracing. Currently equivalent to
+<code>"reactivity"</code>.</p></li>
 </ul><p>This option is useful for debugging and profiling while in production. This
 option will only be useful if the <code>otelsdk</code> package is installed and
 <code><a href="https://otel.r-lib.org/reference/is_tracing_enabled.html" class="external-link">otel::is_tracing_enabled()</a></code> returns <code>TRUE</code>. Please have any OpenTelemetry
-environment variables set before starting your Shiny app.</p></dd>
+environment variables set before loading any relevant R packages.</p>
+<p>To set this option locally within a specific part of your Shiny
+application, see <code><a href="withOtelCollect.html">withOtelCollect()</a></code> and <code><a href="withOtelCollect.html">localOtelCollect()</a></code>.</p></dd>
 
 <dt>shiny.otel.sanitize.errors (defaults to <code>TRUE</code>)</dt>
 <dd><p>If <code>TRUE</code>, fatal and unhandled errors will be sanitized before being sent to the OpenTelemetry backend. The default value of <code>TRUE</code> is set to avoid potentially sending sensitive information to the OpenTelemetry backend. If you want the full error message and stack trace to be sent to the OpenTelemetry backend, set this option to <code>FALSE</code> or use <code>safeError(e)</code>.</p></dd>

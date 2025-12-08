@@ -1,121 +1,129 @@
 ## Comments
 
-#### 2025-12-01
+#### 2025-12-08
 
-Hi CRAN,
+Test has been removed from CRAN checks.
 
-We made changes to underlying structures that packages are not suppose to test. PRs were provided for each failing package.
+Also added a couple bug fixes as found by users.
 
-Maintainer change: From Winston Chang to Carson Sievert.
-
-Please let me know if you need any further information.
+Please let me know if you need any further changes.
 
 Thank you,
 Carson
 
+#### 2025-12-04
+
+Error:
+
+```
+Check Details
+Version: 1.12.0
+Check: tests
+Result: ERROR
+    Running ‘testthat.R’ [100s/394s]
+  Running the tests in ‘tests/testthat.R’ failed.
+  Complete output:
+    > library(testthat)
+    > library(shiny)
+    >
+    > test_check("shiny")
+    Saving _problems/test-timer-35.R
+    [ FAIL 1 | WARN 0 | SKIP 22 | PASS 1981 ]
+
+    ══ Skipped tests (22) ══════════════════════════════════════════════════════════
+    • File system is not case-sensitive (1): 'test-app.R:36:5'
+    • I'm not sure of a great way to test this without timers. (1):
+      'test-test-server.R:216:3'
+    • Not testing in CI (1): 'test-devmode.R:17:3'
+    • On CRAN (18): 'test-actionButton.R:59:1', 'test-busy-indication.R:1:1',
+      'test-busy-indication.R:15:1', 'test-busy-indication.R:50:1',
+      'test-otel-error.R:1:1', 'test-otel-mock.R:1:1', 'test-pkgdown.R:3:3',
+      'test-reactivity.r:146:1', 'test-reactivity.r:1240:5',
+      'test-reactivity.r:1240:5', 'test-stacks-deep.R:93:1',
+      'test-stacks-deep.R:141:1', 'test-stacks.R:140:3', 'test-tabPanel.R:46:1',
+      'test-tabPanel.R:66:1', 'test-tabPanel.R:73:1', 'test-tabPanel.R:83:1',
+      'test-utils.R:177:3'
+    • {shinytest2} is not installed (1): 'test-test-shinyAppTemplate.R:2:1'
+
+    ══ Failed tests ════════════════════════════════════════════════════════════════
+    ── Failure ('test-timer.R:35:3'): Unscheduling works ───────────────────────────
+    Expected `timerCallbacks$.times` to be identical to `origTimes`.
+    Differences:
+    `attr(actual, 'row.names')` is an integer vector ()
+    `attr(expected, 'row.names')` is a character vector ()
+
+
+    [ FAIL 1 | WARN 0 | SKIP 22 | PASS 1981 ]
+    Error:
+    ! Test failures.
+    Execution halted
+```
+
+
+#### 2025-12-03
+
+```
+Dear maintainer,
+
+Please see the problems shown on
+<https://cran.r-project.org/web/checks/check_results_shiny.html>.
+
+Please correct before 2025-12-17 to safely retain your package on CRAN.
+
+The CRAN Team
+```
+
 ## `R CMD check` results:
 
-The maintainer change is correctly detected. The URL check sometimes flags a 429
-error from Wikipedia, which is a temporary issue since the URL is valid when
-visited manually.
+0 errors | 0 warning | 1 note
 
 ```
-* checking CRAN incoming feasibility ... [19s] NOTE
-Maintainer: 'Carson Sievert <barret@posit.co>'
+─  checking CRAN incoming feasibility ... [7s/70s] NOTE (1m 9.5s)
+   Maintainer: ‘Carson Sievert <carson@posit.co>’
 
-New maintainer:
-  Carson Sievert <barret@posit.co>
-Old maintainer(s):
-  Winston Chang <winston@posit.co>
-
-Found the following (possibly) invalid URLs:
-  URL: https://en.wikipedia.org/wiki/Reactive_programming
-    From: README.md
-    Status: 429
-    Message: Too Many Requests
+   Days since last update: 5
 ```
 
-
-## Reverse dependency fixes
-
-The revdep checks below are failing due to changes made in https://github.com/rstudio/shiny/pull/4249 .
-
-Unresolved PRs submitted in 2025/06:
-* omicsTools    - https://github.com/cheemalab/omicsTools/pull/1
-* shinyGovstyle - https://github.com/dfe-analytical-services/shinyGovstyle/pull/155
-* ShinyLink     - https://github.com/cdc-addm/ShinyLink/pull/3
-* shinySbm      - https://github.com/Jo-Theo/shinySbm/pull/2
-
-Unresolved PR submitted in 2025/10/29:
-* biodosetools - PR made 2025/10/29 - https://github.com/biodosetools-team/biodosetools/pull/64
-* inshiny      - PR made 2025/10/29 - https://github.com/nicholasdavies/inshiny/pull/1
-
-## Reverse dependency false positives
-
-* SouthParkRshiny - New NOTE about installed package size. This is unrelated to any new changes in Shiny.
-
-> ```
-> * checking installed package size ... NOTE
->   installed size is  8.6Mb
->   sub-directories of 1Mb or more:
->     data   8.0Mb
-> ```
 
 ## revdepcheck results
 
-We checked 1395 reverse dependencies (1388 from CRAN + 7 from Bioconductor), comparing R CMD check results across CRAN and dev versions of this package.
+We checked 1383 reverse dependencies (1376 from CRAN + 7 from Bioconductor), comparing R CMD check results across CRAN and dev versions of this package.
 
- * We saw 7 new problems
- * We failed to check 21 packages
+ * We saw 0 new problems
+ * We failed to check 31 packages
 
 Issues with CRAN packages are summarised below.
 
-### New problems
-(This reports the first line of each new failure)
-
-* biodosetools
-  checking tests ... ERROR
-
-* inshiny
-  checking examples ... ERROR
-  checking tests ... ERROR
-  checking re-building of vignette outputs ... ERROR
-
-* omicsTools
-  checking tests ... ERROR
-
-* shinyGovstyle
-  checking tests ... ERROR
-
-* ShinyLink
-  checking tests ... ERROR
-
-* shinySbm
-  checking tests ... ERROR
-
-* SouthParkRshiny
-  checking installed package size ... NOTE
-
 ### Failed to check
 
+* AssumpSure
 * boinet
+* brms
+* cheem
 * ctsem
+* detourr
 * FAfA
 * fio
+* fitteR
 * FossilSimShiny
 * GDINA
 * ggsem
 * grandR
 * hbsaems
+* langevitour
 * lavaan.shiny
 * lcsm
 * linkspotter
 * loon.shiny
 * MOsemiind
 * MVN
+* pandemonium
+* polarisR
 * RCTrep
 * rstanarm
 * semdrw
+* shotGroups
 * sphereML
+* spinifex
 * SurprisalAnalysis
 * TestAnaAPP

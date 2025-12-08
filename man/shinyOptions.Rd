@@ -130,22 +130,31 @@ ragg package. See \code{\link[=plotPNG]{plotPNG()}} for more information.}
 Cairo package. See \code{\link[=plotPNG]{plotPNG()}} for more information.}
 \item{shiny.devmode (defaults to \code{NULL})}{Option to enable Shiny Developer Mode. When set,
 different default \code{getOption(key)} values will be returned. See \code{\link[=devmode]{devmode()}} for more details.}
-\item{shiny.otel.collect (defaults to \code{Sys.getenv("SHINY_OTEL_COLLECT", "all")})}{Determines how Shiny will
-interact with OpenTelemetry.
+\item{shiny.otel.collect (defaults to \code{Sys.getenv("SHINY_OTEL_COLLECT", "all")})}{Determines how Shiny will interact with OpenTelemetry.
 
 Supported values:
 \itemize{
 \item \code{"none"} - No Shiny OpenTelemetry tracing.
 \item \code{"session"} - Adds session start/end spans.
-\item \code{"reactive_update"} - Spans for any synchronous/asynchronous reactive update. (Includes \code{"session"} features).
-\item \code{"reactivity"} - Spans for all reactive expressions. (Includes \code{"reactive_update"} features).
-\item \code{"all"} - All Shiny OpenTelemetry tracing. Currently equivalent to \code{"reactivity"}.
+\item \code{"reactive_update"} - Spans for any synchronous/asynchronous reactive
+update. (Includes \code{"session"} features).
+\item \code{"reactivity"} - Spans for all reactive expressions and logs for setting
+reactive vals and values. (Includes \code{"reactive_update"} features). This
+option must be set when creating any reactive objects that should record
+OpenTelemetry spans / logs. See \code{\link[=withOtelCollect]{withOtelCollect()}} and
+\code{\link[=localOtelCollect]{localOtelCollect()}} for ways to set this option locally when creating
+your reactive expressions.
+\item \code{"all"} - All Shiny OpenTelemetry tracing. Currently equivalent to
+\code{"reactivity"}.
 }
 
 This option is useful for debugging and profiling while in production. This
 option will only be useful if the \code{otelsdk} package is installed and
 \code{otel::is_tracing_enabled()} returns \code{TRUE}. Please have any OpenTelemetry
-environment variables set before starting your Shiny app.}
+environment variables set before loading any relevant R packages.
+
+To set this option locally within a specific part of your Shiny
+application, see \code{\link[=withOtelCollect]{withOtelCollect()}} and \code{\link[=localOtelCollect]{localOtelCollect()}}.}
 \item{shiny.otel.sanitize.errors (defaults to \code{TRUE})}{If \code{TRUE}, fatal and unhandled errors will be sanitized before being sent to the OpenTelemetry backend. The default value of \code{TRUE} is set to avoid potentially sending sensitive information to the OpenTelemetry backend. If you want the full error message and stack trace to be sent to the OpenTelemetry backend, set this option to \code{FALSE} or use \code{safeError(e)}.}
 }
 }

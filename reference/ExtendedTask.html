@@ -106,6 +106,27 @@ section on <a href="https://rstudio.github.io/promises/articles/promises_06_shin
 is, a function that quickly returns a promise) and allows even that very
 session to immediately unblock and carry on with other user interactions.</p>
     </div>
+    <div id="opentelemetry-integration">
+    <h2>OpenTelemetry Integration</h2>
+
+
+
+<p>When an <code>ExtendedTask</code> is created, if OpenTelemetry tracing is enabled for
+<code>"reactivity"</code> (see <code><a href="withOtelCollect.html">withOtelCollect()</a></code>), the <code>ExtendedTask</code> will record
+spans for each invocation of the task. The tracing level at <code>invoke()</code> time
+does not affect whether spans are recorded; only the tracing level when
+calling <code>ExtendedTask$new()</code> matters.</p>
+<p>The OTel span will be named based on the label created from the variable the
+<code>ExtendedTask</code> is assigned to. If no label can be determined, the span will
+be named <code>&lt;anonymous&gt;</code>. Similar to other Shiny OpenTelemetry spans, the span
+will also include source reference attributes and session ID attributes.</p>
+<p></p><div class="sourceCode r"><pre><code><span><span class="fu"><a href="../reference/withOtelCollect.html">withOtelCollect</a></span><span class="op">(</span><span class="st">"all"</span>, <span class="op">{</span></span>
+<span>  <span class="va">my_task</span> <span class="op">&lt;-</span> <span class="va"><a href="../reference/ExtendedTask.html">ExtendedTask</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">...</span><span class="op">)</span> <span class="op">{</span> <span class="va">...</span> <span class="op">}</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Span recorded for this invocation: ExtendedTask my_task</span></span>
+<span><span class="va">my_task</span><span class="op">$</span><span class="fu">invoke</span><span class="op">(</span><span class="va">...</span><span class="op">)</span></span></code></pre><p></p></div>
+    </div>
     <div id="methods">
     <h2>Methods</h2>
 

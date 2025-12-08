@@ -160,20 +160,30 @@ getShinyOption <- function(name, default = NULL) {
 # '  side devmode features. Currently the primary feature is the client-side
 # '  error console.}
 ### end shiny.client_devmode
-#' \item{shiny.otel.collect (defaults to `Sys.getenv("SHINY_OTEL_COLLECT", "all")`)}{Determines how Shiny will
-#'   interact with OpenTelemetry.
+#' \item{shiny.otel.collect (defaults to `Sys.getenv("SHINY_OTEL_COLLECT",
+#'   "all")`)}{Determines how Shiny will interact with OpenTelemetry.
 #'
 #'   Supported values:
 #'   * `"none"` - No Shiny OpenTelemetry tracing.
 #'   * `"session"` - Adds session start/end spans.
-#'   * `"reactive_update"` - Spans for any synchronous/asynchronous reactive update. (Includes `"session"` features).
-#'   * `"reactivity"` - Spans for all reactive expressions. (Includes `"reactive_update"` features).
-#'   * `"all"` - All Shiny OpenTelemetry tracing. Currently equivalent to `"reactivity"`.
+#'   * `"reactive_update"` - Spans for any synchronous/asynchronous reactive
+#'     update. (Includes `"session"` features).
+#'   * `"reactivity"` - Spans for all reactive expressions and logs for setting
+#'     reactive vals and values. (Includes `"reactive_update"` features). This
+#'     option must be set when creating any reactive objects that should record
+#'     OpenTelemetry spans / logs. See [`withOtelCollect()`] and
+#'     [`localOtelCollect()`] for ways to set this option locally when creating
+#'     your reactive expressions.
+#'   * `"all"` - All Shiny OpenTelemetry tracing. Currently equivalent to
+#'     `"reactivity"`.
 #'
 #'   This option is useful for debugging and profiling while in production. This
 #'   option will only be useful if the `otelsdk` package is installed and
 #'   `otel::is_tracing_enabled()` returns `TRUE`. Please have any OpenTelemetry
-#'   environment variables set before starting your Shiny app.}
+#'   environment variables set before loading any relevant R packages.
+#'
+#'   To set this option locally within a specific part of your Shiny
+#'   application, see [`withOtelCollect()`] and [`localOtelCollect()`].}
 #' \item{shiny.otel.sanitize.errors (defaults to `TRUE`)}{If `TRUE`, fatal and unhandled errors will be sanitized before being sent to the OpenTelemetry backend. The default value of `TRUE` is set to avoid potentially sending sensitive information to the OpenTelemetry backend. If you want the full error message and stack trace to be sent to the OpenTelemetry backend, set this option to `FALSE` or use `safeError(e)`.}
 #' }
 #'

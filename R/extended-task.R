@@ -41,6 +41,28 @@
 #'   is, a function that quickly returns a promise) and allows even that very
 #'   session to immediately unblock and carry on with other user interactions.
 #'
+#' @section OpenTelemetry Integration:
+#'
+#' When an `ExtendedTask` is created, if OpenTelemetry tracing is enabled for
+#' `"reactivity"` (see [withOtelCollect()]), the `ExtendedTask` will record
+#' spans for each invocation of the task. The tracing level at `invoke()` time
+#' does not affect whether spans are recorded; only the tracing level when
+#' calling `ExtendedTask$new()` matters.
+#'
+#' The OTel span will be named based on the label created from the variable the
+#' `ExtendedTask` is assigned to. If no label can be determined, the span will
+#' be named `<anonymous>`. Similar to other Shiny OpenTelemetry spans, the span
+#' will also include source reference attributes and session ID attributes.
+#'
+#' ```r
+#' withOtelCollect("all", {
+#'   my_task <- ExtendedTask$new(function(...) { ... })
+#' })
+#'
+#' # Span recorded for this invocation: ExtendedTask my_task
+#' my_task$invoke(...)
+#' ```
+#'
 #' @examplesIf rlang::is_interactive() && rlang::is_installed("mirai")
 #' library(shiny)
 #' library(bslib)
@@ -143,6 +165,10 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
         otel_srcref_attributes(call_srcref, "ExtendedTask"),
         otel_session_id_attrs(domain)
       ) %||% list()
+
+      # Capture this value at init-time, not run-time
+      # This way, the span is only created if otel was enabled at time of creation... just like other spans
+      private$is_recording_otel <- has_otel_collect("reactivity")
     },
     #' @description
     #' Starts executing the long-running operation. If this `ExtendedTask` is
@@ -175,7 +201,7 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
         private$invocation_queue$add(list(args = args, call = call))
       } else {
 
-        if (has_otel_collect("reactivity")) {
+        if (private$is_recording_otel) {
           private$otel_span <- start_otel_span(
             private$otel_span_label,
             attributes = private$otel_attrs
@@ -253,6 +279,7 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
     otel_span_label = NULL,
     otel_log_label_add_to_queue = NULL,
     otel_attrs = list(),
+    is_recording_otel = FALSE,
     otel_span = NULL,
 
     do_invoke = function(args, call = NULL) {

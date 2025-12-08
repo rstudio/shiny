@@ -51,7 +51,13 @@
 #' # Does NOT work as intended
 #' x <- reactive({ ... })
 #' # `x` was created outside of `withOtelCollect()`, so OTel settings are not applied
-#' x_with_otel <- withOtelCollect("all", x)
+#' x_no_otel <- withOtelCollect("all", x)
+#'
+#' # Best practice is to create the reactive object inside the withOtelCollect() call
+#' withOtelCollect("all", {
+#'   x_with_otel <- reactive({ ... })
+#'   y_with_otel <- reactive({ ... })
+#' })
 #' ```
 #'
 #' The correct approach is to create the reactive expression **inside** the

@@ -1,5 +1,6 @@
 # shiny (development version)
 
+* Added `withOtelCollect()` and `localOtelCollect()` functions to temporarily control OpenTelemetry collection levels during reactive expression creation. These functions allow you to enable or disable telemetry collection for specific modules or sections of code where reactive expressions are being created. (#4333)
 * OpenTelemetry code attributes now include both preferred (`code.file.path`, `code.line.number`, `code.column.number`) and deprecated (`code.filepath`, `code.lineno`, `code.column`) attribute names to follow OpenTelemetry semantic conventions while maintaining backward compatibility. The deprecated names will be removed in a future release after Logfire supports the preferred names. (#4325)
 * Timer tests are now skipped on CRAN. (#4327)
 

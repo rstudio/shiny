@@ -3,7 +3,7 @@
 \name{withOtelCollect}
 \alias{withOtelCollect}
 \alias{localOtelCollect}
-\title{Temporarily set OpenTelemetry collection level}
+\title{Temporarily set OpenTelemetry (OTel) collection level}
 \usage{
 withOtelCollect(collect, expr)
 
@@ -11,7 +11,13 @@ localOtelCollect(collect, envir = parent.frame())
 }
 \arguments{
 \item{collect}{Character string specifying the OpenTelemetry collection level.
-Must be one of \code{"none"}, \code{"reactivity"}, or \code{"all"}.}
+Must be one of the following:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{* `"none"` - No telemetry data collected
+* `"reactivity"` - Collect reactive execution spans (includes session and
+  reactive update events)
+* `"all"` - All available telemetry (currently equivalent to `"reactivity"`)
+}\if{html}{\out{</div>}}}
 
 \item{expr}{Expression to evaluate with the specified collection level
 (for \code{withOtelCollect()}).}
@@ -27,68 +33,49 @@ Must be one of \code{"none"}, \code{"reactivity"}, or \code{"all"}.}
 }
 }
 \description{
-\code{withOtelCollect()} temporarily sets the OpenTelemetry collection level for
+Control Shiny's OTel collection level for particular reactive expression(s).
+
+\code{withOtelCollect()} sets the OpenTelemetry collection level for
 the duration of evaluating \code{expr}. \code{localOtelCollect()} sets the collection
 level for the remainder of the current function scope.
-
-These functions are useful for temporarily controlling telemetry collection
-during reactive expression creation. Only the following levels are allowed:
-\itemize{
-\item \code{"none"} - No telemetry data collected
-\item \code{"reactivity"} - Collect reactive execution spans (includes session and
-reactive update events)
-\item \code{"all"} - All available telemetry (currently equivalent to \code{"reactivity"})
 }
-
+\details{
 Note that \code{"session"} and \code{"reactive_update"} levels are not permitted as
 these are runtime-specific levels that should only be set permanently via
 \code{options(shiny.otel.collect = ...)} or the \code{SHINY_OTEL_COLLECT} environment
 variable, not temporarily during reactive expression creation.
 }
-\section{Intended Usage}{
+\section{Best practice}{
 
 
-These functions are designed to perform sweeping changes to telemetry
-collection, such as enabling or disabling OpenTelemetry for an entire module
-or section of code where reactive expressions are being \strong{created}:
+Best practice is to set the collection level for code that \emph{creates} reactive
+expressions, not code that \emph{runs} them. For instance:
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{# Enable telemetry for an entire module
-withOtelCollect("all", \{
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{# Disable telemetry for a reactive expression
+withOtelCollect("none", \{
+  my_reactive <- reactive(\{ ... \})
+\})
+
+# Disable telemetry for a render function
+withOtelCollect("none", \{
+  output$my_plot <- renderPlot(\{ ... \})
+\})
+
+#' # Disable telemetry for an observer
+withOtelCollect("none", \{
+  observe(\{ ... \}))
+\})
+
+# Disable telemetry for an entire module
+withOtelCollect("none", \{
   my_result <- my_module("my_id")
 \})
-
-# Disable telemetry for expensive development-only reactives
-withOtelCollect("none", \{
-  debug_reactive <- reactive(\{ expensive_debug_computation() \})
-\})
+# Use `my_result` as normal here
 }\if{html}{\out{</div>}}
-}
 
-\section{Pipe Usage (Not Recommended)}{
-
-
-While using \code{withOtelCollect()} as a pipe-able method, it is not recommended due to the use case where the reactive object is created before the \code{withOtelCollect()} call. In such cases, the reactive object will not inherit the intended OpenTelemetry settings.
-
-Therefore, to avoid this hard-to-debug situation, we recommend that you only create your reactive objects within the \code{withOtelCollect()} call or after setting the local collection level with \code{localOtelCollect()}.
-
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{# Technically works, but not recommended
-x <- reactive(\{ ... \}) \%>\% withOtelCollect(collect = "all")
-x <- reactive(\{ ... \}) |> withOtelCollect(collect = "all")
-# Equivalent to:
-x <- withOtelCollect("all", reactive(\{ ... \}))
-
-# Does NOT work as intended
-x <- reactive(\{ ... \})
-# `x` was created outside of `withOtelCollect()`,
-# therefore no OTel settings are applied
-x_no_otel <- withOtelCollect("all", x)
-
-# Best practice: Create the reactive object within `expr=`
-withOtelCollect("all", \{
-  x_with_otel <- reactive(\{ ... \})
-  y_with_otel <- reactive(\{ ... \})
-\})
-}\if{html}{\out{</div>}}
+NOTE: It's not recommended to pipe existing reactive objects into
+\code{withOtelCollect()} since they won't inherit their intended OTel settings,
+leading to confusion.
 }
 
 \examples{

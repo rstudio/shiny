@@ -143,6 +143,10 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
         otel_srcref_attributes(call_srcref, "ExtendedTask"),
         otel_session_id_attrs(domain)
       ) %||% list()
+
+      # Capture this value at init-time, not run-time
+      # This way, the span is only created if otel was enabled at time of creation... just like other spans
+      private$is_recording_otel <- has_otel_collect("reactivity")
     },
     #' @description
     #' Starts executing the long-running operation. If this `ExtendedTask` is
@@ -175,7 +179,7 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
         private$invocation_queue$add(list(args = args, call = call))
       } else {
 
-        if (has_otel_collect("reactivity")) {
+        if (private$is_recording_otel) {
           private$otel_span <- start_otel_span(
             private$otel_span_label,
             attributes = private$otel_attrs
@@ -253,6 +257,7 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
     otel_span_label = NULL,
     otel_log_label_add_to_queue = NULL,
     otel_attrs = list(),
+    is_recording_otel = FALSE,
     otel_span = NULL,
 
     do_invoke = function(args, call = NULL) {

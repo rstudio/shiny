@@ -30,12 +30,7 @@ has_otel_collect <- function(collect) {
 
 # Run expr with otel collection disabled
 with_no_otel_collect <- function(expr) {
-  withr::with_options(
-    list(
-      shiny.otel.collect = "none"
-    ),
-    expr
-  )
+  withOtelCollect("none", expr)
 }
 
 

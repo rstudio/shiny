@@ -191,6 +191,7 @@ Collate:
     'otel-reactive-update.R'
     'otel-session.R'
     'otel-shiny.R'
+    'otel-with.R'
     'priorityqueue.R'
     'progress.R'
     'react.R'

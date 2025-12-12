@@ -61,7 +61,7 @@ We welcome contributions to the **shiny** package. Please see our [CONTRIBUTING.
 
 ## License
 
-The shiny package as a whole is licensed under the GPLv3. See the [LICENSE](LICENSE) file for more details.
+The shiny package as a whole is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
 
 ## R version support
 

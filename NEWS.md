@@ -1,5 +1,9 @@
 # shiny (development version)
 
+## Bug fixes and minor improvements
+
+* Using `renderXXX` functions in the UI will now return an error (#4189).
+
 # shiny 1.12.1
 
 ## New features

@@ -328,6 +328,12 @@ useRenderFunction <- function(renderFunc, inline = FALSE) {
 #' @export
 #' @method as.tags shiny.render.function
 as.tags.shiny.render.function <- function(x, ..., inline = FALSE) {
+  # return an error when render functions are used in UI
+  if (is.null(getDefaultReactiveDomain())) {
+    stop("There is a renderXXX function in the UI, these should only be used in the server function.",
+         "Use the corresponding XXXOutput function in the UI instead.")
+  }
+
   useRenderFunction(x, inline = inline)
 }
 

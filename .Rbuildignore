@@ -34,3 +34,4 @@
 ^.claude$
 ^README-npm\.md$
 ^CRAN-SUBMISSION$
+^LICENSE\.md$

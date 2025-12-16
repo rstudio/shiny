@@ -6,7 +6,7 @@
   },
   "name": "@posit/shiny",
   "version": "1.12.1-alpha.9000",
-  "license": "GPL-3.0-only",
+  "license": "MIT",
   "main": "",
   "browser": "",
   "types": "srcts/types/extras/globalShiny.d.ts",

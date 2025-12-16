@@ -491,7 +491,7 @@ serviceApp <- function() {
   # to keep the session responsive to user input
   maxTimeout <- ifelse(interactive(), 100, 1000)
 
-  timeout <- max(1, min(maxTimeout, timerCallbacks$timeToNextEvent(), later::next_op_secs()))
+  timeout <- max(1, min(maxTimeout, timerCallbacks$timeToNextEvent(), later::next_op_secs() * 1000))
   service(timeout)
 
   flushReact()

@@ -19,7 +19,3 @@ jobs:
     uses: rstudio/shiny-workflows/.github/workflows/routine.yaml@v1
   R-CMD-check:
     uses: rstudio/shiny-workflows/.github/workflows/R-CMD-check.yaml@v1
-    with:
-      # On R 4.2, Cairo has difficulty installing
-      # Remove this line when https://github.com/s-u/Cairo/issues/52 is merged
-      extra-packages: Cairo=?ignore

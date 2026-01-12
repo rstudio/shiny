@@ -68,6 +68,7 @@ test_that("reactive bindCache labels are created", {
 })
 
 test_that("ExtendedTask otel labels are created", {
+  skip_if_not_installed("otelsdk")
   # Record everything
   localOtelCollect("all")
 

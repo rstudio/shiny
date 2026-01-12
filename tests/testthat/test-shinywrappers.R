@@ -1,3 +1,8 @@
+test_that("render functions in UI throw informative error", {
+  expect_error(as.tags.shiny.render.function(renderTable("table")),
+               "There is a renderXXX function in the UI")
+})
+
 test_that("isTemp passes sanity checks", {
   t <- tempfile(fileext = ".txt")
   writeLines("hello", t)

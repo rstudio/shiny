@@ -240,6 +240,7 @@ test_that("stack trace stripping works", {
 })
 
 test_that("coro async generator deep stack count is low", {
+  skip_if_not_installed("coro")
   gen <- coro::async_generator(function() {
     for (i in 1:50) {
       await(coro::async_sleep(0.001))

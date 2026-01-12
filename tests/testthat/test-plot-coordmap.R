@@ -1,3 +1,4 @@
+skip_if_not_installed("ggplot2")
 library(ggplot2)
 
 # Sort a list by the names of its keys

@@ -216,8 +216,14 @@ runApp <- function(
     # any valid version.
     ver <- Sys.getenv('SHINY_SERVER_VERSION')
     if (utils::compareVersion(ver, .shinyServerMinVersion) < 0) {
-      warning('Shiny Server v', .shinyServerMinVersion,
-              ' or later is required; please upgrade!')
+      rlang::warn(c(
+        sprintf(
+          "Shiny Server v%s or later is required; please upgrade.",
+          .shinyServerMinVersion
+        ),
+        "i" = "If you are not using Shiny Server, you are likely seeing this message because the `SHINY_PORT` environment variable is set in your environment.",
+        "i" = "Avoid using `SHINY_PORT` to prevent this warning."
+      ))
     }
   }
 

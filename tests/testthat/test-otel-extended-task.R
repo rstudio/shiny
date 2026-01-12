@@ -127,6 +127,7 @@ test_that("ExtendedTask respects reactive_update level otel collection", {
 })
 
 test_that("ExtendedTask creates span only when is_recording_otel is TRUE", {
+  skip_if_not_installed("otelsdk")
   # Test that span is only created when otel is enabled
   withr::local_options(list(shiny.otel.collect = "reactivity"))
 

@@ -19,10 +19,10 @@ getShinyOption <- function(name, default = NULL) {
   }
 
   # Check if there's a current app
-  app_state <- getCurrentAppState()
-  if (!is.null(app_state)) {
-    if (name %in% names(app_state$options)) {
-      return(app_state$options[[name]])
+  if (isRunning()) {
+    app_state_options <- getCurrentAppStateOptions()
+    if (name %in% names(app_state_options)) {
+      return(app_state_options[[name]])
     } else {
       return(default)
     }
@@ -234,11 +234,12 @@ shinyOptions <- function(...) {
 
     # If not in a session, but we have a currently running app, modify options
     # at the app level.
-    app_state <- getCurrentAppState()
-    if (!is.null(app_state)) {
+    if (isRunning()) {
       # Modify app-level options
-      app_state$options <- dropNulls(mergeVectors(app_state$options, newOpts))
-      return(invisible(app_state$options))
+      setCurrentAppStateOptions(
+        dropNulls(mergeVectors(getCurrentAppStateOptions(), newOpts))
+      )
+      return(invisible(getCurrentAppStateOptions()))
     }
 
     # If no currently running app, modify global options and return them.
@@ -253,9 +254,8 @@ shinyOptions <- function(...) {
     return(session$options)
   }
 
-  app_state <- getCurrentAppState()
-  if (!is.null(app_state)) {
-    return(app_state$options)
+  if (isRunning()) {
+    return(getCurrentAppStateOptions())
   }
 
   return(.globals$options)

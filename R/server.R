@@ -500,16 +500,6 @@ serviceApp <- function() {
 
 .shinyServerMinVersion <- '0.3.4'
 
-#' Check whether a Shiny application is running
-#'
-#' This function tests whether a Shiny application is currently running.
-#'
-#' @return `TRUE` if a Shiny application is currently running. Otherwise,
-#'   `FALSE`.
-#' @export
-isRunning <- function() {
-  !is.null(getCurrentAppState())
-}
 
 
 # Returns TRUE if we're running in Shiny Server or other hosting environment,

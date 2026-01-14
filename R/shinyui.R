@@ -253,11 +253,32 @@ uiHttpHandler <- function(ui, uiPattern = "^/$") {
     if (is.null(uiValue))
       return(NULL)
 
-    if (inherits(uiValue, "httpResponse")) {
-      return(uiValue)
-    } else {
+    # Avoid caching the UI response to ensure that UI is always re-evaluated.
+    # This is necessary for getCurrentTheme() to be known, required for BS4+.
+    no_cache_headers <- list(
+      "Cache-Control" = "no-cache, no-store, must-revalidate",
+      "Pragma" = "no-cache",
+      "Expires" = "0"
+    )
+
+    if (!inherits(uiValue, "httpResponse")) {
       html <- renderPage(uiValue, showcaseMode, testMode)
-      return(httpResponse(200, content=html))
+      uiValue <- httpResponse(200, content=html)
     }
+
+    # 2023-04-23 jcheng5: Example app in PR comment
+    # https://github.com/rstudio/shiny/pull/3810#issuecomment-1513828996
+    # > I think we should always add the cache-busting headers. Without it,
+    # Connect and ShinyApps.io configurations will have problems in that the
+    # workerId could be a stale value.
+    if (
+      # The user has not set a `Cache-Control` policy within their UI func
+      !"Cache-Control" %in% names(uiValue$headers)
+    ) {
+      # Disable caching for the UI's response
+      uiValue$headers <- utils::modifyList(uiValue$headers, no_cache_headers)
+    }
+
+    uiValue
   }
 }

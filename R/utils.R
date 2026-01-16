@@ -252,7 +252,7 @@ find.file.ci <- function(...) {
 # The function base::dir.exists was added in R 3.2.0, but for backward
 # compatibility we need to add this function
 dirExists <- function(paths) {
-  file.exists(paths) & file.info(paths)$isdir
+  file.exists(paths) & file.info(paths, extra_cols = FALSE)$isdir
 }
 
 # Removes empty directory (vectorized). This is needed because file.remove()
@@ -803,7 +803,7 @@ cachedFuncWithFile <- function(dir, file, func, case.sensitive = FALSE) {
       file.path.ci(dir, file)
     }
 
-    now <- file.info(fname)$mtime
+    now <- file.mtime(fname)
     autoreload <- last_autoreload < cachedAutoReloadLastChanged$get()
     if (autoreload || !identical(last_mtime_file, now)) {
       value <<- func(fname, ...)
@@ -1329,7 +1329,7 @@ checkEncoding <- function(file) {
   # world of consistency (falling back to getOption('encoding') will not help
   # because native.enc is also normally UTF-8 based on *nix)
   if (!isWindows()) return('UTF-8')
-  size <- file.info(file)[, 'size']
+  size <- file.info(file, extra_cols = FALSE)[, 'size']
   if (is.na(size)) stop('Cannot access the file ', file)
   # BOM is 3 bytes, so if the file contains BOM, it must be at least 3 bytes
   if (size < 3L) return('UTF-8')

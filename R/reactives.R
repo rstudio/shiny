@@ -1965,7 +1965,7 @@ coerceToFunc <- function(x) {
 #'     # This function returns the time that log_file was last modified
 #'     checkFunc = function() {
 #'       if (file.exists(log_file))
-#'         file.info(log_file)$mtime[1]
+#'         file.mtime(log_file[1])
 #'       else
 #'         ""
 #'     },
@@ -2127,7 +2127,7 @@ reactiveFileReader <- function(intervalMillis, session, filePath, readFunc, ...)
     session = session,
     checkFunc = function() {
       path <- filePath()
-      info <- file.info(path)
+      info <- file.info(path, extra_cols = FALSE)
       return(paste(path, info$mtime, info$size))
     },
     valueFunc = function() {

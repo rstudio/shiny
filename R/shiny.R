@@ -2237,6 +2237,51 @@ ShinySession <- R6Class(
 
         otel_span_reactive_update_teardown(domain = self)
       }
+    },
+
+    getUrl = function() {
+      req <- self$request
+
+      url <-
+        # Connect
+        req[["HTTP_X_RSC_REQUEST"]] %||%
+        req[["HTTP_RSTUDIO_CONNECT_APP_BASE_URL"]] %||%
+        # ShinyApps.io
+        if (!is.null(req[["HTTP_X_REDX_FRONTEND_NAME"]])) {
+          paste0("https://", req[["HTTP_X_REDX_FRONTEND_NAME"]])
+        }
+
+      if (is.null(url)) {
+        forwarded_host <- req[["HTTP_X_FORWARDED_HOST"]]
+        forwarded_port <- req[["HTTP_X_FORWARDED_PORT"]]
+
+        host <- if (!is.null(forwarded_host) && !is.null(forwarded_port)) {
+          paste0(forwarded_host, ":", forwarded_port)
+        } else {
+          req[["HTTP_HOST"]] %||% paste0(req[["SERVER_NAME"]], ":", req[["SERVER_PORT"]])
+        }
+
+        proto <- req[["HTTP_X_FORWARDED_PROTO"]] %||% req[["rook.url_scheme"]]
+
+        if (tolower(proto) == "http") {
+          host <- sub(":80$", "", host)
+        } else if (tolower(proto) == "https") {
+          host <- sub(":443$", "", host)
+        }
+
+        url <- paste0(
+          proto,
+          "://",
+          host,
+          req[["SCRIPT_NAME"]],
+          req[["PATH_INFO"]]
+        )
+      }
+
+      # Strip existing querystring, if any
+      url <- sub("\\?.*", "", url)
+
+      url
     }
   )
 )

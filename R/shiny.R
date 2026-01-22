@@ -2087,7 +2087,28 @@ ShinySession <- R6Class(
                                         matches[3]))[[1]]
         dlname <- URLdecode(dlmatches[2])
         download <- self$downloads$get(dlname)
-        return(download$filter(download$data, req))
+        if (is.null(download))
+          return(httpResponse(404, 'text/html', '<h1>Not Found</h1>'))
+
+        return(Context$new(getDefaultReactiveDomain(), '[dataobj]')$run(function() {
+          with_promise_domain(reactivePromiseDomain(), {
+            captureStackTraces({
+              self$incrementBusyCount()
+              hybrid_chain(
+                download$filter(download$data, req),
+                function(response) {
+                  response
+                },
+                catch = function(e) {
+                  httpResponse(500, 'text/plain', paste('Error:', conditionMessage(e)))
+                },
+                finally = function() {
+                  self$decrementBusyCount()
+                }
+              )
+            })
+          })
+        }))
       }
 
       return(httpResponse(404, 'text/html', '<h1>Not Found</h1>'))

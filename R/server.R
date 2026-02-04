@@ -498,6 +498,38 @@ serviceApp <- function() {
   flushPendingSessions()
 }
 
+# Non-blocking service loop using later callbacks.
+# Uses 10ms delay between iterations to yield CPU for console interaction.
+startServiceLoop <- function(handle, cleanup) {
+  serviceLoop <- function() {
+    if (!.globals$stopped) {
+      ..stacktraceoff..(
+        captureStackTraces(
+          tryCatch(
+            ..stacktracefloor..(serviceApp()),
+            error = function(e) {
+              .globals$stopped <- TRUE
+              .globals$retval <- e
+              .globals$reterror <- TRUE
+            }
+          )
+        )
+      )
+      if (!.globals$stopped) {
+        later::later(serviceLoop, delay = 0.01)
+      } else {
+        handle$.captureResult()
+        cleanup()
+      }
+    } else {
+      # App was stopped externally (e.g., via stopApp())
+      handle$.captureResult()
+      cleanup()
+    }
+  }
+  later::later(serviceLoop, delay = 0.01)
+}
+
 .shinyServerMinVersion <- '0.3.4'
 
 #' Check whether a Shiny application is running

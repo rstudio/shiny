@@ -12,7 +12,8 @@ runApp(
   workerId = "",
   quiet = FALSE,
   display.mode = c("auto", "normal", "showcase"),
-  test.mode = getOption("shiny.testmode", FALSE)
+  test.mode = getOption("shiny.testmode", FALSE),
+  blocking = getOption("shiny.blocking", TRUE)
 )
 }
 \arguments{
@@ -59,6 +60,18 @@ in its \code{DESCRIPTION} file, if any.}
 \item{test.mode}{Should the application be launched in test mode? This is
 only used for recording or running automated tests. Defaults to the
 \code{shiny.testmode} option, or FALSE if the option is not set.}
+
+\item{blocking}{If \code{TRUE} (the default), the function blocks and does not
+return until the app is stopped. If \code{FALSE}, the app runs in the background
+via \code{later} callbacks and the function returns immediately with a
+\code{ShinyAppHandle} object that can be used to stop the app. The default can
+be changed via \code{options(shiny.blocking = FALSE)}.}
+}
+\value{
+If \code{blocking = TRUE}, returns the value passed to \code{\link[=stopApp]{stopApp()}}, or
+throws an error if the app was stopped with an error. If \code{blocking = FALSE},
+returns a \code{ShinyAppHandle} object with methods \code{stop()}, \code{isRunning()},
+\code{getUrl()}, \code{getServer()}, \code{result()}, and \code{error()}.
 }
 \description{
 Runs a Shiny application. This function normally does not return; interrupt R

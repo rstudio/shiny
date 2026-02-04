@@ -9,7 +9,8 @@ runGadget(
   server = NULL,
   port = getOption("shiny.port"),
   viewer = paneViewer(),
-  stopOnCancel = TRUE
+  stopOnCancel = TRUE,
+  blocking = getOption("shiny.blocking", TRUE)
 )
 }
 \arguments{
@@ -29,9 +30,18 @@ dialog window, or external browser--by passing in a call to one of the
 is automatically created that handles \code{input$cancel} by calling
 \code{stopApp()} with an error. Pass \code{FALSE} if you want to handle
 \code{input$cancel} yourself.}
+
+\item{blocking}{If \code{TRUE} (the default), the function blocks and does not
+return until the app is stopped. If \code{FALSE}, the app runs in the background
+via \code{later} callbacks and the function returns immediately with a
+\code{ShinyAppHandle} object that can be used to stop the app. The default can
+be changed via \code{options(shiny.blocking = FALSE)}.}
 }
 \value{
-The value returned by the gadget.
+If \code{blocking = TRUE} (the default), returns the value passed to
+\code{\link[=stopApp]{stopApp()}} by the gadget. If \code{blocking = FALSE}, returns a
+\code{ShinyAppHandle} object; use \code{handle$result()} to retrieve the gadget's
+return value after it stops.
 }
 \description{
 Similar to \code{runApp}, but handles \code{input$cancel} automatically, and

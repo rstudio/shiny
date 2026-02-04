@@ -10,7 +10,8 @@ runExample(
   launch.browser = getOption("shiny.launch.browser", interactive()),
   host = getOption("shiny.host", "127.0.0.1"),
   display.mode = c("auto", "normal", "showcase"),
-  package = "shiny"
+  package = "shiny",
+  blocking = getOption("shiny.blocking", TRUE)
 )
 }
 \arguments{
@@ -48,6 +49,12 @@ on the subdirectory. Example apps can include a \code{DESCRIPTION} file and a
 \code{README.md} file to provide metadata and commentary about the example. See
 the article on \href{https://shiny.posit.co/r/articles/build/display-modes/}{Display Modes}
 on the Shiny website for more information.}
+
+\item{blocking}{If \code{TRUE} (the default), the function blocks and does not
+return until the app is stopped. If \code{FALSE}, the app runs in the background
+via \code{later} callbacks and the function returns immediately with a
+\code{ShinyAppHandle} object that can be used to stop the app. The default can
+be changed via \code{options(shiny.blocking = FALSE)}.}
 }
 \description{
 Launch Shiny example applications, and optionally, your system's web browser.

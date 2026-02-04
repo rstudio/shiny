@@ -1,5 +1,9 @@
 # shiny (development version)
 
+## New features
+
+* `runApp()`, `runExample()`, and `runGadget()` gain a `blocking` parameter. When `blocking = FALSE`, the app runs in the background and returns a `ShinyAppHandle` object immediately, without blocking the R session. The handle provides `stop()`, `isRunning()`, `getUrl()`, `result()`, and `error()` methods for managing the app lifecycle. The default behaviour can be changed via `options(shiny.blocking = FALSE)`.
+
 # shiny 1.12.1
 
 ## New features

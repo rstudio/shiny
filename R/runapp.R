@@ -45,6 +45,16 @@
 #' @param test.mode Should the application be launched in test mode? This is
 #'   only used for recording or running automated tests. Defaults to the
 #'   `shiny.testmode` option, or FALSE if the option is not set.
+#' @param blocking If `TRUE` (the default), the function blocks and does not
+#'   return until the app is stopped. If `FALSE`, the app runs in the background
+#'   via `later` callbacks and the function returns immediately with a
+#'   `ShinyAppHandle` object that can be used to stop the app. The default can
+#'   be changed via `options(shiny.blocking = FALSE)`.
+#'
+#' @return If `blocking = TRUE`, returns the value passed to [stopApp()], or
+#'   throws an error if the app was stopped with an error. If `blocking = FALSE`,
+#'   returns a `ShinyAppHandle` object with methods `stop()`, `isRunning()`,
+#'   `getUrl()`, `getServer()`, `result()`, and `error()`.
 #'
 #' @examples
 #' \dontrun{
@@ -91,7 +101,8 @@ runApp <- function(
   host=getOption('shiny.host', '127.0.0.1'),
   workerId="", quiet=FALSE,
   display.mode=c("auto", "normal", "showcase"),
-  test.mode=getOption('shiny.testmode', FALSE)
+  test.mode=getOption('shiny.testmode', FALSE),
+  blocking=getOption("shiny.blocking", TRUE)
 ) {
 
   # * Wrap **all** execution of the app inside the otel promise domain
@@ -100,13 +111,9 @@ runApp <- function(
   #   reactivated upon promise domain restoration
   promises::local_otel_promise_domain()
 
-  on.exit({
-    handlerManager$clear()
-  }, add = TRUE)
-
   if (isRunning()) {
-    stop("Can't call `runApp()` from within `runApp()`. If your ",
-         "application code contains `runApp()`, please remove it.")
+    stop("Can't start a new app while another is running. ",
+         "Stop the current app first with handle$stop() or stopApp().")
   }
 
   # Make warnings print immediately
@@ -116,16 +123,27 @@ runApp <- function(
     warn = max(1, getOption("warn", default = 1)),
     pool.scheduler = scheduleTask
   )
-  on.exit(options(ops), add = TRUE)
 
-  # ============================================================================
-  # Global onStart/onStop callbacks
-  # ============================================================================
-  # Invoke user-defined onStop callbacks, before the application's internal
-  # onStop callbacks.
+  # Flag to control whether early cleanup runs on exit.
+  # TRUE for blocking mode (cleanup runs on function exit).
+  # FALSE for non-blocking mode (cleanup is deferred to handle$stop()).
+  earlyCleanup <- TRUE
+
+  # These on.exit handlers ensure cleanup even if startup fails.
+  # For non-blocking mode, earlyCleanup is set to FALSE before returning.
   on.exit({
-    .globals$onStopCallbacks$invoke()
-    .globals$onStopCallbacks <- Callbacks$new()
+    if (earlyCleanup) {
+      options(ops)
+      handlerManager$clear()
+    }
+  }, add = TRUE)
+
+  # Invoke user-defined onStop callbacks even if startup fails
+  on.exit({
+    if (earlyCleanup) {
+      .globals$onStopCallbacks$invoke()
+      .globals$onStopCallbacks <- Callbacks$new()
+    }
   }, add = TRUE)
 
   require(shiny)
@@ -141,7 +159,6 @@ runApp <- function(
   # This is so calls to getCurrentAppState() can be used to find (A) whether an
   # app is running and (B), get options and data associated with the app.
   initCurrentAppState(appParts)
-  on.exit(clearCurrentAppState(), add = TRUE)
   # Any shinyOptions set after this point will apply to the current app only
   # (and will not persist after the app stops).
 
@@ -201,6 +218,8 @@ runApp <- function(
     display.mode <- findVal("display.mode", display.mode)
   if (missing(test.mode))
     test.mode <- findVal("test.mode", test.mode)
+  if (missing(blocking))
+    blocking <- findVal("blocking", blocking)
 
   if (is.null(host) || is.na(host)) host <- '0.0.0.0'
 
@@ -337,12 +356,8 @@ runApp <- function(
   }
 
   # ============================================================================
-  # onStart/onStop callbacks
+  # onStart callback
   # ============================================================================
-  # Set up the onStop before we call onStart, so that it gets called even if an
-  # error happens in onStart.
-  if (!is.null(appParts$onStop))
-    on.exit(appParts$onStop(), add = TRUE)
   if (!is.null(appParts$onStart))
     appParts$onStart()
 
@@ -354,10 +369,6 @@ runApp <- function(
   # Make the httpuv server object accessible. Needed for calling
   # addResourcePath while app is running.
   shinyOptions(server = server)
-
-  on.exit({
-    stopServer(server)
-  }, add = TRUE)
 
   # ============================================================================
   # Launch web browser
@@ -388,33 +399,83 @@ runApp <- function(
   # Application hooks
   # ============================================================================
   callAppHook("onAppStart", appUrl)
-  on.exit({
-    callAppHook("onAppStop", appUrl)
-  }, add = TRUE)
+
+  # ============================================================================
+  # Create cleanup function
+  # ============================================================================
+  cleanup <- createCleanupFunction(server, appParts, appUrl, ops)
+
+  # Initialize globals for this app run (MUST happen before blocking check)
+  .globals$reterror <- NULL
+  .globals$retval <- NULL
+  .globals$stopped <- FALSE
 
   # ============================================================================
   # Run event loop via httpuv
   # ============================================================================
-  .globals$reterror <- NULL
-  .globals$retval <- NULL
-  .globals$stopped <- FALSE
-  # Top-level ..stacktraceoff..; matches with ..stacktraceon in observe(),
-  # reactive(), Callbacks$invoke(), and others
-  ..stacktraceoff..(
-    captureStackTraces({
-      while (!.globals$stopped) {
-        ..stacktracefloor..(serviceApp())
-      }
-    })
-  )
+  # Startup complete - cleanup function now handles all cleanup
+  earlyCleanup <- FALSE
 
-  if (isTRUE(.globals$reterror)) {
-    stop(.globals$retval)
+  if (blocking) {
+    # BLOCKING MODE: run while loop and cleanup on exit
+    on.exit(cleanup(), add = TRUE)
+
+    # Top-level ..stacktraceoff..; matches with ..stacktraceon in observe(),
+    # reactive(), Callbacks$invoke(), and others
+    ..stacktraceoff..(
+      captureStackTraces({
+        while (!.globals$stopped) {
+          ..stacktracefloor..(serviceApp())
+        }
+      })
+    )
+
+    if (isTRUE(.globals$reterror)) {
+      stop(.globals$retval)
+    }
+    else if (.globals$retval$visible)
+      .globals$retval$value
+    else
+      invisible(.globals$retval$value)
+
+  } else {
+    # NON-BLOCKING MODE: return handle immediately, app runs via later callbacks
+    handle <- ShinyAppHandle$new(
+      server = server,
+      appUrl = appUrl,
+      cleanupFn = cleanup
+    )
+
+    tryCatch(
+      {
+        startServiceLoop(handle, cleanup)
+        handle
+      },
+      error = function(e) {
+        cleanup()
+        stop(e)
+      }
+    )
   }
-  else if (.globals$retval$visible)
-    .globals$retval$value
-  else
-    invisible(.globals$retval$value)
+}
+
+# Consolidated cleanup function for runApp()
+createCleanupFunction <- function(server, appParts, appUrl, ops) {
+  cleanedUp <- FALSE
+  function() {
+    if (cleanedUp) return()
+    cleanedUp <<- TRUE
+
+    .globals$stopped <- TRUE
+    callAppHook("onAppStop", appUrl)
+    stopServer(server)
+    if (!is.null(appParts$onStop)) appParts$onStop()
+    .globals$onStopCallbacks$invoke()
+    .globals$onStopCallbacks <- Callbacks$new()
+    clearCurrentAppState()
+    handlerManager$clear()
+    options(ops)
+  }
 }
 
 #' Stop the currently running Shiny app
@@ -495,7 +556,8 @@ runExample <- function(
   launch.browser = getOption("shiny.launch.browser", interactive()),
   host = getOption("shiny.host", "127.0.0.1"),
   display.mode = c("auto", "normal", "showcase"),
-  package = "shiny"
+  package = "shiny",
+  blocking = getOption("shiny.blocking", TRUE)
 ) {
   if (!identical(package, "shiny") && !is_installed(package)) {
     rlang::check_installed(package)
@@ -528,7 +590,7 @@ runExample <- function(
   }
 
   runApp(dir, port = port, host = host, launch.browser = launch.browser,
-         display.mode = display.mode)
+         display.mode = display.mode, blocking = blocking)
 }
 
 #' Run a gadget
@@ -548,7 +610,11 @@ runExample <- function(
 #'   is automatically created that handles `input$cancel` by calling
 #'   `stopApp()` with an error. Pass `FALSE` if you want to handle
 #'   `input$cancel` yourself.
-#' @return The value returned by the gadget.
+#' @inheritParams runApp
+#' @return If `blocking = TRUE` (the default), returns the value passed to
+#'   [stopApp()] by the gadget. If `blocking = FALSE`, returns a
+#'   `ShinyAppHandle` object; use `handle$result()` to retrieve the gadget's
+#'   return value after it stops.
 #'
 #' @examples
 #' \dontrun{
@@ -568,7 +634,8 @@ runExample <- function(
 #' }
 #' @export
 runGadget <- function(app, server = NULL, port = getOption("shiny.port"),
-  viewer = paneViewer(), stopOnCancel = TRUE) {
+  viewer = paneViewer(), stopOnCancel = TRUE,
+  blocking = getOption("shiny.blocking", TRUE)) {
 
   if (!is.shiny.appobj(app)) {
     app <- shinyApp(app, server)
@@ -586,7 +653,7 @@ runGadget <- function(app, server = NULL, port = getOption("shiny.port"),
     viewer <- utils::browseURL
   }
 
-  shiny::runApp(app, port = port, launch.browser = viewer)
+  shiny::runApp(app, port = port, launch.browser = viewer, blocking = blocking)
 }
 
 # Add custom functionality to a Shiny app object's server func

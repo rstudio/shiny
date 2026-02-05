@@ -7,7 +7,7 @@ test_that("ShinyAppHandle lifecycle and API (success path)", {
     server = function(input, output) {}
   )
 
-  handle <- runApp(app, blocking = FALSE, launch.browser = FALSE)
+  handle <- runApp(app, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
 
   # While running
 
@@ -42,7 +42,7 @@ test_that("ShinyAppHandle lifecycle (error path)", {
     server = function(input, output) {}
   )
 
-  handle <- runApp(app, blocking = FALSE, launch.browser = FALSE)
+  handle <- runApp(app, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
 
   stopApp(stop("test_error", call. = FALSE))
   for (i in 1:10) {
@@ -63,7 +63,7 @@ test_that("handle captures result from stopApp", {
     server = function(input, output) {}
   )
 
-  handle <- runApp(app, blocking = FALSE, launch.browser = FALSE)
+  handle <- runApp(app, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
 
   stopApp("test_result")
   for (i in 1:10) {
@@ -85,18 +85,18 @@ test_that("second app prevented while first is running", {
     server = function(input, output) {}
   )
 
-  handle <- runApp(app1, blocking = FALSE, launch.browser = FALSE)
+  handle <- runApp(app1, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
   on.exit(tryCatch(handle$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
 
   expect_error(
-    runApp(app2, blocking = FALSE, launch.browser = FALSE),
+    runApp(app2, blocking = FALSE, launch.browser = FALSE, quiet = TRUE),
     "Can't start a new app while another is running"
   )
 
   handle$stop()
 
   # After stopping, should be able to start a new app
-  handle2 <- runApp(app2, blocking = FALSE, launch.browser = FALSE)
+  handle2 <- runApp(app2, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
   expect_equal(handle2$status(), "running")
   handle2$stop()
 })
@@ -109,7 +109,7 @@ test_that("cleanup callbacks run when stopped", {
   )
   onStop(function() stopped <<- TRUE)
 
-  handle <- runApp(app, blocking = FALSE, launch.browser = FALSE)
+  handle <- runApp(app, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
   handle$stop()
 
   expect_true(stopped)
@@ -121,7 +121,7 @@ test_that("old handle doesn't see new app's result", {
     server = function(input, output) {}
   )
 
-  handle1 <- runApp(app1, blocking = FALSE, launch.browser = FALSE)
+  handle1 <- runApp(app1, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
 
   stopApp("result1")
   for (i in 1:5) {
@@ -135,7 +135,7 @@ test_that("old handle doesn't see new app's result", {
     ui = fluidPage(),
     server = function(input, output) {}
   )
-  handle2 <- runApp(app2, blocking = FALSE, launch.browser = FALSE)
+  handle2 <- runApp(app2, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
 
   stopApp("result2")
   for (i in 1:5) {
@@ -156,7 +156,7 @@ test_that("global isRunning() works with non-blocking apps", {
 
   expect_false(isRunning())
 
-  handle <- runApp(app, blocking = FALSE, launch.browser = FALSE)
+  handle <- runApp(app, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
   on.exit(tryCatch(handle$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
 
   expect_true(isRunning())
@@ -173,7 +173,7 @@ test_that("shiny.blocking option controls default", {
 
   withr::local_options(shiny.blocking = FALSE)
 
-  handle <- runApp(app, launch.browser = FALSE)
+  handle <- runApp(app, launch.browser = FALSE, quiet = TRUE)
   on.exit(tryCatch(handle$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
 
   expect_s3_class(handle, "ShinyAppHandle")
@@ -183,7 +183,7 @@ test_that("shiny.blocking option controls default", {
 })
 
 test_that("runExample works with blocking = FALSE", {
-  handle <- runExample("01_hello", blocking = FALSE, launch.browser = FALSE)
+  handle <- suppressMessages(runExample("01_hello", blocking = FALSE, launch.browser = FALSE))
   on.exit(tryCatch(handle$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
 
   expect_equal(handle$status(), "running")
@@ -199,7 +199,7 @@ test_that("runGadget works with blocking = FALSE", {
   )
   server <- function(input, output, session) {}
 
-  handle <- runGadget(ui, server, blocking = FALSE, viewer = function(url) NULL)
+  handle <- suppressMessages(runGadget(ui, server, blocking = FALSE, viewer = function(url) NULL))
   on.exit(tryCatch(handle$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
 
   expect_s3_class(handle, "ShinyAppHandle")

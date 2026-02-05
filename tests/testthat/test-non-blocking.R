@@ -182,30 +182,6 @@ test_that("shiny.blocking option controls default", {
   handle$stop()
 })
 
-test_that(".captureResult is idempotent", {
-  app <- shinyApp(
-    ui = fluidPage(),
-    server = function(input, output) {}
-  )
-
-  handle <- runApp(app, blocking = FALSE, launch.browser = FALSE)
-
-  stopApp("first_result")
-  for (i in 1:10) {
-    if (handle$status() != "running") break
-    later::run_now(timeoutSecs = 0.1)
-  }
-
-  expect_equal(handle$result(), "first_result")
-
-  # Calling .captureResult again should be a no-op
-  .globals <- shiny:::.globals
-  .globals$retval <- list(value = "second_result")
-  handle$.captureResult()
-
-  expect_equal(handle$result(), "first_result")
-})
-
 test_that("runExample works with blocking = FALSE", {
   handle <- runExample("01_hello", blocking = FALSE, launch.browser = FALSE)
   on.exit(tryCatch(handle$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)

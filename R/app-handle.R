@@ -3,9 +3,12 @@ ShinyAppHandle <- R6::R6Class("ShinyAppHandle",
   cloneable = FALSE,
 
   public = list(
-    initialize = function(appUrl, cleanupFn) {
-      private$url_ <- appUrl
+    initialize = function(appUrl, cleanupFn, registerCapture) {
+      private$appUrl <- appUrl
       private$cleanupFn <- cleanupFn
+
+      # Expose private captureResult to caller via callback registration
+      registerCapture(function() private$captureResult())
 
       reg.finalizer(self, function(e) {
         if (e$status() == "running") {
@@ -19,19 +22,19 @@ ShinyAppHandle <- R6::R6Class("ShinyAppHandle",
         warning("App is not running")
         return(invisible(self))
       }
-      self$.captureResult()
+      private$captureResult()
       .globals$stopped <- TRUE
       private$cleanupFn()
       private$cleanupFn <- NULL
       invisible(self)
     },
 
-    url = function() private$url_,
+    url = function() private$appUrl,
 
     status = function() {
       if (!private$stopped) {
         "running"
-      } else if (!is.null(private$error_)) {
+      } else if (!is.null(private$resultError)) {
         "error"
       } else {
         "success"
@@ -42,35 +45,37 @@ ShinyAppHandle <- R6::R6Class("ShinyAppHandle",
       if (self$status() == "running") {
         stop("App is still running. Use status() to check if the app has stopped.")
       }
-      if (!is.null(private$error_)) {
-        stop(private$error_)
+      if (!is.null(private$resultError)) {
+        stop(private$resultError)
       }
-      private$result_
-    },
-
-    .captureResult = function() {
-      if (private$stopped) return()
-      private$stopped <- TRUE
-      if (isTRUE(.globals$reterror)) {
-        private$error_ <- .globals$retval
-      } else if (!is.null(.globals$retval)) {
-        private$result_ <- .globals$retval$value
-      }
+      private$resultValue
     },
 
     print = function(...) {
       cat("Shiny app handle\n")
-      cat("  URL:   ", private$url_, "\n", sep = "")
+      cat("  URL:   ", private$appUrl, "\n", sep = "")
       cat("  Status:", self$status(), "\n")
       invisible(self)
     }
   ),
 
   private = list(
-    url_ = NULL,
+    appUrl = NULL,
     cleanupFn = NULL,
+    # Whether this handle has captured the result. Distinct from .globals$stopped
+    # which tracks whether a stop was requested (set by stopApp() or stop()).
     stopped = FALSE,
-    result_ = NULL,
-    error_ = NULL
+    resultValue = NULL,
+    resultError = NULL,
+
+    captureResult = function() {
+      if (private$stopped) return()
+      private$stopped <- TRUE
+      if (isTRUE(.globals$reterror)) {
+        private$resultError <- .globals$retval
+      } else if (!is.null(.globals$retval)) {
+        private$resultValue <- .globals$retval$value
+      }
+    }
   )
 )

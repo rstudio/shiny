@@ -19,3 +19,17 @@
         <span class="action-label">Click me</span>
       </button>
 
+# actionLink uses .noWS to prevent underline rendering issues (#4348)
+
+    Code
+      actionLink("foo", "Click me")
+    Output
+      <a id="foo" href="#" class="action-button action-link"><span class="action-label">Click me</span></a>
+
+---
+
+    Code
+      actionLink("foo", "Click me", icon = icon("star"))
+    Output
+      <a id="foo" href="#" class="action-button action-link"><span class="action-icon"><i class="far fa-star" role="presentation" aria-label="star icon"></i></span><span class="action-label">Click me</span></a>
+

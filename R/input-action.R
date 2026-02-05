@@ -86,11 +86,11 @@ actionLink <- function(inputId, label, icon = NULL, ...) {
   icon <- validateIcon(icon)
 
   if (!is.null(icon)) {
-    icon <- span(icon, class = "action-icon")
+    icon <- span(icon, class = "action-icon", .noWS = c("outside", "inside"))
   }
 
   if (!is.null(label)) {
-    label <- span(label, class = "action-label")
+    label <- span(label, class = "action-label", .noWS = c("outside", "inside"))
   }
 
   tags$a(
@@ -99,6 +99,7 @@ actionLink <- function(inputId, label, icon = NULL, ...) {
     class = "action-button action-link",
     `data-val` = value,
     icon, label,
+    .noWS = "inside",
     ...
   )
 }

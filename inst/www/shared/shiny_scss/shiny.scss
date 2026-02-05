@@ -470,6 +470,14 @@ textarea.textarea-autoresize.form-control {
   }
 }
 
+// Add spacing between icon and label for actionLink() (#4348)
+// Using margin instead of padding so the underline doesn't extend into the gap
+.action-link {
+  .action-icon + .action-label {
+    margin-left: 0.5ch;
+  }
+}
+
 /* Overrides bootstrap-datepicker3.css styling for invalid date ranges.
    See https://github.com/rstudio/shiny/issues/2042 for details. */
 .datepicker table tbody tr td.disabled,

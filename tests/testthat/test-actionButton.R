@@ -94,3 +94,34 @@ test_that("Action button allows icon customization", {
   expect_equal(as_character(btn2), as_character(btn3))
   expect_equal(as_character(btn3), as_character(btn4))
 })
+
+test_that("actionLink uses .noWS to prevent underline rendering issues (#4348)", {
+  # actionLink should generate compact HTML without whitespace between tags
+  # This prevents the underline from extending beyond the visible text
+
+  # Test without icon
+  link <- actionLink("test_link", "Click me")
+  link_html <- as.character(link)
+
+  # Verify no newlines/whitespace between closing > and opening <span
+  # Old: <a ...>\n  <span>...</span>\n</a>
+  # New: <a ...><span>...</span></a>
+  expect_false(
+    grepl(">\n\\s+<span", link_html),
+    info = "actionLink should not have whitespace between tags"
+  )
+
+  # Test with icon
+  link_icon <- actionLink("test_link2", "Click me", icon = icon("star"))
+  link_icon_html <- as.character(link_icon)
+
+  # Should also have no whitespace between icon span and label span
+  expect_false(
+    grepl(">\n\\s+<span", link_icon_html),
+    info = "actionLink with icon should not have whitespace between tags"
+  )
+
+  # Snapshot tests show the compact HTML structure
+  expect_snapshot(actionLink("foo", "Click me"))
+  expect_snapshot(actionLink("foo", "Click me", icon = icon("star")))
+})

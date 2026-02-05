@@ -1,4 +1,4 @@
-/*! shiny 1.12.1.9000 | (c) 2012-2026 Posit Software, PBC. | License: MIT + file LICENSE */
+/*! shiny 1.12.1.9000 | (c) 2012-2026 Posit Software, PBC. | License: GPL-3 | file LICENSE */
 "use strict";
 (() => {
   var __create = Object.create;

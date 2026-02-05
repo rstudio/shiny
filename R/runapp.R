@@ -115,7 +115,8 @@ runApp <- function(
 
   if (isRunning()) {
     stop("Can't start a new app while another is running. ",
-         "Stop the current app first with handle$stop() or stopApp().")
+         "If your application code contains `runApp()`, remove it. ",
+         "Otherwise, stop the current app first with handle$stop() or stopApp().")
   }
 
   # Make warnings print immediately

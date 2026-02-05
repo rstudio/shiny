@@ -459,7 +459,7 @@ runApp <- function(
 
     tryCatch(
       {
-        startServiceLoop(captureResult, cleanup)
+        serviceAsync(captureResult, cleanup)
         handle
       },
       error = function(e) {

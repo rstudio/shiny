@@ -499,7 +499,7 @@ serviceApp <- function() {
 }
 
 # Non-blocking service loop using later callbacks.
-# Uses 10ms delay between iterations to yield CPU for console interaction.
+# Uses 1ms delay between iterations to yield CPU for console interaction.
 startServiceLoop <- function(captureResult, cleanup) {
   serviceLoop <- function() {
     if (!.globals$stopped) {
@@ -516,7 +516,7 @@ startServiceLoop <- function(captureResult, cleanup) {
         )
       )
       if (!.globals$stopped) {
-        later::later(serviceLoop, delay = 0.01)
+        later::later(serviceLoop, delay = 0.001)
       } else {
         captureResult()
         cleanup()
@@ -527,7 +527,7 @@ startServiceLoop <- function(captureResult, cleanup) {
       cleanup()
     }
   }
-  later::later(serviceLoop, delay = 0.01)
+  later::later(serviceLoop, delay = 0.001)
 }
 
 .shinyServerMinVersion <- '0.3.4'

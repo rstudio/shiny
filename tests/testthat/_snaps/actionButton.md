@@ -19,7 +19,7 @@
         <span class="action-label">Click me</span>
       </button>
 
-# actionLink uses .noWS to prevent underline rendering issues (#4348)
+# actionLink uses .noWS to prevent underline rendering issues
 
     Code
       actionLink("foo", "Click me")

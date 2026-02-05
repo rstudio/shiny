@@ -1,5 +1,9 @@
 # shiny (development version)
 
+## Bug fixes and minor improvements
+
+* Fixed an issue with `actionLink()` that extended the link underline to whitespace around the text. (#4348)
+
 # shiny 1.12.1
 
 ## New features

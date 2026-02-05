@@ -59,11 +59,11 @@ actionButton <- function(inputId, label, icon = NULL, width = NULL,
   icon <- validateIcon(icon)
 
   if (!is.null(icon)) {
-    icon <- span(icon, class = "action-icon")
+    icon <- span(icon, class = "action-icon", .noWS = c("outside", "inside"))
   }
 
   if (!is.null(label)) {
-    label <- span(label, class = "action-label")
+    label <- span(label, class = "action-label", .noWS = c("outside", "inside"))
   }
 
   tags$button(
@@ -74,6 +74,7 @@ actionButton <- function(inputId, label, icon = NULL, width = NULL,
     `data-val` = value,
     disabled = if (isTRUE(disabled)) NA else NULL,
     icon, label,
+    .noWS = "inside",
     ...
   )
 }

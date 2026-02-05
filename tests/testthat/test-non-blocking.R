@@ -45,9 +45,8 @@ test_that("ShinyAppHandle lifecycle (error path)", {
   handle <- runApp(app, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
 
   stopApp(stop("test_error", call. = FALSE))
-  for (i in 1:10) {
-    if (handle$status() != "running") break
-    later::run_now(timeoutSecs = 0.1)
+  while (handle$status() == "running") {
+    later::run_now(timeoutSecs = 1)
   }
 
   expect_equal(handle$status(), "error")
@@ -66,9 +65,8 @@ test_that("handle captures result from stopApp", {
   handle <- runApp(app, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
 
   stopApp("test_result")
-  for (i in 1:10) {
-    if (handle$status() != "running") break
-    later::run_now(timeoutSecs = 0.1)
+  while (handle$status() == "running") {
+    later::run_now(timeoutSecs = 1)
   }
 
   expect_equal(handle$status(), "success")
@@ -124,9 +122,8 @@ test_that("old handle doesn't see new app's result", {
   handle1 <- runApp(app1, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
 
   stopApp("result1")
-  for (i in 1:5) {
-    if (handle1$status() != "running") break
-    later::run_now(timeoutSecs = 0.1)
+  while (handle1$status() == "running") {
+    later::run_now(timeoutSecs = 1)
   }
   expect_equal(handle1$result(), "result1")
 
@@ -138,9 +135,8 @@ test_that("old handle doesn't see new app's result", {
   handle2 <- runApp(app2, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
 
   stopApp("result2")
-  for (i in 1:5) {
-    if (handle2$status() != "running") break
-    later::run_now(timeoutSecs = 0.1)
+  while (handle2$status() == "running") {
+    later::run_now(timeoutSecs = 1)
   }
   expect_equal(handle2$result(), "result2")
 

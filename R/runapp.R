@@ -126,13 +126,14 @@ runApp <- function(
     pool.scheduler = scheduleTask
   )
 
+  # ============================================================================
+  # Global onStart/onStop callbacks
+  # ============================================================================
   # Flag to control whether early cleanup runs on exit.
-  # TRUE for blocking mode (cleanup runs on function exit).
-  # FALSE for non-blocking mode (cleanup is deferred to handle$stop()).
+  # For non-blocking mode, earlyCleanup is set to FALSE before returning.
   earlyCleanup <- TRUE
 
   # These on.exit handlers ensure cleanup even if startup fails.
-  # For non-blocking mode, earlyCleanup is set to FALSE before returning.
   on.exit({
     if (earlyCleanup) {
       options(ops)
@@ -412,7 +413,7 @@ runApp <- function(
   # ============================================================================
   # Create cleanup function
   # ============================================================================
-  cleanup <- createCleanupFunction(server, appParts, appUrl, ops)
+  cleanup <- createCleanup(server, appParts, appUrl, ops)
 
   # Initialize globals for this app run (MUST happen before blocking check)
   .globals$reterror <- NULL
@@ -470,7 +471,7 @@ runApp <- function(
 }
 
 # Consolidated cleanup function for runApp()
-createCleanupFunction <- function(server, appParts, appUrl, ops) {
+createCleanup <- function(server, appParts, appUrl, ops) {
   cleanedUp <- FALSE
   function() {
     if (cleanedUp) return()

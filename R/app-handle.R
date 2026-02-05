@@ -3,41 +3,51 @@ ShinyAppHandle <- R6::R6Class("ShinyAppHandle",
   cloneable = FALSE,
 
   public = list(
-    initialize = function(server, appUrl, cleanupFn) {
-      private$server <- server
-      private$appUrl <- appUrl
+    initialize = function(appUrl, cleanupFn) {
+      private$url_ <- appUrl
       private$cleanupFn <- cleanupFn
 
-      # Weak reference for cleanup if handle is discarded
       reg.finalizer(self, function(e) {
-        if (e$isRunning()) {
+        if (e$status() == "running") {
           tryCatch(e$stop(), error = function(cnd) NULL, warning = function(cnd) NULL)
         }
       }, onexit = TRUE)
     },
 
     stop = function() {
-      if (!self$isRunning()) {
+      if (self$status() != "running") {
         warning("App is not running")
         return(invisible(self))
       }
       self$.captureResult()
       .globals$stopped <- TRUE
       private$cleanupFn()
-      private$server <- NULL
       private$cleanupFn <- NULL
       invisible(self)
     },
 
-    isRunning = function() !private$stopped,
-    getUrl = function() private$appUrl,
-    getServer = function() private$server,
+    url = function() private$url_,
 
-    # Access return value from stopApp() - captured at stop time
-    result = function() private$result_,
-    error = function() private$error_,
+    status = function() {
+      if (!private$stopped) {
+        "running"
+      } else if (!is.null(private$error_)) {
+        "error"
+      } else {
+        "success"
+      }
+    },
 
-    # Internal: called by service loop when app self-terminates
+    result = function() {
+      if (self$status() == "running") {
+        stop("App is still running. Use status() to check if the app has stopped.")
+      }
+      if (!is.null(private$error_)) {
+        stop(private$error_)
+      }
+      private$result_
+    },
+
     .captureResult = function() {
       if (private$stopped) return()
       private$stopped <- TRUE
@@ -50,15 +60,14 @@ ShinyAppHandle <- R6::R6Class("ShinyAppHandle",
 
     print = function(...) {
       cat("Shiny app handle\n")
-      cat("  URL:   ", private$appUrl, "\n", sep = "")
-      cat("  Status:", if (self$isRunning()) "running" else "stopped", "\n")
+      cat("  URL:   ", private$url_, "\n", sep = "")
+      cat("  Status:", self$status(), "\n")
       invisible(self)
     }
   ),
 
   private = list(
-    server = NULL,
-    appUrl = NULL,
+    url_ = NULL,
     cleanupFn = NULL,
     stopped = FALSE,
     result_ = NULL,

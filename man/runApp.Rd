@@ -70,8 +70,10 @@ be changed via \code{options(shiny.blocking = FALSE)}.}
 \value{
 If \code{blocking = TRUE}, returns the value passed to \code{\link[=stopApp]{stopApp()}}, or
 throws an error if the app was stopped with an error. If \code{blocking = FALSE},
-returns a \code{ShinyAppHandle} object with methods \code{stop()}, \code{isRunning()},
-\code{getUrl()}, \code{getServer()}, \code{result()}, and \code{error()}.
+returns a \code{ShinyAppHandle} object with methods \code{stop()}, \code{status()},
+\code{url()}, and \code{result()}. The \code{status()} method returns \code{"running"},
+\code{"success"}, or \code{"error"}. The \code{result()} method throws an error if called
+while running, or re-throws the error if the app stopped with an error.
 }
 \description{
 Runs a Shiny application. This function normally does not return; interrupt R

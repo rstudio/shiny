@@ -53,8 +53,10 @@
 #'
 #' @return If `blocking = TRUE`, returns the value passed to [stopApp()], or
 #'   throws an error if the app was stopped with an error. If `blocking = FALSE`,
-#'   returns a `ShinyAppHandle` object with methods `stop()`, `isRunning()`,
-#'   `getUrl()`, `getServer()`, `result()`, and `error()`.
+#'   returns a `ShinyAppHandle` object with methods `stop()`, `status()`,
+#'   `url()`, and `result()`. The `status()` method returns `"running"`,
+#'   `"success"`, or `"error"`. The `result()` method throws an error if called
+#'   while running, or re-throws the error if the app stopped with an error.
 #'
 #' @examples
 #' \dontrun{
@@ -441,7 +443,6 @@ runApp <- function(
   } else {
     # NON-BLOCKING MODE: return handle immediately, app runs via later callbacks
     handle <- ShinyAppHandle$new(
-      server = server,
       appUrl = appUrl,
       cleanupFn = cleanup
     )

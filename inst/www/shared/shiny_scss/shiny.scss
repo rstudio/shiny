@@ -463,16 +463,9 @@ textarea.textarea-autoresize.form-control {
   }
 }
 
-// Add spacing between icon and label for actionButton()
-.action-button:not(.action-link) {
-  .action-icon + .action-label {
-    padding-left: 0.5ch;
-  }
-}
-
-// Add spacing between icon and label for actionLink()
-// Using margin instead of padding so the underline doesn't extend into the gap
-.action-link {
+// Add spacing between icon and label for action buttons and links (#4348)
+// Using margin instead of padding so the underline doesn't extend into the gap for links
+.action-button {
   .action-icon + .action-label {
     margin-left: 0.5ch;
   }

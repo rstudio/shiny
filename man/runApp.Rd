@@ -65,7 +65,10 @@ only used for recording or running automated tests. Defaults to the
 return until the app is stopped. If \code{FALSE}, the app runs in the background
 via \code{later} callbacks and the function returns immediately with a
 \code{ShinyAppHandle} object that can be used to stop the app. The default can
-be changed via \code{options(shiny.blocking = FALSE)}.}
+be changed via \code{options(shiny.blocking = FALSE)}. Non-blocking mode
+requires the \code{later} event loop to run; this happens automatically in
+interactive sessions when idle at the console, but in scripts requires
+calling \code{\link[later:run_now]{later::run_now()}} repeatedly.}
 }
 \value{
 If \code{blocking = TRUE}, returns the value passed to \code{\link[=stopApp]{stopApp()}}, or

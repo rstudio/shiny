@@ -49,7 +49,10 @@
 #'   return until the app is stopped. If `FALSE`, the app runs in the background
 #'   via `later` callbacks and the function returns immediately with a
 #'   `ShinyAppHandle` object that can be used to stop the app. The default can
-#'   be changed via `options(shiny.blocking = FALSE)`.
+#'   be changed via `options(shiny.blocking = FALSE)`. Non-blocking mode
+#'   requires the `later` event loop to run; this happens automatically in
+#'   interactive sessions when idle at the console, but in scripts requires
+#'   calling [later::run_now()] repeatedly.
 #'
 #' @return If `blocking = TRUE`, returns the value passed to [stopApp()], or
 #'   throws an error if the app was stopped with an error. If `blocking = FALSE`,

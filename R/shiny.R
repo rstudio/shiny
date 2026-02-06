@@ -629,7 +629,7 @@ ShinySession <- R6Class(
             saveRDS(values, tmpfile)
             on.exit(unlink(tmpfile), add = TRUE)
 
-            content <- readBin(tmpfile, "raw", n = file.info(tmpfile)$size)
+            content <- readBin(tmpfile, "raw", n = file.size(tmpfile))
             httpResponse(200, "application/octet-stream", content)
 
           } else {
@@ -2096,7 +2096,7 @@ ShinySession <- R6Class(
     fileUrl = function(name, file, contentType='application/octet-stream') {
       "Return a URL for a file to be sent to the client. The file will be base64
       encoded and embedded in the URL."
-      bytes <- file.info(file)$size
+      bytes <- file.size(file)
       if (is.na(bytes))
         return(NULL)
 

@@ -38,7 +38,7 @@ is_legacy_shinytest_dir <- function(path){
   }
 
   files <- dir(path, full.names = TRUE)
-  files <- files[!file.info(files)$isdir]
+  files <- files[!file.info(files, extra_cols = FALSE)$isdir]
   if (length(files) == 0) {
     return(FALSE)
   }

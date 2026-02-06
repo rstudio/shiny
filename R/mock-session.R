@@ -344,7 +344,7 @@ MockShinySession <- R6Class(
     #' @param file The file to be encoded
     #' @param contentType The content type of the base64-encoded string
     fileUrl = function(name, file, contentType='application/octet-stream') {
-      bytes <- file.info(file)$size
+      bytes <- file.size(file)
       if (is.na(bytes))
         return(NULL)
 

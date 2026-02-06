@@ -357,7 +357,7 @@ initAutoReloadMonitor <- function(dir) {
       files <- sort_c(
         list.files(dir, pattern = filePattern, recursive = TRUE, ignore.case = TRUE)
       )
-      times <- file.info(files)$mtime
+      times <- file.mtime(files)
       names(times) <- files
   
       if (is.null(lastValue)) {

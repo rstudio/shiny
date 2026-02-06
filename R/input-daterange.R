@@ -65,7 +65,10 @@
 #'
 #'   # Start with decade view instead of default month view
 #'   dateRangeInput("daterange6", "Date range:",
-#'                  startview = "decade")
+#'                  startview = "decade"),
+#'
+#'   # Restrict user to selecting a month
+#'   dateInput("daterange7", "Date range:", minviewmode = "months")
 #' )
 #'
 #' shinyApp(ui, server = function(input, output) { })
@@ -77,13 +80,18 @@
 #' @export
 dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
     min = NULL, max = NULL, format = "yyyy-mm-dd", startview = "month",
-    weekstart = 0, language = "en", separator = " to ", width = NULL,
-    autoclose = TRUE) {
+    weekstart = 0, minviewmode = "days", maxviewmode = "centuries",
+    language = "en", separator = " to ", width = NULL, autoclose = TRUE) {
 
   start <- dateYMD(start, "start")
   end   <- dateYMD(end, "end")
   min   <- dateYMD(min, "min")
   max   <- dateYMD(max, "max")
+
+  # datepicker provides aliases that might cause confusion (e.g. "month" => "days")
+  viewmode_choices <- c("days", "months", "years", "decades", "centuries")
+  minviewmode <- rlang::arg_match(minviewmode, viewmode_choices)
+  maxviewmode <- rlang::arg_match(maxviewmode, viewmode_choices)
 
   restored <- restoreInput(id = inputId, default = list(start, end))
   start <- restored[[1]]
@@ -108,6 +116,8 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
           `data-date-week-start` = weekstart,
           `data-date-format` = format,
           `data-date-start-view` = startview,
+          `data-date-min-view-mode` = minviewmode,
+          `data-date-max-view-mode` = maxviewmode,
           `data-min-date` = min,
           `data-max-date` = max,
           `data-initial-date` = start,
@@ -130,6 +140,8 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
           `data-date-week-start` = weekstart,
           `data-date-format` = format,
           `data-date-start-view` = startview,
+          `data-date-min-view-mode` = minviewmode,
+          `data-date-max-view-mode` = maxviewmode,
           `data-min-date` = min,
           `data-max-date` = max,
           `data-initial-date` = end,

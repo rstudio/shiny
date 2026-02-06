@@ -380,6 +380,9 @@ In addition, various properties of the spinners and pulse can be customized with
 
 # shiny 1.7.3
 
+* Resolved [#1365](https://github.com/rstudio/shiny/issues/1365): Added `minviewmode` and `maxviewmode` as new parameters to `dateInput()` and `dateRangeInput()`. This exposes the underlying arguments of [Bootstrap Datepicker](https://bootstrap-datepicker.readthedocs.io/en/latest/options.html#maxviewmode). The `minviewmode` parameter makes it possible to restrict date selection to a month, a year, a decade, or a century.
+
+
 ### Bug fixes
 
 * Shiny 1.7.0 changed the `icon(lib="fontawesome")` implementation from a bundled copy of fontawesome, to the {fontawesome} package. This led to issue #3688, where icons that were previously working, were now breaking. That's because {fontawesome} 0.3.0 and earlier did not have support for icon names used in Font Awesome 5 and earlier, only the newest icon names used in Font Awesome 6. Now, {fontawesome} 0.4.0 has restored support for those older icon names, and Shiny 1.7.2.1 has updated its {fontawesome} requirement to >=0.4.0.

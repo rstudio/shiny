@@ -205,3 +205,37 @@ test_that("runGadget works with blocking = FALSE", {
   handle$stop()
   expect_equal(handle$status(), "success")
 })
+
+test_that("startup failure clears app state (regression test)", {
+  # If startup fails after initCurrentAppState() but before earlyCleanup <- FALSE,
+  # the app state must be cleared so subsequent runApp() calls don't fail with
+  # "Can't start a new app while another is running"
+
+  # Create an app that fails during onStart (which runs after initCurrentAppState)
+  failing_app <- shinyApp(
+    ui = fluidPage(),
+    server = function(input, output) {},
+    onStart = function() stop("Intentional startup failure")
+  )
+
+  # This should fail
+  expect_error(
+    runApp(failing_app, blocking = FALSE, launch.browser = FALSE, quiet = TRUE),
+    "Intentional startup failure"
+  )
+
+  # isRunning() should return FALSE - no app is actually running
+  expect_false(isRunning())
+
+  # A subsequent runApp() call should work
+  working_app <- shinyApp(
+    ui = fluidPage(),
+    server = function(input, output) {}
+  )
+
+  handle <- runApp(working_app, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  on.exit(tryCatch(handle$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+
+  expect_equal(handle$status(), "running")
+  handle$stop()
+})

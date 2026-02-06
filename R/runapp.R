@@ -139,6 +139,7 @@ runApp <- function(
     if (earlyCleanup) {
       .globals$onStopCallbacks$invoke()
       .globals$onStopCallbacks <- Callbacks$new()
+      clearCurrentAppState()
       handlerManager$clear()
       options(ops)
     }

@@ -134,19 +134,13 @@ runApp <- function(
   # For non-blocking mode, earlyCleanup is set to FALSE before returning.
   earlyCleanup <- TRUE
 
-  # These on.exit handlers ensure cleanup even if startup fails.
-  on.exit({
-    if (earlyCleanup) {
-      options(ops)
-      handlerManager$clear()
-    }
-  }, add = TRUE)
-
-  # Invoke user-defined onStop callbacks even if startup fails
+  # This on.exit handler ensures cleanup even if startup fails.
   on.exit({
     if (earlyCleanup) {
       .globals$onStopCallbacks$invoke()
       .globals$onStopCallbacks <- Callbacks$new()
+      handlerManager$clear()
+      options(ops)
     }
   }, add = TRUE)
 

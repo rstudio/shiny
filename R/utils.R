@@ -1366,11 +1366,41 @@ tryNativeEncoding <- function(string) {
   if (identical(enc2utf8(string2), string)) string2 else string
 }
 
+maybeAnnotateSourceForArk <- function(file, lines) {
+  ark_annotate_source <- get0(".ark_annotate_source", baseenv())
+
+  if (is.null(ark_annotate_source)) {
+    return(lines)
+  }
+
+  file <- normalizePath(file, mustWork = TRUE) # Just to be safe
+  uri <- paste0("file:///", sub("^/", "", file)) # Ark expects URIs
+  lines_str <- paste(lines, collapse = "\n")
+  tryCatch(
+    {
+      cli::cli_inform("Annotating source for Ark: {.val {uri}}") # FIXME
+      annotated <- ark_annotate_source(lines_str, uri)
+      if (!is.null(annotated)) {
+        lines <- strsplit(annotated, "\n", fixed = TRUE)[[1]]
+      } else {
+        cli::cli_warn("Ark annotation returned NULL") # FIXME
+      }
+    },
+    error = function(cnd) {
+      rlang::warn("Can't inject breakpoints for Ark", parent = cnd)
+    }
+  )
+
+
+  lines
+}
+
 # similarly, try to source() a file with UTF-8
 sourceUTF8 <- function(file, envir = globalenv()) {
   lines <- readUTF8(file)
   enc <- if (any(Encoding(lines) == 'UTF-8')) 'UTF-8' else 'unknown'
-  src <- srcfilecopy(file, lines, isFile = TRUE)  # source reference info
+  lines <- maybeAnnotateSourceForArk(file, lines)
+  src <- srcfilecopy(file, lines, isFile = TRUE) # source reference info
   # oddly, parse(file) does not work when file contains multibyte chars that
   # **can** be encoded natively on Windows (might be a bug in base R); we
   # rewrite the source code in a natively encoded temp file and parse it in this

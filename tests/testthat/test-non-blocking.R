@@ -486,3 +486,172 @@ test_that("stopping one app doesn't affect the other", {
   handle2$stop()
   expect_equal(handle2$status(), "success")
 })
+
+# ============================================================================
+# Coverage gap tests
+# ============================================================================
+
+test_that("stopApp(value) targets getCurrentAppState() in multi-app", {
+  app1 <- shinyApp(
+    ui = fluidPage(),
+    server = function(input, output) {}
+  )
+  app2 <- shinyApp(
+    ui = fluidPage(),
+    server = function(input, output) {}
+  )
+
+  handle1 <- runApp(app1, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  on.exit(tryCatch(handle1$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+
+  handle2 <- runApp(app2, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  on.exit(tryCatch(handle2$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+
+  # After starting both, getCurrentAppState() points to app2 (most recently
+  # initialized), so stopApp() targets app2
+  stopApp("targeted_result")
+  while (handle2$status() == "running") {
+    later::run_now(timeoutSecs = 1)
+  }
+
+  expect_equal(handle2$result(), "targeted_result")
+  expect_equal(handle1$status(), "running")
+
+  # After app2 cleanup, currentAppState is NULL (cleared because it matched
+  # app2's token). stopApp() is now a no-op.
+  stopApp("should_be_ignored")
+  later::run_now(timeoutSecs = 0.1)
+  expect_equal(handle1$status(), "running")
+
+  handle1$stop()
+})
+
+test_that("stopApp(value) targets explicitly-set app in multi-app", {
+  app1 <- shinyApp(
+    ui = fluidPage(),
+    server = function(input, output) {}
+  )
+  app2 <- shinyApp(
+    ui = fluidPage(),
+    server = function(input, output) {}
+  )
+
+  handle1 <- runApp(app1, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  on.exit(tryCatch(handle1$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+
+  handle2 <- runApp(app2, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  on.exit(tryCatch(handle2$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+
+  # Simulate what HTTP/WS context handlers do: point to app1
+  appState1 <- handle1$.__enclos_env__$private$appState
+  globals <- shiny:::.globals
+  globals$currentAppState <- appState1
+
+  stopApp("result_for_app1")
+  while (handle1$status() == "running") {
+    later::run_now(timeoutSecs = 1)
+  }
+
+  expect_equal(handle1$result(), "result_for_app1")
+  expect_equal(handle2$status(), "running")
+
+  handle2$stop()
+})
+
+test_that("process options saved on first app, restored when last stops", {
+  withr::local_options(warn = 0)
+
+  app1 <- shinyApp(
+    ui = fluidPage(),
+    server = function(input, output) {}
+  )
+  app2 <- shinyApp(
+    ui = fluidPage(),
+    server = function(input, output) {}
+  )
+
+  handle1 <- runApp(app1, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  on.exit(tryCatch(handle1$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+
+  # First app raises warn to 1
+  expect_equal(getOption("warn"), 1)
+
+  handle2 <- runApp(app2, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  on.exit(tryCatch(handle2$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+
+  # Second app doesn't re-snapshot
+  expect_equal(getOption("warn"), 1)
+
+  # Stopping one app doesn't restore
+  handle1$stop()
+  expect_equal(getOption("warn"), 1)
+
+  # Stopping last app restores original
+  handle2$stop()
+  expect_equal(getOption("warn"), 0)
+})
+
+test_that("serviceLoop attributes serviceApp() error to current app", {
+  app <- shinyApp(
+    ui = fluidPage(),
+    server = function(input, output) {}
+  )
+
+  handle <- runApp(app, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  on.exit(tryCatch(handle$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+
+  # Mock serviceApp to throw, simulating an httpuv-level error
+  local_mocked_bindings(serviceApp = function() stop("service_loop_error"))
+
+  while (handle$status() == "running") {
+    later::run_now(timeoutSecs = 0.5)
+  }
+
+  expect_equal(handle$status(), "error")
+  expect_error(handle$result(), "service_loop_error")
+})
+
+test_that("blocking option can be set via shinyApp(options)", {
+  app <- shinyApp(
+    ui = fluidPage(),
+    server = function(input, output) {},
+    options = list(blocking = FALSE)
+  )
+
+  handle <- runApp(app, launch.browser = FALSE, quiet = TRUE)
+  on.exit(tryCatch(handle$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+
+  expect_s3_class(handle, "ShinyAppHandle")
+  expect_equal(handle$status(), "running")
+
+  handle$stop()
+})
+
+test_that("stopping non-current app preserves currentAppState pointer", {
+  app1 <- shinyApp(
+    ui = fluidPage(),
+    server = function(input, output) {}
+  )
+  app2 <- shinyApp(
+    ui = fluidPage(),
+    server = function(input, output) {}
+  )
+
+  handle1 <- runApp(app1, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  on.exit(tryCatch(handle1$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+
+  handle2 <- runApp(app2, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  on.exit(tryCatch(handle2$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+
+  # currentAppState points to app2 (most recently initialized)
+  appState2 <- handle2$.__enclos_env__$private$appState
+  expect_identical(shiny:::getCurrentAppState(), appState2)
+
+  # Stop app1 — its token doesn't match currentAppState
+  handle1$stop()
+
+  # Pointer should still reference app2
+  expect_identical(shiny:::getCurrentAppState(), appState2)
+
+  handle2$stop()
+})

@@ -214,8 +214,10 @@ uiHttpHandler <- function(ui, uiPattern = "^/$") {
     if (!isTRUE(grepl(uiPattern, req$PATH_INFO)))
       return(NULL)
 
-    showcaseMode <- .globals$showcaseDefault
-    if (.globals$showcaseOverride) {
+    # httpContextHandler sets currentAppState before this handler runs
+    appState <- getCurrentAppState()
+    showcaseMode <- appState$showcaseDefault
+    if (appState$showcaseOverride) {
       mode <- showcaseModeOfReq(req)
       if (!is.null(mode))
         showcaseMode <- mode

@@ -132,7 +132,8 @@ tabContentHelper <- function(files, path, language) {
 showcaseCodeTabs <- function(codeLicense) {
   rFiles <- list.files(pattern = "\\.[rR]$")
   wwwFiles <- list()
-  if (isTRUE(.globals$IncludeWWW)) {
+  # httpContextHandler sets currentAppState before this handler runs
+  if (isTRUE(getCurrentAppState()$IncludeWWW)) {
     path <- file.path(getwd(), "www")
     wwwFiles$jsFiles <- list.files(path, pattern = "\\.js$")
     wwwFiles$cssFiles <- list.files(path, pattern = "\\.css$")
@@ -209,8 +210,14 @@ showcaseBody <- function(htmlBody) {
 
 # Sets the defaults for showcase mode (for app boot).
 setShowcaseDefault <- function(showcaseDefault) {
-  .globals$showcaseDefault <- showcaseDefault
-  .globals$showcaseOverride <- as.logical(showcaseDefault)
+  appState <- getCurrentAppState()
+  if (!is.null(appState)) {
+    appState$showcaseDefault <- showcaseDefault
+    appState$showcaseOverride <- as.logical(showcaseDefault)
+  } else {
+    .globals$showcaseDefault <- showcaseDefault
+    .globals$showcaseOverride <- as.logical(showcaseDefault)
+  }
 }
 
 

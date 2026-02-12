@@ -3,8 +3,9 @@ ShinyAppHandle <- R6::R6Class("ShinyAppHandle",
   cloneable = FALSE,
 
   public = list(
-    initialize = function(appUrl, cleanupFn, registerCapture) {
+    initialize = function(appUrl, appState, cleanupFn, registerCapture) {
       private$appUrl <- appUrl
+      private$appState <- appState
       private$cleanupFn <- cleanupFn
 
       # Expose private captureResult to caller via callback registration
@@ -23,7 +24,7 @@ ShinyAppHandle <- R6::R6Class("ShinyAppHandle",
         return(invisible(self))
       }
       private$captureResult()
-      .globals$stopped <- TRUE
+      private$appState$stopped <- TRUE
       private$cleanupFn()
       private$cleanupFn <- NULL
       invisible(self)
@@ -61,8 +62,9 @@ ShinyAppHandle <- R6::R6Class("ShinyAppHandle",
 
   private = list(
     appUrl = NULL,
+    appState = NULL,
     cleanupFn = NULL,
-    # Whether this handle has captured the result. Distinct from .globals$stopped
+    # Whether this handle has captured the result. Distinct from appState$stopped
     # which tracks whether a stop was requested (set by stopApp() or stop()).
     stopped = FALSE,
     resultValue = NULL,
@@ -71,10 +73,10 @@ ShinyAppHandle <- R6::R6Class("ShinyAppHandle",
     captureResult = function() {
       if (private$stopped) return()
       private$stopped <- TRUE
-      if (isTRUE(.globals$reterror)) {
-        private$resultError <- .globals$retval
-      } else if (!is.null(.globals$retval)) {
-        private$resultValue <- .globals$retval$value
+      if (isTRUE(private$appState$reterror)) {
+        private$resultError <- private$appState$retval
+      } else if (!is.null(private$appState$retval)) {
+        private$resultValue <- private$appState$retval$value
       }
     }
   )

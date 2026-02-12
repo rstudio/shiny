@@ -73,7 +73,7 @@ test_that("handle captures result from stopApp", {
   expect_equal(handle$result(), "test_result")
 })
 
-test_that("second app prevented while first is running", {
+test_that("blocking runApp prevented while another app is running", {
   app1 <- shinyApp(
     ui = fluidPage(),
     server = function(input, output) {}
@@ -87,16 +87,11 @@ test_that("second app prevented while first is running", {
   on.exit(tryCatch(handle$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
 
   expect_error(
-    runApp(app2, blocking = FALSE, launch.browser = FALSE, quiet = TRUE),
-    "Can't start a new app while another is running"
+    runApp(app2, blocking = TRUE, launch.browser = FALSE, quiet = TRUE),
+    "Can't call blocking runApp"
   )
 
   handle$stop()
-
-  # After stopping, should be able to start a new app
-  handle2 <- runApp(app2, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
-  expect_equal(handle2$status(), "running")
-  handle2$stop()
 })
 
 test_that("cleanup callbacks run when stopped", {
@@ -238,4 +233,226 @@ test_that("startup failure clears app state (regression test)", {
 
   expect_equal(handle$status(), "running")
   handle$stop()
+})
+
+# ============================================================================
+# Multi-app concurrent tests
+# ============================================================================
+
+test_that("two concurrent non-blocking apps on different ports", {
+  app1 <- shinyApp(
+    ui = fluidPage(),
+    server = function(input, output) {}
+  )
+  app2 <- shinyApp(
+    ui = fluidPage(),
+    server = function(input, output) {}
+  )
+
+  handle1 <- runApp(app1, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  on.exit(tryCatch(handle1$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+
+  handle2 <- runApp(app2, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  on.exit(tryCatch(handle2$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+
+  expect_equal(handle1$status(), "running")
+  expect_equal(handle2$status(), "running")
+
+  # Different URLs (different ports)
+  expect_false(identical(handle1$url(), handle2$url()))
+
+  handle1$stop()
+  handle2$stop()
+
+  expect_equal(handle1$status(), "success")
+  expect_equal(handle2$status(), "success")
+})
+
+test_that("stop one app while other keeps running", {
+  app1 <- shinyApp(
+    ui = fluidPage(),
+    server = function(input, output) {}
+  )
+  app2 <- shinyApp(
+    ui = fluidPage(),
+    server = function(input, output) {}
+  )
+
+  handle1 <- runApp(app1, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  on.exit(tryCatch(handle1$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+
+  handle2 <- runApp(app2, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  on.exit(tryCatch(handle2$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+
+  # Stop app1
+  handle1$stop()
+  expect_equal(handle1$status(), "success")
+
+  # app2 still running
+  expect_equal(handle2$status(), "running")
+
+  handle2$stop()
+  expect_equal(handle2$status(), "success")
+})
+
+test_that("independent onStop callbacks per app", {
+  stopped1 <- FALSE
+  stopped2 <- FALSE
+
+  app1 <- shinyApp(
+    ui = fluidPage(),
+    server = function(input, output) {},
+    onStart = function() {
+      onStop(function() stopped1 <<- TRUE)
+    }
+  )
+  app2 <- shinyApp(
+    ui = fluidPage(),
+    server = function(input, output) {},
+    onStart = function() {
+      onStop(function() stopped2 <<- TRUE)
+    }
+  )
+
+  handle1 <- runApp(app1, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  on.exit(tryCatch(handle1$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+
+  handle2 <- runApp(app2, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  on.exit(tryCatch(handle2$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+
+  # Stop only app1
+  handle1$stop()
+  expect_true(stopped1)
+  expect_false(stopped2)
+
+  # Stop app2
+  handle2$stop()
+  expect_true(stopped2)
+})
+
+test_that("independent onUnhandledError callbacks per app", {
+  errors1 <- list()
+  errors2 <- list()
+
+  app1 <- shinyApp(
+    ui = fluidPage(),
+    server = function(input, output) {},
+    onStart = function() {
+      onUnhandledError(function(e) errors1[[length(errors1) + 1L]] <<- e)
+    }
+  )
+  app2 <- shinyApp(
+    ui = fluidPage(),
+    server = function(input, output) {},
+    onStart = function() {
+      onUnhandledError(function(e) errors2[[length(errors2) + 1L]] <<- e)
+    }
+  )
+
+  handle1 <- runApp(app1, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  on.exit(tryCatch(handle1$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+
+  handle2 <- runApp(app2, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  on.exit(tryCatch(handle2$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+
+  # Invoke app1's onUnhandledError callbacks directly
+  appState1 <- handle1$.__enclos_env__$private$appState
+  appState1$onUnhandledErrorCallbacks$invoke(simpleError("err1"))
+
+  expect_length(errors1, 1)
+  expect_equal(conditionMessage(errors1[[1]]), "err1")
+  expect_length(errors2, 0)
+
+  # Invoke app2's onUnhandledError callbacks directly
+  appState2 <- handle2$.__enclos_env__$private$appState
+  appState2$onUnhandledErrorCallbacks$invoke(simpleError("err2"))
+
+  expect_length(errors2, 1)
+  expect_equal(conditionMessage(errors2[[1]]), "err2")
+  # app1 still only has its original error
+  expect_length(errors1, 1)
+
+  handle1$stop()
+  handle2$stop()
+})
+
+test_that("independent stopApp results per app", {
+  app1 <- shinyApp(
+    ui = fluidPage(),
+    server = function(input, output) {}
+  )
+  app2 <- shinyApp(
+    ui = fluidPage(),
+    server = function(input, output) {}
+  )
+
+  handle1 <- runApp(app1, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  on.exit(tryCatch(handle1$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+
+  handle2 <- runApp(app2, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  on.exit(tryCatch(handle2$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+
+  # Stop apps via handle (direct)
+  handle1$stop()
+  handle2$stop()
+
+  expect_equal(handle1$status(), "success")
+  expect_equal(handle2$status(), "success")
+})
+
+test_that("isRunning() with multiple apps", {
+  app1 <- shinyApp(
+    ui = fluidPage(),
+    server = function(input, output) {}
+  )
+  app2 <- shinyApp(
+    ui = fluidPage(),
+    server = function(input, output) {}
+  )
+
+  expect_false(isRunning())
+
+  handle1 <- runApp(app1, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  on.exit(tryCatch(handle1$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+  expect_true(isRunning())
+
+  handle2 <- runApp(app2, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  on.exit(tryCatch(handle2$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+  expect_true(isRunning())
+
+  # Stop one — still running
+  handle1$stop()
+  expect_true(isRunning())
+
+  # Stop both — not running
+  handle2$stop()
+  expect_false(isRunning())
+})
+
+test_that("stopping one app doesn't affect the other", {
+  app1 <- shinyApp(
+    ui = fluidPage(),
+    server = function(input, output) {}
+  )
+  app2 <- shinyApp(
+    ui = fluidPage(),
+    server = function(input, output) {}
+  )
+
+  handle1 <- runApp(app1, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  on.exit(tryCatch(handle1$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+
+  handle2 <- runApp(app2, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  on.exit(tryCatch(handle2$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+
+  # Stop app1 via handle (deterministic)
+  handle1$stop()
+
+  expect_equal(handle1$status(), "success")
+
+  # app2 should still be running
+  expect_equal(handle2$status(), "running")
+
+  handle2$stop()
+  expect_equal(handle2$status(), "success")
 })

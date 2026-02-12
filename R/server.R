@@ -132,7 +132,7 @@ on_load({
   autoReloadCallbacks <- Callbacks$new()
 })
 
-createAppHandlers <- function(httpHandlers, serverFuncSource) {
+createAppHandlers <- function(httpHandlers, serverFuncSource, appState = NULL) {
   appvars <- new.env()
   appvars$server <- NULL
 
@@ -143,8 +143,23 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
   # denied (403 response for HTTP, and instant close for websocket).
   checkSharedSecret <- loadSharedSecret()
 
+  # Capture showcase settings from appState at creation time so they are
+  # available via closure even when httpuv dispatches handlers for another app.
+  showcaseDefault <- if (!is.null(appState)) appState$showcaseDefault else .globals$showcaseDefault
+  showcaseOverride <- if (!is.null(appState)) appState$showcaseOverride else .globals$showcaseOverride
+
+  # Defense-in-depth: set the app pointer at the start of each HTTP request
+  # so that handlers like uiHttpHandler() can read from getCurrentAppState().
+  httpContextHandler <- if (!is.null(appState)) {
+    function(req) {
+      .globals$currentAppState <- appState
+      NULL
+    }
+  }
+
   appHandlers <- list(
     http = joinHandlers(c(
+      httpContextHandler,
       sessionHandler,
       httpHandlers,
       sys.www.root,
@@ -152,6 +167,12 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
       reactLogHandler
     )),
     ws = function(ws) {
+      # Defense-in-depth: set the app pointer so any code that calls
+      # getCurrentAppState() during handler execution gets the correct app.
+      if (!is.null(appState)) {
+        .globals$currentAppState <- appState
+      }
+
       if (!checkSharedSecret(ws$request$HTTP_SHINY_SHARED_SECRET)) {
         ws$close()
         return(TRUE)
@@ -181,9 +202,9 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
         stopApp()
       }
 
-      shinysession <- ShinySession$new(ws)
+      shinysession <- ShinySession$new(ws, appState)
       appsByToken$set(shinysession$token, shinysession)
-      shinysession$setShowcase(.globals$showcaseDefault)
+      shinysession$setShowcase(showcaseDefault)
 
       messageHandler <- function(binary, msg) {
         withReactiveDomain(shinysession, {
@@ -242,7 +263,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
               }
 
               # Check for switching into/out of showcase mode
-              if (.globals$showcaseOverride &&
+              if (showcaseOverride &&
                   exists(".clientdata_url_search", where = msg$data)) {
                 mode <- showcaseModeOfQuerystring(msg$data$.clientdata_url_search)
                 if (!is.null(mode))
@@ -354,11 +375,15 @@ identicalFunctionBodies <- function(a, b) {
   identical(getEffectiveBody(a), getEffectiveBody(b))
 }
 
-handlerManager <- HandlerManager$new()
-
 addSubApp <- function(appObj, autoRemove = TRUE) {
   path <- createUniqueId(16, "/app")
-  appHandlers <- createAppHandlers(appObj$httpHandler, appObj$serverFuncSource)
+
+  # Sub-apps are added during session activity (inside serviceApp()), so
+  # getCurrentAppState() is correct. Capture the parent app's state so sub-app
+  # sessions get closure-based correctness (same guarantee as main app sessions).
+  appState <- getCurrentAppState()
+  appHandlers <- createAppHandlers(appObj$httpHandler, appObj$serverFuncSource, appState)
+  handlerManager <- appState$handlerManager
 
   # remove the leading / from the path so a relative path is returned
   # (needed for the case where the root URL for the Shiny app isn't /, such
@@ -373,22 +398,31 @@ addSubApp <- function(appObj, autoRemove = TRUE) {
 
   if (autoRemove) {
     # If a session is currently active, remove this subapp automatically when
-    # the current session ends
+    # the current session ends. Capture the handler manager reference so it
+    # removes from the correct one even if the callback fires during another
+    # app's service iteration.
     onReactiveDomainEnded(getDefaultReactiveDomain(), function() {
-      removeSubApp(finalPath)
+      removeSubApp(finalPath, handlerManager)
     })
   }
 
   return(finalPath)
 }
 
-removeSubApp <- function(path) {
+removeSubApp <- function(path, handlerManager = NULL) {
+  if (is.null(handlerManager)) {
+    handlerManager <- getCurrentAppState()$handlerManager
+  }
   handlerManager$removeHandler(path)
   handlerManager$removeWSHandler(path)
 }
 
-startApp <- function(appObj, port, host, quiet) {
-  appHandlers <- createAppHandlers(appObj$httpHandler, appObj$serverFuncSource)
+startApp <- function(appObj, port, host, quiet, appState) {
+  # Each app gets its own handler manager
+  appState$handlerManager <- HandlerManager$new()
+  handlerManager <- appState$handlerManager
+
+  appHandlers <- createAppHandlers(appObj$httpHandler, appObj$serverFuncSource, appState)
   handlerManager$addHandler(appHandlers$http, "/", tail = TRUE)
   handlerManager$addWSHandler(appHandlers$ws, "/", tail = TRUE)
 
@@ -500,22 +534,23 @@ serviceApp <- function() {
 
 # Non-blocking service loop using later callbacks.
 # Uses 1ms delay between iterations to yield CPU for console interaction.
-serviceAsync <- function(captureResult, cleanup) {
+serviceAsync <- function(appState, captureResult, cleanup) {
   serviceLoop <- function() {
-    if (!.globals$stopped) {
+    if (!appState$stopped) {
+      .globals$currentAppState <- appState
       ..stacktraceoff..(
         captureStackTraces(
           tryCatch(
             ..stacktracefloor..(serviceApp()),
             error = function(e) {
-              .globals$stopped <- TRUE
-              .globals$retval <- e
-              .globals$reterror <- TRUE
+              appState$stopped <- TRUE
+              appState$retval <- e
+              appState$reterror <- TRUE
             }
           )
         )
       )
-      if (!.globals$stopped) {
+      if (!appState$stopped) {
         later::later(serviceLoop, delay = 0.001)
       } else {
         captureResult()
@@ -540,7 +575,7 @@ serviceAsync <- function(captureResult, cleanup) {
 #'   `FALSE`.
 #' @export
 isRunning <- function() {
-  !is.null(getCurrentAppState())
+  anyAppRunning()
 }
 
 

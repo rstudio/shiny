@@ -116,19 +116,22 @@ runApp <- function(
   #   reactivated upon promise domain restoration
   promises::local_otel_promise_domain()
 
-  if (isRunning()) {
-    stop("Can't start a new app while another is running. ",
-         "If your application code contains `runApp()`, remove it. ",
-         "Otherwise, stop the current app first with handle$stop() or stopApp().")
+  if (blocking && anyAppRunning()) {
+    stop("Can't call blocking runApp() while another app is running. ",
+         "Use blocking = FALSE to run multiple apps concurrently.")
   }
 
   # Make warnings print immediately
   # Set pool.scheduler to support pool package
-  ops <- options(
-    # Raise warn level to 1, but don't lower it
-    warn = max(1, getOption("warn", default = 1)),
-    pool.scheduler = scheduleTask
-  )
+  # Only snapshot options on the first app to avoid later apps clobbering the
+  # snapshot or orphaning option values.
+  if (!anyAppRunning()) {
+    .globals$preAppOptions <- options(
+      # Raise warn level to 1, but don't lower it
+      warn = max(1, getOption("warn", default = 1)),
+      pool.scheduler = scheduleTask
+    )
+  }
 
   # ============================================================================
   # Global onStart/onStop callbacks
@@ -137,14 +140,21 @@ runApp <- function(
   # For non-blocking mode, earlyCleanup is set to FALSE before returning.
   earlyCleanup <- TRUE
 
+  # Pre-initialize to NULL so the on.exit handler can safely check it even if
+  # initCurrentAppState() hasn't run yet (e.g., failure in as.shiny.appobj()).
+  appState <- NULL
+
   # This on.exit handler ensures cleanup even if startup fails.
   on.exit({
     if (earlyCleanup) {
-      .globals$onStopCallbacks$invoke()
-      .globals$onStopCallbacks <- Callbacks$new()
-      clearCurrentAppState()
-      handlerManager$clear()
-      options(ops)
+      if (!is.null(appState)) {
+        appState$onStopCallbacks$invoke()
+        if (!is.null(appState$handlerManager)) {
+          appState$handlerManager$clear()
+        }
+        clearCurrentAppState(appState$token)
+      }
+      cleanupGlobalState()
     }
   }, add = TRUE)
 
@@ -160,7 +170,7 @@ runApp <- function(
   # ============================================================================
   # This is so calls to getCurrentAppState() can be used to find (A) whether an
   # app is running and (B), get options and data associated with the app.
-  initCurrentAppState(appParts)
+  appState <- initCurrentAppState(appParts)
   # Any shinyOptions set after this point will apply to the current app only
   # (and will not persist after the app stops).
 
@@ -286,13 +296,13 @@ runApp <- function(
         if (mode == "Showcase") {
           setShowcaseDefault(1)
           if ("IncludeWWW" %in% colnames(settings)) {
-            .globals$IncludeWWW <- as.logical(settings[1, "IncludeWWW"])
-            if (is.na(.globals$IncludeWWW)) {
+            appState$IncludeWWW <- as.logical(settings[1, "IncludeWWW"])
+            if (is.na(appState$IncludeWWW)) {
               stop("In your Description file, `IncludeWWW` ",
                    "must be set to `True` (default) or `False`")
             }
           } else {
-            .globals$IncludeWWW <- TRUE
+            appState$IncludeWWW <- TRUE
           }
         }
       }
@@ -301,8 +311,8 @@ runApp <- function(
 
   ## default is to show the .js, .css and .html files in the www directory
   ## (if not in showcase mode, this variable will simply be ignored)
-  if (is.null(.globals$IncludeWWW) || is.na(.globals$IncludeWWW)) {
-    .globals$IncludeWWW <- TRUE
+  if (is.null(appState$IncludeWWW) || is.na(appState$IncludeWWW)) {
+    appState$IncludeWWW <- TRUE
   }
 
   # If display mode is specified as an argument, apply it (overriding the
@@ -373,7 +383,7 @@ runApp <- function(
   # ============================================================================
   # Start/stop httpuv app
   # ============================================================================
-  server <- startApp(appParts, port, host, quiet)
+  server <- startApp(appParts, port, host, quiet, appState)
 
   # Make the httpuv server object accessible. Needed for calling
   # addResourcePath while app is running.
@@ -412,12 +422,12 @@ runApp <- function(
   # ============================================================================
   # Create cleanup function
   # ============================================================================
-  cleanup <- createCleanup(server, appParts, appUrl, ops)
+  cleanup <- createCleanup(server, appParts, appUrl, appState)
 
-  # Initialize globals for this app run (MUST happen before blocking check)
-  .globals$reterror <- NULL
-  .globals$retval <- NULL
-  .globals$stopped <- FALSE
+  # Initialize per-app state for this app run (MUST happen before blocking check)
+  appState$reterror <- NULL
+  appState$retval <- NULL
+  appState$stopped <- FALSE
 
   # ============================================================================
   # Run event loop via httpuv
@@ -431,34 +441,36 @@ runApp <- function(
 
     # Top-level ..stacktraceoff..; matches with ..stacktraceon in observe(),
     # reactive(), Callbacks$invoke(), and others
+    .globals$currentAppState <- appState
     ..stacktraceoff..(
       captureStackTraces({
-        while (!.globals$stopped) {
+        while (!appState$stopped) {
           ..stacktracefloor..(serviceApp())
         }
       })
     )
 
-    if (isTRUE(.globals$reterror)) {
-      stop(.globals$retval)
+    if (isTRUE(appState$reterror)) {
+      stop(appState$retval)
     }
-    else if (.globals$retval$visible)
-      .globals$retval$value
+    else if (appState$retval$visible)
+      appState$retval$value
     else
-      invisible(.globals$retval$value)
+      invisible(appState$retval$value)
 
   } else {
     # NON-BLOCKING MODE: return handle immediately, app runs via later callbacks
     captureResult <- NULL
     handle <- ShinyAppHandle$new(
       appUrl = appUrl,
+      appState = appState,
       cleanupFn = cleanup,
       registerCapture = function(fn) captureResult <<- fn
     )
 
     tryCatch(
       {
-        serviceAsync(captureResult, cleanup)
+        serviceAsync(appState, captureResult, cleanup)
         handle
       },
       error = function(e) {
@@ -469,22 +481,33 @@ runApp <- function(
   }
 }
 
+# Invoke global onStop callbacks (registered before any app started) and
+# restore process-level options when the last app stops. Called from both
+# the early-cleanup on.exit handler and createCleanup().
+cleanupGlobalState <- function() {
+  .globals$onStopCallbacks$invoke()
+  .globals$onStopCallbacks <- Callbacks$new()
+  if (!anyAppRunning() && !is.null(.globals$preAppOptions)) {
+    options(.globals$preAppOptions)
+    .globals$preAppOptions <- NULL
+  }
+}
+
 # Consolidated cleanup function for runApp()
-createCleanup <- function(server, appParts, appUrl, ops) {
+createCleanup <- function(server, appParts, appUrl, appState) {
   cleanedUp <- FALSE
   function() {
     if (cleanedUp) return()
     cleanedUp <<- TRUE
 
-    .globals$stopped <- TRUE
+    appState$stopped <- TRUE
     callAppHook("onAppStop", appUrl)
     stopServer(server)
     if (!is.null(appParts$onStop)) appParts$onStop()
-    .globals$onStopCallbacks$invoke()
-    .globals$onStopCallbacks <- Callbacks$new()
-    clearCurrentAppState()
-    handlerManager$clear()
-    options(ops)
+    appState$onStopCallbacks$invoke()
+    appState$handlerManager$clear()
+    clearCurrentAppState(appState$token)
+    cleanupGlobalState()
   }
 }
 
@@ -500,22 +523,27 @@ stopApp <- function(returnValue = invisible()) {
   # reterror will indicate whether retval is an error (i.e. it should be passed
   # to stop() when the serviceApp loop stops) or a regular value (in which case
   # it should simply be returned with the appropriate visibility).
-  .globals$reterror <- FALSE
+  appState <- getCurrentAppState()
+  if (is.null(appState)) {
+    # Silently ignore if no app is running (backward compat).
+    return(invisible())
+  }
+  appState$reterror <- FALSE
   ..stacktraceoff..(
     tryCatch(
       {
         captureStackTraces(
-          .globals$retval <- withVisible(..stacktraceon..(force(returnValue)))
+          appState$retval <- withVisible(..stacktraceon..(force(returnValue)))
         )
       },
       error = function(e) {
-        .globals$retval <- e
-        .globals$reterror <- TRUE
+        appState$retval <- e
+        appState$reterror <- TRUE
       }
     )
   )
 
-  .globals$stopped <- TRUE
+  appState$stopped <- TRUE
   httpuv::interrupt()
 }
 

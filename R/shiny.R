@@ -345,6 +345,7 @@ ShinySession <- R6Class(
   private = list(
     # There are some private items with a leading "."; except for the dot, these
     # items share a name with a public item.
+    appState = NULL,  # Reference to the owning app's state
     websocket = 'ANY',
     invalidatedOutputValues = 'Map',
     invalidatedOutputErrors = 'Map',
@@ -710,8 +711,9 @@ ShinySession <- R6Class(
     groups = NULL,
     options = NULL,       # For session-specific shinyOptions()
 
-    initialize = function(websocket) {
+    initialize = function(websocket, appState = NULL) {
       private$websocket <- websocket
+      private$appState <- appState
       self$closed <- FALSE
       # TODO: Put file upload context in user/app-specific dir if possible
 
@@ -742,8 +744,13 @@ ShinySession <- R6Class(
       private$.outputs <- list()
       private$.outputOptions <- list()
 
-      # Copy app-level options
-      self$options <- getCurrentAppState()$options
+      # Copy app-level options from the owning app's state (passed from the
+      # WS handler closure), avoiding cross-app contamination.
+      if (!is.null(appState)) {
+        self$options <- appState$options
+      } else {
+        self$options <- getCurrentAppState()$options
+      }
 
       self$cache <- cachem::cache_mem(max_size = 200 * 1024^2)
 
@@ -1070,7 +1077,13 @@ ShinySession <- R6Class(
       }
 
       private$unhandledErrorCallbacks$invoke(e, onError = printError)
-      .globals$onUnhandledErrorCallbacks$invoke(e, onError = printError)
+      # Invoke app-level callbacks from the owning app's state (captured at
+      # session creation), not the global pointer which may point to another app.
+      if (!is.null(private$appState)) {
+        private$appState$onUnhandledErrorCallbacks$invoke(e, onError = printError)
+      } else {
+        .globals$onUnhandledErrorCallbacks$invoke(e, onError = printError)
+      }
 
       if (close) self$close()
     },
@@ -2523,6 +2536,12 @@ onUnhandledError <- function(fun, session = getDefaultReactiveDomain()) {
   }
 
   if (is.null(session)) {
+    # Route to the current app's callbacks if an app is running;
+    # fall back to global callbacks for backward compatibility.
+    appState <- getCurrentAppState()
+    if (!is.null(appState)) {
+      return(appState$onUnhandledErrorCallbacks$register(fun))
+    }
     .globals$onUnhandledErrorCallbacks$register(fun)
   } else {
     session$onUnhandledError(fun)
@@ -2621,6 +2640,12 @@ flushPendingSessions <- function() {
 #' @export
 onStop <- function(fun, session = getDefaultReactiveDomain()) {
   if (is.null(session)) {
+    # Route to the current app's callbacks if an app is running;
+    # fall back to global callbacks for backward compatibility.
+    appState <- getCurrentAppState()
+    if (!is.null(appState)) {
+      return(appState$onStopCallbacks$register(fun))
+    }
     return(.globals$onStopCallbacks$register(fun))
   } else {
     # Note: In the future if we allow scoping the onStop() callback to modules

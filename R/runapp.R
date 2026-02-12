@@ -483,13 +483,16 @@ runApp <- function(
 
 # Invoke global onStop callbacks (registered before any app started) and
 # restore process-level options when the last app stops. Called from both
-# the early-cleanup on.exit handler and createCleanup().
+# the early-cleanup on.exit handler and createCleanup(). Defers until no
+# apps remain so that global callbacks fire once, not per-app.
 cleanupGlobalState <- function() {
-  .globals$onStopCallbacks$invoke()
-  .globals$onStopCallbacks <- Callbacks$new()
-  if (!anyAppRunning() && !is.null(.globals$preAppOptions)) {
-    options(.globals$preAppOptions)
-    .globals$preAppOptions <- NULL
+  if (!anyAppRunning()) {
+    .globals$onStopCallbacks$invoke()
+    .globals$onStopCallbacks <- Callbacks$new()
+    if (!is.null(.globals$preAppOptions)) {
+      options(.globals$preAppOptions)
+      .globals$preAppOptions <- NULL
+    }
   }
 }
 
@@ -508,6 +511,13 @@ createCleanup <- function(server, appParts, appUrl, appState) {
     appState$handlerManager$clear()
     clearCurrentAppState(appState$token)
     cleanupGlobalState()
+
+    # Release memory: the handle only needs stopped/retval/reterror post-cleanup
+    appState$app <- NULL
+    appState$options <- NULL
+    appState$onStopCallbacks <- NULL
+    appState$onUnhandledErrorCallbacks <- NULL
+    appState$handlerManager <- NULL
   }
 }
 

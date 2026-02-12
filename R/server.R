@@ -532,37 +532,58 @@ serviceApp <- function() {
   flushPendingSessions()
 }
 
-# Non-blocking service loop using later callbacks.
-# Uses 1ms delay between iterations to yield CPU for console interaction.
+# Shared non-blocking service loop. A single later-based loop services all
+# concurrent non-blocking apps, calling the process-global serviceApp() once
+# per cycle rather than once per app. Each app registers its captureResult and
+# cleanup callbacks on its appState; the loop handles per-app lifecycle.
 serviceAsync <- function(appState, captureResult, cleanup) {
-  serviceLoop <- function() {
-    if (!appState$stopped) {
-      .globals$currentAppState <- appState
-      ..stacktraceoff..(
-        captureStackTraces(
-          tryCatch(
-            ..stacktracefloor..(serviceApp()),
-            error = function(e) {
-              appState$stopped <- TRUE
-              appState$retval <- e
-              appState$reterror <- TRUE
-            }
-          )
-        )
+  appState$.captureResult <- captureResult
+  appState$.cleanup <- cleanup
+
+  if (!.globals$serviceLoopRunning) {
+    .globals$serviceLoopRunning <- TRUE
+    later::later(serviceLoop, delay = 0.001)
+  }
+}
+
+serviceLoop <- function() {
+  ..stacktraceoff..(
+    captureStackTraces(
+      tryCatch(
+        ..stacktracefloor..(serviceApp()),
+        error = function(e) {
+          # Best-effort: attribute to whichever app the pointer refers to.
+          # Defense-in-depth handlers set the pointer during httpuv dispatch,
+          # so this is typically the app whose handler threw.
+          appState <- getCurrentAppState()
+          if (!is.null(appState) && !isTRUE(appState$stopped)) {
+            appState$stopped <- TRUE
+            appState$retval <- e
+            appState$reterror <- TRUE
+          }
+        }
       )
-      if (!appState$stopped) {
-        later::later(serviceLoop, delay = 0.001)
-      } else {
-        captureResult()
-        cleanup()
-      }
-    } else {
-      # App was stopped externally (e.g., via stopApp())
-      captureResult()
-      cleanup()
+    )
+  )
+
+  # Handle stopped apps. Snapshot tokens since cleanup modifies the registry.
+  tokens <- names(.globals$appStates)
+  for (token in tokens) {
+    appState <- .globals$appStates[[token]]
+    if (!is.null(appState) && isTRUE(appState$stopped) &&
+        !is.null(appState$.captureResult)) {
+      appState$.captureResult()
+      appState$.cleanup()
+      appState$.captureResult <- NULL
+      appState$.cleanup <- NULL
     }
   }
-  later::later(serviceLoop, delay = 0.001)
+
+  if (anyAppRunning()) {
+    later::later(serviceLoop, delay = 0.001)
+  } else {
+    .globals$serviceLoopRunning <- FALSE
+  }
 }
 
 .shinyServerMinVersion <- '0.3.4'

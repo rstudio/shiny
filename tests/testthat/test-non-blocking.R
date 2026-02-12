@@ -429,6 +429,36 @@ test_that("isRunning() with multiple apps", {
   expect_false(isRunning())
 })
 
+test_that("global onStop callbacks fire when last app stops", {
+  globalStopped <- FALSE
+
+  # Register global callback before any app starts
+  onStop(function() globalStopped <<- TRUE)
+
+  app1 <- shinyApp(
+    ui = fluidPage(),
+    server = function(input, output) {}
+  )
+  app2 <- shinyApp(
+    ui = fluidPage(),
+    server = function(input, output) {}
+  )
+
+  handle1 <- runApp(app1, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  on.exit(tryCatch(handle1$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+
+  handle2 <- runApp(app2, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  on.exit(tryCatch(handle2$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+
+  # Stop first app — global callback should NOT fire yet
+  handle1$stop()
+  expect_false(globalStopped)
+
+  # Stop second (last) app — global callback should fire
+  handle2$stop()
+  expect_true(globalStopped)
+})
+
 test_that("stopping one app doesn't affect the other", {
   app1 <- shinyApp(
     ui = fluidPage(),

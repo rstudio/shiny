@@ -12,6 +12,7 @@ NULL
 
 .globals$appStates <- list()
 .globals$currentAppState <- NULL
+.globals$serviceLoopRunning <- FALSE
 
 initCurrentAppState <- function(appobj) {
   appState <- new.env(parent = emptyenv())

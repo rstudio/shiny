@@ -411,7 +411,9 @@ addSubApp <- function(appObj, autoRemove = TRUE) {
 
 removeSubApp <- function(path, handlerManager = NULL) {
   if (is.null(handlerManager)) {
-    handlerManager <- getCurrentAppState()$handlerManager
+    appState <- getCurrentAppState()
+    if (is.null(appState)) return(invisible())
+    handlerManager <- appState$handlerManager
   }
   handlerManager$removeHandler(path)
   handlerManager$removeWSHandler(path)

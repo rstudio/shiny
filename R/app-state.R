@@ -9,6 +9,22 @@ NULL
 # own appState env, stored in .globals$appStates (keyed by token). The direct
 # pointer .globals$currentAppState is set by the service loop before each
 # iteration, so getCurrentAppState() is a single env read on the hot path.
+#
+# Fields on each appState env (set across several files):
+#   token                    - unique ID (initCurrentAppState)
+#   app                      - the shiny.appobj (initCurrentAppState)
+#   options                  - per-app shinyOptions snapshot (initCurrentAppState)
+#   onStopCallbacks          - Callbacks registry (initCurrentAppState)
+#   onUnhandledErrorCallbacks - Callbacks registry (initCurrentAppState)
+#   handlerManager           - HandlerManager (startApp, server.R)
+#   showcaseDefault          - numeric showcase mode (setShowcaseDefault, showcase.R)
+#   showcaseOverride         - logical showcase override (setShowcaseDefault, showcase.R)
+#   IncludeWWW               - logical, include www/ in showcase (runApp)
+#   reterror                 - logical, TRUE if retval is an error (runApp)
+#   retval                   - return value or error from stopApp (runApp)
+#   stopped                  - logical, TRUE when stop requested (runApp / stopApp)
+#   .captureResult           - callback to capture result (serviceAsync, server.R)
+#   .cleanup                 - cleanup closure (serviceAsync, server.R)
 
 .globals$appStates <- list()
 .globals$currentAppState <- NULL
@@ -23,6 +39,17 @@ initCurrentAppState <- function(appobj) {
   # Per-app callback registries
   appState$onStopCallbacks <- Callbacks$new()
   appState$onUnhandledErrorCallbacks <- Callbacks$new()
+  # Fields set later by runApp / startApp / serviceAsync; listed here for
+  # discoverability. See field inventory above.
+  appState$handlerManager <- NULL
+  appState$showcaseDefault <- NULL
+  appState$showcaseOverride <- NULL
+  appState$IncludeWWW <- NULL
+  appState$reterror <- NULL
+  appState$retval <- NULL
+  appState$stopped <- NULL
+  appState$.captureResult <- NULL
+  appState$.cleanup <- NULL
   .globals$appStates[[appState$token]] <- appState
   .globals$currentAppState <- appState
   appState

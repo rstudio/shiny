@@ -138,6 +138,14 @@ runApp <- function(
   # ============================================================================
   # Flag to control whether early cleanup runs on exit.
   # For non-blocking mode, earlyCleanup is set to FALSE before returning.
+  #
+  # Cleanup paths:
+  # - Startup failure (earlyCleanup=TRUE): on.exit handlers fire for per-app
+  #   callbacks, appParts$onStop, and global state.
+  # - Blocking exit (earlyCleanup=FALSE): on.exit calls cleanup(), which
+  #   handles everything (server stop, callbacks, state removal).
+  # - Non-blocking return (earlyCleanup=FALSE): no on.exit cleanup; the
+  #   shared service loop or handle$stop() calls cleanup() instead.
   earlyCleanup <- TRUE
 
   # Pre-initialize to NULL so the on.exit handler can safely check it even if
@@ -518,6 +526,8 @@ createCleanup <- function(server, appParts, appUrl, appState) {
     appState$onStopCallbacks <- NULL
     appState$onUnhandledErrorCallbacks <- NULL
     appState$handlerManager <- NULL
+    appState$.captureResult <- NULL
+    appState$.cleanup <- NULL
   }
 }
 

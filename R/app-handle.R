@@ -23,6 +23,9 @@ ShinyAppHandle <- R6::R6Class("ShinyAppHandle",
         warning("App is not running")
         return(invisible(self))
       }
+      # Order matters: capture result from appState (reads retval/reterror),
+      # then mark the app as stopped, then run cleanup (which NULLs appState
+      # fields and removes the app from the registry).
       private$captureResult()
       private$appState$stopped <- TRUE
       private$cleanupFn()

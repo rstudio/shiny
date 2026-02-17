@@ -288,6 +288,9 @@ test_that("works with async", {
 })
 
 test_that("works with multiple promises in parallel", {
+  # This test is inherently about timing which is against CRAN's policy.
+  testthat::skip_on_cran()
+
   server <- function(input, output, session) {
     output$txt1 <- renderText({
       future({

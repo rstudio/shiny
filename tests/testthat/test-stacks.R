@@ -272,3 +272,174 @@ test_that("observeEvent is not overly stripped (#4162)", {
   expect_match(st_str, "A__", all = FALSE)
   expect_match(st_str, "B__", all = FALSE)
 })
+
+# Helper: trigger a render function that throws an error, capture the stack
+# trace, apply fence-based filtering, and return the filtered data frame.
+# `render_expr` should be a render* call whose body calls userFunc().
+# `needs_session` indicates whether the render function requires
+# shinysession/name parameters (TRUE for markRenderFunction-based renders
+# like renderPlot and renderPrint, FALSE for createRenderFunction-based
+# renders like renderText/renderTable/renderUI/renderImage which can be
+# called with no args).
+causeRenderError <- function(render_fn, needs_session = TRUE) {
+  session <- MockShinySession$new()
+  on.exit(if (!session$isClosed()) session$close())
+
+  res <- try({
+      captureStackTraces({
+        isolate({
+          withReactiveDomain(session, {
+            if (needs_session) {
+              render_fn(shinysession = session, name = "testoutput")
+            } else {
+              render_fn()
+            }
+          })
+        })
+      })
+    },
+    silent = TRUE)
+
+  cond <- attr(res, "condition", exact = TRUE)
+  stopifnot(!is.null(cond))
+  stopifnot(!is.null(conditionStackTrace(cond)))
+
+  suppressMessages(
+    extractStackTrace(conditionStackTrace(cond), full = FALSE)
+  )
+}
+
+test_that("renderPlot stack trace fences hide internal rendering pipeline (#4357)", {
+  skip_on_cran()
+
+  if (shiny_otel_tracer()$is_enabled()) {
+    skip("Skipping stack trace tests when OpenTelemetry is already enabled")
+  }
+
+  userFunc <- function() {
+    stop("test error in renderPlot")
+  }
+
+  df <- causeRenderError(renderPlot({ userFunc() }))
+
+  expect_true("userFunc" %in% df$call)
+
+  # Internal rendering pipeline frames should NOT appear in the filtered
+  # stack trace. These are Shiny internals between the stack trace fences
+  # that currently leak through due to missing fences.
+  internal_render_frames <- c(
+    "drawPlot",
+    "drawReactive",
+    "renderFunc",
+    "startPNG"
+  )
+
+  leaked <- df$call[df$call %in% internal_render_frames]
+  expect_length(leaked, 0)
+})
+
+test_that("renderPrint stack trace fences hide internal rendering pipeline (#4357)", {
+  skip_on_cran()
+
+  if (shiny_otel_tracer()$is_enabled()) {
+    skip("Skipping stack trace tests when OpenTelemetry is already enabled")
+  }
+
+  userFunc <- function() {
+    stop("test error in renderPrint")
+  }
+
+  df <- causeRenderError(renderPrint({ userFunc() }))
+
+  expect_true("userFunc" %in% df$call)
+
+  internal_render_frames <- c("renderFunc")
+  leaked <- df$call[df$call %in% internal_render_frames]
+  expect_length(leaked, 0)
+})
+
+test_that("renderText stack trace fences hide internal rendering pipeline (#4357)", {
+  skip_on_cran()
+
+  if (shiny_otel_tracer()$is_enabled()) {
+    skip("Skipping stack trace tests when OpenTelemetry is already enabled")
+  }
+
+  userFunc <- function() {
+    stop("test error in renderText")
+  }
+
+  df <- causeRenderError(renderText({ userFunc() }), needs_session = FALSE)
+
+  expect_true("userFunc" %in% df$call)
+
+  internal_render_frames <- c("renderFunc")
+  leaked <- df$call[df$call %in% internal_render_frames]
+  expect_length(leaked, 0)
+})
+
+test_that("renderUI stack trace fences hide internal rendering pipeline (#4357)", {
+  skip_on_cran()
+
+  if (shiny_otel_tracer()$is_enabled()) {
+    skip("Skipping stack trace tests when OpenTelemetry is already enabled")
+  }
+
+  userFunc <- function() {
+    stop("test error in renderUI")
+  }
+
+  df <- causeRenderError(renderUI({ userFunc() }), needs_session = FALSE)
+
+  expect_true("userFunc" %in% df$call)
+
+  internal_render_frames <- c("renderFunc")
+  leaked <- df$call[df$call %in% internal_render_frames]
+  expect_length(leaked, 0)
+})
+
+test_that("renderTable stack trace fences hide internal rendering pipeline (#4357)", {
+  skip_on_cran()
+
+  if (shiny_otel_tracer()$is_enabled()) {
+    skip("Skipping stack trace tests when OpenTelemetry is already enabled")
+  }
+
+  userFunc <- function() {
+    stop("test error in renderTable")
+  }
+
+  df <- causeRenderError(
+    renderTable({ userFunc() }, server = FALSE),
+    needs_session = FALSE
+  )
+
+  expect_true("userFunc" %in% df$call)
+
+  internal_render_frames <- c("renderFunc")
+  leaked <- df$call[df$call %in% internal_render_frames]
+  expect_length(leaked, 0)
+})
+
+test_that("renderImage stack trace fences hide internal rendering pipeline (#4357)", {
+  skip_on_cran()
+
+  if (shiny_otel_tracer()$is_enabled()) {
+    skip("Skipping stack trace tests when OpenTelemetry is already enabled")
+  }
+
+  userFunc <- function() {
+    stop("test error in renderImage")
+  }
+
+  df <- causeRenderError(
+    renderImage({ userFunc() }, deleteFile = FALSE),
+    needs_session = FALSE
+  )
+
+  expect_true("userFunc" %in% df$call)
+
+  internal_render_frames <- c("renderFunc")
+  leaked <- df$call[df$call %in% internal_render_frames]
+  expect_length(leaked, 0)
+})

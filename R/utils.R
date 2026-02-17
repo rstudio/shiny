@@ -1397,30 +1397,35 @@ maybeAnnotateSourceForArk <- function(file, lines) {
 
 # similarly, try to source() a file with UTF-8
 sourceUTF8 <- function(file, envir = globalenv()) {
+  file <- normalizePath(file, mustWork = TRUE, winslash = "/")
+
   lines <- readUTF8(file)
   enc <- if (any(Encoding(lines) == 'UTF-8')) 'UTF-8' else 'unknown'
-  lines <- maybeAnnotateSourceForArk(file, lines)
-  src <- srcfilecopy(file, lines, isFile = TRUE) # source reference info
-  # oddly, parse(file) does not work when file contains multibyte chars that
-  # **can** be encoded natively on Windows (might be a bug in base R); we
-  # rewrite the source code in a natively encoded temp file and parse it in this
-  # case (the source reference is still pointed to the original file, though)
-  if (isWindows() && enc == 'unknown') {
-    file <- tempfile(); on.exit(unlink(file), add = TRUE)
-    writeLines(lines, file)
-  }
-  exprs <- try(parse(file, keep.source = FALSE, srcfile = src, encoding = enc))
-  if (inherits(exprs, "try-error")) {
-    diagnoseCode(file)
-    stop("Error sourcing ", file)
-  }
 
-  # Wrap the exprs in first `{`, then ..stacktraceon..(). It's only really the
-  # ..stacktraceon..() that we care about, but the `{` is needed to make that
-  # possible.
-  exprs <- makeCall(`{`, exprs)
-  # Need to wrap exprs in a list because we want it treated as a single argument
-  exprs <- makeCall(..stacktraceon.., list(exprs))
+  # Inject Ark annotations for breakpoints if available
+  lines <- maybeAnnotateSourceForArk(file, lines)
+
+  # Wrap in `..stacktraceon..({...})` using string manipulation before parsing,
+  # with a `#line` directive to map source references back to the original file
+  lines <- c(
+    "..stacktraceon..({",
+    sprintf('#line 1 "%s"', file),
+    lines,
+    "})"
+  )
+
+  # Create a source file copy, i.e. an in-memory srcfile that contains all the
+  # code but refers to an original file
+  src <- srcfilecopy(file, lines, isFile = TRUE)
+
+  # Parse from our annotated lines
+  exprs <- tryCatch(
+    parse(text = lines, keep.source = FALSE, srcfile = src, encoding = enc),
+    error = function(cnd) {
+      diagnoseCode(file)
+      stop("Error sourcing ", file)
+    }
+  )
 
   eval(exprs, envir)
 }

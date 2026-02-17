@@ -87,13 +87,24 @@ getCallNamesForHash <- function(calls) {
   })
 }
 
+# Get the preferred filename from a srcfile object, preferring the original
+# path (as typed by user, potentially a symlink or relative path) over the
+# normalized absolute path.
+getSrcfileFilename <- function(srcfile) {
+  if (!is.null(srcfile$original) && !is.null(srcfile$original$filename)) {
+    srcfile$original$filename
+  } else {
+    srcfile$filename
+  }
+}
+
 getLocs <- function(calls) {
   vapply(calls, function(call) {
     srcref <- attr(call, "srcref", exact = TRUE)
     if (!is.null(srcref)) {
       srcfile <- attr(srcref, "srcfile", exact = TRUE)
       if (!is.null(srcfile) && !is.null(srcfile$filename)) {
-        loc <- paste0(srcfile$filename, "#", srcref[[1]])
+        loc <- paste0(getSrcfileFilename(srcfile), "#", srcref[[1]])
         return(paste0(" [", loc, "]"))
       }
     }
@@ -101,13 +112,35 @@ getLocs <- function(calls) {
   }, character(1))
 }
 
+# Check if a file path is in an R package library
+isPackageFile <- function(filepath) {
+  if (is.null(filepath) || filepath == "") {
+    return(FALSE)
+  }
+
+  # Normalize the filepath for comparison
+  filepath <- normalizePath(filepath, winslash = "/", mustWork = FALSE)
+
+  # Check if the file is under any library path
+  lib_paths <- normalizePath(.libPaths(), winslash = "/", mustWork = FALSE)
+  any(vapply(
+    lib_paths,
+    function(lib) {
+      startsWith(filepath, paste0(lib, "/"))
+    },
+    logical(1)
+  ))
+}
+
 getCallCategories <- function(calls) {
   vapply(calls, function(call) {
     srcref <- attr(call, "srcref", exact = TRUE)
     if (!is.null(srcref)) {
       srcfile <- attr(srcref, "srcfile", exact = TRUE)
-      if (!is.null(srcfile)) {
-        if (!is.null(srcfile$original)) {
+      if (!is.null(srcfile) && !is.null(srcfile$filename)) {
+        # Use the absolute path for package detection (srcfile$filename)
+        # rather than the original path which might be relative
+        if (isPackageFile(srcfile$filename)) {
           return("pkg")
         } else {
           return("user")

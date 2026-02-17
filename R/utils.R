@@ -1404,10 +1404,7 @@ sourceUTF8 <- function(file, envir = globalenv()) {
   # with a `#line` directive to map source references back to the original file
   lines <- c(
     "..stacktraceon..({",
-    sprintf(
-      '#line 1 "%s"',
-      normalizePath(file, mustWork = TRUE, winslash = "/")
-    ),
+    sprintf('#line 1 "%s"', file),
     lines,
     "})"
   )

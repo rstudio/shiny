@@ -117,9 +117,13 @@ runApp <- function(
   promises::local_otel_promise_domain()
 
   if (isRunning()) {
-    stop("Can't start a new app while another is running. ",
-         "If your application code contains `runApp()`, remove it. ",
-         "Otherwise, stop the current app first with handle$stop() or stopApp().")
+    if (!is.null(.globals$runningHandle)) {
+      .globals$runningHandle$stop()
+    } else {
+      stop("Can't start a new app while another is running. ",
+           "If your application code contains `runApp()`, remove it. ",
+           "Otherwise, stop the current app first with handle$stop() or stopApp().")
+    }
   }
 
   # Make warnings print immediately
@@ -455,6 +459,7 @@ runApp <- function(
       cleanupFn = cleanup,
       registerCapture = function(fn) captureResult <<- fn
     )
+    .globals$runningHandle <- handle
 
     tryCatch(
       {
@@ -477,6 +482,7 @@ createCleanup <- function(server, appParts, appUrl, ops) {
     cleanedUp <<- TRUE
 
     .globals$stopped <- TRUE
+    .globals$runningHandle <- NULL
     callAppHook("onAppStop", appUrl)
     stopServer(server)
     if (!is.null(appParts$onStop)) appParts$onStop()

@@ -73,7 +73,7 @@ test_that("handle captures result from stopApp", {
   expect_equal(handle$result(), "test_result")
 })
 
-test_that("second app prevented while first is running", {
+test_that("non-blocking auto-stops previous app when starting new one", {
   app1 <- shinyApp(
     ui = fluidPage(),
     server = function(input, output) {}
@@ -83,20 +83,37 @@ test_that("second app prevented while first is running", {
     server = function(input, output) {}
   )
 
-  handle <- runApp(app1, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
-  on.exit(tryCatch(handle$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+  handle1 <- runApp(app1, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  expect_equal(handle1$status(), "running")
 
-  expect_error(
-    runApp(app2, blocking = FALSE, launch.browser = FALSE, quiet = TRUE),
-    "Can't start a new app while another is running"
+  # Starting a second non-blocking app should auto-stop the first
+  handle2 <- runApp(app2, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  on.exit(tryCatch(handle2$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+
+  expect_equal(handle1$status(), "success")
+  expect_equal(handle2$status(), "running")
+
+  handle2$stop()
+})
+
+test_that("nested runApp in blocking mode still errors", {
+  inner_app <- shinyApp(
+    ui = fluidPage(),
+    server = function(input, output) {}
   )
 
-  handle$stop()
+  outer_app <- shinyApp(
+    ui = fluidPage(),
+    server = function(input, output) {},
+    onStart = function() {
+      runApp(inner_app, blocking = TRUE, launch.browser = FALSE, quiet = TRUE)
+    }
+  )
 
-  # After stopping, should be able to start a new app
-  handle2 <- runApp(app2, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
-  expect_equal(handle2$status(), "running")
-  handle2$stop()
+  expect_error(
+    runApp(outer_app, blocking = TRUE, launch.browser = FALSE, quiet = TRUE),
+    "Can't start a new app while another is running"
+  )
 })
 
 test_that("cleanup callbacks run when stopped", {

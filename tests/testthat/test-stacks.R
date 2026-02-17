@@ -316,3 +316,25 @@ test_that("renderImage stack trace fences hide internal rendering pipeline (#435
   leaked <- df$call[df$call %in% internal_render_frames]
   expect_length(leaked, 0)
 })
+
+test_that("legacyRenderDataTable stack trace fences hide internal rendering pipeline (#4357)", {
+  skip_on_cran()
+
+  if (shiny_otel_tracer()$is_enabled()) {
+    skip("Skipping stack trace tests when OpenTelemetry is already enabled")
+  }
+
+  userFunc <- function() {
+    stop("test error in renderDataTable")
+  }
+
+  df <- captureFilteredRenderTrace(
+    legacyRenderDataTable({ userFunc() })
+  )
+
+  expect_true("userFunc" %in% df$call)
+
+  internal_render_frames <- c("renderFunc")
+  leaked <- df$call[df$call %in% internal_render_frames]
+  expect_length(leaked, 0)
+})

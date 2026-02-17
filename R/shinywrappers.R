@@ -965,7 +965,7 @@ legacyRenderDataTable <- function(expr, options = NULL, searchDelay = 500,
     options <- checkDT9(options)
     res <- checkAsIs(options)
     hybrid_chain(
-      func(),
+      ..stacktraceon..(func()),
       function(data) {
         if (length(dim(data)) != 2) return() # expects a rectangular data object
         if (is.data.frame(data)) data <- as.data.frame(data)

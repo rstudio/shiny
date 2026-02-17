@@ -1373,17 +1373,14 @@ maybeAnnotateSourceForArk <- function(file, lines) {
     return(lines)
   }
 
-  file <- normalizePath(file, mustWork = TRUE) # Just to be safe
+  file <- normalizePath(file, mustWork = TRUE, winslash = "/") # Just to be safe
   uri <- paste0("file:///", sub("^/", "", file)) # Ark expects URIs
   lines_str <- paste(lines, collapse = "\n")
   tryCatch(
     {
-      cli::cli_inform("Annotating source for Ark: {.val {uri}}") # FIXME
       annotated <- ark_annotate_source(lines_str, uri)
       if (!is.null(annotated)) {
         lines <- strsplit(annotated, "\n", fixed = TRUE)[[1]]
-      } else {
-        cli::cli_warn("Ark annotation returned NULL") # FIXME
       }
     },
     error = function(cnd) {

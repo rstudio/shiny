@@ -107,7 +107,7 @@ runApp <- function(
   workerId="", quiet=FALSE,
   display.mode=c("auto", "normal", "showcase"),
   test.mode=getOption('shiny.testmode', FALSE),
-  blocking=getOption("shiny.blocking", TRUE)
+  blocking=getOption("shiny.blocking", !is_llm())
 ) {
 
   # * Wrap **all** execution of the app inside the otel promise domain
@@ -567,7 +567,7 @@ runExample <- function(
   host = getOption("shiny.host", "127.0.0.1"),
   display.mode = c("auto", "normal", "showcase"),
   package = "shiny",
-  blocking = getOption("shiny.blocking", TRUE)
+  blocking = getOption("shiny.blocking", !is_llm())
 ) {
   if (!identical(package, "shiny") && !is_installed(package)) {
     rlang::check_installed(package)
@@ -645,7 +645,7 @@ runExample <- function(
 #' @export
 runGadget <- function(app, server = NULL, port = getOption("shiny.port"),
   viewer = paneViewer(), stopOnCancel = TRUE,
-  blocking = getOption("shiny.blocking", TRUE)) {
+  blocking = getOption("shiny.blocking", !is_llm())) {
 
   if (!is.shiny.appobj(app)) {
     app <- shinyApp(app, server)
@@ -681,4 +681,12 @@ decorateServerFunc <- function(appobj, serverFunc) {
     }
   }
   appobj
+}
+
+is_llm <- function() {
+  nzchar(Sys.getenv("AGENT")) ||
+    nzchar(Sys.getenv("CLAUDECODE")) ||
+    nzchar(Sys.getenv("GEMINI_CLI")) ||
+    nzchar(Sys.getenv("CURSOR_AGENT")) ||
+    nzchar(Sys.getenv("CODEX_CI"))
 }

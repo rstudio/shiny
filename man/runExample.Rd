@@ -11,7 +11,7 @@ runExample(
   host = getOption("shiny.host", "127.0.0.1"),
   display.mode = c("auto", "normal", "showcase"),
   package = "shiny",
-  blocking = getOption("shiny.blocking", TRUE)
+  blocking = getOption("shiny.blocking", !is_llm())
 )
 }
 \arguments{

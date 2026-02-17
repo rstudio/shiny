@@ -10,7 +10,7 @@ runGadget(
   port = getOption("shiny.port"),
   viewer = paneViewer(),
   stopOnCancel = TRUE,
-  blocking = getOption("shiny.blocking", TRUE)
+  blocking = getOption("shiny.blocking", !is_llm())
 )
 }
 \arguments{

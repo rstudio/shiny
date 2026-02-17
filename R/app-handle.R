@@ -10,15 +10,12 @@ ShinyAppHandle <- R6::R6Class("ShinyAppHandle",
       environment(cleanupFn)$captureResult <- function() private$captureResult()
 
       reg.finalizer(self, function(e) {
-        if (e$status() == "running") {
-          tryCatch(e$stop(), error = function(cnd) NULL)
-        }
+        tryCatch(e$stop(), error = function(cnd) NULL)
       }, onexit = TRUE)
     },
 
     stop = function() {
       if (self$status() != "running") {
-        warning("App is not running")
         return(invisible(self))
       }
       private$captureResult()

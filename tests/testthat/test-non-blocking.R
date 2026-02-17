@@ -32,8 +32,9 @@ test_that("ShinyAppHandle lifecycle and API (success path)", {
   output <- capture.output(print(handle))
   expect_match(output[3], "success")
 
-  # Double stop warns
-  expect_warning(handle$stop(), "App is not running")
+  # Double stop is a silent no-op
+  expect_no_warning(handle$stop())
+  expect_equal(handle$status(), "success")
 })
 
 test_that("ShinyAppHandle lifecycle (error path)", {
@@ -88,7 +89,7 @@ test_that("non-blocking auto-stops previous app when starting new one", {
 
   # Starting a second non-blocking app should auto-stop the first
   handle2 <- runApp(app2, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
-  on.exit(tryCatch(handle2$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+  on.exit(handle2$stop(), add = TRUE)
 
   expect_equal(handle1$status(), "success")
   expect_equal(handle2$status(), "running")
@@ -170,7 +171,7 @@ test_that("global isRunning() works with non-blocking apps", {
   expect_false(isRunning())
 
   handle <- runApp(app, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
-  on.exit(tryCatch(handle$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+  on.exit(handle$stop(), add = TRUE)
 
   expect_true(isRunning())
 
@@ -187,7 +188,7 @@ test_that("shiny.blocking option controls default", {
   withr::local_options(shiny.blocking = FALSE)
 
   handle <- runApp(app, launch.browser = FALSE, quiet = TRUE)
-  on.exit(tryCatch(handle$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+  on.exit(handle$stop(), add = TRUE)
 
   expect_s3_class(handle, "ShinyAppHandle")
   expect_equal(handle$status(), "running")
@@ -197,7 +198,7 @@ test_that("shiny.blocking option controls default", {
 
 test_that("runExample works with blocking = FALSE", {
   handle <- suppressMessages(runExample("01_hello", blocking = FALSE, launch.browser = FALSE))
-  on.exit(tryCatch(handle$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+  on.exit(handle$stop(), add = TRUE)
 
   expect_equal(handle$status(), "running")
   expect_match(handle$url(), "^http://")
@@ -213,7 +214,7 @@ test_that("runGadget works with blocking = FALSE", {
   server <- function(input, output, session) {}
 
   handle <- suppressMessages(runGadget(ui, server, blocking = FALSE, viewer = function(url) NULL))
-  on.exit(tryCatch(handle$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+  on.exit(handle$stop(), add = TRUE)
 
   expect_s3_class(handle, "ShinyAppHandle")
   expect_equal(handle$status(), "running")
@@ -251,7 +252,7 @@ test_that("startup failure clears app state (regression test)", {
   )
 
   handle <- runApp(working_app, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
-  on.exit(tryCatch(handle$stop(), error = function(e) NULL, warning = function(w) NULL), add = TRUE)
+  on.exit(handle$stop(), add = TRUE)
 
   expect_equal(handle$status(), "running")
   handle$stop()

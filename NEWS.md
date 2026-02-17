@@ -1,5 +1,9 @@
 # shiny (development version)
 
+## New features
+
+* Shiny now supports interactive breakpoints when used with Ark (e.g. in Positron). (#4352)
+
 ## Bug fixes and minor improvements
 
 * Fixed an issue with `actionLink()` that extended the link underline to whitespace around the text. (#4348)

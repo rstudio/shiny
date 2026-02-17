@@ -1394,8 +1394,6 @@ maybeAnnotateSourceForArk <- function(file, lines) {
 
 # similarly, try to source() a file with UTF-8
 sourceUTF8 <- function(file, envir = globalenv()) {
-  file <- normalizePath(file, mustWork = TRUE, winslash = "/")
-
   lines <- readUTF8(file)
   enc <- if (any(Encoding(lines) == 'UTF-8')) 'UTF-8' else 'unknown'
 
@@ -1406,7 +1404,10 @@ sourceUTF8 <- function(file, envir = globalenv()) {
   # with a `#line` directive to map source references back to the original file
   lines <- c(
     "..stacktraceon..({",
-    sprintf('#line 1 "%s"', file),
+    sprintf(
+      '#line 1 "%s"',
+      normalizePath(file, mustWork = TRUE, winslash = "/")
+    ),
     lines,
     "})"
   )

@@ -118,16 +118,14 @@ isPackageFile <- function(filepath) {
     return(FALSE)
   }
 
-  # Normalize the filepath for comparison
+  # Normalize paths for comparison
   filepath <- normalizePath(filepath, winslash = "/", mustWork = FALSE)
+  lib_paths <- normalizePath(.libPaths(), winslash = "/", mustWork = FALSE)
 
   # Check if the file is under any library path
-  lib_paths <- normalizePath(.libPaths(), winslash = "/", mustWork = FALSE)
   any(vapply(
     lib_paths,
-    function(lib) {
-      startsWith(filepath, paste0(lib, "/"))
-    },
+    function(lib) identical(substr(filepath, 1, nchar(lib)), lib),
     logical(1)
   ))
 }

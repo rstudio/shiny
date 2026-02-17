@@ -3,9 +3,11 @@
 ## New features
 
 * `runApp()`, `runExample()`, and `runGadget()` gain a `blocking` parameter.
-  When `blocking = FALSE`, the app runs in the background and returns a `ShinyAppHandle` object immediately, without blocking the R session.
-  The handle provides `stop()`, `status()`, `url()`, and `result()` methods for managing the app lifecycle.
-  The default behaviour can be changed via `options(shiny.blocking = FALSE)`.
+  When `blocking = FALSE`, the app runs in the background and returns a
+  `ShinyAppHandle` object with `stop()`, `status()`, `url()`, and `result()`
+  methods. Non-blocking mode is the default when an LLM agent is detected,
+  and can also be set via `options(shiny.blocking = FALSE)`. When running
+  non-blocking, a new `runApp()` call automatically stops the previous app.
 
 ## Bug fixes and minor improvements
 

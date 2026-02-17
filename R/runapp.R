@@ -45,14 +45,11 @@
 #' @param test.mode Should the application be launched in test mode? This is
 #'   only used for recording or running automated tests. Defaults to the
 #'   `shiny.testmode` option, or FALSE if the option is not set.
-#' @param blocking If `TRUE` (the default), the function blocks and does not
-#'   return until the app is stopped. If `FALSE`, the app runs in the background
-#'   via `later` callbacks and the function returns immediately with a
-#'   `ShinyAppHandle` object that can be used to stop the app. The default can
-#'   be changed via `options(shiny.blocking = FALSE)`. Non-blocking mode
-#'   requires the `later` event loop to run; this happens automatically in
-#'   interactive sessions when idle at the console, but in scripts requires
-#'   calling [later::run_now()] repeatedly.
+#' @param blocking If `TRUE`, blocks until the app is stopped. If `FALSE`, the
+#'   app runs in the background and returns a `ShinyAppHandle` immediately.
+#'   Defaults to `TRUE`, except when an LLM agent is detected, where it
+#'   defaults to `FALSE`. Can be set globally via `options(shiny.blocking)`.
+#'   Non-blocking mode requires the `later` event loop to be running.
 #'
 #' @return If `blocking = TRUE`, returns the value passed to [stopApp()], or
 #'   throws an error if the app was stopped with an error. If `blocking = FALSE`,

@@ -50,14 +50,11 @@ on the subdirectory. Example apps can include a \code{DESCRIPTION} file and a
 the article on \href{https://shiny.posit.co/r/articles/build/display-modes/}{Display Modes}
 on the Shiny website for more information.}
 
-\item{blocking}{If \code{TRUE} (the default), the function blocks and does not
-return until the app is stopped. If \code{FALSE}, the app runs in the background
-via \code{later} callbacks and the function returns immediately with a
-\code{ShinyAppHandle} object that can be used to stop the app. The default can
-be changed via \code{options(shiny.blocking = FALSE)}. Non-blocking mode
-requires the \code{later} event loop to run; this happens automatically in
-interactive sessions when idle at the console, but in scripts requires
-calling \code{\link[later:run_now]{later::run_now()}} repeatedly.}
+\item{blocking}{If \code{TRUE}, blocks until the app is stopped. If \code{FALSE}, the
+app runs in the background and returns a \code{ShinyAppHandle} immediately.
+Defaults to \code{TRUE}, except when an LLM agent is detected, where it
+defaults to \code{FALSE}. Can be set globally via \code{options(shiny.blocking)}.
+Non-blocking mode requires the \code{later} event loop to be running.}
 }
 \description{
 Launch Shiny example applications, and optionally, your system's web browser.

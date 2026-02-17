@@ -3,16 +3,15 @@ ShinyAppHandle <- R6::R6Class("ShinyAppHandle",
   cloneable = FALSE,
 
   public = list(
-    initialize = function(appUrl, cleanupFn, registerCapture) {
+    initialize = function(appUrl, cleanupFn) {
       private$appUrl <- appUrl
       private$cleanupFn <- cleanupFn
 
-      # Expose private captureResult to caller via callback registration
-      registerCapture(function() private$captureResult())
+      environment(cleanupFn)$captureResult <- function() private$captureResult()
 
       reg.finalizer(self, function(e) {
         if (e$status() == "running") {
-          tryCatch(e$stop(), error = function(cnd) NULL, warning = function(cnd) NULL)
+          tryCatch(e$stop(), error = function(cnd) NULL)
         }
       }, onexit = TRUE)
     },
@@ -23,7 +22,6 @@ ShinyAppHandle <- R6::R6Class("ShinyAppHandle",
         return(invisible(self))
       }
       private$captureResult()
-      .globals$stopped <- TRUE
       private$cleanupFn()
       private$cleanupFn <- NULL
       invisible(self)

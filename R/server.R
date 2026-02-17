@@ -500,7 +500,8 @@ serviceApp <- function() {
 
 # Non-blocking service loop using later callbacks.
 # Uses 1ms delay between iterations to yield CPU for console interaction.
-serviceAsync <- function(captureResult, cleanup) {
+serviceAsync <- function(cleanup) {
+  captureResult <- environment(cleanup)$captureResult
   serviceLoop <- function() {
     if (!.globals$stopped) {
       ..stacktraceoff..(
@@ -515,14 +516,10 @@ serviceAsync <- function(captureResult, cleanup) {
           )
         )
       )
-      if (!.globals$stopped) {
-        later::later(serviceLoop, delay = 0.001)
-      } else {
-        captureResult()
-        cleanup()
-      }
+    }
+    if (!.globals$stopped) {
+      later::later(serviceLoop, delay = 0.001)
     } else {
-      # App was stopped externally (e.g., via stopApp())
       captureResult()
       cleanup()
     }

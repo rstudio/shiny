@@ -363,11 +363,9 @@ runApp <- function(
   # ============================================================================
   # Set up the onStop before we call onStart, so that it gets called even if an
   # error happens in onStart or later during startup.
-  if (!is.null(appParts$onStop)) {
-    on.exit({
-      if (earlyCleanup) appParts$onStop()
-    }, add = TRUE)
-  }
+  on.exit({
+    if (earlyCleanup && !is.null(appParts$onStop)) appParts$onStop()
+  }, add = TRUE)
   if (!is.null(appParts$onStart))
     appParts$onStart()
 
@@ -450,24 +448,11 @@ runApp <- function(
 
   } else {
     # NON-BLOCKING MODE: return handle immediately, app runs via later callbacks
-    captureResult <- NULL
-    handle <- ShinyAppHandle$new(
-      appUrl = appUrl,
-      cleanupFn = cleanup,
-      registerCapture = function(fn) captureResult <<- fn
-    )
+    handle <- ShinyAppHandle$new(appUrl, cleanup)
     .globals$runningHandle <- handle
 
-    tryCatch(
-      {
-        serviceAsync(captureResult, cleanup)
-        handle
-      },
-      error = function(e) {
-        cleanup()
-        stop(e)
-      }
-    )
+    serviceAsync(cleanup)
+    handle
   }
 }
 

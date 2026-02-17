@@ -451,7 +451,7 @@ runApp <- function(
     handle <- ShinyAppHandle$new(appUrl, cleanup)
     .globals$runningHandle <- handle
 
-    serviceAsync(cleanup)
+    serviceAsync(handle)
     handle
   }
 }

@@ -7,8 +7,6 @@ ShinyAppHandle <- R6::R6Class("ShinyAppHandle",
       private$appUrl <- appUrl
       private$cleanupFn <- cleanupFn
 
-      environment(cleanupFn)$captureResult <- function() private$captureResult()
-
       reg.finalizer(self, function(e) {
         tryCatch(e$stop(), error = function(cnd) NULL)
       }, onexit = TRUE)

@@ -457,14 +457,14 @@ createCleanup <- function(server, appParts, appUrl, ops) {
 
     .globals$stopped <- TRUE
     .globals$runningHandle <- NULL
-    callAppHook("onAppStop", appUrl)
-    stopServer(server)
-    if (!is.null(appParts$onStop)) appParts$onStop()
+    handlerManager$clear()
+    options(ops)
     .globals$onStopCallbacks$invoke()
     .globals$onStopCallbacks <- Callbacks$new()
     clearCurrentAppState()
-    handlerManager$clear()
-    options(ops)
+    if (!is.null(appParts$onStop)) appParts$onStop()
+    stopServer(server)
+    callAppHook("onAppStop", appUrl)
   }
 }
 

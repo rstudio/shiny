@@ -1,3 +1,9 @@
+skip_if_shiny_otel_tracer_is_enabled <- function() {
+  if (shiny_otel_tracer()$is_enabled()) {
+    skip("Skipping stack trace tests when OpenTelemetry is already enabled")
+  }
+}
+
 # Helper function to create a mock otel span
 create_mock_otel_span <- function(name = "test_span") {
   structure(

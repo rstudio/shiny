@@ -185,9 +185,7 @@ test_that("observeEvent is not overly stripped (#4162)", {
 test_that("renderPlot stack trace fences hide internal rendering pipeline (#4357)", {
   skip_on_cran()
 
-  if (shiny_otel_tracer()$is_enabled()) {
-    skip("Skipping stack trace tests when OpenTelemetry is already enabled")
-  }
+  skip_if_shiny_otel_tracer_is_enabled()
 
   userFunc <- function() {
     stop("test error in renderPlot")
@@ -214,9 +212,7 @@ test_that("renderPlot stack trace fences hide internal rendering pipeline (#4357
 test_that("renderPrint stack trace fences hide internal rendering pipeline (#4357)", {
   skip_on_cran()
 
-  if (shiny_otel_tracer()$is_enabled()) {
-    skip("Skipping stack trace tests when OpenTelemetry is already enabled")
-  }
+  skip_if_shiny_otel_tracer_is_enabled()
 
   userFunc <- function() {
     stop("test error in renderPrint")
@@ -234,9 +230,7 @@ test_that("renderPrint stack trace fences hide internal rendering pipeline (#435
 test_that("renderText stack trace fences hide internal rendering pipeline (#4357)", {
   skip_on_cran()
 
-  if (shiny_otel_tracer()$is_enabled()) {
-    skip("Skipping stack trace tests when OpenTelemetry is already enabled")
-  }
+  skip_if_shiny_otel_tracer_is_enabled()
 
   userFunc <- function() {
     stop("test error in renderText")
@@ -254,9 +248,7 @@ test_that("renderText stack trace fences hide internal rendering pipeline (#4357
 test_that("renderUI stack trace fences hide internal rendering pipeline (#4357)", {
   skip_on_cran()
 
-  if (shiny_otel_tracer()$is_enabled()) {
-    skip("Skipping stack trace tests when OpenTelemetry is already enabled")
-  }
+  skip_if_shiny_otel_tracer_is_enabled()
 
   userFunc <- function() {
     stop("test error in renderUI")
@@ -274,9 +266,7 @@ test_that("renderUI stack trace fences hide internal rendering pipeline (#4357)"
 test_that("renderTable stack trace fences hide internal rendering pipeline (#4357)", {
   skip_on_cran()
 
-  if (shiny_otel_tracer()$is_enabled()) {
-    skip("Skipping stack trace tests when OpenTelemetry is already enabled")
-  }
+  skip_if_shiny_otel_tracer_is_enabled()
 
   userFunc <- function() {
     stop("test error in renderTable")
@@ -297,9 +287,7 @@ test_that("renderTable stack trace fences hide internal rendering pipeline (#435
 test_that("renderImage stack trace fences hide internal rendering pipeline (#4357)", {
   skip_on_cran()
 
-  if (shiny_otel_tracer()$is_enabled()) {
-    skip("Skipping stack trace tests when OpenTelemetry is already enabled")
-  }
+  skip_if_shiny_otel_tracer_is_enabled()
 
   userFunc <- function() {
     stop("test error in renderImage")
@@ -320,9 +308,7 @@ test_that("renderImage stack trace fences hide internal rendering pipeline (#435
 test_that("legacyRenderDataTable stack trace fences hide internal rendering pipeline (#4357)", {
   skip_on_cran()
 
-  if (shiny_otel_tracer()$is_enabled()) {
-    skip("Skipping stack trace tests when OpenTelemetry is already enabled")
-  }
+  skip_if_shiny_otel_tracer_is_enabled()
 
   userFunc <- function() {
     stop("test error in renderDataTable")
@@ -342,9 +328,7 @@ test_that("legacyRenderDataTable stack trace fences hide internal rendering pipe
 test_that("markRenderFunction preserves user frames outside reactive domain", {
   skip_on_cran()
 
-  if (shiny_otel_tracer()$is_enabled()) {
-    skip("Skipping stack trace tests when OpenTelemetry is already enabled")
-  }
+  skip_if_shiny_otel_tracer_is_enabled()
 
   # htmlwidgets-style: exprToFunction + markRenderFunction, no ..stacktraceon..
   renderWidgetLike <- function(expr, env = parent.frame(), quoted = FALSE) {

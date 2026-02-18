@@ -407,12 +407,7 @@ runApp <- function(
   callAppHook("onAppStart", appUrl)
   on.exit(if (cleanupOnExit) callAppHook("onAppStop", appUrl), add = TRUE)
 
-  # ============================================================================
-  # Create cleanup function
-  # ============================================================================
-  cleanup <- createCleanup(server, appParts, appUrl, ops)
-
-  # Initialize globals for this app run (MUST happen before blocking check)
+  # Initialize globals used by the event loop and stopApp()
   .globals$reterror <- NULL
   .globals$retval <- NULL
   .globals$stopped <- FALSE
@@ -444,6 +439,7 @@ runApp <- function(
     # NON-BLOCKING MODE: return handle immediately, app runs via later callbacks
     # Disable on.exit handlers; cleanup is handled by handle$stop()
     cleanupOnExit <- FALSE
+    cleanup <- createCleanup(server, appParts, appUrl, ops)
     handle <- ShinyAppHandle$new(appUrl, cleanup)
     .globals$runningHandle <- handle
 

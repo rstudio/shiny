@@ -98,6 +98,35 @@ getSrcfileFilename <- function(srcfile) {
   }
 }
 
+# Get the source lines and correct line number from a srcfile + srcref.
+#
+# sourceUTF8() wraps user code with a `#line` directive that remaps line
+# numbers. This means srcref[1] (the remapped line) may not correctly index
+# into the srcfile's $lines. When a #line directive is present, R extends
+# the srcref to 8 elements: [7] and [8] are the original (pre-remap) first
+# and last line numbers in the srcfilecopy's coordinate system.
+#
+# Additionally, when the #line path differs from the srcfilecopy filename
+# (e.g. macOS /tmp -> /private/tmp, or Windows path normalization), R wraps
+# the srcfile in a srcfilealias whose $lines is NULL. In that case, we
+# retrieve lines from the original srcfilecopy via $original.
+getSrcfileLines <- function(srcfile, srcref) {
+  lines <- srcfile$lines
+  line_num <- srcref[1]
+
+  if (is.null(lines) && inherits(srcfile, "srcfilealias")) {
+    lines <- srcfile$original$lines
+  }
+
+  # Use the pre-remap line number when available and different from the
+  # remapped line, indicating a #line directive shifted line numbering.
+  if (length(srcref) >= 7 && srcref[7] != srcref[1]) {
+    line_num <- srcref[7]
+  }
+
+  list(lines = lines, line_num = line_num)
+}
+
 getLocs <- function(calls) {
   vapply(calls, function(call) {
     srcref <- attr(call, "srcref", exact = TRUE)

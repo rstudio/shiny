@@ -113,6 +113,12 @@ runApp <- function(
   #   reactivated upon promise domain restoration
   promises::local_otel_promise_domain()
 
+  # Flag to control whether on.exit handlers perform cleanup.
+  # Set to FALSE in non-blocking mode, where cleanup is handled by handle$stop().
+  cleanupOnExit <- TRUE
+
+  on.exit(if (cleanupOnExit) handlerManager$clear(), add = TRUE)
+
   if (isRunning()) {
     if (!is.null(.globals$runningHandle)) {
       .globals$runningHandle$stop()
@@ -130,23 +136,14 @@ runApp <- function(
     warn = max(1, getOption("warn", default = 1)),
     pool.scheduler = scheduleTask
   )
+  on.exit(if (cleanupOnExit) options(ops), add = TRUE)
 
   # ============================================================================
   # Global onStart/onStop callbacks
   # ============================================================================
-  # Flag to control whether early cleanup runs on exit.
-  # For non-blocking mode, earlyCleanup is set to FALSE before returning.
-  earlyCleanup <- TRUE
-
-  # This on.exit handler ensures cleanup even if startup fails.
-  on.exit({
-    if (earlyCleanup) {
-      .globals$onStopCallbacks$invoke()
-      .globals$onStopCallbacks <- Callbacks$new()
-      clearCurrentAppState()
-      handlerManager$clear()
-      options(ops)
-    }
+  on.exit(if (cleanupOnExit) {
+    .globals$onStopCallbacks$invoke()
+    .globals$onStopCallbacks <- Callbacks$new()
   }, add = TRUE)
 
   require(shiny)
@@ -162,6 +159,7 @@ runApp <- function(
   # This is so calls to getCurrentAppState() can be used to find (A) whether an
   # app is running and (B), get options and data associated with the app.
   initCurrentAppState(appParts)
+  on.exit(if (cleanupOnExit) clearCurrentAppState(), add = TRUE)
   # Any shinyOptions set after this point will apply to the current app only
   # (and will not persist after the app stops).
 
@@ -363,9 +361,8 @@ runApp <- function(
   # ============================================================================
   # Set up the onStop before we call onStart, so that it gets called even if an
   # error happens in onStart or later during startup.
-  on.exit({
-    if (earlyCleanup && !is.null(appParts$onStop)) appParts$onStop()
-  }, add = TRUE)
+  if (!is.null(appParts$onStop))
+    on.exit(if (cleanupOnExit) appParts$onStop(), add = TRUE)
   if (!is.null(appParts$onStart))
     appParts$onStart()
 
@@ -377,6 +374,7 @@ runApp <- function(
   # Make the httpuv server object accessible. Needed for calling
   # addResourcePath while app is running.
   shinyOptions(server = server)
+  on.exit(if (cleanupOnExit) stopServer(server), add = TRUE)
 
   # ============================================================================
   # Launch web browser
@@ -407,6 +405,7 @@ runApp <- function(
   # Application hooks
   # ============================================================================
   callAppHook("onAppStart", appUrl)
+  on.exit(if (cleanupOnExit) callAppHook("onAppStop", appUrl), add = TRUE)
 
   # ============================================================================
   # Create cleanup function
@@ -421,13 +420,8 @@ runApp <- function(
   # ============================================================================
   # Run event loop via httpuv
   # ============================================================================
-  # Startup complete - cleanup function now handles all cleanup
-  earlyCleanup <- FALSE
-
   if (blocking) {
-    # BLOCKING MODE: run while loop and cleanup on exit
-    on.exit(cleanup(), add = TRUE)
-
+    # BLOCKING MODE: on.exit handlers handle cleanup
     # Top-level ..stacktraceoff..; matches with ..stacktraceon in observe(),
     # reactive(), Callbacks$invoke(), and others
     ..stacktraceoff..(
@@ -448,6 +442,8 @@ runApp <- function(
 
   } else {
     # NON-BLOCKING MODE: return handle immediately, app runs via later callbacks
+    # Disable on.exit handlers; cleanup is handled by handle$stop()
+    cleanupOnExit <- FALSE
     handle <- ShinyAppHandle$new(appUrl, cleanup)
     .globals$runningHandle <- handle
 

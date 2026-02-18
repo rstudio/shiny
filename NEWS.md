@@ -6,9 +6,10 @@
 
 ## Bug fixes and minor improvements
 
+* Stack traces from render functions (e.g., `renderPlot()`, `renderDataTable()`) now hide internal Shiny rendering pipeline frames, making error messages cleaner and more focused on user code. (#4358)
+
 * Fixed an issue with `actionLink()` that extended the link underline to whitespace around the text. (#4348)
 
-* Stack traces from render functions (e.g., `renderPlot()`, `renderDataTable()`) now hide internal Shiny rendering pipeline frames, making error messages cleaner and more focused on user code. (#4358)
 
 # shiny 1.12.1
 

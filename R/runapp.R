@@ -104,9 +104,12 @@ runApp <- function(
   workerId="", quiet=FALSE,
   display.mode=c("auto", "normal", "showcase"),
   test.mode=getOption('shiny.testmode', FALSE),
-  blocking=getOption("shiny.blocking", !is_llm())
+  blocking=getOption("shiny.blocking")
 ) {
 
+  if (is.null(blocking)) {
+    blocking <- !is_llm()
+  }
   # * Wrap **all** execution of the app inside the otel promise domain
   # * While this could be done at a lower level, it allows for _anything_ within
   #   shiny's control to allow for the opportunity to have otel active spans be
@@ -121,6 +124,7 @@ runApp <- function(
 
   if (isRunning()) {
     if (!is.null(.globals$runningHandle)) {
+      message("Stopping running Shiny app.")
       .globals$runningHandle$stop()
     } else {
       stop("Can't start a new app while another is running. ",
@@ -443,7 +447,7 @@ runApp <- function(
     handle <- ShinyAppHandle$new(appUrl, cleanup)
     .globals$runningHandle <- handle
 
-    serviceAsync(handle)
+    serviceNonBlocking(handle)
     handle
   }
 }
@@ -546,8 +550,7 @@ runExample <- function(
   launch.browser = getOption("shiny.launch.browser", interactive()),
   host = getOption("shiny.host", "127.0.0.1"),
   display.mode = c("auto", "normal", "showcase"),
-  package = "shiny",
-  blocking = getOption("shiny.blocking", !is_llm())
+  package = "shiny"
 ) {
   if (!identical(package, "shiny") && !is_installed(package)) {
     rlang::check_installed(package)
@@ -580,7 +583,7 @@ runExample <- function(
   }
 
   runApp(dir, port = port, host = host, launch.browser = launch.browser,
-         display.mode = display.mode, blocking = blocking)
+         display.mode = display.mode)
 }
 
 #' Run a gadget
@@ -600,11 +603,7 @@ runExample <- function(
 #'   is automatically created that handles `input$cancel` by calling
 #'   `stopApp()` with an error. Pass `FALSE` if you want to handle
 #'   `input$cancel` yourself.
-#' @inheritParams runApp
-#' @return If `blocking = TRUE` (the default), returns the value passed to
-#'   [stopApp()] by the gadget. If `blocking = FALSE`, returns a
-#'   `ShinyAppHandle` object; use `handle$result()` to retrieve the gadget's
-#'   return value after it stops.
+#' @return The value returned by the gadget.
 #'
 #' @examples
 #' \dontrun{
@@ -624,8 +623,7 @@ runExample <- function(
 #' }
 #' @export
 runGadget <- function(app, server = NULL, port = getOption("shiny.port"),
-  viewer = paneViewer(), stopOnCancel = TRUE,
-  blocking = getOption("shiny.blocking", !is_llm())) {
+  viewer = paneViewer(), stopOnCancel = TRUE) {
 
   if (!is.shiny.appobj(app)) {
     app <- shinyApp(app, server)
@@ -643,7 +641,7 @@ runGadget <- function(app, server = NULL, port = getOption("shiny.port"),
     viewer <- utils::browseURL
   }
 
-  shiny::runApp(app, port = port, launch.browser = viewer, blocking = blocking)
+  shiny::runApp(app, port = port, launch.browser = viewer)
 }
 
 # Add custom functionality to a Shiny app object's server func

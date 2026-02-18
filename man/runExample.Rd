@@ -10,8 +10,7 @@ runExample(
   launch.browser = getOption("shiny.launch.browser", interactive()),
   host = getOption("shiny.host", "127.0.0.1"),
   display.mode = c("auto", "normal", "showcase"),
-  package = "shiny",
-  blocking = getOption("shiny.blocking", !is_llm())
+  package = "shiny"
 )
 }
 \arguments{
@@ -49,12 +48,6 @@ on the subdirectory. Example apps can include a \code{DESCRIPTION} file and a
 \code{README.md} file to provide metadata and commentary about the example. See
 the article on \href{https://shiny.posit.co/r/articles/build/display-modes/}{Display Modes}
 on the Shiny website for more information.}
-
-\item{blocking}{If \code{TRUE}, blocks until the app is stopped. If \code{FALSE}, the
-app runs in the background and returns a \code{ShinyAppHandle} immediately.
-Defaults to \code{TRUE}, except when an LLM agent is detected, where it
-defaults to \code{FALSE}. Can be set globally via \code{options(shiny.blocking)}.
-Non-blocking mode requires the \code{later} event loop to be running.}
 }
 \description{
 Launch Shiny example applications, and optionally, your system's web browser.

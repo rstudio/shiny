@@ -13,7 +13,7 @@ runApp(
   quiet = FALSE,
   display.mode = c("auto", "normal", "showcase"),
   test.mode = getOption("shiny.testmode", FALSE),
-  blocking = getOption("shiny.blocking", !is_llm())
+  blocking = getOption("shiny.blocking")
 )
 }
 \arguments{

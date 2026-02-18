@@ -481,7 +481,10 @@ startApp <- function(appObj, port, host, quiet) {
 
 # Run an application that was created by \code{\link{startApp}}. This
 # function should normally be called in a \code{while(TRUE)} loop.
-serviceApp <- function() {
+serviceApp <- function(
+  # rely on lazy evaluation for maximum efficiency
+  timeout = max(1, min(maxTimeout, timerCallbacks$timeToNextEvent(), later::next_op_secs()))
+) {
   timerCallbacks$executeElapsed()
 
   flushReact()
@@ -491,7 +494,6 @@ serviceApp <- function() {
   # to keep the session responsive to user input
   maxTimeout <- ifelse(interactive(), 100, 1000)
 
-  timeout <- max(1, min(maxTimeout, timerCallbacks$timeToNextEvent(), later::next_op_secs()))
   service(timeout)
 
   flushReact()
@@ -500,13 +502,13 @@ serviceApp <- function() {
 
 # Non-blocking service loop using later callbacks.
 # Uses 1ms delay between iterations to yield CPU for console interaction.
-serviceAsync <- function(handle) {
+serviceNonBlocking <- function(handle) {
   serviceLoop <- function() {
     if (!.globals$stopped) {
       ..stacktraceoff..(
         captureStackTraces(
           tryCatch(
-            ..stacktracefloor..(serviceApp()),
+            ..stacktracefloor..(serviceApp(.shinyServiceDelaySecs * 1000)),
             error = function(e) {
               .globals$stopped <- TRUE
               .globals$retval <- e
@@ -517,14 +519,15 @@ serviceAsync <- function(handle) {
       )
     }
     if (!.globals$stopped) {
-      later::later(serviceLoop, delay = 0.001)
+      later::later(serviceLoop, delay = .shinyServiceDelaySecs)
     } else {
       handle$stop()
     }
   }
-  later::later(serviceLoop, delay = 0.001)
+  later::later(serviceLoop, delay = .shinyServiceDelaySecs)
 }
 
+.shinyServiceDelaySecs <- 0.001
 .shinyServerMinVersion <- '0.3.4'
 
 #' Check whether a Shiny application is running

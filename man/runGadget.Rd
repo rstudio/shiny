@@ -9,8 +9,7 @@ runGadget(
   server = NULL,
   port = getOption("shiny.port"),
   viewer = paneViewer(),
-  stopOnCancel = TRUE,
-  blocking = getOption("shiny.blocking", !is_llm())
+  stopOnCancel = TRUE
 )
 }
 \arguments{
@@ -30,18 +29,9 @@ dialog window, or external browser--by passing in a call to one of the
 is automatically created that handles \code{input$cancel} by calling
 \code{stopApp()} with an error. Pass \code{FALSE} if you want to handle
 \code{input$cancel} yourself.}
-
-\item{blocking}{If \code{TRUE}, blocks until the app is stopped. If \code{FALSE}, the
-app runs in the background and returns a \code{ShinyAppHandle} immediately.
-Defaults to \code{TRUE}, except when an LLM agent is detected, where it
-defaults to \code{FALSE}. Can be set globally via \code{options(shiny.blocking)}.
-Non-blocking mode requires the \code{later} event loop to be running.}
 }
 \value{
-If \code{blocking = TRUE} (the default), returns the value passed to
-\code{\link[=stopApp]{stopApp()}} by the gadget. If \code{blocking = FALSE}, returns a
-\code{ShinyAppHandle} object; use \code{handle$result()} to retrieve the gadget's
-return value after it stops.
+The value returned by the gadget.
 }
 \description{
 Similar to \code{runApp}, but handles \code{input$cancel} automatically, and

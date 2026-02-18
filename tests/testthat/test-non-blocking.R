@@ -196,34 +196,6 @@ test_that("shiny.blocking option controls default", {
   handle$stop()
 })
 
-test_that("runExample works with blocking = FALSE", {
-  handle <- suppressMessages(runExample("01_hello", blocking = FALSE, launch.browser = FALSE))
-  on.exit(handle$stop(), add = TRUE)
-
-  expect_equal(handle$status(), "running")
-  expect_match(handle$url(), "^http://")
-
-  handle$stop()
-  expect_equal(handle$status(), "success")
-})
-
-test_that("runGadget works with blocking = FALSE", {
-  ui <- fluidPage(
-    actionButton("done", "Done")
-  )
-  server <- function(input, output, session) {}
-
-  handle <- suppressMessages(runGadget(ui, server, blocking = FALSE, viewer = function(url) NULL))
-  on.exit(handle$stop(), add = TRUE)
-
-  expect_s3_class(handle, "ShinyAppHandle")
-  expect_equal(handle$status(), "running")
-  expect_match(handle$url(), "^http://")
-
-  handle$stop()
-  expect_equal(handle$status(), "success")
-})
-
 test_that("startup failure clears app state (regression test)", {
   # If startup fails after initCurrentAppState() but before earlyCleanup <- FALSE,
   # the app state must be cleared so subsequent runApp() calls don't fail with

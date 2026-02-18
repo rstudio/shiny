@@ -128,7 +128,7 @@ getSrcfileLines <- function(srcfile, srcref) {
 
   # Use the pre-remap line number when available and different from the
   # remapped line, indicating a #line directive shifted line numbering.
-  if (length(srcref) >= 7 && srcref[7] != srcref[1]) {
+  if (isTRUE(length(srcref) >= 7 && srcref[7] != srcref[1])) {
     line_num <- srcref[7]
   }
 

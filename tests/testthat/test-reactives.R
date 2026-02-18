@@ -112,6 +112,30 @@ test_that("sourceUTF8() auto-labels reactives despite srcfilealias", {
   expect_equal(as.character(r_observable$.label), "my_react")
 })
 
+describe("srcfilealias filename selection", {
+  parse_as_srcfilealias <- function(user_code, alias_path = "/absolute/path/to/app.R") {
+    code <- c(sprintf('#line 1 "%s"', alias_path), user_code)
+    src <- base::srcfilecopy("app.R", code, isFile = TRUE)
+    exprs <- parse(text = code, keep.source = TRUE, srcfile = src)
+    list(code = code, exprs = exprs, srcrefs = attr(exprs, "srcref"))
+  }
+
+  it("getSrcfileFilename() prefers original unless package file", {
+    lib <- normalizePath(.libPaths()[[1]], winslash = "/", mustWork = FALSE)
+    pkg_path <- file.path(lib, "pkg", "R", "foo.R")
+
+    parsed_pkg <- parse_as_srcfilealias("x <- 1", alias_path = pkg_path)
+    srcref_pkg <- parsed_pkg$srcrefs[[1]]
+    srcfile_pkg <- attr(srcref_pkg, "srcfile", exact = TRUE)
+    expect_equal(getSrcfileFilename(srcfile_pkg), pkg_path)
+
+    parsed_user <- parse_as_srcfilealias("y <- 2", alias_path = "/tmp/user.R")
+    srcref_user <- parsed_user$srcrefs[[1]]
+    srcfile_user <- attr(srcref_user, "srcfile", exact = TRUE)
+    expect_equal(getSrcfileFilename(srcfile_user), "app.R")
+  })
+})
+
 test_that("isPackageFile() uses path-boundary matching", {
   lib <- normalizePath(.libPaths()[[1]], winslash = "/", mustWork = FALSE)
 

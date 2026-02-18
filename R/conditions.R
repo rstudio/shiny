@@ -87,11 +87,19 @@ getCallNamesForHash <- function(calls) {
   })
 }
 
-# Get the preferred filename from a srcfile object, preferring the original
-# path (as typed by user, potentially a symlink or relative path) over the
-# normalized absolute path.
+# Get the preferred filename from a srcfile object.
+#
+# For user code, prefer the original path (as typed by user, potentially a
+# symlink or relative path) over the normalized absolute path.
+#
+# For package files (under .libPaths()), keep the srcfile$filename because
+# when a package is installed with keep.source.pkgs = TRUE, the original
+# srcfilecopy filename may point to a collated build-time path rather than
+# the real installed package path.
 getSrcfileFilename <- function(srcfile) {
-  if (!is.null(srcfile$original) && !is.null(srcfile$original$filename)) {
+  if (!is.null(srcfile$original) &&
+      !is.null(srcfile$original$filename) &&
+      !isPackageFile(srcfile$filename)) {
     srcfile$original$filename
   } else {
     srcfile$filename

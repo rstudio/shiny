@@ -304,20 +304,23 @@ rassignSrcrefToLabel <- function(
   if (is.null(srcfile))
     return(defaultLabel)
 
-  if (is.null(srcfile$lines))
+  src <- getSrcfileLines(srcfile, srcref)
+  lines <- src$lines
+  line_num <- src$line_num
+
+  if (is.null(lines))
     return(defaultLabel)
 
-  lines <- srcfile$lines
   # When pasting at the Console, srcfile$lines is not split
   if (length(lines) == 1) {
     lines <- strsplit(lines, "\n")[[1]]
   }
 
-  if (length(lines) < srcref[1]) {
+  if (length(lines) < line_num) {
     return(defaultLabel)
   }
 
-  firstLine <- substring(lines[srcref[1]], srcref[2] - 1)
+  firstLine <- substring(lines[line_num], srcref[2] - 1)
 
   m <- regexec(
     # Require the first assignment within the line
@@ -1160,20 +1163,23 @@ rexprSrcrefToLabel <- function(srcref, defaultLabel, fnName) {
   if (is.null(srcfile))
     return(defaultLabel)
 
-  if (is.null(srcfile$lines))
+  src <- getSrcfileLines(srcfile, srcref)
+  lines <- src$lines
+  line_num <- src$line_num
+
+  if (is.null(lines))
     return(defaultLabel)
 
-  lines <- srcfile$lines
   # When pasting at the Console, srcfile$lines is not split
   if (length(lines) == 1) {
     lines <- strsplit(lines, "\n")[[1]]
   }
 
-  if (length(lines) < srcref[1]) {
+  if (length(lines) < line_num) {
     return(defaultLabel)
   }
 
-  firstLine <- substring(lines[srcref[1]], 1, srcref[2] - 1)
+  firstLine <- substring(lines[line_num], 1, srcref[2] - 1)
 
   # Require the assignment to be parsed from the start
   m <- regexec(paste0("^(.*)(<<-|<-|=)\\s*", fnName, "\\s*\\($"), firstLine)

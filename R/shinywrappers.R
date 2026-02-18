@@ -130,8 +130,10 @@ markRenderFunction <- function(
       # stop warning from happening again for the same object
       hasExecuted$set(TRUE)
     }
-    if (is.null(formals(renderFunc))) renderFunc()
-    else renderFunc(...)
+    ..stacktraceoff..(
+      if (is.null(formals(renderFunc))) renderFunc()
+      else renderFunc(...)
+    )
   }
 
   otelAttrs <-
@@ -275,7 +277,7 @@ createRenderFunction <- function(
 ) {
   renderFunc <- function(shinysession, name, ...) {
     hybrid_chain(
-      func(),
+      ..stacktraceon..(func()),
       function(value) {
         transform(value, shinysession, name, ...)
       }
@@ -628,7 +630,7 @@ renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
     domain <- createRenderPrintPromiseDomain(width)
     hybrid_chain(
       {
-        with_promise_domain(domain, func())
+        with_promise_domain(domain, ..stacktraceon..(func()))
       },
       function(value) {
         res <- withVisible(value)
@@ -963,7 +965,7 @@ legacyRenderDataTable <- function(expr, options = NULL, searchDelay = 500,
     options <- checkDT9(options)
     res <- checkAsIs(options)
     hybrid_chain(
-      func(),
+      ..stacktraceon..(func()),
       function(data) {
         if (length(dim(data)) != 2) return() # expects a rectangular data object
         if (is.data.frame(data)) data <- as.data.frame(data)

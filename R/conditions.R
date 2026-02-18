@@ -476,43 +476,91 @@ printOneStackTrace <- function(stackTrace, stripResult, full, offset) {
   invisible(st)
 }
 
+# Filter stack traces using fence markers to hide internal Shiny frames.
+#
+# `stackTraces` is a list of character vectors (call names), one per "segment".
+# A single synchronous error produces one segment (the immediate call stack).
+# Asynchronous errors (e.g. from promises) produce multiple segments: the deep
+# stack trace segments come first, then the current segment last. Each deep
+# segment may begin with frames that overlap the previous segment; a
+# `..stacktracefloor..` marker delimits this redundant prefix from the active
+# portion.
+#
+# Within the active frames, `..stacktraceon..` / `..stacktraceoff..` markers
+# act as fences. Frames between a matched off/on pair (reading innermost to
+# outermost) are hidden — these are the internal rendering pipeline frames
+# that users don't need to see. The algorithm uses a *reverse clamped cumulative
+# sum* so that an unmatched `..stacktraceoff..` (one with no corresponding
+# inner `..stacktraceon..`) is a no-op, preventing it from hiding user frames.
+# Fence matching works globally across segments so that a `..stacktraceoff..`
+# at the end of one segment can pair with a `..stacktraceon..` at the start
+# of the next.
 stripStackTraces <- function(stackTraces, values = FALSE) {
-  score <- 1L  # >=1: show, <=0: hide
-  lapply(seq_along(stackTraces), function(i) {
-    res <- stripOneStackTrace(stackTraces[[i]], i != 1, score)
-    score <<- res$score
-    toShow <- as.logical(res$trace)
-    if (values) {
-      as.character(stackTraces[[i]][toShow])
-    } else {
-      as.logical(toShow)
+  n_segs <- length(stackTraces)
+  if (n_segs == 0L) return(list())
+
+  # Replace NULL segments with empty character vectors
+  stackTraces <- lapply(stackTraces, function(st) st %||% character(0))
+  seg_lengths <- lengths(stackTraces)
+  total <- sum(seg_lengths)
+
+  if (total == 0L) {
+    return(lapply(seg_lengths, function(n) {
+      if (values) character(0) else logical(0)
+    }))
+  }
+
+  # Pre-compute segment boundaries (used in steps 1 and 4)
+  seg_ends <- cumsum(seg_lengths)
+  seg_starts <- c(1L, seg_ends[-n_segs] + 1L)
+
+  # Concatenate all segments into one vector for vectorized operations
+  all <- unlist(stackTraces)
+
+  # 1. Identify prefix elements (at/before last ..stacktracefloor.. in segs 2+)
+  # Prefix elements are always hidden and excluded from fence scoring.
+  is_active <- rep.int(TRUE, total)
+  if (n_segs >= 2L) {
+    for (i in 2:n_segs) {
+      if (seg_lengths[i] == 0L) next
+      seg_idx <- seg_starts[i]:seg_ends[i]
+      floor_pos <- which(all[seg_idx] == "..stacktracefloor..")
+      if (length(floor_pos)) {
+        is_active[seg_idx[seq_len(floor_pos[length(floor_pos)])]] <- FALSE
+      }
     }
+  }
+
+  # 2. Compute fence scores and marker mask (vectorized across all segments)
+  is_on <- all == "..stacktraceon.."
+  is_off <- all == "..stacktraceoff.."
+  is_marker <- is_on | is_off | (all == "..stacktracefloor..")
+  scores <- integer(total)
+  scores[is_active & is_on] <- 1L
+  scores[is_active & is_off] <- -1L
+
+  # 3. Reverse clamped cumsum across all segments.
+  # Process from innermost (right) to outermost (left). ..stacktraceon.. (+1)
+  # opens a hidden region working outward, ..stacktraceoff.. (-1) closes it.
+  # Clamping at 0 means an unmatched ..stacktraceoff.. (one with no inner
+  # ..stacktraceon..) is a no-op. Prefix elements have score 0 and pass the
+  # running total through unchanged.
+  #
+  # Vectorized via the identity: clamped_cumsum = cumsum - pmin(0, cummin(cumsum))
+  rs <- rev(scores)
+  cs <- cumsum(rs)
+  depth <- rev(cs - pmin.int(0L, cummin(cs)))
+
+  # 4. Compute visibility (vectorized) and split back into segments
+  toShow <- is_active & depth == 0L & !is_marker
+
+  lapply(seq_len(n_segs), function(i) {
+    if (seg_lengths[i] == 0L) {
+      if (values) return(character(0)) else return(logical(0))
+    }
+    idx <- seg_starts[i]:seg_ends[i]
+    if (values) as.character(all[idx[toShow[idx]]]) else toShow[idx]
   })
-}
-
-stripOneStackTrace <- function(stackTrace, truncateFloor, startingScore) {
-  prefix <- logical(0)
-  if (truncateFloor) {
-    indexOfFloor <- utils::tail(which(stackTrace == "..stacktracefloor.."), 1)
-    if (length(indexOfFloor)) {
-      stackTrace <- stackTrace[(indexOfFloor+1L):length(stackTrace)]
-      prefix <- rep_len(FALSE, indexOfFloor)
-    }
-  }
-
-  if (length(stackTrace) == 0) {
-    return(list(score = startingScore, character(0)))
-  }
-
-  score <- rep.int(0L, length(stackTrace))
-  score[stackTrace == "..stacktraceon.."] <- 1L
-  score[stackTrace == "..stacktraceoff.."] <- -1L
-  score <- startingScore + cumsum(score)
-
-  toShow <- score > 0 & !(stackTrace %in% c("..stacktraceon..", "..stacktraceoff..", "..stacktracefloor.."))
-
-
-  list(score = utils::tail(score, 1), trace = c(prefix, toShow))
 }
 
 # Given sys.parents() (which corresponds to sys.calls()), return a logical index

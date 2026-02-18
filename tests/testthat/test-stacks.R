@@ -48,15 +48,15 @@ test_that("integration tests", {
   # problems on CRAN.
   skip_on_cran()
 
-  df <- causeError(full = FALSE)
-  # dumpTests(df)
+  df_integration_slim <- causeError(full = FALSE)
+  # dumpTests(df_integration_slim)
 
-  expect_snapshot(df)
+  expect_snapshot(df_integration_slim)
 
-  df <- causeError(full = TRUE)
+  df_integration_full <- causeError(full = TRUE)
 
-  expect_snapshot(df)
-  # dumpTests(df)
+  expect_snapshot(df_integration_full)
+  # dumpTests(df_integration_full)
 })
 
 test_that("shiny.error", {
@@ -338,3 +338,29 @@ test_that("legacyRenderDataTable stack trace fences hide internal rendering pipe
   leaked <- df$call[df$call %in% internal_render_frames]
   expect_length(leaked, 0)
 })
+
+test_that("markRenderFunction preserves user frames outside reactive domain", {
+  skip_on_cran()
+
+  if (shiny_otel_tracer()$is_enabled()) {
+    skip("Skipping stack trace tests when OpenTelemetry is already enabled")
+  }
+
+  # htmlwidgets-style: exprToFunction + markRenderFunction, no ..stacktraceon..
+  renderWidgetLike <- function(expr, env = parent.frame(), quoted = FALSE) {
+    if (!quoted) expr <- substitute(expr)
+    func <- exprToFunction(expr, env, TRUE)
+    renderFunc <- function() { func() }
+    markRenderFunction(textOutput, renderFunc)
+  }
+
+  userFunc <- function() stop("boom")
+  render_fn <- renderWidgetLike({ userFunc() })
+
+  res <- try(captureStackTraces({ render_fn() }), silent = TRUE)
+  cond <- attr(res, "condition", exact = TRUE)
+  df <- extractStackTrace(conditionStackTrace(cond), full = FALSE)
+
+  expect_true("userFunc" %in% df$call)
+})
+

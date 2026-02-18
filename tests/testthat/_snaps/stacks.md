@@ -1,7 +1,7 @@
 # integration tests
 
     Code
-      df
+      df_integration_slim
     Output
          num                                     call                 loc
       1   70                                        A   [test-stacks.R#3]
@@ -23,7 +23,7 @@
 ---
 
     Code
-      df
+      df_integration_full
     Output
          num                                     call                 loc
       1   73                                        h                    

@@ -40,15 +40,7 @@ extractStackTrace <- function(calls,
       callnames <- utils::head(callnames, -toRemove)
     }
 
-    # This uses a ref-counting scheme. It might make sense to switch this
-    # to a toggling scheme, so the most recent ..stacktrace(on|off)..
-    # directive wins, regardless of what came before it.
-    # Also explicitly remove ..stacktraceon.. because it can appear with
-    # score > 0 but still should never be shown.
-    score <- rep.int(0, length(callnames))
-    score[callnames == "..stacktraceoff.."] <- -1
-    score[callnames == "..stacktraceon.."] <- 1
-    toShow <- (1 + cumsum(score)) > 0 & !(callnames %in% c("..stacktraceon..", "..stacktraceoff..", "..stacktracefloor.."))
+    toShow <- stripStackTraces(list(callnames))[[1]]
 
     toShow <-
       toShow &

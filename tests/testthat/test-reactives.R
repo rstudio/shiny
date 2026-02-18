@@ -112,6 +112,18 @@ test_that("sourceUTF8() auto-labels reactives despite srcfilealias", {
   expect_equal(as.character(r_observable$.label), "my_react")
 })
 
+test_that("isPackageFile() uses path-boundary matching", {
+  lib <- normalizePath(.libPaths()[[1]], winslash = "/", mustWork = FALSE)
+
+  # A path like "{lib}Extra/foo.R" shares the prefix but is NOT inside the lib
+  fake_path <- paste0(lib, "Extra/foo.R")
+  expect_false(isPackageFile(fake_path))
+
+  # A path actually inside the library SHOULD match
+  real_path <- file.path(lib, "pkg", "R", "foo.R")
+  expect_true(isPackageFile(real_path))
+})
+
 test_that("errors in throttled/debounced reactives are catchable", {
   reactiveConsole(TRUE)
   on.exit(reactiveConsole(FALSE))

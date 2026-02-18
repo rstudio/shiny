@@ -150,6 +150,9 @@ isPackageFile <- function(filepath) {
   # Normalize paths for comparison
   filepath <- normalizePath(filepath, winslash = "/", mustWork = FALSE)
   lib_paths <- normalizePath(.libPaths(), winslash = "/", mustWork = FALSE)
+  # Ensure trailing slash for proper path-boundary matching, otherwise
+  # e.g. "/usr/lib/R" would incorrectly match "/usr/lib/Rcpp/..."
+  lib_paths <- paste0(sub("/$", "", lib_paths), "/")
 
   # Check if the file is under any library path
   any(vapply(

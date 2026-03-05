@@ -1140,7 +1140,7 @@ test_that("Custom render functions that call installExprFunction", {
 
 
 test_that("cacheWriteHook and cacheReadHook for render functions", {
-  testthat::skip_if(shiny_otel_tracer()$is_enabled(), "Skipping stack trace tests when OpenTelemetry is already enabled")
+  skip_if_shiny_otel_tracer_is_enabled()
 
   write_hook_n <- 0
   read_hook_n  <- 0

@@ -13,7 +13,7 @@ runApp(
   quiet = FALSE,
   display.mode = c("auto", "normal", "showcase"),
   test.mode = getOption("shiny.testmode", FALSE),
-  blocking = getOption("shiny.blocking")
+  blocking = getOption("shiny.blocking", TRUE)
 )
 }
 \arguments{
@@ -63,8 +63,7 @@ only used for recording or running automated tests. Defaults to the
 
 \item{blocking}{If \code{TRUE}, blocks until the app is stopped. If \code{FALSE}, the
 app runs in the background and returns a \code{ShinyAppHandle} immediately.
-Defaults to \code{TRUE}, except when an LLM agent is detected, where it
-defaults to \code{FALSE}. Can be set globally via \code{options(shiny.blocking)}.
+Defaults to \code{TRUE}. Can be set globally via \code{options(shiny.blocking)}.
 Non-blocking mode requires the \code{later} event loop to be running.}
 }
 \value{

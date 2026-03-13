@@ -47,8 +47,7 @@
 #'   `shiny.testmode` option, or FALSE if the option is not set.
 #' @param blocking If `TRUE`, blocks until the app is stopped. If `FALSE`, the
 #'   app runs in the background and returns a `ShinyAppHandle` immediately.
-#'   Defaults to `TRUE`, except when an LLM agent is detected, where it
-#'   defaults to `FALSE`. Can be set globally via `options(shiny.blocking)`.
+#'   Defaults to `TRUE`. Can be set globally via `options(shiny.blocking)`.
 #'   Non-blocking mode requires the `later` event loop to be running.
 #'
 #' @return If `blocking = TRUE`, returns the value passed to [stopApp()], or
@@ -104,12 +103,8 @@ runApp <- function(
   workerId="", quiet=FALSE,
   display.mode=c("auto", "normal", "showcase"),
   test.mode=getOption('shiny.testmode', FALSE),
-  blocking=getOption("shiny.blocking")
+  blocking=getOption("shiny.blocking", TRUE)
 ) {
-
-  if (is.null(blocking)) {
-    blocking <- !is_llm()
-  }
   # * Wrap **all** execution of the app inside the otel promise domain
   # * While this could be done at a lower level, it allows for _anything_ within
   #   shiny's control to allow for the opportunity to have otel active spans be
@@ -659,12 +654,4 @@ decorateServerFunc <- function(appobj, serverFunc) {
     }
   }
   appobj
-}
-
-is_llm <- function() {
-  nzchar(Sys.getenv("AGENT")) ||
-    nzchar(Sys.getenv("CLAUDECODE")) ||
-    nzchar(Sys.getenv("GEMINI_CLI")) ||
-    nzchar(Sys.getenv("CURSOR_AGENT")) ||
-    nzchar(Sys.getenv("CODEX_CI"))
 }

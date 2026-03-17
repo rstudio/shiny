@@ -442,7 +442,8 @@ runApp <- function(
     handle <- ShinyAppHandle$new(appUrl, cleanup)
     .globals$runningHandle <- handle
 
-    serviceNonBlocking(handle)
+    .globals$serviceGeneration <- (.globals$serviceGeneration %||% 0L) + 1L
+    serviceNonBlocking(handle, .globals$serviceGeneration)
     handle
   }
 }

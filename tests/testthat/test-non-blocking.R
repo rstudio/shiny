@@ -97,6 +97,39 @@ test_that("non-blocking auto-stops previous app when starting new one", {
   handle2$stop()
 })
 
+test_that("replacing a non-blocking app does not leave stale service loops", {
+  generations_seen <- integer(0)
+
+  # Mock serviceApp to record which generation is active when called
+  local_mocked_bindings(
+    serviceApp = function(timeout) {
+      generations_seen[[length(generations_seen) + 1L]] <<-
+        .globals$serviceGeneration
+    },
+    .package = "shiny"
+  )
+
+  app1 <- shinyApp(ui = fluidPage(), server = function(input, output) {})
+  app2 <- shinyApp(ui = fluidPage(), server = function(input, output) {})
+
+  handle1 <- runApp(app1, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  gen1 <- .globals$serviceGeneration
+
+  handle2 <- runApp(app2, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  on.exit(handle2$stop(), add = TRUE)
+  gen2 <- .globals$serviceGeneration
+
+  # Reset and let service loops run
+  generations_seen <- integer(0)
+  while (length(generations_seen) < 5L) later::run_now(timeoutSecs = 1)
+
+  # Only the new generation should be servicing
+  expect_true(length(generations_seen) > 0)
+  expect_true(all(generations_seen == gen2))
+
+  handle2$stop()
+})
+
 test_that("nested runApp in blocking mode still errors", {
   inner_app <- shinyApp(
     ui = fluidPage(),
@@ -141,7 +174,7 @@ test_that("old handle doesn't see new app's result", {
 
   stopApp("result1")
   while (handle1$status() == "running") {
-    later::run_now(timeoutSecs = 1)
+    later::run_now(1)
   }
   expect_equal(handle1$result(), "result1")
 

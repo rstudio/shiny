@@ -502,8 +502,13 @@ serviceApp <- function(
 
 # Non-blocking service loop using later callbacks.
 # Uses 1ms delay between iterations to yield CPU for console interaction.
-serviceNonBlocking <- function(handle) {
+# The generation token ensures that when one app replaces another, the old
+# app's service loop exits cleanly instead of continuing to run.
+serviceNonBlocking <- function(handle, generation) {
   serviceLoop <- function() {
+    if (!identical(.globals$serviceGeneration, generation)) {
+      return(invisible())
+    }
     if (!.globals$stopped) {
       ..stacktraceoff..(
         captureStackTraces(
@@ -517,6 +522,9 @@ serviceNonBlocking <- function(handle) {
           )
         )
       )
+    }
+    if (!identical(.globals$serviceGeneration, generation)) {
+      return(invisible())
     }
     if (!.globals$stopped) {
       later::later(serviceLoop, delay = .shinyServiceDelaySecs)

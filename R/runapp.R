@@ -411,6 +411,11 @@ runApp <- function(
   .globals$retval <- NULL
   .globals$stopped <- FALSE
 
+  # Invalidate any stale non-blocking service loops from a previous app.
+  # Each app launch gets a fresh generation so old callbacks become no-ops,
+  # regardless of whether this app or the previous one is blocking.
+  .globals$serviceGeneration <- (.globals$serviceGeneration %||% 0L) + 1L
+
   # ============================================================================
   # Run event loop via httpuv
   # ============================================================================
@@ -442,7 +447,6 @@ runApp <- function(
     handle <- ShinyAppHandle$new(appUrl, cleanup)
     .globals$runningHandle <- handle
 
-    .globals$serviceGeneration <- (.globals$serviceGeneration %||% 0L) + 1L
     serviceNonBlocking(handle, .globals$serviceGeneration)
     handle
   }

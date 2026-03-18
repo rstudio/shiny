@@ -130,6 +130,34 @@ test_that("replacing a non-blocking app does not leave stale service loops", {
   handle2$stop()
 })
 
+test_that("starting a blocking app invalidates stale non-blocking service loops", {
+  service_calls <- 0L
+
+  local_mocked_bindings(
+    serviceApp = function(timeout) {
+      service_calls <<- service_calls + 1L
+    },
+    .package = "shiny"
+  )
+
+  ns <- asNamespace("shiny")
+  g <- get(".globals", envir = ns)
+
+  # Simulate a non-blocking app at generation 1
+  assign("serviceGeneration", 1L, envir = g)
+  assign("stopped", FALSE, envir = g)
+  shiny:::serviceNonBlocking(list(stop = function() {}), 1L)
+
+  # Simulate stopping app 1, then starting a blocking app which bumps generation
+  assign("stopped", TRUE, envir = g)
+  assign("serviceGeneration", 2L, envir = g)
+  assign("stopped", FALSE, envir = g)
+
+  later::run_now(timeoutSecs = 1)
+
+  expect_equal(service_calls, 0L)
+})
+
 test_that("nested runApp in blocking mode still errors", {
   inner_app <- shinyApp(
     ui = fluidPage(),

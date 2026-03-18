@@ -502,8 +502,9 @@ serviceApp <- function(
 
 # Non-blocking service loop using later callbacks.
 # Uses 1ms delay between iterations to yield CPU for console interaction.
-# The generation token ensures that when one app replaces another, the old
-# app's service loop exits cleanly instead of continuing to run.
+# The generation token (incremented on every runApp() call) ensures that when
+# a new app starts, any stale service loop from a previous non-blocking app
+# exits cleanly instead of continuing to run.
 serviceNonBlocking <- function(handle, generation) {
   serviceLoop <- function() {
     if (!identical(.globals$serviceGeneration, generation)) {

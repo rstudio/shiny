@@ -124,7 +124,7 @@ runApp <- function(
     } else {
       stop("Can't start a new app while another is running. ",
            "If your application code contains `runApp()`, remove it. ",
-           "Otherwise, stop the current app first with handle$stop() or stopApp().")
+           "Otherwise, stop the current app first with stopApp().")
     }
   }
 

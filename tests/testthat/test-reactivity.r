@@ -144,7 +144,7 @@ test_that("reactiveValues keys are sorted", {
 })
 
 test_that("reactiveValues() has useful print method", {
-  verify_output(test_path("print-reactiveValues.txt"), {
+  expect_snapshot_output({
     x <- reactiveValues(x = 1, y = 2, z = 3)
     x
   })
@@ -1656,4 +1656,3 @@ test_that("Contexts can be masked off via promise domains", {
     later::run_now(all=FALSE)
   }
 })
-

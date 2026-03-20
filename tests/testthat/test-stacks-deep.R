@@ -8,7 +8,9 @@ formatError <- function(err, full = FALSE, offset = TRUE, cleanPaths = TRUE) {
     suppressWarnings(
       suppressMessages(
         withCallingHandlers(
-          printError(err, full = full, offset = offset),
+          {
+            printError(err, full = full, offset = offset)
+          },
           warning = function(cnd) {
             cat(conditionMessage(cnd), "\n", sep = "", file = stderr())
           },
@@ -89,6 +91,10 @@ describe("deep stack trace filtering", {
 })
 
 test_that("deep stack capturing", {
+  # base::tryCatch internals changed in 4.5.2
+  skip_unless_r(">= 4.5.2")
+  skip_if_not_installed("testthat", "3.3.0")
+
   `%...>%` <- promises::`%...>%`
   `%...!%` <- promises::`%...!%`
   finally <- promises::finally
@@ -234,6 +240,7 @@ test_that("stack trace stripping works", {
 })
 
 test_that("coro async generator deep stack count is low", {
+  skip_if_not_installed("coro")
   gen <- coro::async_generator(function() {
     for (i in 1:50) {
       await(coro::async_sleep(0.001))

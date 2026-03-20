@@ -5,8 +5,8 @@
     "url": "git+https://github.com/rstudio/shiny.git"
   },
   "name": "@posit/shiny",
-  "version": "1.11.1-alpha.9000",
-  "license": "GPL-3.0-only",
+  "version": "1.13.0-alpha.9000",
+  "license": "MIT",
   "main": "",
   "browser": "",
   "types": "srcts/types/extras/globalShiny.d.ts",
@@ -33,7 +33,6 @@
     "@types/jqueryui": "1.12.24",
     "@types/lodash": "4.x",
     "@types/node": "18.x",
-    "@types/showdown": "1.x",
     "@typescript-eslint/eslint-plugin": "8.x",
     "@typescript-eslint/parser": "8.x",
     "autoprefixer": "10.x",
@@ -70,7 +69,7 @@
     "coverage_detailed": "npx --yes type-check --detail",
     "coverage": "type-coverage -p tsconfig.json --at-least 90",
     "circular": "npx --yes dpdm --transform ./srcts/src/index.ts",
-    "prepack": "cp README.md README-orig.md && cp npm-README.md README.md",
+    "prepack": "cp README.md README-orig.md && cp README-npm.md README.md",
     "postpack": "test -f README-orig.md && cp README-orig.md README.md && rm README-orig.md"
   },
   "prettier": {

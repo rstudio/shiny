@@ -41,6 +41,28 @@
 #'   is, a function that quickly returns a promise) and allows even that very
 #'   session to immediately unblock and carry on with other user interactions.
 #'
+#' @section OpenTelemetry Integration:
+#'
+#' When an `ExtendedTask` is created, if OpenTelemetry tracing is enabled for
+#' `"reactivity"` (see [withOtelCollect()]), the `ExtendedTask` will record
+#' spans for each invocation of the task. The tracing level at `invoke()` time
+#' does not affect whether spans are recorded; only the tracing level when
+#' calling `ExtendedTask$new()` matters.
+#'
+#' The OTel span will be named based on the label created from the variable the
+#' `ExtendedTask` is assigned to. If no label can be determined, the span will
+#' be named `<anonymous>`. Similar to other Shiny OpenTelemetry spans, the span
+#' will also include source reference attributes and session ID attributes.
+#'
+#' ```r
+#' withOtelCollect("all", {
+#'   my_task <- ExtendedTask$new(function(...) { ... })
+#' })
+#'
+#' # Span recorded for this invocation: ExtendedTask my_task
+#' my_task$invoke(...)
+#' ```
+#'
 #' @examplesIf rlang::is_interactive() && rlang::is_installed("mirai")
 #' library(shiny)
 #' library(bslib)
@@ -116,10 +138,37 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
     #'   read reactive inputs and pass them as arguments.
     initialize = function(func) {
       private$func <- func
-      private$rv_status <- reactiveVal("initial")
-      private$rv_value <- reactiveVal(NULL)
-      private$rv_error <- reactiveVal(NULL)
+
+      # Do not show these private reactive values in otel spans
+      with_no_otel_collect({
+        private$rv_status <- reactiveVal("initial", label = "ExtendedTask$private$status")
+        private$rv_value <- reactiveVal(NULL, label = "ExtendedTask$private$value")
+        private$rv_error <- reactiveVal(NULL, label = "ExtendedTask$private$error")
+      })
+
       private$invocation_queue <- fastmap::fastqueue()
+
+      domain <- getDefaultReactiveDomain()
+
+      # Set a label for the reactive values for easier debugging
+      # Go up an extra sys.call() to get the user's call to ExtendedTask$new()
+      # The first sys.call() is to `initialize(...)`
+      call_srcref <- get_call_srcref(-1)
+      label <- rassignSrcrefToLabel(
+        call_srcref,
+        defaultLabel = "<anonymous>"
+      )
+      private$otel_span_label <- otel_span_label_extended_task(label, domain = domain)
+      private$otel_log_label_add_to_queue <- otel_log_label_extended_task_add_to_queue(label, domain = domain)
+
+      private$otel_attrs <- c(
+        otel_srcref_attributes(call_srcref, "ExtendedTask"),
+        otel_session_id_attrs(domain)
+      ) %||% list()
+
+      # Capture this value at init-time, not run-time
+      # This way, the span is only created if otel was enabled at time of creation... just like other spans
+      private$is_recording_otel <- has_otel_collect("reactivity")
     },
     #' @description
     #' Starts executing the long-running operation. If this `ExtendedTask` is
@@ -139,8 +188,27 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
         isolate(private$rv_status()) == "running" ||
           private$invocation_queue$size() > 0
       ) {
+        otel_log(
+          private$otel_log_add_to_queue_label,
+          severity = "debug",
+          attributes = c(
+            private$otel_attrs,
+            list(
+              queue_size = private$invocation_queue$size() + 1L
+            )
+          )
+        )
         private$invocation_queue$add(list(args = args, call = call))
       } else {
+
+        if (private$is_recording_otel) {
+          private$otel_span <- start_otel_span(
+            private$otel_span_label,
+            attributes = private$otel_attrs
+          )
+          otel::local_active_span(private$otel_span)
+        }
+
         private$do_invoke(args, call = call)
       }
       invisible(NULL)
@@ -188,7 +256,7 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
     #' invalidation will be ignored.
     result = function() {
       switch (private$rv_status(),
-        running = req(FALSE, cancelOutput="progress"),
+        running = req(FALSE, cancelOutput = "progress"),
         success = if (private$rv_value()$visible) {
           private$rv_value()$value
         } else {
@@ -208,21 +276,36 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
     rv_error = NULL,
     invocation_queue = NULL,
 
+    otel_span_label = NULL,
+    otel_log_label_add_to_queue = NULL,
+    otel_attrs = list(),
+    is_recording_otel = FALSE,
+    otel_span = NULL,
+
     do_invoke = function(args, call = NULL) {
       private$rv_status("running")
       private$rv_value(NULL)
       private$rv_error(NULL)
 
-      p <- promises::promise_resolve(
+      p <- promise_resolve(
         maskReactiveContext(do.call(private$func, args))
       )
 
       p <- promises::then(
         p,
         onFulfilled = function(value, .visible) {
+          if (is_otel_span(private$otel_span)) {
+
+            private$otel_span$end(status_code = "ok")
+            private$otel_span <- NULL
+          }
           private$on_success(list(value = value, visible = .visible))
         },
         onRejected = function(error) {
+          if (is_otel_span(private$otel_span)) {
+            private$otel_span$end(status_code = "error")
+            private$otel_span <- NULL
+          }
           private$on_error(error, call = call)
         }
       )

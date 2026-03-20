@@ -214,6 +214,10 @@ reference:
       - runTests
       - testServer
       - MockShinySession
+  - title: OpenTelemetry
+    desc: Functions for OpenTelemetry tracing integration
+    contents:
+      - withOtelCollect
   - title: Superseded
     desc: Functions that have been `r lifecycle::badge("superseded")`
     contents:

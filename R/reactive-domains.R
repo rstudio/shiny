@@ -45,6 +45,8 @@ createMockDomain <- function() {
   callbacks <- Callbacks$new()
   ended <- FALSE
   domain <- new.env(parent = emptyenv())
+  domain$ns <- function(id) id
+  domain$token <- "mock-domain"
   domain$onEnded <- function(callback) {
     return(callbacks$register(callback))
   }
@@ -95,7 +97,11 @@ getDefaultReactiveDomain <- function() {
 #' @rdname domains
 #' @export
 withReactiveDomain <- function(domain, expr) {
-  promises::with_promise_domain(createVarPromiseDomain(.globals, "domain", domain), expr)
+  # Use `promises::` as it shows up in the stack trace
+  promises::with_promise_domain(
+    createVarPromiseDomain(.globals, "domain", domain),
+    expr
+  )
 }
 
 #

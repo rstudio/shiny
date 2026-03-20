@@ -1,90 +1,103 @@
 # integration tests
 
     Code
-      df
+      df_integration_slim
     Output
-        num                call                 loc
-      1  64                   A   [test-stacks.R#3]
-      2  63                   B   [test-stacks.R#7]
-      3  62        <reactive:C>  [test-stacks.R#11]
-      4  42                   C                    
-      5  41         renderTable  [test-stacks.R#18]
-      6  40                func                    
-      7  39               force                    
-      8  38         withVisible                    
-      9  37 withCallingHandlers                    
+         num                                     call                 loc
+      1   70                                        A   [test-stacks.R#3]
+      2   69                                        B   [test-stacks.R#7]
+      3   68                             <reactive:C>  [test-stacks.R#11]
+      4   46                                        C                    
+      5   45                              renderTable  [test-stacks.R#18]
+      6   44                                     func                    
+      7   28 renderTable({     C() }, server = FALSE)                    
+      8   10                                  isolate                    
+      9    9                      withCallingHandlers  [test-stacks.R#16]
+      10   8                          domain$wrapSync                    
+      11   7            promises::with_promise_domain                    
+      12   6                       captureStackTraces                    
+      13   2                                 tryCatch                    
+      14   1                                      try                    
+      15   0                               causeError  [test-stacks.R#14]
 
 ---
 
     Code
-      df
+      df_integration_full
     Output
          num                                     call                 loc
-      1   67                                        h                    
-      2   66                       .handleSimpleError                    
-      3   65                                     stop                    
-      4   64                                        A   [test-stacks.R#3]
-      5   63                                        B   [test-stacks.R#7]
-      6   62                             <reactive:C>  [test-stacks.R#11]
-      7   61                         ..stacktraceon..                    
-      8   60                                    .func                    
-      9   59                              withVisible                    
-      10  58                      withCallingHandlers                    
-      11  57                              contextFunc                    
-      12  56                              env$runWith                    
-      13  55                      withCallingHandlers                    
-      14  54                          domain$wrapSync                    
-      15  53            promises::with_promise_domain                    
-      16  52                       captureStackTraces                    
-      17  51                                    force                    
-      18  50                          domain$wrapSync                    
-      19  49            promises::with_promise_domain                    
-      20  48                       withReactiveDomain                    
-      21  47                          domain$wrapSync                    
-      22  46            promises::with_promise_domain                    
-      23  45                                  ctx$run                    
-      24  44                        self$.updateValue                    
-      25  43                        ..stacktraceoff..                    
-      26  42                                        C                    
-      27  41                              renderTable  [test-stacks.R#18]
-      28  40                                     func                    
-      29  39                                    force                    
-      30  38                              withVisible                    
-      31  37                      withCallingHandlers                    
-      32  36                          domain$wrapSync                    
-      33  35            promises::with_promise_domain                    
-      34  34                       captureStackTraces                    
-      35  33                               doTryCatch                    
-      36  32                              tryCatchOne                    
-      37  31                             tryCatchList                    
-      38  30                                 tryCatch                    
-      39  29                                       do                    
-      40  28                             hybrid_chain                    
-      41  27                               renderFunc                    
-      42  26 renderTable({     C() }, server = FALSE)                    
-      43  25                         ..stacktraceon..  [test-stacks.R#17]
-      44  24                              contextFunc                    
-      45  23                              env$runWith                    
-      46  22                      withCallingHandlers                    
-      47  21                          domain$wrapSync                    
-      48  20            promises::with_promise_domain                    
-      49  19                       captureStackTraces                    
-      50  18                                    force                    
-      51  17                          domain$wrapSync                    
-      52  16            promises::with_promise_domain                    
-      53  15                       withReactiveDomain                    
-      54  14                          domain$wrapSync                    
-      55  13            promises::with_promise_domain                    
-      56  12                                  ctx$run                    
-      57  11                        ..stacktraceoff..                    
-      58  10                                  isolate                    
-      59   9                      withCallingHandlers  [test-stacks.R#16]
-      60   8                          domain$wrapSync                    
-      61   7            promises::with_promise_domain                    
-      62   6                       captureStackTraces                    
-      63   5                               doTryCatch  [test-stacks.R#15]
-      64   4                              tryCatchOne                    
-      65   3                             tryCatchList                    
-      66   2                                 tryCatch                    
-      67   1                                      try                    
+      1   73                                        h                    
+      2   72                       .handleSimpleError                    
+      3   71                                     stop                    
+      4   70                                        A   [test-stacks.R#3]
+      5   69                                        B   [test-stacks.R#7]
+      6   68                             <reactive:C>  [test-stacks.R#11]
+      7   67                         ..stacktraceon..                    
+      8   66                                    .func                    
+      9   65                              withVisible                    
+      10  64                      withCallingHandlers                    
+      11  63                              contextFunc                    
+      12  62                              env$runWith                    
+      13  61                      withCallingHandlers                    
+      14  60                          domain$wrapSync                    
+      15  59            promises::with_promise_domain                    
+      16  58                       captureStackTraces                    
+      17  57                                    force                    
+      18  56                   with_otel_span_context                    
+      19  55                                    force                    
+      20  54                          domain$wrapSync                    
+      21  53            promises::with_promise_domain                    
+      22  52                       withReactiveDomain                    
+      23  51                          domain$wrapSync                    
+      24  50            promises::with_promise_domain                    
+      25  49                                  ctx$run                    
+      26  48                        self$.updateValue                    
+      27  47                        ..stacktraceoff..                    
+      28  46                                        C                    
+      29  45                              renderTable  [test-stacks.R#18]
+      30  44                                     func                    
+      31  43                         ..stacktraceon..                    
+      32  42                                    force                    
+      33  41                              withVisible                    
+      34  40                      withCallingHandlers                    
+      35  39                          domain$wrapSync                    
+      36  38            promises::with_promise_domain                    
+      37  37                       captureStackTraces                    
+      38  36                               doTryCatch                    
+      39  35                              tryCatchOne                    
+      40  34                             tryCatchList                    
+      41  33                                 tryCatch                    
+      42  32                                       do                    
+      43  31                             hybrid_chain                    
+      44  30                               renderFunc                    
+      45  29                        ..stacktraceoff..                    
+      46  28 renderTable({     C() }, server = FALSE)                    
+      47  27                         ..stacktraceon..  [test-stacks.R#17]
+      48  26                              contextFunc                    
+      49  25                              env$runWith                    
+      50  24                      withCallingHandlers                    
+      51  23                          domain$wrapSync                    
+      52  22            promises::with_promise_domain                    
+      53  21                       captureStackTraces                    
+      54  20                                    force                    
+      55  19                   with_otel_span_context                    
+      56  18                                    force                    
+      57  17                          domain$wrapSync                    
+      58  16            promises::with_promise_domain                    
+      59  15                       withReactiveDomain                    
+      60  14                          domain$wrapSync                    
+      61  13            promises::with_promise_domain                    
+      62  12                                  ctx$run                    
+      63  11                        ..stacktraceoff..                    
+      64  10                                  isolate                    
+      65   9                      withCallingHandlers  [test-stacks.R#16]
+      66   8                          domain$wrapSync                    
+      67   7            promises::with_promise_domain                    
+      68   6                       captureStackTraces                    
+      69   5                               doTryCatch  [test-stacks.R#15]
+      70   4                              tryCatchOne                    
+      71   3                             tryCatchList                    
+      72   2                                 tryCatch                    
+      73   1                                      try                    
+      74   0                               causeError  [test-stacks.R#14]
 

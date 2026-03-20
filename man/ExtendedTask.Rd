@@ -45,6 +45,29 @@ is, a function that quickly returns a promise) and allows even that very
 session to immediately unblock and carry on with other user interactions.
 }
 
+\section{OpenTelemetry Integration}{
+
+
+When an \code{ExtendedTask} is created, if OpenTelemetry tracing is enabled for
+\code{"reactivity"} (see \code{\link[=withOtelCollect]{withOtelCollect()}}), the \code{ExtendedTask} will record
+spans for each invocation of the task. The tracing level at \code{invoke()} time
+does not affect whether spans are recorded; only the tracing level when
+calling \code{ExtendedTask$new()} matters.
+
+The OTel span will be named based on the label created from the variable the
+\code{ExtendedTask} is assigned to. If no label can be determined, the span will
+be named \verb{<anonymous>}. Similar to other Shiny OpenTelemetry spans, the span
+will also include source reference attributes and session ID attributes.
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{withOtelCollect("all", \{
+  my_task <- ExtendedTask$new(function(...) \{ ... \})
+\})
+
+# Span recorded for this invocation: ExtendedTask my_task
+my_task$invoke(...)
+}\if{html}{\out{</div>}}
+}
+
 \examples{
 \dontshow{if (rlang::is_interactive() && rlang::is_installed("mirai")) withAutoprint(\{ # examplesIf}
 library(shiny)

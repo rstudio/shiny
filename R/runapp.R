@@ -84,13 +84,22 @@
 #'   runApp(app)
 #' }
 #' @export
-runApp <- function(appDir=getwd(),
-                   port=getOption('shiny.port'),
-                   launch.browser = getOption('shiny.launch.browser', interactive()),
-                   host=getOption('shiny.host', '127.0.0.1'),
-                   workerId="", quiet=FALSE,
-                   display.mode=c("auto", "normal", "showcase"),
-                   test.mode=getOption('shiny.testmode', FALSE)) {
+runApp <- function(
+  appDir=getwd(),
+  port=getOption('shiny.port'),
+  launch.browser = getOption('shiny.launch.browser', interactive()),
+  host=getOption('shiny.host', '127.0.0.1'),
+  workerId="", quiet=FALSE,
+  display.mode=c("auto", "normal", "showcase"),
+  test.mode=getOption('shiny.testmode', FALSE)
+) {
+
+  # * Wrap **all** execution of the app inside the otel promise domain
+  # * While this could be done at a lower level, it allows for _anything_ within
+  #   shiny's control to allow for the opportunity to have otel active spans be
+  #   reactivated upon promise domain restoration
+  promises::local_otel_promise_domain()
+
   on.exit({
     handlerManager$clear()
   }, add = TRUE)
@@ -207,8 +216,14 @@ runApp <- function(appDir=getwd(),
     # any valid version.
     ver <- Sys.getenv('SHINY_SERVER_VERSION')
     if (utils::compareVersion(ver, .shinyServerMinVersion) < 0) {
-      warning('Shiny Server v', .shinyServerMinVersion,
-              ' or later is required; please upgrade!')
+      rlang::warn(c(
+        sprintf(
+          "Shiny Server v%s or later is required; please upgrade.",
+          .shinyServerMinVersion
+        ),
+        "i" = "If you are not using Shiny Server, you are likely seeing this message because the `SHINY_PORT` environment variable is set in your environment.",
+        "i" = "Avoid using `SHINY_PORT` to prevent this warning."
+      ))
     }
   }
 

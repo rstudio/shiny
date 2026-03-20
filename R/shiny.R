@@ -428,7 +428,7 @@ ShinySession <- R6Class(
         stop("Nested calls to withCurrentOutput() are not allowed.")
       }
 
-      promises::with_promise_domain(
+      with_promise_domain(
         createVarPromiseDomain(private, "currentOutputName", name),
         expr
       )
@@ -1056,6 +1056,19 @@ ShinySession <- R6Class(
         class(e) <- c("shiny.error.fatal", class(e))
       }
 
+      # For fatal errors, always log.
+      # For non-fatal errors, only log if we haven't seen this error before.
+      if (close || !has_seen_otel_exception(e)) {
+        otel_log(
+          if (close) "Fatal error" else "Unhandled error",
+          severity = if (close) "fatal" else "error",
+          attributes = otel::as_attributes(list(
+            session.id = self$token,
+            error = get_otel_error_obj(e)
+          ))
+        )
+      }
+
       private$unhandledErrorCallbacks$invoke(e, onError = printError)
       .globals$onUnhandledErrorCallbacks$invoke(e, onError = printError)
 
@@ -1073,7 +1086,9 @@ ShinySession <- R6Class(
       }
       # ..stacktraceon matches with the top-level ..stacktraceoff..
       withReactiveDomain(self, {
-        private$closedCallbacks$invoke(onError = printError, ..stacktraceon = TRUE)
+        otel_span_session_end(domain = self, {
+          private$closedCallbacks$invoke(onError = printError, ..stacktraceon = TRUE)
+        })
       })
     },
     isClosed = function() {
@@ -1142,7 +1157,8 @@ ShinySession <- R6Class(
         attr(label, "srcref") <- srcref
         attr(label, "srcfile") <- srcfile
 
-        obs <- observe(..stacktraceon = FALSE, {
+        # Do not bind this `observe()` call
+        obs <- with_no_otel_collect(observe(..stacktraceon = FALSE, {
 
           private$sendMessage(recalculating = list(
             name = name, status = 'recalculating'
@@ -1154,7 +1170,9 @@ ShinySession <- R6Class(
             hybrid_chain(
               {
                 private$withCurrentOutput(name, {
-                  shinyCallingHandlers(func())
+                  maybe_with_otel_span_reactive_update({
+                    shinyCallingHandlers(func())
+                  }, domain = self)
                 })
               },
               catch = function(cond) {
@@ -1179,9 +1197,7 @@ ShinySession <- R6Class(
                 } else {
                   if (isTRUE(getOption("show.error.messages"))) printError(cond)
                   if (getOption("shiny.sanitize.errors", FALSE)) {
-                    cond <- simpleError(paste("An error has occurred. Check your",
-                      "logs or contact the app author for",
-                      "clarification."))
+                    cond <- sanitized_error()
                   }
                   self$unhandledError(cond, close = FALSE)
                   invisible(structure(list(), class = "try-error", condition = cond))
@@ -1245,7 +1261,7 @@ ShinySession <- R6Class(
                 private$invalidatedOutputValues$set(name, value)
             }
           )
-        }, suspended=private$shouldSuspend(name), label=label)
+        }, suspended=private$shouldSuspend(name), label=label))
 
         # If any output attributes were added to the render function attach
         # them to observer.
@@ -2023,7 +2039,7 @@ ShinySession <- R6Class(
           ext <- paste(".", ext, sep = "")
         tmpdata <- tempfile(fileext = ext)
         return(Context$new(getDefaultReactiveDomain(), '[download]')$run(function() {
-          promises::with_promise_domain(reactivePromiseDomain(), {
+          with_promise_domain(reactivePromiseDomain(), {
             captureStackTraces({
               self$incrementBusyCount()
               hybrid_chain(
@@ -2195,6 +2211,8 @@ ShinySession <- R6Class(
       if (private$busyCount == 0L) {
         rLog$asyncStart(domain = self)
         private$sendMessage(busy = "busy")
+
+        otel_span_reactive_update_init(domain = self)
       }
       private$busyCount <- private$busyCount + 1L
     },
@@ -2216,6 +2234,8 @@ ShinySession <- R6Class(
             private$startCycle()
           }
         })
+
+        otel_span_reactive_update_teardown(domain = self)
       }
     }
   )
@@ -2722,4 +2742,11 @@ validate_session_object <- function(session, label = as.character(sys.call(sys.p
       )
     )
   }
+}
+
+
+sanitized_error <- function() {
+  simpleError(paste("An error has occurred. Check your",
+    "logs or contact the app author for",
+    "clarification."))
 }

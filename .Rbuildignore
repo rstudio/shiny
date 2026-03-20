@@ -32,3 +32,6 @@
 ^eslint\.config\.mjs$
 ^_dev$
 ^.claude$
+^README-npm\.md$
+^CRAN-SUBMISSION$
+^LICENSE\.md$

@@ -353,7 +353,7 @@
       <div class="tabbable">
         <ul class="nav nav-tabs" data-tabsetid="4785">
           <li>
-            <a href="#tab-4785-1" data-toggle="tab" data-bs-toggle="tab"></a>
+            <a href="#tab-4785-1" data-toggle="tab" data-bs-toggle="tab" disabled></a>
           </li>
           <li class="active">
             <a href="#tab-4785-2" data-toggle="tab" data-bs-toggle="tab" data-value="A">A</a>

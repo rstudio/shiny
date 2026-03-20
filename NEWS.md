@@ -1,18 +1,145 @@
 # shiny (development version)
 
+# shiny 1.13.0
+
 ## New features
 
-* The `icon` argument of `updateActionButton()`/`updateActionLink()` nows allows values other than `shiny::icon()` (e.g., `fontawesome::fa()`, `bsicons::bs_icon()`, etc). (#4249)
+* Shiny now supports interactive breakpoints when used with Ark (e.g. in Positron). (#4352)
 
-## Bug fixes
+## Bug fixes and minor improvements
 
-* `updateActionButton()`/`updateActionLink()` now correctly renders HTML content passed to the `label` argument. (#4249)
+* Stack traces from render functions (e.g., `renderPlot()`, `renderDataTable()`) now hide internal Shiny rendering pipeline frames, making error messages cleaner and more focused on user code. (#4358)
 
-* Fixed an issue where `updateSelectizeInput(options = list(plugins="remove_button"))` could lead to multiple remove buttons. (#4275)
+* Fixed an issue with `actionLink()` that extended the link underline to whitespace around the text. (#4348)
 
-## Changes
 
-* The return value of `actionButton()`/`actionLink()` changed slightly: `label` and `icon` are wrapped in an additional HTML container element. This allows for: 1. `updateActionButton()`/`updateActionLink()` to distinguish between the `label` and `icon` when making updates and 2. spacing between `label` and `icon` to be more easily customized via CSS. 
+# shiny 1.12.1
+
+## New features
+
+* `withOtelCollect()` and `localOtelCollect()` temporarily control
+  OpenTelemetry collection levels during reactive expression creation,
+  allowing you to enable or disable telemetry collection for specific modules
+  or sections of code. (#4333)
+
+## Bug fixes and minor improvements
+
+* OpenTelemetry code attributes now include both the preferred attribute names
+  (`code.file.path`, `code.line.number`, `code.column.number`) and the
+  deprecated names (`code.filepath`, `code.lineno`, `code.column`) to follow
+  OpenTelemetry semantic conventions while maintaining backward compatibility.
+  The deprecated names will be removed in a future release after Logfire
+  supports the preferred names. (#4325)
+
+* `ExtendedTask` now captures the OpenTelemetry recording state at
+  initialization time rather than at invocation time, ensuring consistent span
+  recording behavior regardless of runtime configuration changes. (#4334)
+
+* Timer tests are now skipped on CRAN. (#4327)
+
+# shiny 1.12.0
+
+## OpenTelemetry support
+
+* Shiny now supports [OpenTelemetry](https://opentelemetry.io/) via
+  [`{otel}`](https://otel.r-lib.org/index.html). By default, if
+  `otel::is_tracing_enabled()` returns `TRUE`, then `{shiny}` records all
+  OpenTelemetry spans. See [`{otelsdk}`'s Collecting Telemetry
+  Data](https://otelsdk.r-lib.org/reference/collecting.html) for more details
+  on configuring OpenTelemetry. (#4269, #4300)
+
+* Supported values for `options(shiny.otel.collect)` (or
+  `Sys.getenv("SHINY_OTEL_COLLECT")`):
+  * `"none"` - No Shiny OpenTelemetry tracing.
+  * `"session"` - Adds session start/end spans.
+  * `"reactive_update"` - Spans for any synchronous/asynchronous reactive
+    update. (Includes `"session"` features).
+  * `"reactivity"` - Spans for all reactive expressions. (Includes
+    `"reactive_update"` features).
+  * `"all"` [default] - All Shiny OpenTelemetry tracing. Currently equivalent
+    to `"reactivity"`.
+
+* OpenTelemetry spans are recorded for:
+  * `session_start`: Wraps the calling of the `server()` function. Also
+    contains HTTP request within the attributes.
+  * `session_end`: Wraps the calling of the `onSessionEnded()` handlers.
+  * `reactive_update`: Signals the start of when Shiny knows something is to
+    be calculated. This span ends when there are no more reactive updates
+    (promises or synchronous) to be calculated.
+  * `reactive`, `observe`, `output`: Captures the calculation (including any
+    async promise chains) of a reactive expression (`reactive()`), an observer
+    (`observe()`), or an output render function (`render*()`).
+  * `reactive debounce`, `reactive throttle`: Captures the calculation
+    (including any async promise chains) of a `debounce()`d or `throttle()`d
+    reactive expression.
+  * `reactiveFileReader`, `reactivePoll`: Captures the calculation
+    (including any async promise chains) of a `reactiveFileReader()` or
+    `reactivePoll()`.
+  * `ExtendedTask`: Captures the calculation (including any async promise
+    chains) of an `ExtendedTask`.
+
+* OpenTelemetry Logs are recorded for:
+  * `Set reactiveVal <name>` - When a `reactiveVal()` is set
+  * `Set reactiveValues <name>$<key>` - When a `reactiveValues()` element is
+    set
+  * Fatal or unhandled errors - When an error occurs that causes the session
+    to end, or when an unhandled error occurs in a reactive context. Contains
+    the error within the attributes. To unsanitize the error message being
+    collected, set `options(shiny.otel.sanitize.errors = FALSE)`.
+  * `Set ExtendedTask <name> <value>` - When an `ExtendedTask`'s respective
+    reactive value (e.g., `status`, `value`, and `error`) is set.
+  * `<ExtendedTask name> add to queue` - When an `ExtendedTask` is added to
+    the task queue.
+
+* All OpenTelemetry logs and spans will contain a `session.id` attribute
+  containing the active session ID.
+
+## New features
+
+* `updateActionButton()` and `updateActionLink()` now accept values other than
+  `shiny::icon()` for the `icon` argument (e.g., `fontawesome::fa()`,
+  `bsicons::bs_icon()`, etc). (#4249)
+
+## Bug fixes and minor improvements
+
+* Showcase mode now uses server-side markdown rendering with the
+  `{commonmark}` package, providing support for GitHub Flavored Markdown
+  features (tables, strikethrough, autolinks, task lists). While most existing
+  README.md files should continue to work as expected, some minor rendering
+  differences may occur due to the change in markdown processor. (#4202,
+  #4201)
+
+* `debounce()`, `reactiveFileReader()`, `reactivePoll()`, `reactiveValues()`,
+  and `throttle()` now attempt to retrieve the assigned name for the default
+  label if the srcref is available. If a value cannot easily be produced, a
+  default label is used instead. (#4269, #4300)
+
+* The default label for items described below will now attempt to retrieve the
+  assigned name if the srcref is available. If a value can not easily be
+  produced, a default label will be used instead. This should improve the
+  OpenTelemetry span labels and the reactlog experience. (#4269, #4300)
+  * `reactiveValues()`, `reactivePoll()`, `reactiveFileReader()`, `debounce()`,
+    `throttle()`, `observe()`
+  * Combinations of `bindEvent()` and `reactive()` / `observe()`
+  * Combination of `bindCache()` and `reactive()`
+
+* `updateActionButton()` and `updateActionLink()` now correctly render HTML
+  content passed to the `label` argument. (#4249)
+
+* `updateSelectizeInput()` no longer creates multiple remove buttons when
+  `options = list(plugins="remove_button")` is used. (#4275)
+
+* `dateRangeInput()`/`updateDateRangeInput()` now correctly considers the time
+  zones of date-time objects (POSIXct) passed to the `start`, `end`, `min` and
+  `max` arguments. (thanks @ismirsehregal, #4318)
+
+## Breaking changes
+
+* The return value of `actionButton()` and `actionLink()` now wraps `label`
+  and `icon` in an additional HTML container element. This allows
+  `updateActionButton()` and `updateActionLink()` to distinguish between the
+  `label` and `icon` when making updates, and allows spacing between `label`
+  and `icon` to be more easily customized via CSS.
 
 # shiny 1.11.1
 
@@ -684,7 +811,7 @@ This release features plot caching, an important new tool for improving performa
 
 ### Minor new features and improvements
 
-* Upgrade FontAwesome from 4.7.0 to 5.3.1 and made `icon` tags browsable, which means they will display in a web browser or RStudio viewer by default (#2186). Note that if your application or library depends on FontAwesome directly using custom CSS, you may need to make some or all of the changes recommended in [Upgrade from Version 4](https://fontawesome.com/how-to-use/on-the-web/setup/upgrading-from-version-4). Font Awesome icons can also now be used in static R Markdown documents.
+* Upgrade FontAwesome from 4.7.0 to 5.3.1 and made `icon` tags browsable, which means they will display in a web browser or RStudio viewer by default (#2186). Note that if your application or library depends on FontAwesome directly using custom CSS, you may need to make some or all of the changes recommended in [Upgrade from Version 4](https://docs-v5.fontawesome.com/web/setup/upgrade-from-v4). Font Awesome icons can also now be used in static R Markdown documents.
 
 * Address #174: Added `datesdisabled` and `daysofweekdisabled` as new parameters to `dateInput()`. This resolves #174 and exposes the underlying arguments of [Bootstrap Datepicker](http://bootstrap-datepicker.readthedocs.io/en/latest/options.html#datesdisabled). `datesdisabled` expects a character vector with values in `yyyy/mm/dd` format and `daysofweekdisabled` expects an integer vector with day interger ids (Sunday=0, Saturday=6). The default value for both is `NULL`, which leaves all days selectable. Thanks, @nathancday! (#2147)
 

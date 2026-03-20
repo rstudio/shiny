@@ -253,7 +253,7 @@ drawPlot <- function(name, session, func, width, height, alt, pixelratio, res, .
 
   hybrid_chain(
     hybrid_chain(
-      promises::with_promise_domain(domain, {
+      with_promise_domain(domain, {
         hybrid_chain(
           func(),
           function(value) {

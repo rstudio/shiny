@@ -16,6 +16,7 @@ ShinyAppHandle <- R6::R6Class("ShinyAppHandle",
       if (self$status() != "running") {
         return(invisible(self))
       }
+      private$stopped <- TRUE
       private$captureResult()
       private$cleanupFn()
       private$cleanupFn <- NULL
@@ -55,15 +56,13 @@ ShinyAppHandle <- R6::R6Class("ShinyAppHandle",
   private = list(
     appUrl = NULL,
     cleanupFn = NULL,
-    # Whether this handle has captured the result. Distinct from .globals$stopped
+    # Whether this handle has been stopped. Distinct from .globals$stopped
     # which tracks whether a stop was requested (set by stopApp() or stop()).
     stopped = FALSE,
     resultValue = NULL,
     resultError = NULL,
 
     captureResult = function() {
-      if (private$stopped) return()
-      private$stopped <- TRUE
       if (isTRUE(.globals$reterror)) {
         private$resultError <- .globals$retval
       } else if (!is.null(.globals$retval)) {

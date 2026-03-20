@@ -433,11 +433,11 @@ runApp <- function(
 
     if (isTRUE(.globals$reterror)) {
       stop(.globals$retval)
-    }
-    else if (.globals$retval$visible)
+    } else if (.globals$retval$visible) {
       .globals$retval$value
-    else
+    } else {
       invisible(.globals$retval$value)
+    }
 
   } else {
     # NON-BLOCKING MODE: return handle immediately, app runs via later callbacks

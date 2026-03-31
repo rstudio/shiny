@@ -22,7 +22,11 @@ function fadeOut(
   callback?: () => void,
 ): void {
   if (hasJQuery()) {
-    $(el).fadeOut(ms, callback);
+    if (callback) {
+      $(el).fadeOut(ms, callback);
+    } else {
+      $(el).fadeOut(ms);
+    }
     return;
   }
   el.style.transition = `opacity ${ms}ms`;

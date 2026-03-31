@@ -8,6 +8,139 @@ type ShowcaseSrcMessage = {
 
 const animateMs = 400;
 
+// ---------------------------------------------------------------------------
+// jQuery-optional helpers: use jQuery when available, otherwise native JS.
+// ---------------------------------------------------------------------------
+
+function hasJQuery(): boolean {
+  return typeof jQuery !== "undefined";
+}
+
+function fadeOut(
+  el: HTMLElement,
+  ms: number,
+  callback?: () => void,
+): void {
+  if (hasJQuery()) {
+    $(el).fadeOut(ms, callback);
+    return;
+  }
+  el.style.transition = `opacity ${ms}ms`;
+  el.style.opacity = "0";
+  setTimeout(() => {
+    el.style.display = "none";
+    el.style.transition = "";
+    callback?.();
+  }, ms);
+}
+
+function fadeIn(el: HTMLElement, ms: number): void {
+  if (hasJQuery()) {
+    $(el).fadeIn(ms);
+    return;
+  }
+  el.style.display = "";
+  el.style.opacity = "0";
+  el.style.transition = `opacity ${ms}ms`;
+  // Force reflow so the transition actually fires
+  void el.offsetHeight;
+  el.style.opacity = "1";
+  // Clean up after transition ends
+  const cleanup = () => {
+    el.style.transition = "";
+    el.removeEventListener("transitionend", cleanup);
+  };
+  el.addEventListener("transitionend", cleanup);
+}
+
+function hideEl(el: HTMLElement): void {
+  if (hasJQuery()) {
+    $(el).hide();
+    return;
+  }
+  el.style.display = "none";
+}
+
+function animateScroll(top: number, ms: number): void {
+  if (hasJQuery()) {
+    $(document.body).animate({ scrollTop: top }, ms);
+    return;
+  }
+  window.scrollTo({ top, behavior: ms > 0 ? "smooth" : "instant" });
+}
+
+function animateStyle(
+  el: HTMLElement,
+  props: Record<string, string>,
+  ms: number,
+): void {
+  if (hasJQuery()) {
+    $(el).animate(props, ms);
+    return;
+  }
+  el.style.transition = ms > 0 ? `all ${ms}ms` : "";
+  for (const [key, value] of Object.entries(props)) {
+    (el.style as any)[key] = value;
+  }
+  if (ms > 0) {
+    const cleanup = () => {
+      el.style.transition = "";
+      el.removeEventListener("transitionend", cleanup);
+    };
+    el.addEventListener("transitionend", cleanup);
+  }
+}
+
+function highlightEl(el: HTMLElement): void {
+  if (hasJQuery()) {
+    $(el).stop(true, true).effect("highlight", null, 1600);
+    return;
+  }
+  // CSS-based highlight fallback
+  el.style.transition = "background-color 0.4s";
+  el.style.backgroundColor = "#ffff99";
+  setTimeout(() => {
+    el.style.transition = "background-color 1.2s";
+    el.style.backgroundColor = "";
+    const cleanup = () => {
+      el.style.transition = "";
+      el.removeEventListener("transitionend", cleanup);
+    };
+    el.addEventListener("transitionend", cleanup);
+  }, 400);
+}
+
+function triggerResize(): void {
+  if (hasJQuery()) {
+    $(window).trigger("resize");
+    return;
+  }
+  window.dispatchEvent(new Event("resize"));
+}
+
+function onResize(fn: () => void): void {
+  if (hasJQuery()) {
+    $(window).resize(fn);
+    return;
+  }
+  window.addEventListener("resize", fn);
+}
+
+function onLoad(fn: () => void): void {
+  if (hasJQuery()) {
+    $(window).on("load", fn);
+    return;
+  }
+  window.addEventListener("load", fn);
+}
+
+function windowHeight(): number {
+  if (hasJQuery()) {
+    return $(window).height()!;
+  }
+  return window.innerHeight;
+}
+
 // Given a DOM node and a column (count of characters), walk recursively
 // through the node's siblings counting characters until the given number
 // of characters have been found.
@@ -137,7 +270,7 @@ function highlightSrcref(
     range.surroundContents(el);
   }
   // End any previous highlight before starting this one
-  $(el).stop(true, true).effect("highlight", null, 1600);
+  highlightEl(el);
 }
 
 // If this is the main Shiny window, wire up our custom message handler.
@@ -171,12 +304,14 @@ const setCodePosition = function (above: boolean, animate: boolean) {
   if (metadataElement === null) {
     // if there's no app metadata, show and hide the entire well container
     // when the code changes position
-    const wellElement = $("#showcase-well");
+    const wellElement = document.getElementById("showcase-well");
 
-    if (above) {
-      wellElement.fadeOut(animateCodeMs);
-    } else {
-      wellElement.fadeIn(animateCodeMs);
+    if (wellElement) {
+      if (above) {
+        fadeOut(wellElement, animateCodeMs);
+      } else {
+        fadeIn(wellElement, animateCodeMs);
+      }
     }
   }
 
@@ -188,8 +323,8 @@ const setCodePosition = function (above: boolean, animate: boolean) {
     );
     return;
   }
-  $(newHostElement).hide();
-  $(currentHostElement).fadeOut(animateCodeMs, function () {
+  hideEl(newHostElement);
+  fadeOut(currentHostElement, animateCodeMs, function () {
     const tabs = document.getElementById("showcase-code-tabs");
 
     if (tabs === null) {
@@ -211,7 +346,7 @@ const setCodePosition = function (above: boolean, animate: boolean) {
         ?.removeAttribute("style");
     }
 
-    $(newHostElement).fadeIn(animateCodeMs);
+    fadeIn(newHostElement, animateCodeMs);
     if (!above) {
       // remove the applied width and zoom on the app container, and
       // scroll smoothly down to the code's new home
@@ -219,10 +354,9 @@ const setCodePosition = function (above: boolean, animate: boolean) {
         .getElementById("showcase-app-container")
         ?.removeAttribute("style");
       if (animate) {
-        const top = $(newHostElement).offset()?.top;
-        if (top !== undefined) {
-          $(document.body).animate({ scrollTop: top });
-        }
+        const top =
+          newHostElement.getBoundingClientRect().top + window.scrollY;
+        animateScroll(top, animateMs);
       }
     }
     // if there's a readme, move it either alongside the code or beneath
@@ -233,7 +367,7 @@ const setCodePosition = function (above: boolean, animate: boolean) {
       readme.parentElement?.removeChild(readme);
       if (above) {
         currentHostElement.appendChild(readme);
-        $(currentHostElement).fadeIn(animateCodeMs);
+        fadeIn(currentHostElement, animateCodeMs);
       } else
         document.getElementById("showcase-app-metadata")?.appendChild(readme);
     }
@@ -244,11 +378,11 @@ const setCodePosition = function (above: boolean, animate: boolean) {
       : '<i class="fa fa-level-up"></i> show with app';
   });
   if (above) {
-    $(document.body).animate({ scrollTop: 0 }, animateCodeMs);
+    animateScroll(0, animateCodeMs);
   }
   isCodeAbove = above;
   setAppCodeSxsWidths(above && animate);
-  $(window).trigger("resize");
+  triggerResize();
 };
 
 function setAppCodeSxsWidths(animate: boolean) {
@@ -271,13 +405,17 @@ function setAppCodeSxsWidths(animate: boolean) {
     appWidth = totalWidth * 0.66;
     zoom = appWidth / appTargetWidth;
   }
-  $("#showcase-app-container").animate(
-    {
-      width: appWidth + "px",
-      zoom: zoom * 100 + "%",
-    },
-    animate ? animateMs : 0,
-  );
+  const appContainer = document.getElementById("showcase-app-container");
+  if (appContainer) {
+    animateStyle(
+      appContainer,
+      {
+        width: appWidth + "px",
+        zoom: zoom * 100 + "%",
+      },
+      animate ? animateMs : 0,
+    );
+  }
 }
 
 const toggleCodePosition = function () {
@@ -296,7 +434,7 @@ const setInitialCodePosition = function () {
 // for the tabs
 function setCodeHeightFromDocHeight() {
   document.getElementById("showcase-code-content")!.style.height =
-    $(window).height() + "px";
+    windowHeight() + "px";
 }
 
 // Move server-rendered markdown from template into the readme container
@@ -314,7 +452,7 @@ function insertMarkdownContent() {
   }
 }
 
-$(window).resize(function () {
+onResize(function () {
   if (isCodeAbove) {
     setAppCodeSxsWidths(false);
     setCodeHeightFromDocHeight();
@@ -328,8 +466,8 @@ declare global {
 }
 window.toggleCodePosition = toggleCodePosition;
 
-$(window).on("load", setInitialCodePosition);
-$(window).on("load", insertMarkdownContent);
+onLoad(setInitialCodePosition);
+onLoad(insertMarkdownContent);
 
 if (window.hljs) window.hljs.initHighlightingOnLoad();
 

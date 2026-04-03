@@ -8,8 +8,14 @@ class DownloadLinkOutputBinding extends OutputBinding {
   }
   renderValue(el: HTMLElement, data: string): void {
     el.setAttribute("href", data);
-    el.classList.remove("disabled");
-    el.removeAttribute("aria-disabled");
+    // If the element has a `data-shiny-disable-auto-enable` attribute, skip
+    // the auto-enable behavior so that the intentional disabled state is
+    // preserved. Any framework (shinyjs, py-shiny, custom JS) can set this
+    // attribute to opt out. See https://github.com/rstudio/shiny/issues/4119.
+    if (!el.hasAttribute("data-shiny-disable-auto-enable")) {
+      el.classList.remove("disabled");
+      el.removeAttribute("aria-disabled");
+    }
     el.removeAttribute("tabindex");
   }
   // Progress shouldn't be shown on the download button

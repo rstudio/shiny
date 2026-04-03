@@ -8,8 +8,13 @@ class DownloadLinkOutputBinding extends OutputBinding {
   }
   renderValue(el: HTMLElement, data: string): void {
     el.setAttribute("href", data);
-    el.classList.remove("disabled");
-    el.removeAttribute("aria-disabled");
+    // If shinyjs has marked this element as disabled (via shinyjs::disabled()),
+    // skip the auto-enable behavior so that the intentional disabled state is
+    // preserved. See https://github.com/rstudio/shiny/issues/4119.
+    if (!el.classList.contains("shinyjs-disabled")) {
+      el.classList.remove("disabled");
+      el.removeAttribute("aria-disabled");
+    }
     el.removeAttribute("tabindex");
   }
   // Progress shouldn't be shown on the download button

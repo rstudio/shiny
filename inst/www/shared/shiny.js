@@ -3015,8 +3015,10 @@
     }
     renderValue(el, data) {
       el.setAttribute("href", data);
-      el.classList.remove("disabled");
-      el.removeAttribute("aria-disabled");
+      if (!el.classList.contains("shinyjs-disabled")) {
+        el.classList.remove("disabled");
+        el.removeAttribute("aria-disabled");
+      }
       el.removeAttribute("tabindex");
     }
     // Progress shouldn't be shown on the download button

@@ -230,10 +230,6 @@
       this.args = args;
       this.$invoke();
     }
-    cancel() {
-      this.$clearTimer();
-      this.args = null;
-    }
     isPending() {
       return this.timerId !== null;
     }
@@ -254,7 +250,7 @@
   };
   function debounce(threshold, func) {
     let timerId = null;
-    const debounced = function thisFunc(...args) {
+    return function thisFunc(...args) {
       if (timerId !== null) {
         clearTimeout(timerId);
         timerId = null;
@@ -265,13 +261,6 @@
         func.apply(thisFunc, args);
       }, threshold);
     };
-    debounced.cancel = function() {
-      if (timerId !== null) {
-        clearTimeout(timerId);
-        timerId = null;
-      }
-    };
-    return debounced;
   }
 
   // srcts/src/time/invoke.ts
@@ -342,58 +331,22 @@
     }
   };
 
-  // srcts/src/shiny/sendOutputInfo.ts
-  var _pendingObserverCallbacks;
-  var SendOutputInfo = class {
-    constructor() {
-      __privateAdd(this, _pendingObserverCallbacks, /* @__PURE__ */ new Set());
-    }
-    setSendMethod(inputBatchSender, doSendOutputInfo) {
-      const sendOutputInfoDebouncer = new Debouncer(null, doSendOutputInfo, 0);
+  // srcts/src/shiny/sendImageSize.ts
+  var SendImageSize = class {
+    setImageSend(inputBatchSender, doSendImageSize) {
+      const sendImageSizeDebouncer = new Debouncer(null, doSendImageSize, 0);
       this.regular = function() {
-        sendOutputInfoDebouncer.normalCall();
+        sendImageSizeDebouncer.normalCall();
       };
-      inputBatchSender.lastChanceCallback.push(() => {
-        __privateGet(this, _pendingObserverCallbacks).forEach((callback) => callback.flush());
-        if (sendOutputInfoDebouncer.isPending())
-          sendOutputInfoDebouncer.immediateCall();
+      inputBatchSender.lastChanceCallback.push(function() {
+        if (sendImageSizeDebouncer.isPending())
+          sendImageSizeDebouncer.immediateCall();
       });
       this.transitioned = debounce(200, this.regular);
-      return sendOutputInfoDebouncer;
-    }
-    createObserverCallback(delayMs, callback) {
-      const debouncer = new Debouncer(
-        null,
-        () => {
-          __privateGet(this, _pendingObserverCallbacks).delete(observerCallback);
-          callback();
-        },
-        delayMs
-      );
-      const observerCallback = Object.assign(
-        () => {
-          __privateGet(this, _pendingObserverCallbacks).add(observerCallback);
-          debouncer.normalCall();
-        },
-        {
-          cancel: () => {
-            __privateGet(this, _pendingObserverCallbacks).delete(observerCallback);
-            debouncer.cancel();
-          },
-          flush: () => {
-            __privateGet(this, _pendingObserverCallbacks).delete(observerCallback);
-            if (debouncer.isPending()) {
-              debouncer.immediateCall();
-            }
-          },
-          isPending: () => debouncer.isPending()
-        }
-      );
-      return observerCallback;
+      return sendImageSizeDebouncer;
     }
   };
-  _pendingObserverCallbacks = new WeakMap();
-  var sendOutputInfoFns = new SendOutputInfo();
+  var sendImageSizeFns = new SendImageSize();
 
   // srcts/src/shiny/singletons.ts
   var import_jquery4 = __toESM(require_jquery());
@@ -590,7 +543,7 @@
         $head.append(newStyle);
         oldStyle.remove();
         removeSheet(oldSheet);
-        sendOutputInfoFns.transitioned();
+        sendImageSizeFns.transitioned();
       };
       xhr.send();
     };
@@ -625,7 +578,7 @@
           $dummyEl.one("transitionend", () => {
             $dummyEl.remove();
             removeSheet(oldSheet);
-            sendOutputInfoFns.transitioned();
+            sendImageSizeFns.transitioned();
           });
           (0, import_jquery5.default)(document.body).append($dummyEl);
           const color = "#" + Math.floor(Math.random() * 16777215).toString(16);
@@ -857,15 +810,6 @@
       if (style) x2 = style.getPropertyValue(styleProp);
     }
     return x2;
-  }
-  function isVisible(el) {
-    if (el.offsetWidth !== 0 || el.offsetHeight !== 0) {
-      return true;
-    }
-    if (getStyle(el, "display") === "none") {
-      return false;
-    }
-    return el.parentElement ? isVisible(el.parentElement) : true;
   }
   function padZeros(n4, digits) {
     let str = n4.toString();
@@ -1161,6 +1105,11 @@
     // htmlOutputBinding.renderValue() (for dynamically-added input objects).
     // This is called before the input is bound.
     initialize(el) {
+      return;
+      el;
+    }
+    // This is called after unbinding the output.
+    dispose(el) {
       return;
       el;
     }
@@ -3066,8 +3015,10 @@
     }
     renderValue(el, data) {
       el.setAttribute("href", data);
-      el.classList.remove("disabled");
-      el.removeAttribute("aria-disabled");
+      if (!el.classList.contains("shinyjs-disabled")) {
+        el.classList.remove("disabled");
+        el.removeAttribute("aria-disabled");
+      }
       el.removeAttribute("tabindex");
     }
     // Progress shouldn't be shown on the download button
@@ -5800,7 +5751,12 @@ ${duplicateIdMsg}`;
     }
     return inputItems;
   }
-  async function bindOutputs({ outputBindings, outputIsRecalculating }, scope = document.documentElement) {
+  async function bindOutputs({
+    sendOutputHiddenState,
+    maybeAddThemeObserver,
+    outputBindings,
+    outputIsRecalculating
+  }, scope = document.documentElement) {
     const $scope = (0, import_jquery35.default)(scope);
     const bindings = outputBindings.getBindings();
     for (let i5 = 0; i5 < bindings.length; i5++) {
@@ -5815,6 +5771,7 @@ ${duplicateIdMsg}`;
         if ($el.hasClass("shiny-bound-output")) {
           continue;
         }
+        maybeAddThemeObserver(el);
         const bindingAdapter = new OutputBindingAdapter(el, binding);
         await shinyAppBindOutput(id, bindingAdapter);
         $el.data("shiny-output-binding", bindingAdapter);
@@ -5832,7 +5789,8 @@ ${duplicateIdMsg}`;
         });
       }
     }
-    setTimeout(() => sendOutputInfoFns.regular(), 0);
+    setTimeout(sendImageSizeFns.regular, 0);
+    setTimeout(sendOutputHiddenState, 0);
   }
   function unbindInputs(scope = document.documentElement, includeSelf = false) {
     const inputs = (0, import_jquery35.default)(scope).find(".shiny-bound-input").toArray();
@@ -5855,7 +5813,7 @@ ${duplicateIdMsg}`;
       });
     }
   }
-  function unbindOutputs(scope = document.documentElement, includeSelf = false) {
+  function unbindOutputs({ sendOutputHiddenState }, scope = document.documentElement, includeSelf = false) {
     const outputs = (0, import_jquery35.default)(scope).find(".shiny-bound-output").toArray();
     if (includeSelf && (0, import_jquery35.default)(scope).hasClass("shiny-bound-output")) {
       outputs.push(scope);
@@ -5869,20 +5827,6 @@ ${duplicateIdMsg}`;
       bindingsRegistry.removeBinding(id, "output");
       $el.removeClass("shiny-bound-output");
       $el.removeData("shiny-output-binding");
-      for (const prefix of [
-        "shiny-resize-observer",
-        "shiny-intersection-observer",
-        "shiny-mutate-observer"
-      ]) {
-        const observer = $el.data(prefix);
-        if (observer) {
-          observer.disconnect();
-          $el.removeData(prefix);
-        }
-        const callback = $el.data(prefix + "-callback");
-        callback?.cancel?.();
-        $el.removeData(prefix + "-callback");
-      }
       $el.trigger({
         type: "shiny:unbound",
         // @ts-expect-error; Can not remove info on a established, malformed Event object
@@ -5890,7 +5834,8 @@ ${duplicateIdMsg}`;
         bindingType: "output"
       });
     }
-    setTimeout(() => sendOutputInfoFns.regular(), 0);
+    setTimeout(sendImageSizeFns.regular, 0);
+    setTimeout(sendOutputHiddenState, 0);
   }
   async function _bindAll(shinyCtx, scope) {
     await bindOutputs(shinyCtx, scope);
@@ -5898,9 +5843,9 @@ ${duplicateIdMsg}`;
     bindingsRegistry.checkValidity(scope);
     return currentInputs;
   }
-  function unbindAll(scope, includeSelf = false) {
+  function unbindAll(shinyCtx, scope, includeSelf = false) {
     unbindInputs(scope, includeSelf);
-    unbindOutputs(scope, includeSelf);
+    unbindOutputs(shinyCtx, scope, includeSelf);
   }
   async function bindAll(shinyCtx, scope) {
     const currentInputItems = await _bindAll(shinyCtx, scope);
@@ -6290,7 +6235,6 @@ ${duplicateIdMsg}`;
   var messageHandlers = {};
   var customMessageHandlerOrder = [];
   var customMessageHandlers = {};
-  var conditionalShownClass = "shiny-conditional--shown";
   function addMessageHandler(type, handler) {
     if (messageHandlers[type]) {
       throw 'handler for message of type "' + type + '" already added.';
@@ -6763,15 +6707,15 @@ ${duplicateIdMsg}`;
         const nsPrefix = el.attr("data-ns-prefix");
         const nsScope = this._narrowScope(scope, nsPrefix);
         const show3 = Boolean(condFunc(nsScope));
-        const showing = el.hasClass(conditionalShownClass);
+        const showing = el.css("display") !== "none";
         if (show3 !== showing) {
           if (show3) {
             el.trigger("show");
-            el.addClass(conditionalShownClass);
+            el.show();
             el.trigger("shown");
           } else {
             el.trigger("hide");
-            el.removeClass(conditionalShownClass);
+            el.hide();
             el.trigger("hidden");
           }
         }
@@ -7346,6 +7290,8 @@ ${duplicateIdMsg}`;
         return {
           inputs,
           inputsRate,
+          sendOutputHiddenState,
+          maybeAddThemeObserver,
           inputBindings,
           outputBindings,
           initDeferredIframes,
@@ -7356,7 +7302,7 @@ ${duplicateIdMsg}`;
         await bindAll(shinyBindCtx(), scope);
       };
       this.unbindAll = function(scope, includeSelf = false) {
-        unbindAll(scope, includeSelf);
+        unbindAll(shinyBindCtx(), scope, includeSelf);
       };
       function initializeInputs(scope = document.documentElement) {
         const bindings = inputBindings.getBindings();
@@ -7378,190 +7324,230 @@ ${duplicateIdMsg}`;
       function getIdFromEl(el) {
         const $el = (0, import_jquery40.default)(el);
         const bindingAdapter = $el.data("shiny-output-binding");
-        return bindingAdapter ? bindingAdapter.getId() : null;
+        if (!bindingAdapter) return null;
+        else return bindingAdapter.getId();
       }
       initializeInputs(document.documentElement);
       const initialValues = mapValues(
         await _bindAll(shinyBindCtx(), document.documentElement),
         (x2) => x2.value
       );
-      function setInput(name, value, initial = false) {
-        if (initial) {
-          initialValues[name] = value;
-        } else {
-          inputs.setInput(name, value);
+      (0, import_jquery40.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(
+        function() {
+          const id = getIdFromEl(this), rect = getBoundingClientSizeBeforeZoom(this);
+          if (rect.width !== 0 || rect.height !== 0) {
+            initialValues[".clientdata_output_" + id + "_width"] = rect.width;
+            initialValues[".clientdata_output_" + id + "_height"] = rect.height;
+          }
         }
-      }
-      function doSendSize(el, initial = false) {
-        const id = getIdFromEl(el);
-        if (!id) return;
-        const rect = getBoundingClientSizeBeforeZoom(el);
-        if (rect.width !== 0 || rect.height !== 0) {
-          setInput(".clientdata_output_" + id + "_width", rect.width, initial);
-          setInput(".clientdata_output_" + id + "_height", rect.height, initial);
+      );
+      function getComputedBgColor(el) {
+        if (!el) {
+          return null;
         }
+        const bgColor = getStyle(el, "background-color");
+        if (!bgColor) return bgColor;
+        const m2 = bgColor.match(
+          /^rgba\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*\)$/
+        );
+        if (bgColor === "transparent" || m2 && parseFloat(m2[4]) === 0) {
+          const bgImage = getStyle(el, "background-image");
+          if (bgImage && bgImage !== "none") {
+            return null;
+          } else {
+            return getComputedBgColor(el.parentElement);
+          }
+        }
+        return bgColor;
       }
-      function doTriggerResize(el) {
-        const $el = (0, import_jquery40.default)(el), binding = $el.data("shiny-output-binding");
-        if (!binding) return;
-        $el.trigger({
-          type: "shiny:visualchange",
-          // @ts-expect-error; Can not remove info on a established, malformed Event object
-          visible: isVisible(el),
-          binding
-        });
-        binding.onResize();
+      function getComputedFont(el) {
+        const fontFamily = getStyle(el, "font-family");
+        const fontSize = getStyle(el, "font-size");
+        return {
+          families: fontFamily?.replace(/"/g, "").split(", "),
+          size: fontSize
+        };
       }
-      function doSendTheme(el, initial = false) {
+      (0, import_jquery40.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-theme").each(
+        function() {
+          const el = this;
+          const id = getIdFromEl(el);
+          initialValues[".clientdata_output_" + id + "_bg"] = getComputedBgColor(el);
+          initialValues[".clientdata_output_" + id + "_fg"] = getStyle(
+            el,
+            "color"
+          );
+          initialValues[".clientdata_output_" + id + "_accent"] = getComputedLinkColor(el);
+          initialValues[".clientdata_output_" + id + "_font"] = getComputedFont(el);
+          maybeAddThemeObserver(el);
+        }
+      );
+      function maybeAddThemeObserver(el) {
+        if (!window.MutationObserver) {
+          return;
+        }
+        const cl = el.classList;
+        const reportTheme = cl.contains("shiny-image-output") || cl.contains("shiny-plot-output") || cl.contains("shiny-report-theme");
+        if (!reportTheme) {
+          return;
+        }
+        const $el = (0, import_jquery40.default)(el);
+        if ($el.data("shiny-theme-observer")) {
+          return;
+        }
+        const observerCallback = new Debouncer(null, () => doSendTheme(el), 100);
+        const observer = new MutationObserver(
+          () => observerCallback.normalCall()
+        );
+        const config = { attributes: true, attributeFilter: ["style", "class"] };
+        observer.observe(el, config);
+        $el.data("shiny-theme-observer", observer);
+      }
+      function doSendTheme(el) {
         if (el.classList.contains("shiny-output-error")) {
           return;
         }
-        function getComputedBgColor(el2) {
-          if (!el2) {
-            return null;
-          }
-          const bgColor = getStyle(el2, "background-color");
-          if (!bgColor) return bgColor;
-          const m2 = bgColor.match(
-            /^rgba\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*\)$/
-          );
-          if (bgColor === "transparent" || m2 && parseFloat(m2[4]) === 0) {
-            const bgImage = getStyle(el2, "background-image");
-            if (bgImage && bgImage !== "none") {
-              return null;
-            } else {
-              return getComputedBgColor(el2.parentElement);
+        const id = getIdFromEl(el);
+        inputs.setInput(
+          ".clientdata_output_" + id + "_bg",
+          getComputedBgColor(el)
+        );
+        inputs.setInput(
+          ".clientdata_output_" + id + "_fg",
+          getStyle(el, "color")
+        );
+        inputs.setInput(
+          ".clientdata_output_" + id + "_accent",
+          getComputedLinkColor(el)
+        );
+        inputs.setInput(
+          ".clientdata_output_" + id + "_font",
+          getComputedFont(el)
+        );
+      }
+      function doSendImageSize() {
+        (0, import_jquery40.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-size").each(
+          function() {
+            const id = getIdFromEl(this), rect = getBoundingClientSizeBeforeZoom(this);
+            if (rect.width !== 0 || rect.height !== 0) {
+              inputs.setInput(".clientdata_output_" + id + "_width", rect.width);
+              inputs.setInput(
+                ".clientdata_output_" + id + "_height",
+                rect.height
+              );
             }
           }
-          return bgColor;
-        }
-        function getComputedFont(el2) {
-          const fontFamily = getStyle(el2, "font-family");
-          const fontSize = getStyle(el2, "font-size");
-          return {
-            families: fontFamily?.replace(/"/g, "").split(", "),
-            size: fontSize
-          };
-        }
-        const id = getIdFromEl(el);
-        if (!id) return;
-        setInput(
-          ".clientdata_output_" + id + "_bg",
-          getComputedBgColor(el),
-          initial
         );
-        setInput(
-          ".clientdata_output_" + id + "_fg",
-          getStyle(el, "color"),
-          initial
-        );
-        setInput(
-          ".clientdata_output_" + id + "_accent",
-          getComputedLinkColor(el),
-          initial
-        );
-        setInput(
-          ".clientdata_output_" + id + "_font",
-          getComputedFont(el),
-          initial
-        );
-      }
-      const visibleOutputs = /* @__PURE__ */ new Set();
-      function doSendHiddenState(el, initial = false) {
-        const id = getIdFromEl(el);
-        if (!id) return;
-        const hidden = !isVisible(el);
-        if (hidden) {
-          visibleOutputs.delete(id);
-        } else {
-          visibleOutputs.add(id);
-        }
-        setInput(".clientdata_output_" + id + "_hidden", hidden, initial);
-      }
-      function reportsSize(el) {
-        return el.classList.contains("shiny-image-output") || el.classList.contains("shiny-plot-output") || el.classList.contains("shiny-report-size");
-      }
-      function reportsTheme(el) {
-        return el.classList.contains("shiny-image-output") || el.classList.contains("shiny-plot-output") || el.classList.contains("shiny-report-theme");
-      }
-      function refreshOutputInfo(el, initial = false) {
-        if (!initial) doTriggerResize(el);
-        doSendHiddenState(el, initial);
-        if (reportsSize(el)) doSendSize(el, initial);
-        if (reportsTheme(el)) doSendTheme(el, initial);
-      }
-      function refreshThemeOutputs(initial = false) {
-        (0, import_jquery40.default)(".shiny-bound-output").each(function() {
-          const el = this;
-          if (reportsTheme(el)) doSendTheme(el, initial);
-        });
-      }
-      function registerThemeRefreshSignals() {
-        const scheduleThemeInfoRefresh = sendOutputInfoFns.createObserverCallback(
-          100,
-          () => refreshThemeOutputs()
-        );
-        (0, import_jquery40.default)(window).resize(function() {
-          scheduleThemeInfoRefresh();
-        });
-        (0, import_jquery40.default)(document).on("shiny:themechange", function() {
-          scheduleThemeInfoRefresh();
-        });
-      }
-      function ensureObservers(el) {
-        const $el = (0, import_jquery40.default)(el);
-        if (!$el.data("shiny-resize-observer")) {
-          const onResize = sendOutputInfoFns.createObserverCallback(
-            100,
-            () => refreshOutputInfo(el)
-          );
-          const ro = new ResizeObserver(() => onResize());
-          ro.observe(el);
-          $el.data("shiny-resize-observer-callback", onResize);
-          $el.data("shiny-resize-observer", ro);
-        }
-        if (!$el.data("shiny-intersection-observer")) {
-          const onIntersect = sendOutputInfoFns.createObserverCallback(
-            100,
-            () => refreshOutputInfo(el)
-          );
-          const io = new IntersectionObserver(() => onIntersect());
-          io.observe(el);
-          $el.data("shiny-intersection-observer-callback", onIntersect);
-          $el.data("shiny-intersection-observer", io);
-        }
-        if (reportsTheme(el) && !$el.data("shiny-mutate-observer")) {
-          const onMutate = sendOutputInfoFns.createObserverCallback(100, () => {
-            if (reportsTheme(el)) doSendTheme(el);
-          });
-          const mo = new MutationObserver(() => onMutate());
-          mo.observe(el, {
-            attributes: true,
-            attributeFilter: ["style", "class"]
-          });
-          $el.data("shiny-mutate-observer", mo);
-          $el.data("shiny-mutate-observer-callback", onMutate);
-        }
-      }
-      function doSendOutputInfo(initial = false) {
-        const outputIds = /* @__PURE__ */ new Set();
-        (0, import_jquery40.default)(".shiny-bound-output").each(function() {
-          const el = this;
-          const id = getIdFromEl(el);
-          if (id) outputIds.add(id);
-          ensureObservers(el);
-          refreshOutputInfo(el, initial);
-        });
-        visibleOutputs.forEach((id) => {
-          if (!outputIds.has(id)) {
-            visibleOutputs.delete(id);
-            setInput(".clientdata_output_" + id + "_hidden", true, initial);
+        (0, import_jquery40.default)(".shiny-image-output, .shiny-plot-output, .shiny-report-theme").each(
+          function() {
+            doSendTheme(this);
           }
+        );
+        (0, import_jquery40.default)(".shiny-bound-output").each(function() {
+          const $this = (0, import_jquery40.default)(this), binding = $this.data("shiny-output-binding");
+          $this.trigger({
+            type: "shiny:visualchange",
+            // @ts-expect-error; Can not remove info on a established, malformed Event object
+            visible: !isHidden(this),
+            binding
+          });
+          binding.onResize();
         });
       }
-      doSendOutputInfo(true);
-      sendOutputInfoFns.setSendMethod(inputBatchSender, doSendOutputInfo);
-      registerThemeRefreshSignals();
+      sendImageSizeFns.setImageSend(inputBatchSender, doSendImageSize);
+      function isHidden(obj) {
+        if (obj === null || obj.offsetWidth !== 0 || obj.offsetHeight !== 0) {
+          return false;
+        } else if (getStyle(obj, "display") === "none") {
+          return true;
+        } else {
+          return isHidden(obj.parentNode);
+        }
+      }
+      let lastKnownVisibleOutputs = {};
+      (0, import_jquery40.default)(".shiny-bound-output").each(function() {
+        const id = getIdFromEl(this);
+        if (isHidden(this)) {
+          initialValues[".clientdata_output_" + id + "_hidden"] = true;
+        } else {
+          lastKnownVisibleOutputs[id] = true;
+          initialValues[".clientdata_output_" + id + "_hidden"] = false;
+        }
+      });
+      function doSendOutputHiddenState() {
+        const visibleOutputs = {};
+        (0, import_jquery40.default)(".shiny-bound-output").each(function() {
+          const id = getIdFromEl(this);
+          delete lastKnownVisibleOutputs[id];
+          const hidden = isHidden(this), evt = {
+            type: "shiny:visualchange",
+            visible: !hidden
+          };
+          if (hidden) {
+            inputs.setInput(".clientdata_output_" + id + "_hidden", true);
+          } else {
+            visibleOutputs[id] = true;
+            inputs.setInput(".clientdata_output_" + id + "_hidden", false);
+          }
+          const $this = (0, import_jquery40.default)(this);
+          evt.binding = $this.data("shiny-output-binding");
+          $this.trigger(evt);
+        });
+        for (const name in lastKnownVisibleOutputs) {
+          if (hasDefinedProperty(lastKnownVisibleOutputs, name))
+            inputs.setInput(".clientdata_output_" + name + "_hidden", true);
+        }
+        lastKnownVisibleOutputs = visibleOutputs;
+      }
+      const sendOutputHiddenStateDebouncer = new Debouncer(
+        null,
+        doSendOutputHiddenState,
+        0
+      );
+      function sendOutputHiddenState() {
+        sendOutputHiddenStateDebouncer.normalCall();
+      }
+      inputBatchSender.lastChanceCallback.push(function() {
+        if (sendOutputHiddenStateDebouncer.isPending())
+          sendOutputHiddenStateDebouncer.immediateCall();
+      });
+      function filterEventsByNamespace(namespace, handler, ...args) {
+        const namespaceArr = namespace.split(".");
+        return function(e4) {
+          const eventNamespace = e4.namespace?.split(".") ?? [];
+          for (let i5 = 0; i5 < namespaceArr.length; i5++) {
+            if (eventNamespace.indexOf(namespaceArr[i5]) === -1) return;
+          }
+          handler.apply(this, [namespaceArr, handler, ...args]);
+        };
+      }
+      (0, import_jquery40.default)(window).resize(debounce(500, sendImageSizeFns.regular));
+      const bs3classes = [
+        "modal",
+        "dropdown",
+        "tab",
+        "tooltip",
+        "popover",
+        "collapse"
+      ];
+      import_jquery40.default.each(bs3classes, function(idx, classname) {
+        (0, import_jquery40.default)(document.body).on(
+          "shown.bs." + classname + ".sendImageSize",
+          "*",
+          filterEventsByNamespace("bs", sendImageSizeFns.regular)
+        );
+        (0, import_jquery40.default)(document.body).on(
+          "shown.bs." + classname + ".sendOutputHiddenState hidden.bs." + classname + ".sendOutputHiddenState",
+          "*",
+          filterEventsByNamespace("bs", sendOutputHiddenState)
+        );
+      });
+      (0, import_jquery40.default)(document.body).on("shown.sendImageSize", "*", sendImageSizeFns.regular);
+      (0, import_jquery40.default)(document.body).on(
+        "shown.sendOutputHiddenState hidden.sendOutputHiddenState",
+        "*",
+        sendOutputHiddenState
+      );
       initialValues[".clientdata_pixelratio"] = pixelRatio();
       (0, import_jquery40.default)(window).resize(function() {
         inputs.setInput(".clientdata_pixelratio", pixelRatio());

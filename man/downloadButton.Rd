@@ -10,7 +10,7 @@ downloadButton(
   label = "Download",
   class = NULL,
   ...,
-  autoUpdate = TRUE,
+  autoEnable = TRUE,
   icon = shiny::icon("download")
 )
 
@@ -19,7 +19,7 @@ downloadLink(
   label = "Download",
   class = NULL,
   ...,
-  autoUpdate = TRUE
+  autoEnable = TRUE
 )
 }
 \arguments{
@@ -32,7 +32,7 @@ is assigned to.}
 
 \item{...}{Other arguments to pass to the container tag function.}
 
-\item{autoUpdate}{If \code{TRUE} (the default), the button will automatically be
+\item{autoEnable}{If \code{TRUE} (the default), the button will automatically be
 enabled/disabled based on whether the \code{downloadHandler} has a non-\code{NULL}
 filename. If \code{FALSE}, the button will not be automatically enabled/disabled
 based on the \code{downloadHandler}'s filename, and you will need to manage the button's enabled/disabled state yourself (e.g., by using

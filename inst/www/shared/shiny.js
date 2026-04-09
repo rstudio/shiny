@@ -3015,11 +3015,11 @@
     }
     renderValue(el, data) {
       el.setAttribute("href", data);
-      if (!el.classList.contains("shinyjs-disabled")) {
+      if (el.hasAttribute("data-auto-update") && !el.classList.contains("shinyjs-disabled")) {
         el.classList.remove("disabled");
         el.removeAttribute("aria-disabled");
+        el.removeAttribute("tabindex");
       }
-      el.removeAttribute("tabindex");
     }
     // Progress shouldn't be shown on the download button
     // (progress will be shown as a page level pulse instead)
@@ -3030,15 +3030,17 @@
     }
   };
   (0, import_jquery25.default)(document).on(
-    "click.shinyDownloadLink",
+    "click.shinyDownloadLink auxclick.shinyDownloadLink",
     "a.shiny-download-link",
     function(e4) {
+      if (e4.currentTarget.classList.contains("disabled")) {
+        e4.preventDefault();
+        return;
+      }
       const evt = import_jquery25.default.Event("shiny:filedownload");
       evt.name = this.id;
       evt.href = this.href;
       (0, import_jquery25.default)(document).trigger(evt);
-      return;
-      e4;
     }
   );
 

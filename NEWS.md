@@ -1,5 +1,9 @@
 # shiny (development version)
 
+## Bug fixes and minor improvements
+
+* `downloadButton()` and `downloadLink()` gain a new, optional param `autoUpdate`. Set it to `FALSE` to stop Shiny from enabling your `downloadButton` or `downloadLink` when it detects that the download is ready and opt into manual state management. (#4119)
+
 # shiny 1.13.0
 
 ## New features

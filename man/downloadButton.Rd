@@ -10,10 +10,17 @@ downloadButton(
   label = "Download",
   class = NULL,
   ...,
+  autoUpdate = TRUE,
   icon = shiny::icon("download")
 )
 
-downloadLink(outputId, label = "Download", class = NULL, ...)
+downloadLink(
+  outputId,
+  label = "Download",
+  class = NULL,
+  ...,
+  autoUpdate = TRUE
+)
 }
 \arguments{
 \item{outputId}{The name of the output slot that the \code{downloadHandler}
@@ -24,6 +31,12 @@ is assigned to.}
 \item{class}{Additional CSS classes to apply to the tag, if any.}
 
 \item{...}{Other arguments to pass to the container tag function.}
+
+\item{autoUpdate}{If \code{TRUE} (the default), the button will automatically be
+enabled/disabled based on whether the \code{downloadHandler} has a non-\code{NULL}
+filename. If \code{FALSE}, the button will not be automatically enabled/disabled
+based on the \code{downloadHandler}'s filename, and you will need to manage the button's enabled/disabled state yourself (e.g., by using
+\code{\link[shinyjs:enable]{shinyjs::enable()}} and \code{\link[shinyjs:disable]{shinyjs::disable()}}).}
 
 \item{icon}{An \code{\link[=icon]{icon()}} to appear on the button. Default is \code{icon("download")}.}
 }

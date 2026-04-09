@@ -1237,6 +1237,11 @@ uiOutput <- htmlOutput
 #' @param label The label that should appear on the button.
 #' @param class Additional CSS classes to apply to the tag, if any.
 #' @param icon An [icon()] to appear on the button. Default is `icon("download")`.
+#' @param autoUpdate If `TRUE` (the default), the button will automatically be
+#'   enabled/disabled based on whether the `downloadHandler` has a non-`NULL`
+#'   filename. If `FALSE`, the button will not be automatically enabled/disabled
+#'   based on the `downloadHandler`'s filename, and you will need to manage the button's enabled/disabled state yourself (e.g., by using
+#'   [shinyjs::enable()] and [shinyjs::disable()]).
 #' @param ... Other arguments to pass to the container tag function.
 #'
 #' @examples
@@ -1275,6 +1280,7 @@ downloadButton <- function(outputId,
                            label="Download",
                            class=NULL,
                            ...,
+                           autoUpdate = TRUE,
                            icon = shiny::icon("download")) {
   tags$a(id=outputId,
          class='btn btn-default shiny-download-link disabled',
@@ -1283,6 +1289,7 @@ downloadButton <- function(outputId,
          target='_blank',
          download=NA,
          "aria-disabled"="true",
+         "data-auto-update"=if (autoUpdate) NA else NULL,
          tabindex="-1",
          validateIcon(icon),
          label, ...)
@@ -1290,7 +1297,7 @@ downloadButton <- function(outputId,
 
 #' @rdname downloadButton
 #' @export
-downloadLink <- function(outputId, label="Download", class=NULL, ...) {
+downloadLink <- function(outputId, label="Download", class=NULL, ..., autoUpdate = TRUE) {
   tags$a(id=outputId,
          class='shiny-download-link disabled',
          class=class,
@@ -1298,6 +1305,7 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
          target='_blank',
          download=NA,
          "aria-disabled"="true",
+         "data-auto-update"=if (autoUpdate) NA else NULL,
          tabindex="-1",
          label, ...)
 }

@@ -1,23 +1,8 @@
 # shiny (development version)
 
-## Improvements
+## Bug fixes and minor improvements
 
-* Output resize/visibility detection now uses native browser observers
-  (`ResizeObserver`, `IntersectionObserver`) instead of relying on jQuery
-  `shown`/`hidden` events and `window.resize`. This makes Shiny's client-side
-  output-info pipeline (image/plot sizing, hidden-state tracking, theme
-  reporting) work automatically in any layout — including CSS-only show/hide,
-  third-party tab components, and non-Bootstrap frameworks — without requiring
-  custom event hooks. This also introduces a `shiny:themechange` event
-  for code that needs to trigger theme clientdata refreshes after changing
-  surrounding visual theme context. (#3682)
-
-* `conditionalPanel()` no longer briefly flashes its contents on app start
-  when the condition is initially `FALSE`. (#3505)
-
-* Removed `InputBinding.dispose()` from the JavaScript `InputBinding` class.
-  This method was never called by Shiny's runtime, so any overrides were dead
-  code. Use `unsubscribe()` for cleanup logic instead. (#4375)
+* `downloadButton()` and `downloadLink()` gain a new, optional param `autoUpdate`. Set it to `FALSE` to stop Shiny from enabling your `downloadButton` or `downloadLink` when it detects that the download is ready and opt into manual state management. (#4119)
 
 # shiny 1.13.0
 

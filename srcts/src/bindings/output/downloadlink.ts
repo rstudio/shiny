@@ -12,7 +12,7 @@ class DownloadLinkOutputBinding extends OutputBinding {
     // skip the auto-enable behavior so that the intentional disabled state is
     // preserved. See https://github.com/rstudio/shiny/issues/4119.
     if (
-      el.hasAttribute("data-auto-update") &&
+      !el.hasAttribute("data-ignore-update") &&
       !el.classList.contains("shinyjs-disabled")
     ) {
       el.classList.remove("disabled");

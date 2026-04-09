@@ -3015,7 +3015,7 @@
     }
     renderValue(el, data) {
       el.setAttribute("href", data);
-      if (el.hasAttribute("data-auto-update") && !el.classList.contains("shinyjs-disabled")) {
+      if (!el.hasAttribute("data-ignore-update") && !el.classList.contains("shinyjs-disabled")) {
         el.classList.remove("disabled");
         el.removeAttribute("aria-disabled");
         el.removeAttribute("tabindex");

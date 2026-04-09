@@ -1237,7 +1237,7 @@ uiOutput <- htmlOutput
 #' @param label The label that should appear on the button.
 #' @param class Additional CSS classes to apply to the tag, if any.
 #' @param icon An [icon()] to appear on the button. Default is `icon("download")`.
-#' @param autoUpdate If `TRUE` (the default), the button will automatically be
+#' @param autoEnable If `TRUE` (the default), the button will automatically be
 #'   enabled/disabled based on whether the `downloadHandler` has a non-`NULL`
 #'   filename. If `FALSE`, the button will not be automatically enabled/disabled
 #'   based on the `downloadHandler`'s filename, and you will need to manage the button's enabled/disabled state yourself (e.g., by using
@@ -1280,7 +1280,7 @@ downloadButton <- function(outputId,
                            label="Download",
                            class=NULL,
                            ...,
-                           autoUpdate = TRUE,
+                           autoEnable = TRUE,
                            icon = shiny::icon("download")) {
   tags$a(id=outputId,
          class='btn btn-default shiny-download-link disabled',
@@ -1289,7 +1289,7 @@ downloadButton <- function(outputId,
          target='_blank',
          download=NA,
          "aria-disabled"="true",
-         "data-auto-update"=if (autoUpdate) NA else NULL,
+         "data-ignore-update"=if (autoEnable) NULL else NA,
          tabindex="-1",
          validateIcon(icon),
          label, ...)
@@ -1297,7 +1297,7 @@ downloadButton <- function(outputId,
 
 #' @rdname downloadButton
 #' @export
-downloadLink <- function(outputId, label="Download", class=NULL, ..., autoUpdate = TRUE) {
+downloadLink <- function(outputId, label="Download", class=NULL, ..., autoEnable = TRUE) {
   tags$a(id=outputId,
          class='shiny-download-link disabled',
          class=class,
@@ -1305,7 +1305,7 @@ downloadLink <- function(outputId, label="Download", class=NULL, ..., autoUpdate
          target='_blank',
          download=NA,
          "aria-disabled"="true",
-         "data-auto-update"=if (autoUpdate) NA else NULL,
+         "data-ignore-update"=if (autoEnable) NULL else NA,
          tabindex="-1",
          label, ...)
 }

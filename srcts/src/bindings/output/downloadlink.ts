@@ -41,7 +41,7 @@ $(document).on(
   "a.shiny-download-link",
   function (e: Event) {
     // Prevent clicks when the button is disabled.
-    if ((e.currentTarget as HTMLElement).classList.contains("disabled")) {
+    if ((this as HTMLElement).classList.contains("disabled")) {
       e.preventDefault();
       return;
     }

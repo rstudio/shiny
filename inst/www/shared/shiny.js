@@ -3033,7 +3033,7 @@
     "click.shinyDownloadLink auxclick.shinyDownloadLink",
     "a.shiny-download-link",
     function(e4) {
-      if (e4.currentTarget.classList.contains("disabled")) {
+      if (this.classList.contains("disabled")) {
         e4.preventDefault();
         return;
       }

@@ -1,4 +1,4 @@
-# Handle returned by runApp() when blocking = FALSE
+# Handle returned by startApp()
 ShinyAppHandle <- R6::R6Class("ShinyAppHandle",
   cloneable = FALSE,
 

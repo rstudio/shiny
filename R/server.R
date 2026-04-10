@@ -387,7 +387,7 @@ removeSubApp <- function(path) {
   handlerManager$removeWSHandler(path)
 }
 
-startApp <- function(appObj, port, host, quiet) {
+startHttpuvApp <- function(appObj, port, host, quiet) {
   appHandlers <- createAppHandlers(appObj$httpHandler, appObj$serverFuncSource)
   handlerManager$addHandler(appHandlers$http, "/", tail = TRUE)
   handlerManager$addWSHandler(appHandlers$ws, "/", tail = TRUE)
@@ -479,7 +479,7 @@ startApp <- function(appObj, port, host, quiet) {
   }
 }
 
-# Run an application that was created by \code{\link{startApp}}. This
+# Run an application that was created by \code{\link{startHttpuvApp}}. This
 # function should normally be called in a \code{while(TRUE)} loop.
 serviceApp <- function(
   # rely on lazy evaluation for maximum efficiency

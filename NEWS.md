@@ -2,11 +2,10 @@
 
 ## New features
 
-* `runApp()` gains a `blocking` parameter. When `blocking = FALSE`, the app
-  runs in the background and returns a `ShinyAppHandle` object with `stop()`,
-  `status()`, `url()`, and `result()` methods. Can also be set via
-  `options(shiny.blocking = FALSE)`. When running non-blocking, a new
-  `runApp()` call automatically stops the previous app.
+* New `startApp()` runs a Shiny app in non-blocking mode, returning a
+  `ShinyAppHandle` object with `stop()`, `status()`, `url()`, and `result()`
+  methods. When a new app is started, any previously running non-blocking app
+  is automatically stopped.
 
 # shiny 1.13.0
 

@@ -7,7 +7,7 @@ test_that("ShinyAppHandle lifecycle and API (success path)", {
     server = function(input, output) {}
   )
 
-  handle <- runApp(app, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  handle <- startApp(app, launch.browser = FALSE, quiet = TRUE)
 
   # While running
 
@@ -43,7 +43,7 @@ test_that("ShinyAppHandle lifecycle (error path)", {
     server = function(input, output) {}
   )
 
-  handle <- runApp(app, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  handle <- startApp(app, launch.browser = FALSE, quiet = TRUE)
 
   stopApp(stop("test_error", call. = FALSE))
   while (handle$status() == "running") {
@@ -63,7 +63,7 @@ test_that("handle captures result from stopApp", {
     server = function(input, output) {}
   )
 
-  handle <- runApp(app, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  handle <- startApp(app, launch.browser = FALSE, quiet = TRUE)
 
   stopApp("test_result")
   while (handle$status() == "running") {
@@ -84,11 +84,11 @@ test_that("non-blocking auto-stops previous app when starting new one", {
     server = function(input, output) {}
   )
 
-  handle1 <- runApp(app1, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  handle1 <- startApp(app1, launch.browser = FALSE, quiet = TRUE)
   expect_equal(handle1$status(), "running")
 
   # Starting a second non-blocking app should auto-stop the first
-  handle2 <- runApp(app2, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  handle2 <- startApp(app2, launch.browser = FALSE, quiet = TRUE)
   on.exit(handle2$stop(), add = TRUE)
 
   expect_equal(handle1$status(), "success")
@@ -112,10 +112,10 @@ test_that("replacing a non-blocking app does not leave stale service loops", {
   app1 <- shinyApp(ui = fluidPage(), server = function(input, output) {})
   app2 <- shinyApp(ui = fluidPage(), server = function(input, output) {})
 
-  handle1 <- runApp(app1, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  handle1 <- startApp(app1, launch.browser = FALSE, quiet = TRUE)
   gen1 <- .globals$serviceGeneration
 
-  handle2 <- runApp(app2, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  handle2 <- startApp(app2, launch.browser = FALSE, quiet = TRUE)
   on.exit(handle2$stop(), add = TRUE)
   gen2 <- .globals$serviceGeneration
 
@@ -168,13 +168,13 @@ test_that("nested runApp in blocking mode still errors", {
     ui = fluidPage(),
     server = function(input, output) {},
     onStart = function() {
-      runApp(inner_app, blocking = TRUE, launch.browser = FALSE, quiet = TRUE)
+      runApp(inner_app, launch.browser = FALSE, quiet = TRUE)
     }
   )
 
   expect_error(
-    runApp(outer_app, blocking = TRUE, launch.browser = FALSE, quiet = TRUE),
-    "Can't start a new app while another is running"
+    runApp(outer_app, launch.browser = FALSE, quiet = TRUE),
+    "from within `runApp"
   )
 })
 
@@ -186,7 +186,7 @@ test_that("cleanup callbacks run when stopped", {
   )
   onStop(function() stopped <<- TRUE)
 
-  handle <- runApp(app, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  handle <- startApp(app, launch.browser = FALSE, quiet = TRUE)
   handle$stop()
 
   expect_true(stopped)
@@ -198,7 +198,7 @@ test_that("old handle doesn't see new app's result", {
     server = function(input, output) {}
   )
 
-  handle1 <- runApp(app1, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  handle1 <- startApp(app1, launch.browser = FALSE, quiet = TRUE)
 
   stopApp("result1")
   while (handle1$status() == "running") {
@@ -211,7 +211,7 @@ test_that("old handle doesn't see new app's result", {
     ui = fluidPage(),
     server = function(input, output) {}
   )
-  handle2 <- runApp(app2, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  handle2 <- startApp(app2, launch.browser = FALSE, quiet = TRUE)
 
   stopApp("result2")
   while (handle2$status() == "running") {
@@ -231,30 +231,13 @@ test_that("global isRunning() works with non-blocking apps", {
 
   expect_false(isRunning())
 
-  handle <- runApp(app, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  handle <- startApp(app, launch.browser = FALSE, quiet = TRUE)
   on.exit(handle$stop(), add = TRUE)
 
   expect_true(isRunning())
 
   handle$stop()
   expect_false(isRunning())
-})
-
-test_that("shiny.blocking option controls default", {
-  app <- shinyApp(
-    ui = fluidPage(),
-    server = function(input, output) {}
-  )
-
-  withr::local_options(shiny.blocking = FALSE)
-
-  handle <- runApp(app, launch.browser = FALSE, quiet = TRUE)
-  on.exit(handle$stop(), add = TRUE)
-
-  expect_s3_class(handle, "ShinyAppHandle")
-  expect_equal(handle$status(), "running")
-
-  handle$stop()
 })
 
 test_that("startup failure clears app state (regression test)", {
@@ -271,7 +254,7 @@ test_that("startup failure clears app state (regression test)", {
 
   # This should fail
   expect_error(
-    runApp(failing_app, blocking = FALSE, launch.browser = FALSE, quiet = TRUE),
+    startApp(failing_app, launch.browser = FALSE, quiet = TRUE),
     "Intentional startup failure"
   )
 
@@ -284,7 +267,7 @@ test_that("startup failure clears app state (regression test)", {
     server = function(input, output) {}
   )
 
-  handle <- runApp(working_app, blocking = FALSE, launch.browser = FALSE, quiet = TRUE)
+  handle <- startApp(working_app, launch.browser = FALSE, quiet = TRUE)
   on.exit(handle$stop(), add = TRUE)
 
   expect_equal(handle$status(), "running")

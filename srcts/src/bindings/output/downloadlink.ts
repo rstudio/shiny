@@ -8,7 +8,7 @@ class DownloadLinkOutputBinding extends OutputBinding {
   }
   renderValue(el: HTMLElement, data: string): void {
     el.setAttribute("href", data);
-    // If shinyjs has marked this element as disabled (via shinyjs::disabled()),
+    // If we or shinyjs have marked this element as disabled (via shinyjs::disabled()),
     // skip the auto-enable behavior so that the intentional disabled state is
     // preserved. See https://github.com/rstudio/shiny/issues/4119.
     if (

@@ -587,7 +587,9 @@ startApp <- function(
 #' Stop the currently running Shiny app
 #'
 #' Stops the currently running Shiny app, returning control to the caller of
-#' [runApp()].
+#' [runApp()]. Despite the similar names, `stopApp()` is not the
+#' counterpart of [startApp()] — it is the counterpart of [runApp()],
+#' controlling its return value via `returnValue`.
 #'
 #' @param returnValue The value that should be returned from
 #'   [runApp()].

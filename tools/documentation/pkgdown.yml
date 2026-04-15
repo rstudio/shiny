@@ -139,6 +139,7 @@ reference:
     desc: Functions that are used to run or stop Shiny applications.
     contents:
       - runApp
+      - startApp
       - runGadget
       - runExample
       - runGadget

@@ -87,7 +87,9 @@ ReactiveVal <- R6Class(
     value = NULL,
     label = NULL,
     frozen = FALSE,
-    dependents = NULL
+    dependents = NULL,
+    ._destroyed = FALSE,
+    ._destroyHandle = NULL
   ),
   public = list(
     .isRecordingOtel = FALSE, # Needs to be set by Shiny
@@ -106,6 +108,7 @@ ReactiveVal <- R6Class(
       .otelLabel <<- otel_log_label_set_reactive_val(private$label, domain = domain)
     },
     get = function() {
+      if (private$._destroyed) stop(destroyedReactiveError(private$label))
       private$dependents$register()
 
       if (private$frozen)
@@ -114,6 +117,7 @@ ReactiveVal <- R6Class(
       private$value
     },
     set = function(value) {
+      if (private$._destroyed) stop(destroyedReactiveError(private$label))
       if (identical(private$value, value)) {
         return(invisible(FALSE))
       }
@@ -145,6 +149,15 @@ ReactiveVal <- R6Class(
     },
     isFrozen = function() {
       private$frozen
+    },
+    # TODO: Add an exported S3 function (e.g., destroyReactive(x)) to destroy
+    # individual reactive objects. See spec for details.
+    destroy = function() {
+      if (private$._destroyed) return(invisible())
+      private$._destroyed <- TRUE
+      private$dependents$invalidate(log = FALSE)
+      private$value <- NULL
+      invisible()
     },
     format = function(...) {
       # capture.output(print()) is necessary because format() doesn't

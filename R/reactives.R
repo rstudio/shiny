@@ -1287,6 +1287,7 @@ Observer <- R6Class(
     # We must unsubscribe when this observer is destroyed, or else
     # the observer cannot be garbage collected until the session ends.
     .autoDestroyHandle = 'ANY',
+    .autoDestroyOnDestroyHandle = NULL,
     .invalidateCallbacks = list(),
     .execCount = integer(0),
     .onResume = 'function',
@@ -1325,6 +1326,16 @@ Observer <- R6Class(
       .autoDestroy <<- FALSE
       .autoDestroyHandle <<- NULL
       setAutoDestroy(autoDestroy)
+
+      if (!is.null(.domain) && is.function(.domain$onDestroy)) {
+        wr <- rlang::new_weakref(key = self, value = self$destroy)
+        .autoDestroyOnDestroyHandle <<- .domain$onDestroy(function() {
+          destroy_fn <- rlang::wref_value(wr)
+          if (!is.null(destroy_fn)) {
+            destroy_fn()
+          }
+        })
+      }
 
       .reactId <<- nextGlobalReactId()
       rLog$defineObserver(.reactId, .label, .domain)
@@ -1491,6 +1502,11 @@ Observer <- R6Class(
         .autoDestroyHandle()
       }
       .autoDestroyHandle <<- NULL
+
+      if (!is.null(.autoDestroyOnDestroyHandle)) {
+        .autoDestroyOnDestroyHandle()
+      }
+      .autoDestroyOnDestroyHandle <<- NULL
 
       if (!is.null(.ctx)) {
         .ctx$invalidate()

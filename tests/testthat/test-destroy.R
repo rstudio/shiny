@@ -90,3 +90,37 @@ test_that("Observable$destroy() clears value and error refs", {
   expect_null(o$.value)
   expect_false(o$.error)
 })
+
+test_that("Observer registers weak destroy callback with domain$onDestroy", {
+  domain <- createMockDomain()
+  # Add onDestroy to mock domain
+  destroyCBs <- Callbacks$new()
+  domain$onDestroy <- function(callback) destroyCBs$register(callback)
+
+  withReactiveDomain(domain, {
+    val <- reactiveVal(0)
+    count <- 0L
+    obs <- observe({ val(); count <<- count + 1L })
+  })
+  flushReact()
+  expect_equal(count, 1L)
+
+  # Verify something was registered with onDestroy
+  expect_gt(destroyCBs$count(), 0)
+})
+
+test_that("Observer$destroy() deregisters from onDestroy", {
+  domain <- createMockDomain()
+  destroyCBs <- Callbacks$new()
+  domain$onDestroy <- function(callback) destroyCBs$register(callback)
+
+  withReactiveDomain(domain, {
+    obs <- observe({ TRUE })
+  })
+  flushReact()
+  initial_count <- destroyCBs$count()
+
+  obs$destroy()
+  # The unsubscribe handle should have deregistered the callback
+  expect_lt(destroyCBs$count(), initial_count)
+})

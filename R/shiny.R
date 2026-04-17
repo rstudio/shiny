@@ -145,6 +145,18 @@ workerId <- local({
 #'   explicitly namespaced for the current module, `session$ns("name")`
 #'   will return the fully-qualified ID.
 #' }
+#' \item{onDestroy(callback)}{
+#'   Registers a callback to be invoked when the session scope is destroyed
+#'   via `destroy()`. Returns a function that can be called to unregister
+#'   the callback. For module sessions, use this to register cleanup logic
+#'   that runs when `session$destroy()` is called.
+#' }
+#' \item{destroy()}{
+#'   Destroys a module session scope, cleaning up all reactive values,
+#'   observers, and reactive expressions created within it (and any
+#'   descendant scopes). Cannot be called on the root session; only on
+#'   module session proxies returned by [moduleServer()].
+#' }
 #' \item{onEnded(callback)}{
 #'   Synonym for `onSessionEnded`.
 #' }

@@ -53,6 +53,18 @@ Server-side version of \code{\link[=NS]{ns <- NS(id)}}. If bare IDs need to be
 explicitly namespaced for the current module, \code{session$ns("name")}
 will return the fully-qualified ID.
 }
+\item{onDestroy(callback)}{
+Registers a callback to be invoked when the session scope is destroyed
+via \code{destroy()}. Returns a function that can be called to unregister
+the callback. For module sessions, use this to register cleanup logic
+that runs when \code{session$destroy()} is called.
+}
+\item{destroy()}{
+Destroys a module session scope, cleaning up all reactive values,
+observers, and reactive expressions created within it (and any
+descendant scopes). Cannot be called on the root session; only on
+module session proxies returned by \code{\link[=moduleServer]{moduleServer()}}.
+}
 \item{onEnded(callback)}{
 Synonym for \code{onSessionEnded}.
 }

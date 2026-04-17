@@ -119,8 +119,24 @@ insertUI <- function(selector,
 }
 
 
-#' @seealso [ShinySession] for \code{session$destroy()} to clean up server-side
-#'   reactive state after removing module UI.
+#' @section Cleaning up module server-side state:
+#' When `removeUI()` removes a module's UI, the server-side reactive objects
+#' (observers, reactive values, etc.) created by that module continue to run.
+#' Call `session$destroy()` from the module's parent to clean them up:
+#'
+#' ```
+#' # Parent server
+#' server <- function(input, output, session) {
+#'   mod_session <- NULL
+#'   mod_session <<- myModuleServer("mod1")
+#'
+#'   observeEvent(input$remove_module, {
+#'     removeUI(selector = "#mod1-ui")
+#'     mod_session$destroy()
+#'   })
+#' }
+#' ```
+#'
 #' @rdname insertUI
 #' @export
 removeUI <- function(selector,

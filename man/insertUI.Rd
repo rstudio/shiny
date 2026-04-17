@@ -79,6 +79,25 @@ It's particularly useful to pair \code{removeUI} with \code{insertUI()}, but the
 no restriction on what you can use it on. Any element that can be selected
 through a jQuery selector can be removed through this function.
 }
+\section{Cleaning up module server-side state}{
+
+When \code{removeUI()} removes a module's UI, the server-side reactive objects
+(observers, reactive values, etc.) created by that module continue to run.
+Call \code{session$destroy()} from the module's parent to clean them up:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# Parent server
+server <- function(input, output, session) \{
+  mod_session <- NULL
+  mod_session <<- myModuleServer("mod1")
+
+  observeEvent(input$remove_module, \{
+    removeUI(selector = "#mod1-ui")
+    mod_session$destroy()
+  \})
+\}
+}\if{html}{\out{</div>}}
+}
+
 \examples{
 ## Only run this example in interactive R sessions
 if (interactive()) {
@@ -122,8 +141,4 @@ server <- function(input, output, session) {
 # Complete app with UI and server components
 shinyApp(ui, server)
 }
-}
-\seealso{
-\link{ShinySession} for \code{session$destroy()} to clean up server-side
-reactive state after removing module UI.
 }

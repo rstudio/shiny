@@ -1140,11 +1140,14 @@ ShinySession <- R6Class(
     onDestroy = function(callback) {
       "Registers a callback to be invoked when the session scope is destroyed
       via \\code{destroy()}. Returns a function that can be called to
-      unregister the callback."
+      unregister the callback. For module sessions, use this to register
+      cleanup logic that runs when the module's UI is removed and
+      \\code{session$destroy()} is called."
       private$getOrCreateDestroyCallbacks("")$register(callback)
     },
     destroy = function() {
-      "Cannot be called on the root ShinySession."
+      "Cannot be called on the root ShinySession. Call \\code{destroy()} on a
+      module session proxy instead to clean up that module's reactive state."
       stop("destroy() cannot be called on the root ShinySession. Use session$close() instead, or call destroy() on a module session proxy.")
     },
     onInputReceived = function(callback) {

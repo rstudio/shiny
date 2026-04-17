@@ -119,6 +119,8 @@ insertUI <- function(selector,
 }
 
 
+#' @seealso [ShinySession] for \code{session$destroy()} to clean up server-side
+#'   reactive state after removing module UI.
 #' @rdname insertUI
 #' @export
 removeUI <- function(selector,

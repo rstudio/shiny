@@ -123,3 +123,7 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 }
 }
+\seealso{
+\link{ShinySession} for \code{session$destroy()} to clean up server-side
+reactive state after removing module UI.
+}

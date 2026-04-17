@@ -89,6 +89,8 @@ user. Always \code{NULL} for a \code{MockShinySesion}.}
 \item \href{#method-MockShinySession-onFlush}{\code{MockShinySession$onFlush()}}
 \item \href{#method-MockShinySession-onFlushed}{\code{MockShinySession$onFlushed()}}
 \item \href{#method-MockShinySession-onEnded}{\code{MockShinySession$onEnded()}}
+\item \href{#method-MockShinySession-onDestroy}{\code{MockShinySession$onDestroy()}}
+\item \href{#method-MockShinySession-destroy}{\code{MockShinySession$destroy()}}
 \item \href{#method-MockShinySession-isEnded}{\code{MockShinySession$isEnded()}}
 \item \href{#method-MockShinySession-isClosed}{\code{MockShinySession$isClosed()}}
 \item \href{#method-MockShinySession-close}{\code{MockShinySession$close()}}
@@ -181,6 +183,35 @@ Define a callback to be invoked when the session ends
 }
 \if{html}{\out{</div>}}
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MockShinySession-onDestroy"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-onDestroy}{}}}
+\subsection{Method \code{onDestroy()}}{
+Registers a callback to be invoked when the session scope
+is destroyed. Returns a function that can be called to unregister the
+callback.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$onDestroy(callback)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{callback}}{The callback to invoke on destroy.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MockShinySession-destroy"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-destroy}{}}}
+\subsection{Method \code{destroy()}}{
+Cannot be called on the root MockShinySession.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$destroy()}\if{html}{\out{</div>}}
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-MockShinySession-isEnded"></a>}}

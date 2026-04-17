@@ -65,6 +65,23 @@ Dependents <- R6Class(
   )
 )
 
+# Helper to create an onDestroy wrapper closure that only captures the weakref,
+# avoiding accidental strong references to `self`/`private` from the enclosing
+# initialize() environment.
+make_weak_destroy_wrapper <- function(wr) {
+  # force() is critical: without it, `wr` is a promise that retains a reference
+  # to the calling environment (e.g., initialize()), which holds `self` strongly.
+  # Forcing the promise replaces it with the evaluated value, breaking the
+  # reference chain and allowing the weakref key to be GC'd.
+  force(wr)
+  function() {
+    obj <- rlang::wref_key(wr)
+    if (!is.null(obj)) {
+      obj$destroy()
+    }
+  }
+}
+
 destroyedReactiveError <- function(label = NULL) {
   msg <- if (!is.null(label) && nzchar(label)) {
     paste0("Can't access reactive `", label, "`; its module session has been destroyed")
@@ -108,13 +125,8 @@ ReactiveVal <- R6Class(
       .otelLabel <<- otel_log_label_set_reactive_val(private$label, domain = domain)
 
       if (!is.null(domain) && is.function(domain$onDestroy)) {
-        wr <- rlang::new_weakref(key = self, value = self$destroy)
-        private$._destroyHandle <- domain$onDestroy(function() {
-          destroy_fn <- rlang::wref_value(wr)
-          if (!is.null(destroy_fn)) {
-            destroy_fn()
-          }
-        })
+        wr <- rlang::new_weakref(key = self)
+        private$._destroyHandle <- domain$onDestroy(make_weak_destroy_wrapper(wr))
       }
     },
     get = function() {
@@ -994,13 +1006,8 @@ Observable <- R6Class(
       rLog$define(.reactId, .value, .label, type = "observable", .domain)
 
       if (!is.null(.domain) && is.function(.domain$onDestroy)) {
-        wr <- rlang::new_weakref(key = self, value = self$destroy)
-        ._destroyHandle <<- .domain$onDestroy(function() {
-          destroy_fn <- rlang::wref_value(wr)
-          if (!is.null(destroy_fn)) {
-            destroy_fn()
-          }
-        })
+        wr <- rlang::new_weakref(key = self)
+        ._destroyHandle <<- .domain$onDestroy(make_weak_destroy_wrapper(wr))
       }
     },
     getValue = function() {
@@ -1348,13 +1355,8 @@ Observer <- R6Class(
       setAutoDestroy(autoDestroy)
 
       if (!is.null(.domain) && is.function(.domain$onDestroy)) {
-        wr <- rlang::new_weakref(key = self, value = self$destroy)
-        .autoDestroyOnDestroyHandle <<- .domain$onDestroy(function() {
-          destroy_fn <- rlang::wref_value(wr)
-          if (!is.null(destroy_fn)) {
-            destroy_fn()
-          }
-        })
+        wr <- rlang::new_weakref(key = self)
+        .autoDestroyOnDestroyHandle <<- .domain$onDestroy(make_weak_destroy_wrapper(wr))
       }
 
       .reactId <<- nextGlobalReactId()

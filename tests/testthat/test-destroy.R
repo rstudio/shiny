@@ -160,3 +160,101 @@ test_that("Observable without domain does not error on creation", {
   o <- Observable$new(function() 42, label = "no_domain", domain = NULL)
   expect_false(o$._destroyed)
 })
+
+test_that("weakref key becomes NULL after GC of ReactiveVal", {
+  domain <- createMockDomain()
+  wrs <- list()
+  domain$onDestroy <- function(callback) {
+    wrs[[length(wrs) + 1L]] <<- callback
+    function() {}
+  }
+
+  withReactiveDomain(domain, {
+    rv <- reactiveVal(10)
+  })
+  rv_impl <- attr(rv, ".impl")
+
+  expect_equal(length(wrs), 1L)
+  # The wrapper is a function that closes over the weakref
+  expect_true(is.function(wrs[[1L]]))
+
+  # Remove all references to the R6 object
+  rm(rv, rv_impl)
+  gc()
+
+  # The wrapper function should still exist, but when called
+  # it should be a no-op because the weakref key is gone
+  expect_no_error(wrs[[1L]]())
+})
+
+test_that("weakref key becomes NULL after GC of Observable", {
+  domain <- createMockDomain()
+  wrs <- list()
+  domain$onDestroy <- function(callback) {
+    wrs[[length(wrs) + 1L]] <<- callback
+    function() {}
+  }
+
+  withReactiveDomain(domain, {
+    r <- reactive({ 42 })
+  })
+
+  expect_equal(length(wrs), 1L)
+
+  rm(r)
+  gc()
+
+  # Calling the wrapper after GC should be a no-op
+  expect_no_error(wrs[[1L]]())
+})
+
+test_that("weakref key becomes NULL after GC of Observer", {
+  domain <- createMockDomain()
+  wrs <- list()
+  domain$onDestroy <- function(callback) {
+    wrs[[length(wrs) + 1L]] <<- callback
+    function() {}
+  }
+
+  withReactiveDomain(domain, {
+    rv <- reactiveVal(0)
+    obs <- observe({ rv() })
+  })
+  flushReact()
+
+  # Find the observer's wrapper (there may be wrappers from reactiveVal too)
+  initial_count <- length(wrs)
+  expect_gte(initial_count, 1L)
+
+  obs$destroy()
+  rm(obs)
+  gc()
+
+  # All wrappers should be safe to call after GC
+  for (w in wrs) {
+    expect_no_error(w())
+  }
+})
+
+test_that("weakref value (self$destroy) does not prevent GC of key (self)", {
+  domain <- createMockDomain()
+  wrs <- list()
+  domain$onDestroy <- function(callback) {
+    wrs[[length(wrs) + 1L]] <<- callback
+    function() {}
+  }
+
+  withReactiveDomain(domain, {
+    rv <- reactiveVal(999)
+  })
+  rv_impl <- attr(rv, ".impl")
+  weak_check <- rlang::new_weakref(rv_impl)
+
+  expect_false(is.null(rlang::wref_key(weak_check)))
+
+  rm(rv, rv_impl)
+  gc()
+
+  # After removing all references, the object should be GC'd
+  expect_null(rlang::wref_key(weak_check))
+})

@@ -241,7 +241,7 @@ test_that("global isRunning() works with non-blocking apps", {
 })
 
 test_that("startup failure clears app state (regression test)", {
-  # If startup fails after initCurrentAppState() but before earlyCleanup <- FALSE,
+  # If startup fails after initCurrentAppState() but before cleanupOnExit <- FALSE,
   # the app state must be cleared so subsequent runApp() calls don't fail with
   # "Can't start a new app while another is running"
 

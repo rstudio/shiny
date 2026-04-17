@@ -359,6 +359,7 @@ ShinySession <- R6Class(
     .clientData = 'ANY', # Internal ReactiveValues object for other data sent from the client
     busyCount = 0L, # Number of observer callbacks that are pending. When 0, we are idle
     closedCallbacks = 'Callbacks',
+    destroyCallbacksByNs = 'Map',
     flushCallbacks = 'Callbacks',
     flushedCallbacks = 'Callbacks',
     inputReceivedCallbacks = 'Callbacks',
@@ -690,6 +691,87 @@ ShinySession <- R6Class(
       }
 
       invisible()
+    },
+
+    # Sentinel key for root-level destroy callbacks (fastmap disallows empty string keys)
+    destroyNsRoot = "__root__",
+
+    destroyNsKey = function(ns) {
+      if (!nzchar(ns)) private$destroyNsRoot else ns
+    },
+
+    getOrCreateDestroyCallbacks = function(ns) {
+      key <- private$destroyNsKey(ns)
+      if (!private$destroyCallbacksByNs$containsKey(key)) {
+        private$destroyCallbacksByNs$set(key, Callbacks$new())
+      }
+      private$destroyCallbacksByNs$get(key)
+    },
+    invokeDestroyCallbacks = function(nsPrefix = "") {
+      allNs <- private$destroyCallbacksByNs$keys()
+      isRoot <- !nzchar(nsPrefix)
+
+      if (!isRoot) {
+        nsPrefixWithSep <- paste0(nsPrefix, "-")
+        # Match the namespace itself and any children
+        matching <- allNs[allNs == nsPrefix | startsWith(allNs, nsPrefixWithSep)]
+      } else {
+        matching <- allNs
+      }
+
+      if (length(matching) == 0L) return(invisible())
+
+      # Sort deepest-first (most hyphens first)
+      depths <- nchar(gsub("[^-]", "", matching))
+      matching <- matching[order(-depths, matching)]
+
+      for (ns in matching) {
+        cbs <- private$destroyCallbacksByNs$get(ns)
+        if (!is.null(cbs)) {
+          cbs$invoke(onError = printError)
+        }
+        private$destroyCallbacksByNs$remove(ns)
+      }
+
+      # Clean up inputs for matched namespaces
+      if (!isRoot) {
+        nsPrefixWithSep <- paste0(nsPrefix, "-")
+        private$.input$`_destroy`(nsPrefixWithSep)
+        private$.clientData$`_destroy`(nsPrefixWithSep)
+      }
+
+      # Clean up outputs for matched namespaces
+      outputNames <- names(private$.outputs)
+      if (!isRoot) {
+        nsPrefixWithSep <- paste0(nsPrefix, "-")
+        matchingOutputs <- outputNames[startsWith(outputNames, nsPrefixWithSep)]
+      } else {
+        matchingOutputs <- outputNames
+      }
+      for (outName in matchingOutputs) {
+        if (!is.null(private$.outputs[[outName]])) {
+          private$.outputs[[outName]]$destroy()
+        }
+        private$.outputs[[outName]] <- NULL
+        private$.outputOptions[[outName]] <- NULL
+        private$invalidatedOutputValues$remove(outName)
+        private$invalidatedOutputErrors$remove(outName)
+      }
+
+      # Clean up dynamic routes
+      if (!isRoot) {
+        nsPrefixWithSep <- paste0(nsPrefix, "-")
+        downloadNames <- self$downloads$keys()
+        for (name in downloadNames[startsWith(downloadNames, nsPrefixWithSep)]) {
+          self$downloads$remove(name)
+        }
+        fileNames <- self$files$keys()
+        for (name in fileNames[startsWith(fileNames, nsPrefixWithSep)]) {
+          self$files$remove(name)
+        }
+      }
+
+      invisible()
     }
   ),
   public = list(
@@ -721,6 +803,7 @@ ShinySession <- R6Class(
       private$invalidatedOutputErrors <- Map$new()
       private$fileUploadContext <- FileUploadContext$new()
       private$closedCallbacks <- Callbacks$new()
+      private$destroyCallbacksByNs <- Map$new()
       private$flushCallbacks <- Callbacks$new()
       private$flushedCallbacks <- Callbacks$new()
       private$inputReceivedCallbacks <- Callbacks$new()
@@ -1040,6 +1123,16 @@ ShinySession <- R6Class(
       "Synonym for onSessionEnded"
       return(self$onSessionEnded(endedCallback))
     },
+    onDestroy = function(callback) {
+      "Registers a callback to be invoked when the session scope is destroyed
+      via \\code{destroy()}. Returns a function that can be called to
+      unregister the callback."
+      private$getOrCreateDestroyCallbacks("")$register(callback)
+    },
+    destroy = function() {
+      "Cannot be called on the root ShinySession."
+      stop("destroy() cannot be called on the root ShinySession. Use session$close() instead, or call destroy() on a module session proxy.")
+    },
     onInputReceived = function(callback) {
       "Registers the given callback to be invoked when the session receives
       new data from the client."
@@ -1090,6 +1183,7 @@ ShinySession <- R6Class(
           private$closedCallbacks$invoke(onError = printError, ..stacktraceon = TRUE)
         })
       })
+      private$invokeDestroyCallbacks("")
     },
     isClosed = function() {
       return(self$closed)

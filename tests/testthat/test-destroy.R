@@ -309,3 +309,23 @@ test_that("ReactiveValues$_destroy is no-op when no keys match", {
   expect_no_error(rv$`_destroy`("mymod-"))
   expect_equal(isolate(rv$names()), "other-x")
 })
+
+test_that("MockShinySession$onDestroy registers callback and returns unsubscribe", {
+  session <- MockShinySession$new()
+  called <- FALSE
+  unsub <- session$onDestroy(function() called <<- TRUE)
+  expect_true(is.function(unsub))
+})
+
+test_that("MockShinySession$destroy() throws an error", {
+  session <- MockShinySession$new()
+  expect_error(session$destroy(), "destroy")
+})
+
+test_that("MockShinySession$close() invokes destroy callbacks", {
+  session <- MockShinySession$new()
+  called <- FALSE
+  session$onDestroy(function() called <<- TRUE)
+  session$close()
+  expect_true(called)
+})

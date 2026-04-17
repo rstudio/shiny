@@ -255,6 +255,7 @@ MockShinySession <- R6Class(
       private$flushCBs <- Callbacks$new()
       private$flushedCBs <- Callbacks$new()
       private$endedCBs <- Callbacks$new()
+      private$destroyCallbacksByNs <- Map$new()
 
       private$file_generators <- fastmap()
 
@@ -317,6 +318,22 @@ MockShinySession <- R6Class(
     onEnded = function(sessionEndedCallback) {
       private$endedCBs$register(sessionEndedCallback)
     },
+    #' @description Registers a callback to be invoked when the session scope
+    #'   is destroyed. Returns a function that can be called to unregister the
+    #'   callback.
+    #' @param callback The callback to invoke on destroy.
+    onDestroy = function(callback) {
+      # Use sentinel key since fastmap disallows empty string keys
+      ns <- "__root__"
+      if (!private$destroyCallbacksByNs$containsKey(ns)) {
+        private$destroyCallbacksByNs$set(ns, Callbacks$new())
+      }
+      private$destroyCallbacksByNs$get(ns)$register(callback)
+    },
+    #' @description Cannot be called on the root MockShinySession.
+    destroy = function() {
+      stop("destroy() cannot be called on the root session. Use close() instead, or call destroy() on a module session proxy.")
+    },
 
     #' @description Returns `FALSE` if the session has not yet been closed
     isEnded = function(){ private$was_closed },
@@ -330,6 +347,15 @@ MockShinySession <- R6Class(
       withReactiveDomain(self, {
         private$endedCBs$invoke(onError = printError, ..stacktraceon = TRUE)
       })
+      # Invoke destroy callbacks for all namespaces
+      allNs <- private$destroyCallbacksByNs$keys()
+      for (ns in allNs) {
+        cbs <- private$destroyCallbacksByNs$get(ns)
+        if (!is.null(cbs)) {
+          cbs$invoke(onError = printError)
+        }
+        private$destroyCallbacksByNs$remove(ns)
+      }
       private$was_closed <- TRUE
     },
 
@@ -643,6 +669,8 @@ MockShinySession <- R6Class(
     flushedCBs = NULL,
     # @field endedCBs `Callbacks` called when session ends.
     endedCBs = NULL,
+    # @field destroyCallbacksByNs Map of namespace -> Callbacks for destroy.
+    destroyCallbacksByNs = NULL,
     # @field unhandledErrorCallbacks `Callbacks` called when an unhandled error
     #   occurs.
     unhandledErrorCallbacks = Callbacks$new(),

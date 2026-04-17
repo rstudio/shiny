@@ -23,3 +23,4 @@ madge.svg
 .github/r-depends.rds
 .claude/settings.local.json
 /docs/
+.context

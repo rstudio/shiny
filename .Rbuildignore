@@ -36,3 +36,4 @@
 ^CRAN-SUBMISSION$
 ^LICENSE\.md$
 ^docs$
+^\.context$

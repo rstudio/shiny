@@ -944,6 +944,8 @@ Observable <- R6Class(
     .execCount = integer(0),
     .mostRecentCtxId = character(0),
     .ctx = 'Context',
+    ._destroyed = FALSE,
+    ._destroyHandle = NULL,
 
     .isRecordingOtel = FALSE, # Needs to be set by Shiny
     .otelLabel = NULL, # Needs to be set by Shiny
@@ -982,6 +984,7 @@ Observable <- R6Class(
       rLog$define(.reactId, .value, .label, type = "observable", .domain)
     },
     getValue = function() {
+      if (._destroyed) stop(destroyedReactiveError(.label))
       .dependents$register()
 
       if (.invalidated || .running) {
@@ -998,6 +1001,18 @@ Observable <- R6Class(
         .value
       else
         invisible(.value)
+    },
+    destroy = function() {
+      if (._destroyed) return(invisible())
+      ._destroyed <<- TRUE
+      .dependents$invalidate(log = FALSE)
+      .value <<- NULL
+      .error <<- FALSE
+      if (!is.null(.ctx)) {
+        .ctx$invalidate()
+        .ctx <<- NULL
+      }
+      invisible()
     },
     format = function() {
       simpleExprToFunction(fn_body(.origFunc), "reactive")

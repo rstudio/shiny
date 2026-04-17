@@ -53,3 +53,40 @@ test_that("ReactiveVal$destroy() does not emit rLog or otel", {
   rv_impl$destroy()
   flushReact()
 })
+
+test_that("Observable$destroy() sets destroyed flag and invalidates dependents", {
+  o <- Observable$new(function() 42, label = "test_obs", domain = NULL)
+  # Force first evaluation
+  isolate(o$getValue())
+
+  # Track invalidation of downstream
+  invalidated <- FALSE
+  ctx <- Context$new(domain = NULL)
+  ctx$onInvalidate(function() invalidated <<- TRUE)
+  ctx$run(function() o$getValue())
+
+  o$destroy()
+  flushReact()
+
+  expect_true(invalidated)
+})
+
+test_that("Observable$destroy() is idempotent", {
+  o <- Observable$new(function() 42, label = "test_obs", domain = NULL)
+  o$destroy()
+  expect_no_error(o$destroy())
+})
+
+test_that("destroyed Observable$getValue() raises shiny.destroyed.error", {
+  o <- Observable$new(function() 42, label = "test_obs", domain = NULL)
+  o$destroy()
+  expect_error(isolate(o$getValue()), class = "shiny.destroyed.error")
+})
+
+test_that("Observable$destroy() clears value and error refs", {
+  o <- Observable$new(function() list(big = rep(1, 1e6)), label = "test_obs", domain = NULL)
+  isolate(o$getValue())
+  o$destroy()
+  expect_null(o$.value)
+  expect_false(o$.error)
+})

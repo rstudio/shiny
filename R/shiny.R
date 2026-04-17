@@ -954,6 +954,13 @@ ShinySession <- R6Class(
             c(dots, quoted_ = TRUE, env_ = env_),
             quote = TRUE
           )
+        },
+
+        onDestroy = function(callback) {
+          private$getOrCreateDestroyCallbacks(namespace)$register(callback)
+        },
+        destroy = function() {
+          private$invokeDestroyCallbacks(namespace)
         }
       )
 
@@ -1009,7 +1016,7 @@ ShinySession <- R6Class(
       # When scope is created, register these bookmarking callbacks on the main
       # session object. They will invoke the scope's own callbacks, if any are
       # present.
-      self$onBookmark(function(state) {
+      unsub_bookmark <- self$onBookmark(function(state) {
         # Exit if no user-defined callbacks.
         if (bookmarkCallbacks$count() == 0)
           return()
@@ -1043,7 +1050,7 @@ ShinySession <- R6Class(
         }
       })
 
-      self$onRestore(function(state) {
+      unsub_restore <- self$onRestore(function(state) {
         # Exit if no user-defined callbacks.
         if (restoreCallbacks$count() == 0)
           return()
@@ -1053,7 +1060,7 @@ ShinySession <- R6Class(
         restoreCallbacks$invoke(scopeState)
       })
 
-      self$onRestored(function(state) {
+      unsub_restored <- self$onRestored(function(state) {
         # Exit if no user-defined callbacks.
         if (restoredCallbacks$count() == 0)
           return()
@@ -1067,6 +1074,13 @@ ShinySession <- R6Class(
       private$registerBookmarkExclude(function() {
         excluded <- scope$getBookmarkExclude()
         ns(excluded)
+      })
+
+      # Clean up bookmark registrations when this scope is destroyed
+      scope$onDestroy(function() {
+        if (is.function(unsub_bookmark)) unsub_bookmark()
+        if (is.function(unsub_restore)) unsub_restore()
+        if (is.function(unsub_restored)) unsub_restored()
       })
 
       scope

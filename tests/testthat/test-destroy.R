@@ -329,3 +329,66 @@ test_that("MockShinySession$close() invokes destroy callbacks", {
   session$close()
   expect_true(called)
 })
+
+test_that("session proxy onDestroy registers and fires on destroy", {
+  session <- MockShinySession$new()
+  scope <- session$makeScope("mymod")
+
+  called <- FALSE
+  scope$onDestroy(function() called <<- TRUE)
+
+  expect_false(called)
+  scope$destroy()
+  expect_true(called)
+})
+
+test_that("session proxy destroy() invokes callbacks", {
+  session <- MockShinySession$new()
+  scope <- session$makeScope("mymod")
+
+  called <- FALSE
+  scope$onDestroy(function() called <<- TRUE)
+
+  scope$destroy()
+  expect_true(called)
+})
+
+test_that("session proxy destroy() cleans up child namespaces", {
+  session <- MockShinySession$new()
+  scope <- session$makeScope("parent")
+  child <- scope$makeScope("child")
+
+  parent_called <- FALSE
+  child_called <- FALSE
+  scope$onDestroy(function() parent_called <<- TRUE)
+  child$onDestroy(function() child_called <<- TRUE)
+
+  scope$destroy()
+  expect_true(parent_called)
+  expect_true(child_called)
+})
+
+test_that("session proxy destroy() fires deepest-first", {
+  session <- MockShinySession$new()
+  scope <- session$makeScope("parent")
+  child <- scope$makeScope("child")
+
+  order <- character(0)
+  scope$onDestroy(function() order <<- c(order, "parent"))
+  child$onDestroy(function() order <<- c(order, "child"))
+
+  scope$destroy()
+  expect_equal(order, c("child", "parent"))
+})
+
+test_that("session proxy destroy() is idempotent", {
+  session <- MockShinySession$new()
+  scope <- session$makeScope("mymod")
+
+  count <- 0L
+  scope$onDestroy(function() count <<- count + 1L)
+
+  scope$destroy()
+  scope$destroy()
+  expect_equal(count, 1L)
+})

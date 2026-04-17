@@ -552,6 +552,12 @@ MockShinySession <- R6Class(
         ns = function(namespace) ns(namespace),
         setInputs = function(...) {
           self$setInputs(!!!mapNames(ns, rlang::dots_list(..., .homonyms = "error")))
+        },
+        onDestroy = function(callback) {
+          private$getOrCreateDestroyCallbacks(namespace)$register(callback)
+        },
+        destroy = function() {
+          private$invokeDestroyCallbacks(namespace)
         }
       )
     },
@@ -692,6 +698,46 @@ MockShinySession <- R6Class(
     # @field currentOutputName Namespaced name of the currently executing
     #'   output, or `NULL` if no output is currently executing.
     currentOutputName = NULL,
+
+    # @description Get or create a Callbacks object for the given namespace.
+    # @param ns The namespace key.
+    # @return A Callbacks object.
+    getOrCreateDestroyCallbacks = function(ns) {
+      if (!nzchar(ns)) ns <- "__root__"
+      if (!private$destroyCallbacksByNs$containsKey(ns)) {
+        private$destroyCallbacksByNs$set(ns, Callbacks$new())
+      }
+      private$destroyCallbacksByNs$get(ns)
+    },
+
+    # @description Invoke destroy callbacks for the given namespace prefix
+    #   and all child namespaces, deepest-first.
+    # @param nsPrefix The namespace prefix to match.
+    invokeDestroyCallbacks = function(nsPrefix = "") {
+      allNs <- private$destroyCallbacksByNs$keys()
+      isRoot <- !nzchar(nsPrefix)
+
+      if (!isRoot) {
+        nsPrefixWithSep <- paste0(nsPrefix, "-")
+        matching <- allNs[allNs == nsPrefix | startsWith(allNs, nsPrefixWithSep)]
+      } else {
+        matching <- allNs
+      }
+
+      if (length(matching) == 0L) return(invisible())
+
+      # Sort deepest-first (most hyphens first)
+      depths <- nchar(gsub("[^-]", "", matching))
+      matching <- matching[order(-depths, matching)]
+
+      for (ns in matching) {
+        cbs <- private$destroyCallbacksByNs$get(ns)
+        if (!is.null(cbs)) {
+          cbs$invoke(onError = printError)
+        }
+        private$destroyCallbacksByNs$remove(ns)
+      }
+    },
 
     # @description Writes a downloadable file to disk. If the `content` function
     #   associated with a download handler does not write a file, an error is

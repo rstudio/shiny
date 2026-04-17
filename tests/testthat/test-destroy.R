@@ -124,3 +124,39 @@ test_that("Observer$destroy() deregisters from onDestroy", {
   # The unsubscribe handle should have deregistered the callback
   expect_lt(destroyCBs$count(), initial_count)
 })
+
+test_that("ReactiveVal auto-registers weak destroy callback with domain", {
+  domain <- createMockDomain()
+  destroyCBs <- Callbacks$new()
+  domain$onDestroy <- function(callback) destroyCBs$register(callback)
+
+  withReactiveDomain(domain, {
+    rv <- reactiveVal(10)
+  })
+
+  expect_gt(destroyCBs$count(), 0)
+})
+
+test_that("Observable auto-registers weak destroy callback with domain", {
+  domain <- createMockDomain()
+  destroyCBs <- Callbacks$new()
+  domain$onDestroy <- function(callback) destroyCBs$register(callback)
+
+  withReactiveDomain(domain, {
+    r <- reactive({ 42 })
+  })
+
+  expect_gt(destroyCBs$count(), 0)
+})
+
+test_that("ReactiveVal without domain does not error on creation", {
+  rv_impl <- ReactiveVal$new(10, label = "no_domain")
+  isolate(expect_equal(rv_impl$get(), 10))
+  rv_impl$set(20)
+  isolate(expect_equal(rv_impl$get(), 20))
+})
+
+test_that("Observable without domain does not error on creation", {
+  o <- Observable$new(function() 42, label = "no_domain", domain = NULL)
+  expect_false(o$._destroyed)
+})

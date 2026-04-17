@@ -106,6 +106,16 @@ ReactiveVal <- R6Class(
       domain <- getDefaultReactiveDomain()
       rLog$define(private$reactId, value, private$label, type = "reactiveVal", domain)
       .otelLabel <<- otel_log_label_set_reactive_val(private$label, domain = domain)
+
+      if (!is.null(domain) && is.function(domain$onDestroy)) {
+        wr <- rlang::new_weakref(key = self, value = self$destroy)
+        private$._destroyHandle <- domain$onDestroy(function() {
+          destroy_fn <- rlang::wref_value(wr)
+          if (!is.null(destroy_fn)) {
+            destroy_fn()
+          }
+        })
+      }
     },
     get = function() {
       if (private$._destroyed) stop(destroyedReactiveError(private$label))
@@ -982,6 +992,16 @@ Observable <- R6Class(
       .mostRecentCtxId <<- ""
       .ctx <<- NULL
       rLog$define(.reactId, .value, .label, type = "observable", .domain)
+
+      if (!is.null(.domain) && is.function(.domain$onDestroy)) {
+        wr <- rlang::new_weakref(key = self, value = self$destroy)
+        ._destroyHandle <<- .domain$onDestroy(function() {
+          destroy_fn <- rlang::wref_value(wr)
+          if (!is.null(destroy_fn)) {
+            destroy_fn()
+          }
+        })
+      }
     },
     getValue = function() {
       if (._destroyed) stop(destroyedReactiveError(.label))

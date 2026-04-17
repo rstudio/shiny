@@ -65,6 +65,17 @@ Dependents <- R6Class(
   )
 )
 
+destroyedReactiveError <- function(label = NULL) {
+  msg <- if (!is.null(label) && nzchar(label)) {
+    paste0("Can't access reactive `", label, "`; its module session has been destroyed")
+  } else {
+    "Can't access reactive; its module session has been destroyed"
+  }
+  structure(
+    class = c("shiny.destroyed.error", "error", "condition"),
+    list(message = msg)
+  )
+}
 
 # ReactiveVal ---------------------------------------------------------------
 

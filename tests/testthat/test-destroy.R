@@ -392,3 +392,83 @@ test_that("session proxy destroy() is idempotent", {
   scope$destroy()
   expect_equal(count, 1L)
 })
+
+test_that("full module destroy cleans up all reactive state", {
+  session <- MockShinySession$new()
+  scope <- session$makeScope("mod1")
+
+  obs_val <- NULL
+  observer_ran <- 0L
+
+  withReactiveDomain(scope, {
+    rv <- reactiveVal(10)
+    r <- reactive({ rv() * 2 })
+    obs <- observe({
+      observer_ran <<- observer_ran + 1L
+      obs_val <<- r()
+    })
+  })
+  flushReact()
+
+  expect_equal(observer_ran, 1L)
+  expect_equal(obs_val, 20)
+
+  # Destroy the module scope
+  scope$destroy()
+  flushReact()
+
+  # Observer should not run again
+  expect_equal(observer_ran, 1L)
+
+  # Accessing destroyed reactives should error
+  rv_impl <- attr(rv, ".impl")
+  expect_error(rv_impl$get(), class = "shiny.destroyed.error")
+
+  o <- attr(r, "observable")
+  expect_error(isolate(o$getValue()), class = "shiny.destroyed.error")
+})
+
+test_that("destroy then re-create module works cleanly", {
+  session <- MockShinySession$new()
+
+  # First instance
+  scope1 <- session$makeScope("mod1")
+  val1 <- NULL
+  withReactiveDomain(scope1, {
+    rv1 <- reactiveVal(1)
+    observe({ val1 <<- rv1() })
+  })
+  flushReact()
+  expect_equal(val1, 1)
+
+  # Destroy first instance
+  scope1$destroy()
+  flushReact()
+
+  # Second instance with same namespace
+  scope2 <- session$makeScope("mod1")
+  val2 <- NULL
+  withReactiveDomain(scope2, {
+    rv2 <- reactiveVal(99)
+    observe({ val2 <<- rv2() })
+  })
+  flushReact()
+  expect_equal(val2, 99)
+})
+
+test_that("nested module destroy cleans up grandchild scopes", {
+  session <- MockShinySession$new()
+  parent <- session$makeScope("parent")
+  child <- parent$makeScope("child")
+  grandchild <- child$makeScope("gc")
+
+  order <- character(0)
+  parent$onDestroy(function() order <<- c(order, "parent"))
+  child$onDestroy(function() order <<- c(order, "child"))
+  grandchild$onDestroy(function() order <<- c(order, "grandchild"))
+
+  parent$destroy()
+
+  # Deepest-first ordering
+  expect_equal(order, c("grandchild", "child", "parent"))
+})

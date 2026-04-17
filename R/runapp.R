@@ -204,7 +204,13 @@ startApp <- function(
   display.mode = c("auto", "normal", "showcase"),
   test.mode = getOption("shiny.testmode", FALSE)
 ) {
-  promises::local_otel_promise_domain()
+  # OTEL: `local_otel_promise_domain()` ties its lifetime to this frame,
+  # which exits as soon as the handle is returned — before any request is
+  # served. A persistent global install would instead leak into unrelated
+  # user promises between ticks. Wrap the synchronous setup below (covers
+  # onStart) and each service iteration in `serviceNonBlocking()` (covers
+  # handlers and observers). The domain is dormant between ticks, so it
+  # stays out of user promises created at the console.
 
   # Make warnings print immediately
   # Set pool.scheduler to support pool package
@@ -225,12 +231,13 @@ startApp <- function(
 
   require(shiny)
 
-  appParts <- as.shiny.appobj(appDir)
-
-  result <- .setupShinyApp(
-    appDir, appParts, port, launch.browser, host,
-    workerId, quiet, display.mode, test.mode, ops = ops
-  )
+  result <- promises::with_otel_promise_domain({
+    appParts <- as.shiny.appobj(appDir)
+    .setupShinyApp(
+      appDir, appParts, port, launch.browser, host,
+      workerId, quiet, display.mode, test.mode, ops = ops
+    )
+  })
   setupComplete <- TRUE
 
   handle <- ShinyAppHandle$new(result$appUrl, result$cleanup)
@@ -284,9 +291,8 @@ startApp <- function(
   # | no          | yes       | use runApp   | if it's not missing (runApp specifies), use those                                                                                      |
   # | yes         | yes       | use runApp   | if it's not missing (runApp specifies), use those                                                                                      |
   #
-  # `missing()` is evaluated in the caller's frame because `runApp()` /
-  # `startApp()` formals carry defaults, so the arguments are never missing
-  # here in `.setupShinyApp()` itself.
+  # `missing()` runs in the caller's frame: with defaults on the outer
+  # formals, arguments are no longer missing by the time they reach here.
   appOps <- appParts$options
   findVal <- function(arg, default) {
     if (arg %in% names(appOps)) appOps[[arg]] else default

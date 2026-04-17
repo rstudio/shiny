@@ -505,21 +505,30 @@ serviceApp <- function(
 # The generation token (incremented on every runApp() call) ensures that when
 # a new app starts, any stale service loop from a previous non-blocking app
 # exits cleanly instead of continuing to run.
+# Each iteration wraps `serviceApp()` in `with_otel_promise_domain()` so the
+# OTEL domain is active while Shiny processes its own work — handlers,
+# later callbacks, promise fulfillments — all executed synchronously inside
+# `serviceApp()`. Span wrapping is attached at promise-registration time, so
+# callbacks registered inside an iteration stay instrumented when they fire
+# later. The domain is dormant between ticks, keeping it out of unrelated
+# user promises created while the console is interactive.
 serviceNonBlocking <- function(handle, generation) {
   serviceLoop <- function() {
     if (!identical(.globals$serviceGeneration, generation)) {
       return(invisible())
     }
     if (!.globals$stopped) {
-      ..stacktraceoff..(
-        captureStackTraces(
-          tryCatch(
-            ..stacktracefloor..(serviceApp(.shinyServiceDelaySecs * 1000)),
-            error = function(e) {
-              .globals$stopped <- TRUE
-              .globals$retval <- e
-              .globals$reterror <- TRUE
-            }
+      promises::with_otel_promise_domain(
+        ..stacktraceoff..(
+          captureStackTraces(
+            tryCatch(
+              ..stacktracefloor..(serviceApp(.shinyServiceDelaySecs * 1000)),
+              error = function(e) {
+                .globals$stopped <- TRUE
+                .globals$retval <- e
+                .globals$reterror <- TRUE
+              }
+            )
           )
         )
       )

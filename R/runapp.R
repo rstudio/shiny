@@ -136,46 +136,6 @@ runApp <- function(
   # ============================================================================
   appParts <- as.shiny.appobj(appDir)
 
-  # ============================================================================
-  # runApp options set via shinyApp(options = list(...))
-  # ============================================================================
-  # The lines below set some of the app's running options, which
-  # can be:
-  #   - left unspecified (in which case the arguments' default
-  #     values from `runApp` kick in);
-  #   - passed through `shinyApp`
-  #   - passed through `runApp` (this function)
-  #   - passed through both `shinyApp` and `runApp` (the latter
-  #     takes precedence)
-  #
-  # Matrix of possibilities:
-  # | IN shinyApp | IN runApp | result       | check                                                                                                                                  |
-  # |-------------|-----------|--------------|----------------------------------------------------------------------------------------------------------------------------------------|
-  # | no          | no        | use defaults | exhaust all possibilities: if it's missing (runApp does not specify); THEN if it's not in shinyApp appParts$options; THEN use defaults |
-  # | yes         | no        | use shinyApp | if it's missing (runApp does not specify); THEN if it's in shinyApp appParts$options; THEN use shinyApp                                |
-  # | no          | yes       | use runApp   | if it's not missing (runApp specifies), use those                                                                                      |
-  # | yes         | yes       | use runApp   | if it's not missing (runApp specifies), use those                                                                                      |
-  #
-  # I tried to make this as compact and intuitive as possible,
-  # given that there are four distinct possibilities to check
-  appOps <- appParts$options
-  findVal <- function(arg, default) {
-    if (arg %in% names(appOps)) appOps[[arg]] else default
-  }
-
-  if (missing(port))
-    port <- findVal("port", port)
-  if (missing(launch.browser))
-    launch.browser <- findVal("launch.browser", launch.browser)
-  if (missing(host))
-    host <- findVal("host", host)
-  if (missing(quiet))
-    quiet <- findVal("quiet", quiet)
-  if (missing(display.mode))
-    display.mode <- findVal("display.mode", display.mode)
-  if (missing(test.mode))
-    test.mode <- findVal("test.mode", test.mode)
-
   result <- .setupShinyApp(
     appDir, appParts, port, launch.browser, host,
     workerId, quiet, display.mode, test.mode, ops = ops
@@ -246,10 +206,19 @@ startApp <- function(
 ) {
   promises::local_otel_promise_domain()
 
-  # Ensure onStop callbacks fire even if as.shiny.appobj() errors.
-  # See matching guard in runApp().
+  # Make warnings print immediately
+  # Set pool.scheduler to support pool package
+  ops <- options(
+    # Raise warn level to 1, but don't lower it
+    warn = max(1, getOption("warn", default = 1)),
+    pool.scheduler = scheduleTask
+  )
+
+  # Ensure options are restored and onStop callbacks fire even if
+  # as.shiny.appobj() errors. See matching guard in runApp().
   setupComplete <- FALSE
   on.exit(if (!setupComplete) {
+    options(ops)
     .globals$onStopCallbacks$invoke()
     .globals$onStopCallbacks <- Callbacks$new()
   }, add = TRUE)
@@ -258,28 +227,9 @@ startApp <- function(
 
   appParts <- as.shiny.appobj(appDir)
 
-  # Resolve arguments that may also be specified via shinyApp(options = ...)
-  # See runApp() for the full precedence matrix.
-  appOps <- appParts$options
-  findVal <- function(arg, default) {
-    if (arg %in% names(appOps)) appOps[[arg]] else default
-  }
-  if (missing(port))
-    port <- findVal("port", port)
-  if (missing(launch.browser))
-    launch.browser <- findVal("launch.browser", launch.browser)
-  if (missing(host))
-    host <- findVal("host", host)
-  if (missing(quiet))
-    quiet <- findVal("quiet", quiet)
-  if (missing(display.mode))
-    display.mode <- findVal("display.mode", display.mode)
-  if (missing(test.mode))
-    test.mode <- findVal("test.mode", test.mode)
-
   result <- .setupShinyApp(
     appDir, appParts, port, launch.browser, host,
-    workerId, quiet, display.mode, test.mode
+    workerId, quiet, display.mode, test.mode, ops = ops
   )
   setupComplete <- TRUE
 
@@ -294,8 +244,8 @@ startApp <- function(
 # Returns list(appUrl, cleanup) where cleanup() tears down the app.
 # On setup failure, internal on.exit handlers clean up partial state.
 .setupShinyApp <- function(appDir, appParts, port, launch.browser, host,
-                           workerId, quiet, display.mode, test.mode,
-                           ops = NULL) {
+                           workerId, quiet, display.mode, test.mode, ops,
+                           caller = parent.frame()) {
   # Guard on.exit handlers with this flag so they only fire on setup failure.
   # On success, cleanup responsibility is handed to the caller via the
   # returned cleanup function.
@@ -314,16 +264,40 @@ startApp <- function(
     }
   }
 
-  # Make warnings print immediately
-  # Set pool.scheduler to support pool package
-  # When called from runApp(), ops is already set; from startApp(), set here.
-  if (is.null(ops)) {
-    ops <- options(
-      # Raise warn level to 1, but don't lower it
-      warn = max(1, getOption("warn", default = 1)),
-      pool.scheduler = scheduleTask
-    )
+  # ============================================================================
+  # runApp options set via shinyApp(options = list(...))
+  # ============================================================================
+  # The lines below set some of the app's running options, which
+  # can be:
+  #   - left unspecified (in which case the arguments' default
+  #     values from `runApp` kick in);
+  #   - passed through `shinyApp`
+  #   - passed through `runApp` (this function)
+  #   - passed through both `shinyApp` and `runApp` (the latter
+  #     takes precedence)
+  #
+  # Matrix of possibilities:
+  # | IN shinyApp | IN runApp | result       | check                                                                                                                                  |
+  # |-------------|-----------|--------------|----------------------------------------------------------------------------------------------------------------------------------------|
+  # | no          | no        | use defaults | exhaust all possibilities: if it's missing (runApp does not specify); THEN if it's not in shinyApp appParts$options; THEN use defaults |
+  # | yes         | no        | use shinyApp | if it's missing (runApp does not specify); THEN if it's in shinyApp appParts$options; THEN use shinyApp                                |
+  # | no          | yes       | use runApp   | if it's not missing (runApp specifies), use those                                                                                      |
+  # | yes         | yes       | use runApp   | if it's not missing (runApp specifies), use those                                                                                      |
+  #
+  # `missing()` is evaluated in the caller's frame because `runApp()` /
+  # `startApp()` formals carry defaults, so the arguments are never missing
+  # here in `.setupShinyApp()` itself.
+  appOps <- appParts$options
+  findVal <- function(arg, default) {
+    if (arg %in% names(appOps)) appOps[[arg]] else default
   }
+  if (evalq(missing(port), caller))           port <- findVal("port", port)
+  if (evalq(missing(launch.browser), caller)) launch.browser <- findVal("launch.browser", launch.browser)
+  if (evalq(missing(host), caller))           host <- findVal("host", host)
+  if (evalq(missing(quiet), caller))          quiet <- findVal("quiet", quiet)
+  if (evalq(missing(display.mode), caller))   display.mode <- findVal("display.mode", display.mode)
+  if (evalq(missing(test.mode), caller))      test.mode <- findVal("test.mode", test.mode)
+
   on.exit(if (cleanupOnExit) options(ops), add = TRUE)
 
   # ============================================================================

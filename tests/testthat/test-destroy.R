@@ -258,3 +258,54 @@ test_that("weakref value (self$destroy) does not prevent GC of key (self)", {
   # After removing all references, the object should be GC'd
   expect_null(rlang::wref_key(weak_check))
 })
+
+test_that("ReactiveValues$_destroy removes keys matching namespace prefix", {
+  rv <- ReactiveValues$new(dedupe = FALSE, label = "test")
+  rv$set("mymod-x", 1)
+  rv$set("mymod-y", 2)
+  rv$set("other-z", 3)
+  rv$set("mymod-inner-a", 4)
+
+  rv$`_destroy`("mymod-")
+
+  expect_equal(sort(isolate(rv$names())), "other-z")
+  expect_equal(isolate(rv$get("other-z")), 3)
+})
+
+test_that("ReactiveValues$_destroy invalidates dependents of removed keys", {
+  rv <- ReactiveValues$new(dedupe = FALSE, label = "test")
+  rv$set("mymod-x", 10)
+
+  invalidated <- FALSE
+  ctx <- Context$new(domain = NULL)
+  ctx$onInvalidate(function() invalidated <<- TRUE)
+  ctx$run(function() rv$get("mymod-x"))
+
+  rv$`_destroy`("mymod-")
+  flushReact()
+
+  expect_true(invalidated)
+})
+
+test_that("ReactiveValues$_destroy invalidates names() dependents", {
+  rv <- ReactiveValues$new(dedupe = FALSE, label = "test")
+  rv$set("mymod-x", 10)
+
+  invalidated <- FALSE
+  ctx <- Context$new(domain = NULL)
+  ctx$onInvalidate(function() invalidated <<- TRUE)
+  ctx$run(function() rv$names())
+
+  rv$`_destroy`("mymod-")
+  flushReact()
+
+  expect_true(invalidated)
+})
+
+test_that("ReactiveValues$_destroy is no-op when no keys match", {
+  rv <- ReactiveValues$new(dedupe = FALSE, label = "test")
+  rv$set("other-x", 1)
+
+  expect_no_error(rv$`_destroy`("mymod-"))
+  expect_equal(isolate(rv$names()), "other-x")
+})

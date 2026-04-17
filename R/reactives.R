@@ -631,6 +631,27 @@ ReactiveValues <- R6Class(
       .valuesDeps$register()
 
       return(listValue)
+    },
+
+    `_destroy` = function(nsPrefix) {
+      keys <- .values$keys()
+      matching <- keys[startsWith(keys, nsPrefix)]
+      if (length(matching) == 0L) return(invisible())
+
+      for (key in matching) {
+        dep <- .dependents$get(key)
+        if (!is.null(dep)) {
+          dep$invalidate(log = FALSE)
+          .dependents$remove(key)
+        }
+        .values$remove(key)
+        .metadata$remove(key)
+      }
+      .nameOrder <<- setdiff(.nameOrder, matching)
+      .namesDeps$invalidate(log = FALSE)
+      .allValuesDeps$invalidate(log = FALSE)
+      .valuesDeps$invalidate(log = FALSE)
+      invisible()
     }
 
   )

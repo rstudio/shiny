@@ -724,38 +724,41 @@ ShinySession <- R6Class(
       isRoot <- !nzchar(nsPrefix)
 
       if (!isRoot) {
-        nsPrefixWithSep <- paste0(nsPrefix, "-")
+        nsPrefixWithSep <- paste0(nsPrefix, ns.sep)
         # Match the namespace itself and any children
         matching <- allNs[allNs == nsPrefix | startsWith(allNs, nsPrefixWithSep)]
       } else {
         matching <- allNs
       }
 
-      if (length(matching) == 0L) return(invisible())
+      if (length(matching) > 0L) {
+        # Sort deepest-first (most separators first); root sentinel always last
+        depths <- nchar(gsub(paste0("[^", ns.sep, "]"), "", matching))
+        isRootSentinel <- matching == private$destroyNsRoot
+        matching <- matching[order(-depths, isRootSentinel, matching)]
 
-      # Sort deepest-first (most hyphens first)
-      depths <- nchar(gsub("[^-]", "", matching))
-      matching <- matching[order(-depths, matching)]
-
-      for (ns in matching) {
-        cbs <- private$destroyCallbacksByNs$get(ns)
-        if (!is.null(cbs)) {
-          cbs$invoke(onError = printError)
+        for (ns in matching) {
+          cbs <- private$destroyCallbacksByNs$get(ns)
+          if (!is.null(cbs)) {
+            cbs$invoke(onError = printError)
+          }
+          private$destroyCallbacksByNs$remove(ns)
         }
-        private$destroyCallbacksByNs$remove(ns)
       }
 
-      # Clean up inputs for matched namespaces
+      # Clean up inputs and clientData for matched namespaces
       if (!isRoot) {
-        nsPrefixWithSep <- paste0(nsPrefix, "-")
+        nsPrefixWithSep <- paste0(nsPrefix, ns.sep)
         private$.input$`_destroy`(nsPrefixWithSep)
         private$.clientData$`_destroy`(nsPrefixWithSep)
+        # Output-related clientData uses "output_<ns>-..." naming
+        private$.clientData$`_destroy`(paste0("output_", nsPrefixWithSep))
       }
 
       # Clean up outputs for matched namespaces
-      outputNames <- names(private$.outputs)
+      outputNames <- rlang::names2(private$.outputs)
       if (!isRoot) {
-        nsPrefixWithSep <- paste0(nsPrefix, "-")
+        nsPrefixWithSep <- paste0(nsPrefix, ns.sep)
         matchingOutputs <- outputNames[startsWith(outputNames, nsPrefixWithSep)]
       } else {
         matchingOutputs <- outputNames
@@ -772,7 +775,7 @@ ShinySession <- R6Class(
 
       # Clean up dynamic routes
       if (!isRoot) {
-        nsPrefixWithSep <- paste0(nsPrefix, "-")
+        nsPrefixWithSep <- paste0(nsPrefix, ns.sep)
         downloadNames <- self$downloads$keys()
         for (name in downloadNames[startsWith(downloadNames, nsPrefixWithSep)]) {
           self$downloads$remove(name)

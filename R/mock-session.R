@@ -347,15 +347,7 @@ MockShinySession <- R6Class(
       withReactiveDomain(self, {
         private$endedCBs$invoke(onError = printError, ..stacktraceon = TRUE)
       })
-      # Invoke destroy callbacks for all namespaces
-      allNs <- private$destroyCallbacksByNs$keys()
-      for (ns in allNs) {
-        cbs <- private$destroyCallbacksByNs$get(ns)
-        if (!is.null(cbs)) {
-          cbs$invoke(onError = printError)
-        }
-        private$destroyCallbacksByNs$remove(ns)
-      }
+      private$invokeDestroyCallbacks("")
       private$was_closed <- TRUE
     },
 
@@ -718,24 +710,31 @@ MockShinySession <- R6Class(
       isRoot <- !nzchar(nsPrefix)
 
       if (!isRoot) {
-        nsPrefixWithSep <- paste0(nsPrefix, "-")
+        nsPrefixWithSep <- paste0(nsPrefix, ns.sep)
         matching <- allNs[allNs == nsPrefix | startsWith(allNs, nsPrefixWithSep)]
       } else {
         matching <- allNs
       }
 
-      if (length(matching) == 0L) return(invisible())
+      if (length(matching) > 0L) {
+        # Sort deepest-first (most separators first); root sentinel always last
+        depths <- nchar(gsub(paste0("[^", ns.sep, "]"), "", matching))
+        isRootSentinel <- matching == "__root__"
+        matching <- matching[order(-depths, isRootSentinel, matching)]
 
-      # Sort deepest-first (most hyphens first)
-      depths <- nchar(gsub("[^-]", "", matching))
-      matching <- matching[order(-depths, matching)]
-
-      for (ns in matching) {
-        cbs <- private$destroyCallbacksByNs$get(ns)
-        if (!is.null(cbs)) {
-          cbs$invoke(onError = printError)
+        for (ns in matching) {
+          cbs <- private$destroyCallbacksByNs$get(ns)
+          if (!is.null(cbs)) {
+            cbs$invoke(onError = printError)
+          }
+          private$destroyCallbacksByNs$remove(ns)
         }
-        private$destroyCallbacksByNs$remove(ns)
+      }
+
+      # Clean up namespaced inputs
+      if (!isRoot) {
+        nsPrefixWithSep <- paste0(nsPrefix, ns.sep)
+        private$.input$`_destroy`(nsPrefixWithSep)
       }
     },
 

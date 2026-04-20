@@ -236,7 +236,7 @@ test_that("weakref key becomes NULL after GC of Observer", {
   }
 })
 
-test_that("weakref value (self$destroy) does not prevent GC of key (self)", {
+test_that("weakref key can be GC'd when no strong references remain", {
   domain <- createMockDomain()
   wrs <- list()
   domain$onDestroy <- function(callback) {
@@ -328,6 +328,47 @@ test_that("MockShinySession$close() invokes destroy callbacks", {
   session$onDestroy(function() called <<- TRUE)
   session$close()
   expect_true(called)
+})
+
+test_that("MockShinySession$close() fires destroy callbacks deepest-first", {
+  session <- MockShinySession$new()
+  parent <- session$makeScope("parent")
+  child <- parent$makeScope("child")
+
+  order <- character(0)
+  session$onDestroy(function() order <<- c(order, "root"))
+  parent$onDestroy(function() order <<- c(order, "parent"))
+  child$onDestroy(function() order <<- c(order, "child"))
+
+  session$close()
+  expect_equal(order, c("child", "parent", "root"))
+})
+
+test_that("MockShinySession destroy cleans up namespaced inputs", {
+  session <- MockShinySession$new()
+  scope <- session$makeScope("mymod")
+
+  session$setInputs(`mymod-x` = 1, `mymod-y` = 2, other = 3)
+  flushReact()
+
+  scope$destroy()
+  flushReact()
+
+  expect_equal(isolate(session$input$other), 3)
+  expect_null(isolate(session$input$`mymod-x`))
+  expect_null(isolate(session$input$`mymod-y`))
+})
+
+test_that("root onDestroy callbacks fire after module callbacks during close", {
+  session <- MockShinySession$new()
+  scope <- session$makeScope("mod1")
+
+  order <- character(0)
+  session$onDestroy(function() order <<- c(order, "root"))
+  scope$onDestroy(function() order <<- c(order, "mod1"))
+
+  session$close()
+  expect_equal(order, c("mod1", "root"))
 })
 
 test_that("session proxy onDestroy registers and fires on destroy", {

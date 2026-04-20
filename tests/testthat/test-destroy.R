@@ -125,6 +125,40 @@ test_that("Observer$destroy() deregisters from onDestroy", {
   expect_lt(destroyCBs$count(), initial_count)
 })
 
+test_that("ReactiveVal$destroy() deregisters its onDestroy callback", {
+  domain <- createMockDomain()
+  destroyCBs <- Callbacks$new()
+  domain$onDestroy <- function(callback) destroyCBs$register(callback)
+
+  withReactiveDomain(domain, {
+    rv <- reactiveVal(10)
+  })
+  rv_impl <- attr(rv, ".impl")
+
+  initial_count <- destroyCBs$count()
+  expect_gt(initial_count, 0)
+
+  rv_impl$destroy()
+  expect_lt(destroyCBs$count(), initial_count)
+})
+
+test_that("Observable$destroy() deregisters its onDestroy callback", {
+  domain <- createMockDomain()
+  destroyCBs <- Callbacks$new()
+  domain$onDestroy <- function(callback) destroyCBs$register(callback)
+
+  withReactiveDomain(domain, {
+    r <- reactive({ 42 })
+  })
+
+  initial_count <- destroyCBs$count()
+  expect_gt(initial_count, 0)
+
+  o <- attr(r, "observable")
+  o$destroy()
+  expect_lt(destroyCBs$count(), initial_count)
+})
+
 test_that("ReactiveVal auto-registers weak destroy callback with domain", {
   domain <- createMockDomain()
   destroyCBs <- Callbacks$new()

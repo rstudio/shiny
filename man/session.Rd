@@ -239,13 +239,13 @@ returned value will be destroyed and can no longer be read:
   moduleServer(id, function(input, output, session) \{
     result <- reactiveVal(0)
     # ... update result ...
-    return(result)
+    list(result = result, destroy = session$destroy)
   \})
 \}
 
-returned_value <- myModuleServer("editor")
-scope$destroy()
-returned_value()
+mod <- myModuleServer("editor")
+mod$destroy()
+mod$result()
 #> Error: Can't access reactive; its module session has been destroyed
 }\if{html}{\out{</div>}}
 

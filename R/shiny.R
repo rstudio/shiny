@@ -324,13 +324,13 @@ workerId <- local({
 #'   moduleServer(id, function(input, output, session) {
 #'     result <- reactiveVal(0)
 #'     # ... update result ...
-#'     return(result)
+#'     list(result = result, destroy = session$destroy)
 #'   })
 #' }
 #'
-#' returned_value <- myModuleServer("editor")
-#' scope$destroy()
-#' returned_value()
+#' mod <- myModuleServer("editor")
+#' mod$destroy()
+#' mod$result()
 #' #> Error: Can't access reactive; its module session has been destroyed
 #' ```
 #'
@@ -1220,7 +1220,7 @@ ShinySession <- R6Class(
       module session instead to clean up that module's reactive state.
       You can create with `session$makeScope(MOD_ID)` to get a module
       session to use for this purpose."
-      stop("`$destroy()` cannot be called on the root ShinySession. Call `$destroy()`` on a module session. You can create a module session via `session$makeScope(MOD_ID)`.")
+      stop("`$destroy()` cannot be called on the root ShinySession. Call `$destroy()` on a module session. You can create a module session via `session$makeScope(MOD_ID)`.")
     },
     onInputReceived = function(callback) {
       "Registers the given callback to be invoked when the session receives

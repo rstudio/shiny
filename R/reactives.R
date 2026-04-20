@@ -177,6 +177,10 @@ ReactiveVal <- R6Class(
     destroy = function() {
       if (private$._destroyed) return(invisible())
       private$._destroyed <- TRUE
+      if (is.function(private$._destroyHandle)) {
+        private$._destroyHandle()
+        private$._destroyHandle <- NULL
+      }
       private$dependents$invalidate(log = FALSE)
       private$value <- NULL
       invisible()
@@ -1053,6 +1057,10 @@ Observable <- R6Class(
     destroy = function() {
       if (._destroyed) return(invisible())
       ._destroyed <<- TRUE
+      if (is.function(._destroyHandle)) {
+        ._destroyHandle()
+        ._destroyHandle <<- NULL
+      }
       .dependents$invalidate(log = FALSE)
       .value <<- NULL
       .error <<- FALSE

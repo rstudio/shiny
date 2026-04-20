@@ -437,6 +437,7 @@ ShinySession <- R6Class(
     restoredCallbacks = 'Callbacks',
     bookmarkExclude = character(0),  # Names of inputs to exclude from bookmarking
     getBookmarkExcludeFuns = list(),
+    getBookmarkExcludeFunsNextId = 0L,
     timingRecorder = 'ShinyServerTimingRecorder',
 
     testMode = FALSE,                # Are we running in test mode?
@@ -531,7 +532,8 @@ ShinySession <- R6Class(
     # object because the return values of the functions are needed, but
     # Callback$invoke() discards return values.
     registerBookmarkExclude = function(fun) {
-      id <- as.character(length(private$getBookmarkExcludeFuns) + 1L)
+      private$getBookmarkExcludeFunsNextId <- private$getBookmarkExcludeFunsNextId + 1L
+      id <- as.character(private$getBookmarkExcludeFunsNextId)
       private$getBookmarkExcludeFuns[[id]] <- fun
       function() {
         private$getBookmarkExcludeFuns[[id]] <- NULL
@@ -1155,6 +1157,12 @@ ShinySession <- R6Class(
         if (is.function(unsub_restore)) unsub_restore()
         if (is.function(unsub_restored)) unsub_restored()
         if (is.function(unsub_exclude)) unsub_exclude()
+
+        # Reset local var states just in case, even though they won't be used anymore
+        unsub_bookmark <<- NULL
+        unsub_restore <<- NULL
+        unsub_restored <<- NULL
+        unsub_exclude <<- NULL
       })
 
       scope

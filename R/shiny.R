@@ -531,8 +531,11 @@ ShinySession <- R6Class(
     # object because the return values of the functions are needed, but
     # Callback$invoke() discards return values.
     registerBookmarkExclude = function(fun) {
-      len <- length(private$getBookmarkExcludeFuns) + 1
-      private$getBookmarkExcludeFuns[[len]] <- fun
+      id <- as.character(length(private$getBookmarkExcludeFuns) + 1L)
+      private$getBookmarkExcludeFuns[[id]] <- fun
+      function() {
+        private$getBookmarkExcludeFuns[[id]] <- NULL
+      }
     },
 
     # Save output values and errors. This is only used for testing mode.
@@ -1141,7 +1144,7 @@ ShinySession <- R6Class(
       })
 
       # Returns the excluded names with the scope's ns prefix on them.
-      private$registerBookmarkExclude(function() {
+      unsub_exclude <- private$registerBookmarkExclude(function() {
         excluded <- scope$getBookmarkExclude()
         ns(excluded)
       })
@@ -1151,6 +1154,7 @@ ShinySession <- R6Class(
         if (is.function(unsub_bookmark)) unsub_bookmark()
         if (is.function(unsub_restore)) unsub_restore()
         if (is.function(unsub_restored)) unsub_restored()
+        if (is.function(unsub_exclude)) unsub_exclude()
       })
 
       scope

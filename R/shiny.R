@@ -152,10 +152,12 @@ workerId <- local({
 #'   that runs when `session$destroy()` is called.
 #' }
 #' \item{destroy()}{
-#'   Destroys a module session scope, cleaning up all reactive values,
-#'   observers, and reactive expressions created within it (and any
-#'   descendant scopes). Cannot be called on the root session; only on
-#'   module session proxies returned by [moduleServer()].
+#'   Destroys a module session scope (and any descendant scopes) by invoking
+#'   all registered `onDestroy()` callbacks. This includes cleaning up all
+#'   reactive values, observers, and reactive expressions created within
+#'   that scope (and any descendant scopes). Cannot be called on the root
+#'   session; only on module session proxies found in [moduleServer()] or
+#'   from `session$makeScope(MOD_ID)`.
 #' }
 #' \item{onEnded(callback)}{
 #'   Synonym for `onSessionEnded`.
@@ -298,6 +300,59 @@ workerId <- local({
 #'   A reactive read of the current [bootstrapLib()] theme.
 #' }
 #'
+#' @section Module lifecycle and composability:
+#' Every reactive object (values, expressions, observers) is **scoped** to the
+#' session in which it was created. Calling `session$destroy()` on a module
+#' session tears down only the objects in that scope; the parent session and
+#' sibling modules are unaffected.
+#'
+#' This scoping is what makes modules safe to add and remove dynamically.
+#' Without it, destroying one module could leak callbacks or invalidate
+#' reactive objects that belong to another part of the app.
+#'
+#' The key rule: **data that must outlive a module should live outside it.**
+#' A reactive value created inside a module is destroyed with the module.
+#' A reactive value created in the caller's scope and passed in survives
+#' destruction.
+#'
+#' Returning a reactive value from a module works when the module lives for
+#' the entire session. However, if you plan to call `session$destroy()`, the
+#' returned value will be destroyed and can no longer be read:
+#'
+#' ```
+#' myModuleServer <- function(id) {
+#'   moduleServer(id, function(input, output, session) {
+#'     result <- reactiveVal(0)
+#'     # ... update result ...
+#'     return(result)
+#'   })
+#' }
+#'
+#' returned_value <- myModuleServer("editor")
+#' scope$destroy()
+#' returned_value()
+#' #> Error: Can't access reactive; its module session has been destroyed
+#' ```
+#'
+#' Instead, pass a reactive value **into** the module. The value lives in
+#' the caller's scope and survives destruction:
+#'
+#' ```
+#' myModuleServer <- function(id, result) {
+#'   moduleServer(id, function(input, output, session) {
+#'     observeEvent(input$save, {
+#'       result(input$data)
+#'     })
+#'   })
+#' }
+#'
+#' # Caller creates and owns the value
+#' saved_data <- reactiveVal(NULL)
+#' myModuleServer("editor", result = saved_data)
+#' # saved_data is still valid after the module is destroyed
+#' ```
+#'
+#' @seealso [moduleServer()], [removeUI()]
 #' @name session
 NULL
 

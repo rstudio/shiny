@@ -80,7 +80,27 @@ find_ancestor_session <- function(x, depth = 20) {
 #'   almost always be used).
 #'
 #' @return The return value, if any, from executing the module server function
-#' @seealso <https://shiny.rstudio.com/articles/modules.html>
+#'
+#' @section Destroying module reactivity:
+#' When module UI is added and removed dynamically (e.g. via [insertUI()] and
+#' [removeUI()]), the server-side reactive objects created by `moduleServer()`
+#' continue to run after the UI is removed. Call `session$destroy()` inside the
+#' module to tear down all reactive values, expressions, and observers in that
+#' scope:
+#'
+#' ```
+#' myModuleServer <- function(id) {
+#'   moduleServer(id, function(input, output, session) {
+#'     # ... module logic ...
+#'     session$destroy()
+#'   })
+#' }
+#' ```
+#'
+#' See the [session] help topic for details on composability and data ownership
+#' patterns when using `session$destroy()`.
+#'
+#' @seealso [session], [removeUI()], <https://shiny.rstudio.com/articles/modules.html>
 #'
 #' @examples
 #' # Define the UI for a module

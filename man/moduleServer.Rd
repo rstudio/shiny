@@ -30,6 +30,26 @@ Starting in Shiny 1.5.0, we recommend using \code{moduleServer} instead of
 to understand, and modules created with \code{moduleServer} can be tested with
 \code{\link[=testServer]{testServer()}}.
 }
+\section{Destroying module reactivity}{
+
+When module UI is added and removed dynamically (e.g. via \code{\link[=insertUI]{insertUI()}} and
+\code{\link[=removeUI]{removeUI()}}), the server-side reactive objects created by \code{moduleServer()}
+continue to run after the UI is removed. Call \code{session$destroy()} inside the
+module to tear down all reactive values, expressions, and observers in that
+scope:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{myModuleServer <- function(id) \{
+  moduleServer(id, function(input, output, session) \{
+    # ... module logic ...
+    session$destroy()
+  \})
+\}
+}\if{html}{\out{</div>}}
+
+See the \link{session} help topic for details on composability and data ownership
+patterns when using \code{session$destroy()}.
+}
+
 \examples{
 # Define the UI for a module
 counterUI <- function(id, label = "Counter") {
@@ -103,5 +123,5 @@ if (interactive()) {
 
 }
 \seealso{
-\url{https://shiny.rstudio.com/articles/modules.html}
+\link{session}, \code{\link[=removeUI]{removeUI()}}, \url{https://shiny.rstudio.com/articles/modules.html}
 }

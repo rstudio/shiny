@@ -2,7 +2,11 @@
 
 ## New features
 
-* Added `session$destroy()` and `session$onDestroy()` to clean up server-side reactive state when dynamic module UI is removed. Calling `session$destroy()` on a module session proxy destroys all reactive values, reactive expressions, and observers created within that module scope (and any descendant scopes), freeing resources and preventing "dangling reactivity." Reactive primitives auto-register for cleanup via weak references, so no manual bookkeeping is needed. (#4372)
+* `session$destroy()` and `session$onDestroy()` are now available on
+  module session proxies to clean up "dangling reactivity" when dynamic
+  module UI is removed. Calling `session$destroy()` invokes all
+  registered `onDestroy()` callbacks for that scope and its descendants,
+  tearing down reactive values, expressions, and observers (#4372).
 
 # shiny 1.13.0
 

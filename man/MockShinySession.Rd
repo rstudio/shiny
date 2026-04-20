@@ -94,6 +94,8 @@ user. Always \code{NULL} for a \code{MockShinySesion}.}
 \item \href{#method-MockShinySession-isEnded}{\code{MockShinySession$isEnded()}}
 \item \href{#method-MockShinySession-isClosed}{\code{MockShinySession$isClosed()}}
 \item \href{#method-MockShinySession-close}{\code{MockShinySession$close()}}
+\item \href{#method-MockShinySession-setBookmarkExclude}{\code{MockShinySession$setBookmarkExclude()}}
+\item \href{#method-MockShinySession-getBookmarkExclude}{\code{MockShinySession$getBookmarkExclude()}}
 \item \href{#method-MockShinySession-cycleStartAction}{\code{MockShinySession$cycleStartAction()}}
 \item \href{#method-MockShinySession-fileUrl}{\code{MockShinySession$fileUrl()}}
 \item \href{#method-MockShinySession-setInputs}{\code{MockShinySession$setInputs()}}
@@ -240,6 +242,34 @@ Returns \code{FALSE} if the session has not yet been closed
 Closes the session
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MockShinySession$close()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MockShinySession-setBookmarkExclude"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-setBookmarkExclude}{}}}
+\subsection{Method \code{setBookmarkExclude()}}{
+Set input names to be excluded from bookmarking.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$setBookmarkExclude(names)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{names}}{Character vector of input names.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MockShinySession-getBookmarkExclude"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-getBookmarkExclude}{}}}
+\subsection{Method \code{getBookmarkExclude()}}{
+Returns the set of input names to be excluded from bookmarking,
+including those registered by module scopes.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MockShinySession$getBookmarkExclude()}\if{html}{\out{</div>}}
 }
 
 }

@@ -761,7 +761,7 @@ ShinySession <- R6Class(
     },
 
     # Sentinel key for root-level destroy callbacks (fastmap disallows empty string keys)
-    destroyNsRoot = "__root__",
+    destroyNsRoot = "..root",
 
     destroyNsKey = function(ns) {
       if (!nzchar(ns)) private$destroyNsRoot else ns

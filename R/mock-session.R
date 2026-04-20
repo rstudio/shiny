@@ -324,7 +324,7 @@ MockShinySession <- R6Class(
     #' @param callback The callback to invoke on destroy.
     onDestroy = function(callback) {
       # Use sentinel key since fastmap disallows empty string keys
-      ns <- "__root__"
+      ns <- "..root"
       if (!private$destroyCallbacksByNs$containsKey(ns)) {
         private$destroyCallbacksByNs$set(ns, Callbacks$new())
       }
@@ -695,7 +695,7 @@ MockShinySession <- R6Class(
     # @param ns The namespace key.
     # @return A Callbacks object.
     getOrCreateDestroyCallbacks = function(ns) {
-      if (!nzchar(ns)) ns <- "__root__"
+      if (!nzchar(ns)) ns <- "..root"
       if (!private$destroyCallbacksByNs$containsKey(ns)) {
         private$destroyCallbacksByNs$set(ns, Callbacks$new())
       }
@@ -719,7 +719,7 @@ MockShinySession <- R6Class(
       if (length(matching) > 0L) {
         # Sort deepest-first (most separators first); root sentinel always last
         depths <- nchar(gsub(paste0("[^", ns.sep, "]"), "", matching))
-        isRootSentinel <- matching == "__root__"
+        isRootSentinel <- matching == "..root"
         matching <- matching[order(-depths, isRootSentinel, matching)]
 
         for (ns in matching) {

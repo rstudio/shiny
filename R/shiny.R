@@ -1216,9 +1216,11 @@ ShinySession <- R6Class(
       private$getOrCreateDestroyCallbacks("")$register(callback)
     },
     destroy = function() {
-      "Cannot be called on the root ShinySession. Call \\code{destroy()} on a
-      module session proxy instead to clean up that module's reactive state."
-      stop("destroy() cannot be called on the root ShinySession. Use session$close() instead, or call destroy() on a module session proxy.")
+      "Cannot be called on the root ShinySession. Call `$destroy()` on a
+      module session instead to clean up that module's reactive state.
+      You can create with `session$makeScope(MOD_ID)` to get a module
+      session to use for this purpose."
+      stop("`$destroy()` cannot be called on the root ShinySession. Call `$destroy()`` on a module session. You can create a module session via `session$makeScope(MOD_ID)`.")
     },
     onInputReceived = function(callback) {
       "Registers the given callback to be invoked when the session receives

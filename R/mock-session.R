@@ -332,7 +332,7 @@ MockShinySession <- R6Class(
     },
     #' @description Cannot be called on the root MockShinySession.
     destroy = function() {
-      stop("destroy() cannot be called on the root session. Use close() instead, or call destroy() on a module session proxy.")
+      stop("`$destroy()` cannot be called on the root session. Call `$destroy()` on a module session instead. You can create a module session via `session$makeScope(MOD_ID)`.")
     },
 
     #' @description Returns `FALSE` if the session has not yet been closed

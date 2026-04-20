@@ -1982,6 +1982,7 @@ invalidateLater <- function(millis, session = getDefaultReactiveDomain()) {
   rLog$invalidateLater(ctx$.reactId, ctx$id, millis, session)
 
   clear_on_ended_callback <- function() {}
+  clear_on_destroy_callback <- function() {}
 
   scheduler <- defineScheduler(session)
 
@@ -1992,6 +1993,7 @@ invalidateLater <- function(millis, session = getDefaultReactiveDomain()) {
     }
 
     clear_on_ended_callback()
+    clear_on_destroy_callback()
 
     if (!session$isClosed()) {
       session$cycleStartAction(function() {
@@ -2010,6 +2012,14 @@ invalidateLater <- function(millis, session = getDefaultReactiveDomain()) {
     # scheduled task executes; after the task executes, the timerHandle()
     # function is essentially a no-op, so we can deregister it.
     clear_on_ended_callback <- session$onEnded(timerHandle)
+
+    # Also register with onDestroy so module destroy cancels pending timers.
+    # Cross-deregister: when destroy fires, clean up the onEnded registration
+    # (and vice versa — the timer callback above already clears both).
+    clear_on_destroy_callback <- session$onDestroy(function() {
+      timerHandle()
+      clear_on_ended_callback()
+    })
   }
 
   invisible()

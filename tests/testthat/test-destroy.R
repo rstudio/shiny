@@ -547,3 +547,152 @@ test_that("nested module destroy cleans up grandchild scopes", {
   # Deepest-first ordering
   expect_equal(order, c("grandchild", "child", "parent"))
 })
+
+test_that("invalidateLater timer is cancelled on module destroy", {
+  session <- MockShinySession$new()
+  scope <- session$makeScope("mod1")
+
+  count <- 0L
+  withReactiveDomain(scope, {
+    observe({
+      invalidateLater(100)
+      count <<- count + 1L
+    })
+  })
+  session$elapse(0)
+  flushReact()
+  expect_equal(count, 1L)
+
+  # Timer should fire if we elapse enough time
+  session$elapse(100)
+  flushReact()
+  expect_equal(count, 2L)
+
+  # Destroy the module scope — timer should be cancelled
+  scope$destroy()
+  flushReact()
+
+  # Elapsing time should NOT cause the observer to run again
+  session$elapse(200)
+  flushReact()
+  expect_equal(count, 2L)
+})
+
+test_that("invalidateLater cleans up onEnded registration after module destroy", {
+  session <- MockShinySession$new()
+  scope <- session$makeScope("mod1")
+
+  withReactiveDomain(scope, {
+    observe({
+      invalidateLater(100)
+    })
+  })
+  session$elapse(0)
+  flushReact()
+
+  # Destroy the module — should deregister onEnded callback
+  scope$destroy()
+  flushReact()
+
+  # Session close should not error (stale callbacks already cleaned up)
+  expect_no_error(session$close())
+})
+
+test_that("invalidateLater cleans up onDestroy registration after timer fires", {
+  session <- MockShinySession$new()
+  scope <- session$makeScope("mod1")
+
+  withReactiveDomain(scope, {
+    observe({
+      invalidateLater(100)
+    })
+  })
+  session$elapse(0)
+  flushReact()
+
+  # Let the timer fire naturally — should deregister onDestroy callback
+  session$elapse(200)
+  flushReact()
+
+  # Destroying after timer already fired should not error
+  expect_no_error(scope$destroy())
+})
+
+test_that("invalidateLater cleans up onDestroy registration on session close", {
+  session <- MockShinySession$new()
+  scope <- session$makeScope("mod1")
+
+  withReactiveDomain(scope, {
+    observe({
+      invalidateLater(100)
+    })
+  })
+  session$elapse(0)
+  flushReact()
+
+  # Closing the full session should clean up everything without error
+  expect_no_error(session$close())
+})
+
+test_that("invalidateLater timer is cancelled on root session close", {
+  session <- MockShinySession$new()
+
+  count <- 0L
+  withReactiveDomain(session, {
+    observe({
+      invalidateLater(100)
+      count <<- count + 1L
+    })
+  })
+  session$elapse(0)
+  flushReact()
+  expect_equal(count, 1L)
+
+  # Timer fires normally before close
+  session$elapse(100)
+  flushReact()
+  expect_equal(count, 2L)
+
+  # Close the root session — timer should be cancelled via onEnded
+  session$close()
+  flushReact()
+
+  session$elapse(200)
+  flushReact()
+  expect_equal(count, 2L)
+})
+
+test_that("invalidateLater cleans up both registrations on root session close", {
+  session <- MockShinySession$new()
+
+  withReactiveDomain(session, {
+    observe({
+      invalidateLater(100)
+    })
+  })
+  session$elapse(0)
+  flushReact()
+
+  # Closing the root session fires onEnded and then onDestroy;
+  # both registrations should be cleaned up without error
+  expect_no_error(session$close())
+})
+
+test_that("invalidateLater cleans up onDestroy after timer fires on root session", {
+  session <- MockShinySession$new()
+
+  withReactiveDomain(session, {
+    observe({
+      invalidateLater(100)
+    })
+  })
+  session$elapse(0)
+  flushReact()
+
+  # Let timer fire naturally — clears both onEnded and onDestroy
+  session$elapse(200)
+  flushReact()
+
+  # Closing the session after timer already fired should not error
+  expect_no_error(session$close())
+})

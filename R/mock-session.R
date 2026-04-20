@@ -129,7 +129,6 @@ makeExtraMethods <- function() {
     "doBookmark",
     "exportTestValues",
     "flushOutput",
-    "getBookmarkExclude",
     "getTestSnapshotUrl",
     "incrementBusyCount",
     "manageHiddenOutputs",
@@ -159,7 +158,6 @@ makeExtraMethods <- function() {
     "sendProgress",
     "sendRemoveTab",
     "sendRemoveUI",
-    "setBookmarkExclude",
     "setShowcase",
     "showProgress",
     "updateQueryString"
@@ -351,6 +349,19 @@ MockShinySession <- R6Class(
       private$was_closed <- TRUE
     },
 
+    #' @description Set input names to be excluded from bookmarking.
+    #' @param names Character vector of input names.
+    setBookmarkExclude = function(names) {
+      private$bookmarkExclude <- names
+    },
+    #' @description Returns the set of input names to be excluded from bookmarking,
+    #'   including those registered by module scopes.
+    getBookmarkExclude = function() {
+      scopedExcludes <- lapply(private$getBookmarkExcludeFuns, function(f) f())
+      scopedExcludes <- unlist(scopedExcludes)
+      c(private$bookmarkExclude, scopedExcludes)
+    },
+
     #FIXME: this is wrong. Will need to be more complex.
     #' @description Unsophisticated mock implementation that merely invokes
     #   the given callback immediately.
@@ -536,7 +547,10 @@ MockShinySession <- R6Class(
     #' @return A new session proxy.
     makeScope = function(namespace) {
       ns <- NS(namespace)
-      createSessionProxy(
+
+      bookmarkExclude <- character(0)
+
+      scope <- createSessionProxy(
         self,
         input = .createReactiveValues(private$.input, readonly = TRUE, ns = ns),
         output = structure(.createOutputWriter(self, ns = ns), class = "shinyoutput"),
@@ -545,6 +559,12 @@ MockShinySession <- R6Class(
         setInputs = function(...) {
           self$setInputs(!!!mapNames(ns, rlang::dots_list(..., .homonyms = "error")))
         },
+        setBookmarkExclude = function(names) {
+          bookmarkExclude <<- names
+        },
+        getBookmarkExclude = function() {
+          bookmarkExclude
+        },
         onDestroy = function(callback) {
           private$getOrCreateDestroyCallbacks(namespace)$register(callback)
         },
@@ -552,6 +572,17 @@ MockShinySession <- R6Class(
           private$invokeDestroyCallbacks(namespace)
         }
       )
+
+      unsub_exclude <- private$registerBookmarkExclude(function() {
+        excluded <- scope$getBookmarkExclude()
+        ns(excluded)
+      })
+
+      scope$onDestroy(function() {
+        if (is.function(unsub_exclude)) unsub_exclude()
+      })
+
+      scope
     },
     #' @description Set the environment associated with a testServer() call, but
     #'  only if it has not previously been set. This ensures that only the
@@ -669,6 +700,24 @@ MockShinySession <- R6Class(
     endedCBs = NULL,
     # @field destroyCallbacksByNs Map of namespace -> Callbacks for destroy.
     destroyCallbacksByNs = NULL,
+    # @field bookmarkExclude Character vector of input names to exclude from bookmarking.
+    bookmarkExclude = character(0),
+    # @field getBookmarkExcludeFuns List of functions returning exclude names (from scopes).
+    getBookmarkExcludeFuns = list(),
+    # @field getBookmarkExcludeFunsNextId Monotonic counter for exclude fun IDs.
+    getBookmarkExcludeFunsNextId = 0L,
+
+    # @description Register a function that returns input names to exclude from
+    #   bookmarking. Returns an unsubscribe function.
+    # @param fun A function that returns a character vector of namespaced names.
+    registerBookmarkExclude = function(fun) {
+      private$getBookmarkExcludeFunsNextId <- private$getBookmarkExcludeFunsNextId + 1L
+      id <- as.character(private$getBookmarkExcludeFunsNextId)
+      private$getBookmarkExcludeFuns[[id]] <- fun
+      function() {
+        private$getBookmarkExcludeFuns[[id]] <- NULL
+      }
+    },
     # @field unhandledErrorCallbacks `Callbacks` called when an unhandled error
     #   occurs.
     unhandledErrorCallbacks = Callbacks$new(),

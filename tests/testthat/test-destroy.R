@@ -696,3 +696,59 @@ test_that("invalidateLater cleans up onDestroy after timer fires on root session
   # Closing the session after timer already fired should not error
   expect_no_error(session$close())
 })
+
+test_that("module scope bookmark-exclude is cleaned up on destroy", {
+  session <- MockShinySession$new()
+  scope <- session$makeScope("mod1")
+
+  scope$setBookmarkExclude(c("a", "b"))
+
+  # Root session should see the module's excludes (namespaced)
+  expect_true("mod1-a" %in% session$getBookmarkExclude())
+  expect_true("mod1-b" %in% session$getBookmarkExclude())
+
+  scope$destroy()
+
+  # After destroy, module's excludes should be gone
+  expect_false("mod1-a" %in% session$getBookmarkExclude())
+  expect_false("mod1-b" %in% session$getBookmarkExclude())
+})
+
+test_that("multiple module scopes have independent bookmark-exclude cleanup", {
+  session <- MockShinySession$new()
+  scope1 <- session$makeScope("mod1")
+  scope2 <- session$makeScope("mod2")
+
+  scope1$setBookmarkExclude("x")
+  scope2$setBookmarkExclude("y")
+
+  expect_true("mod1-x" %in% session$getBookmarkExclude())
+  expect_true("mod2-y" %in% session$getBookmarkExclude())
+
+  # Destroy only mod1
+  scope1$destroy()
+
+  expect_false("mod1-x" %in% session$getBookmarkExclude())
+  expect_true("mod2-y" %in% session$getBookmarkExclude())
+
+  # Destroy mod2
+  scope2$destroy()
+  expect_false("mod2-y" %in% session$getBookmarkExclude())
+})
+
+test_that("root setBookmarkExclude persists after module destroy", {
+  session <- MockShinySession$new()
+  session$setBookmarkExclude(c("global_input"))
+
+  scope <- session$makeScope("mod1")
+  scope$setBookmarkExclude("a")
+
+  expect_true("global_input" %in% session$getBookmarkExclude())
+  expect_true("mod1-a" %in% session$getBookmarkExclude())
+
+  scope$destroy()
+
+  # Root excludes should still be there
+  expect_true("global_input" %in% session$getBookmarkExclude())
+  expect_false("mod1-a" %in% session$getBookmarkExclude())
+})

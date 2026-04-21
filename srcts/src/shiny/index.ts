@@ -17,7 +17,6 @@ import {
 } from "../inputPolicies";
 import type { InputPolicyOpts } from "../inputPolicies/inputPolicy";
 import { addDefaultInputOpts } from "../inputPolicies/inputValidateDecorator";
-import { debounce } from "../time";
 import {
   $escape,
   compareVersion,
@@ -423,7 +422,7 @@ class ShinyClass {
 
     function ensureObservers(el: HTMLElement): void {
       if (!$(el).data("shiny-resize-observer")) {
-        const onResize = debounce(100, () => {
+        const onResize = sendOutputInfoFns.createObserverCallback(100, () => {
           doTriggerResize(el);
           doSendHiddenState(el);
           if (reportsSize(el)) {
@@ -438,7 +437,7 @@ class ShinyClass {
       }
 
       if (!$(el).data("shiny-intersection-observer")) {
-        const onIntersect = debounce(100, () => {
+        const onIntersect = sendOutputInfoFns.createObserverCallback(100, () => {
           doTriggerResize(el);
           doSendHiddenState(el);
           if (reportsSize(el)) {
@@ -453,7 +452,7 @@ class ShinyClass {
       }
 
       if (!$(el).data("shiny-mutate-observer")) {
-        const onMutate = debounce(100, () => {
+        const onMutate = sendOutputInfoFns.createObserverCallback(100, () => {
           if (reportsTheme(el)) {
             doSendTheme(el);
           }

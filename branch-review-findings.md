@@ -6,14 +6,14 @@ Reviewer: Codex
 
 ## Status
 
-- [ ] Finding 1: Restore the guarantee that output clientdata is flushed before the next input batch is sent
+- [x] Finding 1: Restore the guarantee that output clientdata is flushed before the next input batch is sent
 - [x] Finding 2: Prevent post-unbind observer callbacks from emitting `.clientdata_output_null_*` inputs
 - [ ] Simplification: Move output-info observer setup / flush / disposal behind a dedicated module API
 
 ## Finding 1
 
 Severity: High
-Status: Open
+Status: Fixed on branch
 
 Summary:
 The new observer path no longer guarantees that output clientdata is flushed before the next input batch is sent.
@@ -30,6 +30,9 @@ Relevant files:
 
 Notes:
 - Old behavior routed these updates through debouncers that were explicitly flushed before send.
+
+Resolution:
+Observer-triggered output-info callbacks now use flushable debouncers registered with `SendOutputInfo`. The existing `InputBatchSender.lastChanceCallback` path flushes those pending observer callbacks before sending the next input batch, preserving the existing debounce windows without making resize or visibility reporting more eager.
 
 ## Finding 2
 

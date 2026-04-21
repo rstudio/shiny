@@ -10,6 +10,7 @@ declare class Debouncer<X extends AnyVoidFunction> implements InputRatePolicy<X>
     constructor(target: InputPolicy | null, func: X, delayMs: number | undefined);
     normalCall(...args: Parameters<X>): void;
     immediateCall(...args: Parameters<X>): void;
+    cancel(): void;
     isPending(): boolean;
     $clearTimer(): void;
     $invoke(): void;

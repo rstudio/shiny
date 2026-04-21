@@ -39,6 +39,10 @@ class Debouncer<X extends AnyVoidFunction> implements InputRatePolicy<X> {
     this.args = args;
     this.$invoke();
   }
+  cancel(): void {
+    this.$clearTimer();
+    this.args = null;
+  }
   isPending(): boolean {
     return this.timerId !== null;
   }

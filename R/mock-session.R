@@ -546,6 +546,12 @@ MockShinySession <- R6Class(
     #' @param namespace Character vector indicating a namespace.
     #' @return A new session proxy.
     makeScope = function(namespace) {
+      if (identical(namespace, "..root")) {
+        stop(
+          "The module namespace '..root' is reserved for internal use.",
+          call. = FALSE
+        )
+      }
       ns <- NS(namespace)
 
       bookmarkExclude <- character(0)

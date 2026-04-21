@@ -962,6 +962,13 @@ ShinySession <- R6Class(
       self
     },
     makeScope = function(namespace) {
+      if (identical(namespace, private$destroyNsRoot)) {
+        stop(
+          "The module namespace '", private$destroyNsRoot,
+          "' is reserved for internal use.",
+          call. = FALSE
+        )
+      }
       ns <- NS(namespace)
 
       # Private items for this scope. Can't be part of the scope object because

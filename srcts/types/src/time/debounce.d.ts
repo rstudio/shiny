@@ -14,5 +14,9 @@ declare class Debouncer<X extends AnyVoidFunction> implements InputRatePolicy<X>
     $clearTimer(): void;
     $invoke(): void;
 }
-declare function debounce<T extends (...args: unknown[]) => void>(threshold: number | undefined, func: T): (...args: Parameters<T>) => void;
+type DebouncedFunction<T extends (...args: unknown[]) => void> = ((...args: Parameters<T>) => void) & {
+    cancel: () => void;
+};
+declare function debounce<T extends (...args: unknown[]) => void>(threshold: number | undefined, func: T): DebouncedFunction<T>;
 export { debounce, Debouncer };
+export type { DebouncedFunction };

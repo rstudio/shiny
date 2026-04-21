@@ -442,6 +442,17 @@ function unbindOutputs(
       }
     }
 
+    for (const key of [
+      "shiny-resize-observer-callback",
+      "shiny-intersection-observer-callback",
+      "shiny-mutate-observer-callback",
+    ]) {
+      const callback = $el.data(key) as { cancel?: () => void } | undefined;
+
+      callback?.cancel?.();
+      $el.removeData(key);
+    }
+
     $el.trigger({
       type: "shiny:unbound",
       // @ts-expect-error; Can not remove info on a established, malformed Event object

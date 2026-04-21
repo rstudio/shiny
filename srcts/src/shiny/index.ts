@@ -433,6 +433,7 @@ class ShinyClass {
         const ro = new ResizeObserver(() => onResize());
 
         ro.observe(el);
+        $(el).data("shiny-resize-observer-callback", onResize);
         $(el).data("shiny-resize-observer", ro);
       }
 
@@ -447,6 +448,7 @@ class ShinyClass {
         const io = new IntersectionObserver(() => onIntersect());
 
         io.observe(el);
+        $(el).data("shiny-intersection-observer-callback", onIntersect);
         $(el).data("shiny-intersection-observer", io);
       }
 
@@ -464,6 +466,7 @@ class ShinyClass {
         });
 
         $(el).data("shiny-mutate-observer", mo);
+        $(el).data("shiny-mutate-observer-callback", onMutate);
       }
     }
 

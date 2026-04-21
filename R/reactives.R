@@ -1381,12 +1381,8 @@ Observer <- R6Class(
 
       .autoDestroy <<- FALSE
       .autoDestroyHandle <<- NULL
+      .autoDestroyOnDestroyHandle <<- NULL
       setAutoDestroy(autoDestroy)
-
-      if (!is.null(.domain) && is.function(.domain$onDestroy)) {
-        wr <- rlang::new_weakref(key = self)
-        .autoDestroyOnDestroyHandle <<- .domain$onDestroy(make_weak_destroy_wrapper(wr))
-      }
 
       .reactId <<- nextGlobalReactId()
       rLog$defineObserver(.reactId, .label, .domain)
@@ -1509,12 +1505,19 @@ Observer <- R6Class(
             destroy()
           } else {
             .autoDestroyHandle <<- onReactiveDomainEnded(.domain, .onDomainEnded)
+            if (is.function(.domain$onDestroy)) {
+              wr <- rlang::new_weakref(key = self)
+              .autoDestroyOnDestroyHandle <<- .domain$onDestroy(make_weak_destroy_wrapper(wr))
+            }
           }
         }
       } else {
         if (!is.null(.autoDestroyHandle))
           .autoDestroyHandle()
         .autoDestroyHandle <<- NULL
+        if (!is.null(.autoDestroyOnDestroyHandle))
+          .autoDestroyOnDestroyHandle()
+        .autoDestroyOnDestroyHandle <<- NULL
       }
 
       invisible(oldValue)

@@ -71,6 +71,7 @@ createMockDomain <- function() {
       ended <<- TRUE
       callbacks$invoke()
     }
+    domain$destroy()
     invisible()
   }
   domain$incrementBusyCount <- function() NULL

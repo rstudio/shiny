@@ -2014,7 +2014,10 @@ invalidateLater <- function(millis, session = getDefaultReactiveDomain()) {
     # need to deregister the onEnded(timerHandle) callback each time when the
     # scheduled task executes; after the task executes, the timerHandle()
     # function is essentially a no-op, so we can deregister it.
-    clear_on_ended_callback <- session$onEnded(timerHandle)
+    clear_on_ended_callback <- session$onEnded(function() {
+      timerHandle()
+      clear_on_destroy_callback()
+    })
 
     # Also register with onDestroy so module destroy cancels pending timers.
     # Cross-deregister: when destroy fires, clean up the onEnded registration

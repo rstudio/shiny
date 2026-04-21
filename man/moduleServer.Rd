@@ -34,16 +34,23 @@ to understand, and modules created with \code{moduleServer} can be tested with
 
 When module UI is added and removed dynamically (e.g. via \code{\link[=insertUI]{insertUI()}} and
 \code{\link[=removeUI]{removeUI()}}), the server-side reactive objects created by \code{moduleServer()}
-continue to run after the UI is removed. Call \code{session$destroy()} inside the
-module to tear down all reactive values, expressions, and observers in that
-scope:
+continue to run after the UI is removed. To tear down all reactive values,
+expressions, and observers in that scope, return a cleanup function from the
+module and call it when the UI is removed:
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{myModuleServer <- function(id) \{
   moduleServer(id, function(input, output, session) \{
     # ... module logic ...
-    session$destroy()
+
+    # Return a cleanup function for the parent to call
+    list(result = ..., destroy = session$destroy)
   \})
 \}
+
+# In parent server:
+mod <- myModuleServer("myid")
+removeUI(selector = "#myid")
+mod$destroy()
 }\if{html}{\out{</div>}}
 
 See the \link{session} help topic for details on composability and data ownership

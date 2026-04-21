@@ -84,17 +84,24 @@ find_ancestor_session <- function(x, depth = 20) {
 #' @section Destroying module reactivity:
 #' When module UI is added and removed dynamically (e.g. via [insertUI()] and
 #' [removeUI()]), the server-side reactive objects created by `moduleServer()`
-#' continue to run after the UI is removed. Call `session$destroy()` inside the
-#' module to tear down all reactive values, expressions, and observers in that
-#' scope:
+#' continue to run after the UI is removed. To tear down all reactive values,
+#' expressions, and observers in that scope, return a cleanup function from the
+#' module and call it when the UI is removed:
 #'
 #' ```
 #' myModuleServer <- function(id) {
 #'   moduleServer(id, function(input, output, session) {
 #'     # ... module logic ...
-#'     session$destroy()
+#'
+#'     # Return a cleanup function for the parent to call
+#'     list(result = ..., destroy = session$destroy)
 #'   })
 #' }
+#'
+#' # In parent server:
+#' mod <- myModuleServer("myid")
+#' removeUI(selector = "#myid")
+#' mod$destroy()
 #' ```
 #'
 #' See the [session] help topic for details on composability and data ownership

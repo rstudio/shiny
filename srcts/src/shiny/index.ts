@@ -21,6 +21,7 @@ import { debounce } from "../time";
 import {
   $escape,
   compareVersion,
+  getBoundingClientSizeBeforeZoom,
   getComputedLinkColor,
   getStyle,
   isHidden,
@@ -291,16 +292,17 @@ class ShinyClass {
 
     function doSendSize(el: HTMLElement, initial = false): void {
       const id = getIdFromEl(el);
+      const rect = getBoundingClientSizeBeforeZoom(el);
 
-      if (el.offsetWidth !== 0 || el.offsetHeight !== 0) {
+      if (rect.width !== 0 || rect.height !== 0) {
         setInput(
           ".clientdata_output_" + id + "_width",
-          el.offsetWidth,
+          rect.width,
           initial,
         );
         setInput(
           ".clientdata_output_" + id + "_height",
-          el.offsetHeight,
+          rect.height,
           initial,
         );
       }
@@ -309,6 +311,8 @@ class ShinyClass {
     function doTriggerResize(el: HTMLElement): void {
       const $el = $(el),
         binding = $el.data("shiny-output-binding");
+
+      if (!binding) return;
 
       $el.trigger({
         type: "shiny:visualchange",
@@ -387,15 +391,80 @@ class ShinyClass {
       );
     }
 
-    // eslint-disable-next-line prefer-const
-    let visibleOutputs = new Set<string | null>();
+    const visibleOutputs = new Set<string | null>();
 
     function doSendHiddenState(el: HTMLElement, initial = false): void {
       const id = getIdFromEl(el);
       const hidden = isHidden(el);
 
-      if (!hidden) visibleOutputs.add(id);
+      if (hidden) {
+        visibleOutputs.delete(id);
+      } else {
+        visibleOutputs.add(id);
+      }
       setInput(".clientdata_output_" + id + "_hidden", hidden, initial);
+    }
+
+    function reportsSize(el: HTMLElement): boolean {
+      return (
+        el.classList.contains("shiny-image-output") ||
+        el.classList.contains("shiny-plot-output") ||
+        el.classList.contains("shiny-report-size")
+      );
+    }
+
+    function reportsTheme(el: HTMLElement): boolean {
+      return (
+        el.classList.contains("shiny-image-output") ||
+        el.classList.contains("shiny-plot-output") ||
+        el.classList.contains("shiny-report-theme")
+      );
+    }
+
+    function ensureObservers(el: HTMLElement): void {
+      if (!$(el).data("shiny-resize-observer")) {
+        const onResize = debounce(100, () => {
+          doTriggerResize(el);
+          doSendHiddenState(el);
+          if (reportsSize(el)) {
+            doSendSize(el);
+          }
+        });
+        const ro = new ResizeObserver(() => onResize());
+
+        ro.observe(el);
+        $(el).data("shiny-resize-observer", ro);
+      }
+
+      if (!$(el).data("shiny-intersection-observer")) {
+        const onIntersect = debounce(100, () => {
+          doTriggerResize(el);
+          doSendHiddenState(el);
+          if (reportsSize(el)) {
+            doSendSize(el);
+          }
+        });
+        const io = new IntersectionObserver(() => onIntersect());
+
+        io.observe(el);
+        $(el).data("shiny-intersection-observer", io);
+      }
+
+      if (!$(el).data("shiny-mutate-observer")) {
+        const onMutate = debounce(100, () => {
+          if (reportsTheme(el)) {
+            doSendTheme(el);
+          }
+        });
+        const mo = new MutationObserver(() => onMutate());
+
+        mo.observe(el, {
+          attributes: true,
+          attributeFilter: ["style", "class"],
+        });
+
+        $(el).data("shiny-mutate-observer", mo);
+      }
     }
 
     function doSendOutputInfo(initial = false) {
@@ -403,58 +472,19 @@ class ShinyClass {
 
       $(".shiny-bound-output").each(function () {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
-        const el = this,
-          id = getIdFromEl(el),
-          isPlot =
-            el.classList.contains("shiny-image-output") ||
-            el.classList.contains("shiny-plot-output");
+        const el = this;
 
-        outputIds.add(id);
+        outputIds.add(getIdFromEl(el));
+        ensureObservers(el);
 
-        function handleResize(initial = false) {
-          doTriggerResize(el);
-          doSendHiddenState(el, initial);
-          if (isPlot || el.classList.contains("shiny-report-size")) {
-            doSendSize(el, initial);
-          }
+        doTriggerResize(el);
+        doSendHiddenState(el, initial);
+        if (reportsSize(el)) {
+          doSendSize(el, initial);
         }
-
-        if (!$(el).data("shiny-resize-observer")) {
-          const onResize = debounce(100, () => handleResize(false));
-          const ro = new ResizeObserver(() => onResize());
-
-          ro.observe(el);
-          $(el).data("shiny-resize-observer", ro);
+        if (reportsTheme(el)) {
+          doSendTheme(el, initial);
         }
-
-        if (!$(el).data("shiny-intersection-observer")) {
-          const onIntersect = debounce(100, () => handleResize(false));
-          const io = new IntersectionObserver(() => onIntersect());
-
-          io.observe(el);
-          $(el).data("shiny-intersection-observer", io);
-        }
-
-        function handleMutate(initial = false) {
-          if (isPlot || el.classList.contains("shiny-report-theme")) {
-            doSendTheme(el, initial);
-          }
-        }
-
-        if (!$(el).data("shiny-mutate-observer")) {
-          const onMutate = debounce(100, () => handleMutate(false));
-          const mo = new MutationObserver(() => onMutate());
-
-          mo.observe(el, {
-            attributes: true,
-            attributeFilter: ["style", "class"],
-          });
-
-          $(el).data("shiny-mutate-observer", mo);
-        }
-
-        handleResize(initial);
-        handleMutate(initial);
       });
 
       visibleOutputs.forEach((id) => {

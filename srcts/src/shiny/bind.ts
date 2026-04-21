@@ -428,6 +428,20 @@ function unbindOutputs(
     bindingsRegistry.removeBinding(id, "output");
     $el.removeClass("shiny-bound-output");
     $el.removeData("shiny-output-binding");
+
+    for (const key of [
+      "shiny-resize-observer",
+      "shiny-intersection-observer",
+      "shiny-mutate-observer",
+    ]) {
+      const observer = $el.data(key);
+
+      if (observer) {
+        observer.disconnect();
+        $el.removeData(key);
+      }
+    }
+
     $el.trigger({
       type: "shiny:unbound",
       // @ts-expect-error; Can not remove info on a established, malformed Event object

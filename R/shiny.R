@@ -809,10 +809,10 @@ ShinySession <- R6Class(
       # Clean up inputs and clientData for matched namespaces
       if (!isRoot) {
         nsPrefixWithSep <- paste0(nsPrefix, ns.sep)
-        private$.input$`_destroy`(nsPrefixWithSep)
-        private$.clientData$`_destroy`(nsPrefixWithSep)
+        private$.input$destroyByPrefix(nsPrefixWithSep)
+        private$.clientData$destroyByPrefix(nsPrefixWithSep)
         # Output-related clientData uses "output_<ns>-..." naming
-        private$.clientData$`_destroy`(paste0("output_", nsPrefixWithSep))
+        private$.clientData$destroyByPrefix(paste0("output_", nsPrefixWithSep))
       }
 
       # Clean up outputs for matched namespaces

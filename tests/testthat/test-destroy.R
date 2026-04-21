@@ -192,7 +192,7 @@ test_that("ReactiveVal without domain does not error on creation", {
 
 test_that("Observable without domain does not error on creation", {
   o <- Observable$new(function() 42, label = "no_domain", domain = NULL)
-  expect_false(o$._destroyed)
+  expect_false(o$.destroyed)
 })
 
 test_that("weakref key becomes NULL after GC of ReactiveVal", {
@@ -293,20 +293,20 @@ test_that("weakref key can be GC'd when no strong references remain", {
   expect_null(rlang::wref_key(weak_check))
 })
 
-test_that("ReactiveValues$_destroy removes keys matching namespace prefix", {
+test_that("ReactiveValues$destroyByPrefix removes keys matching namespace prefix", {
   rv <- ReactiveValues$new(dedupe = FALSE, label = "test")
   rv$set("mymod-x", 1)
   rv$set("mymod-y", 2)
   rv$set("other-z", 3)
   rv$set("mymod-inner-a", 4)
 
-  rv$`_destroy`("mymod-")
+  rv$destroyByPrefix("mymod-")
 
   expect_equal(sort(isolate(rv$names())), "other-z")
   expect_equal(isolate(rv$get("other-z")), 3)
 })
 
-test_that("ReactiveValues$_destroy invalidates dependents of removed keys", {
+test_that("ReactiveValues$destroyByPrefix invalidates dependents of removed keys", {
   rv <- ReactiveValues$new(dedupe = FALSE, label = "test")
   rv$set("mymod-x", 10)
 
@@ -315,13 +315,13 @@ test_that("ReactiveValues$_destroy invalidates dependents of removed keys", {
   ctx$onInvalidate(function() invalidated <<- TRUE)
   ctx$run(function() rv$get("mymod-x"))
 
-  rv$`_destroy`("mymod-")
+  rv$destroyByPrefix("mymod-")
   flushReact()
 
   expect_true(invalidated)
 })
 
-test_that("ReactiveValues$_destroy invalidates names() dependents", {
+test_that("ReactiveValues$destroyByPrefix invalidates names() dependents", {
   rv <- ReactiveValues$new(dedupe = FALSE, label = "test")
   rv$set("mymod-x", 10)
 
@@ -330,18 +330,70 @@ test_that("ReactiveValues$_destroy invalidates names() dependents", {
   ctx$onInvalidate(function() invalidated <<- TRUE)
   ctx$run(function() rv$names())
 
-  rv$`_destroy`("mymod-")
+  rv$destroyByPrefix("mymod-")
   flushReact()
 
   expect_true(invalidated)
 })
 
-test_that("ReactiveValues$_destroy is no-op when no keys match", {
+test_that("ReactiveValues$destroyByPrefix is no-op when no keys match", {
   rv <- ReactiveValues$new(dedupe = FALSE, label = "test")
   rv$set("other-x", 1)
 
-  expect_no_error(rv$`_destroy`("mymod-"))
+  expect_no_error(rv$destroyByPrefix("mymod-"))
   expect_equal(isolate(rv$names()), "other-x")
+})
+
+test_that("ReactiveValues$destroy() sets destroyed flag and invalidates dependents", {
+  rv <- ReactiveValues$new(dedupe = FALSE, label = "test")
+  rv$set("x", 1)
+
+  invalidated <- FALSE
+  ctx <- Context$new(domain = NULL)
+  ctx$onInvalidate(function() invalidated <<- TRUE)
+  ctx$run(function() rv$get("x"))
+
+  rv$destroy()
+  flushReact()
+
+  expect_true(invalidated)
+})
+
+test_that("ReactiveValues$destroy() is idempotent", {
+  rv <- ReactiveValues$new(dedupe = FALSE, label = "test")
+  rv$destroy()
+  expect_no_error(rv$destroy())
+})
+
+test_that("destroyed ReactiveValues$get() raises shiny.destroyed.error", {
+  rv <- ReactiveValues$new(dedupe = FALSE, label = "test")
+  rv$set("x", 1)
+  rv$destroy()
+  expect_error(rv$get("x"), class = "shiny.destroyed.error")
+})
+
+test_that("destroyed ReactiveValues$set() raises shiny.destroyed.error", {
+  rv <- ReactiveValues$new(dedupe = FALSE, label = "test")
+  rv$destroy()
+  expect_error(rv$set("x", 1), class = "shiny.destroyed.error")
+})
+
+test_that("ReactiveValues auto-registers weak destroy callback with domain", {
+  domain <- createMockDomain()
+  destroyCBs <- Callbacks$new()
+  domain$onDestroy <- function(callback) destroyCBs$register(callback)
+
+  withReactiveDomain(domain, {
+    rv <- reactiveValues(a = 1)
+  })
+
+  expect_gt(destroyCBs$count(), 0)
+})
+
+test_that("ReactiveValues without domain does not error on creation", {
+  rv <- ReactiveValues$new(dedupe = FALSE, label = "no_domain")
+  rv$set("x", 1)
+  expect_equal(isolate(rv$get("x")), 1)
 })
 
 test_that("MockShinySession$onDestroy registers callback and returns unsubscribe", {

@@ -789,7 +789,7 @@ MockShinySession <- R6Class(
       # Clean up namespaced inputs
       if (!isRoot) {
         nsPrefixWithSep <- paste0(nsPrefix, ns.sep)
-        private$.input$`_destroy`(nsPrefixWithSep)
+        private$.input$destroyByPrefix(nsPrefixWithSep)
       }
     },
 

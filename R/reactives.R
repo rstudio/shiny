@@ -105,8 +105,8 @@ ReactiveVal <- R6Class(
     label = NULL,
     frozen = FALSE,
     dependents = NULL,
-    ._destroyed = FALSE,
-    ._destroyHandle = NULL
+    .destroyed = FALSE,
+    .destroyHandle = NULL
   ),
   public = list(
     .isRecordingOtel = FALSE, # Needs to be set by Shiny
@@ -126,11 +126,11 @@ ReactiveVal <- R6Class(
 
       if (!is.null(domain) && is.function(domain$onDestroy)) {
         wr <- rlang::new_weakref(key = self)
-        private$._destroyHandle <- domain$onDestroy(make_weak_destroy_wrapper(wr))
+        private$.destroyHandle <- domain$onDestroy(make_weak_destroy_wrapper(wr))
       }
     },
     get = function() {
-      if (private$._destroyed) stop(destroyedReactiveError(private$label))
+      if (private$.destroyed) stop(destroyedReactiveError(private$label))
       private$dependents$register()
 
       if (private$frozen)
@@ -139,7 +139,7 @@ ReactiveVal <- R6Class(
       private$value
     },
     set = function(value) {
-      if (private$._destroyed) stop(destroyedReactiveError(private$label))
+      if (private$.destroyed) stop(destroyedReactiveError(private$label))
       if (identical(private$value, value)) {
         return(invisible(FALSE))
       }
@@ -175,11 +175,11 @@ ReactiveVal <- R6Class(
     # TODO: Add an exported S3 function (e.g., destroyReactive(x)) to destroy
     # individual reactive objects. See spec for details.
     destroy = function() {
-      if (private$._destroyed) return(invisible())
-      private$._destroyed <- TRUE
-      if (is.function(private$._destroyHandle)) {
-        private$._destroyHandle()
-        private$._destroyHandle <- NULL
+      if (private$.destroyed) return(invisible())
+      private$.destroyed <- TRUE
+      if (is.function(private$.destroyHandle)) {
+        private$.destroyHandle()
+        private$.destroyHandle <- NULL
       }
       private$dependents$invalidate(log = FALSE)
       private$value <- NULL
@@ -421,6 +421,8 @@ ReactiveValues <- R6Class(
 
     .isRecordingOtel = FALSE, # Needs to be set by Shiny
     .otelAttrs = NULL, # Needs to be set by Shiny
+    .destroyed = FALSE,
+    .destroyHandle = NULL,
 
 
     initialize = function(
@@ -437,9 +439,16 @@ ReactiveValues <- R6Class(
       .allValuesDeps <<- Dependents$new(reactId = rLog$asListAllIdStr(.reactId))
       .valuesDeps <<- Dependents$new(reactId = rLog$asListIdStr(.reactId))
       .dedupe <<- dedupe
+
+      domain <- getDefaultReactiveDomain()
+      if (!is.null(domain) && is.function(domain$onDestroy)) {
+        wr <- rlang::new_weakref(key = self)
+        .destroyHandle <<- domain$onDestroy(make_weak_destroy_wrapper(wr))
+      }
     },
 
     get = function(key) {
+      if (.destroyed) stop(destroyedReactiveError(.label))
       # get value right away to use for logging
       keyValue <- .values$get(key)
 
@@ -463,6 +472,7 @@ ReactiveValues <- R6Class(
     },
 
     set = function(key, value, force = FALSE) {
+      if (.destroyed) stop(destroyedReactiveError(.label))
       # if key exists
       #   if it is the same value, return
       #
@@ -637,7 +647,7 @@ ReactiveValues <- R6Class(
       return(listValue)
     },
 
-    `_destroy` = function(nsPrefix) {
+    destroyByPrefix = function(nsPrefix) {
       keys <- .values$keys()
       matching <- keys[startsWith(keys, nsPrefix)]
       if (length(matching) == 0L) return(invisible())
@@ -655,6 +665,27 @@ ReactiveValues <- R6Class(
       .namesDeps$invalidate(log = FALSE)
       .allValuesDeps$invalidate(log = FALSE)
       .valuesDeps$invalidate(log = FALSE)
+      invisible()
+    },
+
+    destroy = function() {
+      if (.destroyed) return(invisible())
+      .destroyed <<- TRUE
+      if (is.function(.destroyHandle)) {
+        .destroyHandle()
+        .destroyHandle <<- NULL
+      }
+      for (key in .dependents$keys()) {
+        dep <- .dependents$get(key)
+        if (!is.null(dep)) dep$invalidate(log = FALSE)
+      }
+      .namesDeps$invalidate(log = FALSE)
+      .allValuesDeps$invalidate(log = FALSE)
+      .valuesDeps$invalidate(log = FALSE)
+      .dependents <<- Map$new()
+      .values <<- Map$new()
+      .metadata <<- Map$new()
+      .nameOrder <<- character(0)
       invisible()
     }
 
@@ -991,8 +1022,8 @@ Observable <- R6Class(
     .execCount = integer(0),
     .mostRecentCtxId = character(0),
     .ctx = 'Context',
-    ._destroyed = FALSE,
-    ._destroyHandle = NULL,
+    .destroyed = FALSE,
+    .destroyHandle = NULL,
 
     .isRecordingOtel = FALSE, # Needs to be set by Shiny
     .otelLabel = NULL, # Needs to be set by Shiny
@@ -1032,11 +1063,11 @@ Observable <- R6Class(
 
       if (!is.null(.domain) && is.function(.domain$onDestroy)) {
         wr <- rlang::new_weakref(key = self)
-        ._destroyHandle <<- .domain$onDestroy(make_weak_destroy_wrapper(wr))
+        .destroyHandle <<- .domain$onDestroy(make_weak_destroy_wrapper(wr))
       }
     },
     getValue = function() {
-      if (._destroyed) stop(destroyedReactiveError(.label))
+      if (.destroyed) stop(destroyedReactiveError(.label))
       .dependents$register()
 
       if (.invalidated || .running) {
@@ -1055,11 +1086,11 @@ Observable <- R6Class(
         invisible(.value)
     },
     destroy = function() {
-      if (._destroyed) return(invisible())
-      ._destroyed <<- TRUE
-      if (is.function(._destroyHandle)) {
-        ._destroyHandle()
-        ._destroyHandle <<- NULL
+      if (.destroyed) return(invisible())
+      .destroyed <<- TRUE
+      if (is.function(.destroyHandle)) {
+        .destroyHandle()
+        .destroyHandle <<- NULL
       }
       .dependents$invalidate(log = FALSE)
       .value <<- NULL

@@ -752,3 +752,30 @@ test_that("root setBookmarkExclude persists after module destroy", {
   expect_true("global_input" %in% session$getBookmarkExclude())
   expect_false("mod1-a" %in% session$getBookmarkExclude())
 })
+
+test_that("makeScope rejects reserved namespace '..root'", {
+  session <- MockShinySession$new()
+  expect_error(session$makeScope("..root"), "reserved")
+})
+
+test_that("createMockDomain supports onDestroy and destroy", {
+  domain <- createMockDomain()
+
+  called <- FALSE
+  domain$onDestroy(function() called <<- TRUE)
+
+  expect_false(called)
+  domain$destroy()
+  expect_true(called)
+})
+
+test_that("createMockDomain destroy is idempotent", {
+  domain <- createMockDomain()
+
+  count <- 0L
+  domain$onDestroy(function() count <<- count + 1L)
+
+  domain$destroy()
+  domain$destroy()
+  expect_equal(count, 1L)
+})

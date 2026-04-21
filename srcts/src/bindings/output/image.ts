@@ -288,10 +288,12 @@ class ImageOutputBinding extends OutputBinding {
     width: number | string,
     height: number | string,
   ): void {
-    $(el).find("img").trigger("resize");
-    return;
-    width; // eslint-disable-line @typescript-eslint/no-unused-expressions
-    height; // eslint-disable-line @typescript-eslint/no-unused-expressions
+    const img = $(el).find("img");
+
+    img.attr("width", width);
+    img.attr("height", height);
+
+    img.trigger("resize");
   }
 }
 

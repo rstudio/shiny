@@ -10,7 +10,7 @@ import type {
 } from "../inputPolicies";
 import type { EventPriority } from "../inputPolicies/inputPolicy";
 import { shinyAppBindOutput, shinyAppUnbindOutput } from "./initedMethods";
-import { sendImageSizeFns } from "./sendImageSize";
+import { sendOutputInfoFns } from "./sendOutputInfo";
 
 type BindScope = HTMLElement | JQuery<HTMLElement>;
 
@@ -229,8 +229,6 @@ type BindInputsCtx = {
   inputsRate: InputRateDecorator;
   inputBindings: BindingRegistry<InputBinding>;
   outputBindings: BindingRegistry<OutputBinding>;
-  sendOutputHiddenState: () => void;
-  maybeAddThemeObserver: (el: HTMLElement) => void;
   initDeferredIframes: () => void;
   outputIsRecalculating: (id: string) => boolean;
 };
@@ -318,12 +316,7 @@ function bindInputs(
 }
 
 async function bindOutputs(
-  {
-    sendOutputHiddenState,
-    maybeAddThemeObserver,
-    outputBindings,
-    outputIsRecalculating,
-  }: BindInputsCtx,
+  { outputBindings, outputIsRecalculating }: BindInputsCtx,
   scope: BindScope = document.documentElement,
 ): Promise<void> {
   const $scope = $(scope);
@@ -355,12 +348,6 @@ async function bindOutputs(
         continue;
       }
 
-      // If this element reports its CSS styles to getCurrentOutputInfo()
-      // then it should have a MutationObserver() to resend CSS if its
-      // style/class attributes change. This observer should already exist
-      // for _static_ UI, but not yet for _dynamic_ UI
-      maybeAddThemeObserver(el);
-
       const bindingAdapter = new OutputBindingAdapter(el, binding);
 
       await shinyAppBindOutput(id, bindingAdapter);
@@ -383,8 +370,7 @@ async function bindOutputs(
   }
 
   // Send later in case DOM layout isn't final yet.
-  setTimeout(sendImageSizeFns.regular, 0);
-  setTimeout(sendOutputHiddenState, 0);
+  setTimeout(sendOutputInfoFns.regular, 0);
 }
 
 function unbindInputs(
@@ -419,7 +405,6 @@ function unbindInputs(
   }
 }
 function unbindOutputs(
-  { sendOutputHiddenState }: BindInputsCtx,
   scope: BindScope = document.documentElement,
   includeSelf = false,
 ) {
@@ -452,8 +437,7 @@ function unbindOutputs(
   }
 
   // Send later in case DOM layout isn't final yet.
-  setTimeout(sendImageSizeFns.regular, 0);
-  setTimeout(sendOutputHiddenState, 0);
+  setTimeout(sendOutputInfoFns.regular, 0);
 }
 
 // (Named used before TS conversion)
@@ -474,13 +458,9 @@ async function _bindAll(
 
   return currentInputs;
 }
-function unbindAll(
-  shinyCtx: BindInputsCtx,
-  scope: BindScope,
-  includeSelf = false,
-): void {
+function unbindAll(scope: BindScope, includeSelf = false): void {
   unbindInputs(scope, includeSelf);
-  unbindOutputs(shinyCtx, scope, includeSelf);
+  unbindOutputs(scope, includeSelf);
 }
 async function bindAll(
   shinyCtx: BindInputsCtx,

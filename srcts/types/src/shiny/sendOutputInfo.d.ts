@@ -13,5 +13,5 @@ declare class SendOutputInfo {
     createObserverCallback(delayMs: number, callback: () => void): FlushableObserverCallback;
 }
 declare const sendOutputInfoFns: SendOutputInfo;
-export { sendOutputInfoFns, SendOutputInfo };
+export { SendOutputInfo, sendOutputInfoFns };
 export type { FlushableObserverCallback };

@@ -41,6 +41,7 @@ import type {
 import { setFileInputBinding, setShinyObj } from "./initedMethods";
 import { removeModal, showModal } from "./modal";
 import { removeNotification, showNotification } from "./notifications";
+import { handleVisualChange } from "./outputInfoObserver";
 import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
 import {
   registerDependency,
@@ -294,16 +295,8 @@ class ShinyClass {
       const rect = getBoundingClientSizeBeforeZoom(el);
 
       if (rect.width !== 0 || rect.height !== 0) {
-        setInput(
-          ".clientdata_output_" + id + "_width",
-          rect.width,
-          initial,
-        );
-        setInput(
-          ".clientdata_output_" + id + "_height",
-          rect.height,
-          initial,
-        );
+        setInput(".clientdata_output_" + id + "_width", rect.width, initial);
+        setInput(".clientdata_output_" + id + "_height", rect.height, initial);
       }
     }
 
@@ -423,11 +416,14 @@ class ShinyClass {
     function ensureObservers(el: HTMLElement): void {
       if (!$(el).data("shiny-resize-observer")) {
         const onResize = sendOutputInfoFns.createObserverCallback(100, () => {
-          doTriggerResize(el);
-          doSendHiddenState(el);
-          if (reportsSize(el)) {
-            doSendSize(el);
-          }
+          handleVisualChange(el, {
+            doTriggerResize,
+            doSendHiddenState,
+            doSendSize,
+            doSendTheme,
+            reportsSize,
+            reportsTheme,
+          });
         });
         const ro = new ResizeObserver(() => onResize());
 
@@ -437,13 +433,19 @@ class ShinyClass {
       }
 
       if (!$(el).data("shiny-intersection-observer")) {
-        const onIntersect = sendOutputInfoFns.createObserverCallback(100, () => {
-          doTriggerResize(el);
-          doSendHiddenState(el);
-          if (reportsSize(el)) {
-            doSendSize(el);
-          }
-        });
+        const onIntersect = sendOutputInfoFns.createObserverCallback(
+          100,
+          () => {
+            handleVisualChange(el, {
+              doTriggerResize,
+              doSendHiddenState,
+              doSendSize,
+              doSendTheme,
+              reportsSize,
+              reportsTheme,
+            });
+          },
+        );
         const io = new IntersectionObserver(() => onIntersect());
 
         io.observe(el);

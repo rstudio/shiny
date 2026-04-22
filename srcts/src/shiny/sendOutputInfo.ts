@@ -38,7 +38,6 @@ class SendOutputInfo {
     delayMs: number,
     callback: () => void,
   ): FlushableObserverCallback {
-    let observerCallback!: FlushableObserverCallback;
     const debouncer = new Debouncer(
       null,
       () => {
@@ -48,7 +47,7 @@ class SendOutputInfo {
       delayMs,
     );
 
-    observerCallback = Object.assign(
+    const observerCallback: FlushableObserverCallback = Object.assign(
       () => {
         this.#pendingObserverCallbacks.add(observerCallback);
         debouncer.normalCall();
@@ -74,5 +73,5 @@ class SendOutputInfo {
 
 const sendOutputInfoFns = new SendOutputInfo();
 
-export { sendOutputInfoFns, SendOutputInfo };
+export { SendOutputInfo, sendOutputInfoFns };
 export type { FlushableObserverCallback };

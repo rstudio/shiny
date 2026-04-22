@@ -4,15 +4,15 @@ import test from "node:test";
 import { InputBatchSender } from "../../inputPolicies";
 import { SendOutputInfo } from "../sendOutputInfo";
 
-test("pending observer output info is flushed before the next input batch send", () => {
-  const sentInputs: Array<Record<string, unknown>> = [];
+void test("pending observer output info is flushed before the next input batch send", () => {
+  const sentInputs: Array<{ [key: string]: unknown }> = [];
   const shinyapp = {
     taskQueue: {
       enqueue: () => {
         throw new Error("task queue should not be used in this test");
       },
     },
-    sendInput: (values: Record<string, unknown>) => {
+    sendInput: (values: { [key: string]: unknown }) => {
       sentInputs.push(values);
     },
   };
@@ -34,8 +34,9 @@ test("pending observer output info is flushed before the next input batch send",
   inputBatchSender.setInput("user", 1, { priority: "event" });
 
   assert.equal(sentInputs.length, 1);
-  assert.deepEqual(sentInputs[0], {
-    ".clientdata_output_plot_width": 400,
-    user: 1,
-  });
+  const expected: { [key: string]: unknown } = { user: 1 };
+
+  expected[".clientdata_output_plot_width"] = 400;
+
+  assert.deepEqual(sentInputs[0], expected);
 });

@@ -1,9 +1,9 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 
 import { debounce } from "../debounce";
 
-test("debounce can cancel a pending callback before it fires", async () => {
+void test("debounce can cancel a pending callback before it fires", async () => {
   let calls = 0;
   const debounced = debounce(10, () => {
     calls += 1;

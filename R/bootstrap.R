@@ -1237,11 +1237,14 @@ uiOutput <- htmlOutput
 #' @param label The label that should appear on the button.
 #' @param class Additional CSS classes to apply to the tag, if any.
 #' @param icon An [icon()] to appear on the button. Default is `icon("download")`.
-#' @param autoEnable If `TRUE` (the default), the button will automatically be
-#'   enabled/disabled based on whether the `downloadHandler` has a non-`NULL`
-#'   filename. If `FALSE`, the button will not be automatically enabled/disabled
-#'   based on the `downloadHandler`'s filename, and you will need to manage the button's enabled/disabled state yourself (e.g., by using
-#'   [shinyjs::enable()] and [shinyjs::disable()]).
+#' @param enabled Controls the enabled/disabled behavior of the button.
+#'   - `"auto"` (the default): the button starts disabled and is automatically
+#'     enabled when the `downloadHandler` provides a non-`NULL` filename.
+#'   - `TRUE`: the button starts enabled immediately, without waiting for the
+#'     `downloadHandler`.
+#'   - `FALSE`: the button remains disabled and Shiny will not automatically
+#'     enable it; you must manage the enabled/disabled state yourself (e.g.,
+#'     with [shinyjs::enable()] and [shinyjs::disable()]).
 #' @param ... Other arguments to pass to the container tag function.
 #'
 #' @examples
@@ -1280,33 +1283,38 @@ downloadButton <- function(outputId,
                            label="Download",
                            class=NULL,
                            ...,
-                           autoEnable = TRUE,
+                           enabled = c("auto", TRUE, FALSE),
                            icon = shiny::icon("download")) {
+  enabled <- match.arg(as.character(enabled), c("auto", "TRUE", "FALSE"))
   tags$a(id=outputId,
-         class='btn btn-default shiny-download-link disabled',
+         class="btn btn-default shiny-download-link",
+         class=if (enabled != "TRUE") "disabled",
          class=class,
          href='',
          target='_blank',
          download=NA,
-         "aria-disabled"="true",
-         "data-ignore-update"=if (autoEnable) NULL else NA,
-         tabindex="-1",
+         "aria-disabled"=if (enabled != "TRUE") "true" else NULL,
+         "data-ignore-update"=if (enabled == "FALSE") NA else NULL,
+         tabindex=if (enabled != "TRUE") "-1" else NULL,
          validateIcon(icon),
          label, ...)
 }
 
 #' @rdname downloadButton
 #' @export
-downloadLink <- function(outputId, label="Download", class=NULL, ..., autoEnable = TRUE) {
+downloadLink <- function(outputId, label="Download", class=NULL, ...,
+                         enabled = c("auto", TRUE, FALSE)) {
+  enabled <- match.arg(as.character(enabled), c("auto", "TRUE", "FALSE"))
   tags$a(id=outputId,
-         class='shiny-download-link disabled',
+         class="shiny-download-link",
+         class=if (enabled != "TRUE") "disabled",
          class=class,
          href='',
          target='_blank',
          download=NA,
-         "aria-disabled"="true",
-         "data-ignore-update"=if (autoEnable) NULL else NA,
-         tabindex="-1",
+         "aria-disabled"=if (enabled != "TRUE") "true" else NULL,
+         "data-ignore-update"=if (enabled == "FALSE") NA else NULL,
+         tabindex=if (enabled != "TRUE") "-1" else NULL,
          label, ...)
 }
 

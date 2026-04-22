@@ -10,7 +10,7 @@ downloadButton(
   label = "Download",
   class = NULL,
   ...,
-  autoEnable = TRUE,
+  enabled = c("auto", TRUE, FALSE),
   icon = shiny::icon("download")
 )
 
@@ -19,7 +19,7 @@ downloadLink(
   label = "Download",
   class = NULL,
   ...,
-  autoEnable = TRUE
+  enabled = c("auto", TRUE, FALSE)
 )
 }
 \arguments{
@@ -32,11 +32,16 @@ is assigned to.}
 
 \item{...}{Other arguments to pass to the container tag function.}
 
-\item{autoEnable}{If \code{TRUE} (the default), the button will automatically be
-enabled/disabled based on whether the \code{downloadHandler} has a non-\code{NULL}
-filename. If \code{FALSE}, the button will not be automatically enabled/disabled
-based on the \code{downloadHandler}'s filename, and you will need to manage the button's enabled/disabled state yourself (e.g., by using
-\code{\link[shinyjs:enable]{shinyjs::enable()}} and \code{\link[shinyjs:disable]{shinyjs::disable()}}).}
+\item{enabled}{Controls the enabled/disabled behavior of the button.
+\itemize{
+\item \code{"auto"} (the default): the button starts disabled and is automatically
+enabled when the \code{downloadHandler} provides a non-\code{NULL} filename.
+\item \code{TRUE}: the button starts enabled immediately, without waiting for the
+\code{downloadHandler}.
+\item \code{FALSE}: the button remains disabled and Shiny will not automatically
+enable it; you must manage the enabled/disabled state yourself (e.g.,
+with \code{\link[shinyjs:enable]{shinyjs::enable()}} and \code{\link[shinyjs:disable]{shinyjs::disable()}}).
+}}
 
 \item{icon}{An \code{\link[=icon]{icon()}} to appear on the button. Default is \code{icon("download")}.}
 }

@@ -1,34 +1,51 @@
-# downloadButton snapshot (autoEnable = TRUE)
+# downloadButton snapshot (enabled = 'auto')
 
     Code
       downloadButton("dl", "Download")
     Output
-      <a id="dl" class="btn btn-default shiny-download-link disabled" href="" target="_blank" download aria-disabled="true" tabindex="-1">
+      <a aria-disabled="true" class="btn btn-default shiny-download-link disabled" download href="" id="dl" tabindex="-1" target="_blank">
         <i class="fas fa-download" role="presentation" aria-label="download icon"></i>
         Download
       </a>
 
-# downloadButton snapshot (autoEnable = FALSE)
+# downloadButton snapshot (enabled = FALSE)
 
     Code
-      downloadButton("dl", "Download", autoEnable = FALSE)
+      downloadButton("dl", "Download", enabled = FALSE)
     Output
-      <a id="dl" class="btn btn-default shiny-download-link disabled" href="" target="_blank" download aria-disabled="true" data-ignore-update tabindex="-1">
+      <a aria-disabled="true" class="btn btn-default shiny-download-link disabled" data-ignore-update download href="" id="dl" tabindex="-1" target="_blank">
         <i class="fas fa-download" role="presentation" aria-label="download icon"></i>
         Download
       </a>
 
-# downloadLink snapshot (autoEnable = TRUE)
+# downloadButton snapshot (enabled = TRUE)
+
+    Code
+      downloadButton("dl", "Download", enabled = TRUE)
+    Output
+      <a id="dl" class="btn btn-default shiny-download-link" href="" target="_blank" download>
+        <i class="fas fa-download" role="presentation" aria-label="download icon"></i>
+        Download
+      </a>
+
+# downloadLink snapshot (enabled = 'auto')
 
     Code
       downloadLink("dl", "Download")
     Output
-      <a id="dl" class="shiny-download-link disabled" href="" target="_blank" download aria-disabled="true" tabindex="-1">Download</a>
+      <a aria-disabled="true" class="shiny-download-link disabled" download href="" id="dl" tabindex="-1" target="_blank">Download</a>
 
-# downloadLink snapshot (autoEnable = FALSE)
+# downloadLink snapshot (enabled = FALSE)
 
     Code
-      downloadLink("dl", "Download", autoEnable = FALSE)
+      downloadLink("dl", "Download", enabled = FALSE)
     Output
-      <a id="dl" class="shiny-download-link disabled" href="" target="_blank" download aria-disabled="true" data-ignore-update tabindex="-1">Download</a>
+      <a aria-disabled="true" class="shiny-download-link disabled" data-ignore-update download href="" id="dl" tabindex="-1" target="_blank">Download</a>
+
+# downloadLink snapshot (enabled = TRUE)
+
+    Code
+      downloadLink("dl", "Download", enabled = TRUE)
+    Output
+      <a id="dl" class="shiny-download-link" href="" target="_blank" download>Download</a>
 

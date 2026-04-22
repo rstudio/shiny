@@ -6,6 +6,8 @@ type VisualChangeHandlers = {
     reportsSize: (el: HTMLElement) => boolean;
     reportsTheme: (el: HTMLElement) => boolean;
 };
+declare function shouldObserveThemeMutations(reportsTheme: boolean): boolean;
 declare function handleVisualChange(el: HTMLElement, { doTriggerResize, doSendHiddenState, doSendSize, doSendTheme, reportsSize, reportsTheme, }: VisualChangeHandlers): void;
 export { handleVisualChange };
+export { shouldObserveThemeMutations };
 export type { VisualChangeHandlers };

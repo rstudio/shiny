@@ -41,7 +41,10 @@ import type {
 import { setFileInputBinding, setShinyObj } from "./initedMethods";
 import { removeModal, showModal } from "./modal";
 import { removeNotification, showNotification } from "./notifications";
-import { handleVisualChange } from "./outputInfoObserver";
+import {
+  handleVisualChange,
+  shouldObserveThemeMutations,
+} from "./outputInfoObserver";
 import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
 import {
   registerDependency,
@@ -453,7 +456,10 @@ class ShinyClass {
         $(el).data("shiny-intersection-observer", io);
       }
 
-      if (!$(el).data("shiny-mutate-observer")) {
+      if (
+        shouldObserveThemeMutations(reportsTheme(el)) &&
+        !$(el).data("shiny-mutate-observer")
+      ) {
         const onMutate = sendOutputInfoFns.createObserverCallback(100, () => {
           if (reportsTheme(el)) {
             doSendTheme(el);

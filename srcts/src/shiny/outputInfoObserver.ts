@@ -7,6 +7,10 @@ type VisualChangeHandlers = {
   reportsTheme: (el: HTMLElement) => boolean;
 };
 
+function shouldObserveThemeMutations(reportsTheme: boolean): boolean {
+  return reportsTheme;
+}
+
 function handleVisualChange(
   el: HTMLElement,
   {
@@ -31,4 +35,5 @@ function handleVisualChange(
 }
 
 export { handleVisualChange };
+export { shouldObserveThemeMutations };
 export type { VisualChangeHandlers };

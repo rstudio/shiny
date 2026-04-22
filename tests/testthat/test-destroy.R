@@ -50,8 +50,10 @@ test_that("ReactiveVal$destroy() does not emit rLog or otel", {
   rv_impl <- ReactiveVal$new(10, label = "test_rv")
   ctx <- Context$new(domain = NULL)
   ctx$run(function() rv_impl$get())
-  rv_impl$destroy()
-  flushReact()
+  expect_no_error({
+    rv_impl$destroy()
+    flushReact()
+  })
 })
 
 test_that("Observable$destroy() sets destroyed flag and invalidates dependents", {

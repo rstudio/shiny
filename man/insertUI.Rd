@@ -83,16 +83,22 @@ through a jQuery selector can be removed through this function.
 
 When \code{removeUI()} removes a module's UI, the server-side reactive objects
 (observers, reactive values, etc.) created by that module continue to run.
-Call \code{session$destroy()} on the module's session to clean them up:
+Return a cleanup handle from the module, and call it when the parent removes
+the UI:
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{myModuleServer <- function(id) \{
   moduleServer(id, function(input, output, session) \{
     # ... module logic ...
 
-    # Clean up when the module is removed
-    session$destroy()
+    # Return a handle that the parent can call during teardown
+    list(destroy = session$destroy)
   \})
 \}
+
+# In the parent server:
+mod <- myModuleServer("my_module")
+removeUI(selector = "#my_module")
+mod$destroy()
 }\if{html}{\out{</div>}}
 
 See the \link{session} help topic for details on composability and data ownership

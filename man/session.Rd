@@ -54,10 +54,12 @@ explicitly namespaced for the current module, \code{session$ns("name")}
 will return the fully-qualified ID.
 }
 \item{onDestroy(callback)}{
-Registers a callback to be invoked when the session scope is destroyed
-via \code{destroy()}. Returns a function that can be called to unregister
-the callback. For module sessions, use this to register cleanup logic
-that runs when \code{session$destroy()} is called.
+Registers a callback to be invoked when the session scope ends.
+Returns a function that can be called to unregister the callback.
+For the root session, callbacks are invoked when the session closes,
+after \code{session$onEnded()} callbacks. Note, \code{session$destroy()} is not
+allowed for root sessions. For module session proxies, callbacks are
+invoked when \code{session$destroy()} is called.
 }
 \item{destroy()}{
 Destroys a module session scope (and any descendant scopes) by invoking

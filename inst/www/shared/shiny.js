@@ -858,15 +858,6 @@
     }
     return x2;
   }
-  function isHidden(obj) {
-    if (obj === null || obj.offsetWidth !== 0 || obj.offsetHeight !== 0) {
-      return false;
-    } else if (getStyle(obj, "display") === "none") {
-      return true;
-    } else {
-      return isHidden(obj.parentElement);
-    }
-  }
   function padZeros(n4, digits) {
     let str = n4.toString();
     while (str.length < digits) str = "0" + str;
@@ -4220,11 +4211,8 @@
       }).remove();
       OutputBinding.prototype.clearError.call(this, el);
     }
-    resize(el, width, height) {
-      const img = (0, import_jquery32.default)(el).find("img");
-      img.attr("width", width);
-      img.attr("height", height);
-      img.trigger("resize");
+    resize(el) {
+      (0, import_jquery32.default)(el).find("img").trigger("resize");
     }
   };
   var imageOutputBinding = new ImageOutputBinding();
@@ -5874,25 +5862,19 @@ ${duplicateIdMsg}`;
       bindingsRegistry.removeBinding(id, "output");
       $el.removeClass("shiny-bound-output");
       $el.removeData("shiny-output-binding");
-      for (const key of [
+      for (const prefix of [
         "shiny-resize-observer",
         "shiny-intersection-observer",
         "shiny-mutate-observer"
       ]) {
-        const observer = $el.data(key);
+        const observer = $el.data(prefix);
         if (observer) {
           observer.disconnect();
-          $el.removeData(key);
+          $el.removeData(prefix);
         }
-      }
-      for (const key of [
-        "shiny-resize-observer-callback",
-        "shiny-intersection-observer-callback",
-        "shiny-mutate-observer-callback"
-      ]) {
-        const callback = $el.data(key);
+        const callback = $el.data(prefix + "-callback");
         callback?.cancel?.();
-        $el.removeData(key);
+        $el.removeData(prefix + "-callback");
       }
       $el.trigger({
         type: "shiny:unbound",
@@ -6055,25 +6037,6 @@ ${duplicateIdMsg}`;
     const oldRemovalCallback = $notification?.data("removalCallback");
     if (oldRemovalCallback) {
       clearTimeout(oldRemovalCallback);
-    }
-  }
-
-  // srcts/src/shiny/outputInfoObserver.ts
-  function handleVisualChange(el, {
-    doTriggerResize,
-    doSendHiddenState,
-    doSendSize,
-    doSendTheme,
-    reportsSize,
-    reportsTheme
-  }) {
-    doTriggerResize(el);
-    doSendHiddenState(el);
-    if (reportsSize(el)) {
-      doSendSize(el);
-    }
-    if (reportsTheme(el)) {
-      doSendTheme(el);
     }
   }
 
@@ -7423,6 +7386,7 @@ ${duplicateIdMsg}`;
       }
       function doSendSize(el, initial = false) {
         const id = getIdFromEl(el);
+        if (!id) return;
         const rect = getBoundingClientSizeBeforeZoom(el);
         if (rect.width !== 0 || rect.height !== 0) {
           setInput(".clientdata_output_" + id + "_width", rect.width, initial);
@@ -7435,7 +7399,7 @@ ${duplicateIdMsg}`;
         $el.trigger({
           type: "shiny:visualchange",
           // @ts-expect-error; Can not remove info on a established, malformed Event object
-          visible: !isHidden(el),
+          visible: el.checkVisibility(),
           binding
         });
         binding.onResize();
@@ -7472,6 +7436,7 @@ ${duplicateIdMsg}`;
           };
         }
         const id = getIdFromEl(el);
+        if (!id) return;
         setInput(
           ".clientdata_output_" + id + "_bg",
           getComputedBgColor(el),
@@ -7496,7 +7461,8 @@ ${duplicateIdMsg}`;
       const visibleOutputs = /* @__PURE__ */ new Set();
       function doSendHiddenState(el, initial = false) {
         const id = getIdFromEl(el);
-        const hidden = isHidden(el);
+        if (!id) return;
+        const hidden = !el.checkVisibility();
         if (hidden) {
           visibleOutputs.delete(id);
         } else {
@@ -7510,62 +7476,53 @@ ${duplicateIdMsg}`;
       function reportsTheme(el) {
         return el.classList.contains("shiny-image-output") || el.classList.contains("shiny-plot-output") || el.classList.contains("shiny-report-theme");
       }
+      function handleVisualChange(el) {
+        doTriggerResize(el);
+        doSendHiddenState(el);
+        if (reportsSize(el)) doSendSize(el);
+        if (reportsTheme(el)) doSendTheme(el);
+      }
       function ensureObservers(el) {
-        if (!(0, import_jquery40.default)(el).data("shiny-resize-observer")) {
-          const onResize = sendOutputInfoFns.createObserverCallback(100, () => {
-            handleVisualChange(el, {
-              doTriggerResize,
-              doSendHiddenState,
-              doSendSize,
-              doSendTheme,
-              reportsSize,
-              reportsTheme
-            });
-          });
+        const $el = (0, import_jquery40.default)(el);
+        if (!$el.data("shiny-resize-observer")) {
+          const onResize = sendOutputInfoFns.createObserverCallback(
+            100,
+            () => handleVisualChange(el)
+          );
           const ro = new ResizeObserver(() => onResize());
           ro.observe(el);
-          (0, import_jquery40.default)(el).data("shiny-resize-observer-callback", onResize);
-          (0, import_jquery40.default)(el).data("shiny-resize-observer", ro);
+          $el.data("shiny-resize-observer-callback", onResize);
+          $el.data("shiny-resize-observer", ro);
         }
-        if (!(0, import_jquery40.default)(el).data("shiny-intersection-observer")) {
+        if (!$el.data("shiny-intersection-observer")) {
           const onIntersect = sendOutputInfoFns.createObserverCallback(
             100,
-            () => {
-              handleVisualChange(el, {
-                doTriggerResize,
-                doSendHiddenState,
-                doSendSize,
-                doSendTheme,
-                reportsSize,
-                reportsTheme
-              });
-            }
+            () => handleVisualChange(el)
           );
           const io = new IntersectionObserver(() => onIntersect());
           io.observe(el);
-          (0, import_jquery40.default)(el).data("shiny-intersection-observer-callback", onIntersect);
-          (0, import_jquery40.default)(el).data("shiny-intersection-observer", io);
+          $el.data("shiny-intersection-observer-callback", onIntersect);
+          $el.data("shiny-intersection-observer", io);
         }
-        if (!(0, import_jquery40.default)(el).data("shiny-mutate-observer")) {
+        if (reportsTheme(el) && !$el.data("shiny-mutate-observer")) {
           const onMutate = sendOutputInfoFns.createObserverCallback(100, () => {
-            if (reportsTheme(el)) {
-              doSendTheme(el);
-            }
+            if (reportsTheme(el)) doSendTheme(el);
           });
           const mo = new MutationObserver(() => onMutate());
           mo.observe(el, {
             attributes: true,
             attributeFilter: ["style", "class"]
           });
-          (0, import_jquery40.default)(el).data("shiny-mutate-observer", mo);
-          (0, import_jquery40.default)(el).data("shiny-mutate-observer-callback", onMutate);
+          $el.data("shiny-mutate-observer", mo);
+          $el.data("shiny-mutate-observer-callback", onMutate);
         }
       }
       function doSendOutputInfo(initial = false) {
         const outputIds = /* @__PURE__ */ new Set();
         (0, import_jquery40.default)(".shiny-bound-output").each(function() {
           const el = this;
-          outputIds.add(getIdFromEl(el));
+          const id = getIdFromEl(el);
+          if (id) outputIds.add(id);
           ensureObservers(el);
           doTriggerResize(el);
           doSendHiddenState(el, initial);

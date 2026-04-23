@@ -23,7 +23,6 @@ import {
   getBoundingClientSizeBeforeZoom,
   getComputedLinkColor,
   getStyle,
-  isHidden,
   isShinyInDevMode,
   mapValues,
   pixelRatio,
@@ -312,7 +311,7 @@ class ShinyClass {
       $el.trigger({
         type: "shiny:visualchange",
         // @ts-expect-error; Can not remove info on a established, malformed Event object
-        visible: !isHidden(el),
+        visible: el.checkVisibility(),
         binding: binding,
       });
       binding.onResize();
@@ -390,7 +389,7 @@ class ShinyClass {
 
     function doSendHiddenState(el: HTMLElement, initial = false): void {
       const id = getIdFromEl(el);
-      const hidden = isHidden(el);
+      const hidden = !el.checkVisibility();
 
       if (hidden) {
         visibleOutputs.delete(id);

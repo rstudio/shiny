@@ -59,16 +59,6 @@ function getStyle(el: Element, styleProp: string): string | undefined {
   return x;
 }
 
-function isHidden(obj: HTMLElement | null): boolean {
-  if (obj === null || obj.offsetWidth !== 0 || obj.offsetHeight !== 0) {
-    return false;
-  } else if (getStyle(obj, "display") === "none") {
-    return true;
-  } else {
-    return isHidden(obj.parentElement);
-  }
-}
-
 // Convert a number to a string with leading zeros
 function padZeros(n: number, digits: number): string {
   let str = n.toString();
@@ -429,7 +419,6 @@ export {
   hasDefinedProperty,
   hasOwnProperty,
   isBS3,
-  isHidden,
   isnan,
   isShinyInDevMode,
   makeResizeFilter,

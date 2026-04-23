@@ -101,12 +101,15 @@ Imports:
     xtable
 Suggests:
     Cairo (>= 1.5-5),
+    callr,
     coro (>= 1.1.0),
     datasets,
+    devtools,
     DT,
     dygraphs,
     future,
     ggplot2,
+    httr,
     knitr (>= 1.6),
     magrittr,
     markdown,
@@ -116,6 +119,7 @@ Suggests:
     reactlog (>= 1.0.0),
     rmarkdown,
     sass,
+    shinytest2,
     showtext,
     testthat (>= 3.2.1),
     watcher,

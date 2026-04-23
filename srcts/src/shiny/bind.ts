@@ -429,28 +429,24 @@ function unbindOutputs(
     $el.removeClass("shiny-bound-output");
     $el.removeData("shiny-output-binding");
 
-    for (const key of [
+    for (const prefix of [
       "shiny-resize-observer",
       "shiny-intersection-observer",
       "shiny-mutate-observer",
     ]) {
-      const observer = $el.data(key);
+      const observer = $el.data(prefix);
 
       if (observer) {
         observer.disconnect();
-        $el.removeData(key);
+        $el.removeData(prefix);
       }
-    }
 
-    for (const key of [
-      "shiny-resize-observer-callback",
-      "shiny-intersection-observer-callback",
-      "shiny-mutate-observer-callback",
-    ]) {
-      const callback = $el.data(key) as { cancel?: () => void } | undefined;
+      const callback = $el.data(prefix + "-callback") as
+        | { cancel?: () => void }
+        | undefined;
 
       callback?.cancel?.();
-      $el.removeData(key);
+      $el.removeData(prefix + "-callback");
     }
 
     $el.trigger({

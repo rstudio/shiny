@@ -40,10 +40,6 @@ import type {
 import { setFileInputBinding, setShinyObj } from "./initedMethods";
 import { removeModal, showModal } from "./modal";
 import { removeNotification, showNotification } from "./notifications";
-import {
-  handleVisualChange,
-  shouldObserveThemeMutations,
-} from "./outputInfoObserver";
 import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
 import {
   registerDependency,
@@ -294,6 +290,9 @@ class ShinyClass {
 
     function doSendSize(el: HTMLElement, initial = false): void {
       const id = getIdFromEl(el);
+
+      if (!id) return;
+
       const rect = getBoundingClientSizeBeforeZoom(el);
 
       if (rect.width !== 0 || rect.height !== 0) {
@@ -363,6 +362,8 @@ class ShinyClass {
 
       const id = getIdFromEl(el);
 
+      if (!id) return;
+
       setInput(
         ".clientdata_output_" + id + "_bg",
         getComputedBgColor(el),
@@ -385,10 +386,13 @@ class ShinyClass {
       );
     }
 
-    const visibleOutputs = new Set<string | null>();
+    const visibleOutputs = new Set<string>();
 
     function doSendHiddenState(el: HTMLElement, initial = false): void {
       const id = getIdFromEl(el);
+
+      if (!id) return;
+
       const hidden = !el.checkVisibility();
 
       if (hidden) {
@@ -415,54 +419,41 @@ class ShinyClass {
       );
     }
 
+    function handleVisualChange(el: HTMLElement): void {
+      doTriggerResize(el);
+      doSendHiddenState(el);
+      if (reportsSize(el)) doSendSize(el);
+      if (reportsTheme(el)) doSendTheme(el);
+    }
+
     function ensureObservers(el: HTMLElement): void {
-      if (!$(el).data("shiny-resize-observer")) {
-        const onResize = sendOutputInfoFns.createObserverCallback(100, () => {
-          handleVisualChange(el, {
-            doTriggerResize,
-            doSendHiddenState,
-            doSendSize,
-            doSendTheme,
-            reportsSize,
-            reportsTheme,
-          });
-        });
+      const $el = $(el);
+
+      if (!$el.data("shiny-resize-observer")) {
+        const onResize = sendOutputInfoFns.createObserverCallback(100, () =>
+          handleVisualChange(el),
+        );
         const ro = new ResizeObserver(() => onResize());
 
         ro.observe(el);
-        $(el).data("shiny-resize-observer-callback", onResize);
-        $(el).data("shiny-resize-observer", ro);
+        $el.data("shiny-resize-observer-callback", onResize);
+        $el.data("shiny-resize-observer", ro);
       }
 
-      if (!$(el).data("shiny-intersection-observer")) {
-        const onIntersect = sendOutputInfoFns.createObserverCallback(
-          100,
-          () => {
-            handleVisualChange(el, {
-              doTriggerResize,
-              doSendHiddenState,
-              doSendSize,
-              doSendTheme,
-              reportsSize,
-              reportsTheme,
-            });
-          },
+      if (!$el.data("shiny-intersection-observer")) {
+        const onIntersect = sendOutputInfoFns.createObserverCallback(100, () =>
+          handleVisualChange(el),
         );
         const io = new IntersectionObserver(() => onIntersect());
 
         io.observe(el);
-        $(el).data("shiny-intersection-observer-callback", onIntersect);
-        $(el).data("shiny-intersection-observer", io);
+        $el.data("shiny-intersection-observer-callback", onIntersect);
+        $el.data("shiny-intersection-observer", io);
       }
 
-      if (
-        shouldObserveThemeMutations(reportsTheme(el)) &&
-        !$(el).data("shiny-mutate-observer")
-      ) {
+      if (reportsTheme(el) && !$el.data("shiny-mutate-observer")) {
         const onMutate = sendOutputInfoFns.createObserverCallback(100, () => {
-          if (reportsTheme(el)) {
-            doSendTheme(el);
-          }
+          if (reportsTheme(el)) doSendTheme(el);
         });
         const mo = new MutationObserver(() => onMutate());
 
@@ -471,19 +462,20 @@ class ShinyClass {
           attributeFilter: ["style", "class"],
         });
 
-        $(el).data("shiny-mutate-observer", mo);
-        $(el).data("shiny-mutate-observer-callback", onMutate);
+        $el.data("shiny-mutate-observer", mo);
+        $el.data("shiny-mutate-observer-callback", onMutate);
       }
     }
 
     function doSendOutputInfo(initial = false) {
-      const outputIds = new Set<string | null>();
+      const outputIds = new Set<string>();
 
       $(".shiny-bound-output").each(function () {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const el = this;
+        const id = getIdFromEl(el);
 
-        outputIds.add(getIdFromEl(el));
+        if (id) outputIds.add(id);
         ensureObservers(el);
 
         doTriggerResize(el);

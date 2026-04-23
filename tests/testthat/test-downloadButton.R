@@ -8,6 +8,16 @@ test_that("downloadButton starts disabled with correct attributes", {
   expect_match(html, 'href=""')
 })
 
+test_that("downloadLink starts disabled with correct attributes", {
+  lnk <- downloadLink("dl", "Download")
+  html <- as.character(lnk)
+
+  expect_match(html, "class=.*disabled")
+  expect_match(html, 'aria-disabled="true"')
+  expect_match(html, 'tabindex="-1"')
+  expect_match(html, 'href=""')
+})
+
 test_that("downloadButton omits data-ignore-update by default (enabled = 'auto')", {
   btn <- downloadButton("dl", "Download")
   html <- as.character(btn)

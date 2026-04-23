@@ -1242,9 +1242,10 @@ uiOutput <- htmlOutput
 #'     enabled when the `downloadHandler` provides a non-`NULL` filename.
 #'   - `TRUE`: the button starts enabled immediately, without waiting for the
 #'     `downloadHandler`.
-#'   - `FALSE`: the button remains disabled and Shiny will not automatically
-#'     enable it; you must manage the enabled/disabled state yourself (e.g.,
-#'     with [shinyjs::enable()] and [shinyjs::disable()]).
+#'   - `FALSE`: the button starts disabled and Shiny will **never**
+#'     automatically enable it, even after the `downloadHandler` is ready.
+#'     You are responsible for managing the enabled/disabled state yourself
+#'     (e.g., with [shinyjs::enable()] and [shinyjs::disable()]).
 #' @param ... Other arguments to pass to the container tag function.
 #'
 #' @examples
@@ -1280,8 +1281,8 @@ uiOutput <- htmlOutput
 #' @seealso [downloadHandler()]
 #' @export
 downloadButton <- function(outputId,
-                           label="Download",
-                           class=NULL,
+                           label = "Download",
+                           class = NULL,
                            ...,
                            enabled = c("auto", TRUE, FALSE),
                            icon = shiny::icon("download")) {
@@ -1302,19 +1303,19 @@ downloadButton <- function(outputId,
 
 #' @rdname downloadButton
 #' @export
-downloadLink <- function(outputId, label="Download", class=NULL, ...,
+downloadLink <- function(outputId, label = "Download", class = NULL, ...,
                          enabled = c("auto", TRUE, FALSE)) {
   enabled <- match.arg(as.character(enabled), c("auto", "TRUE", "FALSE"))
-  tags$a(id=outputId,
-         class="shiny-download-link",
-         class=if (enabled != "TRUE") "disabled",
-         class=class,
-         href='',
-         target='_blank',
-         download=NA,
-         "aria-disabled"=if (enabled != "TRUE") "true" else NULL,
-         "data-ignore-update"=if (enabled == "FALSE") NA else NULL,
-         tabindex=if (enabled != "TRUE") "-1" else NULL,
+  tags$a(id = outputId,
+         class = "shiny-download-link",
+         class = if (enabled != "TRUE") "disabled",
+         class = class,
+         href = '',
+         target = '_blank',
+         download = NA,
+         "aria-disabled" = if (enabled != "TRUE") "true" else NULL,
+         "data-ignore-update" = if (enabled == "FALSE") NA else NULL,
+         tabindex = if (enabled != "TRUE") "-1" else NULL,
          label, ...)
 }
 

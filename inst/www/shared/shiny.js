@@ -3023,10 +3023,8 @@
     }
     // Progress shouldn't be shown on the download button
     // (progress will be shown as a page level pulse instead)
-    showProgress(el, show3) {
+    showProgress() {
       return;
-      el;
-      show3;
     }
   };
   (0, import_jquery25.default)(document).on(

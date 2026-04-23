@@ -14,7 +14,7 @@ handler <- function() {
 # Mirrors what shinyjs::enable() / shinyjs::disable() does: adds/removes the
 # shinyjs-disabled class and the standard disabled attributes. This lets us test
 # that the download buttons/links respond to external JS changes to their enabled state,
-# without making us require shinyjs .
+# without making us require shinyjs.
 set_enabled_js <- HTML(
   "
   Shiny.addCustomMessageHandler('setEnabled', function(data) {

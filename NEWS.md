@@ -2,7 +2,7 @@
 
 ## Bug fixes and minor improvements
 
-* `downloadButton()` and `downloadLink()` gain a new `enabled` parameter (replacing `autoEnable`). Use `enabled = "auto"` (default) to automatically enable the button when the download is ready, `enabled = TRUE` to start the button already enabled, or `enabled = FALSE` to opt into manual state management. (#4119)
+* `downloadButton()` and `downloadLink()` gain a new `enabled` parameter. Use `enabled = "auto"` (default) to automatically enable the button when the download is ready, `enabled = TRUE` to start the button already enabled, or `enabled = FALSE` to opt into manual state management. (#4119)
 
 # shiny 1.13.0
 

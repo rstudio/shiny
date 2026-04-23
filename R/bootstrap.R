@@ -1239,7 +1239,7 @@ uiOutput <- htmlOutput
 #' @param icon An [icon()] to appear on the button. Default is `icon("download")`.
 #' @param enabled Controls the enabled/disabled behavior of the button.
 #'   - `"auto"` (the default): the button starts disabled and is automatically
-#'     enabled when the `downloadHandler` provides a non-`NULL` filename.
+#'     enabled once the server has initialized the `downloadHandler`.
 #'   - `TRUE`: the button starts enabled immediately, without waiting for the
 #'     `downloadHandler`.
 #'   - `FALSE`: the button starts disabled and Shiny will **never**
@@ -1278,7 +1278,7 @@ uiOutput <- htmlOutput
 #' }
 #'
 #' @aliases downloadLink
-#' @seealso [downloadHandler()]
+#' @seealso [downloadHandler()], [shinyjs::enable()], [shinyjs::disable()]
 #' @export
 downloadButton <- function(outputId,
                            label = "Download",

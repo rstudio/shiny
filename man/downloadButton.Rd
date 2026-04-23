@@ -38,9 +38,13 @@ is assigned to.}
 enabled when the \code{downloadHandler} provides a non-\code{NULL} filename.
 \item \code{TRUE}: the button starts enabled immediately, without waiting for the
 \code{downloadHandler}.
-\item \code{FALSE}: the button remains disabled and Shiny will not automatically
-enable it; you must manage the enabled/disabled state yourself (e.g.,
-with \code{\link[shinyjs:enable]{shinyjs::enable()}} and \code{\link[shinyjs:disable]{shinyjs::disable()}}).
+\item \code{FALSE}: the button starts disabled and Shiny will \strong{never}
+automatically enable it, even after the \code{downloadHandler} is ready.
+This opt-out applies for the lifetime of the page: \code{renderValue} will
+always skip the auto-enable step for this element, regardless of its
+current runtime state. You are responsible for managing the
+enabled/disabled state yourself (e.g., with \code{\link[shinyjs:stateFuncs]{shinyjs::enable()}} and
+\code{\link[shinyjs:stateFuncs]{shinyjs::disable()}}).
 }}
 
 \item{icon}{An \code{\link[=icon]{icon()}} to appear on the button. Default is \code{icon("download")}.}

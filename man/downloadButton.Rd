@@ -83,5 +83,5 @@ shinyApp(ui, server)
 
 }
 \seealso{
-\code{\link[=downloadHandler]{downloadHandler()}}, \code{\link[shinyjs:stateFuncs]{shinyjs::enable()}}, \code{\link[shinyjs:stateFuncs]{shinyjs::disable()}}
+\code{\link[=downloadHandler]{downloadHandler()}}
 }

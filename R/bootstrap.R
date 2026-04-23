@@ -1278,7 +1278,7 @@ uiOutput <- htmlOutput
 #' }
 #'
 #' @aliases downloadLink
-#' @seealso [downloadHandler()], [shinyjs::enable()], [shinyjs::disable()]
+#' @seealso [downloadHandler()]
 #' @export
 downloadButton <- function(outputId,
                            label = "Download",

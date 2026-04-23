@@ -4211,8 +4211,11 @@
       }).remove();
       OutputBinding.prototype.clearError.call(this, el);
     }
-    resize(el) {
+    resize(el, width, height) {
       (0, import_jquery32.default)(el).find("img").trigger("resize");
+      return;
+      width;
+      height;
     }
   };
   var imageOutputBinding = new ImageOutputBinding();

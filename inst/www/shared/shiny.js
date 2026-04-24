@@ -7539,7 +7539,7 @@ ${duplicateIdMsg}`;
           const id = getIdFromEl(el);
           if (id) outputIds.add(id);
           ensureObservers(el);
-          doTriggerResize(el);
+          if (!initial) doTriggerResize(el);
           doSendHiddenState(el, initial);
           if (reportsSize(el)) {
             doSendSize(el, initial);

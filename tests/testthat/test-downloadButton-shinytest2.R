@@ -44,7 +44,6 @@ if (!ready) skip("Download button test app failed to start")
 app_url <- "http://127.0.0.1:7314"
 
 # Start up app once and share across all tests
-# Start up app
 app <- AppDriver$new(app_url)
 withr::defer({ app$stop() })
 app$wait_for_idle()

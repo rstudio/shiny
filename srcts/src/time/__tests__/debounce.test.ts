@@ -7,10 +7,10 @@ void test("debounce can cancel a pending callback before it fires", async () => 
   let calls = 0;
   const debounced = debounce(10, () => {
     calls += 1;
-  }) as ReturnType<typeof debounce> & { cancel?: () => void };
+  });
 
   debounced();
-  debounced.cancel?.();
+  debounced.cancel();
 
   await new Promise((resolve) => setTimeout(resolve, 30));
 

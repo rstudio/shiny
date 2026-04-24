@@ -858,6 +858,18 @@
     }
     return x2;
   }
+  function isVisible(el) {
+    if (typeof el.checkVisibility === "function") {
+      return el.checkVisibility();
+    }
+    if (el.offsetWidth !== 0 || el.offsetHeight !== 0) {
+      return true;
+    }
+    if (getStyle(el, "display") === "none") {
+      return false;
+    }
+    return el.parentElement ? isVisible(el.parentElement) : true;
+  }
   function padZeros(n4, digits) {
     let str = n4.toString();
     while (str.length < digits) str = "0" + str;
@@ -7402,7 +7414,7 @@ ${duplicateIdMsg}`;
         $el.trigger({
           type: "shiny:visualchange",
           // @ts-expect-error; Can not remove info on a established, malformed Event object
-          visible: el.checkVisibility(),
+          visible: isVisible(el),
           binding
         });
         binding.onResize();
@@ -7465,7 +7477,7 @@ ${duplicateIdMsg}`;
       function doSendHiddenState(el, initial = false) {
         const id = getIdFromEl(el);
         if (!id) return;
-        const hidden = !el.checkVisibility();
+        const hidden = !isVisible(el);
         if (hidden) {
           visibleOutputs.delete(id);
         } else {

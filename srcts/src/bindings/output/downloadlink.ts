@@ -38,16 +38,18 @@ $(document).on(
   "click.shinyDownloadLink auxclick.shinyDownloadLink",
   "a.shiny-download-link",
   function (e: Event) {
+    const el = e.currentTarget as HTMLAnchorElement;
+
     // Prevent clicks when the button is disabled.
-    if ((this as HTMLElement).classList.contains("disabled")) {
+    if (el.classList.contains("disabled")) {
       e.preventDefault();
       return;
     }
 
     const evt: FileDownloadEvent = $.Event("shiny:filedownload");
 
-    evt.name = this.id;
-    evt.href = this.href;
+    evt.name = el.id;
+    evt.href = el.href;
     $(document).trigger(evt);
   },
 );

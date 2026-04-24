@@ -119,7 +119,6 @@ Suggests:
     reactlog (>= 1.0.0),
     rmarkdown,
     sass,
-    shinyjs,
     shinytest2,
     showtext,
     testthat (>= 3.2.1),

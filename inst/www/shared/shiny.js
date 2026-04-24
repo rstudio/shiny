@@ -5840,7 +5840,7 @@ ${duplicateIdMsg}`;
         });
       }
     }
-    setTimeout(sendOutputInfoFns.regular, 0);
+    setTimeout(() => sendOutputInfoFns.regular(), 0);
   }
   function unbindInputs(scope = document.documentElement, includeSelf = false) {
     const inputs = (0, import_jquery35.default)(scope).find(".shiny-bound-input").toArray();
@@ -5898,7 +5898,7 @@ ${duplicateIdMsg}`;
         bindingType: "output"
       });
     }
-    setTimeout(sendOutputInfoFns.regular, 0);
+    setTimeout(() => sendOutputInfoFns.regular(), 0);
   }
   async function _bindAll(shinyCtx, scope) {
     await bindOutputs(shinyCtx, scope);

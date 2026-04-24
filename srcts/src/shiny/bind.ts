@@ -370,7 +370,7 @@ async function bindOutputs(
   }
 
   // Send later in case DOM layout isn't final yet.
-  setTimeout(sendOutputInfoFns.regular, 0);
+  setTimeout(() => sendOutputInfoFns.regular(), 0);
 }
 
 function unbindInputs(
@@ -458,7 +458,7 @@ function unbindOutputs(
   }
 
   // Send later in case DOM layout isn't final yet.
-  setTimeout(sendOutputInfoFns.regular, 0);
+  setTimeout(() => sendOutputInfoFns.regular(), 0);
 }
 
 // (Named used before TS conversion)

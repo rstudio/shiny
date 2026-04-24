@@ -22,8 +22,10 @@ class DownloadLinkOutputBinding extends OutputBinding {
   }
   // Progress shouldn't be shown on the download button
   // (progress will be shown as a page level pulse instead)
-  showProgress(): void {
+  showProgress(el: HTMLElement, show: boolean): void {
     return;
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
+    show; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
 }
 
@@ -51,6 +53,9 @@ $(document).on(
     evt.name = el.id;
     evt.href = el.href;
     $(document).trigger(evt);
+
+    return;
+    e; // eslint-disable-line @typescript-eslint/no-unused-expressions
   },
 );
 

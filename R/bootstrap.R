@@ -1287,16 +1287,18 @@ downloadButton <- function(outputId,
                            enabled = c("auto", TRUE, FALSE),
                            icon = shiny::icon("download")) {
   enabled <- match.arg(as.character(enabled), c("auto", "TRUE", "FALSE"))
+  auto_enable <- identical(enabled, "auto")
+  if (auto_enable) enabled <- FALSE else enabled <- identical(enabled, "TRUE")
   tags$a(id=outputId,
          class="btn btn-default shiny-download-link",
-         class=if (enabled != "TRUE") "disabled",
+         class=if (!enabled) "disabled",
          class=class,
          href='',
          target='_blank',
          download=NA,
-         "aria-disabled"=if (enabled != "TRUE") "true" else NULL,
-         "data-ignore-update"=if (enabled == "FALSE") NA else NULL,
-         tabindex=if (enabled != "TRUE") "-1" else NULL,
+         "aria-disabled"=if (!enabled) "true",
+         "data-ignore-update"=if (!auto_enable && !enabled) NA,
+         tabindex=if (!enabled) "-1",
          validateIcon(icon),
          label, ...)
 }
@@ -1306,16 +1308,18 @@ downloadButton <- function(outputId,
 downloadLink <- function(outputId, label = "Download", class = NULL, ...,
                          enabled = c("auto", TRUE, FALSE)) {
   enabled <- match.arg(as.character(enabled), c("auto", "TRUE", "FALSE"))
+  auto_enable <- identical(enabled, "auto")
+  if (auto_enable) enabled <- FALSE else enabled <- identical(enabled, "TRUE")
   tags$a(id = outputId,
          class = "shiny-download-link",
-         class = if (enabled != "TRUE") "disabled",
+         class = if (!enabled) "disabled",
          class = class,
          href = '',
          target = '_blank',
          download = NA,
-         "aria-disabled" = if (enabled != "TRUE") "true" else NULL,
-         "data-ignore-update" = if (enabled == "FALSE") NA else NULL,
-         tabindex = if (enabled != "TRUE") "-1" else NULL,
+         "aria-disabled" = if (!enabled) "true",
+         "data-ignore-update" = if (!auto_enable && !enabled) NA,
+         tabindex = if (!enabled) "-1",
          label, ...)
 }
 

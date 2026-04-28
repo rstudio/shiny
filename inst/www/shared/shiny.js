@@ -1167,7 +1167,7 @@
       return;
       el;
     }
-    // This is called after unbinding the output.
+    // This is called after unbinding the input.
     dispose(el) {
       return;
       el;
@@ -5861,6 +5861,7 @@ ${duplicateIdMsg}`;
         binding,
         bindingType: "input"
       });
+      binding.dispose(el);
     }
   }
   function unbindOutputs(scope = document.documentElement, includeSelf = false) {

@@ -1,5 +1,10 @@
 # shiny (development version)
 
+## Bug fixes
+
+* `conditionalPanel()` no longer briefly flashes its contents on app start
+  when the condition is initially `FALSE`. (#3505)
+
 ## Improvements
 
 * Output resize/visibility detection now uses native browser observers

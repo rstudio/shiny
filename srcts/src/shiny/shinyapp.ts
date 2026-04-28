@@ -616,16 +616,17 @@ class ShinyApp {
       const nsPrefix = el.attr("data-ns-prefix") as string;
       const nsScope = this._narrowScope(scope, nsPrefix);
       const show = Boolean(condFunc(nsScope));
-      const showing = el.hasClass(conditionalShownClass);
+      const rawEl = conditionals[i];
+      const showing = rawEl.classList.contains(conditionalShownClass);
 
       if (show !== showing) {
         if (show) {
           el.trigger("show");
-          el.addClass(conditionalShownClass);
+          rawEl.classList.add(conditionalShownClass);
           el.trigger("shown");
         } else {
           el.trigger("hide");
-          el.removeClass(conditionalShownClass);
+          rawEl.classList.remove(conditionalShownClass);
           el.trigger("hidden");
         }
       }

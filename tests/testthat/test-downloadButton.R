@@ -39,7 +39,7 @@ test_that("downloadButton starts enabled when enabled = TRUE", {
   expect_no_match(html, "disabled")
   expect_no_match(html, "aria-disabled")
   expect_no_match(html, "tabindex")
-  expect_no_match(html, "data-shiny-disable-auto-enable")
+  expect_match(html, "data-shiny-disable-auto-enable")
 })
 
 test_that("downloadLink omits data-shiny-disable-auto-enable by default (enabled = 'auto')", {
@@ -63,7 +63,7 @@ test_that("downloadLink starts enabled when enabled = TRUE", {
   expect_no_match(html, "disabled")
   expect_no_match(html, "aria-disabled")
   expect_no_match(html, "tabindex")
-  expect_no_match(html, "data-shiny-disable-auto-enable")
+  expect_match(html, "data-shiny-disable-auto-enable")
 })
 
 test_that("downloadButton snapshot (enabled = 'auto')", {

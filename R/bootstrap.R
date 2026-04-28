@@ -1297,7 +1297,7 @@ downloadButton <- function(outputId,
          target='_blank',
          download=NA,
          "aria-disabled"=if (!enabled) "true",
-         "data-shiny-disable-auto-enable"=if (!auto_enable && !enabled) NA,
+         "data-shiny-disable-auto-enable"=if (!auto_enable) NA,
          tabindex=if (!enabled) "-1",
          validateIcon(icon),
          label, ...)
@@ -1318,7 +1318,7 @@ downloadLink <- function(outputId, label = "Download", class = NULL, ...,
          target = '_blank',
          download = NA,
          "aria-disabled" = if (!enabled) "true",
-         "data-shiny-disable-auto-enable" = if (!auto_enable && !enabled) NA,
+         "data-shiny-disable-auto-enable" = if (!auto_enable) NA,
          tabindex = if (!enabled) "-1",
          label, ...)
 }

@@ -23,7 +23,7 @@
     Code
       downloadButton("dl", "Download", enabled = TRUE)
     Output
-      <a id="dl" class="btn btn-default shiny-download-link" href="" target="_blank" download>
+      <a id="dl" class="btn btn-default shiny-download-link" href="" target="_blank" download data-shiny-disable-auto-enable>
         <i class="fas fa-download" role="presentation" aria-label="download icon"></i>
         Download
       </a>
@@ -47,5 +47,5 @@
     Code
       downloadLink("dl", "Download", enabled = TRUE)
     Output
-      <a id="dl" class="shiny-download-link" href="" target="_blank" download>Download</a>
+      <a id="dl" class="shiny-download-link" href="" target="_blank" download data-shiny-disable-auto-enable>Download</a>
 

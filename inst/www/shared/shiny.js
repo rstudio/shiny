@@ -3089,18 +3089,6 @@
     }
   };
   (0, import_jquery25.default)(document).on(
-    "auxclick.shinyDownloadLink",
-    "a.shiny-download-link",
-    function(e4) {
-      const el = e4.currentTarget;
-      if (el.classList.contains("disabled")) {
-        e4.preventDefault();
-      }
-      return;
-      e4;
-    }
-  );
-  (0, import_jquery25.default)(document).on(
     "click.shinyDownloadLink",
     "a.shiny-download-link",
     function(e4) {

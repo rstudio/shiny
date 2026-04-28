@@ -35,22 +35,6 @@ interface FileDownloadEvent extends JQuery.Event {
 }
 
 // TODO-barret should this be in an init method?
-// Prevent non-primary button clicks (e.g. right-click) on disabled download links.
-$(document).on(
-  "auxclick.shinyDownloadLink",
-  "a.shiny-download-link",
-  function (e: Event) {
-    const el = e.currentTarget as HTMLAnchorElement;
-
-    if (el.classList.contains("disabled")) {
-      e.preventDefault();
-    }
-
-    return;
-    e; // eslint-disable-line @typescript-eslint/no-unused-expressions
-  },
-);
-
 // Trigger shiny:filedownload event whenever a downloadButton/Link is clicked
 $(document).on(
   "click.shinyDownloadLink",

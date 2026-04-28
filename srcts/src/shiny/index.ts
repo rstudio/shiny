@@ -420,39 +420,11 @@ class ShinyClass {
       );
     }
 
-    function refreshOutputInfo(el: HTMLElement, initial = false): void {
-      if (!initial) doTriggerResize(el);
-      doSendHiddenState(el, initial);
-      if (reportsSize(el)) doSendSize(el, initial);
-      if (reportsTheme(el)) doSendTheme(el, initial);
-    }
-
-    function refreshThemeOutputs(initial = false): void {
-      $(".shiny-bound-output").each(function () {
-        // eslint-disable-next-line @typescript-eslint/no-this-alias
-        const el = this;
-
-        if (reportsTheme(el)) doSendTheme(el, initial);
-      });
-    }
-
-    function registerThemeRefreshSignals(): void {
-      const scheduleThemeInfoRefresh = sendOutputInfoFns.createObserverCallback(
-        100,
-        () => refreshThemeOutputs(),
-      );
-
-      // Compatibility: window resize used to refresh theme-reporting output
-      // info.
-      $(window).resize(function () {
-        scheduleThemeInfoRefresh();
-      });
-
-      // Explicit API for code that changes surrounding theme context without
-      // changing the output element itself.
-      $(document).on("shiny:themechange", function () {
-        scheduleThemeInfoRefresh();
-      });
+    function handleVisualChange(el: HTMLElement): void {
+      doTriggerResize(el);
+      doSendHiddenState(el);
+      if (reportsSize(el)) doSendSize(el);
+      if (reportsTheme(el)) doSendTheme(el);
     }
 
     function ensureObservers(el: HTMLElement): void {
@@ -460,7 +432,7 @@ class ShinyClass {
 
       if (!$el.data("shiny-resize-observer")) {
         const onResize = sendOutputInfoFns.createObserverCallback(100, () =>
-          refreshOutputInfo(el),
+          handleVisualChange(el),
         );
         const ro = new ResizeObserver(() => onResize());
 
@@ -471,7 +443,7 @@ class ShinyClass {
 
       if (!$el.data("shiny-intersection-observer")) {
         const onIntersect = sendOutputInfoFns.createObserverCallback(100, () =>
-          refreshOutputInfo(el),
+          handleVisualChange(el),
         );
         const io = new IntersectionObserver(() => onIntersect());
 
@@ -507,7 +479,14 @@ class ShinyClass {
         if (id) outputIds.add(id);
         ensureObservers(el);
 
-        refreshOutputInfo(el, initial);
+        if (!initial) doTriggerResize(el);
+        doSendHiddenState(el, initial);
+        if (reportsSize(el)) {
+          doSendSize(el, initial);
+        }
+        if (reportsTheme(el)) {
+          doSendTheme(el, initial);
+        }
       });
 
       visibleOutputs.forEach((id) => {
@@ -520,7 +499,6 @@ class ShinyClass {
 
     doSendOutputInfo(true);
     sendOutputInfoFns.setSendMethod(inputBatchSender, doSendOutputInfo);
-    registerThemeRefreshSignals();
 
     // Send initial pixel ratio, and update it if it changes
     initialValues[".clientdata_pixelratio"] = pixelRatio();

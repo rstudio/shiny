@@ -1,5 +1,15 @@
 # shiny (development version)
 
+## Improvements
+
+* Output resize/visibility detection now uses native browser observers
+  (`ResizeObserver`, `IntersectionObserver`) instead of relying on jQuery
+  `shown`/`hidden` events and `window.resize`. This makes Shiny's client-side
+  output-info pipeline (image/plot sizing, hidden-state tracking, theme
+  reporting) work automatically in any layout — including CSS-only show/hide,
+  third-party tab components, and non-Bootstrap frameworks — without requiring
+  custom event hooks. (#3682)
+
 ## Bug fixes and minor improvements
 
 * `downloadButton()` and `downloadLink()` gain a new `enabled` parameter. Use `enabled = "auto"` (default) to automatically enable the button when the download is ready, `enabled = TRUE` to start the button already enabled, or `enabled = FALSE` to opt into manual state management. (#4119)

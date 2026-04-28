@@ -13,7 +13,6 @@ declare global {
         on(events: EvtPrefix<"mousedown2">, handler: EvtFn<JQuery.MouseDownEvent>): this;
         on(events: EvtPrefix<"mouseup">, handler: EvtFn<JQuery.MouseUpEvent>): this;
         on(events: EvtPrefix<"resize">, handler: EvtFn<JQuery.ResizeEvent>): this;
-        on(events: `shown.bs.${string}.sendImageSize`, selector: string, handler: (this: HTMLElement, e: JQuery.EventHandlerBase<HTMLElement, any>) => void): this;
     }
 }
 export {};

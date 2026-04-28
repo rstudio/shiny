@@ -8,17 +8,32 @@
   registered `onDestroy()` callbacks for that scope and its descendants,
   tearing down reactive values, expressions, and observers (#4372).
 
+## Improvements
+
+* Output resize/visibility detection now uses native browser observers
+  (`ResizeObserver`, `IntersectionObserver`) instead of relying on jQuery
+  `shown`/`hidden` events and `window.resize`. This makes Shiny's client-side
+  output-info pipeline (image/plot sizing, hidden-state tracking, theme
+  reporting) work automatically in any layout — including CSS-only show/hide,
+  third-party tab components, and non-Bootstrap frameworks — without requiring
+  custom event hooks. (#3682)
+
+
 # shiny 1.13.0
 
 ## New features
 
-* Shiny now supports interactive breakpoints when used with Ark (e.g. in Positron). (#4352)
+* Shiny now supports interactive breakpoints when used with Ark (e.g. in
+  Positron). (#4352)
 
 ## Bug fixes and minor improvements
 
-* Stack traces from render functions (e.g., `renderPlot()`, `renderDataTable()`) now hide internal Shiny rendering pipeline frames, making error messages cleaner and more focused on user code. (#4358)
+* Stack traces from render functions (e.g., `renderPlot()`, `renderDataTable()`)
+  now hide internal Shiny rendering pipeline frames, making error messages
+  cleaner and more focused on user code. (#4358)
 
-* Fixed an issue with `actionLink()` that extended the link underline to whitespace around the text. (#4348)
+* Fixed an issue with `actionLink()` that extended the link underline to
+  whitespace around the text. (#4348)
 
 
 # shiny 1.12.1

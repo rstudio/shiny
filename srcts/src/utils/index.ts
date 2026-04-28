@@ -59,6 +59,20 @@ function getStyle(el: Element, styleProp: string): string | undefined {
   return x;
 }
 
+function isVisible(el: HTMLElement): boolean {
+  if (typeof el.checkVisibility === "function") {
+    return el.checkVisibility();
+  }
+  // Fallback for browsers that don't support checkVisibility (Safari < 17.4)
+  if (el.offsetWidth !== 0 || el.offsetHeight !== 0) {
+    return true;
+  }
+  if (getStyle(el, "display") === "none") {
+    return false;
+  }
+  return el.parentElement ? isVisible(el.parentElement) : true;
+}
+
 // Convert a number to a string with leading zeros
 function padZeros(n: number, digits: number): string {
   let str = n.toString();
@@ -421,6 +435,7 @@ export {
   isBS3,
   isnan,
   isShinyInDevMode,
+  isVisible,
   makeResizeFilter,
   mapValues,
   mergeSort,

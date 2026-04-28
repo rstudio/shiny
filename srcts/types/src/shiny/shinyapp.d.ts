@@ -51,6 +51,7 @@ declare class ShinyApp {
     };
     $nextRequestId: number;
     $allowReconnect: boolean | "force";
+    private _conditionalsUpdateScheduled;
     constructor();
     connect(initialInput: InputValues): void;
     isConnected(): boolean;
@@ -77,6 +78,7 @@ declare class ShinyApp {
     private _narrowScopeComponent;
     private _narrowScope;
     $updateConditionals(): void;
+    private _doUpdateConditionals;
     dispatchMessage(data: ArrayBufferLike | string): Promise<void>;
     private _sendMessagesToHandlers;
     private _updateProgress;

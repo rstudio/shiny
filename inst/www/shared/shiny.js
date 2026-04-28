@@ -6295,7 +6295,7 @@ ${duplicateIdMsg}`;
   var messageHandlers = {};
   var customMessageHandlerOrder = [];
   var customMessageHandlers = {};
-  var conditionalActiveClass = "shiny-panel-conditional--active";
+  var conditionalShownClass = "shiny-conditional--shown";
   function addMessageHandler(type, handler) {
     if (messageHandlers[type]) {
       throw 'handler for message of type "' + type + '" already added.';
@@ -6768,15 +6768,15 @@ ${duplicateIdMsg}`;
         const nsPrefix = el.attr("data-ns-prefix");
         const nsScope = this._narrowScope(scope, nsPrefix);
         const show3 = Boolean(condFunc(nsScope));
-        const showing = el.hasClass(conditionalActiveClass);
+        const showing = el.hasClass(conditionalShownClass);
         if (show3 !== showing) {
           if (show3) {
             el.trigger("show");
-            el.addClass(conditionalActiveClass);
+            el.addClass(conditionalShownClass);
             el.trigger("shown");
           } else {
             el.trigger("hide");
-            el.removeClass(conditionalActiveClass);
+            el.removeClass(conditionalShownClass);
             el.trigger("hidden");
           }
         }

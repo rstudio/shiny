@@ -3074,7 +3074,7 @@
     }
     renderValue(el, data) {
       el.setAttribute("href", data);
-      if (!el.hasAttribute("data-ignore-update") && !el.classList.contains("shinyjs-disabled")) {
+      if (!el.hasAttribute("data-shiny-disable-auto-enable") && !el.classList.contains("shinyjs-disabled")) {
         el.classList.remove("disabled");
         el.removeAttribute("aria-disabled");
         el.removeAttribute("tabindex");
@@ -3089,7 +3089,19 @@
     }
   };
   (0, import_jquery25.default)(document).on(
-    "click.shinyDownloadLink auxclick.shinyDownloadLink",
+    "auxclick.shinyDownloadLink",
+    "a.shiny-download-link",
+    function(e4) {
+      const el = e4.currentTarget;
+      if (el.classList.contains("disabled")) {
+        e4.preventDefault();
+      }
+      return;
+      e4;
+    }
+  );
+  (0, import_jquery25.default)(document).on(
+    "click.shinyDownloadLink",
     "a.shiny-download-link",
     function(e4) {
       const el = e4.currentTarget;

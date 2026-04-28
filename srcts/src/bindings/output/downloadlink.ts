@@ -12,7 +12,7 @@ class DownloadLinkOutputBinding extends OutputBinding {
     // skip the auto-enable behavior so that the intentional disabled state is
     // preserved. See https://github.com/rstudio/shiny/issues/4119.
     if (
-      !el.hasAttribute("data-ignore-update") &&
+      !el.hasAttribute("data-shiny-disable-auto-enable") &&
       !el.classList.contains("shinyjs-disabled")
     ) {
       el.classList.remove("disabled");
@@ -35,10 +35,25 @@ interface FileDownloadEvent extends JQuery.Event {
 }
 
 // TODO-barret should this be in an init method?
-// Trigger shiny:filedownload event whenever a downloadButton/Link is clicked
-// auxclick covers non-primary button clicks (e.g. right-click) that can also trigger a download
+// Prevent non-primary button clicks (e.g. right-click) on disabled download links.
 $(document).on(
-  "click.shinyDownloadLink auxclick.shinyDownloadLink",
+  "auxclick.shinyDownloadLink",
+  "a.shiny-download-link",
+  function (e: Event) {
+    const el = e.currentTarget as HTMLAnchorElement;
+
+    if (el.classList.contains("disabled")) {
+      e.preventDefault();
+    }
+
+    return;
+    e; // eslint-disable-line @typescript-eslint/no-unused-expressions
+  },
+);
+
+// Trigger shiny:filedownload event whenever a downloadButton/Link is clicked
+$(document).on(
+  "click.shinyDownloadLink",
   "a.shiny-download-link",
   function (e: Event) {
     const el = e.currentTarget as HTMLAnchorElement;

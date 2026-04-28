@@ -101,15 +101,12 @@ Imports:
     xtable
 Suggests:
     Cairo (>= 1.5-5),
-    callr,
     coro (>= 1.1.0),
     datasets,
-    devtools,
     DT,
     dygraphs,
     future,
     ggplot2,
-    httr,
     knitr (>= 1.6),
     magrittr,
     markdown,
@@ -119,11 +116,12 @@ Suggests:
     reactlog (>= 1.0.0),
     rmarkdown,
     sass,
-    shinytest2,
+    shinyjs,
     showtext,
     testthat (>= 3.2.1),
     watcher,
     yaml
+Config/Needs/check: callr, devtools, httr, shinytest2
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

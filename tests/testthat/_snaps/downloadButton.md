@@ -13,7 +13,7 @@
     Code
       downloadButton("dl", "Download", enabled = FALSE)
     Output
-      <a aria-disabled="true" class="btn btn-default shiny-download-link disabled" data-ignore-update download href="" id="dl" tabindex="-1" target="_blank">
+      <a aria-disabled="true" class="btn btn-default shiny-download-link disabled" data-shiny-disable-auto-enable download href="" id="dl" tabindex="-1" target="_blank">
         <i class="fas fa-download" role="presentation" aria-label="download icon"></i>
         Download
       </a>
@@ -40,7 +40,7 @@
     Code
       downloadLink("dl", "Download", enabled = FALSE)
     Output
-      <a aria-disabled="true" class="shiny-download-link disabled" data-ignore-update download href="" id="dl" tabindex="-1" target="_blank">Download</a>
+      <a aria-disabled="true" class="shiny-download-link disabled" data-shiny-disable-auto-enable download href="" id="dl" tabindex="-1" target="_blank">Download</a>
 
 # downloadLink snapshot (enabled = TRUE)
 

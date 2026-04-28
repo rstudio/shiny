@@ -6355,6 +6355,7 @@ ${duplicateIdMsg}`;
       this.$activeRequests = {};
       this.$nextRequestId = 0;
       this.$allowReconnect = false;
+      this._conditionalsUpdateScheduled = false;
       this.scheduledReconnect = void 0;
       // How long should we wait before trying the next reconnection?
       // The delay will increase with subsequent attempts.
@@ -6747,6 +6748,14 @@ ${duplicateIdMsg}`;
       return scope;
     }
     $updateConditionals() {
+      if (this._conditionalsUpdateScheduled) return;
+      this._conditionalsUpdateScheduled = true;
+      requestAnimationFrame(() => {
+        this._conditionalsUpdateScheduled = false;
+        this._doUpdateConditionals();
+      });
+    }
+    _doUpdateConditionals() {
       (0, import_jquery39.default)(document).trigger({
         type: "shiny:conditional"
       });

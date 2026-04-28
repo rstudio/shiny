@@ -155,6 +155,8 @@ class ShinyApp {
 
   $allowReconnect: boolean | "force" = false;
 
+  private _conditionalsUpdateScheduled = false;
+
   constructor() {
     this._init();
   }
@@ -579,6 +581,15 @@ class ShinyApp {
   }
 
   $updateConditionals(): void {
+    if (this._conditionalsUpdateScheduled) return;
+    this._conditionalsUpdateScheduled = true;
+    requestAnimationFrame(() => {
+      this._conditionalsUpdateScheduled = false;
+      this._doUpdateConditionals();
+    });
+  }
+
+  private _doUpdateConditionals(): void {
     // @ts-expect-error; TODO-barret; Could this be transformed into `.trigger(TYPE)`?
     $(document).trigger({
       type: "shiny:conditional",

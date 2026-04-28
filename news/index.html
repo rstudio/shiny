@@ -49,6 +49,10 @@
 
     <div class="section level2">
 <h2 class="page-header" data-toc-text="development version" id="shiny-development-version">shiny (development version)<a class="anchor" aria-label="anchor" href="#shiny-development-version"></a></h2>
+<div class="section level3">
+<h3 id="improvements-development-version">Improvements<a class="anchor" aria-label="anchor" href="#improvements-development-version"></a></h3>
+<ul><li>Output resize/visibility detection now uses native browser observers (<code>ResizeObserver</code>, <code>IntersectionObserver</code>) instead of relying on jQuery <code>shown</code>/<code>hidden</code> events and <code>window.resize</code>. This makes Shiny’s client-side output-info pipeline (image/plot sizing, hidden-state tracking, theme reporting) work automatically in any layout — including CSS-only show/hide, third-party tab components, and non-Bootstrap frameworks — without requiring custom event hooks. (<a href="https://github.com/rstudio/shiny/issues/3682" class="external-link">#3682</a>)</li>
+</ul></div>
 </div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.13.0" id="shiny-1130">shiny 1.13.0<small>2026-02-20</small><a class="anchor" aria-label="anchor" href="#shiny-1130"></a></h2>
@@ -744,7 +748,7 @@
 <h4 id="bug-fixes-1-1-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-1-0"></a></h4>
 <ul><li><p>Fixed <a href="https://github.com/rstudio/shiny/issues/1006" class="external-link">#1006</a>: Slider inputs sometimes showed too many digits. (<a href="https://github.com/rstudio/shiny/issues/1956" class="external-link">#1956</a>)</p></li>
 <li><p>Fixed <a href="https://github.com/rstudio/shiny/issues/1958" class="external-link">#1958</a>: Slider inputs previously displayed commas after a decimal point. (<a href="https://github.com/rstudio/shiny/issues/1960" class="external-link">#1960</a>)</p></li>
-<li><p>The internal <code><a href="https://rdrr.io/r/utils/URLencode.html" class="external-link">URLdecode()</a></code> function previously was a copy of <code><a href="https://rdrr.io/pkg/httpuv/man/encodeURI.html" class="external-link">httpuv::decodeURIComponent()</a></code>, assigned at build time; now it invokes the httpuv function at run time.</p></li>
+<li><p>The internal <code><a href="https://rdrr.io/r/utils/URLencode.html" class="external-link">URLdecode()</a></code> function previously was a copy of <code><a href="https://rstudio.github.io/httpuv/reference/encodeURI.html" class="external-link">httpuv::decodeURIComponent()</a></code>, assigned at build time; now it invokes the httpuv function at run time.</p></li>
 <li><p>Fixed <a href="https://github.com/rstudio/shiny/issues/1840" class="external-link">#1840</a>: with the release of Shiny 1.0.5, we accidently changed the relative positioning of the icon and the title text in <code>navbarMenu</code>s and <code>tabPanel</code>s. This fix reverts this behavior back (i.e. the icon should be to the left of the text and/or the downward arrow in case of <code>navbarMenu</code>s). (<a href="https://github.com/rstudio/shiny/issues/1848" class="external-link">#1848</a>)</p></li>
 <li><p>Fixed <a href="https://github.com/rstudio/shiny/issues/1600" class="external-link">#1600</a>: URL-encoded bookmarking did not work with sliders that had dates or date-times. (<a href="https://github.com/rstudio/shiny/issues/1961" class="external-link">#1961</a>)</p></li>
 <li><p>Fixed <a href="https://github.com/rstudio/shiny/issues/1962" class="external-link">#1962</a>: <a href="https://posit.co/blog/shiny-1-0-4/" class="external-link">File dragging and dropping</a> broke in the presence of jQuery version 3.0 as introduced by the <a href="https://jrowen.github.io/rhandsontable/" class="external-link">rhandsontable</a> <a href="https://www.htmlwidgets.org/" class="external-link">htmlwidget</a>. (<a href="https://github.com/rstudio/shiny/issues/2005" class="external-link">#2005</a>)</p></li>

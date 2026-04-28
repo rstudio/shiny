@@ -1288,11 +1288,7 @@ downloadButton <- function(outputId,
                            icon = shiny::icon("download")) {
   enabled <- match.arg(as.character(enabled), c("auto", "TRUE", "FALSE"))
   auto_enable <- identical(enabled, "auto")
-  if (auto_enable) {
-    enabled <- FALSE
-  } else {
-    enabled <- identical(enabled, "TRUE")
-  }
+  enabled <- identical(enabled, "TRUE")
   tags$a(id=outputId,
          class="btn btn-default shiny-download-link",
          class=if (!enabled) "disabled",
@@ -1313,11 +1309,7 @@ downloadLink <- function(outputId, label = "Download", class = NULL, ...,
                          enabled = c("auto", TRUE, FALSE)) {
   enabled <- match.arg(as.character(enabled), c("auto", "TRUE", "FALSE"))
   auto_enable <- identical(enabled, "auto")
-  if (auto_enable) {
-    enabled <- FALSE
-  } else {
-    enabled <- identical(enabled, "TRUE")
-  }
+  enabled <- identical(enabled, "TRUE")
   tags$a(id = outputId,
          class = "shiny-download-link",
          class = if (!enabled) "disabled",

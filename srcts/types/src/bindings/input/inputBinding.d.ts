@@ -20,7 +20,6 @@ declare class InputBinding {
         delay: number;
     } | null;
     initialize(el: HTMLElement): void;
-    dispose(el: HTMLElement): void;
 }
 export { InputBinding };
 export type { InputSubscribeCallback, SubscribeEventPriority };

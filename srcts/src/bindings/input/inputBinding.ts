@@ -86,13 +86,6 @@ class InputBinding {
     return;
     el; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
-
-  // This is called after unbinding the input.
-  dispose(el: HTMLElement): void {
-    //empty
-    return;
-    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
-  }
 }
 
 //// NOTES FOR FUTURE DEV

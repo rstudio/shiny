@@ -1167,11 +1167,6 @@
       return;
       el;
     }
-    // This is called after unbinding the input.
-    dispose(el) {
-      return;
-      el;
-    }
   };
 
   // srcts/src/bindings/input/actionbutton.ts
@@ -5861,7 +5856,6 @@ ${duplicateIdMsg}`;
         binding,
         bindingType: "input"
       });
-      binding.dispose(el);
     }
   }
   function unbindOutputs(scope = document.documentElement, includeSelf = false) {

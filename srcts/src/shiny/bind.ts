@@ -402,7 +402,6 @@ function unbindInputs(
       binding: binding,
       bindingType: "input",
     });
-    binding.dispose(el);
   }
 }
 function unbindOutputs(

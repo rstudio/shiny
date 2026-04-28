@@ -859,9 +859,6 @@
     return x2;
   }
   function isVisible(el) {
-    if (typeof el.checkVisibility === "function") {
-      return el.checkVisibility();
-    }
     if (el.offsetWidth !== 0 || el.offsetHeight !== 0) {
       return true;
     }

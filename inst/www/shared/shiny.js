@@ -6768,16 +6768,15 @@ ${duplicateIdMsg}`;
         const nsPrefix = el.attr("data-ns-prefix");
         const nsScope = this._narrowScope(scope, nsPrefix);
         const show3 = Boolean(condFunc(nsScope));
-        const rawEl = conditionals[i5];
-        const showing = rawEl.classList.contains(conditionalShownClass);
+        const showing = el.hasClass(conditionalShownClass);
         if (show3 !== showing) {
           if (show3) {
             el.trigger("show");
-            rawEl.classList.add(conditionalShownClass);
+            el.addClass(conditionalShownClass);
             el.trigger("shown");
           } else {
             el.trigger("hide");
-            rawEl.classList.remove(conditionalShownClass);
+            el.removeClass(conditionalShownClass);
             el.trigger("hidden");
           }
         }

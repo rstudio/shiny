@@ -36,6 +36,7 @@ interface FileDownloadEvent extends JQuery.Event {
 
 // TODO-barret should this be in an init method?
 // Trigger shiny:filedownload event whenever a downloadButton/Link is clicked
+// auxclick covers non-primary button clicks (e.g. right-click) that can also trigger a download
 $(document).on(
   "click.shinyDownloadLink auxclick.shinyDownloadLink",
   "a.shiny-download-link",

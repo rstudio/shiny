@@ -1281,8 +1281,8 @@ uiOutput <- htmlOutput
 #' @seealso [downloadHandler()]
 #' @export
 downloadButton <- function(outputId,
-                           label = "Download",
-                           class = NULL,
+                           label="Download",
+                           class=NULL,
                            ...,
                            enabled = c("auto", TRUE, FALSE),
                            icon = shiny::icon("download")) {

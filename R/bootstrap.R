@@ -1245,7 +1245,7 @@ uiOutput <- htmlOutput
 #'   - `FALSE`: the button starts disabled and Shiny will **never**
 #'     automatically enable it, even after the `downloadHandler` is ready.
 #'     You are responsible for managing the enabled/disabled state yourself
-#'     (e.g., with [shinyjs::enable()] and [shinyjs::disable()]).
+#'     (e.g., with `shinyjs::enable()` and `shinyjs::disable()`).
 #' @param ... Other arguments to pass to the container tag function.
 #'
 #' @examples

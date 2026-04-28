@@ -17,7 +17,8 @@ app_process <- callr::r_bg(
       port = port,
       host = "127.0.0.1",
       launch.browser = FALSE,
-      quiet = TRUE
+      quiet = TRUE,
+      test.mode = TRUE
     )
   },
   args = list(
@@ -62,7 +63,9 @@ is_disabled <- function(id) {
 # ---------------------------------------------------------------------------
 
 click_toggle <- function(id) {
-  app$click(input = paste0("toggle_", id), wait_ = FALSE)
+  input_name <- paste0("toggle_", id)
+  current <- isTRUE(app$get_value(input = input_name))
+  do.call(app$set_inputs, setNames(list(!current), input_name))
   app$wait_for_idle()
 }
 

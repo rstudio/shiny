@@ -489,7 +489,7 @@ textarea.textarea-autoresize.form-control {
 }
 
 /* conditionalPanel: hidden until JS evaluates the condition */
-.shiny-panel-conditional:not(.shiny-panel-conditional--active) {
+[data-display-if]:not(.shiny-panel-conditional--active) {
   display: none;
 }
 

@@ -12,6 +12,9 @@
   for code that needs to trigger theme clientdata refreshes after changing
   surrounding visual theme context. (#3682)
 
+* `conditionalPanel()` no longer briefly flashes its contents on app start
+  when the condition is initially `FALSE`. (#3505)
+
 # shiny 1.13.0
 
 ## New features

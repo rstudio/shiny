@@ -5832,7 +5832,7 @@ ${duplicateIdMsg}`;
           $el.trigger({
             type: "shiny:outputinvalidated",
             // @ts-expect-error; Can not remove info on a established, malformed Event object
-            binding,
+            binding: bindingAdapter,
             name: id
           });
         }

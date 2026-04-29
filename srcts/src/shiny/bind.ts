@@ -364,7 +364,7 @@ async function bindOutputs(
         $el.trigger({
           type: "shiny:outputinvalidated",
           // @ts-expect-error; Can not remove info on a established, malformed Event object
-          binding: binding,
+          binding: bindingAdapter,
           name: id,
         });
       }

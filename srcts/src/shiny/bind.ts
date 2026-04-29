@@ -231,6 +231,7 @@ type BindInputsCtx = {
   outputBindings: BindingRegistry<OutputBinding>;
   initDeferredIframes: () => void;
   outputIsRecalculating: (id: string) => boolean;
+  outputIsInvalidated: (id: string) => boolean;
 };
 function bindInputs(
   shinyCtx: BindInputsCtx,
@@ -316,7 +317,7 @@ function bindInputs(
 }
 
 async function bindOutputs(
-  { outputBindings, outputIsRecalculating }: BindInputsCtx,
+  { outputBindings, outputIsRecalculating, outputIsInvalidated }: BindInputsCtx,
   scope: BindScope = document.documentElement,
 ): Promise<void> {
   const $scope = $(scope);
@@ -354,6 +355,15 @@ async function bindOutputs(
       $el.data("shiny-output-binding", bindingAdapter);
       $el.addClass("shiny-bound-output");
       if (!$el.attr("aria-live")) $el.attr("aria-live", "polite");
+
+      if (outputIsInvalidated(id)) {
+        $el.trigger({
+          type: "shiny:outputinvalidated",
+          // @ts-expect-error; Can not remove info on a established, malformed Event object
+          binding: bindingAdapter,
+          name: id,
+        });
+      }
 
       if (outputIsRecalculating(id)) {
         bindingAdapter.showProgress(true);

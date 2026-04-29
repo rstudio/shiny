@@ -96,6 +96,10 @@ class OutputProgressReporter {
     return result;
   }
 
+  isInvalidated(name: string): boolean {
+    return this.#getState(name) === OutputStates.Invalidated;
+  }
+
   // Returns whether the output is recalculating or not.
   isRecalculating(name: string): boolean {
     const state = this.#getState(name);

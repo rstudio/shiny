@@ -9,6 +9,7 @@ type BindInputsCtx = {
     outputBindings: BindingRegistry<OutputBinding>;
     initDeferredIframes: () => void;
     outputIsRecalculating: (id: string) => boolean;
+    outputIsInvalidated: (id: string) => boolean;
 };
 declare function bindInputs(shinyCtx: BindInputsCtx, scope?: BindScope): {
     [key: string]: {

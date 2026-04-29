@@ -224,6 +224,8 @@ class ShinyClass {
         initDeferredIframes,
         outputIsRecalculating: (id: string) =>
           this.shinyapp?.$outputProgress.isRecalculating(id) ?? false,
+        outputIsInvalidated: (id: string) =>
+          this.shinyapp?.$outputProgress.isInvalidated(id) ?? false,
       };
     };
 

@@ -6,6 +6,7 @@ declare class OutputProgressReporter {
     private outputStates;
     private changedOutputs;
     takeChanges(): Map<string, boolean>;
+    isInvalidated(name: string): boolean;
     isRecalculating(name: string): boolean;
     updateStateFromMessage(message: Message): void;
 }

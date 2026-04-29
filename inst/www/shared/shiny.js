@@ -5825,9 +5825,6 @@ ${duplicateIdMsg}`;
         $el.data("shiny-output-binding", bindingAdapter);
         $el.addClass("shiny-bound-output");
         if (!$el.attr("aria-live")) $el.attr("aria-live", "polite");
-        if (outputIsRecalculating(id)) {
-          bindingAdapter.showProgress(true);
-        }
         if (outputIsInvalidated(id)) {
           $el.trigger({
             type: "shiny:outputinvalidated",
@@ -5835,6 +5832,9 @@ ${duplicateIdMsg}`;
             binding: bindingAdapter,
             name: id
           });
+        }
+        if (outputIsRecalculating(id)) {
+          bindingAdapter.showProgress(true);
         }
         bindingsRegistry.addBinding(id, "output");
         $el.trigger({

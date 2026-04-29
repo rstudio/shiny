@@ -5805,7 +5805,7 @@ ${duplicateIdMsg}`;
     }
     return inputItems;
   }
-  async function bindOutputs({ outputBindings, outputIsRecalculating }, scope = document.documentElement) {
+  async function bindOutputs({ outputBindings, outputIsRecalculating, outputIsInvalidated }, scope = document.documentElement) {
     const $scope = (0, import_jquery35.default)(scope);
     const bindings = outputBindings.getBindings();
     for (let i5 = 0; i5 < bindings.length; i5++) {
@@ -5827,6 +5827,14 @@ ${duplicateIdMsg}`;
         if (!$el.attr("aria-live")) $el.attr("aria-live", "polite");
         if (outputIsRecalculating(id)) {
           bindingAdapter.showProgress(true);
+        }
+        if (outputIsInvalidated(id)) {
+          $el.trigger({
+            type: "shiny:outputinvalidated",
+            // @ts-expect-error; Can not remove info on a established, malformed Event object
+            binding,
+            name: id
+          });
         }
         bindingsRegistry.addBinding(id, "output");
         $el.trigger({
@@ -6136,6 +6144,9 @@ ${duplicateIdMsg}`;
       const result = this.changedOutputs;
       this.changedOutputs = /* @__PURE__ */ new Map();
       return result;
+    }
+    isInvalidated(name) {
+      return __privateMethod(this, _OutputProgressReporter_instances, getState_fn).call(this, name) === "invalidated" /* Invalidated */;
     }
     // Returns whether the output is recalculating or not.
     isRecalculating(name) {
@@ -7353,7 +7364,8 @@ ${duplicateIdMsg}`;
           inputBindings,
           outputBindings,
           initDeferredIframes,
-          outputIsRecalculating: (id) => this.shinyapp?.$outputProgress.isRecalculating(id) ?? false
+          outputIsRecalculating: (id) => this.shinyapp?.$outputProgress.isRecalculating(id) ?? false,
+          outputIsInvalidated: (id) => this.shinyapp?.$outputProgress.isInvalidated(id) ?? false
         };
       };
       this.bindAll = async function(scope) {

@@ -17,7 +17,7 @@
 
 * Removed `InputBinding.dispose()` from the JavaScript `InputBinding` class.
   This method was never called by Shiny's runtime, so any overrides were dead
-  code. Use `unsubscribe()` for cleanup logic instead. (#2875)
+  code. Use `unsubscribe()` for cleanup logic instead. (#4375)
 
 # shiny 1.13.0
 

@@ -6290,6 +6290,7 @@ ${duplicateIdMsg}`;
   var messageHandlers = {};
   var customMessageHandlerOrder = [];
   var customMessageHandlers = {};
+  var conditionalShownClass = "shiny-conditional--shown";
   function addMessageHandler(type, handler) {
     if (messageHandlers[type]) {
       throw 'handler for message of type "' + type + '" already added.';
@@ -6762,15 +6763,15 @@ ${duplicateIdMsg}`;
         const nsPrefix = el.attr("data-ns-prefix");
         const nsScope = this._narrowScope(scope, nsPrefix);
         const show3 = Boolean(condFunc(nsScope));
-        const showing = el.css("display") !== "none";
+        const showing = el.hasClass(conditionalShownClass);
         if (show3 !== showing) {
           if (show3) {
             el.trigger("show");
-            el.show();
+            el.addClass(conditionalShownClass);
             el.trigger("shown");
           } else {
             el.trigger("hide");
-            el.hide();
+            el.removeClass(conditionalShownClass);
             el.trigger("hidden");
           }
         }
@@ -7483,18 +7484,36 @@ ${duplicateIdMsg}`;
       function reportsTheme(el) {
         return el.classList.contains("shiny-image-output") || el.classList.contains("shiny-plot-output") || el.classList.contains("shiny-report-theme");
       }
-      function handleVisualChange(el) {
-        doTriggerResize(el);
-        doSendHiddenState(el);
-        if (reportsSize(el)) doSendSize(el);
-        if (reportsTheme(el)) doSendTheme(el);
+      function refreshOutputInfo(el, initial = false) {
+        if (!initial) doTriggerResize(el);
+        doSendHiddenState(el, initial);
+        if (reportsSize(el)) doSendSize(el, initial);
+        if (reportsTheme(el)) doSendTheme(el, initial);
+      }
+      function refreshThemeOutputs(initial = false) {
+        (0, import_jquery40.default)(".shiny-bound-output").each(function() {
+          const el = this;
+          if (reportsTheme(el)) doSendTheme(el, initial);
+        });
+      }
+      function registerThemeRefreshSignals() {
+        const scheduleThemeInfoRefresh = sendOutputInfoFns.createObserverCallback(
+          100,
+          () => refreshThemeOutputs()
+        );
+        (0, import_jquery40.default)(window).resize(function() {
+          scheduleThemeInfoRefresh();
+        });
+        (0, import_jquery40.default)(document).on("shiny:themechange", function() {
+          scheduleThemeInfoRefresh();
+        });
       }
       function ensureObservers(el) {
         const $el = (0, import_jquery40.default)(el);
         if (!$el.data("shiny-resize-observer")) {
           const onResize = sendOutputInfoFns.createObserverCallback(
             100,
-            () => handleVisualChange(el)
+            () => refreshOutputInfo(el)
           );
           const ro = new ResizeObserver(() => onResize());
           ro.observe(el);
@@ -7504,7 +7523,7 @@ ${duplicateIdMsg}`;
         if (!$el.data("shiny-intersection-observer")) {
           const onIntersect = sendOutputInfoFns.createObserverCallback(
             100,
-            () => handleVisualChange(el)
+            () => refreshOutputInfo(el)
           );
           const io = new IntersectionObserver(() => onIntersect());
           io.observe(el);
@@ -7531,14 +7550,7 @@ ${duplicateIdMsg}`;
           const id = getIdFromEl(el);
           if (id) outputIds.add(id);
           ensureObservers(el);
-          if (!initial) doTriggerResize(el);
-          doSendHiddenState(el, initial);
-          if (reportsSize(el)) {
-            doSendSize(el, initial);
-          }
-          if (reportsTheme(el)) {
-            doSendTheme(el, initial);
-          }
+          refreshOutputInfo(el, initial);
         });
         visibleOutputs.forEach((id) => {
           if (!outputIds.has(id)) {
@@ -7549,6 +7561,7 @@ ${duplicateIdMsg}`;
       }
       doSendOutputInfo(true);
       sendOutputInfoFns.setSendMethod(inputBatchSender, doSendOutputInfo);
+      registerThemeRefreshSignals();
       initialValues[".clientdata_pixelratio"] = pixelRatio();
       (0, import_jquery40.default)(window).resize(function() {
         inputs.setInput(".clientdata_pixelratio", pixelRatio());

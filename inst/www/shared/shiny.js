@@ -1164,11 +1164,6 @@
       return;
       el;
     }
-    // This is called after unbinding the output.
-    dispose(el) {
-      return;
-      el;
-    }
   };
 
   // srcts/src/bindings/input/actionbutton.ts

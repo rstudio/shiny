@@ -15,6 +15,10 @@
 * `conditionalPanel()` no longer briefly flashes its contents on app start
   when the condition is initially `FALSE`. (#3505)
 
+* Removed `InputBinding.dispose()` from the JavaScript `InputBinding` class.
+  This method was never called by Shiny's runtime, so any overrides were dead
+  code. Use `unsubscribe()` for cleanup logic instead. (#4375)
+
 # shiny 1.13.0
 
 ## New features

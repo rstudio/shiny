@@ -120,7 +120,7 @@ Suggests:
     testthat (>= 3.2.1),
     watcher,
     yaml
-Config/Needs/check: callr, devtools, httr, shinytest2
+Config/Needs/check: callr, devtools, httr, shinyjs, shinytest2
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

@@ -1,134 +1,161 @@
 skip_if_not_shinytest2()
 library(shinytest2)
 
-# Passed as a function to AppDriver$new() so shinytest2 can load the dev shiny
-# in the subprocess. shinytest2 shims library()/require() to redirect to
-# pkgload::load_all(), but those shims need shiny present to call
-# shiny::runApp() -- so we load it explicitly at the top of this function.
-generate_app <- function() {
-  pkgload::load_all(quiet = TRUE)
+# AppDriver$new(app_dir) and AppDriver$new(fn) both have a timing issue with
+# devtools-loaded packages: shinytest2's tracer injects before jQuery is ready,
+# causing "jQuery not found". We work around this by starting the app ourselves
+# in a callr subprocess, polling until it's up, then connecting via URL so that
+# AppDriver only navigates to an already-running app.
+app_process <- callr::r_bg(
+  function(port) {
+    pkgload::load_all(quiet = TRUE)
+    library(shinyjs)
 
-  handler <- function() {
-    downloadHandler(
-      filename = "test.txt",
-      content = function(file) writeLines("test", file)
+    handler <- function() {
+      downloadHandler(
+        filename = "test.txt",
+        content = function(file) writeLines("test", file)
+      )
+    }
+
+    ui <- fluidPage(
+      useShinyjs(),
+
+      h3("downloadButton"),
+
+      uiOutput("btn_auto_ui"),
+      bslib::input_switch("toggle_btn_auto", "Enabled", value = TRUE),
+
+      uiOutput("btn_off_ui"),
+      bslib::input_switch("toggle_btn_off", "Enabled", value = FALSE),
+
+      uiOutput("btn_on_ui"),
+      bslib::input_switch("toggle_btn_on", "Enabled", value = TRUE),
+
+      uiOutput("btn_shinyjs_ui"),
+      bslib::input_switch("toggle_btn_shinyjs", "Enabled", value = FALSE),
+
+      h3("downloadLink"),
+
+      uiOutput("lnk_auto_ui"),
+      bslib::input_switch("toggle_lnk_auto", "Enabled", value = TRUE),
+
+      uiOutput("lnk_off_ui"),
+      bslib::input_switch("toggle_lnk_off", "Enabled", value = FALSE),
+
+      uiOutput("lnk_on_ui"),
+      bslib::input_switch("toggle_lnk_on", "Enabled", value = TRUE),
+
+      uiOutput("lnk_shinyjs_ui"),
+      bslib::input_switch("toggle_lnk_shinyjs", "Enabled", value = FALSE)
     )
-  }
 
-  ui <- fluidPage(
-    shinyjs::useShinyjs(),
+    server <- function(input, output, session) {
+      output$btn_auto <- handler()
+      output$btn_off <- handler()
+      output$btn_on <- handler()
+      output$btn_shinyjs <- handler()
+      output$lnk_auto <- handler()
+      output$lnk_off <- handler()
+      output$lnk_on <- handler()
+      output$lnk_shinyjs <- handler()
 
-    h3("downloadButton"),
+      output$btn_auto_ui <- renderUI({
+        if (isTRUE(input$toggle_btn_auto)) {
+          downloadButton("btn_auto", "Auto (default)")
+        } else {
+          downloadButton("btn_auto", "Auto (default)", enabled = FALSE)
+        }
+      })
 
-    uiOutput("btn_auto_ui"),
-    bslib::input_switch("toggle_btn_auto", "Enabled", value = TRUE),
+      output$btn_off_ui <- renderUI({
+        if (isTRUE(input$toggle_btn_off)) {
+          downloadButton("btn_off", "Disabled", enabled = TRUE)
+        } else {
+          downloadButton("btn_off", "Disabled", enabled = FALSE)
+        }
+      })
 
-    uiOutput("btn_off_ui"),
-    bslib::input_switch("toggle_btn_off", "Enabled", value = FALSE),
+      output$btn_on_ui <- renderUI({
+        if (isTRUE(input$toggle_btn_on)) {
+          downloadButton("btn_on", "Pre-enabled", enabled = TRUE)
+        } else {
+          downloadButton("btn_on", "Pre-enabled", enabled = FALSE)
+        }
+      })
 
-    uiOutput("btn_on_ui"),
-    bslib::input_switch("toggle_btn_on", "Enabled", value = TRUE),
+      output$btn_shinyjs_ui <- renderUI({
+        btn <- downloadButton("btn_shinyjs", "shinyjs-disabled")
+        if (!isTRUE(input$toggle_btn_shinyjs)) {
+          shinyjs::disabled(btn)
+        } else {
+          btn
+        }
+      })
 
-    uiOutput("btn_shinyjs_ui"),
-    bslib::input_switch("toggle_btn_shinyjs", "Enabled", value = FALSE),
+      output$lnk_auto_ui <- renderUI({
+        if (isTRUE(input$toggle_lnk_auto)) {
+          downloadLink("lnk_auto", "Auto (default)")
+        } else {
+          downloadLink("lnk_auto", "Auto (default)", enabled = FALSE)
+        }
+      })
 
-    h3("downloadLink"),
+      output$lnk_off_ui <- renderUI({
+        if (isTRUE(input$toggle_lnk_off)) {
+          downloadLink("lnk_off", "Disabled", enabled = TRUE)
+        } else {
+          downloadLink("lnk_off", "Disabled", enabled = FALSE)
+        }
+      })
 
-    uiOutput("lnk_auto_ui"),
-    bslib::input_switch("toggle_lnk_auto", "Enabled", value = TRUE),
+      output$lnk_on_ui <- renderUI({
+        if (isTRUE(input$toggle_lnk_on)) {
+          downloadLink("lnk_on", "Pre-enabled", enabled = TRUE)
+        } else {
+          downloadLink("lnk_on", "Pre-enabled", enabled = FALSE)
+        }
+      })
 
-    uiOutput("lnk_off_ui"),
-    bslib::input_switch("toggle_lnk_off", "Enabled", value = FALSE),
+      output$lnk_shinyjs_ui <- renderUI({
+        lnk <- downloadLink("lnk_shinyjs", "shinyjs-disabled")
+        if (!isTRUE(input$toggle_lnk_shinyjs)) {
+          shinyjs::disabled(lnk)
+        } else {
+          lnk
+        }
+      })
+    }
 
-    uiOutput("lnk_on_ui"),
-    bslib::input_switch("toggle_lnk_on", "Enabled", value = TRUE),
+    shiny::runApp(
+      shinyApp(ui, server),
+      port = port,
+      host = "127.0.0.1",
+      launch.browser = FALSE,
+      quiet = TRUE,
+      test.mode = TRUE
+    )
+  },
+  args = list(port = 7315L)
+)
+withr::defer(app_process$kill())
 
-    uiOutput("lnk_shinyjs_ui"),
-    bslib::input_switch("toggle_lnk_shinyjs", "Enabled", value = FALSE)
+# Wait for the app to be ready
+for (i in seq_len(20)) {
+  Sys.sleep(0.5)
+  ready <- tryCatch(
+    {
+      httr::GET("http://127.0.0.1:7315", httr::timeout(1))
+      TRUE
+    },
+    error = function(e) FALSE
   )
-
-  server <- function(input, output, session) {
-    output$btn_auto <- handler()
-    output$btn_off <- handler()
-    output$btn_on <- handler()
-    output$btn_shinyjs <- handler()
-    output$lnk_auto <- handler()
-    output$lnk_off <- handler()
-    output$lnk_on <- handler()
-    output$lnk_shinyjs <- handler()
-
-    output$btn_auto_ui <- renderUI({
-      if (isTRUE(input$toggle_btn_auto)) {
-        downloadButton("btn_auto", "Auto (default)")
-      } else {
-        downloadButton("btn_auto", "Auto (default)", enabled = FALSE)
-      }
-    })
-
-    output$btn_off_ui <- renderUI({
-      if (isTRUE(input$toggle_btn_off)) {
-        downloadButton("btn_off", "Disabled", enabled = TRUE)
-      } else {
-        downloadButton("btn_off", "Disabled", enabled = FALSE)
-      }
-    })
-
-    output$btn_on_ui <- renderUI({
-      if (isTRUE(input$toggle_btn_on)) {
-        downloadButton("btn_on", "Pre-enabled", enabled = TRUE)
-      } else {
-        downloadButton("btn_on", "Pre-enabled", enabled = FALSE)
-      }
-    })
-
-    output$btn_shinyjs_ui <- renderUI({
-      btn <- downloadButton("btn_shinyjs", "shinyjs-disabled")
-      if (!isTRUE(input$toggle_btn_shinyjs)) {
-        shinyjs::disabled(btn)
-      } else {
-        btn
-      }
-    })
-
-    output$lnk_auto_ui <- renderUI({
-      if (isTRUE(input$toggle_lnk_auto)) {
-        downloadLink("lnk_auto", "Auto (default)")
-      } else {
-        downloadLink("lnk_auto", "Auto (default)", enabled = FALSE)
-      }
-    })
-
-    output$lnk_off_ui <- renderUI({
-      if (isTRUE(input$toggle_lnk_off)) {
-        downloadLink("lnk_off", "Disabled", enabled = TRUE)
-      } else {
-        downloadLink("lnk_off", "Disabled", enabled = FALSE)
-      }
-    })
-
-    output$lnk_on_ui <- renderUI({
-      if (isTRUE(input$toggle_lnk_on)) {
-        downloadLink("lnk_on", "Pre-enabled", enabled = TRUE)
-      } else {
-        downloadLink("lnk_on", "Pre-enabled", enabled = FALSE)
-      }
-    })
-
-    output$lnk_shinyjs_ui <- renderUI({
-      lnk <- downloadLink("lnk_shinyjs", "shinyjs-disabled")
-      if (!isTRUE(input$toggle_lnk_shinyjs)) {
-        shinyjs::disabled(lnk)
-      } else {
-        lnk
-      }
-    })
-  }
-
-  shinyApp(ui, server)
+  if (ready) break
 }
+if (!ready) skip("Download button test app failed to start")
 
 # Start up app once and share across all tests
-app <- AppDriver$new(generate_app)
+app <- AppDriver$new("http://127.0.0.1:7315")
 withr::defer({ app$stop() })
 app$wait_for_idle()
 

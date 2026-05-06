@@ -1,7 +1,8 @@
 library(shiny)
+library(shinyjs)
 
 # This app covers the three `enabled` values for both downloadButton and downloadLink,
-# plus a simulated shinyjs-disabled case, with toggle switches for each scenario.
+# plus a shinyjs-disabled case, with toggle switches for each scenario.
 
 # Create a downloadHandler that just serves a simple text file for testing.
 handler <- function() {
@@ -12,6 +13,8 @@ handler <- function() {
 }
 
 ui <- fluidPage(
+  useShinyjs(),
+
   h3("downloadButton"),
 
   uiOutput("btn_auto_ui"),
@@ -23,8 +26,6 @@ ui <- fluidPage(
   uiOutput("btn_on_ui"),
   bslib::input_switch("toggle_btn_on", "Enabled", value = TRUE),
 
-  # This mimics what happens when a download button is wrapped in a
-  # shinyjs::disabled() call within the UI (and therefore at render time).
   uiOutput("btn_shinyjs_ui"),
   bslib::input_switch("toggle_btn_shinyjs", "Enabled", value = FALSE),
 
@@ -80,7 +81,7 @@ server <- function(input, output, session) {
   output$btn_shinyjs_ui <- renderUI({
     btn <- downloadButton("btn_shinyjs", "shinyjs-disabled")
     if (!isTRUE(input$toggle_btn_shinyjs)) {
-      htmltools::tagAppendAttributes(btn, class = "shinyjs-disabled")
+      shinyjs::disabled(btn)
     } else {
       btn
     }
@@ -113,7 +114,7 @@ server <- function(input, output, session) {
   output$lnk_shinyjs_ui <- renderUI({
     lnk <- downloadLink("lnk_shinyjs", "shinyjs-disabled")
     if (!isTRUE(input$toggle_lnk_shinyjs)) {
-      htmltools::tagAppendAttributes(lnk, class = "shinyjs-disabled")
+      shinyjs::disabled(lnk)
     } else {
       lnk
     }

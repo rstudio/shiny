@@ -1,12 +1,18 @@
-
-# We should move the shinytest2 files to the end, how do we do that?
-# Could be filenames? ex. zzz-test-downloadButton-shinytest2.R
-
 skip_if_not_shinytest2()
 library(shinytest2)
 
-# This function is passed to AppDriver$new(), making the local dev shiny
-# available in the subprocess that runs the app.
+# This function is passed to AppDriver$new() so shinytest2 runs the app in a
+# callr subprocess, avoiding a jQuery timing issue that affects
+# AppDriver$new(app_dir) with devtools-loaded packages.
+#
+# When testthat runs, pkgload::load_all() sources the dev shiny in the
+# foreground process. AppDriver$new() spawns a fresh background subprocess
+# where no packages are loaded. shinytest2 installs library()/require() shims
+# in that subprocess to intercept calls for the local dev package and redirect
+# them to pkgload::load_all() -- but those shims depend on shiny already being
+# present in order to invoke shiny::runApp() after the function returns. We
+# therefore call pkgload::load_all() explicitly here, ensuring the dev shiny
+# is the first thing loaded in the subprocess regardless of how tests are run.
 generate_app <- function() {
   pkgload::load_all(quiet = TRUE)
 
@@ -18,6 +24,8 @@ generate_app <- function() {
   }
 
   ui <- fluidPage(
+    shinyjs::useShinyjs(),
+
     h3("downloadButton"),
 
     uiOutput("btn_auto_ui"),
@@ -29,8 +37,6 @@ generate_app <- function() {
     uiOutput("btn_on_ui"),
     bslib::input_switch("toggle_btn_on", "Enabled", value = TRUE),
 
-    # This mimics what happens when a download button is wrapped in a
-    # shinyjs::disabled() call within the UI (and therefore at render time).
     uiOutput("btn_shinyjs_ui"),
     bslib::input_switch("toggle_btn_shinyjs", "Enabled", value = FALSE),
 
@@ -86,7 +92,7 @@ generate_app <- function() {
     output$btn_shinyjs_ui <- renderUI({
       btn <- downloadButton("btn_shinyjs", "shinyjs-disabled")
       if (!isTRUE(input$toggle_btn_shinyjs)) {
-        htmltools::tagAppendAttributes(btn, class = "shinyjs-disabled")
+        shinyjs::disabled(btn)
       } else {
         btn
       }
@@ -119,7 +125,7 @@ generate_app <- function() {
     output$lnk_shinyjs_ui <- renderUI({
       lnk <- downloadLink("lnk_shinyjs", "shinyjs-disabled")
       if (!isTRUE(input$toggle_lnk_shinyjs)) {
-        htmltools::tagAppendAttributes(lnk, class = "shinyjs-disabled")
+        shinyjs::disabled(lnk)
       } else {
         lnk
       }

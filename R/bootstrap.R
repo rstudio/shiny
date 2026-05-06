@@ -1285,8 +1285,8 @@ downloadButton <- function(outputId,
                            label="Download",
                            class=NULL,
                            ...,
-                           enabled = "auto",
-                           icon = shiny::icon("download")) {
+                           icon = shiny::icon("download"),
+                           enabled = "auto") {
   auto_enable <- identical(enabled, "auto")
   if (auto_enable) {
     enabled <- FALSE

@@ -10,17 +10,11 @@ downloadButton(
   label = "Download",
   class = NULL,
   ...,
-  enabled = c("auto", TRUE, FALSE),
-  icon = shiny::icon("download")
+  icon = shiny::icon("download"),
+  enabled = "auto"
 )
 
-downloadLink(
-  outputId,
-  label = "Download",
-  class = NULL,
-  ...,
-  enabled = c("auto", TRUE, FALSE)
-)
+downloadLink(outputId, label = "Download", class = NULL, ..., enabled = "auto")
 }
 \arguments{
 \item{outputId}{The name of the output slot that the \code{downloadHandler}
@@ -32,20 +26,20 @@ is assigned to.}
 
 \item{...}{Other arguments to pass to the container tag function.}
 
+\item{icon}{An \code{\link[=icon]{icon()}} to appear on the button. Default is \code{icon("download")}.}
+
 \item{enabled}{Controls the enabled/disabled behavior of the button.
+Defaults to \code{"auto"}.
 \itemize{
-\item \code{"auto"} (the default): the button starts disabled and is automatically
+\item \code{"auto"}: the button starts disabled and is automatically
 enabled once the server has initialized the \code{downloadHandler}.
 \item \code{TRUE}: the button starts enabled immediately, without waiting for the
 \code{downloadHandler}.
 \item \code{FALSE}: the button starts disabled and Shiny will \strong{never}
 automatically enable it, even after the \code{downloadHandler} is ready.
 You are responsible for managing the enabled/disabled state yourself
-(e.g., with \code{\link[shinyjs:enable]{shinyjs::enable()}} and \code{\link[shinyjs:disable]{shinyjs::disable()}}).
 (e.g., with \code{shinyjs::enable()} and \code{shinyjs::disable()}).
 }}
-
-\item{icon}{An \code{\link[=icon]{icon()}} to appear on the button. Default is \code{icon("download")}.}
 }
 \description{
 Use these functions to create a download button or link; when clicked, it

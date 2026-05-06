@@ -1,11 +1,18 @@
 skip_if_not_shinytest2()
 library(shinytest2)
 
-# AppDriver$new(app_dir) and AppDriver$new(fn) both have a timing issue with
-# devtools-loaded packages: shinytest2's tracer injects before jQuery is ready,
-# causing "jQuery not found". We work around this by starting the app ourselves
-# in a callr subprocess, polling until it's up, then connecting via URL so that
-# AppDriver only navigates to an already-running app.
+# The app is started manually via callr and AppDriver connects to the running
+# URL rather than using AppDriver$new(fn). This is necessary because
+# AppDriver$new(fn) navigates to the app immediately after the port opens,
+# but a complex app hasn't finished serving all static resources yet at that
+# point. In the devtools-loaded context this causes a race where shinyjs's
+# inline handlers fire before shiny.min.js has loaded, leaving Shiny
+# undefined. Polling with httr::GET() ensures the app is fully ready before
+# AppDriver connects.
+#
+# Note: bslib is avoided for the toggle controls (checkboxInput is used
+# instead) because bslib adds a <script type="module"> tag that is deferred
+# and also contributes to the resource-loading race described above.
 app_process <- callr::r_bg(
   function(port) {
     pkgload::load_all(quiet = TRUE)
@@ -24,30 +31,30 @@ app_process <- callr::r_bg(
       h3("downloadButton"),
 
       uiOutput("btn_auto_ui"),
-      bslib::input_switch("toggle_btn_auto", "Enabled", value = TRUE),
+      checkboxInput("toggle_btn_auto", "Enabled", value = TRUE),
 
       uiOutput("btn_off_ui"),
-      bslib::input_switch("toggle_btn_off", "Enabled", value = FALSE),
+      checkboxInput("toggle_btn_off", "Enabled", value = FALSE),
 
       uiOutput("btn_on_ui"),
-      bslib::input_switch("toggle_btn_on", "Enabled", value = TRUE),
+      checkboxInput("toggle_btn_on", "Enabled", value = TRUE),
 
       uiOutput("btn_shinyjs_ui"),
-      bslib::input_switch("toggle_btn_shinyjs", "Enabled", value = FALSE),
+      checkboxInput("toggle_btn_shinyjs", "Enabled", value = FALSE),
 
       h3("downloadLink"),
 
       uiOutput("lnk_auto_ui"),
-      bslib::input_switch("toggle_lnk_auto", "Enabled", value = TRUE),
+      checkboxInput("toggle_lnk_auto", "Enabled", value = TRUE),
 
       uiOutput("lnk_off_ui"),
-      bslib::input_switch("toggle_lnk_off", "Enabled", value = FALSE),
+      checkboxInput("toggle_lnk_off", "Enabled", value = FALSE),
 
       uiOutput("lnk_on_ui"),
-      bslib::input_switch("toggle_lnk_on", "Enabled", value = TRUE),
+      checkboxInput("toggle_lnk_on", "Enabled", value = TRUE),
 
       uiOutput("lnk_shinyjs_ui"),
-      bslib::input_switch("toggle_lnk_shinyjs", "Enabled", value = FALSE)
+      checkboxInput("toggle_lnk_shinyjs", "Enabled", value = FALSE)
     )
 
     server <- function(input, output, session) {
@@ -140,7 +147,7 @@ app_process <- callr::r_bg(
 )
 withr::defer(app_process$kill())
 
-# Wait for the app to be ready
+# Wait for the app to be ready before connecting
 for (i in seq_len(20)) {
   Sys.sleep(0.5)
   ready <- tryCatch(

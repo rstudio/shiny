@@ -4,5 +4,4 @@ skip_if_not_shinytest2 <- function() {
   skip_on_cran()
   skip_on_os(c("windows", "linux", "solaris", "emscripten"))
   skip_if_not_installed("shinytest2")
-  skip_if_not_installed("callr")
 }

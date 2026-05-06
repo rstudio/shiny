@@ -169,7 +169,7 @@ test_download_enabled_behavior <- function(type, prefix) {
     )))
   })
 
-  test_that(paste(type, "with shinyjs-disabled class stays disabled after server init"), {
+  test_that(paste(type, "disabled via shinyjs stays disabled after server init"), {
     expect_true(is_disabled(id("shinyjs")))
   })
 
@@ -197,7 +197,7 @@ test_download_enabled_behavior <- function(type, prefix) {
     expect_false(is_disabled(id("on")))
   })
 
-  test_that(paste(type, "(shinyjs-disabled) can be toggled on and back off"), {
+  test_that(paste(type, "disabled via shinyjs can be toggled on and back off"), {
     click_toggle(id("shinyjs"))
     expect_false(is_disabled(id("shinyjs")))
 

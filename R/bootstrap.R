@@ -1238,7 +1238,8 @@ uiOutput <- htmlOutput
 #' @param class Additional CSS classes to apply to the tag, if any.
 #' @param icon An [icon()] to appear on the button. Default is `icon("download")`.
 #' @param enabled Controls the enabled/disabled behavior of the button.
-#'   - `"auto"` (the default): the button starts disabled and is automatically
+#'   Defaults to `"auto"`.
+#'   - `"auto"`: the button starts disabled and is automatically
 #'     enabled once the server has initialized the `downloadHandler`.
 #'   - `TRUE`: the button starts enabled immediately, without waiting for the
 #'     `downloadHandler`.
@@ -1284,11 +1285,17 @@ downloadButton <- function(outputId,
                            label="Download",
                            class=NULL,
                            ...,
-                           enabled = c("auto", TRUE, FALSE),
+                           enabled = "auto",
                            icon = shiny::icon("download")) {
-  enabled <- match.arg(as.character(enabled), c("auto", "TRUE", "FALSE"))
   auto_enable <- identical(enabled, "auto")
-  enabled <- identical(enabled, "TRUE")
+  if (auto_enable) {
+    enabled <- FALSE
+  }
+  if (!is.logical(enabled)) {
+    cli::cli_abort(
+      "{.arg enabled} must be {.val TRUE}, {.val FALSE}, or {.val \"auto\"}, not {.obj_type_friendly {enabled}}."
+    )
+  }
   tags$a(id=outputId,
          class="btn btn-default shiny-download-link",
          class=if (!enabled) "disabled",
@@ -1306,10 +1313,16 @@ downloadButton <- function(outputId,
 #' @rdname downloadButton
 #' @export
 downloadLink <- function(outputId, label = "Download", class = NULL, ...,
-                         enabled = c("auto", TRUE, FALSE)) {
-  enabled <- match.arg(as.character(enabled), c("auto", "TRUE", "FALSE"))
+                         enabled = "auto") {
   auto_enable <- identical(enabled, "auto")
-  enabled <- identical(enabled, "TRUE")
+  if (auto_enable) {
+    enabled <- FALSE
+  }
+  if (!is.logical(enabled)) {
+    cli::cli_abort(
+      "{.arg enabled} must be {.val TRUE}, {.val FALSE}, or {.val \"auto\"}, not {.obj_type_friendly {enabled}}."
+    )
+  }
   tags$a(id = outputId,
          class = "shiny-download-link",
          class = if (!enabled) "disabled",

@@ -1,10 +1,10 @@
 skip_if_not_shinytest2()
 library(shinytest2)
 
-# Passed as a function to AppDriver$new() to avoid a jQuery timing issue with
-# AppDriver$new(app_dir) and devtools-loaded packages. shinytest2 shims
-# library()/require() in the subprocess to load the dev package, but those
-# shims need shiny present to call shiny::runApp() -- so we load it explicitly.
+# Passed as a function to AppDriver$new() so shinytest2 can load the dev shiny
+# in the subprocess. shinytest2 shims library()/require() to redirect to
+# pkgload::load_all(), but those shims need shiny present to call
+# shiny::runApp() -- so we load it explicitly at the top of this function.
 generate_app <- function() {
   pkgload::load_all(quiet = TRUE)
 

@@ -1,8 +1,4 @@
-skip_on_cran()
-# Skip on everything but mac
-skip_on_os(c("windows", "linux", "solaris", "emscripten"))
-skip_if_not_installed("shinytest2")
-skip_if_not_installed("callr")
+skip_if_not_shinytest2()
 library(shinytest2)
 
 # Start the test app in a subprocess, loading the local dev shiny.

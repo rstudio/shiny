@@ -1237,13 +1237,13 @@ uiOutput <- htmlOutput
 #' @param label The label that should appear on the button.
 #' @param class Additional CSS classes to apply to the tag, if any.
 #' @param icon An [icon()] to appear on the button. Default is `icon("download")`.
-#' @param enabled Controls the enabled/disabled behavior of the button.
+#' @param enabled Controls the enabled/disabled behavior of the button or link.
 #'   Defaults to `"auto"`.
-#'   - `"auto"`: the button starts disabled and is automatically
+#'   - `"auto"`: the button or link starts disabled and is automatically
 #'     enabled once the server has initialized the `downloadHandler`.
-#'   - `TRUE`: the button starts enabled immediately, without waiting for the
-#'     `downloadHandler`.
-#'   - `FALSE`: the button starts disabled and Shiny will **never**
+#'   - `TRUE`: the button or link starts enabled immediately, without waiting
+#'     for the `downloadHandler`.
+#'   - `FALSE`: the button or link starts disabled and Shiny will **never**
 #'     automatically enable it, even after the `downloadHandler` is ready.
 #'     You are responsible for managing the enabled/disabled state yourself
 #'     (e.g., with `shinyjs::enable()` and `shinyjs::disable()`).
@@ -1291,7 +1291,8 @@ downloadButton <- function(outputId,
   if (auto_enable) {
     enabled <- FALSE
   }
-  if (!is.logical(enabled)) {
+  # Use isTRUE/isFALSE rather than is.logical: NA passes is.logical() but is not valid here.
+  if (!isTRUE(enabled) && !isFALSE(enabled)) {
     cli::cli_abort(
       "{.arg enabled} must be {.val TRUE}, {.val FALSE}, or {.val \"auto\"}, not {.obj_type_friendly {enabled}}."
     )
@@ -1318,7 +1319,8 @@ downloadLink <- function(outputId, label = "Download", class = NULL, ...,
   if (auto_enable) {
     enabled <- FALSE
   }
-  if (!is.logical(enabled)) {
+  # Use isTRUE/isFALSE rather than is.logical: NA passes is.logical() but is not valid here.
+  if (!isTRUE(enabled) && !isFALSE(enabled)) {
     cli::cli_abort(
       "{.arg enabled} must be {.val TRUE}, {.val FALSE}, or {.val \"auto\"}, not {.obj_type_friendly {enabled}}."
     )

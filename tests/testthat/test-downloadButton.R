@@ -94,6 +94,14 @@ test_that("downloadButton errors on invalid enabled value", {
   expect_error(downloadButton("dl", "Download", enabled = 1), "enabled")
 })
 
+test_that("downloadButton errors on NA enabled value", {
+  expect_error(downloadButton("dl", "Download", enabled = NA), "enabled")
+})
+
 test_that("downloadLink errors on invalid enabled value", {
   expect_error(downloadLink("dl", "Download", enabled = 1), "enabled")
+})
+
+test_that("downloadLink errors on NA enabled value", {
+  expect_error(downloadLink("dl", "Download", enabled = NA), "enabled")
 })

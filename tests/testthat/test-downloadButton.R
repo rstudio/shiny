@@ -89,3 +89,11 @@ test_that("downloadLink snapshot (enabled = FALSE)", {
 test_that("downloadLink snapshot (enabled = TRUE)", {
   expect_snapshot(downloadLink("dl", "Download", enabled = TRUE))
 })
+
+test_that("downloadButton errors on invalid enabled value", {
+  expect_error(downloadButton("dl", "Download", enabled = 1), "enabled")
+})
+
+test_that("downloadLink errors on invalid enabled value", {
+  expect_error(downloadLink("dl", "Download", enabled = 1), "enabled")
+})

@@ -1,21 +1,11 @@
 skip_if_not_shinytest2()
 library(shinytest2)
 
-# The app is started manually via callr and AppDriver connects to the running
-# URL rather than using AppDriver$new(fn). This is necessary because
-# AppDriver$new(fn) navigates to the app immediately after the port opens,
-# but a complex app hasn't finished serving all static resources yet at that
-# point. In the devtools-loaded context this causes a race where shinyjs's
-# inline handlers fire before shiny.min.js has loaded, leaving Shiny
-# undefined. Polling with httr::GET() ensures the app is fully ready before
-# AppDriver connects.
-#
-# Note: bslib is avoided for the toggle controls (checkboxInput is used
-# instead) because bslib adds a <script type="module"> tag that is deferred
-# and also contributes to the resource-loading race described above.
-app_process <- callr::r_bg(
-  function(port) {
-    pkgload::load_all(quiet = TRUE)
+# library(shiny) must be called explicitly inside the function so that
+# shinytest2's library shim loads the dev package via pkgload::load_all().
+app <- AppDriver$new(
+  function() {
+    library(shiny)
     library(shinyjs)
 
     handler <- function() {
@@ -134,35 +124,9 @@ app_process <- callr::r_bg(
       })
     }
 
-    shiny::runApp(
-      shinyApp(ui, server),
-      port = port,
-      host = "127.0.0.1",
-      launch.browser = FALSE,
-      quiet = TRUE,
-      test.mode = TRUE
-    )
-  },
-  args = list(port = 7315L)
+    shinyApp(ui, server)
+  }
 )
-withr::defer(app_process$kill())
-
-# Wait for the app to be ready before connecting
-for (i in seq_len(20)) {
-  Sys.sleep(0.5)
-  ready <- tryCatch(
-    {
-      httr::GET("http://127.0.0.1:7315", httr::timeout(1))
-      TRUE
-    },
-    error = function(e) FALSE
-  )
-  if (ready) break
-}
-if (!ready) skip("Download button test app failed to start")
-
-# Start up app once and share across all tests
-app <- AppDriver$new("http://127.0.0.1:7315")
 withr::defer({ app$stop() })
 app$wait_for_idle()
 

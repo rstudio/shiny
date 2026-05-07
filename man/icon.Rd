@@ -21,7 +21,7 @@ supported styles).}
 
 \item{lib}{The icon library to use. Either \code{"font-awesome"} or \code{"glyphicon"}.}
 
-\item{...}{Arguments passed to the \verb{<i>} tag of \link[htmltools:tags]{htmltools::tags}.}
+\item{...}{Arguments passed to the \verb{<i>} tag of \link[htmltools:builder]{htmltools::tags}.}
 }
 \value{
 An \verb{<i>} (icon) HTML tag.

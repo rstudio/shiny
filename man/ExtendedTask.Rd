@@ -122,28 +122,29 @@ shinyApp(ui, server)
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-ExtendedTask-new}{\code{ExtendedTask$new()}}
-\item \href{#method-ExtendedTask-invoke}{\code{ExtendedTask$invoke()}}
-\item \href{#method-ExtendedTask-status}{\code{ExtendedTask$status()}}
-\item \href{#method-ExtendedTask-result}{\code{ExtendedTask$result()}}
-}
+  \itemize{
+    \item \href{#method-ExtendedTask-initialize}{\code{ExtendedTask$new()}}
+    \item \href{#method-ExtendedTask-invoke}{\code{ExtendedTask$invoke()}}
+    \item \href{#method-ExtendedTask-status}{\code{ExtendedTask$status()}}
+    \item \href{#method-ExtendedTask-result}{\code{ExtendedTask$result()}}
+  }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-ExtendedTask-new"></a>}}
-\if{latex}{\out{\hypertarget{method-ExtendedTask-new}{}}}
-\subsection{Method \code{new()}}{
-Creates a new \code{ExtendedTask} object. \code{ExtendedTask} should generally be
+\if{html}{\out{<a id="method-ExtendedTask-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-ExtendedTask-initialize}{}}}
+\subsection{\code{ExtendedTask$new()}}{
+  Creates a new \code{ExtendedTask} object. \code{ExtendedTask} should generally be
 created either at the top of a server function, or at the top of a module
 server function.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ExtendedTask$new(func)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{func}}{The long-running operation to execute. This should be an
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{ExtendedTask$new(func)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{func}}{The long-running operation to execute. This should be an
 asynchronous function, meaning, it should use the
 \href{https://rstudio.github.io/promises/}{\{promises\}} package, most
 likely in conjunction with the
@@ -151,45 +152,48 @@ likely in conjunction with the
 \href{https://rstudio.github.io/promises/articles/promises_04_futures.html}{\{future\}}
 package. (In short, the return value of \code{func} should be a
 \code{\link[mirai:mirai]{mirai}}, \code{\link[future:future]{Future}}, \code{promise},
-or something else that \code{\link[promises:is.promise]{promises::as.promise()}} understands.)
+or something else that \code{\link[promises:as.promise]{promises::as.promise()}} understands.)
 
 It's also important that this logic does not read from any
 reactive inputs/sources, as inputs may change after the function is
 invoked; instead, if the function needs to access reactive inputs, it
 should take parameters and the caller of the \code{invoke()} method should
 read reactive inputs and pass them as arguments.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
-\if{html}{\out{</div>}}
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ExtendedTask-invoke"></a>}}
 \if{latex}{\out{\hypertarget{method-ExtendedTask-invoke}{}}}
-\subsection{Method \code{invoke()}}{
-Starts executing the long-running operation. If this \code{ExtendedTask} is
+\subsection{\code{ExtendedTask$invoke()}}{
+  Starts executing the long-running operation. If this \code{ExtendedTask} is
 already running (meaning, a previous call to \code{invoke()} is not yet
 complete) then enqueues this invocation until after the current
 invocation, and any already-enqueued invocation, completes.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ExtendedTask$invoke(...)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{...}}{Parameters to use for this invocation of the underlying
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{ExtendedTask$invoke(...)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{...}}{Parameters to use for this invocation of the underlying
 function. If reactive inputs are needed by the underlying function,
 they should be read by the caller of \code{invoke} and passed in as
 arguments.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
-\if{html}{\out{</div>}}
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ExtendedTask-status"></a>}}
 \if{latex}{\out{\hypertarget{method-ExtendedTask-status}{}}}
-\subsection{Method \code{status()}}{
-This is a reactive read that invalidates the caller when the task's
+\subsection{\code{ExtendedTask$status()}}{
+  This is a reactive read that invalidates the caller when the task's
 status changes.
 
 Returns one of the following values:
@@ -201,16 +205,18 @@ retrieved via the \code{result()} method
 \item \code{"error"}: An invocation completed with an error, which will be
 re-thrown if you call the \code{result()} method
 }
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ExtendedTask$status()}\if{html}{\out{</div>}}
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{ExtendedTask$status()}
+    \if{html}{\out{</div>}}
+  }
 }
 
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ExtendedTask-result"></a>}}
 \if{latex}{\out{\hypertarget{method-ExtendedTask-result}{}}}
-\subsection{Method \code{result()}}{
-Attempts to read the results of the most recent invocation. This is a
+\subsection{\code{ExtendedTask$result()}}{
+  Attempts to read the results of the most recent invocation. This is a
 reactive read that invalidates as the task's status changes.
 
 The actual behavior differs greatly depending on the current status of
@@ -236,9 +242,11 @@ there.
 Note that the \code{result()} method is generally not meant to be used with
 \code{\link[=observeEvent]{observeEvent()}}, \code{\link[=eventReactive]{eventReactive()}}, \code{\link[=bindEvent]{bindEvent()}}, or \code{\link[=isolate]{isolate()}} as the
 invalidation will be ignored.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ExtendedTask$result()}\if{html}{\out{</div>}}
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{ExtendedTask$result()}
+    \if{html}{\out{</div>}}
+  }
 }
 
-}
 }

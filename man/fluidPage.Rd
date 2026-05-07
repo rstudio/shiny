@@ -107,13 +107,13 @@ shinyApp(ui, server = function(input, output) { })
 \seealso{
 \code{\link[=column]{column()}}
 
-Other layout functions: 
-\code{\link{fillPage}()},
-\code{\link{fixedPage}()},
-\code{\link{flowLayout}()},
-\code{\link{navbarPage}()},
-\code{\link{sidebarLayout}()},
-\code{\link{splitLayout}()},
-\code{\link{verticalLayout}()}
+Other layout functions:
+\code{\link[=fillPage]{fillPage()}},
+\code{\link[=fixedPage]{fixedPage()}},
+\code{\link[=flowLayout]{flowLayout()}},
+\code{\link[=navbarPage]{navbarPage()}},
+\code{\link[=sidebarLayout]{sidebarLayout()}},
+\code{\link[=splitLayout]{splitLayout()}},
+\code{\link[=verticalLayout]{verticalLayout()}}
 }
 \concept{layout functions}

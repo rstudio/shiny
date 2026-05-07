@@ -12,7 +12,16 @@
   output-info pipeline (image/plot sizing, hidden-state tracking, theme
   reporting) work automatically in any layout — including CSS-only show/hide,
   third-party tab components, and non-Bootstrap frameworks — without requiring
-  custom event hooks. (#3682)
+  custom event hooks. This also introduces a `shiny:themechange` event
+  for code that needs to trigger theme clientdata refreshes after changing
+  surrounding visual theme context. (#3682)
+
+* `conditionalPanel()` no longer briefly flashes its contents on app start
+  when the condition is initially `FALSE`. (#3505)
+
+* Removed `InputBinding.dispose()` from the JavaScript `InputBinding` class.
+  This method was never called by Shiny's runtime, so any overrides were dead
+  code. Use `unsubscribe()` for cleanup logic instead. (#4375)
 
 # shiny 1.13.0
 

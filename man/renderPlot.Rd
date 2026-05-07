@@ -62,7 +62,7 @@ would like to use its expression as a value for \code{expr}, then you must set
 
 \item{execOnResize}{If \code{FALSE} (the default), then when a plot is
 resized, Shiny will \emph{replay} the plot drawing commands with
-\code{\link[grDevices:recordplot]{grDevices::replayPlot()}} instead of re-executing \code{expr}.
+\code{\link[grDevices:replayPlot]{grDevices::replayPlot()}} instead of re-executing \code{expr}.
 This can result in faster plot redrawing, but there may be rare cases where
 it is undesirable. If you encounter problems when resizing a plot, you can
 have Shiny re-execute the code on resize by setting this to \code{TRUE}.}

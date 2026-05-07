@@ -3085,7 +3085,7 @@
     "a.shiny-download-link",
     function(e4) {
       const el = e4.currentTarget;
-      if (el.classList.contains("disabled")) {
+      if (el.classList.contains("disabled") || !el.getAttribute("href")) {
         e4.preventDefault();
         return;
       }

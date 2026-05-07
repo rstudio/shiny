@@ -42,8 +42,10 @@ $(document).on(
   function (e: Event) {
     const el = e.currentTarget as HTMLAnchorElement;
 
-    // Prevent clicks when the button is disabled.
-    if (el.classList.contains("disabled")) {
+    // Prevent clicks when the button is disabled or the URL is not yet set
+    // (enabled=TRUE buttons start with href="" before renderValue fires, which
+    // would otherwise navigate to the current page URL).
+    if (el.classList.contains("disabled") || !el.getAttribute("href")) {
       e.preventDefault();
       return;
     }

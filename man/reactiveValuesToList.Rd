@@ -14,7 +14,7 @@ reactiveValuesToList(x, all.names = FALSE)
 }
 \description{
 This function does something similar to what you might want or expect
-\code{\link[base:list]{base::as.list()}} to do. The difference is that the calling context will take
+\code{\link[base:as.list]{base::as.list()}} to do. The difference is that the calling context will take
 dependencies on every object in the \code{reactivevalue}s object. To avoid taking
 dependencies on all the objects, you can wrap the call with \code{\link[=isolate]{isolate()}}.
 }

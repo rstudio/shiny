@@ -24,7 +24,6 @@ includes extensive annotated examples.
 
 Authors:
 \itemize{
-  \item Carson Sievert \email{carson@posit.co} (\href{https://orcid.org/0000-0002-4958-2844}{ORCID})
   \item Winston Chang \email{winston@posit.co} (\href{https://orcid.org/0000-0002-1576-2126}{ORCID})
   \item Joe Cheng \email{joe@posit.co}
   \item JJ Allaire \email{jj@posit.co}

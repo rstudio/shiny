@@ -1,4 +1,5 @@
 skip_if_not_shinytest2()
+skip_if_not_installed("shinyjs")
 library(shinytest2)
 
 # library(shiny) must be called explicitly inside the function so that

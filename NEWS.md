@@ -2,7 +2,7 @@
 
 ## New features
 
-* `downloadButton()` and `downloadLink()` gain a new `enabled` parameter. Use `enabled = "auto"` (default) to automatically enable the button or link when the download is ready, `enabled = TRUE` to start already enabled, or `enabled = FALSE` to opt into manual state management. (#4119)
+* `downloadButton()` and `downloadLink()` gain a new `enabled` parameter. The default value, `"auto"`, automatically enables the button/link when the download is ready. To opt-into manual state management (e.g., `shinyjs::enable()`), set `enabled` to `FALSE` (or `TRUE`). (#4119)
 
 ## Improvements
 

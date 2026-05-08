@@ -172,6 +172,13 @@ runApp <- function(
 #' The `later` event loop services the app, so the R console remains
 #' available for interaction.
 #'
+#' To stop a non-blocking app from the R console, call `handle$stop()`
+#' on the returned `ShinyAppHandle`. Despite the similar name, [stopApp()]
+#' is not the counterpart of `startApp()` — it is for use from *inside*
+#' app code (e.g. server functions, observers, or the `onStart` hook),
+#' where it sets a return value that is later surfaced via
+#' `handle$result()`.
+#'
 #' @inheritParams runApp
 #'
 #' @return A `ShinyAppHandle` object with methods `stop()`, `status()`,
@@ -192,7 +199,7 @@ runApp <- function(
 #' handle$stop()
 #' }
 #'
-#' @seealso [runApp()] for blocking mode, [stopApp()] to stop a running app.
+#' @seealso [runApp()] for blocking mode.
 #' @export
 startApp <- function(
   appDir = getwd(),

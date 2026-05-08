@@ -72,6 +72,14 @@ Starts a Shiny application in non-blocking mode, returning a
 The \code{later} event loop services the app, so the R console remains
 available for interaction.
 }
+\details{
+To stop a non-blocking app from the R console, call \code{handle$stop()}
+on the returned \code{ShinyAppHandle}. Despite the similar name, \code{\link[=stopApp]{stopApp()}}
+is not the counterpart of \code{startApp()} — it is for use from \emph{inside}
+app code (e.g. server functions, observers, or the \code{onStart} hook),
+where it sets a return value that is later surfaced via
+\code{handle$result()}.
+}
 \examples{
 \dontrun{
 # Start app in the background
@@ -87,5 +95,5 @@ handle$stop()
 
 }
 \seealso{
-\code{\link[=runApp]{runApp()}} for blocking mode, \code{\link[=stopApp]{stopApp()}} to stop a running app.
+\code{\link[=runApp]{runApp()}} for blocking mode.
 }

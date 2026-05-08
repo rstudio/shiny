@@ -273,3 +273,39 @@ test_that("startup failure clears app state (regression test)", {
   expect_equal(handle$status(), "running")
   handle$stop()
 })
+
+test_that("stopApp() called from onStart is preserved during setup", {
+  # Regression: .setupShinyApp() previously reset the stop globals after
+  # onStart() ran, silently clobbering a stop request made during setup.
+
+  app_ok <- shinyApp(
+    ui = fluidPage(),
+    server = function(input, output) {},
+    onStart = function() stopApp("early_result")
+  )
+
+  # Blocking: short-circuits the service loop and returns the value.
+  expect_equal(
+    runApp(app_ok, launch.browser = FALSE, quiet = TRUE),
+    "early_result"
+  )
+  expect_false(isRunning())
+
+  # Non-blocking: handle is in its terminal state on return — no service
+  # tick required, since the stop was already requested during setup.
+  handle <- startApp(app_ok, launch.browser = FALSE, quiet = TRUE)
+  expect_equal(handle$status(), "success")
+  expect_equal(handle$result(), "early_result")
+  expect_false(isRunning())
+
+  # Non-blocking error path: the condition reaches handle$result().
+  app_err <- shinyApp(
+    ui = fluidPage(),
+    server = function(input, output) {},
+    onStart = function() stopApp(stop("early_error", call. = FALSE))
+  )
+  handle <- startApp(app_err, launch.browser = FALSE, quiet = TRUE)
+  expect_equal(handle$status(), "error")
+  expect_error(handle$result(), "early_error")
+  expect_false(isRunning())
+})

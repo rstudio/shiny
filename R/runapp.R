@@ -242,7 +242,13 @@ startApp <- function(
 
   handle <- ShinyAppHandle$new(result$appUrl, result$cleanup)
   .globals$runningHandle <- handle
-  serviceNonBlocking(handle, .globals$serviceGeneration)
+  if (.globals$stopped) {
+    # Setup-time stopApp() (e.g. from onStart). Skip the service loop
+    # so the returned handle is already in its terminal state.
+    handle$stop()
+  } else {
+    serviceNonBlocking(handle, .globals$serviceGeneration)
+  }
   handle
 }
 
@@ -270,6 +276,16 @@ startApp <- function(
            "Otherwise, stop the current app first with stopApp().")
     }
   }
+
+  # Initialize globals for this run before any user code (onStart,
+  # onAppStart hooks, etc.) executes. Setting these afterwards would
+  # clobber a stopApp() called from inside setup.
+  .globals$reterror <- NULL
+  .globals$retval <- NULL
+  .globals$stopped <- FALSE
+  # Each app launch gets a fresh generation so any stale non-blocking
+  # service callback from a previous app becomes a no-op.
+  .globals$serviceGeneration <- (.globals$serviceGeneration %||% 0L) + 1L
 
   # ============================================================================
   # runApp options set via shinyApp(options = list(...))
@@ -525,15 +541,6 @@ startApp <- function(
   # ============================================================================
   callAppHook("onAppStart", appUrl)
   on.exit(if (cleanupOnExit) callAppHook("onAppStop", appUrl), add = TRUE)
-
-  # Initialize globals used by the event loop and stopApp()
-  .globals$reterror <- NULL
-  .globals$retval <- NULL
-  .globals$stopped <- FALSE
-
-  # Invalidate any stale non-blocking service loops from a previous app.
-  # Each app launch gets a fresh generation so old callbacks become no-ops.
-  .globals$serviceGeneration <- (.globals$serviceGeneration %||% 0L) + 1L
 
   # Setup complete - disable on.exit cleanup, hand off to caller
   cleanupOnExit <- FALSE

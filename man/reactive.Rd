@@ -19,7 +19,7 @@ is.reactive(x)
 }
 \arguments{
 \item{x}{For \code{is.reactive()}, an object to test. For \code{reactive()}, an
-expression. When passing in a \code{\link[rlang:defusing-advanced]{rlang::quo()}}sure with \code{reactive()},
+expression. When passing in a \code{\link[rlang:quo]{rlang::quo()}}sure with \code{reactive()},
 remember to use \code{\link[rlang:inject]{rlang::inject()}} to distinguish that you are passing in
 the content of your quosure, not the expression of the quosure.}
 

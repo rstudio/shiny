@@ -131,20 +131,20 @@ shinyApp(ui, server = function(input, output) { })
 \seealso{
 \code{\link[=dateRangeInput]{dateRangeInput()}}, \code{\link[=updateDateInput]{updateDateInput()}}
 
-Other input elements: 
-\code{\link{actionButton}()},
-\code{\link{checkboxGroupInput}()},
-\code{\link{checkboxInput}()},
-\code{\link{dateRangeInput}()},
-\code{\link{fileInput}()},
-\code{\link{numericInput}()},
-\code{\link{passwordInput}()},
-\code{\link{radioButtons}()},
-\code{\link{selectInput}()},
-\code{\link{sliderInput}()},
-\code{\link{submitButton}()},
-\code{\link{textAreaInput}()},
-\code{\link{textInput}()},
-\code{\link{varSelectInput}()}
+Other input elements:
+\code{\link[=actionButton]{actionButton()}},
+\code{\link[=checkboxGroupInput]{checkboxGroupInput()}},
+\code{\link[=checkboxInput]{checkboxInput()}},
+\code{\link[=dateRangeInput]{dateRangeInput()}},
+\code{\link[=fileInput]{fileInput()}},
+\code{\link[=numericInput]{numericInput()}},
+\code{\link[=passwordInput]{passwordInput()}},
+\code{\link[=radioButtons]{radioButtons()}},
+\code{\link[=selectInput]{selectInput()}},
+\code{\link[=sliderInput]{sliderInput()}},
+\code{\link[=submitButton]{submitButton()}},
+\code{\link[=textAreaInput]{textAreaInput()}},
+\code{\link[=textInput]{textInput()}},
+\code{\link[=varSelectInput]{varSelectInput()}}
 }
 \concept{input elements}

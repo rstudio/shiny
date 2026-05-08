@@ -500,11 +500,26 @@ serviceApp <- function(
   flushPendingSessions()
 }
 
-# Non-blocking service loop using later callbacks.
-# Uses 1ms delay between iterations to yield CPU for console interaction.
-# The generation token (incremented on every runApp() call) ensures that when
-# a new app starts, any stale service loop from a previous non-blocking app
-# exits cleanly instead of continuing to run.
+# Non-blocking service loop driven by `later` callbacks.
+#
+# Each iteration calls `serviceApp(NA)`, which drains queued I/O and
+# `later` callbacks without blocking R, then flushes the reactive graph
+# and any pending session messages.
+#
+# The next iteration is scheduled adaptively, sleeping until the earliest
+# of:
+#   - the next reactive timer event (`invalidateLater`, `reactiveTimer`)
+#   - the next `later` op (incl. httpuv-scheduled callbacks for incoming
+#     HTTP/WS I/O, promise resolutions)
+#   - `.shinyServiceMaxDelaySecs` — a defensive ceiling for reactive-state
+#     changes that don't go through either of the above (e.g. a
+#     `reactiveVal` set from a promise resolution). Going fully event-
+#     driven would require hooking every reactive mutation path; the cap
+#     bounds worst-case flush lag without that audit.
+#
+# The generation token (incremented on every runApp()/startApp() call)
+# ensures that when a new app starts, any stale service loop from a
+# previous non-blocking app exits cleanly instead of continuing to run.
 # Each iteration wraps `serviceApp()` in `with_otel_promise_domain()` so the
 # OTEL domain is active while Shiny processes its own work — handlers,
 # later callbacks, promise fulfillments — all executed synchronously inside
@@ -522,7 +537,7 @@ serviceNonBlocking <- function(handle, generation) {
         ..stacktraceoff..(
           captureStackTraces(
             tryCatch(
-              ..stacktracefloor..(serviceApp(.shinyServiceDelaySecs * 1000)),
+              ..stacktracefloor..(serviceApp(NA)),
               error = function(e) {
                 .globals$stopped <- TRUE
                 .globals$retval <- e
@@ -537,15 +552,20 @@ serviceNonBlocking <- function(handle, generation) {
       return(invisible())
     }
     if (!.globals$stopped) {
-      later::later(serviceLoop, delay = .shinyServiceDelaySecs)
+      delay <- min(
+        .shinyServiceMaxDelaySecs,
+        timerCallbacks$timeToNextEvent() / 1000,
+        later::next_op_secs()
+      )
+      later::later(serviceLoop, delay = max(0, delay))
     } else {
       handle$stop()
     }
   }
-  later::later(serviceLoop, delay = .shinyServiceDelaySecs)
+  later::later(serviceLoop)
 }
 
-.shinyServiceDelaySecs <- 0.001
+.shinyServiceMaxDelaySecs <- 0.05
 .shinyServerMinVersion <- '0.3.4'
 
 #' Check whether a Shiny application is running

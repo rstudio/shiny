@@ -7,17 +7,40 @@
   methods. When a new app is started, any previously running non-blocking app
   is automatically stopped.
 
+## Improvements
+
+* Output resize/visibility detection now uses native browser observers
+  (`ResizeObserver`, `IntersectionObserver`) instead of relying on jQuery
+  `shown`/`hidden` events and `window.resize`. This makes Shiny's client-side
+  output-info pipeline (image/plot sizing, hidden-state tracking, theme
+  reporting) work automatically in any layout — including CSS-only show/hide,
+  third-party tab components, and non-Bootstrap frameworks — without requiring
+  custom event hooks. This also introduces a `shiny:themechange` event
+  for code that needs to trigger theme clientdata refreshes after changing
+  surrounding visual theme context. (#3682)
+
+* `conditionalPanel()` no longer briefly flashes its contents on app start
+  when the condition is initially `FALSE`. (#3505)
+
+* Removed `InputBinding.dispose()` from the JavaScript `InputBinding` class.
+  This method was never called by Shiny's runtime, so any overrides were dead
+  code. Use `unsubscribe()` for cleanup logic instead. (#4375)
+
 # shiny 1.13.0
 
 ## New features
 
-* Shiny now supports interactive breakpoints when used with Ark (e.g. in Positron). (#4352)
+* Shiny now supports interactive breakpoints when used with Ark (e.g. in
+  Positron). (#4352)
 
 ## Bug fixes and minor improvements
 
-* Stack traces from render functions (e.g., `renderPlot()`, `renderDataTable()`) now hide internal Shiny rendering pipeline frames, making error messages cleaner and more focused on user code. (#4358)
+* Stack traces from render functions (e.g., `renderPlot()`, `renderDataTable()`)
+  now hide internal Shiny rendering pipeline frames, making error messages
+  cleaner and more focused on user code. (#4358)
 
-* Fixed an issue with `actionLink()` that extended the link underline to whitespace around the text. (#4348)
+* Fixed an issue with `actionLink()` that extended the link underline to
+  whitespace around the text. (#4348)
 
 
 # shiny 1.12.1

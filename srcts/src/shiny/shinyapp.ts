@@ -70,6 +70,8 @@ const messageHandlers: { [key: string]: Handler } = {};
 const customMessageHandlerOrder: string[] = [];
 const customMessageHandlers: { [key: string]: Handler } = {};
 
+const conditionalShownClass = "shiny-conditional--shown";
+
 // Adds Shiny (internal) message handler
 function addMessageHandler(type: string, handler: Handler) {
   if (messageHandlers[type]) {
@@ -614,16 +616,16 @@ class ShinyApp {
       const nsPrefix = el.attr("data-ns-prefix") as string;
       const nsScope = this._narrowScope(scope, nsPrefix);
       const show = Boolean(condFunc(nsScope));
-      const showing = el.css("display") !== "none";
+      const showing = el.hasClass(conditionalShownClass);
 
       if (show !== showing) {
         if (show) {
           el.trigger("show");
-          el.show();
+          el.addClass(conditionalShownClass);
           el.trigger("shown");
         } else {
           el.trigger("hide");
-          el.hide();
+          el.removeClass(conditionalShownClass);
           el.trigger("hidden");
         }
       }

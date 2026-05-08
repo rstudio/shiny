@@ -488,6 +488,11 @@ textarea.textarea-autoresize.form-control {
   display: none;
 }
 
+/* conditionalPanel: hidden until JS evaluates the condition */
+[data-display-if]:not(.shiny-conditional--shown) {
+  display: none;
+}
+
 /* Hidden tabPanels */
 .nav-hidden {
   /* override anything bootstrap sets for `.nav` */

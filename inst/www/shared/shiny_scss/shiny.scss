@@ -498,3 +498,10 @@ textarea.textarea-autoresize.form-control {
   /* override anything bootstrap sets for `.nav` */
   display: none !important;
 }
+
+/* Bootstrap only applies pointer-events: none to a.btn.disabled, not plain
+   anchor-based download links. Apply it universally so disabled download
+   links cannot be clicked regardless of how they were disabled. */
+a.shiny-download-link.disabled {
+  pointer-events: none;
+}

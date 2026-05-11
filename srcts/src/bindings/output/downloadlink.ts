@@ -8,9 +8,17 @@ class DownloadLinkOutputBinding extends OutputBinding {
   }
   renderValue(el: HTMLElement, data: string): void {
     el.setAttribute("href", data);
-    el.classList.remove("disabled");
-    el.removeAttribute("aria-disabled");
-    el.removeAttribute("tabindex");
+    // If we or shinyjs have marked this element as disabled (via shinyjs::disabled()),
+    // skip the auto-enable behavior so that the intentional disabled state is
+    // preserved. See https://github.com/rstudio/shiny/issues/4119.
+    if (
+      !el.hasAttribute("data-shiny-disable-auto-enable") &&
+      !el.classList.contains("shinyjs-disabled")
+    ) {
+      el.classList.remove("disabled");
+      el.removeAttribute("aria-disabled");
+      el.removeAttribute("tabindex");
+    }
   }
   // Progress shouldn't be shown on the download button
   // (progress will be shown as a page level pulse instead)
@@ -32,10 +40,20 @@ $(document).on(
   "click.shinyDownloadLink",
   "a.shiny-download-link",
   function (e: Event) {
+    const el = e.currentTarget as HTMLAnchorElement;
+
+    // Prevent clicks when the button is disabled or the URL is not yet set
+    // (enabled=TRUE buttons start with href="" before renderValue fires, which
+    // would otherwise navigate to the current page URL).
+    if (el.classList.contains("disabled") || !el.getAttribute("href")) {
+      e.preventDefault();
+      return;
+    }
+
     const evt: FileDownloadEvent = $.Event("shiny:filedownload");
 
-    evt.name = this.id;
-    evt.href = this.href;
+    evt.name = el.id;
+    evt.href = el.href;
     $(document).trigger(evt);
 
     return;

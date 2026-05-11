@@ -1237,6 +1237,16 @@ uiOutput <- htmlOutput
 #' @param label The label that should appear on the button.
 #' @param class Additional CSS classes to apply to the tag, if any.
 #' @param icon An [icon()] to appear on the button. Default is `icon("download")`.
+#' @param enabled Controls the enabled/disabled behavior of the button or link.
+#'   Defaults to `"auto"`.
+#'   - `"auto"`: the button or link starts disabled and is automatically
+#'     enabled once the server has initialized the `downloadHandler`.
+#'   - `TRUE`: the button or link starts enabled immediately, without waiting
+#'     for the `downloadHandler`.
+#'   - `FALSE`: the button or link starts disabled and Shiny will **never**
+#'     automatically enable it, even after the `downloadHandler` is ready.
+#'     You are responsible for managing the enabled/disabled state yourself
+#'     (e.g., with `shinyjs::enable()` and `shinyjs::disable()`).
 #' @param ... Other arguments to pass to the container tag function.
 #'
 #' @examples
@@ -1275,30 +1285,56 @@ downloadButton <- function(outputId,
                            label="Download",
                            class=NULL,
                            ...,
-                           icon = shiny::icon("download")) {
+                           icon = shiny::icon("download"),
+                           enabled = "auto") {
+  auto_enable <- identical(enabled, "auto")
+  if (auto_enable) {
+    enabled <- FALSE
+  }
+  # Use isTRUE/isFALSE rather than is.logical: NA passes is.logical() but is not valid here.
+  if (!isTRUE(enabled) && !isFALSE(enabled)) {
+    cli::cli_abort(
+      "{.arg enabled} must be {.val TRUE}, {.val FALSE}, or {.val \"auto\"}, not {.obj_type_friendly {enabled}}."
+    )
+  }
   tags$a(id=outputId,
-         class='btn btn-default shiny-download-link disabled',
+         class="btn btn-default shiny-download-link",
+         class=if (!enabled) "disabled",
          class=class,
          href='',
          target='_blank',
          download=NA,
-         "aria-disabled"="true",
-         tabindex="-1",
+         "aria-disabled"=if (!enabled) "true",
+         "data-shiny-disable-auto-enable"=if (!auto_enable) NA,
+         tabindex=if (!enabled) "-1",
          validateIcon(icon),
          label, ...)
 }
 
 #' @rdname downloadButton
 #' @export
-downloadLink <- function(outputId, label="Download", class=NULL, ...) {
-  tags$a(id=outputId,
-         class='shiny-download-link disabled',
-         class=class,
-         href='',
-         target='_blank',
-         download=NA,
-         "aria-disabled"="true",
-         tabindex="-1",
+downloadLink <- function(outputId, label = "Download", class = NULL, ...,
+                         enabled = "auto") {
+  auto_enable <- identical(enabled, "auto")
+  if (auto_enable) {
+    enabled <- FALSE
+  }
+  # Use isTRUE/isFALSE rather than is.logical: NA passes is.logical() but is not valid here.
+  if (!isTRUE(enabled) && !isFALSE(enabled)) {
+    cli::cli_abort(
+      "{.arg enabled} must be {.val TRUE}, {.val FALSE}, or {.val \"auto\"}, not {.obj_type_friendly {enabled}}."
+    )
+  }
+  tags$a(id = outputId,
+         class = "shiny-download-link",
+         class = if (!enabled) "disabled",
+         class = class,
+         href = '',
+         target = '_blank',
+         download = NA,
+         "aria-disabled" = if (!enabled) "true",
+         "data-shiny-disable-auto-enable" = if (!auto_enable) NA,
+         tabindex = if (!enabled) "-1",
          label, ...)
 }
 

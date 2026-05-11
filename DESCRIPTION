@@ -117,10 +117,11 @@ Suggests:
     rmarkdown,
     sass,
     showtext,
+    shinytest2,
     testthat (>= 3.2.1),
     watcher,
     yaml
-Config/Needs/check: shinyjs, shinytest2
+Config/Needs/check: shinyjs
 Config/roxygen2/version: 8.0.0
 Config/testthat/edition: 3
 Encoding: UTF-8

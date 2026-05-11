@@ -6,7 +6,8 @@ library(shinytest2)
 # shinytest2's library shim loads the dev package via pkgload::load_all().
 app <- launch_test_app(function() {
   library(shiny)
-  library(shinyjs)
+  shinyjs_disabled <- getFromNamespace("disabled", "shinyjs")
+  useShinyjs <- getFromNamespace("useShinyjs", "shinyjs")
 
   handler <- function() {
     downloadHandler(
@@ -84,7 +85,7 @@ app <- launch_test_app(function() {
     output$btn_shinyjs_ui <- renderUI({
       btn <- downloadButton("btn_shinyjs", "shinyjs-disabled")
       if (!isTRUE(input$toggle_btn_shinyjs)) {
-        shinyjs::disabled(btn)
+        shinyjs_disabled(btn)
       } else {
         btn
       }
@@ -117,7 +118,7 @@ app <- launch_test_app(function() {
     output$lnk_shinyjs_ui <- renderUI({
       lnk <- downloadLink("lnk_shinyjs", "shinyjs-disabled")
       if (!isTRUE(input$toggle_lnk_shinyjs)) {
-        shinyjs::disabled(lnk)
+        shinyjs_disabled(lnk)
       } else {
         lnk
       }

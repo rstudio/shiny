@@ -3066,9 +3066,11 @@
     }
     renderValue(el, data) {
       el.setAttribute("href", data);
-      el.classList.remove("disabled");
-      el.removeAttribute("aria-disabled");
-      el.removeAttribute("tabindex");
+      if (!el.hasAttribute("data-shiny-disable-auto-enable") && !el.classList.contains("shinyjs-disabled")) {
+        el.classList.remove("disabled");
+        el.removeAttribute("aria-disabled");
+        el.removeAttribute("tabindex");
+      }
     }
     // Progress shouldn't be shown on the download button
     // (progress will be shown as a page level pulse instead)
@@ -3082,9 +3084,14 @@
     "click.shinyDownloadLink",
     "a.shiny-download-link",
     function(e4) {
+      const el = e4.currentTarget;
+      if (el.classList.contains("disabled") || !el.getAttribute("href")) {
+        e4.preventDefault();
+        return;
+      }
       const evt = import_jquery25.default.Event("shiny:filedownload");
-      evt.name = this.id;
-      evt.href = this.href;
+      evt.name = el.id;
+      evt.href = el.href;
       (0, import_jquery25.default)(document).trigger(evt);
       return;
       e4;

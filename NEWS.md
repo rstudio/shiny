@@ -7,6 +7,8 @@
   methods. When a new app is started, any previously running non-blocking app
   is automatically stopped.
 
+* `downloadButton()` and `downloadLink()` gain a new `enabled` parameter. The default value, `"auto"`, automatically enables the button/link when the download is ready. To opt-into manual state management (e.g., `shinyjs::enable()`), set `enabled` to `FALSE` (or `TRUE`). (#4119)
+
 ## Improvements
 
 * Output resize/visibility detection now uses native browser observers

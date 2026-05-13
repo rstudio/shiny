@@ -178,6 +178,35 @@ test_that("nested runApp in blocking mode still errors", {
   )
 })
 
+test_that("nested startApp from within a tick errors instead of auto-replacing", {
+  app1 <- shinyApp(ui = fluidPage(), server = function(input, output) {})
+  app2 <- shinyApp(ui = fluidPage(), server = function(input, output) {})
+
+  handle <- startApp(app1, launch.browser = FALSE, quiet = TRUE)
+  on.exit({
+    h <- shiny:::.globals$runningHandle
+    if (!is.null(h)) h$stop()
+  }, add = TRUE)
+
+  # `serviceApp(NA)` drains one pending later callback while on the stack,
+  # mirroring production where user code runs inside the tick.
+  in_tick <- NULL
+  nested_err <- NULL
+  later::later(function() {
+    in_tick <<- shiny:::.isInAppTick()
+    nested_err <<- tryCatch(
+      startApp(app2, launch.browser = FALSE, quiet = TRUE),
+      error = identity
+    )
+  })
+  while (is.null(nested_err)) later::run_now(timeoutSecs = 1)
+
+  expect_true(in_tick)
+  expect_s3_class(nested_err, "error")
+  expect_match(conditionMessage(nested_err), "another is running")
+  expect_equal(handle$status(), "running")
+})
+
 test_that("cleanup callbacks run when stopped", {
   stopped <- FALSE
   app <- shinyApp(

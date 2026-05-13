@@ -568,6 +568,20 @@ serviceNonBlocking <- function(handle, generation) {
 .shinyServiceMaxDelaySecs <- 0.05
 .shinyServerMinVersion <- '0.3.4'
 
+# TRUE if `serviceApp` is on the call stack — i.e. we're inside an app tick.
+# Walked on demand so the service hot path stays untouched.
+.isInAppTick <- function() {
+  target <- quote(serviceApp)
+  calls <- sys.calls()
+  for (i in seq_along(calls)) {
+    if (identical(calls[[i]][[1]], target) &&
+        identical(sys.function(i), serviceApp)) {
+      return(TRUE)
+    }
+  }
+  FALSE
+}
+
 #' Check whether a Shiny application is running
 #'
 #' This function tests whether a Shiny application is currently running.

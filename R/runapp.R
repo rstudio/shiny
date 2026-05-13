@@ -274,14 +274,15 @@ startApp <- function(
   on.exit(if (cleanupOnExit) handlerManager$clear(), add = TRUE)
 
   if (isRunning()) {
-    if (!is.null(.globals$runningHandle)) {
-      message("Stopping running Shiny app.")
-      .globals$runningHandle$stop()
-    } else {
+    # Auto-replace only at top level; a nested launch from inside a tick
+    # (server, observer, promise callback) must error, not tear down its host.
+    if (is.null(.globals$runningHandle) || .isInAppTick()) {
       stop("Can't start a new app while another is running. ",
            "If your application code contains `runApp()` or `startApp()`, remove it. ",
            "Otherwise, stop the current app first with stopApp().")
     }
+    message("Stopping running Shiny app.")
+    .globals$runningHandle$stop()
   }
 
   # Initialize globals for this run before any user code (onStart,

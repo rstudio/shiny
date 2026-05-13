@@ -7,6 +7,9 @@ ShinyAppHandle <- R6::R6Class("ShinyAppHandle",
       private$appUrl <- appUrl
       private$cleanupFn <- cleanupFn
 
+      # Does NOT fire while the app is running: internal refs
+      # (.globals$runningHandle and the serviceLoop closure) keep the
+      # handle alive.
       reg.finalizer(self, function(e) {
         tryCatch(e$stop(), error = function(cnd) NULL)
       }, onexit = TRUE)

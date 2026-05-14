@@ -80,6 +80,15 @@ app code (e.g. server functions, observers, or the \code{onStart} hook),
 where it sets a return value that is later surfaced via
 \code{handle$result()}.
 }
+\section{Auto-replacement}{
+
+If another Shiny app is already running in this session when \code{startApp()}
+is called, the running app is stopped before the new one starts.
+Stopping happens up front, so if the new app then fails to start, no app
+will be running. You can always call \code{handle$stop()} on the existing
+handle first if you would rather manage the transition yourself.
+}
+
 \examples{
 \dontrun{
 # Start app in the background

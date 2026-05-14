@@ -179,6 +179,13 @@ runApp <- function(
 #' where it sets a return value that is later surfaced via
 #' `handle$result()`.
 #'
+#' @section Auto-replacement:
+#' If another Shiny app is already running in this session when `startApp()`
+#' is called, the running app is stopped before the new one starts.
+#' Stopping happens up front, so if the new app then fails to start, no app
+#' will be running. You can always call `handle$stop()` on the existing
+#' handle first if you would rather manage the transition yourself.
+#'
 #' @inheritParams runApp
 #'
 #' @return A `ShinyAppHandle` object with methods `stop()`, `status()`,

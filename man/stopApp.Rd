@@ -12,5 +12,7 @@ stopApp(returnValue = invisible())
 }
 \description{
 Stops the currently running Shiny app, returning control to the caller of
-\code{\link[=runApp]{runApp()}}.
+\code{\link[=runApp]{runApp()}}. Despite the similar names, \code{stopApp()} is not the
+counterpart of \code{\link[=startApp]{startApp()}} — it is the counterpart of \code{\link[=runApp]{runApp()}},
+controlling its return value via \code{returnValue}.
 }

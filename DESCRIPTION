@@ -127,6 +127,7 @@ Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Collate:
+    'app-handle.R'
     'globals.R'
     'app-state.R'
     'app_template.R'

@@ -28,6 +28,10 @@
   This method was never called by Shiny's runtime, so any overrides were dead
   code. Use `unsubscribe()` for cleanup logic instead. (#4375)
 
+## Bug fixes
+
+* Loading shiny no longer creates `.Random.seed` in the global environment as a side effect. (#4382)
+
 # shiny 1.13.0
 
 ## New features

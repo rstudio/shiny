@@ -60,6 +60,10 @@
 <li><p><code><a href="../reference/conditionalPanel.html">conditionalPanel()</a></code> no longer briefly flashes its contents on app start when the condition is initially <code>FALSE</code>. (<a href="https://github.com/rstudio/shiny/issues/3505" class="external-link">#3505</a>)</p></li>
 <li><p>Removed <code>InputBinding.dispose()</code> from the JavaScript <code>InputBinding</code> class. This method was never called by Shiny’s runtime, so any overrides were dead code. Use <code>unsubscribe()</code> for cleanup logic instead. (<a href="https://github.com/rstudio/shiny/issues/4375" class="external-link">#4375</a>)</p></li>
 </ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>
+<ul><li>Loading shiny no longer creates <code>.Random.seed</code> in the global environment as a side effect. (<a href="https://github.com/rstudio/shiny/issues/4382" class="external-link">#4382</a>)</li>
+</ul></div>
 </div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.13.0" id="shiny-1130">shiny 1.13.0<small>2026-02-20</small><a class="anchor" aria-label="anchor" href="#shiny-1130"></a></h2>

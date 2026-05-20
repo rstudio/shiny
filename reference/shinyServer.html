@@ -3,10 +3,9 @@
 Defines the server-side logic of the Shiny application. This generally
 involves creating functions that map user inputs to various kinds of output.
 In older versions of Shiny, it was necessary to call shinyServer() in
-the server.R file, but this is no longer required as of Shiny 0.10.
-Now the server.R file may simply return the appropriate server
-function (as the last expression in the code), without calling
-shinyServer().
+the server.R file, but this is no longer required. The server.R file
+may simply return the appropriate server function as the last expression
+in the code, without calling shinyServer().
 Call shinyServer from your application's server.R
 file, passing in a &quot;server function&quot; that provides the server-side logic of
 your application.
@@ -70,10 +69,9 @@ on how to write a server function."><meta property="og:image" content="/logo.png
 <p>Defines the server-side logic of the Shiny application. This generally
 involves creating functions that map user inputs to various kinds of output.
 In older versions of Shiny, it was necessary to call <code>shinyServer()</code> in
-the <code>server.R</code> file, but this is no longer required as of Shiny 0.10.
-Now the <code>server.R</code> file may simply return the appropriate server
-function (as the last expression in the code), without calling
-<code>shinyServer()</code>.</p>
+the <code>server.R</code> file, but this is no longer required. The <code>server.R</code> file
+may simply return the appropriate server function as the last expression
+in the code, without calling <code>shinyServer()</code>.</p>
 <p>Call <code>shinyServer</code> from your application's <code>server.R</code>
 file, passing in a "server function" that provides the server-side logic of
 your application.</p>
@@ -82,7 +80,7 @@ the Shiny application's page. It must take an <code>input</code> and an
 <code>output</code> parameter. Any return value will be ignored. It also takes an
 optional <code>session</code> parameter, which is used when greater control is
 needed.</p>
-<p>See the <a href="https://shiny.rstudio.com/tutorial/" class="external-link">tutorial</a> for more
+<p>See the <a href="https://shiny.posit.co/tutorial/" class="external-link">tutorial</a> for more
 on how to write a server function.</p>
     </div>
 

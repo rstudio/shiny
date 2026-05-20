@@ -71,9 +71,9 @@ name will be treated as a placeholder prompt. For example:
 \code{selectInput("letter", "Letter", c("Choose one" = "", LETTERS))}
 
 \strong{Performance note:} \code{selectInput()} and \code{selectizeInput()} can slow down
-significantly when thousands of choices are used; with legacy browsers like
-Internet Explorer, the user interface may hang for many seconds. For large
-numbers of choices, Shiny offers a "server-side selectize" option that
+significantly when thousands of choices are used, and the user interface may
+hang for many seconds. For large numbers of choices, Shiny offers a
+"server-side selectize" option that
 massively improves performance and efficiency; see
 \href{https://shiny.rstudio.com/articles/selectize.html}{this selectize article}
 on the Shiny Dev Center for details.

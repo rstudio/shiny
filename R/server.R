@@ -446,7 +446,7 @@ startHttpuvApp <- function(appObj, port, host, quiet) {
 
   httpuvApp$staticPathOptions <- httpuv::staticPathOptions(
     html_charset = "utf-8",
-    headers = list("X-UA-Compatible" = "IE=edge,chrome=1"),
+    headers = list("X-Content-Type-Options" = "nosniff"),
     validation =
       if (!is.null(getOption("shiny.sharedSecret"))) {
         sprintf('"Shiny-Shared-Secret" == "%s"', getOption("shiny.sharedSecret"))

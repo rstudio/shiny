@@ -17,7 +17,7 @@
 #' hang for many seconds. For large numbers of choices, Shiny offers a
 #' "server-side selectize" option that
 #' massively improves performance and efficiency; see
-#' [this selectize article](https://shiny.rstudio.com/articles/selectize.html)
+#' [this selectize article](https://shiny.posit.co/articles/selectize.html)
 #' on the Shiny Dev Center for details.
 #'
 #' @inheritParams textInput

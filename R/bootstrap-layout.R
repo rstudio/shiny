@@ -21,7 +21,7 @@
 #'   higher-level layout functions like [sidebarLayout()].
 #'
 #' @note See the [
-#'   Shiny-Application-Layout-Guide](https://shiny.rstudio.com/articles/layout-guide.html) for additional details on laying out fluid
+#'   Shiny-Application-Layout-Guide](https://shiny.posit.co/articles/layout-guide.html) for additional details on laying out fluid
 #'   pages.
 #'
 #' @family layout functions
@@ -120,7 +120,7 @@ fluidRow <- function(...) {
 #'   with `fixedRow` and `column`.
 #'
 #' @note See the [
-#'   Shiny Application Layout Guide](https://shiny.rstudio.com/articles/layout-guide.html) for additional details on laying out fixed
+#'   Shiny Application Layout Guide](https://shiny.posit.co/articles/layout-guide.html) for additional details on laying out fixed
 #'   pages.
 #'
 #' @family layout functions

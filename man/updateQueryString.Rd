@@ -38,8 +38,8 @@ For \code{mode = "push"}, only three updates are currently allowed:
 In other words, if \code{mode = "push"}, the \code{queryString} must start
 with either \verb{?} or with \verb{#}.
 
-A technical curiosity: under the hood, this function is calling the HTML5
-history API (which is where the names for the \code{mode} argument come from).
+A technical curiosity: under the hood, this function is calling the History
+API (which is where the names for the \code{mode} argument come from).
 When \code{mode = "replace"}, the function called is
 \code{window.history.replaceState(null, null, queryString)}.
 When \code{mode = "push"}, the function called is

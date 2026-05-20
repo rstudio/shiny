@@ -8,8 +8,7 @@
 #' @param width The width of the input, e.g. `'400px'`, or `'100%'`;
 #'   see [validateCssUnit()].
 #' @param placeholder A character string giving the user a hint as to what can
-#'   be entered into the control. Internet Explorer 8 and 9 do not support this
-#'   option.
+#'   be entered into the control.
 #' @param ... Ignored, included to require named arguments and for future
 #'   feature expansion.
 #' @param updateOn A character vector specifying when the input should be

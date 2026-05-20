@@ -538,9 +538,8 @@ splitLayout <- function(..., cellWidths = NULL, cellArgs = list()) {
 #'
 #' Creates row and column layouts with proportionally-sized cells, using the
 #' Flex Box layout model of CSS3. These can be nested to create arbitrary
-#' proportional-grid layouts. **Warning:** Flex Box is not well supported
-#' by Internet Explorer, so these functions should only be used where modern
-#' browsers can be assumed.
+#' proportional-grid layouts. **Note:** These functions require a browser with
+#' flexbox support.
 #'
 #' @details If you try to use `fillRow` and `fillCol` inside of other
 #'   Shiny containers, such as [sidebarLayout()],

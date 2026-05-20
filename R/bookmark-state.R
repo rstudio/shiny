@@ -529,8 +529,8 @@ restoreInput <- function(id, default) {
 #' Update URL in browser's location bar
 #'
 #' This function updates the client browser's query string in the location bar.
-#' It typically is called from an observer. Note that this will not work in
-#' Internet Explorer 9 and below.
+#' It typically is called from an observer. Note that this requires a browser
+#' with History API support (`history.pushState` / `history.replaceState`).
 #'
 #' For `mode = "push"`, only three updates are currently allowed:
 #' \enumerate{

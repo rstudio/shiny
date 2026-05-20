@@ -16,10 +16,9 @@ for more information.}
 Defines the server-side logic of the Shiny application. This generally
 involves creating functions that map user inputs to various kinds of output.
 In older versions of Shiny, it was necessary to call \code{shinyServer()} in
-the \code{server.R} file, but this is no longer required as of Shiny 0.10.
-Now the \code{server.R} file may simply return the appropriate server
-function (as the last expression in the code), without calling
-\code{shinyServer()}.
+the \code{server.R} file, but this is no longer required. The \code{server.R} file
+may simply return the appropriate server function as the last expression
+in the code, without calling \code{shinyServer()}.
 
 Call \code{shinyServer} from your application's \code{server.R}
 file, passing in a "server function" that provides the server-side logic of
@@ -31,7 +30,7 @@ the Shiny application's page. It must take an \code{input} and an
 optional \code{session} parameter, which is used when greater control is
 needed.
 
-See the \href{https://shiny.rstudio.com/tutorial/}{tutorial} for more
+See the \href{https://shiny.posit.co/tutorial/}{tutorial} for more
 on how to write a server function.
 }
 \examples{

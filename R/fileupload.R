@@ -1,4 +1,4 @@
-# For HTML5-capable browsers, file uploads happen through a series of requests.
+# File uploads happen through a series of requests.
 #
 # 1. Client tells server that one or more files are about to be uploaded; the
 #    server responds with a "job ID" that the client should use for the rest of
@@ -16,7 +16,7 @@
 #    input ID that this data should be associated with.
 #
 # Unfortunately this approach will not work for browsers that don't support
-# HTML5 File API, but the fallback approach we would like to use (multipart
+# the File API, but the fallback approach we would like to use (multipart
 # form upload, i.e. traditional HTTP POST-based file upload) doesn't work with
 # the websockets package's HTTP server at the moment.
 

@@ -39,10 +39,9 @@ registerClient <- function(client) {
 #' @description Defines the server-side logic of the Shiny application. This generally
 #' involves creating functions that map user inputs to various kinds of output.
 #' In older versions of Shiny, it was necessary to call `shinyServer()` in
-#' the `server.R` file, but this is no longer required as of Shiny 0.10.
-#' Now the `server.R` file may simply return the appropriate server
-#' function (as the last expression in the code), without calling
-#' `shinyServer()`.
+#' the `server.R` file, but this is no longer required. The `server.R` file
+#' may simply return the appropriate server function as the last expression
+#' in the code, without calling `shinyServer()`.
 #'
 #' Call `shinyServer` from your application's `server.R`
 #' file, passing in a "server function" that provides the server-side logic of
@@ -54,7 +53,7 @@ registerClient <- function(client) {
 #' optional `session` parameter, which is used when greater control is
 #' needed.
 #'
-#' See the [tutorial](https://shiny.rstudio.com/tutorial/) for more
+#' See the [tutorial](https://shiny.posit.co/tutorial/) for more
 #' on how to write a server function.
 #'
 #' @param func The server function for this application. See the details section
@@ -447,7 +446,7 @@ startHttpuvApp <- function(appObj, port, host, quiet) {
 
   httpuvApp$staticPathOptions <- httpuv::staticPathOptions(
     html_charset = "utf-8",
-    headers = list("X-UA-Compatible" = "IE=edge,chrome=1"),
+    headers = list("X-Content-Type-Options" = "nosniff"),
     validation =
       if (!is.null(getOption("shiny.sharedSecret"))) {
         sprintf('"Shiny-Shared-Secret" == "%s"', getOption("shiny.sharedSecret"))

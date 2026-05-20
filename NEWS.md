@@ -28,6 +28,8 @@
   This method was never called by Shiny's runtime, so any overrides were dead
   code. Use `unsubscribe()` for cleanup logic instead. (#4375)
 
+* Updated default HTTP headers for better security. Shiny now sends `X-Content-Type-Options: nosniff` instead of the legacy `X-UA-Compatible` header. This removes outdated Internet Explorer–specific behavior and adds a modern safeguard that prevents browsers from misinterpreting file types. (#4385)
+
 ## Bug fixes
 
 * Loading shiny no longer creates `.Random.seed` in the global environment as a side effect. (#4382)
@@ -946,7 +948,7 @@ This is a significant release for Shiny, with a major new feature that was nearl
 
 * Fixed #1600: URL-encoded bookmarking did not work with sliders that had dates or date-times. (#1961)
 
-* Fixed #1962: [File dragging and dropping](https://posit.co/blog/shiny-1-0-4/) broke in the presence of jQuery version 3.0 as introduced by the [rhandsontable](https://jrowen.github.io/rhandsontable/) [htmlwidget](https://www.htmlwidgets.org/). (#2005)
+* Fixed #1962: [File dragging and dropping](https://posit.co/blog/shiny-1-0-4) broke in the presence of jQuery version 3.0 as introduced by the [rhandsontable](https://jrowen.github.io/rhandsontable/) [htmlwidget](https://www.htmlwidgets.org/). (#2005)
 
 * Improved the error handling inside the `addResourcePath()` function, to give end users more informative error messages when the `directoryPath` argument cannot be normalized. This is especially useful for `runtime: shiny_prerendered` Rmd documents, like `learnr` tutorials. (#1968)
 

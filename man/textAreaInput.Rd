@@ -43,8 +43,7 @@ If the \code{height} argument is specified, \code{height} will take precedence i
 browser's rendering.}
 
 \item{placeholder}{A character string giving the user a hint as to what can
-be entered into the control. Internet Explorer 8 and 9 do not support this
-option.}
+be entered into the control.}
 
 \item{resize}{Which directions the textarea box can be resized. Can be one of
 \code{"both"}, \code{"none"}, \code{"vertical"}, and \code{"horizontal"}. The default, \code{NULL},

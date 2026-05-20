@@ -21,8 +21,8 @@ fileInput(
 \item{label}{Display label for the control, or \code{NULL} for no label.}
 
 \item{multiple}{Whether the user should be allowed to select and upload
-multiple files at once. \strong{Does not work on older browsers, including
-Internet Explorer 9 and earlier.}}
+multiple files at once. Support for selecting multiple files depends on
+the browser's support for the HTML \code{multiple} attribute on file inputs.}
 
 \item{accept}{A character vector of "unique file type specifiers" which gives
 the browser a hint as to the type of file the server expects. Many browsers

@@ -23,8 +23,7 @@ updateTextInput(
 \item{value}{Initial value.}
 
 \item{placeholder}{A character string giving the user a hint as to what can
-be entered into the control. Internet Explorer 8 and 9 do not support this
-option.}
+be entered into the control.}
 }
 \description{
 Change the value of a text input on the client

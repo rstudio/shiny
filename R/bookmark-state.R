@@ -543,8 +543,8 @@ restoreInput <- function(id, default) {
 #' In other words, if `mode = "push"`, the `queryString` must start
 #' with either `?` or with `#`.
 #'
-#' A technical curiosity: under the hood, this function is calling the HTML5
-#' history API (which is where the names for the `mode` argument come from).
+#' A technical curiosity: under the hood, this function is calling the History
+#' API (which is where the names for the `mode` argument come from).
 #' When `mode = "replace"`, the function called is
 #' `window.history.replaceState(null, null, queryString)`.
 #' When `mode = "push"`, the function called is

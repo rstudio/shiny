@@ -46,6 +46,12 @@
 #'   only used for recording or running automated tests. Defaults to the
 #'   `shiny.testmode` option, or FALSE if the option is not set.
 #'
+#' @return The value passed to [stopApp()], or throws an error if the app was
+#'   stopped with an error.
+#'
+#' @seealso [startApp()] for non-blocking mode, [stopApp()] to stop a running
+#'   app.
+#'
 #' @examples
 #' \dontrun{
 #' # Start app in the current working directory
@@ -93,18 +99,14 @@ runApp <- function(
   display.mode=c("auto", "normal", "showcase"),
   test.mode=getOption('shiny.testmode', FALSE)
 ) {
-
   # * Wrap **all** execution of the app inside the otel promise domain
   # * While this could be done at a lower level, it allows for _anything_ within
   #   shiny's control to allow for the opportunity to have otel active spans be
   #   reactivated upon promise domain restoration
   promises::local_otel_promise_domain()
 
-  on.exit({
-    handlerManager$clear()
-  }, add = TRUE)
-
-  if (isRunning()) {
+  # Check for nested blocking runApp() before sourcing app code
+  if (isRunning() && is.null(.globals$runningHandle)) {
     stop("Can't call `runApp()` from within `runApp()`. If your ",
          "application code contains `runApp()`, please remove it.")
   }
@@ -116,14 +118,13 @@ runApp <- function(
     warn = max(1, getOption("warn", default = 1)),
     pool.scheduler = scheduleTask
   )
-  on.exit(options(ops), add = TRUE)
 
-  # ============================================================================
-  # Global onStart/onStop callbacks
-  # ============================================================================
-  # Invoke user-defined onStop callbacks, before the application's internal
-  # onStop callbacks.
-  on.exit({
+  # Ensure options are restored and onStop callbacks fire even if
+  # as.shiny.appobj() errors. Once .setupShinyApp() succeeds, the returned
+  # cleanup function takes over and this guard becomes a no-op.
+  setupComplete <- FALSE
+  on.exit(if (!setupComplete) {
+    options(ops)
     .globals$onStopCallbacks$invoke()
     .globals$onStopCallbacks <- Callbacks$new()
   }, add = TRUE)
@@ -135,32 +136,171 @@ runApp <- function(
   # ============================================================================
   appParts <- as.shiny.appobj(appDir)
 
-  # ============================================================================
-  # Initialize app state object
-  # ============================================================================
-  # This is so calls to getCurrentAppState() can be used to find (A) whether an
-  # app is running and (B), get options and data associated with the app.
-  initCurrentAppState(appParts)
-  on.exit(clearCurrentAppState(), add = TRUE)
-  # Any shinyOptions set after this point will apply to the current app only
-  # (and will not persist after the app stops).
+  result <- .setupShinyApp(
+    appDir, appParts, port, launch.browser, host,
+    workerId, quiet, display.mode, test.mode, ops = ops
+  )
+  setupComplete <- TRUE
+  on.exit(result$cleanup(), add = TRUE)
 
   # ============================================================================
-  # shinyOptions
+  # Run event loop via httpuv
   # ============================================================================
-  # A unique identifier associated with this run of this application. It is
-  # shared across sessions.
-  shinyOptions(appToken = createUniqueId(8))
+  # Top-level ..stacktraceoff..; matches with ..stacktraceon in observe(),
+  # reactive(), Callbacks$invoke(), and others
+  ..stacktraceoff..(
+    captureStackTraces({
+      while (!.globals$stopped) {
+        ..stacktracefloor..(serviceApp())
+      }
+    })
+  )
 
-  # Set up default cache for app.
-  if (is.null(getShinyOption("cache", default = NULL))) {
-    shinyOptions(cache = cachem::cache_mem(max_size = 200 * 1024^2))
+  if (isTRUE(.globals$reterror)) {
+    stop(.globals$retval)
+  } else if (.globals$retval$visible) {
+    .globals$retval$value
+  } else {
+    invisible(.globals$retval$value)
+  }
+}
+
+#' Start Shiny Application (Non-Blocking)
+#'
+#' Starts a Shiny application in non-blocking mode, returning a
+#' `ShinyAppHandle` immediately while the app runs in the background.
+#' The `later` event loop services the app, so the R console remains
+#' available for interaction.
+#'
+#' To stop a non-blocking app from the R console, call `handle$stop()`
+#' on the returned `ShinyAppHandle`. Despite the similar name, [stopApp()]
+#' is not the counterpart of `startApp()` — it is for use from *inside*
+#' app code (e.g. server functions, observers, or the `onStart` hook),
+#' where it sets a return value that is later surfaced via
+#' `handle$result()`.
+#'
+#' @section Auto-replacement:
+#' If another Shiny app is already running in this session when `startApp()`
+#' is called, the running app is stopped before the new one starts.
+#' Stopping happens up front, so if the new app then fails to start, no app
+#' will be running. You can always call `handle$stop()` on the existing
+#' handle first if you would rather manage the transition yourself.
+#'
+#' @inheritParams runApp
+#'
+#' @return A `ShinyAppHandle` object with methods `stop()`, `status()`,
+#'   `url()`, and `result()`. The `status()` method returns `"running"`,
+#'   `"success"`, or `"error"`. The `result()` method throws an error if called
+#'   while running, or re-throws the error if the app stopped with an error.
+#'
+#' @examples
+#' \dontrun{
+#' # Start app in the background
+#' handle <- startApp("myapp")
+#'
+#' # Check status
+#' handle$status()
+#' handle$url()
+#'
+#' # Stop the app
+#' handle$stop()
+#' }
+#'
+#' @seealso [runApp()] for blocking mode.
+#' @export
+startApp <- function(
+  appDir = getwd(),
+  port = getOption("shiny.port"),
+  launch.browser = getOption("shiny.launch.browser", interactive()),
+  host = getOption("shiny.host", "127.0.0.1"),
+  workerId = "",
+  quiet = FALSE,
+  display.mode = c("auto", "normal", "showcase"),
+  test.mode = getOption("shiny.testmode", FALSE)
+) {
+  # OTEL: `local_otel_promise_domain()` ties its lifetime to this frame,
+  # which exits as soon as the handle is returned — before any request is
+  # served. A persistent global install would instead leak into unrelated
+  # user promises between ticks. Wrap the synchronous setup below (covers
+  # onStart) and each service iteration in `serviceNonBlocking()` (covers
+  # handlers and observers). The domain is dormant between ticks, so it
+  # stays out of user promises created at the console.
+
+  # Make warnings print immediately
+  # Set pool.scheduler to support pool package
+  ops <- options(
+    # Raise warn level to 1, but don't lower it
+    warn = max(1, getOption("warn", default = 1)),
+    pool.scheduler = scheduleTask
+  )
+
+  # Ensure options are restored and onStop callbacks fire even if
+  # as.shiny.appobj() errors. See matching guard in runApp().
+  setupComplete <- FALSE
+  on.exit(if (!setupComplete) {
+    options(ops)
+    .globals$onStopCallbacks$invoke()
+    .globals$onStopCallbacks <- Callbacks$new()
+  }, add = TRUE)
+
+  require(shiny)
+
+  result <- promises::with_otel_promise_domain({
+    appParts <- as.shiny.appobj(appDir)
+    .setupShinyApp(
+      appDir, appParts, port, launch.browser, host,
+      workerId, quiet, display.mode, test.mode, ops = ops
+    )
+  })
+  setupComplete <- TRUE
+
+  handle <- ShinyAppHandle$new(result$appUrl, result$cleanup)
+  .globals$runningHandle <- handle
+  if (.globals$stopped) {
+    # Setup-time stopApp() (e.g. from onStart). Skip the service loop
+    # so the returned handle is already in its terminal state.
+    handle$stop()
+  } else {
+    serviceNonBlocking(handle, .globals$serviceGeneration)
+  }
+  handle
+}
+
+# Shared initialization for runApp() and startApp().
+# Handles all app setup: options, state, httpuv server, browser launch, etc.
+# Returns list(appUrl, cleanup) where cleanup() tears down the app.
+# On setup failure, internal on.exit handlers clean up partial state.
+.setupShinyApp <- function(appDir, appParts, port, launch.browser, host,
+                           workerId, quiet, display.mode, test.mode, ops,
+                           caller = parent.frame()) {
+  # Guard on.exit handlers with this flag so they only fire on setup failure.
+  # On success, cleanup responsibility is handed to the caller via the
+  # returned cleanup function.
+  cleanupOnExit <- TRUE
+
+  on.exit(if (cleanupOnExit) handlerManager$clear(), add = TRUE)
+
+  if (isRunning()) {
+    # Auto-replace only at top level; a nested launch from inside a tick
+    # (server, observer, promise callback) must error, not tear down its host.
+    if (is.null(.globals$runningHandle) || .isInAppTick()) {
+      stop("Can't start a new app while another is running. ",
+           "If your application code contains `runApp()` or `startApp()`, remove it. ",
+           "Otherwise, stop the current app first with stopApp().")
+    }
+    message("Stopping running Shiny app.")
+    .globals$runningHandle$stop()
   }
 
-  # Extract appOptions (which is a list) and store them as shinyOptions, for
-  # this app. (This is the only place we have to store settings that are
-  # accessible both the UI and server portion of the app.)
-  applyCapturedAppOptions(appParts$appOptions)
+  # Initialize globals for this run before any user code (onStart,
+  # onAppStart hooks, etc.) executes. Setting these afterwards would
+  # clobber a stopApp() called from inside setup.
+  .globals$reterror <- NULL
+  .globals$retval <- NULL
+  .globals$stopped <- FALSE
+  # Each app launch gets a fresh generation so any stale non-blocking
+  # service callback from a previous app becomes a no-op.
+  .globals$serviceGeneration <- (.globals$serviceGeneration %||% 0L) + 1L
 
   # ============================================================================
   # runApp options set via shinyApp(options = list(...))
@@ -182,25 +322,55 @@ runApp <- function(
   # | no          | yes       | use runApp   | if it's not missing (runApp specifies), use those                                                                                      |
   # | yes         | yes       | use runApp   | if it's not missing (runApp specifies), use those                                                                                      |
   #
-  # I tried to make this as compact and intuitive as possible,
-  # given that there are four distinct possibilities to check
+  # `missing()` runs in the caller's frame: with defaults on the outer
+  # formals, arguments are no longer missing by the time they reach here.
   appOps <- appParts$options
   findVal <- function(arg, default) {
     if (arg %in% names(appOps)) appOps[[arg]] else default
   }
+  if (evalq(missing(port), caller))           port <- findVal("port", port)
+  if (evalq(missing(launch.browser), caller)) launch.browser <- findVal("launch.browser", launch.browser)
+  if (evalq(missing(host), caller))           host <- findVal("host", host)
+  if (evalq(missing(quiet), caller))          quiet <- findVal("quiet", quiet)
+  if (evalq(missing(display.mode), caller))   display.mode <- findVal("display.mode", display.mode)
+  if (evalq(missing(test.mode), caller))      test.mode <- findVal("test.mode", test.mode)
 
-  if (missing(port))
-    port <- findVal("port", port)
-  if (missing(launch.browser))
-    launch.browser <- findVal("launch.browser", launch.browser)
-  if (missing(host))
-    host <- findVal("host", host)
-  if (missing(quiet))
-    quiet <- findVal("quiet", quiet)
-  if (missing(display.mode))
-    display.mode <- findVal("display.mode", display.mode)
-  if (missing(test.mode))
-    test.mode <- findVal("test.mode", test.mode)
+  on.exit(if (cleanupOnExit) options(ops), add = TRUE)
+
+  # ============================================================================
+  # Global onStart/onStop callbacks
+  # ============================================================================
+  on.exit(if (cleanupOnExit) {
+    .globals$onStopCallbacks$invoke()
+    .globals$onStopCallbacks <- Callbacks$new()
+  }, add = TRUE)
+
+  # ============================================================================
+  # Initialize app state object
+  # ============================================================================
+  # This is so calls to getCurrentAppState() can be used to find (A) whether an
+  # app is running and (B), get options and data associated with the app.
+  initCurrentAppState(appParts)
+  on.exit(if (cleanupOnExit) clearCurrentAppState(), add = TRUE)
+  # Any shinyOptions set after this point will apply to the current app only
+  # (and will not persist after the app stops).
+
+  # ============================================================================
+  # shinyOptions
+  # ============================================================================
+  # A unique identifier associated with this run of this application. It is
+  # shared across sessions.
+  shinyOptions(appToken = createUniqueId(8))
+
+  # Set up default cache for app.
+  if (is.null(getShinyOption("cache", default = NULL))) {
+    shinyOptions(cache = cachem::cache_mem(max_size = 200 * 1024^2))
+  }
+
+  # Extract appOptions (which is a list) and store them as shinyOptions, for
+  # this app. (This is the only place we have to store settings that are
+  # accessible both the UI and server portion of the app.)
+  applyCapturedAppOptions(appParts$appOptions)
 
   if (is.null(host) || is.na(host)) host <- '0.0.0.0'
 
@@ -286,7 +456,7 @@ runApp <- function(
 
   # If display mode is specified as an argument, apply it (overriding the
   # value specified in DESCRIPTION, if any).
-  display.mode <- match.arg(display.mode)
+  display.mode <- match.arg(display.mode, c("auto", "normal", "showcase"))
   if (display.mode == "normal") {
     setShowcaseDefault(0)
   }
@@ -340,24 +510,21 @@ runApp <- function(
   # onStart/onStop callbacks
   # ============================================================================
   # Set up the onStop before we call onStart, so that it gets called even if an
-  # error happens in onStart.
+  # error happens in onStart or later during startup.
   if (!is.null(appParts$onStop))
-    on.exit(appParts$onStop(), add = TRUE)
+    on.exit(if (cleanupOnExit) appParts$onStop(), add = TRUE)
   if (!is.null(appParts$onStart))
     appParts$onStart()
 
   # ============================================================================
-  # Start/stop httpuv app
+  # Start httpuv app
   # ============================================================================
-  server <- startApp(appParts, port, host, quiet)
+  server <- startHttpuvApp(appParts, port, host, quiet)
 
   # Make the httpuv server object accessible. Needed for calling
   # addResourcePath while app is running.
   shinyOptions(server = server)
-
-  on.exit({
-    stopServer(server)
-  }, add = TRUE)
+  on.exit(if (cleanupOnExit) stopServer(server), add = TRUE)
 
   # ============================================================================
   # Launch web browser
@@ -388,39 +555,43 @@ runApp <- function(
   # Application hooks
   # ============================================================================
   callAppHook("onAppStart", appUrl)
-  on.exit({
-    callAppHook("onAppStop", appUrl)
-  }, add = TRUE)
+  on.exit(if (cleanupOnExit) callAppHook("onAppStop", appUrl), add = TRUE)
 
-  # ============================================================================
-  # Run event loop via httpuv
-  # ============================================================================
-  .globals$reterror <- NULL
-  .globals$retval <- NULL
-  .globals$stopped <- FALSE
-  # Top-level ..stacktraceoff..; matches with ..stacktraceon in observe(),
-  # reactive(), Callbacks$invoke(), and others
-  ..stacktraceoff..(
-    captureStackTraces({
-      while (!.globals$stopped) {
-        ..stacktracefloor..(serviceApp())
-      }
-    })
+  # Setup complete - disable on.exit cleanup, hand off to caller
+  cleanupOnExit <- FALSE
+
+  list(
+    appUrl = appUrl,
+    cleanup = .createCleanup(server, appParts, appUrl, ops)
   )
+}
 
-  if (isTRUE(.globals$reterror)) {
-    stop(.globals$retval)
+# Consolidated cleanup function for app teardown
+.createCleanup <- function(server, appParts, appUrl, ops) {
+  cleanedUp <- FALSE
+  function() {
+    if (cleanedUp) return()
+    cleanedUp <<- TRUE
+
+    .globals$stopped <- TRUE
+    .globals$runningHandle <- NULL
+    handlerManager$clear()
+    options(ops)
+    .globals$onStopCallbacks$invoke()
+    .globals$onStopCallbacks <- Callbacks$new()
+    clearCurrentAppState()
+    if (!is.null(appParts$onStop)) appParts$onStop()
+    stopServer(server)
+    callAppHook("onAppStop", appUrl)
   }
-  else if (.globals$retval$visible)
-    .globals$retval$value
-  else
-    invisible(.globals$retval$value)
 }
 
 #' Stop the currently running Shiny app
 #'
 #' Stops the currently running Shiny app, returning control to the caller of
-#' [runApp()].
+#' [runApp()]. Despite the similar names, `stopApp()` is not the
+#' counterpart of [startApp()] — it is the counterpart of [runApp()],
+#' controlling its return value via `returnValue`.
 #'
 #' @param returnValue The value that should be returned from
 #'   [runApp()].

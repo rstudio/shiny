@@ -8,7 +8,7 @@ NULL
 #' prebuilt widgets make it possible to build beautiful, responsive, and
 #' powerful applications with minimal effort.
 #'
-#' The Shiny tutorial at <https://shiny.rstudio.com/tutorial/> explains
+#' The Shiny tutorial at <https://shiny.posit.co/tutorial/> explains
 #' the framework in depth, walks you through building a simple application, and
 #' includes extensive annotated examples.
 #'
@@ -362,7 +362,7 @@ NULL
 #'
 #' The `NS` function creates namespaced IDs out of bare IDs, by joining
 #' them using `ns.sep` as the delimiter. It is intended for use in Shiny
-#' modules. See <https://shiny.rstudio.com/articles/modules.html>.
+#' modules. See <https://shiny.posit.co/articles/modules.html>.
 #'
 #' Shiny applications use IDs to identify inputs and outputs. These IDs must be
 #' unique within an application, as accidentally using the same input/output ID
@@ -379,7 +379,7 @@ NULL
 #' @param id The id string to be namespaced (optional).
 #' @return If `id` is missing, returns a function that expects an id string
 #'   as its only argument and returns that id with the namespace prepended.
-#' @seealso <https://shiny.rstudio.com/articles/modules.html>
+#' @seealso <https://shiny.posit.co/articles/modules.html>
 #' @export
 NS <- function(namespace, id = NULL) {
   if (length(namespace) == 0)

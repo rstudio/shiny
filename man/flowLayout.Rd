@@ -32,13 +32,13 @@ shinyApp(ui, server = function(input, output) { })
 }
 }
 \seealso{
-Other layout functions: 
-\code{\link{fillPage}()},
-\code{\link{fixedPage}()},
-\code{\link{fluidPage}()},
-\code{\link{navbarPage}()},
-\code{\link{sidebarLayout}()},
-\code{\link{splitLayout}()},
-\code{\link{verticalLayout}()}
+Other layout functions:
+\code{\link[=fillPage]{fillPage()}},
+\code{\link[=fixedPage]{fixedPage()}},
+\code{\link[=fluidPage]{fluidPage()}},
+\code{\link[=navbarPage]{navbarPage()}},
+\code{\link[=sidebarLayout]{sidebarLayout()}},
+\code{\link[=splitLayout]{splitLayout()}},
+\code{\link[=verticalLayout]{verticalLayout()}}
 }
 \concept{layout functions}

@@ -8,6 +8,13 @@
   registered `onDestroy()` callbacks for that scope and its descendants,
   tearing down reactive values, expressions, and observers (#4372).
 
+* New `startApp()` runs a Shiny app in non-blocking mode, returning a
+  `ShinyAppHandle` object with `stop()`, `status()`, `url()`, and `result()`
+  methods. When a new app is started, any previously running non-blocking app
+  is automatically stopped. (#4349)
+
+* `downloadButton()` and `downloadLink()` gain a new `enabled` parameter. The default value, `"auto"`, automatically enables the button/link when the download is ready. To opt-into manual state management (e.g., `shinyjs::enable()`), set `enabled` to `FALSE` (or `TRUE`). (#4119)
+
 ## Improvements
 
 * Output resize/visibility detection now uses native browser observers
@@ -16,7 +23,22 @@
   output-info pipeline (image/plot sizing, hidden-state tracking, theme
   reporting) work automatically in any layout — including CSS-only show/hide,
   third-party tab components, and non-Bootstrap frameworks — without requiring
-  custom event hooks. (#3682)
+  custom event hooks. This also introduces a `shiny:themechange` event
+  for code that needs to trigger theme clientdata refreshes after changing
+  surrounding visual theme context. (#3682)
+
+* `conditionalPanel()` no longer briefly flashes its contents on app start
+  when the condition is initially `FALSE`. (#3505)
+
+* Removed `InputBinding.dispose()` from the JavaScript `InputBinding` class.
+  This method was never called by Shiny's runtime, so any overrides were dead
+  code. Use `unsubscribe()` for cleanup logic instead. (#4375)
+
+* Updated default HTTP headers for better security. Shiny now sends `X-Content-Type-Options: nosniff` instead of the legacy `X-UA-Compatible` header. This removes outdated Internet Explorer–specific behavior and adds a modern safeguard that prevents browsers from misinterpreting file types. (#4385)
+
+## Bug fixes
+
+* Loading shiny no longer creates `.Random.seed` in the global environment as a side effect. (#4382)
 
 
 # shiny 1.13.0
@@ -933,7 +955,7 @@ This is a significant release for Shiny, with a major new feature that was nearl
 
 * Fixed #1600: URL-encoded bookmarking did not work with sliders that had dates or date-times. (#1961)
 
-* Fixed #1962: [File dragging and dropping](https://posit.co/blog/shiny-1-0-4/) broke in the presence of jQuery version 3.0 as introduced by the [rhandsontable](https://jrowen.github.io/rhandsontable/) [htmlwidget](https://www.htmlwidgets.org/). (#2005)
+* Fixed #1962: [File dragging and dropping](https://posit.co/blog/shiny-1-0-4) broke in the presence of jQuery version 3.0 as introduced by the [rhandsontable](https://jrowen.github.io/rhandsontable/) [htmlwidget](https://www.htmlwidgets.org/). (#2005)
 
 * Improved the error handling inside the `addResourcePath()` function, to give end users more informative error messages when the `directoryPath` argument cannot be normalized. This is especially useful for `runtime: shiny_prerendered` Rmd documents, like `learnr` tutorials. (#1968)
 

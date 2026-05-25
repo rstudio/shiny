@@ -60,10 +60,6 @@ function getStyle(el: Element, styleProp: string): string | undefined {
 }
 
 function isVisible(el: HTMLElement): boolean {
-  if (typeof el.checkVisibility === "function") {
-    return el.checkVisibility();
-  }
-  // Fallback for browsers that don't support checkVisibility (Safari < 17.4)
   if (el.offsetWidth !== 0 || el.offsetHeight !== 0) {
     return true;
   }

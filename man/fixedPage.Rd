@@ -47,7 +47,7 @@ layout functions like \code{sidebarLayout}, rather, all layout must be done
 with \code{fixedRow} and \code{column}.
 }
 \note{
-See the \href{https://shiny.rstudio.com/articles/layout-guide.html}{ Shiny Application Layout Guide} for additional details on laying out fixed
+See the \href{https://shiny.posit.co/articles/layout-guide.html}{ Shiny Application Layout Guide} for additional details on laying out fixed
 pages.
 }
 \examples{
@@ -73,13 +73,13 @@ shinyApp(ui, server = function(input, output) { })
 \seealso{
 \code{\link[=column]{column()}}
 
-Other layout functions: 
-\code{\link{fillPage}()},
-\code{\link{flowLayout}()},
-\code{\link{fluidPage}()},
-\code{\link{navbarPage}()},
-\code{\link{sidebarLayout}()},
-\code{\link{splitLayout}()},
-\code{\link{verticalLayout}()}
+Other layout functions:
+\code{\link[=fillPage]{fillPage()}},
+\code{\link[=flowLayout]{flowLayout()}},
+\code{\link[=fluidPage]{fluidPage()}},
+\code{\link[=navbarPage]{navbarPage()}},
+\code{\link[=sidebarLayout]{sidebarLayout()}},
+\code{\link[=splitLayout]{splitLayout()}},
+\code{\link[=verticalLayout]{verticalLayout()}}
 }
 \concept{layout functions}

@@ -19,7 +19,7 @@ is.reactive(x)
 }
 \arguments{
 \item{x}{For \code{is.reactive()}, an object to test. For \code{reactive()}, an
-expression. When passing in a \code{\link[rlang:defusing-advanced]{rlang::quo()}}sure with \code{reactive()},
+expression. When passing in a \code{\link[rlang:quo]{rlang::quo()}}sure with \code{reactive()},
 remember to use \code{\link[rlang:inject]{rlang::inject()}} to distinguish that you are passing in
 the content of your quosure, not the expression of the quosure.}
 
@@ -58,7 +58,7 @@ invalidated, any other reactive expressions that recently called it are also
 marked as invalidated. In this way, invalidations ripple through the
 expressions that depend on each other.
 
-See the \href{https://shiny.rstudio.com/tutorial/}{Shiny tutorial} for
+See the \href{https://shiny.posit.co/tutorial/}{Shiny tutorial} for
 more information about reactive expressions.
 }
 \examples{

@@ -12,7 +12,7 @@ prebuilt widgets make it possible to build beautiful, responsive, and
 powerful applications with minimal effort.
 }
 \details{
-The Shiny tutorial at \url{https://shiny.rstudio.com/tutorial/} explains
+The Shiny tutorial at \url{https://shiny.posit.co/tutorial/} explains
 the framework in depth, walks you through building a simple application, and
 includes extensive annotated examples.
 }
@@ -24,6 +24,7 @@ includes extensive annotated examples.
 
 Authors:
 \itemize{
+  \item Carson Sievert \email{carson@posit.co} (\href{https://orcid.org/0000-0002-4958-2844}{ORCID})
   \item Winston Chang \email{winston@posit.co} (\href{https://orcid.org/0000-0002-1576-2126}{ORCID})
   \item Joe Cheng \email{joe@posit.co}
   \item JJ Allaire \email{jj@posit.co}

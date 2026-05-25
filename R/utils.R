@@ -76,12 +76,12 @@ withPrivateSeed <- function(expr) {
 
     if (hasOrigSeed) {
       .GlobalEnv$.Random.seed <- origSeed
+      # Need to call this to make sure that the value of .Random.seed gets put
+      # into R's internal RNG state. (Issue #1763)
+      httpuv::getRNGState()
     } else {
       rm(.Random.seed, envir = .GlobalEnv, inherits = FALSE)
     }
-    # Need to call this to make sure that the value of .Random.seed gets put
-    # into R's internal RNG state. (Issue #1763)
-    httpuv::getRNGState()
   })
 
   expr
@@ -1340,7 +1340,7 @@ checkEncoding <- function(file) {
   if (identical(charToRaw(readChar(file, 3L, TRUE)), charToRaw('\UFEFF'))) {
     warning('You should not include the Byte Order Mark (BOM) in ', file, '. ',
             'Please re-save it in UTF-8 without BOM. See ',
-            'https://shiny.rstudio.com/articles/unicode.html for more info.')
+            'https://shiny.posit.co/articles/unicode.html for more info.')
     return('UTF-8-BOM')
   }
   x <- readChar(file, size, useBytes = TRUE)

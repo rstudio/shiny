@@ -66,7 +66,7 @@ find_ancestor_session <- function(x, depth = 20) {
 #' Shiny's module feature lets you break complicated UI and server logic into
 #' smaller, self-contained pieces. Compared to large monolithic Shiny apps,
 #' modules are easier to reuse and easier to reason about. See the article at
-#' <https://shiny.rstudio.com/articles/modules.html> to learn more.
+#' <https://shiny.posit.co/articles/modules.html> to learn more.
 #'
 #' Starting in Shiny 1.5.0, we recommend using `moduleServer` instead of
 #' [`callModule()`], because the syntax is a little easier
@@ -107,7 +107,7 @@ find_ancestor_session <- function(x, depth = 20) {
 #' See the [session] help topic for details on composability and data ownership
 #' patterns when using `session$destroy()`.
 #'
-#' @seealso [session], [removeUI()], <https://shiny.rstudio.com/articles/modules.html>
+#' @seealso [session], [removeUI()], <https://shiny.posit.co/articles/modules.html>
 #'
 #' @examples
 #' # Define the UI for a module

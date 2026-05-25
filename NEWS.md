@@ -34,6 +34,8 @@
 
 * Loading shiny no longer creates `.Random.seed` in the global environment as a side effect. (#4382)
 
+* Closed #2884 (`selectInput()` turns `NA` into `"NA"`) by adding an option `keepNA` to `selectInput()` while maintaining previous behavior with default value `keepNA = FALSE`. (#3594)
+
 # shiny 1.13.0
 
 ## New features

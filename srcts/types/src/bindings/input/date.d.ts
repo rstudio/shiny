@@ -1,4 +1,3 @@
-/// <reference types="bootstrap-datepicker" />
 import { InputBinding } from "./inputBinding";
 declare global {
     interface JQuery {
@@ -9,7 +8,7 @@ declare global {
         bsDatepicker(methodName: string, params: Date | null): void;
     }
 }
-declare type DateReceiveMessageData = {
+type DateReceiveMessageData = {
     label: string;
     min?: Date | null;
     max?: Date | null;
@@ -31,8 +30,8 @@ declare class DateInputBindingBase extends InputBinding {
         parts: string[];
         separators: string[];
     }): string;
-    protected _setMin(el: HTMLElement, date: Date | null | undefined): void;
-    protected _setMax(el: HTMLElement, date: Date): void;
+    protected _setMin(el: HTMLElement, date: Date | null): void;
+    protected _setMax(el: HTMLElement, date: Date | null): void;
     protected _newDate(date: Date | never | string): Date | null;
     protected _floorDateTime(date: Date): Date;
     protected _dateAsUTC(date: Date): Date;
@@ -40,7 +39,7 @@ declare class DateInputBindingBase extends InputBinding {
 }
 declare class DateInputBinding extends DateInputBindingBase {
     getValue(el: HTMLElement): string;
-    setValue(el: HTMLElement, value: Date): void;
+    setValue(el: HTMLElement, value: Date | null): void;
     getState(el: HTMLElement): {
         label: string;
         value: string | null;
@@ -52,7 +51,7 @@ declare class DateInputBinding extends DateInputBindingBase {
         format: string;
         startview: DatepickerViewModes;
     };
-    receiveMessage(el: HTMLElement, data: DateReceiveMessageData): void;
+    receiveMessage(el: HTMLElement, data: DateReceiveMessageData): Promise<void>;
 }
 export { DateInputBinding, DateInputBindingBase };
 export type { DateReceiveMessageData };

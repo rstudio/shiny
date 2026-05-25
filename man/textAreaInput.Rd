@@ -13,7 +13,10 @@ textAreaInput(
   cols = NULL,
   rows = NULL,
   placeholder = NULL,
-  resize = NULL
+  resize = NULL,
+  ...,
+  autoresize = FALSE,
+  updateOn = c("change", "blur")
 )
 }
 \arguments{
@@ -40,12 +43,24 @@ If the \code{height} argument is specified, \code{height} will take precedence i
 browser's rendering.}
 
 \item{placeholder}{A character string giving the user a hint as to what can
-be entered into the control. Internet Explorer 8 and 9 do not support this
-option.}
+be entered into the control.}
 
 \item{resize}{Which directions the textarea box can be resized. Can be one of
 \code{"both"}, \code{"none"}, \code{"vertical"}, and \code{"horizontal"}. The default, \code{NULL},
 will use the client browser's default setting for resizing textareas.}
+
+\item{...}{Ignored, included to require named arguments and for future
+feature expansion.}
+
+\item{autoresize}{If \code{TRUE}, the textarea will automatically resize to fit
+the input text.}
+
+\item{updateOn}{A character vector specifying when the input should be
+updated. Options are \code{"change"} (default) and \code{"blur"}. Use \code{"change"} to
+update the input immediately whenever the value changes. Use \code{"blur"}to
+delay the input update until the input loses focus (the user moves away
+from the input), or when Enter is pressed (or Cmd/Ctrl + Enter for
+\code{\link[=textAreaInput]{textAreaInput()}}).}
 }
 \value{
 A textarea input control that can be added to a UI definition.
@@ -78,20 +93,20 @@ shinyApp(ui, server)
 \seealso{
 \code{\link[=updateTextAreaInput]{updateTextAreaInput()}}
 
-Other input elements: 
-\code{\link{actionButton}()},
-\code{\link{checkboxGroupInput}()},
-\code{\link{checkboxInput}()},
-\code{\link{dateInput}()},
-\code{\link{dateRangeInput}()},
-\code{\link{fileInput}()},
-\code{\link{numericInput}()},
-\code{\link{passwordInput}()},
-\code{\link{radioButtons}()},
-\code{\link{selectInput}()},
-\code{\link{sliderInput}()},
-\code{\link{submitButton}()},
-\code{\link{textInput}()},
-\code{\link{varSelectInput}()}
+Other input elements:
+\code{\link[=actionButton]{actionButton()}},
+\code{\link[=checkboxGroupInput]{checkboxGroupInput()}},
+\code{\link[=checkboxInput]{checkboxInput()}},
+\code{\link[=dateInput]{dateInput()}},
+\code{\link[=dateRangeInput]{dateRangeInput()}},
+\code{\link[=fileInput]{fileInput()}},
+\code{\link[=numericInput]{numericInput()}},
+\code{\link[=passwordInput]{passwordInput()}},
+\code{\link[=radioButtons]{radioButtons()}},
+\code{\link[=selectInput]{selectInput()}},
+\code{\link[=sliderInput]{sliderInput()}},
+\code{\link[=submitButton]{submitButton()}},
+\code{\link[=textInput]{textInput()}},
+\code{\link[=varSelectInput]{varSelectInput()}}
 }
 \concept{input elements}

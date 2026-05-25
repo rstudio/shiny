@@ -62,13 +62,13 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-Other layout functions: 
-\code{\link{fillPage}()},
-\code{\link{fixedPage}()},
-\code{\link{flowLayout}()},
-\code{\link{fluidPage}()},
-\code{\link{navbarPage}()},
-\code{\link{sidebarLayout}()},
-\code{\link{verticalLayout}()}
+Other layout functions:
+\code{\link[=fillPage]{fillPage()}},
+\code{\link[=fixedPage]{fixedPage()}},
+\code{\link[=flowLayout]{flowLayout()}},
+\code{\link[=fluidPage]{fluidPage()}},
+\code{\link[=navbarPage]{navbarPage()}},
+\code{\link[=sidebarLayout]{sidebarLayout()}},
+\code{\link[=verticalLayout]{verticalLayout()}}
 }
 \concept{layout functions}

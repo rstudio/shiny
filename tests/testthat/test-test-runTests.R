@@ -122,7 +122,7 @@ test_that("runTests runs as expected without rewiring", {
   appDir <- test_path(file.path("..", "test-helpers", "app1-standard"))
   df <- testthat::expect_output(
     print(runTests(appDir = appDir, assert = FALSE)),
-    "Shiny App Test Results\\n\\* Success\\n  - app1-standard/tests/runner1\\.R\\n  - app1-standard/tests/runner2\\.R"
+    "Shiny App Test Results\\n\\v Success\\n  - app1-standard/tests/runner1\\.R\\n  - app1-standard/tests/runner2\\.R"
   )
 
   expect_equal(df, data.frame(

@@ -1,6 +1,6 @@
 import $ from "jquery";
-import type { InputPolicy, InputPolicyOpts } from "./inputPolicy";
 import type { ShinyEventInputChanged } from "../events/shinyEvents";
+import type { InputPolicy, InputPolicyOpts } from "./inputPolicy";
 import { splitInputNameType } from "./splitInputNameType";
 
 class InputEventDecorator implements InputPolicy {
@@ -11,7 +11,7 @@ class InputEventDecorator implements InputPolicy {
   }
 
   setInput(nameType: string, value: unknown, opts: InputPolicyOpts): void {
-    const evt = jQuery.Event("shiny:inputchanged") as ShinyEventInputChanged;
+    const evt = $.Event("shiny:inputchanged") as ShinyEventInputChanged;
 
     const input = splitInputNameType(nameType);
 

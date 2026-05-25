@@ -42,7 +42,7 @@ In the example here, the \code{bindCache()} key consists of \code{input$x} and
 \code{input$y} combined, and the value is \code{input$x * input$y}. In this simple
 example, for any given key, there is only one possible returned value.
 
-\if{html}{\out{<div class="sourceCode NA">}}\preformatted{r <- reactive(\{ input$x * input$y \}) \%>\%
+\if{html}{\out{<div class="sourceCode">}}\preformatted{r <- reactive(\{ input$x * input$y \}) \%>\%
   bindCache(input$x, input$y)
 }\if{html}{\out{</div>}}
 
@@ -67,7 +67,7 @@ have a large data set with timestamps, it might make sense to extract the
 most recent timestamp and return that. Then, instead of hashing the entire
 data object, the cached reactive only needs to hash the timestamp.
 
-\if{html}{\out{<div class="sourceCode NA">}}\preformatted{r <- reactive(\{ compute(bigdata()) \} \%>\%
+\if{html}{\out{<div class="sourceCode">}}\preformatted{r <- reactive(\{ compute(bigdata()) \} \%>\%
   bindCache(\{ extract_most_recent_time(bigdata()) \})
 }\if{html}{\out{</div>}}
 
@@ -111,7 +111,7 @@ time that someone accesses the cached reactive. It is only re-executed if
 it has been invalidated by one of the reactives it depends on. For
 example, suppose we have this cached reactive:
 
-\if{html}{\out{<div class="sourceCode NA">}}\preformatted{r <- reactive(\{ input$x * input$y \}) \%>\%
+\if{html}{\out{<div class="sourceCode">}}\preformatted{r <- reactive(\{ input$x * input$y \}) \%>\%
  bindCache(input$x, input$y)
 }\if{html}{\out{</div>}}
 
@@ -166,8 +166,8 @@ instead of the default 200 MB:
 }\if{html}{\out{</div>}}
 
 To use different settings for a session-scoped cache, you can set
-\code{self$cache} at the top of your server function. By default, it will create
-a 200 MB memory cache for each session, but you can replace it with
+\code{session$cache} at the top of your server function. By default, it will
+create a 200 MB memory cache for each session, but you can replace it with
 something different. To use the session-scoped cache, you must also call
 \code{bindCache()} with \code{cache="session"}. This will create a 100 MB cache for
 the session:
@@ -182,7 +182,7 @@ If you want to use a cache that is shared across multiple R processes, you
 can use a \code{\link[cachem:cache_disk]{cachem::cache_disk()}}. You can create a application-level shared
 cache by putting this at the top of your app.R, server.R, or global.R:
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{shinyOptions(cache = cachem::cache_disk(file.path(dirname(tempdir()), "myapp-cache"))
+\if{html}{\out{<div class="sourceCode">}}\preformatted{shinyOptions(cache = cachem::cache_disk(file.path(dirname(tempdir()), "myapp-cache")))
 }\if{html}{\out{</div>}}
 
 This will create a subdirectory in your system temp directory named
@@ -234,8 +234,8 @@ With a cached reactive expression, the key and/or value expression can be
 promises, but rather objects provided by the
 \href{https://rstudio.github.io/promises/}{\pkg{promises}}  package, which
 are similar to promises in JavaScript. (See \code{\link[promises:promise]{promises::promise()}} for more
-information.) You can also use \code{\link[future:future]{future::future()}} objects to run code in a
-separate process or even on a remote machine.
+information.) You can also use \code{\link[mirai:mirai]{mirai::mirai()}} or \code{\link[future:future]{future::future()}}
+objects to run code in a separate process or even on a remote machine.
 
 If the value returns a promise, then anything that consumes the cached
 reactive must expect it to return a promise.
@@ -276,7 +276,7 @@ cache key, in addition to the one passed to \code{bindCache()} by the user. The
 cache hint can be viewed by calling the internal Shiny function
 \code{extractCacheHint()}:
 
-\if{html}{\out{<div class="sourceCode NA">}}\preformatted{r <- renderText(\{ input$x \})
+\if{html}{\out{<div class="sourceCode">}}\preformatted{r <- renderText(\{ input$x \})
 shiny:::extractCacheHint(r)
 }\if{html}{\out{</div>}}
 
@@ -448,7 +448,7 @@ shinyApp(
       bindEvent(input$go)
       # The cached, eventified reactive takes a reactive dependency on
       # input$go, but doesn't use it for the cache key. It uses input$x and
-      # input$y for the cache key, but doesn't take a reactive depdency on
+      # input$y for the cache key, but doesn't take a reactive dependency on
       # them, because the reactive dependency is superseded by addEvent().
 
     output$txt <- renderText(r())

@@ -1,6 +1,6 @@
 import type { InputPolicy, InputPolicyOpts } from "./inputPolicy";
 import type { InputRatePolicy } from "./inputRatePolicy";
-declare type RatePolicyModes = "debounce" | "direct" | "throttle";
+type RatePolicyModes = "debounce" | "direct" | "throttle";
 declare class InputRateDecorator implements InputPolicy {
     target: InputPolicy;
     inputRatePolicies: {

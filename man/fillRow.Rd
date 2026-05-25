@@ -32,9 +32,8 @@ not determined by the height of its contents.}
 \description{
 Creates row and column layouts with proportionally-sized cells, using the
 Flex Box layout model of CSS3. These can be nested to create arbitrary
-proportional-grid layouts. \strong{Warning:} Flex Box is not well supported
-by Internet Explorer, so these functions should only be used where modern
-browsers can be assumed.
+proportional-grid layouts. \strong{Note:} These functions require a browser with
+flexbox support.
 }
 \details{
 If you try to use \code{fillRow} and \code{fillCol} inside of other

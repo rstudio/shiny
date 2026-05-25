@@ -1,29 +1,29 @@
 import $ from "jquery";
-import { asArray } from "../../utils";
 import type { ErrorsMessageValue } from "../../shiny/shinyapp";
+import { asArray } from "../../utils";
 
 class OutputBinding {
-  name: string;
+  name!: string;
 
   // Returns a jQuery object or element array that contains the
   // descendants of scope that match this binding
   find(scope: HTMLElement | JQuery<HTMLElement>): JQuery<HTMLElement> {
     throw "Not implemented";
-    scope;
+    scope; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
-  renderValue(el: HTMLElement, data: unknown): void {
+  renderValue(el: HTMLElement, data: unknown): Promise<void> | void {
     throw "Not implemented";
-    el;
-    data;
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
+    data; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
 
   getId(el: HTMLElement): string {
     return el.getAttribute("data-input-id") || el.id;
   }
 
-  onValueChange(el: HTMLElement, data: unknown): void {
+  async onValueChange(el: HTMLElement, data: unknown): Promise<void> {
     this.clearError(el);
-    this.renderValue(el, data);
+    await this.renderValue(el, data);
   }
   onValueError(el: HTMLElement, err: ErrorsMessageValue): void {
     this.renderError(el, err);

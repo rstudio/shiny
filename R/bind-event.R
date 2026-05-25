@@ -196,31 +196,58 @@ bindEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE
   valueFunc <- reactive_get_value_func(x)
   valueFunc <- wrapFunctionLabel(valueFunc, "eventReactiveValueFunc", ..stacktraceon = TRUE)
 
-  label <- label %||%
-    sprintf('bindEvent(%s, %s)', attr(x, "observable", exact = TRUE)$.label, quos_to_label(qs))
+  call_srcref <- get_call_srcref(-1)
+  if (is.null(label)) {
+    label <- rassignSrcrefToLabel(
+      call_srcref,
+      defaultLabel = as_default_label(sprintf(
+        'bindEvent(%s, %s)',
+        attr(x, "observable", exact = TRUE)$.label,
+        quos_to_label(qs)
+      ))
+    )
+  }
+
+  x_classes <- class(x)
+  x_otel_attrs <- attr(x, "observable", exact = TRUE)$.otelAttrs
 
   # Don't hold on to the reference for x, so that it can be GC'd
   rm(x)
 
   initialized <- FALSE
 
-  res <- reactive(label = label, domain = domain, ..stacktraceon = FALSE, {
-    hybrid_chain(
-      eventFunc(),
-      function(value) {
-        if (ignoreInit && !initialized) {
-          initialized <<- TRUE
-          req(FALSE)
+  with_no_otel_collect({
+    res <- reactive(label = label, domain = domain, ..stacktraceon = FALSE, {
+      hybrid_chain(
+        {
+          eventFunc()
+        },
+        function(value) {
+          if (ignoreInit && !initialized) {
+            initialized <<- TRUE
+            req(FALSE)
+          }
+
+          req(!ignoreNULL || !isNullEvent(value))
+
+          isolate(valueFunc())
         }
-
-        req(!ignoreNULL || !isNullEvent(value))
-
-        isolate(valueFunc())
-      }
-    )
+      )
+    })
   })
 
-  class(res) <- c("reactive.event", class(res))
+  class(res) <- c("reactive.event", x_classes)
+
+  local({
+    impl <- attr(res, "observable", exact = TRUE)
+    impl$.otelAttrs <- append_otel_srcref_attrs(x_otel_attrs, call_srcref, fn_name = "bindEvent")
+  })
+
+
+  if (has_otel_collect("reactivity")) {
+    res <- enable_otel_reactive_expr(res)
+  }
+
   res
 }
 
@@ -249,6 +276,7 @@ bindEvent.shiny.render.function <- function(x, ..., ignoreNULL = TRUE, ignoreIni
     )
   }
 
+  # Passes over the otelAttrs from valueFunc to renderFunc
   renderFunc <- addAttributes(renderFunc, renderFunctionAttributes(valueFunc))
   class(renderFunc) <- c("shiny.render.function.event", class(valueFunc))
   renderFunc
@@ -269,7 +297,17 @@ bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
 
   # Note that because the observer will already have been logged by this point,
   # this updated label won't show up in the reactlog.
-  x$.label <- label %||% sprintf('bindEvent(%s, %s)', x$.label, quos_to_label(qs))
+  if (is.null(label)) {
+    call_srcref <- get_call_srcref(-1)
+    x$.label <- rassignSrcrefToLabel(
+      call_srcref,
+      defaultLabel = as_default_label(
+        sprintf('bindEvent(%s, %s)', x$.label, quos_to_label(qs))
+      )
+    )
+  } else {
+    x$.label <- label
+  }
 
   initialized <- FALSE
 
@@ -302,6 +340,13 @@ bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
   )
 
   class(x) <- c("Observer.event", class(x))
+  call_srcref <- get_call_srcref(-1)
+  x$.otelAttrs <- append_otel_srcref_attrs(x$.otelAttrs, call_srcref, fn_name = "bindEvent")
+
+  if (has_otel_collect("reactivity")) {
+    x <- enable_otel_observe(x)
+  }
+
   invisible(x)
 }
 

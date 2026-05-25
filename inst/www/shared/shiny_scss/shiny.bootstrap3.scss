@@ -1,0 +1,34 @@
+$bg: $body-bg !default;
+$fg: $text-color !default; // BS3
+$theme-colors: ("primary": $brand-primary, "info": $brand-info, "warning": $brand-warning, "danger": $brand-danger) !default;
+
+// No $border-width, $border-color, or $border-radius in BS3
+$border-width: 1px !default;
+$border-color: mix($bg, $fg, 70%) !default;
+$border-radius: $border-radius-base !default;
+
+$shiny-disconnected-bg:             mix($bg, $fg, 58%) !default;
+$shiny-table-na:                    mix($bg, $fg, 54%) !default;
+$shiny-error-validated-color:       mix($bg, $fg, 50%) !default;
+$shiny-progress-text-bg-color:      #eef8ff !default;
+$shiny-input-panel-bg:              mix($bg, $fg, 96%) !default;
+$shiny-input-panel-border:          $border-width solid $border-color !default;
+$shiny-input-panel-border-radius:   $border-radius !default;
+$shiny-text-output-border-radius:   $border-radius !default;
+$notification-bg-color:             mix($bg, $fg, 90%) !default;
+$notification-color:                $fg !default;
+$notification-border:               $border-width solid $border-color !default;
+$notification-border-radius:        $border-radius !default;
+$notification-message-bg:           mix($bg, map-get($theme-colors, "info"), 90%) !default;
+$notification-message-color:        mix($fg, map-get($theme-colors, "info"), 10%) !default;
+$notification-message-border:       $border-width solid mix($bg, map-get($theme-colors, "info"), 53%) !default;
+$notification-warning-bg:           mix($bg, map-get($theme-colors, "warning"), 90%) !default;
+$notification-warning-color:        mix($fg, map-get($theme-colors, "warning"), 10%) !default;
+$notification-warning-border:       $border-width solid mix($bg, map-get($theme-colors, "warning"), 71%) !default;
+$notification-error-bg:             mix($bg, map-get($theme-colors, "danger"), 90%) !default;
+$notification-error-color:          mix($fg, map-get($theme-colors, "danger"), 10%) !default;
+$notification-error-border:         $border-width solid mix($bg, map-get($theme-colors, "danger"), 79%) !default;
+$notification-close-color:          mix($bg, $fg, 20%) !default;
+$notification-close-hover-color:    $fg !default;
+$notification-content-action-color: map-get($theme-colors, "primary") !default;
+$datepicker-disabled-color:         $dropdown-link-disabled-color !default;

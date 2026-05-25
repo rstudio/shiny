@@ -1,4 +1,3 @@
-/// <reference types="jquery" />
 import type { InputBinding } from "../bindings/input/inputBinding";
 import type { OutputBindingAdapter } from "../bindings/outputAdapter";
 import type { EventPriority } from "../inputPolicies/inputPolicy";
@@ -31,4 +30,4 @@ interface ShinyEventMessage extends JQuery.Event {
         [key: string]: unknown;
     };
 }
-export type { ShinyEventInputChanged, ShinyEventUpdateInput, ShinyEventValue, ShinyEventError, ShinyEventMessage, };
+export type { ShinyEventError, ShinyEventInputChanged, ShinyEventMessage, ShinyEventUpdateInput, ShinyEventValue, };

@@ -159,8 +159,8 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'   ```
 #'
 #'   To use different settings for a session-scoped cache, you can set
-#'   `self$cache` at the top of your server function. By default, it will create
-#'   a 200 MB memory cache for each session, but you can replace it with
+#'   `session$cache` at the top of your server function. By default, it will
+#'   create a 200 MB memory cache for each session, but you can replace it with
 #'   something different. To use the session-scoped cache, you must also call
 #'   `bindCache()` with `cache="session"`. This will create a 100 MB cache for
 #'   the session:
@@ -177,7 +177,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'   cache by putting this at the top of your app.R, server.R, or global.R:
 #'
 #'   ```
-#'   shinyOptions(cache = cachem::cache_disk(file.path(dirname(tempdir()), "myapp-cache"))
+#'   shinyOptions(cache = cachem::cache_disk(file.path(dirname(tempdir()), "myapp-cache")))
 #'   ```
 #'
 #'   This will create a subdirectory in your system temp directory named
@@ -231,8 +231,8 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'   promises, but rather objects provided by the
 #'   \href{https://rstudio.github.io/promises/}{\pkg{promises}}  package, which
 #'   are similar to promises in JavaScript. (See [promises::promise()] for more
-#'   information.) You can also use [future::future()] objects to run code in a
-#'   separate process or even on a remote machine.
+#'   information.) You can also use [mirai::mirai()] or [future::future()]
+#'   objects to run code in a separate process or even on a remote machine.
 #'
 #'   If the value returns a promise, then anything that consumes the cached
 #'   reactive must expect it to return a promise.
@@ -453,7 +453,7 @@ utils::globalVariables(".GenericCallEnv", add = TRUE)
 #'       bindEvent(input$go)
 #'       # The cached, eventified reactive takes a reactive dependency on
 #'       # input$go, but doesn't use it for the cache key. It uses input$x and
-#'       # input$y for the cache key, but doesn't take a reactive depdency on
+#'       # input$y for the cache key, but doesn't take a reactive dependency on
 #'       # them, because the reactive dependency is superseded by addEvent().
 #'
 #'     output$txt <- renderText(r())
@@ -478,7 +478,12 @@ bindCache.default <- function(x, ...) {
 bindCache.reactiveExpr <- function(x, ..., cache = "app") {
   check_dots_unnamed()
 
-  label <- exprToLabel(substitute(key), "cachedReactive")
+  call_srcref <- get_call_srcref(-1)
+  label <- rassignSrcrefToLabel(
+    call_srcref,
+    defaultLabel = exprToLabel(substitute(x), "cachedReactive")
+  )
+
   domain <- reactive_get_domain(x)
 
   # Convert the ... to a function that returns their evaluated values.
@@ -490,24 +495,37 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
   cacheHint <- rlang::hash(extractCacheHint(x))
   valueFunc <- wrapFunctionLabel(valueFunc, "cachedReactiveValueFunc", ..stacktraceon = TRUE)
 
+  x_classes <- class(x)
+  x_otel_attrs <- attr(x, "observable", exact = TRUE)$.otelAttrs
+
   # Don't hold on to the reference for x, so that it can be GC'd
   rm(x)
   # Hacky workaround for issue with `%>%` preventing GC:
   # https://github.com/tidyverse/magrittr/issues/229
-  if (exists(".GenericCallEnv") && exists(".", envir = .GenericCallEnv)) {
-    rm(list = ".", envir = .GenericCallEnv)
+  if (exists(".GenericCallEnv") && exists(".", envir = .GenericCallEnv, inherits = FALSE)) {
+    rm(list = ".", envir = .GenericCallEnv, inherits = FALSE)
   }
 
-
-  res <- reactive(label = label, domain = domain, {
-    cache <- resolve_cache_object(cache, domain)
-    hybrid_chain(
-      keyFunc(),
-      generateCacheFun(valueFunc, cache, cacheHint, cacheReadHook = identity, cacheWriteHook = identity)
-    )
+  with_no_otel_collect({
+    res <- reactive(label = label, domain = domain, {
+      cache <- resolve_cache_object(cache, domain)
+      hybrid_chain(
+        keyFunc(),
+        generateCacheFun(valueFunc, cache, cacheHint, cacheReadHook = identity, cacheWriteHook = identity)
+      )
+    })
   })
 
   class(res) <- c("reactive.cache", class(res))
+
+  local({
+    impl <- attr(res, "observable", exact = TRUE)
+    impl$.otelAttrs <- append_otel_srcref_attrs(x_otel_attrs, call_srcref, fn_name = "bindCache")
+  })
+
+  if (has_otel_collect("reactivity")) {
+    res <- enable_otel_reactive_expr(res)
+  }
   res
 }
 
@@ -534,6 +552,7 @@ bindCache.shiny.render.function <- function(x, ..., cache = "app") {
     )
   }
 
+  # Passes over the otelAttrs from valueFunc to renderFunc
   renderFunc <- addAttributes(renderFunc, renderFunctionAttributes(valueFunc))
   class(renderFunc) <- c("shiny.render.function.cache", class(valueFunc))
   renderFunc
@@ -585,7 +604,7 @@ bindCache.shiny.renderPlot <- function(x, ...,
 
     observe({
       doResizeCheck()
-    })
+    }, label = "plot-resize")
     # TODO: Make sure this observer gets GC'd if output$foo is replaced.
     # Currently, if you reassign output$foo, the observer persists until the
     # session ends. This is generally bad programming practice and should be

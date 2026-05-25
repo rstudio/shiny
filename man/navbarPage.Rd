@@ -46,7 +46,7 @@ the top (\code{"fixed-top"}), or pinned at the bottom
 (\code{"fixed-bottom"}). Note that using \code{"fixed-top"} or
 \code{"fixed-bottom"} will cause the navbar to overlay your body content,
 unless you add padding, e.g.: \code{tags$style(type="text/css", "body
-  {padding-top: 70px;}")}}
+{padding-top: 70px;}")}}
 
 \item{header}{Tag or list of tags to display as a common header above all
 tabPanels.}
@@ -58,8 +58,7 @@ tabPanels}
 navigation bar}
 
 \item{collapsible}{\code{TRUE} to automatically collapse the navigation
-elements into a menu when the width of the browser is less than 940 pixels
-(useful for viewing on smaller touchscreen device)}
+elements into an expandable menu on mobile devices or narrow window widths.}
 
 \item{fluid}{\code{TRUE} to use a fluid layout. \code{FALSE} to use a fixed
 layout.}
@@ -122,13 +121,13 @@ navbarPage("App Title",
 \code{\link[=updateNavbarPage]{updateNavbarPage()}}, \code{\link[=insertTab]{insertTab()}},
 \code{\link[=showTab]{showTab()}}
 
-Other layout functions: 
-\code{\link{fillPage}()},
-\code{\link{fixedPage}()},
-\code{\link{flowLayout}()},
-\code{\link{fluidPage}()},
-\code{\link{sidebarLayout}()},
-\code{\link{splitLayout}()},
-\code{\link{verticalLayout}()}
+Other layout functions:
+\code{\link[=fillPage]{fillPage()}},
+\code{\link[=fixedPage]{fixedPage()}},
+\code{\link[=flowLayout]{flowLayout()}},
+\code{\link[=fluidPage]{fluidPage()}},
+\code{\link[=sidebarLayout]{sidebarLayout()}},
+\code{\link[=splitLayout]{splitLayout()}},
+\code{\link[=verticalLayout]{verticalLayout()}}
 }
 \concept{layout functions}

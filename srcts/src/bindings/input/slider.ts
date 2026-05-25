@@ -1,10 +1,14 @@
+import type {
+  IonRangeSliderEvent,
+  IonRangeSliderOptions,
+} from "ion-rangeslider";
 import $ from "jquery";
 // import { NameValueHTMLElement } from ".";
 import {
-  formatDateUTC,
-  updateLabel,
   $escape,
-  hasOwnProperty,
+  formatDateUTC,
+  hasDefinedProperty,
+  updateLabel,
 } from "../../utils";
 
 import type { TextHTMLElement } from "./text";
@@ -28,6 +32,11 @@ type SliderReceiveMessageData = {
   min?: number;
   max?: number;
   step?: number;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  "data-type"?: string;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  "time-format"?: string;
+  timezone?: string;
 };
 
 // MUST use window.strftime as the javascript dependency is dynamic
@@ -42,7 +51,7 @@ declare global {
 }
 
 // Necessary to get hidden sliders to send their updated values
-function forceIonSliderUpdate(slider) {
+function forceIonSliderUpdate(slider: any) {
   if (slider.$cache && slider.$cache.input)
     slider.$cache.input.trigger("change");
   else console.log("Couldn't force ion slider to update");
@@ -52,7 +61,7 @@ type Prettify = (num: number) => string;
 function getTypePrettifyer(
   dataType: string,
   timeFormat: string,
-  timezone: string
+  timezone: string,
 ) {
   let timeFormatter: TimeFormatter;
   let prettify: Prettify;
@@ -73,7 +82,7 @@ function getTypePrettifyer(
     // The default prettify function for ion.rangeSlider adds thousands
     // separators after the decimal mark, so we have our own version here.
     // (#1958)
-    prettify = function (num) {
+    prettify = function (this: IonRangeSliderOptions, num: number) {
       // When executed, `this` will refer to the `IonRangeSlider.options`
       // object.
       return formatNumber(num, this.prettify_separator);
@@ -104,18 +113,18 @@ class SliderInputBinding extends TextInputBindingBase {
     return $(scope).find("input.js-range-slider");
   }
 
-  getType(el: HTMLElement): string | false {
+  getType(el: HTMLElement): string | null {
     const dataType = $(el).data("data-type");
 
     if (dataType === "date") return "shiny.date";
     else if (dataType === "datetime") return "shiny.datetime";
-    else return false;
+    else return null;
   }
   getValue(
-    el: TextHTMLElement
+    el: TextHTMLElement,
   ): number | string | [number | string, number | string] {
     const $el = $(el);
-    const result = $(el).data("ionRangeSlider").result;
+    const result = $(el).data("ionRangeSlider").result as IonRangeSliderEvent;
 
     // Function for converting numeric value from slider to appropriate type.
     let convert: (val: unknown) => number | string;
@@ -144,7 +153,7 @@ class SliderInputBinding extends TextInputBindingBase {
   }
   setValue(
     el: HTMLElement,
-    value: number | string | [number | string, number | string]
+    value: number | string | [number | string, number | string],
   ): void {
     const $el = $(el);
     const slider = $el.data("ionRangeSlider");
@@ -170,7 +179,10 @@ class SliderInputBinding extends TextInputBindingBase {
   unsubscribe(el: HTMLElement): void {
     $(el).off(".sliderInputBinding");
   }
-  receiveMessage(el: HTMLElement, data: SliderReceiveMessageData): void {
+  async receiveMessage(
+    el: HTMLElement,
+    data: SliderReceiveMessageData,
+  ): Promise<void> {
     const $el = $(el);
     const slider = $el.data("ionRangeSlider");
     const msg: {
@@ -182,35 +194,55 @@ class SliderInputBinding extends TextInputBindingBase {
       prettify?: Prettify;
     } = {};
 
-    if (hasOwnProperty(data, "value")) {
+    if (hasDefinedProperty(data, "value")) {
       if (numValues(el) === 2 && data.value instanceof Array) {
         msg.from = data.value[0];
         msg.to = data.value[1];
       } else {
-        msg.from = data.value as number | string;
+        if (Array.isArray(data.value)) {
+          const errorReason = [
+            "an empty array.",
+            "a single-value array.",
+            "an array with more than two values.",
+          ];
+          throw (
+            "Slider requires two values to update with an array, " +
+            "but message value was " +
+            errorReason[Math.min(data.value.length, 2)]
+          );
+        }
+        msg.from = data.value;
       }
     }
 
-    const sliderFeatures = ["min", "max", "step"];
+    const sliderFeatures: Array<"max" | "min" | "step"> = [
+      "min",
+      "max",
+      "step",
+    ];
 
     for (let i = 0; i < sliderFeatures.length; i++) {
       const feats = sliderFeatures[i];
 
-      if (hasOwnProperty(data, feats)) {
+      if (hasDefinedProperty(data, feats)) {
         msg[feats] = data[feats];
       }
     }
 
-    updateLabel(data.label, getLabelNode(el));
+    await updateLabel(data.label, getLabelNode(el));
 
     // (maybe) update data elements
-    const domElements = ["data-type", "time-format", "timezone"];
+    const domElements: Array<"data-type" | "time-format" | "timezone"> = [
+      "data-type",
+      "time-format",
+      "timezone",
+    ];
 
     for (let i = 0; i < domElements.length; i++) {
       const elem = domElements[i];
 
-      if (hasOwnProperty(data, elem)) {
-        $el.data(elem, data[elem]);
+      if (hasDefinedProperty(data, elem)) {
+        $el.data(elem, data[elem]!);
       }
     }
 
@@ -234,12 +266,13 @@ class SliderInputBinding extends TextInputBindingBase {
       policy: "debounce",
       delay: 250,
     };
-    el;
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
   // TODO-barret Why not implemented?
   getState(el: HTMLInputElement): void {
     // empty
-    el;
+    return;
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
 
   initialize(el: HTMLElement): void {
@@ -265,14 +298,14 @@ class SliderInputBinding extends TextInputBindingBase {
 function formatNumber(
   num: number,
   thousandSep = ",",
-  decimalSep = "."
+  decimalSep = ".",
 ): string {
   const parts = num.toString().split(".");
 
   // Add separators to portion before decimal mark.
   parts[0] = parts[0].replace(
     /(\d{1,3}(?=(?:\d\d\d)+(?!\d)))/g,
-    "$1" + thousandSep
+    "$1" + thousandSep,
   );
 
   if (parts.length === 1) return parts[0];
@@ -284,12 +317,12 @@ function formatNumber(
 $(document).on("click", ".slider-animate-button", function (evt: Event) {
   evt.preventDefault();
   const self = $(this);
-  const target = $("#" + $escape(self.attr("data-target-id")));
+  const target = $("#" + $escape(self.attr("data-target-id") as string));
   const startLabel = "Play";
   const stopLabel = "Pause";
   const loop =
     self.attr("data-loop") !== undefined &&
-    !/^\s*false\s*$/i.test(self.attr("data-loop"));
+    !/^\s*false\s*$/i.test(self.attr("data-loop") as string);
   let animInterval = self.attr("data-interval") as number | string;
 
   if (isNaN(animInterval as number)) animInterval = 1500;
@@ -343,14 +376,14 @@ $(document).on("click", ".slider-animate-button", function (evt: Event) {
         const val: { from: number; to?: number } = {
           from: Math.min(
             slider.result.max,
-            slider.result.from + slider.options.step
+            slider.result.from + slider.options.step,
           ),
         };
 
         if (slider.options.type === "double")
           val.to = Math.min(
             slider.result.max,
-            slider.result.to + slider.options.step
+            slider.result.to + slider.options.step,
           );
 
         slider.update(val);

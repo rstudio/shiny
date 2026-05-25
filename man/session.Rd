@@ -96,9 +96,10 @@ The equivalent of hitting the browser's Reload button. Only works if the
 session is actually connected.
 }
 \item{request}{
-An environment that implements the Rook specification for HTTP requests.
-This is the request that was used to initiate the websocket connection
-(as opposed to the request that downloaded the web page for the app).
+An environment that implements the \href{https://github.com/jeffreyhorner/Rook#the-environment}{Rook specification} for
+HTTP requests. This is the request that was used to initiate the websocket
+connection (as opposed to the request that downloaded the web page for the
+app).
 }
 \item{userData}{
 An environment for app authors and module/package authors to store whatever
@@ -120,7 +121,7 @@ any \code{imageOutput} or \code{plotOutput} in the app.
 Sends a custom message to the web page. \code{type} must be a
 single-element character vector giving the type of message, while
 \code{message} can be any jsonlite-encodable value. Custom messages
-have no meaning to Shiny itself; they are used soley to convey information
+have no meaning to Shiny itself; they are used solely to convey information
 to custom JavaScript logic in the browser. You can do this by adding
 JavaScript code to the browser that calls
 \code{Shiny.addCustomMessageHandler(type, function(message){...})}

@@ -1,6 +1,9 @@
-import type { EventPriority } from "./inputPolicy";
-import type { InputPolicy, InputPolicyOpts } from "./inputPolicy";
-import { hasOwnProperty } from "../utils";
+import { hasDefinedProperty } from "../utils";
+import type {
+  EventPriority,
+  InputPolicy,
+  InputPolicyOpts,
+} from "./inputPolicy";
 
 class InputDeferDecorator implements InputPolicy {
   pendingInput: {
@@ -18,7 +21,7 @@ class InputDeferDecorator implements InputPolicy {
   }
   submit(): void {
     for (const nameType in this.pendingInput) {
-      if (hasOwnProperty(this.pendingInput, nameType)) {
+      if (hasDefinedProperty(this.pendingInput, nameType)) {
         const { value, opts } = this.pendingInput[nameType];
 
         this.target.setInput(nameType, value, opts);

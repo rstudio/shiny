@@ -16,6 +16,60 @@ processId <- local({
   }
 })
 
+ctx_otel_info_obj <- function(
+  isRecordingOtel = FALSE,
+  otelLabel = "<unknown>",
+  otelAttrs = list()
+) {
+  structure(
+    list(
+      isRecordingOtel = isRecordingOtel,
+      otelLabel = otelLabel,
+      otelAttrs = otelAttrs
+    ),
+    class = "ctx_otel_info"
+  )
+}
+
+with_otel_span_context <- function(otel_info, expr, domain) {
+  if (!otel_is_tracing_enabled()) {
+    return(force(expr))
+  }
+
+  isRecordingOtel <- .subset2(otel_info, "isRecordingOtel")
+  otelLabel <- .subset2(otel_info, "otelLabel")
+  otelAttrs <- .subset2(otel_info, "otelAttrs")
+
+  # Always set the reactive update span as active
+  # This ensures that any spans created within the reactive context
+  # are at least children of the reactive update span
+  maybe_with_otel_span_reactive_update(domain = domain, {
+    if (isRecordingOtel) {
+      with_otel_span(
+        otelLabel,
+        {
+          # Works with both sync and async expressions
+          # Needed for both observer and reactive contexts
+          hybrid_then(
+            expr,
+            on_failure = set_otel_exception_status_and_throw,
+            # Must upgrade the error object
+            tee = FALSE
+          )
+        },
+        # expr,
+        attributes = otelAttrs
+      )
+    } else {
+      force(expr)
+    }
+  })
+
+}
+
+
+
+
 #' @include graph.R
 Context <- R6Class(
   'Context',
@@ -33,11 +87,14 @@ Context <- R6Class(
     .pid = NULL,
     .weak = NULL,
 
+    .otel_info = NULL,
+
     initialize = function(
       domain, label='', type='other', prevId='',
       reactId = rLog$noReactId,
       id = .getReactiveEnvironment()$nextId(), # For dummy context
-      weak = FALSE
+      weak = FALSE,
+      otel_info = ctx_otel_info_obj()
     ) {
       id <<- id
       .label <<- label
@@ -47,16 +104,27 @@ Context <- R6Class(
       .reactType <<- type
       .weak <<- weak
       rLog$createContext(id, label, type, prevId, domain)
+      if (!is.null(otel_info)) {
+        if (IS_SHINY_LOCAL_PKG) {
+          stopifnot(inherits(otel_info, "ctx_otel_info"))
+        }
+        .otel_info <<- otel_info
+      }
     },
     run = function(func) {
       "Run the provided function under this context."
 
+      # Use `promises::` as it shows up in the stack trace
       promises::with_promise_domain(reactivePromiseDomain(), {
         withReactiveDomain(.domain, {
-          env <- .getReactiveEnvironment()
-          rLog$enter(.reactId, id, .reactType, .domain)
-          on.exit(rLog$exit(.reactId, id, .reactType, .domain), add = TRUE)
-          env$runWith(self, func)
+          with_otel_span_context(.otel_info, domain = .domain, {
+            captureStackTraces({
+              env <- .getReactiveEnvironment()
+              rLog$enter(.reactId, id, .reactType, .domain)
+              on.exit(rLog$exit(.reactId, id, .reactType, .domain), add = TRUE)
+              env$runWith(self, func)
+            })
+          })
         })
       })
     },
@@ -219,27 +287,31 @@ getDummyContext <- function() {
 
 wrapForContext <- function(func, ctx) {
   force(func)
-  force(ctx)
+  force(ctx) # may be NULL (in the case of maskReactiveContext())
 
   function(...) {
-    ctx$run(function() {
-      captureStackTraces(
-        func(...)
-      )
+    .getReactiveEnvironment()$runWith(ctx, function() {
+      func(...)
     })
   }
 }
 
 reactivePromiseDomain <- function() {
-  promises::new_promise_domain(
+  new_promise_domain(
     wrapOnFulfilled = function(onFulfilled) {
       force(onFulfilled)
-      ctx <- getCurrentContext()
+
+      # ctx will be NULL if we're in a maskReactiveContext()
+      ctx <- if (hasCurrentContext()) getCurrentContext() else NULL
+
       wrapForContext(onFulfilled, ctx)
     },
     wrapOnRejected = function(onRejected) {
       force(onRejected)
-      ctx <- getCurrentContext()
+
+      # ctx will be NULL if we're in a maskReactiveContext()
+      ctx <- if (hasCurrentContext()) getCurrentContext() else NULL
+
       wrapForContext(onRejected, ctx)
     }
   )

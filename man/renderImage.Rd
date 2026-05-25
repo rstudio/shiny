@@ -125,6 +125,9 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-For more details on how the images are generated, and how to control
+\itemize{
+\item For more details on how the images are generated, and how to control
 the output, see \code{\link[=plotPNG]{plotPNG()}}.
+\item Use \code{\link[=outputOptions]{outputOptions()}} to set general output options for an image output.
+}
 }

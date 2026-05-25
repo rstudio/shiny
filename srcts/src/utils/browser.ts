@@ -25,4 +25,4 @@ function IEVersion(): number {
   return versionIE;
 }
 
-export { isQt, isIE, IEVersion, setIsQt, setIsIE, setIEVersion };
+export { IEVersion, isIE, isQt, setIEVersion, setIsIE, setIsQt };

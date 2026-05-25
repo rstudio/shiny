@@ -5,12 +5,20 @@ version <- "2.3.1"
 # types_version <- version
 types_version <- "2.3.0"
 
-zip_src <- sprintf("https://github.com/IonDen/ion.rangeSlider/archive/%s.zip", version)
+zip_src <- sprintf(
+  "https://github.com/IonDen/ion.rangeSlider/archive/%s.zip",
+  version
+)
 zip_target <- file.path(tmpdir, "ion.zip")
 download.file(zip_src, zip_target)
 unzip(zip_target, exdir = dirname(zip_target))
 src <- file.path(dirname(zip_target), paste0("ion.rangeSlider-", version))
-target <- rprojroot::find_package_root_file("inst", "www", "shared", "ionrangeslider")
+target <- rprojroot::find_package_root_file(
+  "inst",
+  "www",
+  "shared",
+  "ionrangeslider"
+)
 unlink(target, recursive = TRUE)
 dir.create(target)
 # Move over JS files
@@ -21,7 +29,7 @@ file.rename(
 
 # Grab less src files and convert to sass
 # Use `npx` to temp install and execute on the entire less folder
-system(paste0("npx less2sass ", file.path(src, "less")))
+system(paste0("npx --yes less2sass ", file.path(src, "less")))
 
 # Copy over only the base (i.e., core) scss that we need for the shiny skin
 dir.create(file.path(target, "scss"))
@@ -40,33 +48,37 @@ writeLines(
 # Apply git patches *before* compiling skin Sass -> CSS (this should add the shiny skin)
 patch_dir <- rprojroot::find_package_root_file("tools/ion.rangeSlider-patches")
 for (patch in list.files(patch_dir, full.names = TRUE)) {
-  tryCatch({
-    message(sprintf("Applying %s", basename(patch)))
-    withr::with_dir(rprojroot::find_package_root_file(), system(sprintf("git apply %s", patch)))
-  },
+  tryCatch(
+    {
+      message(sprintf("Applying %s", basename(patch)))
+      withr::with_dir(
+        rprojroot::find_package_root_file(),
+        system(sprintf("git apply %s", patch))
+      )
+    },
     error = function(e) {
       quit(save = "no", status = 1)
     }
   )
 }
 
-
 # Now compile Sass -> CSS so that if the default styles are requested, we
 # can serve them up without compilation (The distributed CSS includes all
 # the skins in the same CSS file, but we want them split up)
 library(sass)
 withr::with_dir(
-  target, {
+  target,
+  {
     dir.create("css")
     sass_partial(
       sass_file("scss/shiny.scss"),
       bslib::bs_theme(version = 3),
       output = "css/ion.rangeSlider.css",
-      options = sass_options()
+      options = sass_options(),
+      write_attachments = FALSE
     )
   }
 )
-
 
 # Save version to R file
 writeLines(
@@ -77,16 +89,13 @@ writeLines(
   rprojroot::find_package_root_file("R", "version_ion_range_slider.R")
 )
 
-
-
-
-# Finally, run yarn build so the JS patches propogate to the minified files
+# Finally, run `npm run build` so the JS patches propogate to the minified files
 withr::with_dir(rprojroot::find_package_root_file(), {
-  exit_code <- system(paste0("yarn add --dev ion-rangeslider@", version))
-  if (exit_code != 0) stop("yarn could not install ion-rangeslider")
+  # exit_code <- system(paste0("npm install --save-dev --save-exact ion-rangeslider@", version))
+  # if (exit_code != 0) stop("npm could not install ion-rangeslider")
 
-  exit_code <- system(paste0("yarn add @types/ion-rangeslider@", types_version))
-  if (exit_code != 0) stop("yarn could not install @types/ion-rangeslider")
+  exit_code <- system(paste0("npm install --save --save-exact @types/ion-rangeslider@", types_version))
+  if (exit_code != 0) stop("npm could not install @types/ion-rangeslider")
 
-  system("yarn bundle_external_libs")
+  system("npm run bundle_external_libs")
 })

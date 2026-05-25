@@ -1,14 +1,37 @@
-import type { Shiny } from ".";
+import type { ShinyClass } from ".";
 import type { FileInputBinding } from "../bindings/input/fileinput";
 import type { OutputBindingAdapter } from "../bindings/outputAdapter";
 import type { EventPriority } from "../inputPolicies";
 import type { BindScope } from "./bind";
 import type { Handler, ShinyApp } from "./shinyapp";
 
-let fullShinyObj: Shiny = null;
+let fullShinyObj: FullShinyDef;
 
-function setShinyObj(shiny: Shiny): void {
-  fullShinyObj = shiny;
+// TODO-future; It would be nice to have a way to export this type value instead of / in addition to `Shiny`
+type FullShinyDef = Required<
+  Pick<
+    ShinyClass,
+    | "bindAll"
+    | "forgetLastInputValue"
+    | "initializeInputs"
+    | "oncustommessage"
+    | "setInputValue"
+    | "shinyapp"
+    | "unbindAll"
+    | "user"
+  >
+> &
+  ShinyClass;
+
+function setShinyObj(shiny: ShinyClass): void {
+  fullShinyObj = shiny as FullShinyDef;
+}
+
+function validateShinyHasBeenSet(): FullShinyDef {
+  if (typeof fullShinyObj === "undefined") {
+    throw "Shiny has not finish initialization yet. Please wait for the 'shiny-initialized' event.";
+  }
+  return fullShinyObj;
 }
 
 //// 2021/03: TypeScript Conversion note
@@ -19,42 +42,45 @@ function setShinyObj(shiny: Shiny): void {
 function shinySetInputValue(
   name: string,
   value: unknown,
-  opts?: { priority?: EventPriority }
+  opts?: { priority?: EventPriority },
 ): void {
-  fullShinyObj.setInputValue(name, value, opts);
+  validateShinyHasBeenSet().setInputValue(name, value, opts);
 }
 function shinyShinyApp(): ShinyApp {
-  return fullShinyObj.shinyapp;
+  return validateShinyHasBeenSet().shinyapp;
 }
 function setShinyUser(user: string): void {
-  fullShinyObj.user = user;
+  validateShinyHasBeenSet().user = user;
 }
 function shinyForgetLastInputValue(name: string): void {
-  fullShinyObj.forgetLastInputValue(name);
+  validateShinyHasBeenSet().forgetLastInputValue(name);
 }
-function shinyBindAll(scope: BindScope): void {
-  fullShinyObj.bindAll(scope);
+async function shinyBindAll(scope: BindScope): Promise<void> {
+  await validateShinyHasBeenSet().bindAll(scope);
 }
 function shinyUnbindAll(scope: BindScope, includeSelf = false): void {
-  fullShinyObj.unbindAll(scope, includeSelf);
+  validateShinyHasBeenSet().unbindAll(scope, includeSelf);
 }
 function shinyInitializeInputs(scope: BindScope): void {
-  fullShinyObj.initializeInputs(scope);
+  validateShinyHasBeenSet().initializeInputs(scope);
 }
 
-function shinyAppBindOutput(id: string, binding: OutputBindingAdapter): void {
-  fullShinyObj.shinyapp.bindOutput(id, binding);
+async function shinyAppBindOutput(
+  id: string,
+  binding: OutputBindingAdapter,
+): Promise<void> {
+  await shinyShinyApp().bindOutput(id, binding);
 }
 
 function shinyAppUnbindOutput(
   id: string,
-  binding: OutputBindingAdapter
+  binding: OutputBindingAdapter,
 ): boolean {
-  return fullShinyObj.shinyapp.unbindOutput(id, binding);
+  return shinyShinyApp().unbindOutput(id, binding);
 }
 
 function getShinyOnCustomMessage(): Handler | null {
-  return fullShinyObj.oncustommessage;
+  return validateShinyHasBeenSet().oncustommessage;
 }
 
 let fileInputBinding: FileInputBinding;
@@ -67,22 +93,22 @@ function setFileInputBinding(fileInputBinding_: FileInputBinding): void {
 }
 
 function getShinyCreateWebsocket(): (() => WebSocket) | void {
-  return fullShinyObj.createSocket;
+  return validateShinyHasBeenSet().createSocket;
 }
 
 export {
+  getFileInputBinding,
+  getShinyCreateWebsocket,
+  getShinyOnCustomMessage,
+  setFileInputBinding,
   setShinyObj,
-  shinySetInputValue,
-  shinyShinyApp,
   setShinyUser,
-  shinyForgetLastInputValue,
-  shinyBindAll,
-  shinyUnbindAll,
-  shinyInitializeInputs,
   shinyAppBindOutput,
   shinyAppUnbindOutput,
-  getShinyOnCustomMessage,
-  getFileInputBinding,
-  setFileInputBinding,
-  getShinyCreateWebsocket,
+  shinyBindAll,
+  shinyForgetLastInputValue,
+  shinyInitializeInputs,
+  shinySetInputValue,
+  shinyShinyApp,
+  shinyUnbindAll,
 };

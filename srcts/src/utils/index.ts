@@ -1,21 +1,25 @@
 import $ from "jquery";
+import type { HtmlDep } from "../shiny/render";
+import { renderContent } from "../shiny/render";
 import { windowDevicePixelRatio } from "../window/pixelRatio";
-import { makeBlob } from "./blob";
-import { hasOwnProperty } from "./object";
+import type { MapValuesUnion, MapWithResult } from "./extraTypes";
+import { asArray, hasDefinedProperty, hasOwnProperty } from "./object";
 
 function escapeHTML(str: string): string {
-  const escaped = {
+  /* eslint-disable @typescript-eslint/naming-convention */
+  const escaped: { [key: string]: string } = {
     "&": "&amp;",
     "<": "&lt;",
     ">": "&gt;",
-    // eslint-disable-next-line prettier/prettier
-    "\"": "&quot;",
+
+    '"': "&quot;",
     "'": "&#039;",
     "/": "&#x2F;",
   };
+  /* eslint-enable @typescript-eslint/naming-convention */
 
   return str.replace(/[&<>'"/]/g, function (m) {
-    return escaped[m];
+    return escaped[m] as string;
   });
 }
 
@@ -41,17 +45,28 @@ function strToBool(str: string): boolean | undefined {
 function getStyle(el: Element, styleProp: string): string | undefined {
   let x = undefined;
 
-  // @ts-expect-error; Old, IE 5+ attribute only - https://developer.mozilla.org/en-US/docs/Web/API/Element/currentStyle
-  if (el.currentStyle) x = el.currentStyle[styleProp];
-  else if (window.getComputedStyle) {
+  if ("currentStyle" in el) {
+    // @ts-expect-error; Old, IE 5+ attribute only - https://developer.mozilla.org/en-US/docs/Web/API/Element/currentStyle
+    x = el.currentStyle[styleProp];
+  } else {
     // getComputedStyle can return null when we're inside a hidden iframe on
     // Firefox; don't attempt to retrieve style props in this case.
     // https://bugzilla.mozilla.org/show_bug.cgi?id=548397
-    const style = document.defaultView.getComputedStyle(el, null);
+    const style = document?.defaultView?.getComputedStyle(el, null);
 
     if (style) x = style.getPropertyValue(styleProp);
   }
   return x;
+}
+
+function isVisible(el: HTMLElement): boolean {
+  if (el.offsetWidth !== 0 || el.offsetHeight !== 0) {
+    return true;
+  }
+  if (getStyle(el, "display") === "none") {
+    return false;
+  }
+  return el.parentElement ? isVisible(el.parentElement) : true;
 }
 
 // Convert a number to a string with leading zeros
@@ -85,6 +100,7 @@ function parseDate(dateString: string): Date {
 
 // Given a Date object, return a string in yyyy-mm-dd format, using the
 // UTC date. This may be a day off from the date in the local time zone.
+function formatDateUTC(x: Date): string;
 function formatDateUTC(date: Date | null): string | null {
   if (date instanceof Date) {
     return (
@@ -116,13 +132,14 @@ function makeResizeFilter(
   el: HTMLElement,
   func: (
     width: HTMLElement["offsetWidth"],
-    height: HTMLElement["offsetHeight"]
-  ) => void
+    height: HTMLElement["offsetHeight"],
+  ) => void,
 ): () => void {
   let lastSize: LastSizeInterface = {};
 
   return function () {
-    const size = { w: el.offsetWidth, h: el.offsetHeight };
+    const rect = el.getBoundingClientRect();
+    const size = { w: rect.width, h: rect.height };
 
     if (size.w === 0 && size.h === 0) return;
     if (size.w === lastSize.w && size.h === lastSize.h) return;
@@ -139,11 +156,25 @@ function pixelRatio(): number {
   }
 }
 
+function getBoundingClientSizeBeforeZoom(el: HTMLElement): {
+  width: number;
+  height: number;
+} {
+  const rect = el.getBoundingClientRect();
+  // Cast to any because currentCSSZoom isn't in the type def of HTMLElement
+  // TODO: typescript >= 5.5.2 added this property to the type definition
+  const zoom = (el as any).currentCSSZoom || 1;
+  return {
+    width: rect.width / zoom,
+    height: rect.height / zoom,
+  };
+}
+
 // Takes a string expression and returns a function that takes an argument.
 //
 // When the function is executed, it will evaluate that expression using
 // "with" on the argument value, and return the result.
-function scopeExprToFunc(expr: string): (scope: unknown) => boolean {
+function scopeExprToFunc(expr: string): (scope: unknown) => unknown {
   /*jshint evil: true */
   const exprEscaped = expr
     .replace(/[\\"']/g, "\\$&")
@@ -154,7 +185,7 @@ function scopeExprToFunc(expr: string): (scope: unknown) => boolean {
     // \b has a special meaning; need [\b] to match backspace char.
     .replace(/[\b]/g, "\\b");
 
-  let func: () => boolean;
+  let func: () => unknown;
 
   try {
     // @ts-expect-error; Do not know how to type this _dangerous_ situation
@@ -166,37 +197,31 @@ function scopeExprToFunc(expr: string): (scope: unknown) => boolean {
           console.error('Error evaluating expression: ${exprEscaped}');
           throw e;
         }
-      }`
+      }`,
     );
   } catch (e) {
     console.error("Error parsing expression: " + expr);
     throw e;
   }
 
-  return function (scope: unknown): boolean {
+  return function (scope: unknown): unknown {
     return func.call(scope);
   };
 }
 
-function asArray<T>(value: T | T[] | null | undefined): T[] {
-  if (value === null || value === undefined) return [];
-  if (Array.isArray(value)) return value;
-  return [value];
-}
-
 // We need a stable sorting algorithm for ordering
 // bindings by priority and insertion order.
-function mergeSort<T>(
-  list: T[],
-  sortfunc: (a: T, b: T) => boolean | number
-): T[] {
-  function merge(sortfunc, a, b) {
+function mergeSort<Item>(
+  list: Item[],
+  sortfunc: (a: Item, b: Item) => boolean | number,
+): Item[] {
+  function merge(a: Item[], b: Item[]) {
     let ia = 0;
     let ib = 0;
     const sorted = [];
 
     while (ia < a.length && ib < b.length) {
-      if (sortfunc(a[ia], b[ib]) <= 0) {
+      if (Number(sortfunc(a[ia], b[ib])) <= 0) {
         sorted.push(a[ia++]);
       } else {
         sorted.push(b[ib++]);
@@ -214,8 +239,8 @@ function mergeSort<T>(
     for (let i = 0; i < list.length; i += chunkSize * 2) {
       const listA = list.slice(i, i + chunkSize);
       const listB = list.slice(i + chunkSize, i + chunkSize * 2);
-      const merged = merge(sortfunc, listA, listB);
-      const args = [i, merged.length];
+      const merged = merge(listA, listB);
+      const args = [i, merged.length] as [number, number];
 
       Array.prototype.push.apply(args, merged);
       Array.prototype.splice.apply(list, args);
@@ -226,21 +251,24 @@ function mergeSort<T>(
 }
 
 // Escape jQuery selector metacharacters: !"#$%&'()*+,./:;<=>?@[\]^`{|}~
-const $escape = function (val: string): string {
+function $escape(val: undefined): undefined;
+function $escape(val: string): string;
+function $escape(val: string | undefined): string | undefined {
+  if (typeof val === "undefined") return val;
   return val.replace(/([!"#$%&'()*+,./:;<=>?@[\\\]^`{|}~])/g, "\\$1");
-};
+}
 
 // Maps a function over an object, preserving keys. Like the mapValues
 // function from lodash.
-function mapValues<V, R>(
-  obj: { [key: string]: V },
-  f: (value: V, key: string, obj: { [key: string]: V }) => R
-): { [key: string]: R } {
-  const newObj: { [key: string]: R } = {};
+function mapValues<T extends { [key: string]: any }, R>(
+  obj: T,
+  f: (value: MapValuesUnion<T>, key: string, object: typeof obj) => R,
+): MapWithResult<T, R> {
+  const newObj = {} as MapWithResult<T, R>;
 
-  for (const key in obj) {
-    if (hasOwnProperty(obj, key)) newObj[key] = f(obj[key], key, obj);
-  }
+  Object.keys(obj).forEach((key: keyof typeof obj) => {
+    newObj[key] = f(obj[key], key as string, obj);
+  });
   return newObj;
 }
 
@@ -295,28 +323,28 @@ function equal(...args: unknown[]): boolean {
 const compareVersion = function (
   a: string,
   op: "<" | "<=" | "==" | ">" | ">=",
-  b: string
+  b: string,
 ): boolean {
-  function versionParts(ver) {
+  function versionParts(ver: string) {
     return (ver + "")
       .replace(/-/, ".")
       .replace(/(\.0)+[^.]*$/, "")
       .split(".");
   }
 
-  function cmpVersion(a, b) {
-    a = versionParts(a);
-    b = versionParts(b);
-    const len = Math.min(a.length, b.length);
+  function cmpVersion(a: string, b: string) {
+    const aParts = versionParts(a);
+    const bParts = versionParts(b);
+    const len = Math.min(aParts.length, bParts.length);
     let cmp;
 
     for (let i = 0; i < len; i++) {
-      cmp = parseInt(a[i], 10) - parseInt(b[i], 10);
+      cmp = parseInt(aParts[i], 10) - parseInt(bParts[i], 10);
       if (cmp !== 0) {
         return cmp;
       }
     }
-    return a.length - b.length;
+    return aParts.length - bParts.length;
   }
 
   const diff = cmpVersion(a, b);
@@ -329,23 +357,27 @@ const compareVersion = function (
   else throw `Unknown operator: ${op}`;
 };
 
-function updateLabel(
-  labelTxt: string | undefined,
-  labelNode: JQuery<HTMLElement>
-): void {
+async function updateLabel(
+  labelContent: string | { html: string; deps: HtmlDep[] } | undefined,
+  labelNode: JQuery<HTMLElement>,
+): Promise<void> {
   // Only update if label was specified in the update method
-  if (typeof labelTxt === "undefined") return;
+  if (typeof labelContent === "undefined") return;
   if (labelNode.length !== 1) {
     throw new Error("labelNode must be of length 1");
   }
 
-  // Should the label be empty?
-  const emptyLabel = Array.isArray(labelTxt) && labelTxt.length === 0;
+  if (typeof labelContent === "string") {
+    labelContent = {
+      html: labelContent,
+      deps: [],
+    };
+  }
 
-  if (emptyLabel) {
+  if (labelContent.html === "") {
     labelNode.addClass("shiny-label-null");
   } else {
-    labelNode.text(labelTxt);
+    await renderContent(labelNode, labelContent);
     labelNode.removeClass("shiny-label-null");
   }
 }
@@ -371,7 +403,6 @@ function getComputedLinkColor(el: HTMLElement): string {
 }
 
 function isBS3(): boolean {
-  // @ts-expect-error; Check if `window.bootstrap` exists
   return !window.bootstrap;
 }
 
@@ -379,30 +410,38 @@ function toLowerCase<T extends string>(str: T): Lowercase<T> {
   return str.toLowerCase() as Lowercase<T>;
 }
 
+function isShinyInDevMode(): boolean {
+  if ("__SHINY_DEV_MODE__" in window) return Boolean(window.__SHINY_DEV_MODE__);
+  return false;
+}
+
 export {
-  escapeHTML,
-  randomId,
-  strToBool,
-  getStyle,
-  padZeros,
-  roundSignif,
-  parseDate,
-  formatDateUTC,
-  makeResizeFilter,
-  pixelRatio,
-  scopeExprToFunc,
-  asArray,
-  mergeSort,
   $escape,
-  mapValues,
-  isnan,
   _equal,
-  equal,
+  asArray,
   compareVersion,
-  updateLabel,
+  equal,
+  escapeHTML,
+  formatDateUTC,
+  getBoundingClientSizeBeforeZoom,
   getComputedLinkColor,
-  makeBlob,
+  getStyle,
+  hasDefinedProperty,
   hasOwnProperty,
   isBS3,
+  isnan,
+  isShinyInDevMode,
+  isVisible,
+  makeResizeFilter,
+  mapValues,
+  mergeSort,
+  padZeros,
+  parseDate,
+  pixelRatio,
+  randomId,
+  roundSignif,
+  scopeExprToFunc,
+  strToBool,
   toLowerCase,
+  updateLabel,
 };

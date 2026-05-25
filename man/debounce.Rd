@@ -56,7 +56,7 @@ Throttling, on the other hand, delays invalidation if the \emph{throttled}
 reactive recently (within the time window) invalidated. New \code{r}
 invalidations do not reset the time window. This means that if invalidations
 continually come from \code{r} within the time window, the throttled reactive
-will invalidate regularly, at a rate equal to or slower than than the time
+will invalidate regularly, at a rate equal to or slower than the time
 window.
 
 \verb{ooo-oo-oo---- => o--o--o--o---}

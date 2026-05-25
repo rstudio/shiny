@@ -1,6 +1,6 @@
 import { InputBinding } from "./inputBinding";
-declare type TextHTMLElement = HTMLInputElement;
-declare type TextReceiveMessageData = {
+type TextHTMLElement = HTMLInputElement;
+type TextReceiveMessageData = {
     label: string;
     value?: TextHTMLElement["value"];
     placeholder?: TextHTMLElement["placeholder"];
@@ -27,7 +27,7 @@ declare class TextInputBinding extends TextInputBindingBase {
         value: string;
         placeholder: string;
     };
-    receiveMessage(el: TextHTMLElement, data: TextReceiveMessageData): void;
+    receiveMessage(el: TextHTMLElement, data: TextReceiveMessageData): Promise<void>;
 }
 export { TextInputBinding, TextInputBindingBase };
 export type { TextHTMLElement, TextReceiveMessageData };

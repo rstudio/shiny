@@ -173,7 +173,7 @@ user sets both \code{x} and \code{y}, and then clicks on an \link{actionButton} 
 To use both caching and events, the object should first be passed to
 \code{bindCache()}, then \code{bindEvent()}. For example:
 
-\if{html}{\out{<div class="sourceCode NA">}}\preformatted{r <- reactive(\{
+\if{html}{\out{<div class="sourceCode">}}\preformatted{r <- reactive(\{
    Sys.sleep(2)  # Pretend this is an expensive computation
    input$x * input$y
  \}) \%>\%

@@ -53,8 +53,8 @@ formalsAndBody <- function(x) {
 
 #' @describeIn createRenderFunction convert a quosure to a function.
 #' @param q Quosure of the expression `x`. When capturing expressions to create
-#'   your quosure, it is recommended to use [`enquo0()`] to not unquote the
-#'   object too early. See [`enquo0()`] for more details.
+#'   your quosure, it is recommended to use [`rlang::enquo0()`] to not unquote
+#'   the object too early. See [`rlang::enquo0()`] for more details.
 #' @inheritParams installExprFunction
 #' @export
 quoToFunction <- function(
@@ -208,8 +208,10 @@ exprToLabel <- function(expr, function_name, label = NULL) {
   if (is.null(label)) {
     label <- rexprSrcrefToLabel(
       srcref[[1]],
-      simpleExprToFunction(expr, function_name)
+      simpleExprToFunction(expr, function_name),
+      function_name
     )
+    label <- as_default_label(label)
   }
   if (length(srcref) >= 2) attr(label, "srcref") <- srcref[[2]]
   attr(label, "srcfile") <- srcFileOfRef(srcref[[1]])
@@ -229,10 +231,12 @@ funcToLabelBody <- function(func) {
 funcToLabel <- function(func, functionLabel, label = NULL) {
   if (!is.null(label)) return(label)
 
-  sprintf(
-    '%s(%s)',
-    functionLabel,
-    funcToLabelBody(func)
+  as_default_label(
+    sprintf(
+      '%s(%s)',
+      functionLabel,
+      funcToLabelBody(func)
+    )
   )
 }
 quoToLabelBody <- function(q) {
@@ -241,9 +245,19 @@ quoToLabelBody <- function(q) {
 quoToLabel <- function(q, functionLabel, label = NULL) {
   if (!is.null(label)) return(label)
 
-  sprintf(
-    '%s(%s)',
-    functionLabel,
-    quoToLabelBody(q)
+  as_default_label(
+    sprintf(
+      '%s(%s)',
+      functionLabel,
+      quoToLabelBody(q)
+    )
   )
+}
+
+as_default_label <- function(x) {
+  class(x) <- c("default_label", class(x))
+  x
+}
+is_default_label <- function(x) {
+  inherits(x, "default_label")
 }

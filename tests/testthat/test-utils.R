@@ -4,7 +4,7 @@ test_that("Private randomness works at startup", {
     rm(".Random.seed", envir = .GlobalEnv)
   .globals$ownSeed <- NULL
   # Just make sure this doesn't blow up
-  expect_error(createUniqueId(4), NA)
+  expect_no_error(createUniqueId(4))
 })
 
 test_that("Setting process-wide seed doesn't affect private randomness", {
@@ -239,6 +239,10 @@ test_that("dateYMD works", {
     dateYMD(c("2020/01/14", "2019/11/05")),
     c("2020-01-14", "2019-11-05")
   )
+  expect_identical(
+    dateYMD(as.POSIXct("2025-11-09 00:01:59", tz = "Asia/Tokyo")),
+    "2025-11-09"
+  )
 
   expect_warning(val <- dateYMD(""))
   expect_identical(val, "")
@@ -267,4 +271,28 @@ test_that("quoToFunction handles nested quosures", {
 
   func <- quoToFunction(quo_outer, "foo")
   expect_identical(func(), 2)
+})
+
+
+
+test_that("toJSON can set digits using options - default", {
+  withr::local_options(list(shiny.json.digits = NULL))
+  expect_equal(
+    as.character(toJSON(pi)),
+    "[3.141592653589793]"
+  )
+})
+test_that("toJSON can set digits using options - number", {
+  withr::local_options(list(shiny.json.digits = 4))
+  expect_equal(
+    as.character(toJSON(pi)),
+    "[3.1416]"
+  )
+})
+test_that("toJSON can set digits using options - asis number", {
+  withr::local_options(list(shiny.json.digits = I(4)))
+  expect_equal(
+    as.character(toJSON(pi)),
+    "[3.142]"
+  )
 })

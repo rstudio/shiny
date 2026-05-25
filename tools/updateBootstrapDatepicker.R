@@ -4,8 +4,8 @@
 
 library(rprojroot)
 
-version <- "1.9.0"
-types_version <- "0.0.14"
+version <- "1.10.0"
+types_version <- "1.10.0"
 
 dest_dir  <- rprojroot::find_package_root_file("inst/www/shared/datepicker")
 tag       <- paste0("v", version)
@@ -40,7 +40,7 @@ dir.create(scss_dir, recursive = TRUE)
 # Grab less source files & convert to sass
 # Use `npx` to temp install and execute on the entire less folder
 src <- file.path(unzipped, paste0("bootstrap-datepicker-", version))
-system(paste0("npx less2sass ", src))
+system(paste0("npx --yes less2sass ", src))
 
 
 # Copy over just the bootstrap
@@ -105,10 +105,10 @@ writeLines(
 withr::with_dir(
   rprojroot::find_package_root_file(),
   {
-    exit_code <- system(paste0("yarn add --dev bootstrap-datepicker@", version))
-    if (exit_code != 0) stop("yarn could not install bootstrap-datepicker")
+    exit_code <- system(paste0("npm install --save-dev --save-exact bootstrap-datepicker@", version))
+    if (exit_code != 0) stop("npm could not install bootstrap-datepicker")
 
-    exit_code <- system(paste0("yarn add @types/bootstrap-datepicker@", types_version))
-    if (exit_code != 0) stop("yarn could not install @types/bootstrap-datepicker")
+    exit_code <- system(paste0("npm install --save --save-exact @types/bootstrap-datepicker@", types_version))
+    if (exit_code != 0) stop("npm could not install @types/bootstrap-datepicker")
   }
 )

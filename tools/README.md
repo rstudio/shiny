@@ -90,5 +90,5 @@ To create a new patch:
 ## Updating Shiny's [S]CSS
 
 1. Make any desired changes to source files in `inst/www/shared/shiny_scss`
-1. Run `yarn build` to generate a built `shiny.min.css` file
+1. Run `npm run build` to generate a built `shiny.min.css` file
 1. Commit any changes

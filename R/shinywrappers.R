@@ -130,11 +130,20 @@ markRenderFunction <- function(
       # stop warning from happening again for the same object
       hasExecuted$set(TRUE)
     }
-    if (is.null(formals(renderFunc))) renderFunc()
-    else renderFunc(...)
+    ..stacktraceoff..(
+      if (is.null(formals(renderFunc))) renderFunc()
+      else renderFunc(...)
+    )
   }
 
-  structure(
+  otelAttrs <-
+    otel_srcref_attributes(
+      attr(renderFunc, "wrappedFunc", exact = TRUE),
+      # Can't retrieve the render function used at this point, so just use NULL
+      fn_name = NULL
+    )
+
+  ret <- structure(
     wrappedRenderFunc,
     class          = c("shiny.render.function", "function"),
     outputFunc     = uiFunc,
@@ -142,8 +151,15 @@ markRenderFunction <- function(
     hasExecuted    = hasExecuted,
     cacheHint      = cacheHint,
     cacheWriteHook = cacheWriteHook,
-    cacheReadHook  = cacheReadHook
+    cacheReadHook  = cacheReadHook,
+    otelAttrs      = otelAttrs
   )
+
+  if (has_otel_collect("reactivity")) {
+    ret <- enable_otel_shiny_render_function(ret)
+  }
+
+  ret
 }
 
 #' @export
@@ -261,7 +277,7 @@ createRenderFunction <- function(
 ) {
   renderFunc <- function(shinysession, name, ...) {
     hybrid_chain(
-      func(),
+      ..stacktraceon..(func()),
       function(value) {
         transform(value, shinysession, name, ...)
       }
@@ -271,9 +287,7 @@ createRenderFunction <- function(
   # Hoist func's wrappedFunc attribute into renderFunc, so that when we pass
   # renderFunc on to markRenderFunction, it is able to find the original user
   # function.
-  if (identical(cacheHint, "auto")) {
-    attr(renderFunc, "wrappedFunc") <- attr(func, "wrappedFunc", exact = TRUE)
-  }
+  attr(renderFunc, "wrappedFunc") <- attr(func, "wrappedFunc", exact = TRUE)
 
   markRenderFunction(outputFunc, renderFunc, outputArgs, cacheHint,
                      cacheWriteHook, cacheReadHook)
@@ -321,7 +335,7 @@ as.tags.shiny.render.function <- function(x, ..., inline = FALSE) {
 
 # Get relevant attributes from a render function object.
 renderFunctionAttributes <- function(x) {
-  attrs <- c("outputFunc", "outputArgs", "hasExecuted", "cacheHint")
+  attrs <- c("outputFunc", "outputArgs", "hasExecuted", "cacheHint", "otelAttrs")
   names(attrs) <- attrs
   lapply(attrs, function(name) attr(x, name, exact = TRUE))
 }
@@ -383,8 +397,10 @@ markOutputAttrs <- function(renderFunc, snapshotExclude = NULL,
 #' The corresponding HTML output tag should be `div` or `img` and have
 #' the CSS class name `shiny-image-output`.
 #'
-#' @seealso For more details on how the images are generated, and how to control
+#' @seealso
+#' * For more details on how the images are generated, and how to control
 #'   the output, see [plotPNG()].
+#' * Use [outputOptions()] to set general output options for an image output.
 #'
 #' @param expr An expression that returns a list.
 #' @inheritParams renderUI
@@ -598,6 +614,7 @@ isTemp <- function(path, tempDir = tempdir(), mustExist) {
 #'   used in an interactive RMarkdown document.
 #'
 #' @example res/text-example.R
+#' @seealso [outputOptions()]
 #' @export
 renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
                         width = getOption('width'), outputArgs=list())
@@ -613,7 +630,7 @@ renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
     domain <- createRenderPrintPromiseDomain(width)
     hybrid_chain(
       {
-        promises::with_promise_domain(domain, func())
+        with_promise_domain(domain, ..stacktraceon..(func()))
       },
       function(value) {
         res <- withVisible(value)
@@ -642,7 +659,7 @@ renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
 createRenderPrintPromiseDomain <- function(width) {
   f <- file()
 
-  promises::new_promise_domain(
+  new_promise_domain(
     wrapOnFulfilled = function(onFulfilled) {
       force(onFulfilled)
       function(...) {
@@ -719,7 +736,7 @@ renderText <- function(expr, env = parent.frame(), quoted = FALSE,
 #'   call to [uiOutput()] when `renderUI` is used in an
 #'   interactive R Markdown document.
 #'
-#' @seealso [uiOutput()]
+#' @seealso [uiOutput()], [outputOptions()]
 #' @export
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -778,8 +795,8 @@ renderUI <- function(expr, env = parent.frame(), quoted = FALSE,
 #'   function.)
 #' @param contentType A string of the download's
 #'   [content type](https://en.wikipedia.org/wiki/Internet_media_type), for
-#'   example `"text/csv"` or `"image/png"`. If `NULL`, the content type 
-#'   will be guessed based on the filename extension, or 
+#'   example `"text/csv"` or `"image/png"`. If `NULL`, the content type
+#'   will be guessed based on the filename extension, or
 #'   `application/octet-stream` if the extension is unknown.
 #' @param outputArgs A list of arguments to be passed through to the implicit
 #'   call to [downloadButton()] when `downloadHandler` is used
@@ -809,6 +826,13 @@ renderUI <- function(expr, env = parent.frame(), quoted = FALSE,
 #'
 #' shinyApp(ui, server)
 #' }
+#'
+#' @seealso
+#' * The download handler, like other outputs, is suspended (disabled) by
+#'   default for download buttons and links that are hidden. Use
+#'   [outputOptions()] to control this behavior, e.g. to set
+#'   `suspendWhenHidden = FALSE` if the download is initiated by
+#'   programmatically clicking on the download button using JavaScript.
 #' @export
 downloadHandler <- function(filename, content, contentType=NULL, outputArgs=list()) {
   renderFunc <- function(shinysession, name, ...) {
@@ -822,20 +846,12 @@ downloadHandler <- function(filename, content, contentType=NULL, outputArgs=list
 #' Table output with the JavaScript DataTables library
 #'
 #' @description
-#' `r lifecycle::badge("superseded")` Please use
-#' \href{https://rstudio.github.io/DT/shiny.html}{\code{DT::renderDataTable()}}.
-#' (Shiny 0.11.1)
+#' `r lifecycle::badge("deprecated")`
 #'
-#' Makes a reactive version of the given function that returns a data frame (or
-#' matrix), which will be rendered with the [DataTables](https://datatables.net)
-#' library. Paging, searching, filtering, and sorting can be done on the R side
-#' using Shiny as the server infrastructure.
-#'
-#' This function only provides the server-side version of DataTables (using R
-#' to process the data object on the server side). There is a separate
-#' [DT](https://github.com/rstudio/DT) that allows you to create both
-#' server-side and client-side DataTables, and supports additional features.
-#' Learn more at <https://rstudio.github.io/DT/shiny.html>.
+#' This function is deprecated, use
+#' [DT::renderDT()](https://rstudio.github.io/DT/shiny.html) instead. It
+#' provides a superset of functionality, better performance, and better user
+#' experience.
 #'
 #' @param expr An expression that returns a data frame or a matrix.
 #' @inheritParams renderTable
@@ -887,18 +903,60 @@ downloadHandler <- function(filename, content, contentType=NULL, outputArgs=list
 #'     }
 #'   )
 #' }
+#' @keywords internal
 renderDataTable <- function(expr, options = NULL, searchDelay = 500,
                             callback = 'function(oTable) {}', escape = TRUE,
                             env = parent.frame(), quoted = FALSE,
-                            outputArgs=list())
-{
+                            outputArgs = list()) {
 
-  if (in_devmode()) {
-    shinyDeprecated(
-      "0.11.1", "shiny::renderDataTable()", "DT::renderDataTable()",
-      details = "See <https://rstudio.github.io/DT/shiny.html> for more information"
+  legacy <- useLegacyDataTable(
+    from = "shiny::renderDataTable()",
+    to = "DT::renderDT()"
+  )
+
+  if (!quoted) {
+    expr <- substitute(expr)
+    quoted <- TRUE
+  }
+
+  if (legacy) {
+
+    legacyRenderDataTable(
+      expr, env = env, quoted = quoted,
+      options = options,
+      searchDelay = searchDelay,
+      callback = callback,
+      escape = escape,
+      outputArgs = outputArgs
+    )
+
+  } else {
+
+    if (!missing(searchDelay)) {
+      warning("Ignoring renderDataTable()'s searchDelay value (since DT::renderDT() has no equivalent).")
+    }
+
+    force(options)
+    force(callback)
+    force(escape)
+    force(outputArgs)
+
+    DT::renderDataTable(
+      expr, env = env, quoted = quoted,
+      options = if (is.null(options)) list() else options,
+      # Turn function into a statement
+      callback = DT::JS(paste0("(", callback, ")(table)")),
+      escape = escape,
+      outputArgs = outputArgs
     )
   }
+}
+
+
+legacyRenderDataTable <- function(expr, options = NULL, searchDelay = 500,
+                                  callback = 'function(oTable) {}', escape = TRUE,
+                                  env = parent.frame(), quoted = FALSE,
+                                  outputArgs=list()) {
 
   func <- installExprFunction(expr, "func", env, quoted, label = "renderDataTable")
 
@@ -907,7 +965,7 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
     options <- checkDT9(options)
     res <- checkAsIs(options)
     hybrid_chain(
-      func(),
+      ..stacktraceon..(func()),
       function(data) {
         if (length(dim(data)) != 2) return() # expects a rectangular data object
         if (is.data.frame(data)) data <- as.data.frame(data)

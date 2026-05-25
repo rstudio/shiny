@@ -63,20 +63,12 @@ call to \code{dataTableOutput()} when \code{renderDataTable()} is used
 in an interactive R Markdown document.}
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}} Please use
-\href{https://rstudio.github.io/DT/shiny.html}{\code{DT::renderDataTable()}}.
-(Shiny 0.11.1)
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
 
-Makes a reactive version of the given function that returns a data frame (or
-matrix), which will be rendered with the \href{https://datatables.net}{DataTables}
-library. Paging, searching, filtering, and sorting can be done on the R side
-using Shiny as the server infrastructure.
-
-This function only provides the server-side version of DataTables (using R
-to process the data object on the server side). There is a separate
-\href{https://github.com/rstudio/DT}{DT} that allows you to create both
-server-side and client-side DataTables, and supports additional features.
-Learn more at \url{https://rstudio.github.io/DT/shiny.html}.
+This function is deprecated, use
+\href{https://rstudio.github.io/DT/shiny.html}{DT::renderDT()} instead. It
+provides a superset of functionality, better performance, and better user
+experience.
 }
 \examples{
 ## Only run this example in interactive R sessions
@@ -101,3 +93,4 @@ if (interactive()) {
   )
 }
 }
+\keyword{internal}

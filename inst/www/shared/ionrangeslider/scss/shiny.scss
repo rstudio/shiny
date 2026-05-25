@@ -1,4 +1,5 @@
 /* 'shiny' skin for Ion.RangeSlider, largely based on the 'big' skin, but with smaller dimensions, grayscale grid text, and without gradients
+© Posit, PBC, 2023
 © RStudio, Inc, 2014
 © Denis Ineshin, 2014  https://github.com/IonDen
 © guybowden, 2014  https://github.com/guybowden
@@ -79,6 +80,19 @@ $font-family: $font-family-base !default;
     background-color: $line_bg_color;
     border: $line_border;
     @include border-radius-shim($line_height);
+
+    // Increase the touch target area of the slider line
+    overflow: visible;
+    &::before {
+      content: "";
+      display: block;
+      position: relative;
+      cursor: s-resize; // downward arrow
+      width: 100%;
+      height: $handle_height;
+      top: -(($handle_height - $line_height / 2) / 2);
+      z-index: 1; // raise touch area above grid
+    }
   }
 
   .#{$name}-bar {
@@ -87,9 +101,22 @@ $font-family: $font-family-base !default;
     border-top: 1px solid $bar_color;
     border-bottom: 1px solid $bar_color;
     background: $bar_color;
+    cursor: s-resize; // downard arrow, overwritten when a range
+    z-index: 2;
 
     &--single {
       @include border-radius-shim($line_height 0 0 $line_height);
+    }
+
+    // Increase the touch target area of the slider bar
+    &::before {
+      content: "";
+      display: block;
+      position: relative;
+      width: 100%;
+      height: $handle_height;
+      top: -(($handle_height - $line_height / 2) / 2);
+      z-index: 2; // raise touch area above line touch target
     }
   }
 
@@ -114,6 +141,12 @@ $font-family: $font-family-base !default;
     background-color: $handle_color;
     box-shadow: $handle_box_shadow;
     border-radius: $handle_width;
+    z-index: 2;
+
+    &.type_last {
+      // Ensure last-used handle is on top if it overlaps with another handle
+      z-index: 3;
+    }
 
     &.state_hover,
     &:hover {

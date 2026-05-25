@@ -14,6 +14,7 @@ reference:
     contents:
       - absolutePanel
       - bootstrapPage
+      - busyIndicatorOptions
       - column
       - conditionalPanel
       - fillPage
@@ -31,6 +32,7 @@ reference:
       - inputPanel
       - flowLayout
       - splitLayout
+      - useBusyIndicators
       - verticalLayout
       - wellPanel
       - withMathJax
@@ -121,6 +123,7 @@ reference:
       - reactiveValues
       - bindCache
       - bindEvent
+      - ExtendedTask
       - reactiveValuesToList
       - is.reactivevalues
       - isolate
@@ -136,6 +139,7 @@ reference:
     desc: Functions that are used to run or stop Shiny applications.
     contents:
       - runApp
+      - startApp
       - runGadget
       - runExample
       - runGadget
@@ -211,6 +215,10 @@ reference:
       - runTests
       - testServer
       - MockShinySession
+  - title: OpenTelemetry
+    desc: Functions for OpenTelemetry tracing integration
+    contents:
+      - withOtelCollect
   - title: Superseded
     desc: Functions that have been `r lifecycle::badge("superseded")`
     contents:
@@ -218,3 +226,7 @@ reference:
       - shinyUI
       - shinyServer
       - exprToFunction
+  # This section is silently dropped by pkgdown https://github.com/r-lib/pkgdown/pull/1783
+  - title: internal
+    contents:
+      - shiny-package

@@ -1,0 +1,39 @@
+diff --git a/inst/www/shared/selectize/scss/selectize.bootstrap3.scss b/inst/www/shared/selectize/scss/selectize.bootstrap3.scss
+index 9f5ea2aea..cd4e21777 100644
+--- a/inst/www/shared/selectize/scss/selectize.bootstrap3.scss
++++ b/inst/www/shared/selectize/scss/selectize.bootstrap3.scss
+@@ -13,7 +13,7 @@ $select-color-disabled: $input-bg;
+ $select-color-item: #efefef;
+ $select-color-item-border: rgba(0, 0, 0, 0);
+ $select-color-item-active: $component-active-bg;
+-$select-color-item-active-text: #fff;
++$select-color-item-active-text: color-contrast($select-color-item-active);
+ $select-color-item-active-border: rgba(0, 0, 0, 0);
+ $select-color-optgroup: $dropdown-bg;
+ $select-color-optgroup-text: $dropdown-header-color;
+diff --git a/inst/www/shared/selectize/scss/selectize.bootstrap4.scss b/inst/www/shared/selectize/scss/selectize.bootstrap4.scss
+index 6518010b6..b8c35f14b 100644
+--- a/inst/www/shared/selectize/scss/selectize.bootstrap4.scss
++++ b/inst/www/shared/selectize/scss/selectize.bootstrap4.scss
+@@ -17,7 +17,7 @@ $select-color-disabled: $input-bg !default;
+ $select-color-item: #efefef !default;
+ $select-color-item-border: $border-color !default;
+ $select-color-item-active: $component-active-bg !default;
+-$select-color-item-active-text: #fff !default;
++$select-color-item-active-text: color-contrast($select-color-item-active) !default;
+ $select-color-item-active-border: rgba(0, 0, 0, 0) !default;
+ $select-color-optgroup: $dropdown-bg !default;
+ $select-color-optgroup-text: $dropdown-header-color !default;
+diff --git a/inst/www/shared/selectize/scss/selectize.bootstrap5.scss b/inst/www/shared/selectize/scss/selectize.bootstrap5.scss
+index c2f09fffc..4d991532d 100644
+--- a/inst/www/shared/selectize/scss/selectize.bootstrap5.scss
++++ b/inst/www/shared/selectize/scss/selectize.bootstrap5.scss
+@@ -17,7 +17,7 @@ $select-color-disabled: $input-bg !default;
+ $select-color-item: #efefef !default;
+ $select-color-item-border: $border-color !default;
+ $select-color-item-active: $component-active-bg !default;
+-$select-color-item-active-text: #fff !default;
++$select-color-item-active-text: color-contrast($select-color-item-active) !default;
+ $select-color-item-active-border: rgba(0, 0, 0, 0) !default;
+ $select-color-optgroup: $dropdown-bg !default;
+ $select-color-optgroup-text: $dropdown-header-color !default;

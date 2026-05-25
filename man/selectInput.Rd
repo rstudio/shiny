@@ -53,8 +53,8 @@ value in \code{choices} is still an \code{NA} in the returned selection.}
 
 \item{...}{Arguments passed to \code{selectInput()}.}
 
-\item{options}{A list of options. See the documentation of \pkg{selectize.js}
-for possible options (character option values inside \code{\link[base:AsIs]{base::I()}} will
+\item{options}{A list of options. See the documentation of \pkg{selectize.js}(\url{https://selectize.dev/docs/usage})
+for possible options (character option values inside \code{\link[base:I]{base::I()}} will
 be treated as literal JavaScript code; see \code{\link[=renderDataTable]{renderDataTable()}}
 for details).}
 }
@@ -67,7 +67,7 @@ from a list of values.
 }
 \details{
 By default, \code{selectInput()} and \code{selectizeInput()} use the JavaScript library
-\pkg{selectize.js} (\url{https://github.com/selectize/selectize.js}) instead of
+\pkg{selectize.js} (\url{https://selectize.dev/}) instead of
 the basic select input element. To use the standard HTML select input
 element, use \code{selectInput()} with \code{selectize=FALSE}.
 
@@ -76,11 +76,11 @@ name will be treated as a placeholder prompt. For example:
 \code{selectInput("letter", "Letter", c("Choose one" = "", LETTERS))}
 
 \strong{Performance note:} \code{selectInput()} and \code{selectizeInput()} can slow down
-significantly when thousands of choices are used; with legacy browsers like
-Internet Explorer, the user interface may hang for many seconds. For large
-numbers of choices, Shiny offers a "server-side selectize" option that
+significantly when thousands of choices are used, and the user interface may
+hang for many seconds. For large numbers of choices, Shiny offers a
+"server-side selectize" option that
 massively improves performance and efficiency; see
-\href{https://shiny.rstudio.com/articles/selectize.html}{this selectize article}
+\href{https://shiny.posit.co/articles/selectize.html}{this selectize article}
 on the Shiny Dev Center for details.
 }
 \note{
@@ -141,20 +141,20 @@ shinyApp(
 \seealso{
 \code{\link[=updateSelectInput]{updateSelectInput()}} \code{\link[=varSelectInput]{varSelectInput()}}
 
-Other input elements: 
-\code{\link{actionButton}()},
-\code{\link{checkboxGroupInput}()},
-\code{\link{checkboxInput}()},
-\code{\link{dateInput}()},
-\code{\link{dateRangeInput}()},
-\code{\link{fileInput}()},
-\code{\link{numericInput}()},
-\code{\link{passwordInput}()},
-\code{\link{radioButtons}()},
-\code{\link{sliderInput}()},
-\code{\link{submitButton}()},
-\code{\link{textAreaInput}()},
-\code{\link{textInput}()},
-\code{\link{varSelectInput}()}
+Other input elements:
+\code{\link[=actionButton]{actionButton()}},
+\code{\link[=checkboxGroupInput]{checkboxGroupInput()}},
+\code{\link[=checkboxInput]{checkboxInput()}},
+\code{\link[=dateInput]{dateInput()}},
+\code{\link[=dateRangeInput]{dateRangeInput()}},
+\code{\link[=fileInput]{fileInput()}},
+\code{\link[=numericInput]{numericInput()}},
+\code{\link[=passwordInput]{passwordInput()}},
+\code{\link[=radioButtons]{radioButtons()}},
+\code{\link[=sliderInput]{sliderInput()}},
+\code{\link[=submitButton]{submitButton()}},
+\code{\link[=textAreaInput]{textAreaInput()}},
+\code{\link[=textInput]{textInput()}},
+\code{\link[=varSelectInput]{varSelectInput()}}
 }
 \concept{input elements}

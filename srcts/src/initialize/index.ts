@@ -1,18 +1,21 @@
+import { determineBrowserInfo } from "./browser";
 import { disableFormSubmission } from "./disableForm";
 import { trackHistory } from "./history";
-import { determineBrowserInfo } from "./browser";
 
-import { windowShiny } from "../window/libraries";
-import { setShiny } from "../shiny";
-import { setBlobBuilder } from "../utils/blob";
-import { windowBlobBuilder } from "../window/blobBuilder";
+import { ShinyClass } from "../shiny";
 import { setUserAgent } from "../utils/userAgent";
 import { windowUserAgent } from "../window/userAgent";
 
 import { initReactlog } from "../shiny/reactlog";
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
+let Shiny: ShinyClass;
+
 function init(): void {
-  setShiny(windowShiny());
+  if (window.Shiny) {
+    throw new Error("Trying to create window.Shiny, but it already exists!");
+  }
+  Shiny = window.Shiny = new ShinyClass();
   setUserAgent(windowUserAgent()); // before determineBrowserInfo()
 
   determineBrowserInfo();
@@ -20,9 +23,7 @@ function init(): void {
 
   disableFormSubmission();
 
-  setBlobBuilder(windowBlobBuilder());
-
   initReactlog();
 }
 
-export { init };
+export { init, Shiny, type ShinyClass };

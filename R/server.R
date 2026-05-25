@@ -1,7 +1,12 @@
 #' @include server-input-handlers.R
 
-appsByToken <- Map$new()
-appsNeedingFlush <- Map$new()
+appsByToken <- NULL
+appsNeedingFlush <- NULL
+on_load({
+  appsByToken <- Map$new()
+  appsNeedingFlush <- Map$new()
+})
+
 
 # Provide a character representation of the WS that can be used
 # as a key in a Map.
@@ -29,15 +34,14 @@ registerClient <- function(client) {
 
 #' Define Server Functionality
 #'
-#' @description \lifecycle{superseded}
+#' @description `r lifecycle::badge("superseded")`
 #'
 #' @description Defines the server-side logic of the Shiny application. This generally
 #' involves creating functions that map user inputs to various kinds of output.
 #' In older versions of Shiny, it was necessary to call `shinyServer()` in
-#' the `server.R` file, but this is no longer required as of Shiny 0.10.
-#' Now the `server.R` file may simply return the appropriate server
-#' function (as the last expression in the code), without calling
-#' `shinyServer()`.
+#' the `server.R` file, but this is no longer required. The `server.R` file
+#' may simply return the appropriate server function as the last expression
+#' in the code, without calling `shinyServer()`.
 #'
 #' Call `shinyServer` from your application's `server.R`
 #' file, passing in a "server function" that provides the server-side logic of
@@ -49,7 +53,7 @@ registerClient <- function(client) {
 #' optional `session` parameter, which is used when greater control is
 #' needed.
 #'
-#' See the [tutorial](https://rstudio.github.io/shiny/tutorial/) for more
+#' See the [tutorial](https://shiny.posit.co/tutorial/) for more
 #' on how to write a server function.
 #'
 #' @param func The server function for this application. See the details section
@@ -122,7 +126,10 @@ decodeMessage <- function(data) {
   return(mainMessage)
 }
 
-autoReloadCallbacks <- Callbacks$new()
+autoReloadCallbacks <- NULL
+on_load({
+  autoReloadCallbacks <- Callbacks$new()
+})
 
 createAppHandlers <- function(httpHandlers, serverFuncSource) {
   appvars <- new.env()
@@ -266,15 +273,20 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
                 args <- argsForServerFunc(serverFunc, shinysession)
 
                 withReactiveDomain(shinysession, {
-                  do.call(
-                    # No corresponding ..stacktraceoff; the server func is pure
-                    # user code
-                    wrapFunctionLabel(appvars$server, "server",
-                      ..stacktraceon = TRUE
-                    ),
-                    args
-                  )
+                  otel_span_session_start(domain = shinysession, {
+
+                    do.call(
+                      # No corresponding ..stacktraceoff; the server func is pure
+                      # user code
+                      wrapFunctionLabel(appvars$server, "server",
+                        ..stacktraceon = TRUE
+                      ),
+                      args
+                    )
+
+                  })
                 })
+
               })
             },
             update = {
@@ -331,7 +343,7 @@ argsForServerFunc <- function(serverFunc, session) {
 getEffectiveBody <- function(func) {
   if (is.null(func))
     NULL
-  else if (isS4(func) && class(func) == "functionWithTrace")
+  else if (isS4(func) && inherits(func, "functionWithTrace"))
     body(func@original)
   else
     body(func)
@@ -374,7 +386,7 @@ removeSubApp <- function(path) {
   handlerManager$removeWSHandler(path)
 }
 
-startApp <- function(appObj, port, host, quiet) {
+startHttpuvApp <- function(appObj, port, host, quiet) {
   appHandlers <- createAppHandlers(appObj$httpHandler, appObj$serverFuncSource)
   handlerManager$addHandler(appHandlers$http, "/", tail = TRUE)
   handlerManager$addWSHandler(appHandlers$ws, "/", tail = TRUE)
@@ -434,7 +446,7 @@ startApp <- function(appObj, port, host, quiet) {
 
   httpuvApp$staticPathOptions <- httpuv::staticPathOptions(
     html_charset = "utf-8",
-    headers = list("X-UA-Compatible" = "IE=edge,chrome=1"),
+    headers = list("X-Content-Type-Options" = "nosniff"),
     validation =
       if (!is.null(getOption("shiny.sharedSecret"))) {
         sprintf('"Shiny-Shared-Secret" == "%s"', getOption("shiny.sharedSecret"))
@@ -466,9 +478,12 @@ startApp <- function(appObj, port, host, quiet) {
   }
 }
 
-# Run an application that was created by \code{\link{startApp}}. This
+# Run an application that was created by \code{\link{startHttpuvApp}}. This
 # function should normally be called in a \code{while(TRUE)} loop.
-serviceApp <- function() {
+serviceApp <- function(
+  # rely on lazy evaluation for maximum efficiency
+  timeout = max(1, min(maxTimeout, timerCallbacks$timeToNextEvent(), later::next_op_secs()))
+) {
   timerCallbacks$executeElapsed()
 
   flushReact()
@@ -478,14 +493,93 @@ serviceApp <- function() {
   # to keep the session responsive to user input
   maxTimeout <- ifelse(interactive(), 100, 1000)
 
-  timeout <- max(1, min(maxTimeout, timerCallbacks$timeToNextEvent(), later::next_op_secs()))
   service(timeout)
 
   flushReact()
   flushPendingSessions()
 }
 
+# Non-blocking service loop driven by `later` callbacks.
+#
+# Each iteration calls `serviceApp(NA)`, which drains queued I/O and
+# `later` callbacks without blocking R, then flushes the reactive graph
+# and any pending session messages.
+#
+# The next iteration is scheduled adaptively, sleeping until the earliest
+# of:
+#   - the next reactive timer event (`invalidateLater`, `reactiveTimer`)
+#   - the next `later` op (incl. httpuv-scheduled callbacks for incoming
+#     HTTP/WS I/O, promise resolutions)
+#   - `.shinyServiceMaxDelaySecs` — a defensive ceiling for reactive-state
+#     changes that don't go through either of the above (e.g. a
+#     `reactiveVal` set from a promise resolution). Going fully event-
+#     driven would require hooking every reactive mutation path; the cap
+#     bounds worst-case flush lag without that audit.
+#
+# The generation token (incremented on every runApp()/startApp() call)
+# ensures that when a new app starts, any stale service loop from a
+# previous non-blocking app exits cleanly instead of continuing to run.
+# Each iteration wraps `serviceApp()` in `with_otel_promise_domain()` so the
+# OTEL domain is active while Shiny processes its own work — handlers,
+# later callbacks, promise fulfillments — all executed synchronously inside
+# `serviceApp()`. Span wrapping is attached at promise-registration time, so
+# callbacks registered inside an iteration stay instrumented when they fire
+# later. The domain is dormant between ticks, keeping it out of unrelated
+# user promises created while the console is interactive.
+serviceNonBlocking <- function(handle, generation) {
+  serviceLoop <- function() {
+    if (!identical(.globals$serviceGeneration, generation)) {
+      return(invisible())
+    }
+    if (!.globals$stopped) {
+      promises::with_otel_promise_domain(
+        ..stacktraceoff..(
+          captureStackTraces(
+            tryCatch(
+              ..stacktracefloor..(serviceApp(NA)),
+              error = function(e) {
+                .globals$stopped <- TRUE
+                .globals$retval <- e
+                .globals$reterror <- TRUE
+              }
+            )
+          )
+        )
+      )
+    }
+    if (!identical(.globals$serviceGeneration, generation)) {
+      return(invisible())
+    }
+    if (!.globals$stopped) {
+      delay <- min(
+        .shinyServiceMaxDelaySecs,
+        timerCallbacks$timeToNextEvent() / 1000,
+        later::next_op_secs()
+      )
+      later::later(serviceLoop, delay = max(0, delay))
+    } else {
+      handle$stop()
+    }
+  }
+  later::later(serviceLoop)
+}
+
+.shinyServiceMaxDelaySecs <- 0.05
 .shinyServerMinVersion <- '0.3.4'
+
+# TRUE if `serviceApp` is on the call stack — i.e. we're inside an app tick.
+# Walked on demand so the service hot path stays untouched.
+.isInAppTick <- function() {
+  target <- quote(serviceApp)
+  calls <- sys.calls()
+  for (i in seq_along(calls)) {
+    if (identical(calls[[i]][[1]], target) &&
+        identical(sys.function(i), serviceApp)) {
+      return(TRUE)
+    }
+  }
+  FALSE
+}
 
 #' Check whether a Shiny application is running
 #'

@@ -60,4 +60,14 @@ server <- function(input, output) {
 
 shinyApp(ui, server)
 }
+
+}
+\seealso{
+\itemize{
+\item The download handler, like other outputs, is suspended (disabled) by
+default for download buttons and links that are hidden. Use
+\code{\link[=outputOptions]{outputOptions()}} to control this behavior, e.g. to set
+\code{suspendWhenHidden = FALSE} if the download is initiated by
+programmatically clicking on the download button using JavaScript.
+}
 }

@@ -9,7 +9,8 @@ updateActionButton(
   session = getDefaultReactiveDomain(),
   inputId,
   label = NULL,
-  icon = NULL
+  icon = NULL,
+  disabled = NULL
 )
 
 updateActionLink(
@@ -28,6 +29,9 @@ updateActionLink(
 \item{label}{The label to set for the input object.}
 
 \item{icon}{An optional \code{\link[=icon]{icon()}} to appear on the button.}
+
+\item{disabled}{If \code{TRUE}, the button will not be clickable; if \code{FALSE}, it
+will be.}
 }
 \description{
 Change the label or icon of an action button on the client
@@ -74,13 +78,13 @@ server <- function(input, output, session) {
       label = "New label",
       icon = icon("calendar"))
 
-    # Leaves goButton2's label unchaged and
+    # Leaves goButton2's label unchanged and
     # removes its icon
     updateActionButton(session, "goButton2",
       icon = character(0))
 
     # Leaves goButton3's icon, if it exists,
-    # unchaged and changes its label
+    # unchanged and changes its label
     updateActionButton(session, "goButton3",
       label = "New label 3")
 

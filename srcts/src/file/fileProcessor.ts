@@ -1,8 +1,8 @@
 import $ from "jquery";
 import { triggerFileInputChanged } from "../events/inputChanged";
-import { $escape } from "../utils";
-import type { ShinyApp } from "../shiny/shinyapp";
 import { getFileInputBinding } from "../shiny/initedMethods";
+import type { ShinyApp } from "../shiny/shinyapp";
+import { $escape } from "../utils";
 
 type JobId = string;
 type UploadUrl = string;
@@ -13,7 +13,7 @@ type UploadEndValue = never;
 // FileList object. Subclass/clone it and override the `on*` functions to
 // make it do something useful.
 class FileProcessor {
-  files: FileList;
+  files: File[];
   fileIndex = -1;
   // Currently need to use small chunk size because R-Websockets can't
   // handle continuation frames
@@ -21,7 +21,7 @@ class FileProcessor {
   completed = false;
 
   constructor(files: FileList, exec$run = true) {
-    this.files = files;
+    this.files = Array.from(files);
 
     // TODO: Register error/abort callbacks
     if (exec$run) {
@@ -30,13 +30,15 @@ class FileProcessor {
   }
 
   // Begin callbacks. Subclassers/cloners may override any or all of these.
-  onBegin(files: FileList, cont: () => void): void {
-    files;
+  onBegin(files: File[], cont: () => void): void {
     setTimeout(cont, 0);
+    return;
+    files; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
   onFile(file: File, cont: () => void): void {
-    file;
     setTimeout(cont, 0);
+    return;
+    file; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
   onComplete(): void {
     return;
@@ -99,16 +101,16 @@ class FileUploader extends FileProcessor {
   id: string;
   el: HTMLElement;
 
-  jobId: JobId;
-  uploadUrl: UploadUrl;
-  progressBytes: number;
-  totalBytes: number;
+  jobId!: JobId;
+  uploadUrl!: UploadUrl;
+  progressBytes!: number;
+  totalBytes!: number;
 
   constructor(
     shinyapp: ShinyApp,
     id: string,
     files: FileList,
-    el: HTMLElement
+    el: HTMLElement,
   ) {
     // Init super with files, do not execute `this.$run()` before setting variables
     super(files, false);
@@ -123,7 +125,7 @@ class FileUploader extends FileProcessor {
     args: Array<Array<{ name: string; size: number; type: string }>>,
     onSuccess: (value: UploadInitValue) => void,
     onFailure: Parameters<ShinyApp["makeRequest"]>[3],
-    blobs: Parameters<ShinyApp["makeRequest"]>[4]
+    blobs: Parameters<ShinyApp["makeRequest"]>[4],
   ): void;
   makeRequest(
     method: "uploadEnd",
@@ -131,18 +133,18 @@ class FileUploader extends FileProcessor {
     // UploadEndValue can not be used as the type will not conform
     onSuccess: (value: unknown) => void,
     onFailure: Parameters<ShinyApp["makeRequest"]>[3],
-    blobs: Parameters<ShinyApp["makeRequest"]>[4]
+    blobs: Parameters<ShinyApp["makeRequest"]>[4],
   ): void;
   makeRequest(
     method: string,
     args: unknown[],
     onSuccess: Parameters<ShinyApp["makeRequest"]>[2],
     onFailure: Parameters<ShinyApp["makeRequest"]>[3],
-    blobs: Parameters<ShinyApp["makeRequest"]>[4]
+    blobs: Parameters<ShinyApp["makeRequest"]>[4],
   ): void {
     this.shinyapp.makeRequest(method, args, onSuccess, onFailure, blobs);
   }
-  onBegin(files: FileList, cont: () => void): void {
+  onBegin(files: File[], cont: () => void): void {
     // Reset progress bar
     this.$setError(null);
     this.$setActive(true);
@@ -155,13 +157,12 @@ class FileUploader extends FileProcessor {
       this.totalBytes += file.size;
     });
 
-    const fileInfo = $.map(files, function (file: File, i) {
+    const fileInfo = $.map(files, function (file: File) {
       return {
         name: file.name,
         size: file.size,
         type: file.type,
       };
-      i;
     });
 
     this.makeRequest(
@@ -175,7 +176,7 @@ class FileUploader extends FileProcessor {
       (error) => {
         this.onError(error);
       },
-      undefined
+      undefined,
     );
   }
   onFile(file: File, cont: () => void): void {
@@ -185,6 +186,9 @@ class FileUploader extends FileProcessor {
       type: "POST",
       cache: false,
       xhr: () => {
+        if (typeof $.ajaxSettings.xhr !== "function")
+          throw "jQuery's XHR is not a function";
+
         const xhrVal = $.ajaxSettings.xhr();
 
         if (xhrVal.upload) {
@@ -192,7 +196,7 @@ class FileUploader extends FileProcessor {
             if (e.lengthComputable) {
               this.onProgress(
                 file,
-                (this.progressBytes + e.loaded) / this.totalBytes
+                (this.progressBytes + e.loaded) / this.totalBytes,
               );
             }
           };
@@ -207,8 +211,9 @@ class FileUploader extends FileProcessor {
         cont();
       },
       error: (jqXHR, textStatus, errorThrown) => {
-        errorThrown;
         this.onError(jqXHR.responseText || textStatus);
+        return;
+        errorThrown; // eslint-disable-line @typescript-eslint/no-unused-expressions
       },
     });
   }
@@ -219,7 +224,7 @@ class FileUploader extends FileProcessor {
         size: file.size,
         type: file.type,
       };
-      i;
+      i; // eslint-disable-line @typescript-eslint/no-unused-expressions
     });
 
     // Trigger shiny:inputchanged. Unlike a normal shiny:inputchanged event,
@@ -231,7 +236,7 @@ class FileUploader extends FileProcessor {
       getFileInputBinding(),
       this.el,
       "shiny.fileupload",
-      document
+      document,
     );
 
     this.makeRequest(
@@ -243,12 +248,12 @@ class FileUploader extends FileProcessor {
         this.$bar().text("Upload complete");
         // Reset the file input's value to "". This allows the same file to be
         // uploaded again. https://stackoverflow.com/a/22521275
-        $(evt.el).val("");
+        $(evt.el as HTMLElement).val("");
       },
       (error) => {
         this.onError(error);
       },
-      undefined
+      undefined,
     );
     this.$bar().text("Finishing upload");
   }
@@ -270,7 +275,7 @@ class FileUploader extends FileProcessor {
     return $(
       "#" +
         $escape(this.id) +
-        "_progress.shiny-file-input-progress .progress-bar"
+        "_progress.shiny-file-input-progress .progress-bar",
     );
   }
   $setVisible(visible: boolean): void {
@@ -289,4 +294,4 @@ class FileUploader extends FileProcessor {
 }
 
 export { FileUploader };
-export type { UploadInitValue, UploadEndValue };
+export type { UploadEndValue, UploadInitValue };

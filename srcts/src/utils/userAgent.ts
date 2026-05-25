@@ -6,5 +6,5 @@ function setUserAgent(userAgent_: UserAgent): void {
   userAgent = userAgent_;
 }
 
+export { setUserAgent, userAgent };
 export type { UserAgent };
-export { userAgent, setUserAgent };

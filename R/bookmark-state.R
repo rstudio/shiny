@@ -99,12 +99,12 @@ saveShinySaveState <- function(state) {
 
 # Encode the state to a URL. This does not save to disk.
 encodeShinySaveState <- function(state) {
-  exclude <- c(state$exclude, "._bookmark_")
-  inputVals <- serializeReactiveValues(state$input, exclude, stateDir = NULL)
-
   # Allow user-supplied onSave function to do things like add state$values.
   if (!is.null(state$onSave))
     isolate(state$onSave(state))
+
+  exclude <- c(state$exclude, "._bookmark_")
+  inputVals <- serializeReactiveValues(state$input, exclude, stateDir = NULL)
 
   inputVals <- vapply(inputVals,
     function(x) toJSON(x, strict_atomic = FALSE),
@@ -452,8 +452,10 @@ RestoreInputSet <- R6Class("RestoreInputSet",
   )
 )
 
-# This is a fastmap::faststack(); value is assigned in .onLoad().
 restoreCtxStack <- NULL
+on_load({
+    restoreCtxStack <- fastmap::faststack()
+})
 
 withRestoreContext <- function(ctx, expr) {
   restoreCtxStack$push(ctx)
@@ -527,8 +529,8 @@ restoreInput <- function(id, default) {
 #' Update URL in browser's location bar
 #'
 #' This function updates the client browser's query string in the location bar.
-#' It typically is called from an observer. Note that this will not work in
-#' Internet Explorer 9 and below.
+#' It typically is called from an observer. Note that this requires a browser
+#' with History API support (`history.pushState` / `history.replaceState`).
 #'
 #' For `mode = "push"`, only three updates are currently allowed:
 #' \enumerate{
@@ -541,15 +543,15 @@ restoreInput <- function(id, default) {
 #' In other words, if `mode = "push"`, the `queryString` must start
 #' with either `?` or with `#`.
 #'
-#' A technical curiosity: under the hood, this function is calling the HTML5
-#' history API (which is where the names for the `mode` argument come from).
+#' A technical curiosity: under the hood, this function is calling the History
+#' API (which is where the names for the `mode` argument come from).
 #' When `mode = "replace"`, the function called is
 #' `window.history.replaceState(null, null, queryString)`.
 #' When `mode = "push"`, the function called is
 #' `window.history.pushState(null, null, queryString)`.
 #'
 #' @param queryString The new query string to show in the location bar.
-#' @param mode When the query string is updated, should the the current history
+#' @param mode When the query string is updated, should the current history
 #'   entry be replaced (default), or should a new history entry be pushed onto
 #'   the history stack? The former should only be used in a live bookmarking
 #'   context. The latter is useful if you want to navigate between states using

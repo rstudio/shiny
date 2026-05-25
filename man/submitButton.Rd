@@ -28,7 +28,7 @@ the more versatile \code{\link[=actionButton]{actionButton()}} (see details belo
 Submit buttons are unusual Shiny inputs, and we recommend using
 \code{\link[=actionButton]{actionButton()}} instead of \code{submitButton} when you
 want to delay a reaction.
-See \href{https://shiny.rstudio.com/articles/action-buttons.html}{this article} for more information (including a demo of how to "translate"
+See \href{https://shiny.posit.co/articles/action-buttons.html}{this article} for more information (including a demo of how to "translate"
 code using a \code{submitButton} to code using an \code{actionButton}).
 
 In essence, the presence of a submit button stops all inputs from
@@ -64,20 +64,20 @@ shinyApp(
 }
 }
 \seealso{
-Other input elements: 
-\code{\link{actionButton}()},
-\code{\link{checkboxGroupInput}()},
-\code{\link{checkboxInput}()},
-\code{\link{dateInput}()},
-\code{\link{dateRangeInput}()},
-\code{\link{fileInput}()},
-\code{\link{numericInput}()},
-\code{\link{passwordInput}()},
-\code{\link{radioButtons}()},
-\code{\link{selectInput}()},
-\code{\link{sliderInput}()},
-\code{\link{textAreaInput}()},
-\code{\link{textInput}()},
-\code{\link{varSelectInput}()}
+Other input elements:
+\code{\link[=actionButton]{actionButton()}},
+\code{\link[=checkboxGroupInput]{checkboxGroupInput()}},
+\code{\link[=checkboxInput]{checkboxInput()}},
+\code{\link[=dateInput]{dateInput()}},
+\code{\link[=dateRangeInput]{dateRangeInput()}},
+\code{\link[=fileInput]{fileInput()}},
+\code{\link[=numericInput]{numericInput()}},
+\code{\link[=passwordInput]{passwordInput()}},
+\code{\link[=radioButtons]{radioButtons()}},
+\code{\link[=selectInput]{selectInput()}},
+\code{\link[=sliderInput]{sliderInput()}},
+\code{\link[=textAreaInput]{textAreaInput()}},
+\code{\link[=textInput]{textInput()}},
+\code{\link[=varSelectInput]{varSelectInput()}}
 }
 \concept{input elements}

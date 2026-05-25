@@ -42,7 +42,7 @@ Selectize.define("selectize-plugin-a11y", function (options) {
               // random IDs are assigned when .selectize() is called, but we're
               // doing it here to limit the scope of changes.
               var kids = self.$dropdown_content[0].children;
-              for (i = 0; i < kids.length; i++) {
+              for (var i = 0; i < kids.length; i++) {
                 var attrs = kids[i].attributes;
                 if (!attrs.role) {
                   kids[i].setAttribute("role", "option");

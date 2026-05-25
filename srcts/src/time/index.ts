@@ -1,5 +1,5 @@
-import { Debouncer, debounce } from "./debounce";
+import { debounce, Debouncer } from "./debounce";
 import { Invoker } from "./invoke";
 import { Throttler } from "./throttle";
 
-export { Debouncer, debounce, Invoker, Throttler };
+export { debounce, Debouncer, Invoker, Throttler };

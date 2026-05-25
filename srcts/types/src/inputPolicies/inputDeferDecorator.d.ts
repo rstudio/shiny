@@ -1,5 +1,4 @@
-import type { EventPriority } from "./inputPolicy";
-import type { InputPolicy, InputPolicyOpts } from "./inputPolicy";
+import type { EventPriority, InputPolicy, InputPolicyOpts } from "./inputPolicy";
 declare class InputDeferDecorator implements InputPolicy {
     pendingInput: {
         [key: string]: {

@@ -172,9 +172,10 @@ setCurrentTheme <- function(theme) {
 
 #' Register a theme dependency
 #'
-#' This function registers a function that returns an [htmlDependency()] or list
-#' of such objects. If `session$setCurrentTheme()` is called, the function will
-#' be re-executed, and the resulting html dependency will be sent to the client.
+#' This function registers a function that returns an
+#' [htmltools::htmlDependency()] or list of such objects. If
+#' `session$setCurrentTheme()` is called, the function will be re-executed, and
+#' the resulting html dependency will be sent to the client.
 #'
 #' Note that `func` should **not** be an anonymous function, or a function which
 #' is defined within the calling function. This is so that,
@@ -374,8 +375,7 @@ collapseSizes <- function(padding) {
 #' @param inverse `TRUE` to use a dark background and light text for the
 #'   navigation bar
 #' @param collapsible `TRUE` to automatically collapse the navigation
-#'   elements into a menu when the width of the browser is less than 940 pixels
-#'   (useful for viewing on smaller touchscreen device)
+#'   elements into an expandable menu on mobile devices or narrow window widths.
 #' @param fluid `TRUE` to use a fluid layout. `FALSE` to use a fixed
 #'   layout.
 #' @param windowTitle the browser window title (as a character string). The
@@ -533,7 +533,12 @@ wellPanel <- function(...) {
 #' }
 #' @export
 conditionalPanel <- function(condition, ..., ns = NS(NULL)) {
-  div(`data-display-if`=condition, `data-ns-prefix`=ns(""), ...)
+  div(
+    class = "shiny-panel-conditional",
+    `data-display-if` = condition,
+    `data-ns-prefix` = ns(""),
+    ...
+  )
 }
 
 #' Create a help text element
@@ -794,7 +799,7 @@ verbatimTextOutput <- function(outputId, placeholder = FALSE) {
 #' @export
 imageOutput <- function(outputId, width = "100%", height="400px",
                         click = NULL, dblclick = NULL, hover = NULL, brush = NULL,
-                        inline = FALSE) {
+                        inline = FALSE, fill = FALSE) {
 
   style <- if (!inline) {
     # Using `css()` here instead of paste/sprintf so that NULL values will
@@ -850,7 +855,8 @@ imageOutput <- function(outputId, width = "100%", height="400px",
   }
 
   container <- if (inline) span else div
-  do.call(container, args)
+  res <- do.call(container, args)
+  bindFillRole(res, item = fill)
 }
 
 #' Create an plot or image output element
@@ -918,6 +924,11 @@ imageOutput <- function(outputId, width = "100%", height="400px",
 #'   `imageOutput`/`plotOutput` calls may share the same `id`
 #'   value; brushing one image or plot will cause any other brushes with the
 #'   same `id` to disappear.
+#' @param fill Whether or not the returned tag should be treated as a fill item,
+#'   meaning that its `height` is allowed to grow/shrink to fit a fill container
+#'   with an opinionated height (see [htmltools::bindFillRole()]) with an
+#'   opinionated height. Examples of fill containers include `bslib::card()` and
+#'   `bslib::card_body_fill()`.
 #' @inheritParams textOutput
 #' @note The arguments `clickId` and `hoverId` only work for R base graphics
 #'   (see the \pkg{\link[graphics:graphics-package]{graphics}} package). They do
@@ -1088,11 +1099,11 @@ imageOutput <- function(outputId, width = "100%", height="400px",
 #' @export
 plotOutput <- function(outputId, width = "100%", height="400px",
                        click = NULL, dblclick = NULL, hover = NULL, brush = NULL,
-                       inline = FALSE) {
+                       inline = FALSE, fill = !inline) {
 
   # Result is the same as imageOutput, except for HTML class
   res <- imageOutput(outputId, width, height, click, dblclick,
-                     hover, brush, inline)
+                     hover, brush, inline, fill)
 
   res$attribs$class <- "shiny-plot-output"
   res
@@ -1102,23 +1113,23 @@ plotOutput <- function(outputId, width = "100%", height="400px",
 #' @rdname renderTable
 #' @export
 tableOutput <- function(outputId) {
-  div(id = outputId, class="shiny-html-output")
+  div(id = outputId, class="shiny-html-output shiny-table-output")
 }
 
 dataTableDependency <- list(
   htmlDependency(
     "datatables",
-    "1.10.5",
+    "1.10.22",
     src = "www/shared/datatables",
     package = "shiny",
     script = "js/jquery.dataTables.min.js"
   ),
   htmlDependency(
     "datatables-bootstrap",
-    "1.10.5",
+    "1.10.22",
     src = "www/shared/datatables",
     package = "shiny",
-    stylesheet = c("css/dataTables.bootstrap.css", "css/dataTables.extra.css"),
+    stylesheet = "css/dataTables.bootstrap.css",
     script = "js/dataTables.bootstrap.js"
   )
 )
@@ -1126,24 +1137,67 @@ dataTableDependency <- list(
 #' @rdname renderDataTable
 #' @export
 dataTableOutput <- function(outputId) {
-  attachDependencies(
-    div(id = outputId, class="shiny-datatable-output"),
-    dataTableDependency
-  )
+  legacy <- useLegacyDataTable(from = "shiny::dataTableOutput()", to = "DT::DTOutput()")
+
+  if (legacy) {
+    attachDependencies(
+      div(id = outputId, class = "shiny-datatable-output"),
+      dataTableDependency
+    )
+  } else {
+    DT::DTOutput(outputId)
+  }
 }
+
+useLegacyDataTable <- function(from, to) {
+  legacy <- getOption("shiny.legacy.datatable")
+
+  # If option has been set, user knows what they're doing
+  if (!is.null(legacy)) {
+    return(legacy)
+  }
+
+  # If not set, use DT if a suitable version is available (and inform either way)
+  hasDT <- is_installed("DT", "0.32.1")
+  details <- NULL
+  if (hasDT) {
+    details <- paste0(c(
+      "Since you have a suitable version of DT (>= v0.32.1), ",
+      from,
+      " will automatically use ",
+      to,
+      " under-the-hood.\n",
+      "If this happens to break your app, set `options(shiny.legacy.datatable = TRUE)` ",
+      "to get the legacy datatable implementation (or `FALSE` to squelch this message).\n"
+    ), collapse = "")
+  }
+
+  details <- paste0(details, "See <https://rstudio.github.io/DT/shiny.html> for more information.")
+
+  shinyDeprecated("1.8.1", from, to, details)
+
+  !hasDT
+}
+
 
 #' Create an HTML output element
 #'
 #' Render a reactive output variable as HTML within an application page. The
-#' text will be included within an HTML `div` tag, and is presumed to
-#' contain HTML content which should not be escaped.
+#' text will be included within an HTML `div` tag, and is presumed to contain
+#' HTML content which should not be escaped.
 #'
-#' `uiOutput` is intended to be used with `renderUI` on the server
-#' side. It is currently just an alias for `htmlOutput`.
+#' `uiOutput` is intended to be used with `renderUI` on the server side. It is
+#' currently just an alias for `htmlOutput`.
 #'
 #' @param outputId output variable to read the value from
 #' @param ... Other arguments to pass to the container tag function. This is
 #'   useful for providing additional classes for the tag.
+#' @param fill If `TRUE`, the result of `container` is treated as _both_ a fill
+#'   item and container (see [htmltools::bindFillRole()]), which means both the
+#'   `container` as well as its immediate children (i.e., the result of
+#'   `renderUI()`) are allowed to grow/shrink to fit a fill container with an
+#'   opinionated height. Set `fill = "item"` or `fill = "container"` to treat
+#'   `container` as just a fill item or a fill container.
 #' @inheritParams textOutput
 #' @return An HTML output element that can be included in a panel
 #' @examples
@@ -1155,12 +1209,16 @@ dataTableOutput <- function(outputId) {
 #' )
 #' @export
 htmlOutput <- function(outputId, inline = FALSE,
-  container = if (inline) span else div, ...)
+  container = if (inline) span else div, fill = FALSE, ...)
 {
   if (any_unnamed(list(...))) {
     warning("Unnamed elements in ... will be replaced with dynamic UI.")
   }
-  container(id = outputId, class="shiny-html-output", ...)
+  res <- container(id = outputId, class = "shiny-html-output", ...)
+  bindFillRole(
+    res, item = isTRUE(fill) || isTRUE("item" == fill),
+    container = isTRUE(fill) || isTRUE("container" == fill)
+  )
 }
 
 #' @rdname htmlOutput
@@ -1179,24 +1237,40 @@ uiOutput <- htmlOutput
 #' @param label The label that should appear on the button.
 #' @param class Additional CSS classes to apply to the tag, if any.
 #' @param icon An [icon()] to appear on the button. Default is `icon("download")`.
+#' @param enabled Controls the enabled/disabled behavior of the button or link.
+#'   Defaults to `"auto"`.
+#'   - `"auto"`: the button or link starts disabled and is automatically
+#'     enabled once the server has initialized the `downloadHandler`.
+#'   - `TRUE`: the button or link starts enabled immediately, without waiting
+#'     for the `downloadHandler`.
+#'   - `FALSE`: the button or link starts disabled and Shiny will **never**
+#'     automatically enable it, even after the `downloadHandler` is ready.
+#'     You are responsible for managing the enabled/disabled state yourself
+#'     (e.g., with `shinyjs::enable()` and `shinyjs::disable()`).
 #' @param ... Other arguments to pass to the container tag function.
 #'
 #' @examples
 #' \dontrun{
 #' ui <- fluidPage(
+#'   p("Choose a dataset to download."),
+#'   selectInput("dataset", "Dataset", choices = c("mtcars", "airquality")),
 #'   downloadButton("downloadData", "Download")
 #' )
 #'
 #' server <- function(input, output) {
-#'   # Our dataset
-#'   data <- mtcars
+#'   # The requested dataset
+#'   data <- reactive({
+#'     get(input$dataset)
+#'   })
 #'
 #'   output$downloadData <- downloadHandler(
 #'     filename = function() {
-#'       paste("data-", Sys.Date(), ".csv", sep="")
+#'       # Use the selected dataset as the suggested file name
+#'       paste0(input$dataset, ".csv")
 #'     },
 #'     content = function(file) {
-#'       write.csv(data, file)
+#'       # Write the dataset to the `file` that will be downloaded
+#'       write.csv(data(), file)
 #'     }
 #'   )
 #' }
@@ -1211,24 +1285,56 @@ downloadButton <- function(outputId,
                            label="Download",
                            class=NULL,
                            ...,
-                           icon = shiny::icon("download")) {
-  aTag <- tags$a(id=outputId,
-                 class=paste('btn btn-default shiny-download-link', class),
-                 href='',
-                 target='_blank',
-                 download=NA,
-                 validateIcon(icon),
-                 label, ...)
+                           icon = shiny::icon("download"),
+                           enabled = "auto") {
+  auto_enable <- identical(enabled, "auto")
+  if (auto_enable) {
+    enabled <- FALSE
+  }
+  # Use isTRUE/isFALSE rather than is.logical: NA passes is.logical() but is not valid here.
+  if (!isTRUE(enabled) && !isFALSE(enabled)) {
+    cli::cli_abort(
+      "{.arg enabled} must be {.val TRUE}, {.val FALSE}, or {.val \"auto\"}, not {.obj_type_friendly {enabled}}."
+    )
+  }
+  tags$a(id=outputId,
+         class="btn btn-default shiny-download-link",
+         class=if (!enabled) "disabled",
+         class=class,
+         href='',
+         target='_blank',
+         download=NA,
+         "aria-disabled"=if (!enabled) "true",
+         "data-shiny-disable-auto-enable"=if (!auto_enable) NA,
+         tabindex=if (!enabled) "-1",
+         validateIcon(icon),
+         label, ...)
 }
 
 #' @rdname downloadButton
 #' @export
-downloadLink <- function(outputId, label="Download", class=NULL, ...) {
-  tags$a(id=outputId,
-         class=paste(c('shiny-download-link', class), collapse=" "),
-         href='',
-         target='_blank',
-         download=NA,
+downloadLink <- function(outputId, label = "Download", class = NULL, ...,
+                         enabled = "auto") {
+  auto_enable <- identical(enabled, "auto")
+  if (auto_enable) {
+    enabled <- FALSE
+  }
+  # Use isTRUE/isFALSE rather than is.logical: NA passes is.logical() but is not valid here.
+  if (!isTRUE(enabled) && !isFALSE(enabled)) {
+    cli::cli_abort(
+      "{.arg enabled} must be {.val TRUE}, {.val FALSE}, or {.val \"auto\"}, not {.obj_type_friendly {enabled}}."
+    )
+  }
+  tags$a(id = outputId,
+         class = "shiny-download-link",
+         class = if (!enabled) "disabled",
+         class = class,
+         href = '',
+         target = '_blank',
+         download = NA,
+         "aria-disabled" = if (!enabled) "true",
+         "data-shiny-disable-auto-enable" = if (!auto_enable) NA,
+         tabindex = if (!enabled) "-1",
          label, ...)
 }
 

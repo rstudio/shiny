@@ -1,6 +1,3 @@
-library(shiny)
-library(testthat)
-
 test_that("testServer works with dir app", {
   # app.R
   testServer(test_path("..", "test-modules", "06_tabsets"), {
@@ -41,16 +38,17 @@ test_that("runTests works with a dir app that calls modules and uses testServer"
   app <- test_path("..", "test-modules", "12_counter")
   run <- testthat::expect_output(
     print(runTests(app)),
-    "Shiny App Test Results\\n\\* Success\\n  - 12_counter/tests/testthat\\.R"
+    "Shiny App Test Results\\n\\v Success\\n  - 12_counter/tests/testthat\\.R"
   )
   expect_true(all(run$pass))
 })
 
 test_that("runTests works with a dir app that calls modules that return reactives and use brushing", {
+  skip_if_not_installed("ggplot2")
   app <- test_path("..", "test-modules", "107_scatterplot")
   run <- testthat::expect_output(
     print(runTests(app)),
-    "Shiny App Test Results\\n\\* Success\\n  - 107_scatterplot/tests/testthat\\.R"
+    "Shiny App Test Results\\n\\v Success\\n  - 107_scatterplot/tests/testthat\\.R"
   )
   expect_true(all(run$pass))
 })

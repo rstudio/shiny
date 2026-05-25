@@ -1,12 +1,13 @@
 import $ from "jquery";
-import { InputBinding } from "./inputBinding";
 import {
-  formatDateUTC,
-  updateLabel,
   $escape,
+  formatDateUTC,
+  hasDefinedProperty,
   parseDate,
-  hasOwnProperty,
+  updateLabel,
 } from "../../utils";
+import type { NotUndefined } from "../../utils/extraTypes";
+import { InputBinding } from "./inputBinding";
 
 declare global {
   interface JQuery {
@@ -14,8 +15,10 @@ declare global {
     bsDatepicker(methodName: "getUTCDate"): Date;
     // Infinity is not allowed as a literal return type. Using `1e9999` as a placeholder that resolves to Infinity
     // https://github.com/microsoft/TypeScript/issues/32277
-    bsDatepicker(methodName: "getStartDate"): Date | -1e9999;
-    bsDatepicker(methodName: "getEndDate"): Date | 1e9999;
+
+    bsDatepicker(methodName: "getStartDate"): Date | -1e9999; // eslint-disable-line no-loss-of-precision
+
+    bsDatepicker(methodName: "getEndDate"): Date | 1e9999; // eslint-disable-line no-loss-of-precision
     bsDatepicker(methodName: string): void;
     bsDatepicker(methodName: string, params: Date | null): void;
   }
@@ -34,24 +37,20 @@ class DateInputBindingBase extends InputBinding {
   }
   getType(el: HTMLElement): string {
     return "shiny.date";
-    el;
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
   subscribe(el: HTMLElement, callback: (x: boolean) => void): void {
-    $(el).on(
-      "keyup.dateInputBinding input.dateInputBinding",
-      // event: Event
-      function () {
-        // Use normal debouncing policy when typing
-        callback(true);
-      }
-    );
+    // Don't update when in the middle of typing; listening on keyup or input
+    // tends to send spurious values to the server, based on unpredictable
+    // browser-dependant interpretation of partially-typed date strings.
     $(el).on(
       "changeDate.dateInputBinding change.dateInputBinding",
       // event: Event
       function () {
         // Send immediately when clicked
+        // Or if typing, when enter pressed or focus lost
         callback(false);
-      }
+      },
     );
   }
   unsubscribe(el: HTMLElement): void {
@@ -67,8 +66,8 @@ class DateInputBindingBase extends InputBinding {
 
   setValue(el: HTMLElement, data: unknown): void {
     throw "not implemented";
-    el;
-    data;
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
+    data; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
   initialize(el: HTMLElement): void {
     const $input = $(el).find("input");
@@ -122,8 +121,7 @@ class DateInputBindingBase extends InputBinding {
   }
   // Given an unambiguous date string or a Date object, set the min (start) date.
   // null will unset. undefined will result in no change,
-  protected _setMin(el: HTMLElement, date: Date | null | undefined): void {
-    if (date === undefined) return;
+  protected _setMin(el: HTMLElement, date: Date | null): void {
     if (date === null) {
       $(el).bsDatepicker("setStartDate", null);
       return;
@@ -161,8 +159,7 @@ class DateInputBindingBase extends InputBinding {
   }
   // Given an unambiguous date string or a Date object, set the max (end) date
   // null will unset.
-  protected _setMax(el: HTMLElement, date: Date): void {
-    if (date === undefined) return;
+  protected _setMax(el: HTMLElement, date: Date | null): void {
     if (date === null) {
       $(el).bsDatepicker("setEndDate", null);
       return;
@@ -236,7 +233,7 @@ class DateInputBinding extends DateInputBindingBase {
     return formatDateUTC(date);
   }
   // value must be an unambiguous string like '2001-01-01', or a Date object.
-  setValue(el: HTMLElement, value: Date): void {
+  setValue(el: HTMLElement, value: Date | null): void {
     // R's NA, which is null here will remove current value
     if (value === null) {
       $(el).find("input").val("").bsDatepicker("update");
@@ -286,7 +283,7 @@ class DateInputBinding extends DateInputBindingBase {
     return {
       label: this._getLabelNode(el).text(),
       value: this.getValue(el),
-      valueString: $input.val(),
+      valueString: $input.val() as NotUndefined<ReturnType<typeof $input.val>>,
       min: min,
       max: max,
       language: $input.data("datepicker").language,
@@ -295,19 +292,22 @@ class DateInputBinding extends DateInputBindingBase {
       startview: startview,
     };
   }
-  receiveMessage(el: HTMLElement, data: DateReceiveMessageData): void {
+  async receiveMessage(
+    el: HTMLElement,
+    data: DateReceiveMessageData,
+  ): Promise<void> {
     const $input = $(el).find("input");
 
-    updateLabel(data.label, this._getLabelNode(el));
+    await updateLabel(data.label, this._getLabelNode(el));
 
-    if (hasOwnProperty(data, "min")) this._setMin($input[0], data.min);
+    if (hasDefinedProperty(data, "min")) this._setMin($input[0], data.min!);
 
-    if (hasOwnProperty(data, "max")) this._setMax($input[0], data.max);
+    if (hasDefinedProperty(data, "max")) this._setMax($input[0], data.max!);
 
     // Must set value only after min and max have been set. If new value is
     // outside the bounds of the previous min/max, then the result will be a
     // blank input.
-    if (hasOwnProperty(data, "value")) this.setValue(el, data.value);
+    if (hasDefinedProperty(data, "value")) this.setValue(el, data.value!);
 
     $(el).trigger("change");
   }

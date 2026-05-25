@@ -29,8 +29,8 @@ test_that("Render functions correctly handle quosures", {
   r1 <- inject(renderTable({ pressure[!!a, ] }, digits = 1))
   r2 <- renderTable({ eval_tidy(quo(pressure[!!a, ])) }, digits = 1)
   a <- 2
-  expect_true(grepl("0\\.0", r1()))
-  expect_true(grepl("20\\.0", r2()))
+  expect_match(r1(), "0\\.0")
+  expect_match(r2(), "20\\.0")
 })
 
 test_that("functionLabel returns static value when the label can not be assigned to", {

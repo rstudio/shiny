@@ -60,6 +60,10 @@ in its \code{DESCRIPTION} file, if any.}
 only used for recording or running automated tests. Defaults to the
 \code{shiny.testmode} option, or FALSE if the option is not set.}
 }
+\value{
+The value passed to \code{\link[=stopApp]{stopApp()}}, or throws an error if the app was
+stopped with an error.
+}
 \description{
 Runs a Shiny application. This function normally does not return; interrupt R
 to stop the application (usually by pressing Ctrl+C or Esc).
@@ -108,4 +112,8 @@ if (interactive()) {
   )
   runApp(app)
 }
+}
+\seealso{
+\code{\link[=startApp]{startApp()}} for non-blocking mode, \code{\link[=stopApp]{stopApp()}} to stop a running
+app.
 }

@@ -14,7 +14,7 @@ function addDefaultInputOpts(opts: Partial<InputPolicyOpts>): InputPolicyOpts {
       break;
     default:
       throw new Error(
-        "Unexpected input value mode: '" + newOpts.priority + "'"
+        "Unexpected input value mode: '" + newOpts.priority + "'",
       );
   }
 
@@ -30,7 +30,7 @@ class InputValidateDecorator implements InputPolicy {
   setInput(
     nameType: string,
     value: unknown,
-    opts: Partial<InputPolicyOpts> = {}
+    opts: Partial<InputPolicyOpts> = {},
   ): void {
     if (!nameType) throw "Can't set input with empty name.";
 
@@ -40,4 +40,4 @@ class InputValidateDecorator implements InputPolicy {
   }
 }
 
-export { InputValidateDecorator, addDefaultInputOpts };
+export { addDefaultInputOpts, InputValidateDecorator };

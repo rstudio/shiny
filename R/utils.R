@@ -4,7 +4,7 @@ NULL
 
 # @staticimports pkg:staticimports
 #   is_installed get_package_version system_file
-#   s3_register register_upgrade_message
+#   s3_register
 #   any_named any_unnamed
 
 #' Make a random number generator repeatable
@@ -76,12 +76,12 @@ withPrivateSeed <- function(expr) {
 
     if (hasOrigSeed) {
       .GlobalEnv$.Random.seed <- origSeed
+      # Need to call this to make sure that the value of .Random.seed gets put
+      # into R's internal RNG state. (Issue #1763)
+      httpuv::getRNGState()
     } else {
       rm(.Random.seed, envir = .GlobalEnv, inherits = FALSE)
     }
-    # Need to call this to make sure that the value of .Random.seed gets put
-    # into R's internal RNG state. (Issue #1763)
-    httpuv::getRNGState()
   })
 
   expr
@@ -493,7 +493,6 @@ shinyCallingHandlers <- function(expr) {
   )
 }
 
-
 #' Register a function with the debugger (if one is active).
 #'
 #' Call this function after exprToFunction to give any active debugger a hook
@@ -771,22 +770,45 @@ formatNoSci <- function(x) {
   format(x, scientific = FALSE, digits = 15)
 }
 
+# A simple getter/setting to track the last time the auto-reload process
+# updated. This value is used by `cachedFuncWithFile()` when auto-reload is
+# enabled to reload app/ui/server files when watched supporting files change.
+cachedAutoReloadLastChanged <- local({
+  last_update <- 0
+
+  list(
+    set = function() {
+      last_update <<- as.integer(Sys.time())
+      invisible(last_update)
+    },
+    get = function() {
+      last_update
+    }
+  )
+})
+
 # Returns a function that calls the given func and caches the result for
 # subsequent calls, unless the given file's mtime changes.
 cachedFuncWithFile <- function(dir, file, func, case.sensitive = FALSE) {
-  dir <- normalizePath(dir, mustWork=TRUE)
-  mtime <- NA
+  dir <- normalizePath(dir, mustWork = TRUE)
+
   value <- NULL
+  last_mtime_file <- NA
+  last_autoreload <- 0
+
   function(...) {
-    fname <- if (case.sensitive)
+    fname <- if (case.sensitive) {
       file.path(dir, file)
-    else
+    } else {
       file.path.ci(dir, file)
+    }
 
     now <- file.info(fname)$mtime
-    if (!identical(mtime, now)) {
+    autoreload <- last_autoreload < cachedAutoReloadLastChanged$get()
+    if (autoreload || !identical(last_mtime_file, now)) {
       value <<- func(fname, ...)
-      mtime <<- now
+      last_mtime_file <<- now
+      last_autoreload <<- cachedAutoReloadLastChanged$get()
     }
     value
   }
@@ -1093,7 +1115,7 @@ need <- function(expr, message = paste(label, "must be provided"), label) {
 #'
 #' You can use `req(FALSE)` (i.e. no condition) if you've already performed
 #' all the checks you needed to by that point and just want to stop the reactive
-#' chain now. There is no advantange to this, except perhaps ease of readibility
+#' chain now. There is no advantage to this, except perhaps ease of readability
 #' if you have a complicated condition to check for (or perhaps if you'd like to
 #' divide your condition into nested `if` statements).
 #'
@@ -1115,7 +1137,10 @@ need <- function(expr, message = paste(label, "must be provided"), label) {
 #' @param ... Values to check for truthiness.
 #' @param cancelOutput If `TRUE` and an output is being evaluated, stop
 #'   processing as usual but instead of clearing the output, leave it in
-#'   whatever state it happens to be in.
+#'   whatever state it happens to be in. If `"progress"`, do the same as `TRUE`,
+#'   but also keep the output in recalculating state; this is intended for cases
+#'   when an in-progress calculation will not be completed in this reactive
+#'   flush cycle, but is still expected to provide a result in the future.
 #' @return The first value that was passed in.
 #' @export
 #' @examples
@@ -1147,6 +1172,8 @@ req <- function(..., cancelOutput = FALSE) {
     if (!isTruthy(item)) {
       if (isTRUE(cancelOutput)) {
         cancelOutput()
+      } else if (identical(cancelOutput, "progress")) {
+        reactiveStop(class = "shiny.output.progress")
       } else {
         reactiveStop(class = "validation")
       }
@@ -1240,14 +1267,12 @@ dotloop <- function(fun_, ...) {
 #' @param x An expression whose truthiness value we want to determine
 #' @export
 isTruthy <- function(x) {
-  if (inherits(x, 'try-error'))
-    return(FALSE)
-
-  if (!is.atomic(x))
-    return(TRUE)
-
   if (is.null(x))
     return(FALSE)
+  if (inherits(x, 'try-error'))
+    return(FALSE)
+  if (!is.atomic(x))
+    return(TRUE)
   if (length(x) == 0)
     return(FALSE)
   if (all(is.na(x)))
@@ -1315,7 +1340,7 @@ checkEncoding <- function(file) {
   if (identical(charToRaw(readChar(file, 3L, TRUE)), charToRaw('\UFEFF'))) {
     warning('You should not include the Byte Order Mark (BOM) in ', file, '. ',
             'Please re-save it in UTF-8 without BOM. See ',
-            'https://shiny.rstudio.com/articles/unicode.html for more info.')
+            'https://shiny.posit.co/articles/unicode.html for more info.')
     return('UTF-8-BOM')
   }
   x <- readChar(file, size, useBytes = TRUE)
@@ -1341,31 +1366,62 @@ tryNativeEncoding <- function(string) {
   if (identical(enc2utf8(string2), string)) string2 else string
 }
 
-# similarly, try to source() a file with UTF-8
-sourceUTF8 <- function(file, envir = globalenv()) {
-  lines <- readUTF8(file)
-  enc <- if (any(Encoding(lines) == 'UTF-8')) 'UTF-8' else 'unknown'
-  src <- srcfilecopy(file, lines, isFile = TRUE)  # source reference info
-  # oddly, parse(file) does not work when file contains multibyte chars that
-  # **can** be encoded natively on Windows (might be a bug in base R); we
-  # rewrite the source code in a natively encoded temp file and parse it in this
-  # case (the source reference is still pointed to the original file, though)
-  if (isWindows() && enc == 'unknown') {
-    file <- tempfile(); on.exit(unlink(file), add = TRUE)
-    writeLines(lines, file)
-  }
-  exprs <- try(parse(file, keep.source = FALSE, srcfile = src, encoding = enc))
-  if (inherits(exprs, "try-error")) {
-    diagnoseCode(file)
-    stop("Error sourcing ", file)
+maybeAnnotateSourceForArk <- function(file, lines) {
+  ark_annotate_source <- get0(".ark_annotate_source", baseenv())
+
+  if (is.null(ark_annotate_source)) {
+    return(lines)
   }
 
-  # Wrap the exprs in first `{`, then ..stacktraceon..(). It's only really the
-  # ..stacktraceon..() that we care about, but the `{` is needed to make that
-  # possible.
-  exprs <- makeCall(`{`, exprs)
-  # Need to wrap exprs in a list because we want it treated as a single argument
-  exprs <- makeCall(..stacktraceon.., list(exprs))
+  file <- normalizePath(file, mustWork = TRUE, winslash = "/") # Just to be safe
+  uri <- paste0("file:///", sub("^/", "", file)) # Ark expects URIs
+  lines_str <- paste(lines, collapse = "\n")
+  tryCatch(
+    {
+      annotated <- ark_annotate_source(lines_str, uri)
+      if (!is.null(annotated)) {
+        lines <- strsplit(annotated, "\n", fixed = TRUE)[[1]]
+      }
+    },
+    error = function(cnd) {
+      rlang::warn("Can't inject breakpoints for Ark", parent = cnd)
+    }
+  )
+
+
+  lines
+}
+
+# similarly, try to source() a file with UTF-8
+sourceUTF8 <- function(file, envir = globalenv()) {
+  file_norm <- normalizePath(file, mustWork = TRUE, winslash = "/")
+  lines <- readUTF8(file)
+  enc <- if (any(Encoding(lines) == 'UTF-8')) 'UTF-8' else 'unknown'
+
+  # Inject Ark annotations for breakpoints if available
+  lines <- maybeAnnotateSourceForArk(file, lines)
+
+  # Wrap in `..stacktraceon..({...})` using string manipulation before parsing,
+  # with a `#line` directive to map source references back to the original file
+  lines <- c(
+    "..stacktraceon..({",
+    sprintf('#line 1 "%s"', file_norm),
+    lines,
+    "})"
+  )
+
+  # Create a source file copy, i.e. an in-memory srcfile that contains all the
+  # code but refers to an original file
+  src <- srcfilecopy(file, lines, isFile = TRUE)
+
+  # Parse from our annotated lines
+  exprs <- tryCatch(
+    parse(text = lines, keep.source = FALSE, srcfile = src, encoding = enc),
+    error = function(cnd) {
+      diagnoseCode(file)
+      stop("Error sourcing ", file)
+    }
+  )
 
   eval(exprs, envir)
 }
@@ -1408,7 +1464,11 @@ URLencode <- function(value, reserved = FALSE) {
 dateYMD <- function(date = NULL, argName = "value") {
   if (!length(date)) return(NULL)
   tryCatch({
-      res <- format(as.Date(date), "%Y-%m-%d")
+      if (inherits(date, "POSIXt")) {
+        res <- format(date, "%Y-%m-%d")
+      } else {
+        res <- format(as.Date(date), "%Y-%m-%d")
+      }
       if (any(is.na(res))) stop()
       date <- res
     },
@@ -1431,6 +1491,12 @@ wrapFunctionLabel <- function(func, name, ..stacktraceon = FALSE, dots = TRUE) {
   if (name == "name" || name == "func" || name == "relabelWrapper") {
     stop("Invalid name for wrapFunctionLabel: ", name)
   }
+  if (nchar(name, "bytes") > 10000) {
+    # Max variable length in R is 10000 bytes. Truncate to a shorter number of
+    # chars because some characters could be multi-byte.
+    name <- substr(name, 1, 5000)
+  }
+
   assign(name, func, environment())
   registerDebugHook(name, environment(), name)
 
@@ -1494,7 +1560,7 @@ promise_chain <- function(promise, ..., catch = NULL, finally = NULL,
   }
 
   if (!is.null(domain)) {
-    promises::with_promise_domain(domain, do(), replace = replace)
+    with_promise_domain(domain, do(), replace = replace)
   } else {
     do()
   }
@@ -1511,7 +1577,7 @@ hybrid_chain <- function(expr, ..., catch = NULL, finally = NULL,
       {
         captureStackTraces({
           result <- withVisible(force(expr))
-          if (promises::is.promising(result$value)) {
+          if (is.promising(result$value)) {
             # Purposefully NOT including domain (nor replace), as we're already in
             # the domain at this point
             p <- promise_chain(valueWithVisible(result), ..., catch = catch, finally = finally)
@@ -1545,7 +1611,7 @@ hybrid_chain <- function(expr, ..., catch = NULL, finally = NULL,
   }
 
   if (!is.null(domain)) {
-    promises::with_promise_domain(domain, do(), replace = replace)
+    with_promise_domain(domain, do(), replace = replace)
   } else {
     do()
   }
@@ -1563,7 +1629,7 @@ createVarPromiseDomain <- function(env, name, value) {
   force(name)
   force(value)
 
-  promises::new_promise_domain(
+  new_promise_domain(
     wrapOnFulfilled = function(onFulfilled) {
       function(...) {
         orig <- env[[name]]

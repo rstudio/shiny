@@ -11,7 +11,10 @@ req(..., cancelOutput = FALSE)
 
 \item{cancelOutput}{If \code{TRUE} and an output is being evaluated, stop
 processing as usual but instead of clearing the output, leave it in
-whatever state it happens to be in.}
+whatever state it happens to be in. If \code{"progress"}, do the same as \code{TRUE},
+but also keep the output in recalculating state; this is intended for cases
+when an in-progress calculation will not be completed in this reactive
+flush cycle, but is still expected to provide a result in the future.}
 }
 \value{
 The first value that was passed in.
@@ -59,7 +62,7 @@ way to check for a value "inline" with its first use.
 
 You can use \code{req(FALSE)} (i.e. no condition) if you've already performed
 all the checks you needed to by that point and just want to stop the reactive
-chain now. There is no advantange to this, except perhaps ease of readibility
+chain now. There is no advantage to this, except perhaps ease of readability
 if you have a complicated condition to check for (or perhaps if you'd like to
 divide your condition into nested \code{if} statements).
 }

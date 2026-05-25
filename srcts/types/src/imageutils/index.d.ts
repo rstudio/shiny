@@ -1,9 +1,10 @@
 import { createBrush } from "./createBrush";
 import { createClickInfo } from "./createClickInfo";
-import { createClickHandler, createHoverHandler, createBrushHandler } from "./createHandlers";
+import { createBrushHandler, createClickHandler, createHoverHandler } from "./createHandlers";
 import { disableDrag } from "./disableDrag";
 import { findBox } from "./findbox";
+import { findImageOutputs } from "./imageBindingUtils";
 import { initCoordmap } from "./initCoordmap";
 import { initPanelScales } from "./initPanelScales";
 import { shiftToRange } from "./shiftToRange";
-export { disableDrag, initPanelScales, initCoordmap, findBox, shiftToRange, createClickInfo, createClickHandler, createHoverHandler, createBrushHandler, createBrush, };
+export { createBrush, createBrushHandler, createClickHandler, createClickInfo, createHoverHandler, disableDrag, findBox, findImageOutputs, initCoordmap, initPanelScales, shiftToRange, };

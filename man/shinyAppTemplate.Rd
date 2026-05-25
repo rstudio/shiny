@@ -45,6 +45,7 @@ following files and directories is created:
 `- tests
     |- testthat.R
     `- testthat
+        |- setup-shinytest2.R
         |- test-examplemodule.R
         |- test-server.R
         |- test-shinytest2.R
@@ -67,6 +68,7 @@ choose to use or remove any of them. They can be executed by the
 \verb{tests/testthat/} directory using the
 \href{https://rstudio.github.io/shinytest2/reference/test_app.html}{shinytest2}
 package.
+\item \code{tests/testthat/setup-shinytest2.R} is setup file to source your \code{./R} folder into the testing environment.
 \item \code{tests/testthat/test-examplemodule.R} is a test for an application's module server function.
 \item \code{tests/testthat/test-server.R} is a test for the application's server code
 \item \code{tests/testthat/test-shinytest2.R} is a test that uses the

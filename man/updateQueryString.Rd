@@ -13,7 +13,7 @@ updateQueryString(
 \arguments{
 \item{queryString}{The new query string to show in the location bar.}
 
-\item{mode}{When the query string is updated, should the the current history
+\item{mode}{When the query string is updated, should the current history
 entry be replaced (default), or should a new history entry be pushed onto
 the history stack? The former should only be used in a live bookmarking
 context. The latter is useful if you want to navigate between states using
@@ -23,8 +23,8 @@ the browser's back and forward buttons. See Examples.}
 }
 \description{
 This function updates the client browser's query string in the location bar.
-It typically is called from an observer. Note that this will not work in
-Internet Explorer 9 and below.
+It typically is called from an observer. Note that this requires a browser
+with History API support (\code{history.pushState} / \code{history.replaceState}).
 }
 \details{
 For \code{mode = "push"}, only three updates are currently allowed:
@@ -38,8 +38,8 @@ For \code{mode = "push"}, only three updates are currently allowed:
 In other words, if \code{mode = "push"}, the \code{queryString} must start
 with either \verb{?} or with \verb{#}.
 
-A technical curiosity: under the hood, this function is calling the HTML5
-history API (which is where the names for the \code{mode} argument come from).
+A technical curiosity: under the hood, this function is calling the History
+API (which is where the names for the \code{mode} argument come from).
 When \code{mode = "replace"}, the function called is
 \code{window.history.replaceState(null, null, queryString)}.
 When \code{mode = "push"}, the function called is

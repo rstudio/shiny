@@ -1,6 +1,3 @@
-library(shiny)
-library(testthat)
-
 test_that("Variables outside of the module are inaccessible", {
   module <- local({
     outside <- 123

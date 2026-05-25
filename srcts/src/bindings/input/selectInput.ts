@@ -1,7 +1,7 @@
 import $ from "jquery";
-import { InputBinding } from "./inputBinding";
-import { $escape, hasOwnProperty, updateLabel } from "../../utils";
+import { $escape, hasDefinedProperty, updateLabel } from "../../utils";
 import { indirectEval } from "../../utils/eval";
+import { InputBinding } from "./inputBinding";
 
 type SelectHTMLElement = HTMLSelectElement & { nonempty: boolean };
 
@@ -17,6 +17,21 @@ type SelectizeInfo = Selectize.IApi<string, unknown> & {
   settings: Selectize.IOptions<string, unknown>;
 };
 
+type SelectizeOptions = Selectize.IOptions<string, unknown> & {
+  // Provide some stronger typing for the Selectize options
+  labelField: "label";
+  valueField: "value";
+  searchField: ["label"];
+  onItemRemove?: (value: string) => void;
+  onDropdownClose?: () => void;
+};
+
+// Adds a py-shiny specific "option" that makes the
+// input_selectize(remove_button) parameter possible
+type SelectizeShinyOptions = SelectizeOptions & {
+  shinyRemoveButton?: "none" | "true" | "false" | "both";
+};
+
 function getLabelNode(el: SelectHTMLElement): JQuery<HTMLElement> {
   let escapedId = $escape(el.id);
 
@@ -29,7 +44,7 @@ function getLabelNode(el: SelectHTMLElement): JQuery<HTMLElement> {
     .find('label[for="' + escapedId + '"]');
 }
 // Return true if it's a selectize input, false if it's a regular select input.
-// eslint-disable-next-line camelcase
+
 function isSelectize(el: HTMLElement): boolean {
   const config = $(el)
     .parent()
@@ -40,9 +55,10 @@ function isSelectize(el: HTMLElement): boolean {
 
 class SelectInputBinding extends InputBinding {
   find(scope: HTMLElement): JQuery<HTMLElement> {
+    // Inputs also have .shiny-input-select class
     return $(scope).find("select");
   }
-  getType(el: HTMLElement): string {
+  getType(el: HTMLElement): string | null {
     const $el = $(el);
 
     if (!$el.hasClass("symbol")) {
@@ -58,8 +74,14 @@ class SelectInputBinding extends InputBinding {
   getId(el: SelectHTMLElement): string {
     return InputBinding.prototype.getId.call(this, el) || el.name;
   }
-  getValue(el: HTMLElement): string[] | number | string {
-    return $(el).val();
+  getValue(el: SelectHTMLElement): any {
+    if (!isSelectize(el)) {
+      return $(el).val();
+    } else {
+      const selectize = this._selectize(el);
+
+      return selectize?.getValue();
+    }
   }
   setValue(el: SelectHTMLElement, value: string): void {
     if (!isSelectize(el)) {
@@ -67,19 +89,17 @@ class SelectInputBinding extends InputBinding {
     } else {
       const selectize = this._selectize(el);
 
-      if (selectize) {
-        selectize.setValue(value);
-      }
+      selectize?.setValue(value);
     }
   }
   getState(el: SelectHTMLElement): {
     label: JQuery<HTMLElement>;
-    value: string[] | number | string;
+    value: ReturnType<SelectInputBinding["getValue"]>;
     options: Array<{ value: string; label: string }>;
   } {
     // Store options in an array of objects, each with with value and label
     const options: Array<{ value: string; label: string }> = new Array(
-      el.length
+      el.length,
     );
 
     for (let i = 0; i < el.length; i++) {
@@ -96,40 +116,56 @@ class SelectInputBinding extends InputBinding {
       options: options,
     };
   }
-  receiveMessage(
+  async receiveMessage(
     el: SelectHTMLElement,
-    data: SelectInputReceiveMessageData
-  ): void {
+    data: SelectInputReceiveMessageData,
+  ): Promise<void> {
     const $el = $(el);
-    let selectize;
 
     // This will replace all the options
-    if (hasOwnProperty(data, "options")) {
-      selectize = this._selectize(el);
+    if (hasDefinedProperty(data, "options")) {
+      const selectize = this._selectize(el);
+
       // Must destroy selectize before appending new options, otherwise
       // selectize will restore the original select
-      if (selectize) selectize.destroy();
+      selectize?.destroy();
       // Clear existing options and add each new one
-      $el.empty().append(data.options);
+      $el.empty().append(data.options!);
       this._selectize(el);
     }
 
     // re-initialize selectize
-    if (hasOwnProperty(data, "config")) {
+    if (hasDefinedProperty(data, "config")) {
       $el
         .parent()
         .find('script[data-for="' + $escape(el.id) + '"]')
-        .replaceWith(data.config);
+        .replaceWith(data.config!);
       this._selectize(el, true);
     }
 
     // use server-side processing for selectize
-    if (hasOwnProperty(data, "url")) {
-      selectize = this._selectize(el);
+    if (hasDefinedProperty(data, "url")) {
+      type CallbackFn = Parameters<
+        NonNullable<SelectizeInfo["settings"]["load"]>
+      >[1];
+      const selectize = this._selectize(el) as ReturnType<
+        SelectInputBinding["_selectize"]
+      > & {
+        settings: {
+          load: (query: string, callback: CallbackFn) => any;
+        };
+      };
+
+      // Calling selectize.clear() first works around https://github.com/selectize/selectize.js/issues/2146
+      // As of selectize.js >= v0.13.1, .clearOptions() clears the selection,
+      // but does NOT remove the previously-selected options. So unless we call
+      // .clear() first, the current selection(s) will remain as (deselected)
+      // options. See #3966 #4142
+      selectize.clear();
       selectize.clearOptions();
       let loaded = false;
 
-      selectize.settings.load = function (query, callback) {
+      selectize.settings.load = function (query: string, callback: CallbackFn) {
         const settings = selectize.settings;
 
         $.ajax({
@@ -155,7 +191,7 @@ class SelectInputBinding extends InputBinding {
               // the group's label and value. We use the current settings of
               // the selectize object to decide the fieldnames of that obj.
               const optgroupId = elem[settings.optgroupField || "optgroup"];
-              const optgroup = {};
+              const optgroup: { [key: string]: string } = {};
 
               optgroup[settings.optgroupLabelField || "label"] = optgroupId;
               optgroup[settings.optgroupValueField || "value"] = optgroupId;
@@ -163,8 +199,8 @@ class SelectInputBinding extends InputBinding {
             });
             callback(res);
             if (!loaded) {
-              if (hasOwnProperty(data, "value")) {
-                selectize.setValue(data.value);
+              if (hasDefinedProperty(data, "value")) {
+                selectize.setValue(data.value as any);
               } else if (settings.maxItems === 1) {
                 // first item selected by default only for single-select
                 selectize.setValue(res[0].value);
@@ -178,11 +214,12 @@ class SelectInputBinding extends InputBinding {
       selectize.load(function (callback) {
         selectize.settings.load.apply(selectize, ["", callback]);
       });
-    } else if (hasOwnProperty(data, "value")) {
+    } else if (hasDefinedProperty(data, "value")) {
+      // @ts-expect-error; data.value is currently a never type
       this.setValue(el, data.value);
     }
 
-    updateLabel(data.label, getLabelNode(el));
+    await updateLabel(data.label, getLabelNode(el));
 
     $(el).trigger("change");
   }
@@ -198,7 +235,7 @@ class SelectInputBinding extends InputBinding {
           return;
         }
         callback(false);
-      }
+      },
     );
   }
   unsubscribe(el: HTMLElement): void {
@@ -207,7 +244,12 @@ class SelectInputBinding extends InputBinding {
   initialize(el: SelectHTMLElement): void {
     this._selectize(el);
   }
-  protected _selectize(el: SelectHTMLElement, update = false): SelectizeInfo {
+  protected _selectize(
+    el: SelectHTMLElement,
+    update = false,
+  ): SelectizeInfo | undefined {
+    // Apps like 008-html do not have the selectize js library
+    // Safe-guard against missing the selectize js library
     if (!$.fn.selectize) return undefined;
     const $el = $(el);
     const config = $el
@@ -216,26 +258,22 @@ class SelectInputBinding extends InputBinding {
 
     if (config.length === 0) return undefined;
 
-    let options: {
-      labelField: "label";
-      valueField: "value";
-      searchField: ["label"];
-      onItemRemove?: (value: string) => void;
-      onDropdownClose?: () => void;
-    } & { [key: string]: unknown } = $.extend(
+    let options: SelectizeShinyOptions = $.extend(
       {
         labelField: "label",
         valueField: "value",
         searchField: ["label"],
       },
-      JSON.parse(config.html())
+      JSON.parse(config.html()),
     );
+
+    options = this._addShinyRemoveButton(options, el.hasAttribute("multiple"));
 
     // selectize created from selectInput()
     if (typeof config.data("nonempty") !== "undefined") {
       el.nonempty = true;
       options = $.extend(options, {
-        onItemRemove: function (value) {
+        onItemRemove: function (this: SelectizeInfo, value: string) {
           if (this.getValue() === "")
             $("select#" + $escape(el.id))
               .empty()
@@ -243,15 +281,16 @@ class SelectInputBinding extends InputBinding {
                 $("<option/>", {
                   value: value,
                   selected: true,
-                })
+                }),
               )
               .trigger("change");
         },
         onDropdownClose:
           // $dropdown: any
-          function () {
-            if (this.getValue() === "")
-              this.setValue($("select#" + $escape(el.id)).val());
+          function (this: SelectizeInfo) {
+            if (this.getValue() === "") {
+              this.setValue($("select#" + $escape(el.id)).val() as string);
+            }
           },
       });
     } else {
@@ -259,8 +298,9 @@ class SelectInputBinding extends InputBinding {
     }
     // options that should be eval()ed
     if (config.data("eval") instanceof Array)
-      $.each(config.data("eval"), function (i, x) {
+      $.each(config.data("eval"), function (i, x: string) {
         /*jshint evil: true*/
+        // @ts-expect-error; Need to type `options` keys to know exactly which values are accessed.
         options[x] = indirectEval("(" + options[x] + ")");
       });
     let control = $el.selectize(options)[0].selectize as SelectizeInfo;
@@ -272,7 +312,46 @@ class SelectInputBinding extends InputBinding {
       control.destroy();
       control = $el.selectize(settings)[0].selectize as SelectizeInfo;
     }
+
     return control;
+  }
+
+  // Translate shinyRemoveButton option into selectize plugins
+  private _addShinyRemoveButton(
+    options: SelectizeShinyOptions,
+    multiple: boolean,
+  ): SelectizeOptions {
+    let removeButton = options.shinyRemoveButton;
+    if (removeButton === undefined) {
+      return options;
+    }
+
+    // None really means 'smart default'
+    if (removeButton === "none") {
+      removeButton = multiple ? "true" : "false";
+    }
+
+    if (removeButton === "false") {
+      return options;
+    }
+
+    const plugins = [];
+    if (removeButton === "both") {
+      plugins.push("remove_button", "clear_button");
+    } else if (removeButton === "true") {
+      plugins.push(multiple ? "remove_button" : "clear_button");
+    }
+
+    // Add plugins to existing plugins if not already present
+    return {
+      ...options,
+      plugins: Array.from(
+        new Set([
+          ...(Array.isArray(options.plugins) ? options.plugins : []),
+          ...plugins,
+        ]),
+      ),
+    };
   }
 }
 

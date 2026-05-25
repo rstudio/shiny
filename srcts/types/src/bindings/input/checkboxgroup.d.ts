@@ -1,26 +1,26 @@
-import { InputBinding } from "./inputBinding";
 import type { CheckedHTMLElement } from "./checkbox";
-declare type CheckboxGroupHTMLElement = CheckedHTMLElement;
-declare type ValueLabelObject = {
+import { InputBinding } from "./inputBinding";
+type CheckboxGroupHTMLElement = CheckedHTMLElement;
+type ValueLabelObject = {
     value: HTMLInputElement["value"];
     label: string;
 };
-declare type CheckboxGroupReceiveMessageData = {
+type CheckboxGroupReceiveMessageData = {
     options?: string;
     value?: Parameters<CheckboxGroupInputBinding["setValue"]>[1];
     label: string;
 };
-declare type CheckboxGroupValue = CheckboxGroupHTMLElement["value"];
+type CheckboxGroupValue = CheckboxGroupHTMLElement["value"];
 declare class CheckboxGroupInputBinding extends InputBinding {
     find(scope: HTMLElement): JQuery<HTMLElement>;
     getValue(el: CheckboxGroupHTMLElement): CheckboxGroupValue[];
-    setValue(el: HTMLElement, value: string[] | string): void;
+    setValue(el: HTMLElement, value: string[] | string | null): void;
     getState(el: CheckboxGroupHTMLElement): {
         label: string;
         value: ReturnType<CheckboxGroupInputBinding["getValue"]>;
         options: ValueLabelObject[];
     };
-    receiveMessage(el: CheckboxGroupHTMLElement, data: CheckboxGroupReceiveMessageData): void;
+    receiveMessage(el: CheckboxGroupHTMLElement, data: CheckboxGroupReceiveMessageData): Promise<void>;
     subscribe(el: CheckboxGroupHTMLElement, callback: (x: boolean) => void): void;
     unsubscribe(el: CheckboxGroupHTMLElement): void;
 }

@@ -1,6 +1,6 @@
 import { TextInputBindingBase } from "./text";
-declare type NumberHTMLElement = HTMLInputElement;
-declare type NumberReceiveMessageData = {
+type NumberHTMLElement = HTMLInputElement;
+type NumberReceiveMessageData = {
     label: string;
     value?: string | null;
     min?: string | null;
@@ -9,10 +9,10 @@ declare type NumberReceiveMessageData = {
 };
 declare class NumberInputBinding extends TextInputBindingBase {
     find(scope: HTMLElement): JQuery<HTMLElement>;
-    getValue(el: NumberHTMLElement): string[] | number | string;
+    getValue(el: NumberHTMLElement): string[] | number | string | null | undefined;
     setValue(el: NumberHTMLElement, value: number): void;
     getType(el: NumberHTMLElement): string;
-    receiveMessage(el: NumberHTMLElement, data: NumberReceiveMessageData): void;
+    receiveMessage(el: NumberHTMLElement, data: NumberReceiveMessageData): Promise<void>;
     getState(el: NumberHTMLElement): {
         label: string;
         value: ReturnType<NumberInputBinding["getValue"]>;

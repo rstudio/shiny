@@ -72,8 +72,8 @@ example, some render functions call \code{\link[=createWebDependency]{createWebD
 is able to serve JS and CSS resources.}
 
 \item{q}{Quosure of the expression \code{x}. When capturing expressions to create
-your quosure, it is recommended to use \code{\link[=enquo0]{enquo0()}} to not unquote the
-object too early. See \code{\link[=enquo0]{enquo0()}} for more details.}
+your quosure, it is recommended to use \code{\link[rlang:enquo0]{rlang::enquo0()}} to not unquote
+the object too early. See \code{\link[rlang:enquo0]{rlang::enquo0()}} for more details.}
 
 \item{label}{A label for the object to be shown in the debugger. Defaults to
 the name of the calling function.}
@@ -125,12 +125,12 @@ function.
 }
 \section{Functions}{
 \itemize{
-\item \code{quoToFunction}: convert a quosure to a function.
+\item \code{quoToFunction()}: convert a quosure to a function.
 
-\item \code{installExprFunction}: converts a user's reactive \code{expr} into a
+\item \code{installExprFunction()}: converts a user's reactive \code{expr} into a
 function that's assigned to a \code{name} in the \code{assign.env}.
-}}
 
+}}
 \examples{
 # A custom render function that repeats the supplied value 3 times
 renderTriple <- function(expr) {

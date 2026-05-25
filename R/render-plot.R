@@ -194,8 +194,8 @@ renderPlot <- function(expr, width = 'auto', height = 'auto', res = 72, ...,
 }
 
 resizeSavedPlot <- function(name, session, result, width, height, alt, pixelratio, res, ...) {
-  if (result$img$width == width && result$img$height == height &&
-      result$pixelratio == pixelratio && result$res == res) {
+  if (isTRUE(result$img$width == width && result$img$height == height &&
+      result$pixelratio == pixelratio && result$res == res)) {
     return(result)
   }
 
@@ -253,7 +253,7 @@ drawPlot <- function(name, session, func, width, height, alt, pixelratio, res, .
 
   hybrid_chain(
     hybrid_chain(
-      promises::with_promise_domain(domain, {
+      with_promise_domain(domain, {
         hybrid_chain(
           func(),
           function(value) {
@@ -266,6 +266,8 @@ drawPlot <- function(name, session, func, width, height, alt, pixelratio, res, .
               # addition to ggplot, and there's a print method for that class, that we
               # won't override that method. https://github.com/rstudio/shiny/issues/841
               print.ggplot <- custom_print.ggplot
+              # For compatibility with ggplot2 >v4.0.0
+              `print.ggplot2::ggplot` <- custom_print.ggplot
 
               # Use capture.output to squelch printing to the actual console; we
               # are only interested in plot output

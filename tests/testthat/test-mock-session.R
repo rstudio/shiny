@@ -75,6 +75,8 @@ test_that("reactivePoll supported", {
 # })
 
 test_that("renderDataTable supported", {
+  withr::local_options(list(shiny.legacy.datatable = TRUE))
+
   session <- MockShinySession$new()
   isolate({
     rt <- renderDataTable({

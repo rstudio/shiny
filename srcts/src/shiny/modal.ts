@@ -1,12 +1,28 @@
 import $ from "jquery";
 import { shinyUnbindAll } from "./initedMethods";
-import { renderContent } from "./render";
+import type { HtmlDep } from "./render";
+import { renderContentAsync, renderDependenciesAsync } from "./render";
 
 // Show a modal dialog. This is meant to handle two types of cases: one is
 // that the content is a Bootstrap modal dialog, and the other is that the
 // content is non-Bootstrap. Bootstrap modals require some special handling,
 // which is coded in here.
-function show({ html = "", deps = [] } = {}): void {
+async function show({
+  html = "",
+  deps = [],
+}: {
+  html?: string;
+  deps?: HtmlDep[];
+} = {}): Promise<void> {
+  // Normally we'd first create the modal's DOM elements, then call
+  // `renderContentAsync(x, {html: html, deps: deps})`, but that has a potential
+  // problem with async rendering. If we did that, then an empty modal (from
+  // this function) could show up and then sit there empty while the
+  // dependencies load (asynchronously), and only after all that get filled with
+  // content for the modal. So instead we'll render the deps here, then render
+  // the modal, then render the content in the modal.
+  await renderDependenciesAsync(deps);
+
   // If there was an existing Bootstrap modal, then there will be a modal-
   // backdrop div that was added outside of the modal wrapper, and it must be
   // removed; otherwise there can be multiple of these divs.
@@ -44,7 +60,7 @@ function show({ html = "", deps = [] } = {}): void {
   });
 
   // Set/replace contents of wrapper with html.
-  renderContent($modal, { html: html, deps: deps });
+  await renderContentAsync($modal, { html: html });
 }
 
 function remove(): void {
@@ -55,8 +71,12 @@ function remove(): void {
   // Look for a Bootstrap modal and if present, trigger hide event. This will
   // trigger the hidden.bs.modal callback that we set in show(), which unbinds
   // and removes the element.
-  if ($modal.find(".modal").length > 0) {
-    $modal.find(".modal").modal("hide");
+  const $bsModal = $modal.find(".modal");
+  if ($bsModal.length > 0) {
+    // We both hide the modal when its shown and also immediately; the immediate
+    // version is a no-op in Bootstrap if called before the modal is fully shown
+    $bsModal.on("shown.bs.modal", () => $bsModal.modal("hide"));
+    $bsModal.modal("hide");
   } else {
     // If not a Bootstrap modal dialog, simply unbind and remove it.
     shinyUnbindAll($modal);
@@ -64,4 +84,4 @@ function remove(): void {
   }
 }
 
-export { show as showModal, remove as removeModal };
+export { remove as removeModal, show as showModal };

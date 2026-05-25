@@ -86,8 +86,8 @@ Positive, negative, and zero values are allowed.}
 automatically destroyed when its domain (if any) ends.}
 
 \item{ignoreNULL}{Whether the action should be triggered (or value
-calculated, in the case of \code{eventReactive}) when the input is
-\code{NULL}. See Details.}
+calculated, in the case of \code{eventReactive}) when the input event expression
+is \code{NULL}. See Details.}
 
 \item{ignoreInit}{If \code{TRUE}, then, when this \code{observeEvent} is
 first created/initialized, ignore the \code{handlerExpr} (the second

@@ -1,20 +1,35 @@
 import $ from "jquery";
 import type { InputBinding, OutputBinding } from "../bindings";
+import type { SubscribeEventPriority } from "../bindings/input/inputBinding";
 import { OutputBindingAdapter } from "../bindings/outputAdapter";
 import type { BindingRegistry } from "../bindings/registry";
+import { ShinyClientMessageEvent } from "../components/errorConsole";
 import type {
   InputRateDecorator,
   InputValidateDecorator,
 } from "../inputPolicies";
+import type { EventPriority } from "../inputPolicies/inputPolicy";
 import { shinyAppBindOutput, shinyAppUnbindOutput } from "./initedMethods";
-import { sendImageSizeFns } from "./sendImageSize";
-
-const boundInputs = {};
+import { sendOutputInfoFns } from "./sendOutputInfo";
 
 type BindScope = HTMLElement | JQuery<HTMLElement>;
 
+/**
+ * Type guard to check if a value is a jQuery object containing HTMLElements
+ * @param value The value to check
+ * @returns A type predicate indicating if the value is a jQuery<HTMLElement>
+ */
+function isJQuery<T = HTMLElement>(value: unknown): value is JQuery<T> {
+  return Boolean(value && (value as any).jquery);
+}
+
 // todo make sure allowDeferred can NOT be supplied and still work
-function valueChangeCallback(inputs, binding, el, allowDeferred) {
+function valueChangeCallback(
+  inputs: InputValidateDecorator,
+  binding: InputBinding,
+  el: HTMLElement,
+  priority?: SubscribeEventPriority,
+) {
   let id = binding.getId(el);
 
   if (id) {
@@ -23,14 +38,190 @@ function valueChangeCallback(inputs, binding, el, allowDeferred) {
 
     if (type) id = id + ":" + type;
 
-    const opts = {
-      priority: allowDeferred ? "deferred" : "immediate",
-      binding: binding,
-      el: el,
-    };
+    // Normalize the priority to a valid EventPriority
+    const normalizedPriority = normalizeEventPriority(priority);
 
-    inputs.setInput(id, value, opts);
+    inputs.setInput(id, value, { priority: normalizedPriority, binding, el });
   }
+}
+
+// Narrow the type of the subscribe callback value to EventPriority
+function normalizeEventPriority(
+  priority?: SubscribeEventPriority,
+): EventPriority {
+  if (priority === false || priority === undefined) {
+    return "immediate";
+  }
+
+  if (priority === true) {
+    return "deferred";
+  }
+
+  if (typeof priority === "object" && "priority" in priority) {
+    return priority.priority;
+  }
+
+  return priority;
+}
+
+/**
+ * Registry for input and output binding IDs. Used to check for duplicate IDs
+ * and to keep track of which IDs have already been added to the app. Use an
+ * immediately invoked function to keep the sets private and not clutter the
+ * scope.
+ */
+const bindingsRegistry = (() => {
+  type BindingTypes = "input" | "output";
+
+  /**
+   * Keyed by binding IDs to the array of each type of binding that ID is associated for in current app state.
+   *
+   * Ideally the
+   * value would be a length 1 array but in some (invalid) cases there could be
+   * multiple types for a single ID.
+   */
+  type IdToBindingTypes = Map<string, BindingTypes[]>;
+
+  // Main store of bindings.
+  const bindings: IdToBindingTypes = new Map();
+
+  /**
+   * Checks if the bindings registry is valid. Currently this just checks if IDs
+   * are duplicated within a binding typ but in the future could be expanded to
+   * check more conditions.
+   *
+   * @description IDs are allowed to be duplicated across binding types, but
+   * when duplicated within a binding type we report all uses of the ID.
+   * Currently the IDs are typically stored in the bound element's `id`
+   * attribute, in which case they really *should* be globally unique for
+   * accessibility and other reasons. However, in practice our bindings still
+   * work as long as inputs the IDs within a binding type don't overlap.
+   *
+   * @returns ShinyClientMessageEvent if current ID bindings are invalid,
+   * otherwise returns an ok status.
+   */
+  function checkValidity(scope: BindScope): void {
+    if (!isJQuery(scope) && !(scope instanceof HTMLElement)) {
+      return;
+    }
+
+    type BindingCounts = { [T in BindingTypes]: number };
+    const duplicateIds = new Map<string, BindingCounts>();
+    const problems: Set<string> = new Set();
+
+    // count duplicate IDs of each binding type
+    bindings.forEach((idTypes, id) => {
+      const counts: { [T in BindingTypes]: number } = { input: 0, output: 0 };
+
+      idTypes.forEach((type) => (counts[type] += 1));
+
+      if (counts.input + counts.output < 2) {
+        return;
+      }
+      // We have duplicated IDs, add them to the set of duplicated IDs to be
+      // reported to the user.
+      duplicateIds.set(id, counts);
+
+      if (counts.input > 1) {
+        problems.add("input");
+      }
+      if (counts.output > 1) {
+        problems.add("output");
+      }
+      if (counts.input >= 1 && counts.output >= 1) {
+        problems.add("shared");
+      }
+    });
+
+    if (duplicateIds.size === 0) return;
+    // Duplicated IDs are now always a warning. Before the ShinyClient console
+    // was added duplicate output IDs were errors in "production" mode. After
+    // the Shiny Client console was introduced, duplicate IDs were no longer
+    // production errors but *would* break apps in dev mode. Now, in v1.10+,
+    // duplicate IDs are always warnings in all modes for consistency.
+
+    const duplicateIdMsg = Array.from(duplicateIds.entries())
+      .map(([id, counts]) => {
+        const messages = [
+          pluralize(counts.input, "input"),
+          pluralize(counts.output, "output"),
+        ]
+          .filter((msg) => msg !== "")
+          .join(" and ");
+
+        return `- "${id}": ${messages}`;
+      })
+      .join("\n");
+
+    let txtVerb = "Duplicate";
+    let txtNoun = "input/output";
+    if (problems.has("input") && problems.has("output")) {
+      // base case
+    } else if (problems.has("input")) {
+      txtNoun = "input";
+    } else if (problems.has("output")) {
+      txtNoun = "output";
+    } else if (problems.has("shared")) {
+      txtVerb = "Shared";
+    }
+
+    const txtIdsWere = duplicateIds.size == 1 ? "ID was" : "IDs were";
+    const headline = `${txtVerb} ${txtNoun} ${txtIdsWere} found`;
+    const message = `The following ${txtIdsWere} used for more than one ${
+      problems.has("shared") ? "input/output" : txtNoun
+    }:\n${duplicateIdMsg}`;
+
+    const event = new ShinyClientMessageEvent({ headline, message });
+    const scopeElement = isJQuery(scope) ? scope.get(0) : scope;
+    (scopeElement || window).dispatchEvent(event);
+  }
+
+  /**
+   * Add a binding id to the binding ids registry
+   * @param id Id to add
+   * @param bindingType Binding type, either "input" or "output"
+   */
+  function addBinding(id: string, bindingType: BindingTypes): void {
+    const existingBinding = bindings.get(id);
+
+    if (existingBinding) {
+      existingBinding.push(bindingType);
+    } else {
+      bindings.set(id, [bindingType]);
+    }
+  }
+
+  /**
+   * Remove a binding id from the binding ids registry
+   * @param id Id to remove
+   * @param bindingType Binding type, either "input" or "output"
+   */
+  function removeBinding(id: string, bindingType: BindingTypes): void {
+    const existingBinding = bindings.get(id);
+
+    if (existingBinding) {
+      const index = existingBinding.indexOf(bindingType);
+      if (index > -1) {
+        existingBinding.splice(index, 1);
+      }
+    }
+
+    if (existingBinding?.length === 0) {
+      bindings.delete(id);
+    }
+  }
+
+  return {
+    addBinding,
+    removeBinding,
+    checkValidity,
+  };
+})();
+
+function pluralize(num: number, word: string): string {
+  if (num === 0) return "";
+  if (num === 1) return `${num} ${word}`;
+  return `${num} ${word}s`;
 }
 
 type BindInputsCtx = {
@@ -38,13 +229,12 @@ type BindInputsCtx = {
   inputsRate: InputRateDecorator;
   inputBindings: BindingRegistry<InputBinding>;
   outputBindings: BindingRegistry<OutputBinding>;
-  sendOutputHiddenState: () => void;
-  maybeAddThemeObserver: (el: HTMLElement) => void;
   initDeferredIframes: () => void;
+  outputIsRecalculating: (id: string) => boolean;
 };
 function bindInputs(
   shinyCtx: BindInputsCtx,
-  scope: BindScope = document.documentElement
+  scope: BindScope = document.documentElement,
 ): {
   [key: string]: {
     value: ReturnType<InputBinding["getValue"]>;
@@ -54,7 +244,16 @@ function bindInputs(
   const { inputs, inputsRate, inputBindings } = shinyCtx;
   const bindings = inputBindings.getBindings();
 
-  const inputItems = {};
+  const inputItems: {
+    [key: string]: {
+      value: any;
+      opts: {
+        immediate: true;
+        binding: InputBinding;
+        el: HTMLElement;
+      };
+    };
+  } = {};
 
   for (let i = 0; i < bindings.length; i++) {
     const binding = bindings[i].binding;
@@ -62,10 +261,11 @@ function bindInputs(
 
     for (let j = 0; j < matches.length; j++) {
       const el = matches[j];
+      if (el.hasAttribute("data-shiny-no-bind-input")) continue;
       const id = binding.getId(el);
 
-      // Check if ID is falsy, or if already bound
-      if (!id || boundInputs[id]) continue;
+      // Don't bind if ID is falsy or is currently bound
+      if (!id || $(el).hasClass("shiny-bound-input")) continue;
 
       const type = binding.getType(el);
       const effectiveId = type ? id + ":" + type : id;
@@ -84,8 +284,8 @@ function bindInputs(
         const thisBinding = binding;
         const thisEl = el;
 
-        return function (allowDeferred) {
-          valueChangeCallback(inputs, thisBinding, thisEl, allowDeferred);
+        return function (priority?: SubscribeEventPriority) {
+          valueChangeCallback(inputs, thisBinding, thisEl, priority);
         };
       })();
 
@@ -98,15 +298,11 @@ function bindInputs(
         inputsRate.setRatePolicy(
           effectiveId,
           ratePolicy.policy,
-          ratePolicy.delay
+          ratePolicy.delay,
         );
       }
 
-      boundInputs[id] = {
-        binding: binding,
-        node: el,
-      };
-
+      bindingsRegistry.addBinding(id, "input");
       $(el).trigger({
         type: "shiny:bound",
         // @ts-expect-error; Can not remove info on a established, malformed Event object
@@ -119,14 +315,10 @@ function bindInputs(
   return inputItems;
 }
 
-function bindOutputs(
-  {
-    sendOutputHiddenState,
-    maybeAddThemeObserver,
-    outputBindings,
-  }: BindInputsCtx,
-  scope: BindScope = document.documentElement
-): void {
+async function bindOutputs(
+  { outputBindings, outputIsRecalculating }: BindInputsCtx,
+  scope: BindScope = document.documentElement,
+): Promise<void> {
   const $scope = $(scope);
 
   const bindings = outputBindings.getBindings();
@@ -135,6 +327,7 @@ function bindOutputs(
     const binding = bindings[i].binding;
     const matches = binding.find($scope) || [];
 
+    // First loop over the matches and assemble map of id->element
     for (let j = 0; j < matches.length; j++) {
       const el = matches[j];
       const id = binding.getId(el);
@@ -155,18 +348,18 @@ function bindOutputs(
         continue;
       }
 
-      // If this element reports its CSS styles to getCurrentOutputInfo()
-      // then it should have a MutationObserver() to resend CSS if its
-      // style/class attributes change. This observer should already exist
-      // for _static_ UI, but not yet for _dynamic_ UI
-      maybeAddThemeObserver(el);
-
       const bindingAdapter = new OutputBindingAdapter(el, binding);
 
-      shinyAppBindOutput(id, bindingAdapter);
+      await shinyAppBindOutput(id, bindingAdapter);
       $el.data("shiny-output-binding", bindingAdapter);
       $el.addClass("shiny-bound-output");
       if (!$el.attr("aria-live")) $el.attr("aria-live", "polite");
+
+      if (outputIsRecalculating(id)) {
+        bindingAdapter.showProgress(true);
+      }
+
+      bindingsRegistry.addBinding(id, "output");
       $el.trigger({
         type: "shiny:bound",
         // @ts-expect-error; Can not remove info on a established, malformed Event object
@@ -177,13 +370,12 @@ function bindOutputs(
   }
 
   // Send later in case DOM layout isn't final yet.
-  setTimeout(sendImageSizeFns.regular, 0);
-  setTimeout(sendOutputHiddenState, 0);
+  setTimeout(() => sendOutputInfoFns.regular(), 0);
 }
 
 function unbindInputs(
   scope: BindScope = document.documentElement,
-  includeSelf = false
+  includeSelf = false,
 ) {
   const inputs: Array<HTMLElement | JQuery<HTMLElement>> = $(scope)
     .find(".shiny-bound-input")
@@ -201,7 +393,8 @@ function unbindInputs(
     const id = binding.getId(el);
 
     $(el).removeClass("shiny-bound-input");
-    delete boundInputs[id];
+
+    bindingsRegistry.removeBinding(id, "input");
     binding.unsubscribe(el);
     $(el).trigger({
       type: "shiny:unbound",
@@ -212,9 +405,8 @@ function unbindInputs(
   }
 }
 function unbindOutputs(
-  { sendOutputHiddenState }: BindInputsCtx,
   scope: BindScope = document.documentElement,
-  includeSelf = false
+  includeSelf = false,
 ) {
   const outputs: Array<HTMLElement | JQuery<HTMLElement>> = $(scope)
     .find(".shiny-bound-output")
@@ -232,8 +424,31 @@ function unbindOutputs(
     const id = bindingAdapter.binding.getId(outputs[i]);
 
     shinyAppUnbindOutput(id, bindingAdapter);
+
+    bindingsRegistry.removeBinding(id, "output");
     $el.removeClass("shiny-bound-output");
     $el.removeData("shiny-output-binding");
+
+    for (const prefix of [
+      "shiny-resize-observer",
+      "shiny-intersection-observer",
+      "shiny-mutate-observer",
+    ]) {
+      const observer = $el.data(prefix);
+
+      if (observer) {
+        observer.disconnect();
+        $el.removeData(prefix);
+      }
+
+      const callback = $el.data(prefix + "-callback") as
+        | { cancel?: () => void }
+        | undefined;
+
+      callback?.cancel?.();
+      $el.removeData(prefix + "-callback");
+    }
+
     $el.trigger({
       type: "shiny:unbound",
       // @ts-expect-error; Can not remove info on a established, malformed Event object
@@ -243,31 +458,38 @@ function unbindOutputs(
   }
 
   // Send later in case DOM layout isn't final yet.
-  setTimeout(sendImageSizeFns.regular, 0);
-  setTimeout(sendOutputHiddenState, 0);
+  setTimeout(() => sendOutputInfoFns.regular(), 0);
 }
 
 // (Named used before TS conversion)
 // eslint-disable-next-line @typescript-eslint/naming-convention
-function _bindAll(
-  shinyCtx: BindInputsCtx,
-  scope: BindScope
-): ReturnType<typeof bindInputs> {
-  bindOutputs(shinyCtx, scope);
-  return bindInputs(shinyCtx, scope);
-}
-function unbindAll(
+async function _bindAll(
   shinyCtx: BindInputsCtx,
   scope: BindScope,
-  includeSelf = false
-): void {
-  unbindInputs(scope, includeSelf);
-  unbindOutputs(shinyCtx, scope, includeSelf);
+): Promise<ReturnType<typeof bindInputs>> {
+  await bindOutputs(shinyCtx, scope);
+  const currentInputs = bindInputs(shinyCtx, scope);
+
+  // Check to make sure the bindings setup is valid. By checking the validity
+  // _after_ we've attempted all the bindings we can give the user a more
+  // complete error message that contains everything they will need to fix. If
+  // we threw as we saw collisions then the user would fix the first collision,
+  // re-run, and then see the next collision, etc.
+  bindingsRegistry.checkValidity(scope);
+
+  return currentInputs;
 }
-function bindAll(shinyCtx: BindInputsCtx, scope: BindScope): void {
+function unbindAll(scope: BindScope, includeSelf = false): void {
+  unbindInputs(scope, includeSelf);
+  unbindOutputs(scope, includeSelf);
+}
+async function bindAll(
+  shinyCtx: BindInputsCtx,
+  scope: BindScope,
+): Promise<void> {
   // _bindAll returns input values; it doesn't send them to the server.
   // Shiny.bindAll needs to send the values to the server.
-  const currentInputItems = _bindAll(shinyCtx, scope);
+  const currentInputItems = await _bindAll(shinyCtx, scope);
 
   const inputs = shinyCtx.inputs;
 
@@ -282,6 +504,5 @@ function bindAll(shinyCtx: BindInputsCtx, scope: BindScope): void {
   shinyCtx.initDeferredIframes();
 }
 
-export { unbindAll, bindAll, _bindAll };
-
-export type { BindScope, BindInputsCtx };
+export { _bindAll, bindAll, unbindAll };
+export type { BindInputsCtx, BindScope };

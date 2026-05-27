@@ -106,7 +106,6 @@ test_that("need() works as expected", {
   expect_null(need(TRUE, FALSE))
   expect_null(need(c(NA, NA, TRUE), FALSE))
   expect_null(need(c(FALSE, FALSE, TRUE), FALSE))
-
 })
 
 test_that("need() message/label handling (#2509)", {
@@ -114,11 +113,13 @@ test_that("need() message/label handling (#2509)", {
   # whether `expr` is truthy or falsy (the message default is evaluated eagerly).
   expect_error(
     need(1 + 1),
-    "`need\\(\\)` requires either a `message` or `label` argument"
+    "`need()` requires either a `message` or `label` argument",
+    fixed = TRUE
   )
   expect_error(
     need(NULL),
-    "`need\\(\\)` requires either a `message` or `label` argument"
+    "`need()` requires either a `message` or `label` argument",
+    fixed = TRUE
   )
 
   # `label` alone: default message is built from `label`

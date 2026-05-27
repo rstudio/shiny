@@ -1064,7 +1064,9 @@ validate <- function(..., errorClass = character(0)) {
 need <- function(expr, message = paste(label, "must be provided"), label) {
 
   if (missing(message) && missing(label)) {
-    stop("`need()` requires either a `message` or `label` argument.", call. = FALSE)
+    cli::cli_abort(
+      "{.fn need} requires either a {.arg message} or {.arg label} argument."
+    )
   }
   force(message) # Fail fast in case `label` is missing but referenced via `message`
 

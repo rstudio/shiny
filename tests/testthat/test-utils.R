@@ -106,6 +106,38 @@ test_that("need() works as expected", {
   expect_null(need(TRUE, FALSE))
   expect_null(need(c(NA, NA, TRUE), FALSE))
   expect_null(need(c(FALSE, FALSE, TRUE), FALSE))
+
+})
+
+test_that("need() message/label handling (#2509)", {
+  # Errors clearly when both `message` and `label` are missing, regardless of
+  # whether `expr` is truthy or falsy (the message default is evaluated eagerly).
+  expect_error(
+    need(1 + 1),
+    "`need\\(\\)` requires either a `message` or `label` argument"
+  )
+  expect_error(
+    need(NULL),
+    "`need\\(\\)` requires either a `message` or `label` argument"
+  )
+
+  # `label` alone: default message is built from `label`
+  expect_identical(need(NULL, label = "input$x"), "input$x must be provided")
+  expect_null(need(1, label = "input$x"))
+
+  # `message` alone: used verbatim, no `label` needed
+  expect_identical(need(NULL, message = "custom message"), "custom message")
+  expect_null(need(1, message = "custom message"))
+
+  # `message = FALSE` is a documented "fail with no message" mode, and must
+  # work without a `label`
+  expect_false(need(NULL, FALSE))
+
+  # When both are provided, `message` wins (no reference to `label`)
+  expect_identical(
+    need(NULL, message = "explicit", label = "ignored"),
+    "explicit"
+  )
 })
 
 test_that("req works", {

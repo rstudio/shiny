@@ -475,7 +475,25 @@ class ShinyClass {
         );
         const io = new IntersectionObserver(() => onIntersect());
 
-        io.observe(el);
+        // shiny-html-output elements become display:contents when they have
+        // children (CSS :has(> *) rule), removing their box model and
+        // preventing IO from detecting visibility changes. Observe the
+        // nearest ancestor with a box model instead.
+        let ioTarget: Element = el;
+
+        if (el.classList.contains("shiny-html-output")) {
+          let candidate = el.parentElement;
+
+          while (candidate && candidate !== document.documentElement) {
+            if (!candidate.classList.contains("shiny-html-output")) {
+              ioTarget = candidate;
+              break;
+            }
+            candidate = candidate.parentElement;
+          }
+        }
+
+        io.observe(ioTarget);
         $el.data("shiny-intersection-observer-callback", onIntersect);
         $el.data("shiny-intersection-observer", io);
       }

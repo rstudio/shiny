@@ -7515,14 +7515,17 @@ ${duplicateIdMsg}`;
           scheduleThemeInfoRefresh();
         });
       }
-      function findBoxModelAncestor(el) {
+      function resolveObservableTarget(el) {
         if (!el.classList.contains("shiny-html-output")) {
           return el;
         }
         let candidate = el.parentElement;
-        while (candidate && candidate !== document.documentElement) {
+        while (candidate) {
           if (!candidate.classList.contains("shiny-html-output")) {
             return candidate;
+          }
+          if (candidate === document.documentElement) {
+            break;
           }
           candidate = candidate.parentElement;
         }
@@ -7546,7 +7549,7 @@ ${duplicateIdMsg}`;
             () => refreshOutputInfo(el)
           );
           const io = new IntersectionObserver(() => onIntersect());
-          io.observe(findBoxModelAncestor(el));
+          io.observe(resolveObservableTarget(el));
           $el.data("shiny-intersection-observer-callback", onIntersect);
           $el.data("shiny-intersection-observer", io);
         }

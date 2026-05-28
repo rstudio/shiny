@@ -33,7 +33,8 @@
 * Input constructors (e.g., `textInput()`, `sliderInput()`, `selectInput()`,
   `actionButton()`) now report which function and which argument were missing
   when a required argument is omitted, rather than surfacing a downstream
-  message like `argument "label" is missing, with no default`. (#1423)
+  message like `argument "label" is missing, with no default`.
+  (thanks @daattali, #1423)
 
 ## Bug fixes
 

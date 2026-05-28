@@ -80,6 +80,8 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
     weekstart = 0, language = "en", separator = " to ", width = NULL,
     autoclose = TRUE) {
 
+  check_required(inputId, label)
+
   start <- dateYMD(start, "start")
   end   <- dateYMD(end, "end")
   min   <- dateYMD(min, "min")

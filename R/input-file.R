@@ -94,6 +94,8 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL,
   width = NULL, buttonLabel = "Browse...", placeholder = "No file selected",
   capture = NULL) {
 
+  check_required(inputId, label)
+
   restoredValue <- restoreInput(id = inputId, default = NULL)
 
   # Catch potential edge case - ensure that it's either NULL or a data frame.

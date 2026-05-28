@@ -7515,6 +7515,22 @@ ${duplicateIdMsg}`;
           scheduleThemeInfoRefresh();
         });
       }
+      function resolveObservableTarget(el) {
+        if (!el.classList.contains("shiny-html-output")) {
+          return el;
+        }
+        let candidate = el.parentElement;
+        while (candidate) {
+          if (!candidate.classList.contains("shiny-html-output")) {
+            return candidate;
+          }
+          if (candidate === document.documentElement) {
+            break;
+          }
+          candidate = candidate.parentElement;
+        }
+        return el;
+      }
       function ensureObservers(el) {
         const $el = (0, import_jquery40.default)(el);
         if (!$el.data("shiny-resize-observer")) {
@@ -7533,7 +7549,7 @@ ${duplicateIdMsg}`;
             () => refreshOutputInfo(el)
           );
           const io = new IntersectionObserver(() => onIntersect());
-          io.observe(el);
+          io.observe(resolveObservableTarget(el));
           $el.data("shiny-intersection-observer-callback", onIntersect);
           $el.data("shiny-intersection-observer", io);
         }

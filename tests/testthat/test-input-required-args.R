@@ -17,6 +17,21 @@ test_that("check_required() reports the calling function and missing args", {
   expect_silent(f(NA, NA))
 })
 
+test_that("missing-arg errors carry the shiny_missing_arg_error class", {
+  expect_error(textInput("id"),    class = "shiny_missing_arg_error")
+  expect_error(sliderInput("id"),  class = "shiny_missing_arg_error")
+  expect_error(actionButton("id"), class = "shiny_missing_arg_error")
+})
+
+test_that("check_required() works under do.call()", {
+  # do.call() loses the call name, but the missing argument(s) are still
+  # reported correctly.
+  expect_error(
+    do.call(textInput, list(inputId = "id")),
+    "is missing required argument: `label`"
+  )
+})
+
 test_that("missing required args error before downstream R errors", {
   # Before the fix these produced messages like
   #   `argument "label" is missing, with no default`
@@ -35,22 +50,25 @@ test_that("explicit NULL/NA satisfies required args (documented opt-out)", {
   expect_silent(actionButton("id", NULL))
 })
 
-test_that("happy paths still construct an input without error", {
-  expect_silent(textInput("id", "Label"))
-  expect_silent(textAreaInput("id", "Label"))
-  expect_silent(passwordInput("id", "Label"))
-  expect_silent(numericInput("id", "Label", value = 1))
-  expect_silent(checkboxInput("id", "Label"))
-  expect_silent(checkboxGroupInput("id", "Label", choices = "a"))
-  expect_silent(radioButtons("id", "Label", choices = "a"))
-  expect_silent(selectInput("id", "Label", choices = "a"))
-  expect_silent(varSelectInput("id", "Label", data = mtcars))
-  expect_silent(dateInput("id", "Label"))
-  expect_silent(dateRangeInput("id", "Label"))
-  expect_silent(fileInput("id", "Label"))
-  expect_silent(sliderInput("id", "Label", min = 1, max = 10, value = 5))
-  expect_silent(actionButton("id", "Label"))
-  expect_silent(actionLink("id", "Label"))
+test_that("happy paths still construct a shiny.tag without error", {
+  expect_tag <- function(x) {
+    expect_s3_class(x, c("shiny.tag", "shiny.tag.list"), exact = FALSE)
+  }
+  expect_tag(textInput("id", "Label"))
+  expect_tag(textAreaInput("id", "Label"))
+  expect_tag(passwordInput("id", "Label"))
+  expect_tag(numericInput("id", "Label", value = 1))
+  expect_tag(checkboxInput("id", "Label"))
+  expect_tag(checkboxGroupInput("id", "Label", choices = "a"))
+  expect_tag(radioButtons("id", "Label", choices = "a"))
+  expect_tag(selectInput("id", "Label", choices = "a"))
+  expect_tag(varSelectInput("id", "Label", data = mtcars))
+  expect_tag(dateInput("id", "Label"))
+  expect_tag(dateRangeInput("id", "Label"))
+  expect_tag(fileInput("id", "Label"))
+  expect_tag(sliderInput("id", "Label", min = 1, max = 10, value = 5))
+  expect_tag(actionButton("id", "Label"))
+  expect_tag(actionLink("id", "Label"))
 })
 
 test_that("missing required input args produce informative errors", {

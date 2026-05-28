@@ -455,6 +455,31 @@ class ShinyClass {
       });
     }
 
+    // IntersectionObserver cannot detect visibility on elements with
+    // display:contents — they have no box model, so intersection ratio
+    // is permanently 0. shiny-html-output elements acquire display:contents
+    // via a CSS :has(> *) rule once they have children.
+    //
+    // Walk up to the nearest ancestor with a box model. Currently scoped
+    // to shiny-html-output; if other containers adopt display:contents,
+    // generalize here. Note: getComputedStyle at setup time won't catch
+    // styles that activate later (e.g. :has()), so a runtime check would
+    // require re-evaluating the target on style changes.
+    function findBoxModelAncestor(el: Element): Element {
+      if (!el.classList.contains("shiny-html-output")) {
+        return el;
+      }
+      let candidate = el.parentElement;
+
+      while (candidate && candidate !== document.documentElement) {
+        if (!candidate.classList.contains("shiny-html-output")) {
+          return candidate;
+        }
+        candidate = candidate.parentElement;
+      }
+      return el;
+    }
+
     function ensureObservers(el: HTMLElement): void {
       const $el = $(el);
 
@@ -475,25 +500,7 @@ class ShinyClass {
         );
         const io = new IntersectionObserver(() => onIntersect());
 
-        // shiny-html-output elements become display:contents when they have
-        // children (CSS :has(> *) rule), removing their box model and
-        // preventing IO from detecting visibility changes. Observe the
-        // nearest ancestor with a box model instead.
-        let ioTarget: Element = el;
-
-        if (el.classList.contains("shiny-html-output")) {
-          let candidate = el.parentElement;
-
-          while (candidate && candidate !== document.documentElement) {
-            if (!candidate.classList.contains("shiny-html-output")) {
-              ioTarget = candidate;
-              break;
-            }
-            candidate = candidate.parentElement;
-          }
-        }
-
-        io.observe(ioTarget);
+        io.observe(findBoxModelAncestor(el));
         $el.data("shiny-intersection-observer-callback", onIntersect);
         $el.data("shiny-intersection-observer", io);
       }

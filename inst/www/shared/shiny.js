@@ -7515,6 +7515,19 @@ ${duplicateIdMsg}`;
           scheduleThemeInfoRefresh();
         });
       }
+      function findBoxModelAncestor(el) {
+        if (!el.classList.contains("shiny-html-output")) {
+          return el;
+        }
+        let candidate = el.parentElement;
+        while (candidate && candidate !== document.documentElement) {
+          if (!candidate.classList.contains("shiny-html-output")) {
+            return candidate;
+          }
+          candidate = candidate.parentElement;
+        }
+        return el;
+      }
       function ensureObservers(el) {
         const $el = (0, import_jquery40.default)(el);
         if (!$el.data("shiny-resize-observer")) {
@@ -7533,18 +7546,7 @@ ${duplicateIdMsg}`;
             () => refreshOutputInfo(el)
           );
           const io = new IntersectionObserver(() => onIntersect());
-          let ioTarget = el;
-          if (el.classList.contains("shiny-html-output")) {
-            let candidate = el.parentElement;
-            while (candidate && candidate !== document.documentElement) {
-              if (!candidate.classList.contains("shiny-html-output")) {
-                ioTarget = candidate;
-                break;
-              }
-              candidate = candidate.parentElement;
-            }
-          }
-          io.observe(ioTarget);
+          io.observe(findBoxModelAncestor(el));
           $el.data("shiny-intersection-observer-callback", onIntersect);
           $el.data("shiny-intersection-observer", io);
         }

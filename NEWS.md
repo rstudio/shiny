@@ -40,6 +40,7 @@
 
 * Loading shiny no longer creates `.Random.seed` in the global environment as a side effect. (#4382)
 
+* `need()` now gives a clearer error when called without either a `message` or `label` argument, instead of the cryptic "argument \"label\" is missing, with no default". (thanks @chasemc and @sundrelingam, #2509)
 
 # shiny 1.13.0
 

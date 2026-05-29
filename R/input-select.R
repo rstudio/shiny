@@ -187,6 +187,11 @@ needOptgroup <- function(choices) {
 #'   value when it is a single choice input and the empty string is not in the
 #'   `choices` argument. This is to keep compatibility with
 #'   `selectInput(..., selectize = FALSE)`.
+#'
+#'   When `multiple = TRUE`, deleting all selected options yields an input
+#'   value of `NULL`. Because [observeEvent()] and [eventReactive()] ignore
+#'   `NULL` by default, this transition will not trigger them unless you set
+#'   `ignoreNULL = FALSE`.
 #' @export
 selectizeInput <- function(inputId, ..., options = NULL, width = NULL) {
   selectizeIt(
@@ -411,6 +416,11 @@ varSelectInput <- function(
 #'   value when it is a single choice input and the empty string is not in the
 #'   `choices` argument. This is to keep compatibility with
 #'   `selectInput(..., selectize = FALSE)`.
+#'
+#'   When `multiple = TRUE`, deleting all selected options yields an input
+#'   value of `NULL`. Because [observeEvent()] and [eventReactive()] ignore
+#'   `NULL` by default, this transition will not trigger them unless you set
+#'   `ignoreNULL = FALSE`.
 #' @export
 varSelectizeInput <- function(inputId, ..., options = NULL, width = NULL) {
   selectizeIt(

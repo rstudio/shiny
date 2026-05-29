@@ -1276,19 +1276,19 @@ ShinySession <- R6Class(
     },
     onDestroy = function(callback) {
       "Registers a callback to be invoked when the session scope is destroyed
-      via \\code{destroy()}. Returns a function that can be called to
+      via `destroy()`. Returns a function that can be called to
       unregister the callback. For module sessions, use this to register
       cleanup logic that runs when the module's UI is removed and
-      \\code{session$destroy()} is called."
+      `session$destroy()` is called."
       private$getOrCreateDestroyCallbacks("")$register(callback)
     },
     destroy = function(id = NULL) {
       "Destroys a module session scope, cleaning up its reactive state and
-      invoking its \\code{onDestroy()} callbacks. On the root session, an
-      \\code{id} is required: \\code{session$destroy(id)} tears down the
-      child module scope of that \\code{id}. Calling \\code{destroy()}
-      with no \\code{id} on the root session is an error; the root session
-      is torn down via \\code{close()}."
+      invoking its `onDestroy()` callbacks. On the root session, an
+      `id` is required: `session$destroy(id)` tears down the
+      child module scope of that `id`. Calling `destroy()`
+      with no `id` on the root session is an error; the root session
+      is torn down via `close()`."
       if (is.null(id)) {
         stop("`$destroy()` cannot be called on the root ShinySession without an `id`. Pass a module `id` to tear down that scope (e.g. `session$destroy(\"my_module\")`), or call `$destroy()` on a module session.")
       }

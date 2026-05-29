@@ -219,8 +219,8 @@ callback.
 \subsection{\code{MockShinySession$destroy()}}{
   Destroys a module session scope. On the root session, an
 \code{id} is required: \code{session$destroy(id)} tears down the child module
-scope of that \code{id} (equivalent to \code{session$makeScope(id)$destroy()}).
-Calling \code{destroy()} with no \code{id} on the root session is an error.
+scope of that \code{id}. Calling \code{destroy()} with no \code{id} on the root
+session is an error.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{MockShinySession$destroy(id = NULL)}

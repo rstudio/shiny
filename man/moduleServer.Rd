@@ -44,7 +44,6 @@ removeUI(selector = "#myid")
 session$destroy("myid")
 }\if{html}{\out{</div>}}
 
-\code{session$destroy(id)} is equivalent to \code{session$makeScope(id)$destroy()}.
 If teardown must happen somewhere that doesn't have the parent session or
 \code{id}, a module can instead return its own \code{session$destroy} as a handle:
 

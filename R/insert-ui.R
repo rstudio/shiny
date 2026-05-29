@@ -132,7 +132,6 @@ insertUI <- function(selector,
 #' session$destroy("my_module")
 #' ```
 #'
-#' `session$destroy(id)` is equivalent to `session$makeScope(id)$destroy()`.
 #' If teardown must happen somewhere that doesn't have the parent session or
 #' `id`, a module can instead return its own `session$destroy` as a handle:
 #'

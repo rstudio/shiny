@@ -330,8 +330,8 @@ MockShinySession <- R6Class(
     },
     #' @description Destroys a module session scope. On the root session, an
     #'   `id` is required: `session$destroy(id)` tears down the child module
-    #'   scope of that `id` (equivalent to `session$makeScope(id)$destroy()`).
-    #'   Calling `destroy()` with no `id` on the root session is an error.
+    #'   scope of that `id`. Calling `destroy()` with no `id` on the root
+    #'   session is an error.
     #' @param id Optional module `id` whose scope should be destroyed.
     destroy = function(id = NULL) {
       if (is.null(id)) {

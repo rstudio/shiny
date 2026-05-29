@@ -153,13 +153,25 @@ workerId <- local({
 #'   allowed for root sessions. For module session proxies, callbacks are
 #'   invoked when `session$destroy()` is called.
 #' }
-#' \item{destroy()}{
+#' \item{destroy(id = NULL)}{
 #'   Destroys a module session scope (and any descendant scopes) by invoking
 #'   all registered `onDestroy()` callbacks. This includes cleaning up all
 #'   reactive values, observers, and reactive expressions created within
-#'   that scope (and any descendant scopes). Cannot be called on the root
-#'   session; only on module session proxies found in [moduleServer()] or
-#'   from `session$makeScope(MOD_ID)`.
+#'   that scope (and any descendant scopes).
+#'
+#'   Called with no `id` on a module session proxy (e.g. the `session`
+#'   inside [moduleServer()]), it destroys that module's own scope. Called
+#'   with an `id`, it destroys the child module scope of that `id` — this is
+#'   how a parent tears down a module it added, using the same id it used to
+#'   insert the UI:
+#'
+#'   ```
+#'   removeUI(selector = "#editor")
+#'   session$destroy("editor")
+#'   ```
+#'
+#'   On the root session an `id` is required; `session$destroy()` with no
+#'   `id` is an error (the root session is torn down via `close()`).
 #' }
 #' \item{onEnded(callback)}{
 #'   Synonym for `onSessionEnded`.
@@ -302,19 +314,16 @@ workerId <- local({
 #'   A reactive read of the current [bootstrapLib()] theme.
 #' }
 #'
-#' @section Module lifecycle and composability:
+#' @section Destroying a module:
 #' Every reactive object (values, expressions, observers) is **scoped** to the
-#' session in which it was created. Calling `session$destroy()` on a module
-#' session tears down only the objects in that scope; the parent session and
-#' sibling modules are unaffected.
+#' session in which it was created. Destroying a module session tears down only
+#' the objects in that scope; the parent session and sibling modules are
+#' unaffected. This scoping is what makes modules safe to add and remove
+#' dynamically — without it, destroying one module could leak callbacks or
+#' invalidate reactive objects that belong to another part of the app.
 #'
-#' This scoping is what makes modules safe to add and remove dynamically.
-#' Without it, destroying one module could leak callbacks or invalidate
-#' reactive objects that belong to another part of the app.
-#'
-#' There are two ways to destroy a module scope. The parent that inserted the
-#' module's UI under an `id` can tear it down by that same `id`, without the
-#' module having to hand anything back:
+#' The parent that inserted the module's UI under an `id` can tear it down by
+#' that same `id`, without the module having to hand anything back:
 #'
 #' ```
 #' # In the parent server: insert, then later remove and destroy by id
@@ -328,11 +337,12 @@ workerId <- local({
 #' })
 #' ```
 #'
-#' `session$destroy(id)` is equivalent to `session$makeScope(id)$destroy()`.
-#' Alternatively, a module can expose its own `session$destroy` as a handle
-#' for callers that need to trigger teardown from somewhere that doesn't have
-#' the parent session or `id` (see below).
+#' Inside the module, `session$destroy()` (with no `id`) destroys the module's
+#' own scope. A module can expose this as a handle for callers that need to
+#' trigger teardown from somewhere that doesn't have the parent session or
+#' `id` (see the data ownership section below for an example).
 #'
+#' @section Module data ownership:
 #' The key rule: **data that must outlive a module should live outside it.**
 #' A reactive value created inside a module is destroyed with the module.
 #' A reactive value created in the caller's scope and passed in survives
@@ -1276,8 +1286,7 @@ ShinySession <- R6Class(
       "Destroys a module session scope, cleaning up its reactive state and
       invoking its \\code{onDestroy()} callbacks. On the root session, an
       \\code{id} is required: \\code{session$destroy(id)} tears down the
-      child module scope of that \\code{id} (equivalent to
-      \\code{session$makeScope(id)$destroy()}). Calling \\code{destroy()}
+      child module scope of that \\code{id}. Calling \\code{destroy()}
       with no \\code{id} on the root session is an error; the root session
       is torn down via \\code{close()}."
       if (is.null(id)) {

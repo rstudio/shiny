@@ -61,13 +61,24 @@ after \code{session$onEnded()} callbacks. Note, \code{session$destroy()} is not
 allowed for root sessions. For module session proxies, callbacks are
 invoked when \code{session$destroy()} is called.
 }
-\item{destroy()}{
+\item{destroy(id = NULL)}{
 Destroys a module session scope (and any descendant scopes) by invoking
 all registered \code{onDestroy()} callbacks. This includes cleaning up all
 reactive values, observers, and reactive expressions created within
-that scope (and any descendant scopes). Cannot be called on the root
-session; only on module session proxies found in \code{\link[=moduleServer]{moduleServer()}} or
-from \code{session$makeScope(MOD_ID)}.
+that scope (and any descendant scopes).
+
+Called with no \code{id} on a module session proxy (e.g. the \code{session}
+inside \code{\link[=moduleServer]{moduleServer()}}), it destroys that module's own scope. Called
+with an \code{id}, it destroys the child module scope of that \code{id} — this is
+how a parent tears down a module it added, using the same id it used to
+insert the UI:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{removeUI(selector = "#editor")
+session$destroy("editor")
+}\if{html}{\out{</div>}}
+
+On the root session an \code{id} is required; \code{session$destroy()} with no
+\code{id} is an error (the root session is torn down via \code{close()}).
 }
 \item{onEnded(callback)}{
 Synonym for \code{onSessionEnded}.
@@ -217,20 +228,17 @@ relating to the session. The following list describes the items available
 in the environment; they can be accessed using the \code{$} operator (for
 example, \code{session$clientData$url_search}).
 }
-\section{Module lifecycle and composability}{
+\section{Destroying a module}{
 
 Every reactive object (values, expressions, observers) is \strong{scoped} to the
-session in which it was created. Calling \code{session$destroy()} on a module
-session tears down only the objects in that scope; the parent session and
-sibling modules are unaffected.
+session in which it was created. Destroying a module session tears down only
+the objects in that scope; the parent session and sibling modules are
+unaffected. This scoping is what makes modules safe to add and remove
+dynamically — without it, destroying one module could leak callbacks or
+invalidate reactive objects that belong to another part of the app.
 
-This scoping is what makes modules safe to add and remove dynamically.
-Without it, destroying one module could leak callbacks or invalidate
-reactive objects that belong to another part of the app.
-
-There are two ways to destroy a module scope. The parent that inserted the
-module's UI under an \code{id} can tear it down by that same \code{id}, without the
-module having to hand anything back:
+The parent that inserted the module's UI under an \code{id} can tear it down by
+that same \code{id}, without the module having to hand anything back:
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{# In the parent server: insert, then later remove and destroy by id
 observeEvent(input$add, \{
@@ -243,10 +251,13 @@ observeEvent(input$remove, \{
 \})
 }\if{html}{\out{</div>}}
 
-\code{session$destroy(id)} is equivalent to \code{session$makeScope(id)$destroy()}.
-Alternatively, a module can expose its own \code{session$destroy} as a handle
-for callers that need to trigger teardown from somewhere that doesn't have
-the parent session or \code{id} (see below).
+Inside the module, \code{session$destroy()} (with no \code{id}) destroys the module's
+own scope. A module can expose this as a handle for callers that need to
+trigger teardown from somewhere that doesn't have the parent session or
+\code{id} (see the data ownership section below for an example).
+}
+
+\section{Module data ownership}{
 
 The key rule: \strong{data that must outlive a module should live outside it.}
 A reactive value created inside a module is destroyed with the module.

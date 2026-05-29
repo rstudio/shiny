@@ -1366,9 +1366,9 @@ ShinySession <- R6Class(
 
     defineOutput = function(name, func, label) {
       "Binds an output generating function to this name. The function can either
-      take no parameters, or have named parameters for \\code{name} and
-      \\code{shinysession} (in the future this list may expand, so it is a good idea
-      to also include \\code{...} in your function signature)."
+      take no parameters, or have named parameters for `name` and
+      `shinysession` (in the future this list may expand, so it is a good idea
+      to also include `...` in your function signature)."
 
       # jcheng 08/31/2012: User submitted an example of a dynamically calculated
       # name not working unless name was eagerly evaluated. Yikes!
@@ -1627,7 +1627,7 @@ ShinySession <- R6Class(
     },
     showProgress = function(id, persistent=FALSE) {
       'Send a message to the client that recalculation of the output identified
-      by \\code{id} is in progress. There is currently no mechanism for
+      by `id` is in progress. There is currently no mechanism for
       explicitly turning off progress for an output component; instead, all
       progress is implicitly turned off when flushOutput is next called.
 

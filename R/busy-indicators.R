@@ -220,7 +220,7 @@ spinnerOptions <- function(type = NULL, color = NULL, size = NULL, delay = NULL,
   if (!is.null(type)) {
     stopifnot(is.character(type) && length(type) == 1)
     if (file.exists(type) && grepl("\\.svg$", type)) {
-      typeRaw <- readBin(type, "raw", n = file.info(type)$size)
+      typeRaw <- readBin(type, "raw", n = file.size(type))
       url <- sprintf("url('data:image/svg+xml;base64,%s')", rawToBase64(typeRaw))
     } else {
       type <- rlang::arg_match(type, .busySpinnerTypes)

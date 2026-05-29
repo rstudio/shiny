@@ -112,6 +112,29 @@ disconnected.</p></dd>
 explicitly namespaced for the current module, <code>session$ns("name")</code>
 will return the fully-qualified ID.</p></dd>
 
+<dt>onDestroy(callback)</dt>
+<dd><p>Registers a callback to be invoked when the session scope ends.
+Returns a function that can be called to unregister the callback.
+For the root session, callbacks are invoked when the session closes,
+after <code>session$onEnded()</code> callbacks. Note, <code>session$destroy()</code> is not
+allowed for root sessions. For module session proxies, callbacks are
+invoked when <code>session$destroy()</code> is called.</p></dd>
+
+<dt>destroy(id = NULL)</dt>
+<dd><p>Destroys a module session scope (and any descendant scopes) by invoking
+all registered <code>onDestroy()</code> callbacks. This includes cleaning up all
+reactive values, observers, and reactive expressions created within
+that scope (and any descendant scopes).</p>
+<p>Called with no <code>id</code> on a module session proxy (e.g. the <code>session</code>
+inside <code><a href="moduleServer.html">moduleServer()</a></code>), it destroys that module's own scope. Called
+with an <code>id</code>, it destroys the child module scope of that <code>id</code> — this is
+how a parent tears down a module it added, using the same id it used to
+insert the UI:</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">removeUI</span>(<span class="at">selector =</span> <span class="st">"#editor"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>session<span class="sc">$</span><span class="fu">destroy</span>(<span class="st">"editor"</span>)</span></code></pre><p></p></div>
+<p>On the root session an <code>id</code> is required; <code>session$destroy()</code> with no
+<code>id</code> is an error (the root session is torn down via <code><a href="https://rdrr.io/r/base/connections.html" class="external-link">close()</a></code>).</p></dd>
+
 <dt>onEnded(callback)</dt>
 <dd><p>Synonym for <code>onSessionEnded</code>.</p></dd>
 
@@ -252,6 +275,74 @@ removed).</p></dd>
 <dd><p>A reactive read of the current <code><a href="bootstrapLib.html">bootstrapLib()</a></code> theme.</p></dd>
 
 </dl></div>
+    <div id="destroying-a-module">
+    <h2>Destroying a module</h2>
+
+
+<p>Every reactive object (values, expressions, observers) is <strong>scoped</strong> to the
+session in which it was created. Destroying a module session tears down only
+the objects in that scope; the parent session and sibling modules are
+unaffected. This scoping is what makes modules safe to add and remove
+dynamically — without it, destroying one module could leak callbacks or
+invalidate reactive objects that belong to another part of the app.</p>
+<p>The parent that inserted the module's UI under an <code>id</code> can tear it down by
+that same <code>id</code>, without the module having to hand anything back:</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># In the parent server: insert, then later remove and destroy by id</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">observeEvent</span>(input<span class="sc">$</span>add, {</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>  <span class="fu">insertUI</span>(<span class="st">"#container"</span>, <span class="at">ui =</span> <span class="fu">myModuleUI</span>(<span class="st">"editor"</span>))</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>  <span class="fu">myModuleServer</span>(<span class="st">"editor"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>})</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="fu">observeEvent</span>(input<span class="sc">$</span>remove, {</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>  <span class="fu">removeUI</span>(<span class="at">selector =</span> <span class="st">"#editor"</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>  session<span class="sc">$</span><span class="fu">destroy</span>(<span class="st">"editor"</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>})</span></code></pre><p></p></div>
+<p>Inside the module, <code>session$destroy()</code> (with no <code>id</code>) destroys the module's
+own scope. A module can expose this as a handle for callers that need to
+trigger teardown from somewhere that doesn't have the parent session or
+<code>id</code> (see the data ownership section below for an example).</p>
+    </div>
+    <div id="module-data-ownership">
+    <h2>Module data ownership</h2>
+
+
+<p>The key rule: <strong>data that must outlive a module should live outside it.</strong>
+A reactive value created inside a module is destroyed with the module.
+A reactive value created in the caller's scope and passed in survives
+destruction.</p>
+<p>Returning a reactive value from a module works when the module lives for
+the entire session. However, if you plan to call <code>session$destroy()</code>, the
+returned value will be destroyed and can no longer be read:</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>myModuleServer <span class="ot">&lt;-</span> <span class="cf">function</span>(id) {</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  <span class="fu">moduleServer</span>(id, <span class="cf">function</span>(input, output, session) {</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>    result <span class="ot">&lt;-</span> <span class="fu">reactiveVal</span>(<span class="dv">0</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>    <span class="co"># ... update result ...</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>    <span class="fu">list</span>(<span class="at">result =</span> result, <span class="at">destroy =</span> session<span class="sc">$</span>destroy)</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>  })</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>}</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">myModuleServer</span>(<span class="st">"editor"</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>mod<span class="sc">$</span><span class="fu">destroy</span>()</span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>mod<span class="sc">$</span><span class="fu">result</span>()</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co">#&gt; Error: Can't access reactive; its module session has been destroyed</span></span></code></pre><p></p></div>
+<p>Instead, pass a reactive value <strong>into</strong> the module. The value lives in
+the caller's scope and survives destruction:</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>myModuleServer <span class="ot">&lt;-</span> <span class="cf">function</span>(id, result) {</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  <span class="fu">moduleServer</span>(id, <span class="cf">function</span>(input, output, session) {</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>    <span class="fu">observeEvent</span>(input<span class="sc">$</span>save, {</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>      <span class="fu">result</span>(input<span class="sc">$</span>data)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>    })</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>  })</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>}</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co"># Caller creates and owns the value</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>saved_data <span class="ot">&lt;-</span> <span class="fu">reactiveVal</span>(<span class="cn">NULL</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="fu">myModuleServer</span>(<span class="st">"editor"</span>, <span class="at">result =</span> saved_data)</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co"># saved_data is still valid after the module is destroyed</span></span></code></pre><p></p></div>
+    </div>
+    <div id="see-also">
+    <h2>See also</h2>
+    <div class="dont-index"><p><code><a href="moduleServer.html">moduleServer()</a></code>, <code><a href="insertUI.html">removeUI()</a></code></p></div>
+    </div>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

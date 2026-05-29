@@ -405,9 +405,101 @@ test_that("MockShinySession$onDestroy registers callback and returns unsubscribe
   expect_true(is.function(unsub))
 })
 
-test_that("MockShinySession$destroy() throws an error", {
+test_that("MockShinySession$destroy() with no id throws an error", {
   session <- MockShinySession$new()
-  expect_error(session$destroy(), "destroy")
+  expect_error(session$destroy(), "without an `id`")
+})
+
+test_that("root session$destroy(id) tears down the named module scope", {
+  session <- MockShinySession$new()
+  scope <- session$makeScope("mod1")
+
+  called <- FALSE
+  scope$onDestroy(function() called <<- TRUE)
+
+  expect_false(called)
+  # Destroy the scope from the root session using only its id
+  session$destroy("mod1")
+  expect_true(called)
+})
+
+test_that("root session$destroy(id) destroys the scope's reactive state", {
+  session <- MockShinySession$new()
+  scope <- session$makeScope("mod1")
+
+  obs_val <- NULL
+  observer_ran <- 0L
+  withReactiveDomain(scope, {
+    rv <- reactiveVal(10)
+    obs <- observe({
+      observer_ran <<- observer_ran + 1L
+      obs_val <<- rv()
+    })
+  })
+  flushReact()
+  expect_equal(observer_ran, 1L)
+
+  session$destroy("mod1")
+  flushReact()
+
+  # Observer should not run again
+  expect_equal(observer_ran, 1L)
+
+  # Accessing the destroyed reactive should error
+  rv_impl <- attr(rv, ".impl")
+  expect_error(isolate(rv_impl$get()), class = "shiny.destroyed.error")
+})
+
+test_that("session$destroy(id) is equivalent to makeScope(id)$destroy()", {
+  session <- MockShinySession$new()
+  scope <- session$makeScope("mymod")
+
+  session$setInputs(`mymod-x` = 1, other = 2)
+  flushReact()
+
+  session$destroy("mymod")
+  flushReact()
+
+  expect_null(isolate(session$input$`mymod-x`))
+  expect_equal(isolate(session$input$other), 2)
+})
+
+test_that("module session$destroy(id) tears down a nested child scope", {
+  session <- MockShinySession$new()
+  parent <- session$makeScope("parent")
+  child <- parent$makeScope("child")
+
+  child_called <- FALSE
+  parent_called <- FALSE
+  child$onDestroy(function() child_called <<- TRUE)
+  parent$onDestroy(function() parent_called <<- TRUE)
+
+  # Destroy the child from the parent session using only its id
+  parent$destroy("child")
+  expect_true(child_called)
+  # Parent itself should remain alive
+  expect_false(parent_called)
+})
+
+test_that("session$destroy(id) on an unknown id is a harmless no-op", {
+  session <- MockShinySession$new()
+  expect_no_error(session$destroy("never_created"))
+})
+
+test_that("session$destroy(id) validates the id argument", {
+  session <- MockShinySession$new()
+  expect_error(session$destroy(1), "single, non-empty string")
+  expect_error(session$destroy(c("a", "b")), "single, non-empty string")
+  expect_error(session$destroy(""), "single, non-empty string")
+  expect_error(session$destroy(NA_character_), "single, non-empty string")
+})
+
+test_that("session$destroy(id) does not leak bookmark-exclude callbacks", {
+  session <- MockShinySession$new()
+  before <- session$getBookmarkExclude()
+  session$makeScope("mod1")
+  session$destroy("mod1")
+  expect_equal(session$getBookmarkExclude(), before)
 })
 
 test_that("MockShinySession$close() invokes destroy callbacks", {

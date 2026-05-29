@@ -228,6 +228,26 @@ This scoping is what makes modules safe to add and remove dynamically.
 Without it, destroying one module could leak callbacks or invalidate
 reactive objects that belong to another part of the app.
 
+There are two ways to destroy a module scope. The parent that inserted the
+module's UI under an \code{id} can tear it down by that same \code{id}, without the
+module having to hand anything back:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# In the parent server: insert, then later remove and destroy by id
+observeEvent(input$add, \{
+  insertUI("#container", ui = myModuleUI("editor"))
+  myModuleServer("editor")
+\})
+observeEvent(input$remove, \{
+  removeUI(selector = "#editor")
+  session$destroy("editor")
+\})
+}\if{html}{\out{</div>}}
+
+\code{session$destroy(id)} is equivalent to \code{session$makeScope(id)$destroy()}.
+Alternatively, a module can expose its own \code{session$destroy} as a handle
+for callers that need to trigger teardown from somewhere that doesn't have
+the parent session or \code{id} (see below).
+
 The key rule: \strong{data that must outlive a module should live outside it.}
 A reactive value created inside a module is destroyed with the module.
 A reactive value created in the caller's scope and passed in survives

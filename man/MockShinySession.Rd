@@ -217,10 +217,20 @@ callback.
 \if{html}{\out{<a id="method-MockShinySession-destroy"></a>}}
 \if{latex}{\out{\hypertarget{method-MockShinySession-destroy}{}}}
 \subsection{\code{MockShinySession$destroy()}}{
-  Cannot be called on the root MockShinySession.
+  Destroys a module session scope. On the root session, an
+\code{id} is required: \code{session$destroy(id)} tears down the child module
+scope of that \code{id} (equivalent to \code{session$makeScope(id)$destroy()}).
+Calling \code{destroy()} with no \code{id} on the root session is an error.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{MockShinySession$destroy()}
+    \preformatted{MockShinySession$destroy(id = NULL)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{id}}{Optional module \code{id} whose scope should be destroyed.}
+    }
     \if{html}{\out{</div>}}
   }
 }

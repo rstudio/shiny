@@ -328,9 +328,17 @@ MockShinySession <- R6Class(
       }
       private$destroyCallbacksByNs$get(ns)$register(callback)
     },
-    #' @description Cannot be called on the root MockShinySession.
-    destroy = function() {
-      stop("`$destroy()` cannot be called on the root session. Call `$destroy()` on a module session instead. You can create a module session via `session$makeScope(MOD_ID)`.")
+    #' @description Destroys a module session scope. On the root session, an
+    #'   `id` is required: `session$destroy(id)` tears down the child module
+    #'   scope of that `id` (equivalent to `session$makeScope(id)$destroy()`).
+    #'   Calling `destroy()` with no `id` on the root session is an error.
+    #' @param id Optional module `id` whose scope should be destroyed.
+    destroy = function(id = NULL) {
+      if (is.null(id)) {
+        stop("`$destroy()` cannot be called on the root session without an `id`. Pass a module `id` to tear down that scope (e.g. `session$destroy(\"my_module\")`), or call `$destroy()` on a module session.")
+      }
+      validateDestroyId(id)
+      self$makeScope(id)$destroy()
     },
 
     #' @description Returns `FALSE` if the session has not yet been closed
@@ -574,8 +582,13 @@ MockShinySession <- R6Class(
         onDestroy = function(callback) {
           private$getOrCreateDestroyCallbacks(namespace)$register(callback)
         },
-        destroy = function() {
-          private$invokeDestroyCallbacks(namespace)
+        destroy = function(id = NULL) {
+          if (is.null(id)) {
+            private$invokeDestroyCallbacks(namespace)
+          } else {
+            validateDestroyId(id)
+            self$makeScope(ns(id))$destroy()
+          }
         }
       )
 

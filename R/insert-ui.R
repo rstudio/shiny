@@ -122,20 +122,30 @@ insertUI <- function(selector,
 #' @section Cleaning up module server-side state:
 #' When `removeUI()` removes a module's UI, the server-side reactive objects
 #' (observers, reactive values, etc.) created by that module continue to run.
-#' Return a cleanup handle from the module, and call it when the parent removes
-#' the UI:
+#' The parent inserted the module's UI under an `id`, so it can tear down the
+#' module's server-side state by that same `id`:
+#'
+#' ```
+#' # In the parent server:
+#' myModuleServer("my_module")
+#' removeUI(selector = "#my_module")
+#' session$destroy("my_module")
+#' ```
+#'
+#' `session$destroy(id)` is equivalent to `session$makeScope(id)$destroy()`.
+#' If teardown must happen somewhere that doesn't have the parent session or
+#' `id`, a module can instead return its own `session$destroy` as a handle:
 #'
 #' ```
 #' myModuleServer <- function(id) {
 #'   moduleServer(id, function(input, output, session) {
 #'     # ... module logic ...
 #'
-#'     # Return a handle that the parent can call during teardown
+#'     # Return a handle that the caller can invoke during teardown
 #'     list(destroy = session$destroy)
 #'   })
 #' }
 #'
-#' # In the parent server:
 #' mod <- myModuleServer("my_module")
 #' removeUI(selector = "#my_module")
 #' mod$destroy()

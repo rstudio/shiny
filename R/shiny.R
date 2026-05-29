@@ -312,6 +312,27 @@ workerId <- local({
 #' Without it, destroying one module could leak callbacks or invalidate
 #' reactive objects that belong to another part of the app.
 #'
+#' There are two ways to destroy a module scope. The parent that inserted the
+#' module's UI under an `id` can tear it down by that same `id`, without the
+#' module having to hand anything back:
+#'
+#' ```
+#' # In the parent server: insert, then later remove and destroy by id
+#' observeEvent(input$add, {
+#'   insertUI("#container", ui = myModuleUI("editor"))
+#'   myModuleServer("editor")
+#' })
+#' observeEvent(input$remove, {
+#'   removeUI(selector = "#editor")
+#'   session$destroy("editor")
+#' })
+#' ```
+#'
+#' `session$destroy(id)` is equivalent to `session$makeScope(id)$destroy()`.
+#' Alternatively, a module can expose its own `session$destroy` as a handle
+#' for callers that need to trigger teardown from somewhere that doesn't have
+#' the parent session or `id` (see below).
+#'
 #' The key rule: **data that must outlive a module should live outside it.**
 #' A reactive value created inside a module is destroyed with the module.
 #' A reactive value created in the caller's scope and passed in survives
@@ -407,6 +428,16 @@ NS <- function(namespace, id = NULL) {
 #' @export
 ns.sep <- "-"
 
+
+# Validate the `id` passed to `session$destroy(id)`. Must be a single,
+# non-empty, non-NA string. The reserved `..root` sentinel is additionally
+# rejected by `makeScope()`.
+validateDestroyId <- function(id) {
+  if (!is.character(id) || length(id) != 1L || is.na(id) || !nzchar(id)) {
+    stop("`id` must be a single, non-empty string.", call. = FALSE)
+  }
+  invisible(id)
+}
 
 #' @include utils.R
 ShinySession <- R6Class(
@@ -1043,8 +1074,13 @@ ShinySession <- R6Class(
         onDestroy = function(callback) {
           private$getOrCreateDestroyCallbacks(namespace)$register(callback)
         },
-        destroy = function() {
-          private$invokeDestroyCallbacks(namespace)
+        destroy = function(id = NULL) {
+          if (is.null(id)) {
+            private$invokeDestroyCallbacks(namespace)
+          } else {
+            validateDestroyId(id)
+            self$makeScope(ns(id))$destroy()
+          }
         }
       )
 
@@ -1236,12 +1272,19 @@ ShinySession <- R6Class(
       \\code{session$destroy()} is called."
       private$getOrCreateDestroyCallbacks("")$register(callback)
     },
-    destroy = function() {
-      "Cannot be called on the root ShinySession. Call `$destroy()` on a
-      module session instead to clean up that module's reactive state.
-      You can create with `session$makeScope(MOD_ID)` to get a module
-      session to use for this purpose."
-      stop("`$destroy()` cannot be called on the root ShinySession. Call `$destroy()` on a module session. You can create a module session via `session$makeScope(MOD_ID)`.")
+    destroy = function(id = NULL) {
+      "Destroys a module session scope, cleaning up its reactive state and
+      invoking its \\code{onDestroy()} callbacks. On the root session, an
+      \\code{id} is required: \\code{session$destroy(id)} tears down the
+      child module scope of that \\code{id} (equivalent to
+      \\code{session$makeScope(id)$destroy()}). Calling \\code{destroy()}
+      with no \\code{id} on the root session is an error; the root session
+      is torn down via \\code{close()}."
+      if (is.null(id)) {
+        stop("`$destroy()` cannot be called on the root ShinySession without an `id`. Pass a module `id` to tear down that scope (e.g. `session$destroy(\"my_module\")`), or call `$destroy()` on a module session.")
+      }
+      validateDestroyId(id)
+      self$makeScope(id)$destroy()
     },
     onInputReceived = function(callback) {
       "Registers the given callback to be invoked when the session receives

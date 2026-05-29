@@ -43,7 +43,9 @@ NULL
 ## ------------------------------------------------------------------------
 createMockDomain <- function() {
   callbacks <- Callbacks$new()
+  destroyCBs <- Callbacks$new()
   ended <- FALSE
+  destroyed <- FALSE
   domain <- new.env(parent = emptyenv())
   domain$ns <- function(id) id
   domain$token <- "mock-domain"
@@ -53,12 +55,23 @@ createMockDomain <- function() {
   domain$isEnded <- function() {
     ended
   }
+  domain$onDestroy <- function(callback) {
+    return(destroyCBs$register(callback))
+  }
+  domain$destroy <- function() {
+    if (!destroyed) {
+      destroyed <<- TRUE
+      destroyCBs$invoke()
+    }
+    invisible()
+  }
   domain$reactlog <- function(logEntry) NULL
   domain$end <- function() {
     if (!ended) {
       ended <<- TRUE
       callbacks$invoke()
     }
+    domain$destroy()
     invisible()
   }
   domain$incrementBusyCount <- function() NULL

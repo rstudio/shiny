@@ -2,6 +2,14 @@
 
 ## New features
 
+* `session$destroy()` and `session$onDestroy()` are now available on
+  module session proxies to clean up "dangling reactivity" when dynamic
+  module UI is removed. Calling `session$destroy()` invokes all
+  registered `onDestroy()` callbacks for that scope and its descendants,
+  tearing down reactive values, expressions, and observers. A parent can
+  also destroy a child module scope by id with `session$destroy(id)`, so it
+  can tear down a module using the same id it used to insert the UI (#4372).
+
 * New `startApp()` runs a Shiny app in non-blocking mode, returning a
   `ShinyAppHandle` object with `stop()`, `status()`, `url()`, and `result()`
   methods. When a new app is started, any previously running non-blocking app

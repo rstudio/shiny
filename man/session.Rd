@@ -53,6 +53,33 @@ Server-side version of \code{\link[=NS]{ns <- NS(id)}}. If bare IDs need to be
 explicitly namespaced for the current module, \code{session$ns("name")}
 will return the fully-qualified ID.
 }
+\item{onDestroy(callback)}{
+Registers a callback to be invoked when the session scope ends.
+Returns a function that can be called to unregister the callback.
+For the root session, callbacks are invoked when the session closes,
+after \code{session$onEnded()} callbacks. Note, \code{session$destroy()} is not
+allowed for root sessions. For module session proxies, callbacks are
+invoked when \code{session$destroy()} is called.
+}
+\item{destroy(id = NULL)}{
+Destroys a module session scope (and any descendant scopes) by invoking
+all registered \code{onDestroy()} callbacks. This includes cleaning up all
+reactive values, observers, and reactive expressions created within
+that scope (and any descendant scopes).
+
+Called with no \code{id} on a module session proxy (e.g. the \code{session}
+inside \code{\link[=moduleServer]{moduleServer()}}), it destroys that module's own scope. Called
+with an \code{id}, it destroys the child module scope of that \code{id} — this is
+how a parent tears down a module it added, using the same id it used to
+insert the UI:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{removeUI(selector = "#editor")
+session$destroy("editor")
+}\if{html}{\out{</div>}}
+
+On the root session an \code{id} is required; \code{session$destroy()} with no
+\code{id} is an error (the root session is torn down via \code{close()}).
+}
 \item{onEnded(callback)}{
 Synonym for \code{onSessionEnded}.
 }
@@ -200,4 +227,79 @@ environment that can be used to access information and functionality
 relating to the session. The following list describes the items available
 in the environment; they can be accessed using the \code{$} operator (for
 example, \code{session$clientData$url_search}).
+}
+\section{Destroying a module}{
+
+Every reactive object (values, expressions, observers) is \strong{scoped} to the
+session in which it was created. Destroying a module session tears down only
+the objects in that scope; the parent session and sibling modules are
+unaffected. This scoping is what makes modules safe to add and remove
+dynamically — without it, destroying one module could leak callbacks or
+invalidate reactive objects that belong to another part of the app.
+
+The parent that inserted the module's UI under an \code{id} can tear it down by
+that same \code{id}, without the module having to hand anything back:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# In the parent server: insert, then later remove and destroy by id
+observeEvent(input$add, \{
+  insertUI("#container", ui = myModuleUI("editor"))
+  myModuleServer("editor")
+\})
+observeEvent(input$remove, \{
+  removeUI(selector = "#editor")
+  session$destroy("editor")
+\})
+}\if{html}{\out{</div>}}
+
+Inside the module, \code{session$destroy()} (with no \code{id}) destroys the module's
+own scope. A module can expose this as a handle for callers that need to
+trigger teardown from somewhere that doesn't have the parent session or
+\code{id} (see the data ownership section below for an example).
+}
+
+\section{Module data ownership}{
+
+The key rule: \strong{data that must outlive a module should live outside it.}
+A reactive value created inside a module is destroyed with the module.
+A reactive value created in the caller's scope and passed in survives
+destruction.
+
+Returning a reactive value from a module works when the module lives for
+the entire session. However, if you plan to call \code{session$destroy()}, the
+returned value will be destroyed and can no longer be read:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{myModuleServer <- function(id) \{
+  moduleServer(id, function(input, output, session) \{
+    result <- reactiveVal(0)
+    # ... update result ...
+    list(result = result, destroy = session$destroy)
+  \})
+\}
+
+mod <- myModuleServer("editor")
+mod$destroy()
+mod$result()
+#> Error: Can't access reactive; its module session has been destroyed
+}\if{html}{\out{</div>}}
+
+Instead, pass a reactive value \strong{into} the module. The value lives in
+the caller's scope and survives destruction:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{myModuleServer <- function(id, result) \{
+  moduleServer(id, function(input, output, session) \{
+    observeEvent(input$save, \{
+      result(input$data)
+    \})
+  \})
+\}
+
+# Caller creates and owns the value
+saved_data <- reactiveVal(NULL)
+myModuleServer("editor", result = saved_data)
+# saved_data is still valid after the module is destroyed
+}\if{html}{\out{</div>}}
+}
+
+\seealso{
+\code{\link[=moduleServer]{moduleServer()}}, \code{\link[=removeUI]{removeUI()}}
 }

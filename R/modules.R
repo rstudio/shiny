@@ -80,7 +80,43 @@ find_ancestor_session <- function(x, depth = 20) {
 #'   almost always be used).
 #'
 #' @return The return value, if any, from executing the module server function
-#' @seealso <https://shiny.posit.co/articles/modules.html>
+#'
+#' @section Destroying module reactivity:
+#' When module UI is added and removed dynamically (e.g. via [insertUI()] and
+#' [removeUI()]), the server-side reactive objects created by `moduleServer()`
+#' continue to run after the UI is removed. The parent inserted the module's
+#' UI under an `id`, so it can tear down all reactive values, expressions, and
+#' observers in that scope by that same `id`:
+#'
+#' ```
+#' # In parent server:
+#' myModuleServer("myid")
+#' removeUI(selector = "#myid")
+#' session$destroy("myid")
+#' ```
+#'
+#' If teardown must happen somewhere that doesn't have the parent session or
+#' `id`, a module can instead return its own `session$destroy` as a handle:
+#'
+#' ```
+#' myModuleServer <- function(id) {
+#'   moduleServer(id, function(input, output, session) {
+#'     # ... module logic ...
+#'
+#'     # Return a cleanup function for the caller to invoke
+#'     list(result = ..., destroy = session$destroy)
+#'   })
+#' }
+#'
+#' mod <- myModuleServer("myid")
+#' removeUI(selector = "#myid")
+#' mod$destroy()
+#' ```
+#'
+#' See the [session] help topic for details on composability and data ownership
+#' patterns when using `session$destroy()`.
+#'
+#' @seealso [session], [removeUI()], <https://shiny.posit.co/articles/modules.html>
 #'
 #' @examples
 #' # Define the UI for a module

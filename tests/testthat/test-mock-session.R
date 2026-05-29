@@ -250,18 +250,11 @@ test_that("session supports sendInputMessage", {
   expect_true(TRUE) # testthat insists that every test must have an expectation
 })
 
-test_that("session supports setBookmarkExclude", {
+test_that("session supports setBookmarkExclude and getBookmarkExclude", {
   session <- MockShinySession$new()
-  withr::with_options(list("shiny.mocksession.warn" = TRUE), {
-    expect_warning(session$setBookmarkExclude(names=1))
-  })
-})
-
-test_that("session supports getBookmarkExclude", {
-  session <- MockShinySession$new()
-  withr::with_options(list("shiny.mocksession.warn" = TRUE), {
-    expect_warning(session$getBookmarkExclude())
-  })
+  expect_equal(session$getBookmarkExclude(), character(0))
+  session$setBookmarkExclude(c("x", "y"))
+  expect_equal(session$getBookmarkExclude(), c("x", "y"))
 })
 
 test_that("session supports onBookmark", {

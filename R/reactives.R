@@ -65,6 +65,34 @@ Dependents <- R6Class(
   )
 )
 
+# Helper to create an onDestroy wrapper closure that only captures the weakref,
+# avoiding accidental strong references to `self`/`private` from the enclosing
+# initialize() environment.
+make_weak_destroy_wrapper <- function(wr) {
+  # force() is critical: without it, `wr` is a promise that retains a reference
+  # to the calling environment (e.g., initialize()), which holds `self` strongly.
+  # Forcing the promise replaces it with the evaluated value, breaking the
+  # reference chain and allowing the weakref key to be GC'd.
+  force(wr)
+  function() {
+    obj <- rlang::wref_key(wr)
+    if (!is.null(obj)) {
+      obj$destroy()
+    }
+  }
+}
+
+destroyedReactiveError <- function(label = NULL) {
+  msg <- if (!is.null(label) && nzchar(label)) {
+    paste0("Can't access reactive `", label, "`; its module session has been destroyed")
+  } else {
+    "Can't access reactive; its module session has been destroyed"
+  }
+  structure(
+    class = c("shiny.destroyed.error", "error", "condition"),
+    list(message = msg)
+  )
+}
 
 # ReactiveVal ---------------------------------------------------------------
 
@@ -76,7 +104,9 @@ ReactiveVal <- R6Class(
     value = NULL,
     label = NULL,
     frozen = FALSE,
-    dependents = NULL
+    dependents = NULL,
+    .destroyed = FALSE,
+    .destroyHandle = NULL
   ),
   public = list(
     .isRecordingOtel = FALSE, # Needs to be set by Shiny
@@ -93,8 +123,14 @@ ReactiveVal <- R6Class(
       domain <- getDefaultReactiveDomain()
       rLog$define(private$reactId, value, private$label, type = "reactiveVal", domain)
       .otelLabel <<- otel_log_label_set_reactive_val(private$label, domain = domain)
+
+      if (!is.null(domain) && is.function(domain$onDestroy)) {
+        wr <- rlang::new_weakref(key = self)
+        private$.destroyHandle <- domain$onDestroy(make_weak_destroy_wrapper(wr))
+      }
     },
     get = function() {
+      if (private$.destroyed) stop(destroyedReactiveError(private$label))
       private$dependents$register()
 
       if (private$frozen)
@@ -103,6 +139,7 @@ ReactiveVal <- R6Class(
       private$value
     },
     set = function(value) {
+      if (private$.destroyed) stop(destroyedReactiveError(private$label))
       if (identical(private$value, value)) {
         return(invisible(FALSE))
       }
@@ -134,6 +171,19 @@ ReactiveVal <- R6Class(
     },
     isFrozen = function() {
       private$frozen
+    },
+    # TODO: Add an exported S3 function (e.g., destroyReactive(x)) to destroy
+    # individual reactive objects. See spec for details.
+    destroy = function() {
+      if (private$.destroyed) return(invisible())
+      private$.destroyed <- TRUE
+      if (is.function(private$.destroyHandle)) {
+        private$.destroyHandle()
+        private$.destroyHandle <- NULL
+      }
+      private$dependents$invalidate(log = FALSE)
+      private$value <- NULL
+      invisible()
     },
     format = function(...) {
       # capture.output(print()) is necessary because format() doesn't
@@ -371,6 +421,8 @@ ReactiveValues <- R6Class(
 
     .isRecordingOtel = FALSE, # Needs to be set by Shiny
     .otelAttrs = NULL, # Needs to be set by Shiny
+    .destroyed = FALSE,
+    .destroyHandle = NULL,
 
 
     initialize = function(
@@ -387,9 +439,16 @@ ReactiveValues <- R6Class(
       .allValuesDeps <<- Dependents$new(reactId = rLog$asListAllIdStr(.reactId))
       .valuesDeps <<- Dependents$new(reactId = rLog$asListIdStr(.reactId))
       .dedupe <<- dedupe
+
+      domain <- getDefaultReactiveDomain()
+      if (!is.null(domain) && is.function(domain$onDestroy)) {
+        wr <- rlang::new_weakref(key = self)
+        .destroyHandle <<- domain$onDestroy(make_weak_destroy_wrapper(wr))
+      }
     },
 
     get = function(key) {
+      if (.destroyed) stop(destroyedReactiveError(.label))
       # get value right away to use for logging
       keyValue <- .values$get(key)
 
@@ -413,6 +472,7 @@ ReactiveValues <- R6Class(
     },
 
     set = function(key, value, force = FALSE) {
+      if (.destroyed) stop(destroyedReactiveError(.label))
       # if key exists
       #   if it is the same value, return
       #
@@ -585,6 +645,48 @@ ReactiveValues <- R6Class(
       .valuesDeps$register()
 
       return(listValue)
+    },
+
+    destroyByPrefix = function(nsPrefix) {
+      keys <- .values$keys()
+      matching <- keys[startsWith(keys, nsPrefix)]
+      if (length(matching) == 0L) return(invisible())
+
+      for (key in matching) {
+        dep <- .dependents$get(key)
+        if (!is.null(dep)) {
+          dep$invalidate(log = FALSE)
+          .dependents$remove(key)
+        }
+        .values$remove(key)
+        .metadata$remove(key)
+      }
+      .nameOrder <<- setdiff(.nameOrder, matching)
+      .namesDeps$invalidate(log = FALSE)
+      .allValuesDeps$invalidate(log = FALSE)
+      .valuesDeps$invalidate(log = FALSE)
+      invisible()
+    },
+
+    destroy = function() {
+      if (.destroyed) return(invisible())
+      .destroyed <<- TRUE
+      if (is.function(.destroyHandle)) {
+        .destroyHandle()
+        .destroyHandle <<- NULL
+      }
+      for (key in .dependents$keys()) {
+        dep <- .dependents$get(key)
+        if (!is.null(dep)) dep$invalidate(log = FALSE)
+      }
+      .namesDeps$invalidate(log = FALSE)
+      .allValuesDeps$invalidate(log = FALSE)
+      .valuesDeps$invalidate(log = FALSE)
+      .dependents <<- Map$new()
+      .values <<- Map$new()
+      .metadata <<- Map$new()
+      .nameOrder <<- character(0)
+      invisible()
     }
 
   )
@@ -920,6 +1022,8 @@ Observable <- R6Class(
     .execCount = integer(0),
     .mostRecentCtxId = character(0),
     .ctx = 'Context',
+    .destroyed = FALSE,
+    .destroyHandle = NULL,
 
     .isRecordingOtel = FALSE, # Needs to be set by Shiny
     .otelLabel = NULL, # Needs to be set by Shiny
@@ -956,8 +1060,14 @@ Observable <- R6Class(
       .mostRecentCtxId <<- ""
       .ctx <<- NULL
       rLog$define(.reactId, .value, .label, type = "observable", .domain)
+
+      if (!is.null(.domain) && is.function(.domain$onDestroy)) {
+        wr <- rlang::new_weakref(key = self)
+        .destroyHandle <<- .domain$onDestroy(make_weak_destroy_wrapper(wr))
+      }
     },
     getValue = function() {
+      if (.destroyed) stop(destroyedReactiveError(.label))
       .dependents$register()
 
       if (.invalidated || .running) {
@@ -974,6 +1084,22 @@ Observable <- R6Class(
         .value
       else
         invisible(.value)
+    },
+    destroy = function() {
+      if (.destroyed) return(invisible())
+      .destroyed <<- TRUE
+      if (is.function(.destroyHandle)) {
+        .destroyHandle()
+        .destroyHandle <<- NULL
+      }
+      .dependents$invalidate(log = FALSE)
+      .value <<- NULL
+      .error <<- FALSE
+      if (!is.null(.ctx)) {
+        .ctx$invalidate()
+        .ctx <<- NULL
+      }
+      invisible()
     },
     format = function() {
       simpleExprToFunction(fn_body(.origFunc), "reactive")
@@ -1248,6 +1374,7 @@ Observer <- R6Class(
     # We must unsubscribe when this observer is destroyed, or else
     # the observer cannot be garbage collected until the session ends.
     .autoDestroyHandle = 'ANY',
+    .autoDestroyOnDestroyHandle = NULL,
     .invalidateCallbacks = list(),
     .execCount = integer(0),
     .onResume = 'function',
@@ -1285,6 +1412,7 @@ Observer <- R6Class(
 
       .autoDestroy <<- FALSE
       .autoDestroyHandle <<- NULL
+      .autoDestroyOnDestroyHandle <<- NULL
       setAutoDestroy(autoDestroy)
 
       .reactId <<- nextGlobalReactId()
@@ -1408,12 +1536,19 @@ Observer <- R6Class(
             destroy()
           } else {
             .autoDestroyHandle <<- onReactiveDomainEnded(.domain, .onDomainEnded)
+            if (is.function(.domain$onDestroy)) {
+              wr <- rlang::new_weakref(key = self)
+              .autoDestroyOnDestroyHandle <<- .domain$onDestroy(make_weak_destroy_wrapper(wr))
+            }
           }
         }
       } else {
         if (!is.null(.autoDestroyHandle))
           .autoDestroyHandle()
         .autoDestroyHandle <<- NULL
+        if (!is.null(.autoDestroyOnDestroyHandle))
+          .autoDestroyOnDestroyHandle()
+        .autoDestroyOnDestroyHandle <<- NULL
       }
 
       invisible(oldValue)
@@ -1452,6 +1587,11 @@ Observer <- R6Class(
         .autoDestroyHandle()
       }
       .autoDestroyHandle <<- NULL
+
+      if (!is.null(.autoDestroyOnDestroyHandle)) {
+        .autoDestroyOnDestroyHandle()
+      }
+      .autoDestroyOnDestroyHandle <<- NULL
 
       if (!is.null(.ctx)) {
         .ctx$invalidate()
@@ -1876,6 +2016,7 @@ invalidateLater <- function(millis, session = getDefaultReactiveDomain()) {
   rLog$invalidateLater(ctx$.reactId, ctx$id, millis, session)
 
   clear_on_ended_callback <- function() {}
+  clear_on_destroy_callback <- function() {}
 
   scheduler <- defineScheduler(session)
 
@@ -1886,6 +2027,7 @@ invalidateLater <- function(millis, session = getDefaultReactiveDomain()) {
     }
 
     clear_on_ended_callback()
+    clear_on_destroy_callback()
 
     if (!session$isClosed()) {
       session$cycleStartAction(function() {
@@ -1903,7 +2045,18 @@ invalidateLater <- function(millis, session = getDefaultReactiveDomain()) {
     # need to deregister the onEnded(timerHandle) callback each time when the
     # scheduled task executes; after the task executes, the timerHandle()
     # function is essentially a no-op, so we can deregister it.
-    clear_on_ended_callback <- session$onEnded(timerHandle)
+    clear_on_ended_callback <- session$onEnded(function() {
+      timerHandle()
+      clear_on_destroy_callback()
+    })
+
+    # Also register with onDestroy so module destroy cancels pending timers.
+    # Cross-deregister: when destroy fires, clean up the onEnded registration
+    # (and vice versa — the timer callback above already clears both).
+    clear_on_destroy_callback <- session$onDestroy(function() {
+      timerHandle()
+      clear_on_ended_callback()
+    })
   }
 
   invisible()

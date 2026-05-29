@@ -491,20 +491,21 @@ test_that("session ended handlers work", {
   server <- function(input, output, session){}
 
   testServer(server, {
-    rv <- reactiveValues(closed = FALSE)
+    state <- new.env(parent = emptyenv())
+    state$closed <- FALSE
     session$onEnded(function(){
-      rv$closed <- TRUE
+      state$closed <- TRUE
     })
 
     expect_equal(session$isEnded(), FALSE)
     expect_equal(session$isClosed(), FALSE)
-    expect_false(rv$closed)
+    expect_false(state$closed)
 
     session$close()
 
     expect_equal(session$isEnded(), TRUE)
     expect_equal(session$isClosed(), TRUE)
-    expect_true(rv$closed)
+    expect_true(state$closed)
   })
 })
 

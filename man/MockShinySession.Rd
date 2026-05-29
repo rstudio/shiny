@@ -89,9 +89,13 @@ user. Always \code{NULL} for a \code{MockShinySesion}.}
     \item \href{#method-MockShinySession-onFlush}{\code{MockShinySession$onFlush()}}
     \item \href{#method-MockShinySession-onFlushed}{\code{MockShinySession$onFlushed()}}
     \item \href{#method-MockShinySession-onEnded}{\code{MockShinySession$onEnded()}}
+    \item \href{#method-MockShinySession-onDestroy}{\code{MockShinySession$onDestroy()}}
+    \item \href{#method-MockShinySession-destroy}{\code{MockShinySession$destroy()}}
     \item \href{#method-MockShinySession-isEnded}{\code{MockShinySession$isEnded()}}
     \item \href{#method-MockShinySession-isClosed}{\code{MockShinySession$isClosed()}}
     \item \href{#method-MockShinySession-close}{\code{MockShinySession$close()}}
+    \item \href{#method-MockShinySession-setBookmarkExclude}{\code{MockShinySession$setBookmarkExclude()}}
+    \item \href{#method-MockShinySession-getBookmarkExclude}{\code{MockShinySession$getBookmarkExclude()}}
     \item \href{#method-MockShinySession-cycleStartAction}{\code{MockShinySession$cycleStartAction()}}
     \item \href{#method-MockShinySession-fileUrl}{\code{MockShinySession$fileUrl()}}
     \item \href{#method-MockShinySession-setInputs}{\code{MockShinySession$setInputs()}}
@@ -189,6 +193,49 @@ user. Always \code{NULL} for a \code{MockShinySesion}.}
 }
 
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MockShinySession-onDestroy"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-onDestroy}{}}}
+\subsection{\code{MockShinySession$onDestroy()}}{
+  Registers a callback to be invoked when the session scope
+is destroyed. Returns a function that can be called to unregister the
+callback.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{MockShinySession$onDestroy(callback)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{callback}}{The callback to invoke on destroy.}
+    }
+    \if{html}{\out{</div>}}
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MockShinySession-destroy"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-destroy}{}}}
+\subsection{\code{MockShinySession$destroy()}}{
+  Destroys a module session scope. On the root session, an
+\code{id} is required: \code{session$destroy(id)} tears down the child module
+scope of that \code{id}. Calling \code{destroy()} with no \code{id} on the root
+session is an error.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{MockShinySession$destroy(id = NULL)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{id}}{Optional module \code{id} whose scope should be destroyed.}
+    }
+    \if{html}{\out{</div>}}
+  }
+}
+
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-MockShinySession-isEnded"></a>}}
 \if{latex}{\out{\hypertarget{method-MockShinySession-isEnded}{}}}
 \subsection{\code{MockShinySession$isEnded()}}{
@@ -220,6 +267,38 @@ user. Always \code{NULL} for a \code{MockShinySesion}.}
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{MockShinySession$close()}
+    \if{html}{\out{</div>}}
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MockShinySession-setBookmarkExclude"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-setBookmarkExclude}{}}}
+\subsection{\code{MockShinySession$setBookmarkExclude()}}{
+  Set input names to be excluded from bookmarking.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{MockShinySession$setBookmarkExclude(names)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{names}}{Character vector of input names.}
+    }
+    \if{html}{\out{</div>}}
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MockShinySession-getBookmarkExclude"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-getBookmarkExclude}{}}}
+\subsection{\code{MockShinySession$getBookmarkExclude()}}{
+  Returns the set of input names to be excluded from bookmarking,
+including those registered by module scopes.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{MockShinySession$getBookmarkExclude()}
     \if{html}{\out{</div>}}
   }
 }

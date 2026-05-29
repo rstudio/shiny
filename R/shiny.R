@@ -145,6 +145,34 @@ workerId <- local({
 #'   explicitly namespaced for the current module, `session$ns("name")`
 #'   will return the fully-qualified ID.
 #' }
+#' \item{onDestroy(callback)}{
+#'   Registers a callback to be invoked when the session scope ends.
+#'   Returns a function that can be called to unregister the callback.
+#'   For the root session, callbacks are invoked when the session closes,
+#'   after `session$onEnded()` callbacks. Note, `session$destroy()` is not
+#'   allowed for root sessions. For module session proxies, callbacks are
+#'   invoked when `session$destroy()` is called.
+#' }
+#' \item{destroy(id = NULL)}{
+#'   Destroys a module session scope (and any descendant scopes) by invoking
+#'   all registered `onDestroy()` callbacks. This includes cleaning up all
+#'   reactive values, observers, and reactive expressions created within
+#'   that scope (and any descendant scopes).
+#'
+#'   Called with no `id` on a module session proxy (e.g. the `session`
+#'   inside [moduleServer()]), it destroys that module's own scope. Called
+#'   with an `id`, it destroys the child module scope of that `id` — this is
+#'   how a parent tears down a module it added, using the same id it used to
+#'   insert the UI:
+#'
+#'   ```
+#'   removeUI(selector = "#editor")
+#'   session$destroy("editor")
+#'   ```
+#'
+#'   On the root session an `id` is required; `session$destroy()` with no
+#'   `id` is an error (the root session is torn down via `close()`).
+#' }
 #' \item{onEnded(callback)}{
 #'   Synonym for `onSessionEnded`.
 #' }
@@ -286,6 +314,78 @@ workerId <- local({
 #'   A reactive read of the current [bootstrapLib()] theme.
 #' }
 #'
+#' @section Destroying a module:
+#' Every reactive object (values, expressions, observers) is **scoped** to the
+#' session in which it was created. Destroying a module session tears down only
+#' the objects in that scope; the parent session and sibling modules are
+#' unaffected. This scoping is what makes modules safe to add and remove
+#' dynamically — without it, destroying one module could leak callbacks or
+#' invalidate reactive objects that belong to another part of the app.
+#'
+#' The parent that inserted the module's UI under an `id` can tear it down by
+#' that same `id`, without the module having to hand anything back:
+#'
+#' ```
+#' # In the parent server: insert, then later remove and destroy by id
+#' observeEvent(input$add, {
+#'   insertUI("#container", ui = myModuleUI("editor"))
+#'   myModuleServer("editor")
+#' })
+#' observeEvent(input$remove, {
+#'   removeUI(selector = "#editor")
+#'   session$destroy("editor")
+#' })
+#' ```
+#'
+#' Inside the module, `session$destroy()` (with no `id`) destroys the module's
+#' own scope. A module can expose this as a handle for callers that need to
+#' trigger teardown from somewhere that doesn't have the parent session or
+#' `id` (see the data ownership section below for an example).
+#'
+#' @section Module data ownership:
+#' The key rule: **data that must outlive a module should live outside it.**
+#' A reactive value created inside a module is destroyed with the module.
+#' A reactive value created in the caller's scope and passed in survives
+#' destruction.
+#'
+#' Returning a reactive value from a module works when the module lives for
+#' the entire session. However, if you plan to call `session$destroy()`, the
+#' returned value will be destroyed and can no longer be read:
+#'
+#' ```
+#' myModuleServer <- function(id) {
+#'   moduleServer(id, function(input, output, session) {
+#'     result <- reactiveVal(0)
+#'     # ... update result ...
+#'     list(result = result, destroy = session$destroy)
+#'   })
+#' }
+#'
+#' mod <- myModuleServer("editor")
+#' mod$destroy()
+#' mod$result()
+#' #> Error: Can't access reactive; its module session has been destroyed
+#' ```
+#'
+#' Instead, pass a reactive value **into** the module. The value lives in
+#' the caller's scope and survives destruction:
+#'
+#' ```
+#' myModuleServer <- function(id, result) {
+#'   moduleServer(id, function(input, output, session) {
+#'     observeEvent(input$save, {
+#'       result(input$data)
+#'     })
+#'   })
+#' }
+#'
+#' # Caller creates and owns the value
+#' saved_data <- reactiveVal(NULL)
+#' myModuleServer("editor", result = saved_data)
+#' # saved_data is still valid after the module is destroyed
+#' ```
+#'
+#' @seealso [moduleServer()], [removeUI()]
 #' @name session
 NULL
 
@@ -339,6 +439,16 @@ NS <- function(namespace, id = NULL) {
 ns.sep <- "-"
 
 
+# Validate the `id` passed to `session$destroy(id)`. Must be a single,
+# non-empty, non-NA string. The reserved `..root` sentinel is additionally
+# rejected by `makeScope()`.
+validateDestroyId <- function(id) {
+  if (!is.character(id) || length(id) != 1L || is.na(id) || !nzchar(id)) {
+    stop("`id` must be a single, non-empty string.", call. = FALSE)
+  }
+  invisible(id)
+}
+
 #' @include utils.R
 ShinySession <- R6Class(
   'ShinySession',
@@ -359,6 +469,7 @@ ShinySession <- R6Class(
     .clientData = 'ANY', # Internal ReactiveValues object for other data sent from the client
     busyCount = 0L, # Number of observer callbacks that are pending. When 0, we are idle
     closedCallbacks = 'Callbacks',
+    destroyCallbacksByNs = 'Map',
     flushCallbacks = 'Callbacks',
     flushedCallbacks = 'Callbacks',
     inputReceivedCallbacks = 'Callbacks',
@@ -369,6 +480,7 @@ ShinySession <- R6Class(
     restoredCallbacks = 'Callbacks',
     bookmarkExclude = character(0),  # Names of inputs to exclude from bookmarking
     getBookmarkExcludeFuns = list(),
+    getBookmarkExcludeFunsNextId = 0L,
     timingRecorder = 'ShinyServerTimingRecorder',
 
     testMode = FALSE,                # Are we running in test mode?
@@ -463,8 +575,12 @@ ShinySession <- R6Class(
     # object because the return values of the functions are needed, but
     # Callback$invoke() discards return values.
     registerBookmarkExclude = function(fun) {
-      len <- length(private$getBookmarkExcludeFuns) + 1
-      private$getBookmarkExcludeFuns[[len]] <- fun
+      private$getBookmarkExcludeFunsNextId <- private$getBookmarkExcludeFunsNextId + 1L
+      id <- as.character(private$getBookmarkExcludeFunsNextId)
+      private$getBookmarkExcludeFuns[[id]] <- fun
+      function() {
+        private$getBookmarkExcludeFuns[[id]] <- NULL
+      }
     },
 
     # Save output values and errors. This is only used for testing mode.
@@ -690,6 +806,90 @@ ShinySession <- R6Class(
       }
 
       invisible()
+    },
+
+    # Sentinel key for root-level destroy callbacks (fastmap disallows empty string keys)
+    destroyNsRoot = "..root",
+
+    destroyNsKey = function(ns) {
+      if (!nzchar(ns)) private$destroyNsRoot else ns
+    },
+
+    getOrCreateDestroyCallbacks = function(ns) {
+      key <- private$destroyNsKey(ns)
+      if (!private$destroyCallbacksByNs$containsKey(key)) {
+        private$destroyCallbacksByNs$set(key, Callbacks$new())
+      }
+      private$destroyCallbacksByNs$get(key)
+    },
+    invokeDestroyCallbacks = function(nsPrefix = "") {
+      allNs <- private$destroyCallbacksByNs$keys()
+      isRoot <- !nzchar(nsPrefix)
+
+      if (!isRoot) {
+        nsPrefixWithSep <- paste0(nsPrefix, ns.sep)
+        # Match the namespace itself and any children
+        matching <- allNs[allNs == nsPrefix | startsWith(allNs, nsPrefixWithSep)]
+      } else {
+        matching <- allNs
+      }
+
+      if (length(matching) > 0L) {
+        # Sort deepest-first (most separators first); root sentinel always last
+        depths <- nchar(gsub(paste0("[^", ns.sep, "]"), "", matching))
+        isRootSentinel <- matching == private$destroyNsRoot
+        matching <- matching[order(-depths, isRootSentinel, matching)]
+
+        for (ns in matching) {
+          cbs <- private$destroyCallbacksByNs$get(ns)
+          if (!is.null(cbs)) {
+            cbs$invoke(onError = printError)
+          }
+          private$destroyCallbacksByNs$remove(ns)
+        }
+      }
+
+      # Clean up inputs and clientData for matched namespaces
+      if (!isRoot) {
+        nsPrefixWithSep <- paste0(nsPrefix, ns.sep)
+        private$.input$destroyByPrefix(nsPrefixWithSep)
+        private$.clientData$destroyByPrefix(nsPrefixWithSep)
+        # Output-related clientData uses "output_<ns>-..." naming
+        private$.clientData$destroyByPrefix(paste0("output_", nsPrefixWithSep))
+      }
+
+      # Clean up outputs for matched namespaces
+      outputNames <- rlang::names2(private$.outputs)
+      if (!isRoot) {
+        nsPrefixWithSep <- paste0(nsPrefix, ns.sep)
+        matchingOutputs <- outputNames[startsWith(outputNames, nsPrefixWithSep)]
+      } else {
+        matchingOutputs <- outputNames
+      }
+      for (outName in matchingOutputs) {
+        if (!is.null(private$.outputs[[outName]])) {
+          private$.outputs[[outName]]$destroy()
+        }
+        private$.outputs[[outName]] <- NULL
+        private$.outputOptions[[outName]] <- NULL
+        private$invalidatedOutputValues$remove(outName)
+        private$invalidatedOutputErrors$remove(outName)
+      }
+
+      # Clean up dynamic routes
+      if (!isRoot) {
+        nsPrefixWithSep <- paste0(nsPrefix, ns.sep)
+        downloadNames <- self$downloads$keys()
+        for (name in downloadNames[startsWith(downloadNames, nsPrefixWithSep)]) {
+          self$downloads$remove(name)
+        }
+        fileNames <- self$files$keys()
+        for (name in fileNames[startsWith(fileNames, nsPrefixWithSep)]) {
+          self$files$remove(name)
+        }
+      }
+
+      invisible()
     }
   ),
   public = list(
@@ -721,6 +921,7 @@ ShinySession <- R6Class(
       private$invalidatedOutputErrors <- Map$new()
       private$fileUploadContext <- FileUploadContext$new()
       private$closedCallbacks <- Callbacks$new()
+      private$destroyCallbacksByNs <- Map$new()
       private$flushCallbacks <- Callbacks$new()
       private$flushedCallbacks <- Callbacks$new()
       private$inputReceivedCallbacks <- Callbacks$new()
@@ -804,6 +1005,13 @@ ShinySession <- R6Class(
       self
     },
     makeScope = function(namespace) {
+      if (identical(namespace, private$destroyNsRoot)) {
+        stop(
+          "The module namespace '", private$destroyNsRoot,
+          "' is reserved for internal use.",
+          call. = FALSE
+        )
+      }
       ns <- NS(namespace)
 
       # Private items for this scope. Can't be part of the scope object because
@@ -871,6 +1079,18 @@ ShinySession <- R6Class(
             c(dots, quoted_ = TRUE, env_ = env_),
             quote = TRUE
           )
+        },
+
+        onDestroy = function(callback) {
+          private$getOrCreateDestroyCallbacks(namespace)$register(callback)
+        },
+        destroy = function(id = NULL) {
+          if (is.null(id)) {
+            private$invokeDestroyCallbacks(namespace)
+          } else {
+            validateDestroyId(id)
+            self$makeScope(ns(id))$destroy()
+          }
         }
       )
 
@@ -926,7 +1146,7 @@ ShinySession <- R6Class(
       # When scope is created, register these bookmarking callbacks on the main
       # session object. They will invoke the scope's own callbacks, if any are
       # present.
-      self$onBookmark(function(state) {
+      unsub_bookmark <- self$onBookmark(function(state) {
         # Exit if no user-defined callbacks.
         if (bookmarkCallbacks$count() == 0)
           return()
@@ -960,7 +1180,7 @@ ShinySession <- R6Class(
         }
       })
 
-      self$onRestore(function(state) {
+      unsub_restore <- self$onRestore(function(state) {
         # Exit if no user-defined callbacks.
         if (restoreCallbacks$count() == 0)
           return()
@@ -970,7 +1190,7 @@ ShinySession <- R6Class(
         restoreCallbacks$invoke(scopeState)
       })
 
-      self$onRestored(function(state) {
+      unsub_restored <- self$onRestored(function(state) {
         # Exit if no user-defined callbacks.
         if (restoredCallbacks$count() == 0)
           return()
@@ -981,9 +1201,23 @@ ShinySession <- R6Class(
       })
 
       # Returns the excluded names with the scope's ns prefix on them.
-      private$registerBookmarkExclude(function() {
+      unsub_exclude <- private$registerBookmarkExclude(function() {
         excluded <- scope$getBookmarkExclude()
         ns(excluded)
+      })
+
+      # Clean up bookmark registrations when this scope is destroyed
+      scope$onDestroy(function() {
+        if (is.function(unsub_bookmark)) unsub_bookmark()
+        if (is.function(unsub_restore)) unsub_restore()
+        if (is.function(unsub_restored)) unsub_restored()
+        if (is.function(unsub_exclude)) unsub_exclude()
+
+        # Reset local var states just in case, even though they won't be used anymore
+        unsub_bookmark <<- NULL
+        unsub_restore <<- NULL
+        unsub_restored <<- NULL
+        unsub_exclude <<- NULL
       })
 
       scope
@@ -1040,6 +1274,27 @@ ShinySession <- R6Class(
       "Synonym for onSessionEnded"
       return(self$onSessionEnded(endedCallback))
     },
+    onDestroy = function(callback) {
+      "Registers a callback to be invoked when the session scope is destroyed
+      via `destroy()`. Returns a function that can be called to
+      unregister the callback. For module sessions, use this to register
+      cleanup logic that runs when the module's UI is removed and
+      `session$destroy()` is called."
+      private$getOrCreateDestroyCallbacks("")$register(callback)
+    },
+    destroy = function(id = NULL) {
+      "Destroys a module session scope, cleaning up its reactive state and
+      invoking its `onDestroy()` callbacks. On the root session, an
+      `id` is required: `session$destroy(id)` tears down the
+      child module scope of that `id`. Calling `destroy()`
+      with no `id` on the root session is an error; the root session
+      is torn down via `close()`."
+      if (is.null(id)) {
+        stop("`$destroy()` cannot be called on the root ShinySession without an `id`. Pass a module `id` to tear down that scope (e.g. `session$destroy(\"my_module\")`), or call `$destroy()` on a module session.")
+      }
+      validateDestroyId(id)
+      self$makeScope(id)$destroy()
+    },
     onInputReceived = function(callback) {
       "Registers the given callback to be invoked when the session receives
       new data from the client."
@@ -1090,6 +1345,7 @@ ShinySession <- R6Class(
           private$closedCallbacks$invoke(onError = printError, ..stacktraceon = TRUE)
         })
       })
+      private$invokeDestroyCallbacks("")
     },
     isClosed = function() {
       return(self$closed)
@@ -1110,9 +1366,9 @@ ShinySession <- R6Class(
 
     defineOutput = function(name, func, label) {
       "Binds an output generating function to this name. The function can either
-      take no parameters, or have named parameters for \\code{name} and
-      \\code{shinysession} (in the future this list may expand, so it is a good idea
-      to also include \\code{...} in your function signature)."
+      take no parameters, or have named parameters for `name` and
+      `shinysession` (in the future this list may expand, so it is a good idea
+      to also include `...` in your function signature)."
 
       # jcheng 08/31/2012: User submitted an example of a dynamically calculated
       # name not working unless name was eagerly evaluated. Yikes!
@@ -1371,7 +1627,7 @@ ShinySession <- R6Class(
     },
     showProgress = function(id, persistent=FALSE) {
       'Send a message to the client that recalculation of the output identified
-      by \\code{id} is in progress. There is currently no mechanism for
+      by `id` is in progress. There is currently no mechanism for
       explicitly turning off progress for an output component; instead, all
       progress is implicitly turned off when flushOutput is next called.
 

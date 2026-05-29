@@ -30,6 +30,41 @@ Starting in Shiny 1.5.0, we recommend using \code{moduleServer} instead of
 to understand, and modules created with \code{moduleServer} can be tested with
 \code{\link[=testServer]{testServer()}}.
 }
+\section{Destroying module reactivity}{
+
+When module UI is added and removed dynamically (e.g. via \code{\link[=insertUI]{insertUI()}} and
+\code{\link[=removeUI]{removeUI()}}), the server-side reactive objects created by \code{moduleServer()}
+continue to run after the UI is removed. The parent inserted the module's
+UI under an \code{id}, so it can tear down all reactive values, expressions, and
+observers in that scope by that same \code{id}:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# In parent server:
+myModuleServer("myid")
+removeUI(selector = "#myid")
+session$destroy("myid")
+}\if{html}{\out{</div>}}
+
+If teardown must happen somewhere that doesn't have the parent session or
+\code{id}, a module can instead return its own \code{session$destroy} as a handle:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{myModuleServer <- function(id) \{
+  moduleServer(id, function(input, output, session) \{
+    # ... module logic ...
+
+    # Return a cleanup function for the caller to invoke
+    list(result = ..., destroy = session$destroy)
+  \})
+\}
+
+mod <- myModuleServer("myid")
+removeUI(selector = "#myid")
+mod$destroy()
+}\if{html}{\out{</div>}}
+
+See the \link{session} help topic for details on composability and data ownership
+patterns when using \code{session$destroy()}.
+}
+
 \examples{
 # Define the UI for a module
 counterUI <- function(id, label = "Counter") {
@@ -103,5 +138,5 @@ if (interactive()) {
 
 }
 \seealso{
-\url{https://shiny.posit.co/articles/modules.html}
+\link{session}, \code{\link[=removeUI]{removeUI()}}, \url{https://shiny.posit.co/articles/modules.html}
 }

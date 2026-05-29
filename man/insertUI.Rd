@@ -79,6 +79,40 @@ It's particularly useful to pair \code{removeUI} with \code{insertUI()}, but the
 no restriction on what you can use it on. Any element that can be selected
 through a jQuery selector can be removed through this function.
 }
+\section{Cleaning up module server-side state}{
+
+When \code{removeUI()} removes a module's UI, the server-side reactive objects
+(observers, reactive values, etc.) created by that module continue to run.
+The parent inserted the module's UI under an \code{id}, so it can tear down the
+module's server-side state by that same \code{id}:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# In the parent server:
+myModuleServer("my_module")
+removeUI(selector = "#my_module")
+session$destroy("my_module")
+}\if{html}{\out{</div>}}
+
+If teardown must happen somewhere that doesn't have the parent session or
+\code{id}, a module can instead return its own \code{session$destroy} as a handle:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{myModuleServer <- function(id) \{
+  moduleServer(id, function(input, output, session) \{
+    # ... module logic ...
+
+    # Return a handle that the caller can invoke during teardown
+    list(destroy = session$destroy)
+  \})
+\}
+
+mod <- myModuleServer("my_module")
+removeUI(selector = "#my_module")
+mod$destroy()
+}\if{html}{\out{</div>}}
+
+See the \link{session} help topic for details on composability and data ownership
+patterns when using \code{session$destroy()} with dynamic modules.
+}
+
 \examples{
 ## Only run this example in interactive R sessions
 if (interactive()) {

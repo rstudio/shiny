@@ -1,3 +1,29 @@
+# Check that required arguments of the calling function were supplied by the
+# caller. Produces a classed error that names both the calling function and
+# the missing argument(s), e.g.
+#   `textInput()` is missing required argument: `label`.
+# `missing()` must be evaluated in the caller frame to avoid forcing the
+# unsupplied promise. When invoked via `do.call()`, `rlang::call_name()`
+# cannot recover the original function name and we fall back to "function".
+check_required <- function(..., call = rlang::caller_env()) {
+  args <- rlang::enquos(...)
+  missing_args <- character()
+  for (i in seq_along(args)) {
+    name <- rlang::as_name(args[[i]])
+    if (eval(call("missing", as.name(name)), envir = call)) {
+      missing_args <- c(missing_args, name)
+    }
+  }
+  if (!length(missing_args)) return(invisible())
+
+  fn <- rlang::call_name(rlang::frame_call(call)) %||% "function"
+  cli::cli_abort(
+    "{.fn {fn}} is missing required argument{cli::qty(length(missing_args))}{?s}: {.arg {missing_args}}.",
+    call = call,
+    class = "shiny_missing_arg_error"
+  )
+}
+
 shinyInputLabel <- function(inputId, label = NULL) {
   tags$label(
     label,

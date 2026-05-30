@@ -43,6 +43,8 @@ numericInput <- function(
   rlang::check_dots_empty()
   updateOn <- rlang::arg_match(updateOn)
 
+  check_required(inputId, label, value)
+
   value <- restoreInput(id = inputId, default = value)
 
   # build input tag

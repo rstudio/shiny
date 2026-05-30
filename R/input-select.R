@@ -89,6 +89,8 @@ selectInput <- function(inputId, label, choices, selected = NULL,
   multiple = FALSE, selectize = TRUE, width = NULL,
   size = NULL) {
 
+  check_required(inputId, label, choices)
+
   selected <- restoreInput(id = inputId, default = selected)
 
   # resolve names
@@ -367,6 +369,8 @@ varSelectInput <- function(
   multiple = FALSE, selectize = TRUE, width = NULL,
   size = NULL
 ) {
+  check_required(inputId, label, data)
+
   # no place holders
   choices <- colnames(data)
 

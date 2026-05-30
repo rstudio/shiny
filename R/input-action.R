@@ -54,6 +54,8 @@
 actionButton <- function(inputId, label, icon = NULL, width = NULL,
   disabled = FALSE, ...) {
 
+  check_required(inputId, label)
+
   value <- restoreInput(id = inputId, default = NULL)
 
   icon <- validateIcon(icon)
@@ -82,6 +84,8 @@ actionButton <- function(inputId, label, icon = NULL, width = NULL,
 #' @rdname actionButton
 #' @export
 actionLink <- function(inputId, label, icon = NULL, ...) {
+  check_required(inputId, label)
+
   value <- restoreInput(id = inputId, default = NULL)
 
   icon <- validateIcon(icon)

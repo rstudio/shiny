@@ -44,6 +44,10 @@
 
 * `need()` now gives a clearer error when called without either a `message` or `label` argument, instead of the cryptic "argument \"label\" is missing, with no default". (thanks @chasemc and @sundrelingam, #2509)
 
+* Clarified `varSelectInput()` documentation to explain that the input
+  returns a symbol for use with tidy evaluation, and fixed a grammatical
+  typo. (#2334)
+
 # shiny 1.13.0
 
 ## New features

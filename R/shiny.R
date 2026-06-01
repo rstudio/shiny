@@ -812,7 +812,8 @@ ShinySession <- R6Class(
     destroyNsRoot = "..root",
 
     destroyNsKey = function(ns) {
-      if (!nzchar(ns)) private$destroyNsRoot else ns
+      # length-0 namespace is the root scope; nzchar(character(0)) is logical(0)
+      if (length(ns) == 0L || !nzchar(ns)) private$destroyNsRoot else ns
     },
 
     getOrCreateDestroyCallbacks = function(ns) {
@@ -824,7 +825,7 @@ ShinySession <- R6Class(
     },
     invokeDestroyCallbacks = function(nsPrefix = "") {
       allNs <- private$destroyCallbacksByNs$keys()
-      isRoot <- !nzchar(nsPrefix)
+      isRoot <- length(nsPrefix) == 0L || !nzchar(nsPrefix)
 
       if (!isRoot) {
         nsPrefixWithSep <- paste0(nsPrefix, ns.sep)

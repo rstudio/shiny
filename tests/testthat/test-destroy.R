@@ -904,6 +904,29 @@ test_that("makeScope rejects reserved namespace '..root'", {
   expect_error(session$makeScope("..root"), "reserved")
 })
 
+test_that("makeScope() accepts an empty (character(0)) namespace", {
+  session <- MockShinySession$new()
+  expect_no_error(scope <- session$makeScope(character(0)))
+
+  called <- FALSE
+  scope$onDestroy(function() called <<- TRUE)
+  session$close()
+  expect_true(called)
+})
+
+test_that("empty namespace scope leaves ids un-prefixed (NS length-0 semantics)", {
+  session <- MockShinySession$new()
+  scope <- session$makeScope(character(0))
+  expect_identical(scope$ns("x"), "x")
+})
+
+test_that("callModule() with an empty namespace id does not error", {
+  session <- MockShinySession$new()
+  expect_no_error(
+    callModule(function(input, output, session) NULL, character(0), session = session)
+  )
+})
+
 test_that("createMockDomain supports onDestroy and destroy", {
   domain <- createMockDomain()
 

@@ -763,7 +763,8 @@ MockShinySession <- R6Class(
     # @param ns The namespace key.
     # @return A Callbacks object.
     getOrCreateDestroyCallbacks = function(ns) {
-      if (!nzchar(ns)) ns <- "..root"
+      # length-0 namespace is the root scope; nzchar(character(0)) is logical(0)
+      if (length(ns) == 0L || !nzchar(ns)) ns <- "..root"
       if (!private$destroyCallbacksByNs$containsKey(ns)) {
         private$destroyCallbacksByNs$set(ns, Callbacks$new())
       }
@@ -775,7 +776,7 @@ MockShinySession <- R6Class(
     # @param nsPrefix The namespace prefix to match.
     invokeDestroyCallbacks = function(nsPrefix = "") {
       allNs <- private$destroyCallbacksByNs$keys()
-      isRoot <- !nzchar(nsPrefix)
+      isRoot <- length(nsPrefix) == 0L || !nzchar(nsPrefix)
 
       if (!isRoot) {
         nsPrefixWithSep <- paste0(nsPrefix, ns.sep)

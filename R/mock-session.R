@@ -321,16 +321,16 @@ MockShinySession <- R6Class(
     #'   callback.
     #' @param callback The callback to invoke on destroy.
     onDestroy = function(callback) {
-      private$getOrCreateDestroyCallbacks(character(0))$register(callback)
+      private$getOrCreateDestroyCallbacks(NULL)$register(callback)
     },
     #' @description Destroys a module session scope. `namespace` must be a
     #'   non-empty, non-NA string naming a child module scope. The root scope is
-    #'   identified by `character(0)` (the default) and cannot be destroyed this
-    #'   way: calling `destroy()` with no `namespace` on the root session is an
-    #'   error.
+    #'   the absence of a namespace -- `NULL` (the default) or `character(0)` --
+    #'   and cannot be destroyed this way: calling `destroy()` with no
+    #'   `namespace` on the root session is an error.
     #' @param namespace Module `namespace` (a non-empty, non-NA string) whose
     #'   scope should be destroyed.
-    destroy = function(namespace = character(0)) {
+    destroy = function(namespace = NULL) {
       if (length(namespace) == 0) {
         stop(
           "`$destroy()` cannot be called on the root session without a `namespace`. Pass a module `namespace` to tear down that scope (e.g. `session$destroy(\"my_module\")`), or call `close()` to tear down the whole session.",
@@ -561,11 +561,11 @@ MockShinySession <- R6Class(
           call. = FALSE
         )
       }
-      # `character(0)` is the root; "" / NA are not valid namespaces (they
-      # can't be used as a fastmap key, and `NS("")` yields a stray `-`).
+      # A length-0 namespace (`NULL` or `character(0)`) is the root; "" / NA are
+      # not valid (they can't be a fastmap key, and `NS("")` yields a stray `-`).
       if (length(namespace) == 1L && (is.na(namespace) || !nzchar(namespace))) {
         stop(
-          "A module namespace must be a non-empty, non-NA string; use `character(0)` for the root scope.",
+          "A module namespace must be a non-empty, non-NA string; use `NULL` for the root scope.",
           call. = FALSE
         )
       }
@@ -594,7 +594,7 @@ MockShinySession <- R6Class(
         onDestroy = function(callback) {
           private$getOrCreateDestroyCallbacks(namespace)$register(callback)
         },
-        destroy = function(namespace = character(0)) {
+        destroy = function(namespace = NULL) {
           if (length(namespace) == 0) {
             # Tear down this scope itself.
             private$invokeDestroyCallbacks(selfNamespace)
@@ -777,8 +777,8 @@ MockShinySession <- R6Class(
     # @param ns The namespace key.
     # @return A Callbacks object.
     getOrCreateDestroyCallbacks = function(ns) {
-      # `character(0)` is the root; the sentinel keeps it out of fastmap, which
-      # disallows an empty-string key.
+      # The root scope (length 0: `NULL` or `character(0)`) maps to the sentinel
+      # key; fastmap can't use an empty-string key.
       if (length(ns) == 0) ns <- destroyNsRoot
       if (!private$destroyCallbacksByNs$containsKey(ns)) {
         private$destroyCallbacksByNs$set(ns, Callbacks$new())
@@ -787,11 +787,11 @@ MockShinySession <- R6Class(
     },
 
     # @description Invoke destroy callbacks for the given namespace
-    #   and all child namespaces, deepest-first. The root (`character(0)`)
-    #   may only be torn down with `allowRoot = TRUE` (via `close()`).
-    # @param namespace The namespace to match (`character(0)` is the root).
+    #   and all child namespaces, deepest-first. The root (length 0: `NULL` or
+    #   `character(0)`) may only be torn down with `allowRoot = TRUE` (via `close()`).
+    # @param namespace The namespace to match (length 0 is the root).
     # @param allowRoot Whether tearing down the root scope is permitted.
-    invokeDestroyCallbacks = function(namespace = character(0), allowRoot = FALSE) {
+    invokeDestroyCallbacks = function(namespace = NULL, allowRoot = FALSE) {
       isRoot <- length(namespace) == 0
       # The root scope can only be torn down via `close()` (allowRoot = TRUE).
       if (isRoot && !allowRoot) {

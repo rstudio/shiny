@@ -494,15 +494,19 @@ test_that("session$destroy(namespace) validates the namespace argument", {
   expect_error(session$destroy(NA_character_), "Invalid `namespace`")
 })
 
-test_that("makeScope() accepts an empty (character(0)) namespace and leaves ids un-prefixed", {
-  session <- MockShinySession$new()
-  expect_no_error(scope <- session$makeScope(character(0)))
-  expect_identical(scope$ns("x"), "x")
+test_that("makeScope() accepts a NULL or character(0) root namespace and leaves ids un-prefixed", {
+  # `NULL` is the documented root spelling; `character(0)` is also accepted
+  # (both are length 0).
+  for (root in list(NULL, character(0))) {
+    session <- MockShinySession$new()
+    expect_no_error(scope <- session$makeScope(root))
+    expect_identical(scope$ns("x"), "x")
 
-  called <- FALSE
-  scope$onDestroy(function() called <<- TRUE)
-  session$close()
-  expect_true(called)
+    called <- FALSE
+    scope$onDestroy(function() called <<- TRUE)
+    session$close()
+    expect_true(called)
+  }
 })
 
 test_that("callModule() with an empty namespace id does not error", {
@@ -947,7 +951,8 @@ test_that("makeScope rejects empty-string and NA namespaces", {
     callModule(function(input, output, session) NULL, "", session = session),
     "non-empty, non-NA string"
   )
-  # `character(0)` (the root) is still accepted.
+  # Root scopes (length 0) are still accepted.
+  expect_no_error(session$makeScope(NULL))
   expect_no_error(session$makeScope(character(0)))
 })
 

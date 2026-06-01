@@ -219,12 +219,12 @@ callback.
 \subsection{\code{MockShinySession$destroy()}}{
   Destroys a module session scope. \code{namespace} must be a
 non-empty, non-NA string naming a child module scope. The root scope is
-identified by \code{character(0)} (the default) and cannot be destroyed this
-way: calling \code{destroy()} with no \code{namespace} on the root session is an
-error.
+the absence of a namespace -- \code{NULL} (the default) or \code{character(0)} --
+and cannot be destroyed this way: calling \code{destroy()} with no
+\code{namespace} on the root session is an error.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{MockShinySession$destroy(namespace = character(0))}
+    \preformatted{MockShinySession$destroy(namespace = NULL)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{

@@ -127,9 +127,14 @@ for details).</p></dd>
     </div>
     <div id="details">
     <h2>Details</h2>
-    <p>By default, <code>varSelectInput()</code> and <code><a href="selectInput.html">selectizeInput()</a></code> use the
+    <p><code>varSelectInput()</code> is a convenience wrapper around <code><a href="selectInput.html">selectInput()</a></code> for use
+with tidy evaluation: it returns the selected column name as a symbol
+(see "Server value" below) so the value can be spliced directly into
+tidy-evaluation contexts without wrapping it in <code><a href="https://rlang.r-lib.org/reference/sym.html" class="external-link">rlang::sym()</a></code>. If you
+don't need a symbol, use <code><a href="selectInput.html">selectInput()</a></code> instead.</p>
+<p>By default, <code>varSelectInput()</code> and <code><a href="selectInput.html">selectizeInput()</a></code> use the
 JavaScript library <span class="pkg">selectize.js</span>
-(<a href="https://selectize.dev/" class="external-link">https://selectize.dev/</a>) to instead of the basic
+(<a href="https://selectize.dev/" class="external-link">https://selectize.dev/</a>) instead of the basic
 select input element. To use the standard HTML select input element, use
 <code><a href="selectInput.html">selectInput()</a></code> with <code>selectize=FALSE</code>.</p>
     </div>

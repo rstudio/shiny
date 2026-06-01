@@ -337,7 +337,6 @@ MockShinySession <- R6Class(
       if (is.null(id)) {
         stop("`$destroy()` cannot be called on the root session without an `id`. Pass a module `id` to tear down that scope (e.g. `session$destroy(\"my_module\")`), or call `$destroy()` on a module session.")
       }
-      validateDestroyId(id)
       self$makeScope(id)$destroy()
     },
 
@@ -586,7 +585,6 @@ MockShinySession <- R6Class(
           if (is.null(id)) {
             private$invokeDestroyCallbacks(namespace)
           } else {
-            validateDestroyId(id)
             self$makeScope(ns(id))$destroy()
           }
         }

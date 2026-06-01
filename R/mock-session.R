@@ -328,16 +328,17 @@ MockShinySession <- R6Class(
       }
       private$destroyCallbacksByNs$get(ns)$register(callback)
     },
-    #' @description Destroys a module session scope. On the root session, an
-    #'   `id` is required: `session$destroy(id)` tears down the child module
-    #'   scope of that `id`. Calling `destroy()` with no `id` on the root
-    #'   session is an error.
-    #' @param id Optional module `id` whose scope should be destroyed.
-    destroy = function(id = NULL) {
-      if (is.null(id)) {
-        stop("`$destroy()` cannot be called on the root session without an `id`. Pass a module `id` to tear down that scope (e.g. `session$destroy(\"my_module\")`), or call `$destroy()` on a module session.")
+    #' @description Destroys a module session scope. On the root session, a
+    #'   `namespace` is required: `session$destroy(namespace)` tears down the
+    #'   child module scope of that `namespace`. Calling `destroy()` with no
+    #'   `namespace` on the root session is an error.
+    #' @param namespace Optional module `namespace` whose scope should be destroyed.
+    destroy = function(namespace = character(0)) {
+      if (length(namespace) == 0) {
+        stop("`$destroy()` cannot be called on the root session without a `namespace`. Pass a module `namespace` to tear down that scope (e.g. `session$destroy(\"my_module\")`), or call `$destroy()` on a module session.")
       }
-      self$makeScope(id)$destroy()
+      validateDestroyNamespace(namespace)
+      self$makeScope(namespace)$destroy()
     },
 
     #' @description Returns `FALSE` if the session has not yet been closed
@@ -352,7 +353,7 @@ MockShinySession <- R6Class(
       withReactiveDomain(self, {
         private$endedCBs$invoke(onError = printError, ..stacktraceon = TRUE)
       })
-      private$invokeDestroyCallbacks("")
+      private$invokeDestroyCallbacks(allowRoot = TRUE)
       private$was_closed <- TRUE
     },
 
@@ -560,6 +561,9 @@ MockShinySession <- R6Class(
         )
       }
       ns <- NS(namespace)
+      # The scope's own namespace, captured because the proxy `destroy()` below
+      # has a `namespace` parameter that would otherwise shadow it.
+      selfNamespace <- namespace
 
       bookmarkExclude <- character(0)
 
@@ -581,11 +585,14 @@ MockShinySession <- R6Class(
         onDestroy = function(callback) {
           private$getOrCreateDestroyCallbacks(namespace)$register(callback)
         },
-        destroy = function(id = NULL) {
-          if (is.null(id)) {
-            private$invokeDestroyCallbacks(namespace)
+        destroy = function(namespace = character(0)) {
+          if (length(namespace) == 0) {
+            # Tear down this scope itself.
+            private$invokeDestroyCallbacks(selfNamespace)
           } else {
-            self$makeScope(ns(id))$destroy()
+            # Tear down a named child scope.
+            validateDestroyNamespace(namespace)
+            self$makeScope(ns(namespace))$destroy()
           }
         }
       )
@@ -761,19 +768,32 @@ MockShinySession <- R6Class(
     # @param ns The namespace key.
     # @return A Callbacks object.
     getOrCreateDestroyCallbacks = function(ns) {
-      if (!nzchar(ns)) ns <- "..root"
+      # `character(0)` is the root; also fold in `""` since fastmap can't use
+      # an empty-string key.
+      if (length(ns) == 0 || !nzchar(ns)) ns <- "..root"
       if (!private$destroyCallbacksByNs$containsKey(ns)) {
         private$destroyCallbacksByNs$set(ns, Callbacks$new())
       }
       private$destroyCallbacksByNs$get(ns)
     },
 
-    # @description Invoke destroy callbacks for the given namespace prefix
-    #   and all child namespaces, deepest-first.
-    # @param nsPrefix The namespace prefix to match.
-    invokeDestroyCallbacks = function(nsPrefix = "") {
+    # @description Invoke destroy callbacks for the given namespace
+    #   and all child namespaces, deepest-first. The root (`character(0)`)
+    #   may only be torn down with `allowRoot = TRUE` (via `close()`).
+    # @param namespace The namespace to match (`character(0)` is the root).
+    # @param allowRoot Whether tearing down the root scope is permitted.
+    invokeDestroyCallbacks = function(namespace = character(0), allowRoot = FALSE) {
+      isRoot <- length(namespace) == 0
+      # The root scope can only be torn down via `close()` (allowRoot = TRUE).
+      if (isRoot && !allowRoot) {
+        stop(
+          "`$destroy()` cannot be called on the root session without a `namespace`. Pass a module `namespace` to tear down that scope (e.g. `session$destroy(\"my_module\")`), or call `$destroy()` on a module session.",
+          call. = FALSE
+        )
+      }
+
+      nsPrefix <- namespace
       allNs <- private$destroyCallbacksByNs$keys()
-      isRoot <- !nzchar(nsPrefix)
 
       if (!isRoot) {
         nsPrefixWithSep <- paste0(nsPrefix, ns.sep)

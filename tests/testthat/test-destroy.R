@@ -405,9 +405,9 @@ test_that("MockShinySession$onDestroy registers callback and returns unsubscribe
   expect_true(is.function(unsub))
 })
 
-test_that("MockShinySession$destroy() with no id throws an error", {
+test_that("MockShinySession$destroy() with no namespace throws an error", {
   session <- MockShinySession$new()
-  expect_error(session$destroy(), "without an `id`")
+  expect_error(session$destroy(), "without a `namespace`")
 })
 
 test_that("root session$destroy(id) tears down the named module scope", {
@@ -486,12 +486,46 @@ test_that("session$destroy(id) on an unknown id is a harmless no-op", {
   expect_no_error(session$destroy("never_created"))
 })
 
-test_that("session$destroy(id) validates the id argument", {
+test_that("session$destroy(namespace) validates the namespace argument", {
   session <- MockShinySession$new()
-  expect_error(session$destroy(1), "single, non-empty string")
-  expect_error(session$destroy(c("a", "b")), "single, non-empty string")
-  expect_error(session$destroy(""), "single, non-empty string")
-  expect_error(session$destroy(NA_character_), "single, non-empty string")
+  expect_error(session$destroy(1), "Invalid `namespace`")
+  expect_error(session$destroy(c("a", "b")), "Invalid `namespace`")
+  expect_error(session$destroy(""), "Invalid `namespace`")
+  expect_error(session$destroy(NA_character_), "Invalid `namespace`")
+})
+
+test_that("makeScope() accepts an empty (character(0)) namespace and leaves ids un-prefixed", {
+  session <- MockShinySession$new()
+  expect_no_error(scope <- session$makeScope(character(0)))
+  expect_identical(scope$ns("x"), "x")
+
+  called <- FALSE
+  scope$onDestroy(function() called <<- TRUE)
+  session$close()
+  expect_true(called)
+})
+
+test_that("callModule() with an empty namespace id does not error", {
+  session <- MockShinySession$new()
+  expect_no_error(
+    callModule(function(input, output, session) NULL, character(0), session = session)
+  )
+})
+
+test_that("session$destroy(namespace) tears down a module without recursing", {
+  session <- MockShinySession$new()
+  scope <- session$makeScope("mod1")
+
+  rv_destroyed <- FALSE
+  withReactiveDomain(scope, {
+    rv <- reactiveVal(1)
+    observe({ rv() })
+  })
+  flushReact()
+  scope$onDestroy(function() rv_destroyed <<- TRUE)
+
+  expect_no_error(session$destroy("mod1"))
+  expect_true(rv_destroyed)
 })
 
 test_that("session$destroy(id) does not leak bookmark-exclude callbacks", {

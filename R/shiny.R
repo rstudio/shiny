@@ -439,6 +439,20 @@ NS <- function(namespace, id = NULL) {
 ns.sep <- "-"
 
 
+# Validate the user-supplied `namespace` passed to `session$destroy(namespace)`.
+# Must be a single, non-empty, non-NA string. Checked at the public boundary,
+# before `makeScope()` runs (which would otherwise choke on bad input).
+validateDestroyNamespace <- function(namespace) {
+  if (!is.character(namespace) || length(namespace) != 1L || is.na(namespace) || !nzchar(namespace)) {
+    stop(
+      "Invalid `namespace`: ", paste0(namespace, collapse = ", "),
+      ". `namespace` must be a non-empty length 1 character vector.",
+      call. = FALSE
+    )
+  }
+  invisible(namespace)
+}
+
 #' @include utils.R
 ShinySession <- R6Class(
   'ShinySession',
@@ -802,7 +816,9 @@ ShinySession <- R6Class(
     destroyNsRoot = "..root",
 
     destroyNsKey = function(ns) {
-      if (length(ns) == 0) private$destroyNsRoot else ns
+      # `character(0)` is the root; also fold in `""` since fastmap can't use
+      # an empty-string key.
+      if (length(ns) == 0 || !nzchar(ns)) private$destroyNsRoot else ns
     },
 
     getOrCreateDestroyCallbacks = function(ns) {
@@ -814,21 +830,12 @@ ShinySession <- R6Class(
     },
     invokeDestroyCallbacks = function(namespace = character(0), allowRoot = FALSE) {
       isRoot <- length(namespace) == 0
-      if (!allowRoot) {
-        if (isRoot) {
-          stop(
-            "`$destroy()` cannot be called on the root ShinySession without a `namespace`. Pass a module `namespace` to tear down that scope (e.g. `session$destroy(\"my_module\")`), or call `$destroy()` on a module session.",
-            call. = FALSE
-          )
-        }
-        if (!is.character(namespace) || length(namespace) != 1L || is.na(namespace) || !nzchar(namespace)) {
-          stop(
-            "Invalid `namespace`:",
-            paste0(namespace, collapse = ", "),
-            ". `namespace` must be a non-empty length 1 character vector.",
-            call. = FALSE
-          )
-        }
+      # The root scope can only be torn down via `close()` (allowRoot = TRUE).
+      if (isRoot && !allowRoot) {
+        stop(
+          "`$destroy()` cannot be called on the root ShinySession without a `namespace`. Pass a module `namespace` to tear down that scope (e.g. `session$destroy(\"my_module\")`), or call `close()` to tear down the whole session.",
+          call. = FALSE
+        )
       }
 
       nsPrefix <- namespace
@@ -1013,7 +1020,17 @@ ShinySession <- R6Class(
       self
     },
     makeScope = function(namespace) {
+      if (identical(namespace, private$destroyNsRoot)) {
+        stop(
+          "The module namespace '", private$destroyNsRoot,
+          "' is reserved for internal use.",
+          call. = FALSE
+        )
+      }
       ns <- NS(namespace)
+      # The scope's own namespace, captured because the proxy `destroy()` below
+      # has a `namespace` parameter that would otherwise shadow it.
+      selfNamespace <- namespace
 
       # Private items for this scope. Can't be part of the scope object because
       # `$<-.session_proxy` doesn't allow assignment on overidden names.
@@ -1085,7 +1102,14 @@ ShinySession <- R6Class(
           private$getOrCreateDestroyCallbacks(namespace)$register(callback)
         },
         destroy = function(namespace = character(0)) {
-          self$makeScope(ns(namespace))$destroy()
+          if (length(namespace) == 0) {
+            # Tear down this scope itself.
+            private$invokeDestroyCallbacks(selfNamespace)
+          } else {
+            # Tear down a named child scope.
+            validateDestroyNamespace(namespace)
+            self$makeScope(ns(namespace))$destroy()
+          }
         }
       )
 
@@ -1284,6 +1308,13 @@ ShinySession <- R6Class(
       child module scope of that `namespace`. Calling `destroy()`
       with no `namespace` on the root session is an error; the root session
       is torn down via `close()`."
+      if (length(namespace) == 0) {
+        stop(
+          "`$destroy()` cannot be called on the root ShinySession without a `namespace`. Pass a module `namespace` to tear down that scope (e.g. `session$destroy(\"my_module\")`), or call `close()` to tear down the whole session.",
+          call. = FALSE
+        )
+      }
+      validateDestroyNamespace(namespace)
       self$makeScope(namespace)$destroy()
     },
     onInputReceived = function(callback) {

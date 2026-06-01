@@ -1,6 +1,11 @@
-# shiny (development version)
+# shiny 1.14.0
 
 ## New features
+
+* New `startApp()` runs a Shiny app in non-blocking mode, returning a
+  `ShinyAppHandle` object with `stop()`, `status()`, `url()`, and `result()`
+  methods. When a new app is started, any previously running non-blocking app
+  is automatically stopped. (#4349)
 
 * `session$destroy()` and `session$onDestroy()` are now available on
   module session proxies to clean up "dangling reactivity" when dynamic
@@ -10,12 +15,10 @@
   also destroy a child module scope by id with `session$destroy(id)`, so it
   can tear down a module using the same id it used to insert the UI (#4372).
 
-* New `startApp()` runs a Shiny app in non-blocking mode, returning a
-  `ShinyAppHandle` object with `stop()`, `status()`, `url()`, and `result()`
-  methods. When a new app is started, any previously running non-blocking app
-  is automatically stopped. (#4349)
-
-* `downloadButton()` and `downloadLink()` gain a new `enabled` parameter. The default value, `"auto"`, automatically enables the button/link when the download is ready. To opt-into manual state management (e.g., `shinyjs::enable()`), set `enabled` to `FALSE` (or `TRUE`). (#4119)
+* `downloadButton()` and `downloadLink()` gain a new `enabled` parameter. The
+  default value, `"auto"`, automatically enables the button/link when the
+  download is ready. To opt-into manual state management (e.g.,
+  `shinyjs::enable()`), set `enabled` to `FALSE` (or `TRUE`). (#4119)
 
 ## Improvements
 
@@ -32,17 +35,24 @@
 * `conditionalPanel()` no longer briefly flashes its contents on app start
   when the condition is initially `FALSE`. (#3505)
 
+* Updated default HTTP headers for better security. Shiny now sends
+  `X-Content-Type-Options: nosniff` instead of the legacy `X-UA-Compatible`
+  header. This removes outdated Internet Explorer–specific behavior and adds a
+  modern safeguard that prevents browsers from misinterpreting file types.
+  (#4385)
+
 * Removed `InputBinding.dispose()` from the JavaScript `InputBinding` class.
   This method was never called by Shiny's runtime, so any overrides were dead
   code. Use `unsubscribe()` for cleanup logic instead. (#4375)
 
-* Updated default HTTP headers for better security. Shiny now sends `X-Content-Type-Options: nosniff` instead of the legacy `X-UA-Compatible` header. This removes outdated Internet Explorer–specific behavior and adds a modern safeguard that prevents browsers from misinterpreting file types. (#4385)
-
 ## Bug fixes
 
-* Loading shiny no longer creates `.Random.seed` in the global environment as a side effect. (#4382)
+* Loading shiny no longer creates `.Random.seed` in the global environment as a
+  side effect. (#4382)
 
-* `need()` now gives a clearer error when called without either a `message` or `label` argument, instead of the cryptic "argument \"label\" is missing, with no default". (thanks @chasemc and @sundrelingam, #2509)
+* `need()` now gives a clearer error when called without either a `message` or
+  `label` argument, instead of the cryptic "argument \"label\" is missing, with
+  no default". (thanks @chasemc and @sundrelingam, #2509)
 
 * Clarified `varSelectInput()` documentation to explain that the input
   returns a symbol for use with tidy evaluation, and fixed a grammatical

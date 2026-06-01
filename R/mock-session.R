@@ -370,6 +370,7 @@ MockShinySession <- R6Class(
       # `isolate(reactiveValuesToList(...))` — uncomment the line below and the
       # paired tests in tests/testthat/test-destroy.R (search for this same
       # marker) and tests/testthat/test-test-server.R.
+      #
       # private$invokeDestroyCallbacks("")
       private$was_closed <- TRUE
     },

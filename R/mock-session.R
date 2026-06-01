@@ -353,7 +353,24 @@ MockShinySession <- R6Class(
       withReactiveDomain(self, {
         private$endedCBs$invoke(onError = printError, ..stacktraceon = TRUE)
       })
-      private$invokeDestroyCallbacks("")
+      # TEMPORARILY DISABLED for the 1.14.0 release. #4372 made a closing
+      # session destroy the reactives bound to it; because testServer() closes
+      # its mock session on exit, reactives created inside a module under test
+      # are now torn down as soon as testServer() returns. Several CRAN
+      # packages (blockr.core, blockr.dock, teal.slice) read such reactives
+      # *after* the testServer() block and broke with "its module session has
+      # been destroyed". The real ShinySession (ShinySession$wsClosed()) still
+      # destroys on close, so app behavior is unchanged; only the test harness
+      # is reverted to the pre-#4372 behavior of leaving reactives intact.
+      #
+      # TO RE-ENABLE (target: a future release): once the affected maintainers
+      # have been notified to update their tests — either create session-
+      # independent reactives with `withReactiveDomain(NULL, ...)`, or read
+      # reactive state inside the testServer() block / snapshot it with
+      # `isolate(reactiveValuesToList(...))` — uncomment the line below and the
+      # paired tests in tests/testthat/test-destroy.R (search for this same
+      # marker) and tests/testthat/test-test-server.R.
+      # private$invokeDestroyCallbacks("")
       private$was_closed <- TRUE
     },
 

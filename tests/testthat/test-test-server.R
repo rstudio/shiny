@@ -917,3 +917,16 @@ test_that("isServer is only returns true for server funtions", {
   expect_false(isServer(function(output, session, input) {}))
   expect_true(isServer(function(input, output, session) {}))
 })
+
+# Deferred reactive cleanup on testServer() exit. See the note in
+# MockShinySession$close() (R/mock-session.R): for this release the mock
+# session does not destroy reactives when it closes, so reactives created
+# inside a module under test remain readable after testServer() returns.
+test_that("reactives created inside testServer() are readable after it returns", {
+  captured <- NULL
+  server <- function(input, output, session) {
+    captured <<- reactiveValues(x = 1)
+  }
+  testServer(server, {})
+  expect_identical(isolate(captured$x), 1)
+})

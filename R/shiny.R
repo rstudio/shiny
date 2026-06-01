@@ -1031,11 +1031,11 @@ ShinySession <- R6Class(
           call. = FALSE
         )
       }
-      # `character(0)` is the root; an empty string is not a valid namespace
-      # (it can't be used as a fastmap key, and `NS(\"\")` yields a stray `-`).
-      if (length(namespace) == 1L && !nzchar(namespace)) {
+      # `character(0)` is the root; "" / NA are not valid namespaces (they
+      # can't be used as a fastmap key, and `NS("")` yields a stray `-`).
+      if (length(namespace) == 1L && (is.na(namespace) || !nzchar(namespace))) {
         stop(
-          "A module namespace must be a non-empty string; use `character(0)` for the root scope.",
+          "A module namespace must be a non-empty, non-NA string; use `character(0)` for the root scope.",
           call. = FALSE
         )
       }
@@ -1316,11 +1316,12 @@ ShinySession <- R6Class(
     },
     destroy = function(namespace = character(0)) {
       "Destroys a module session scope, cleaning up its reactive state and
-      invoking its `onDestroy()` callbacks. On the root session, an
-      `namespace` is required: `session$destroy(namespace)` tears down the
-      child module scope of that `namespace`. Calling `destroy()`
-      with no `namespace` on the root session is an error; the root session
-      is torn down via `close()`."
+      invoking its `onDestroy()` callbacks. `namespace` must be a non-empty,
+      non-NA string naming a child module scope; `session$destroy(namespace)`
+      tears that scope down. The root scope is identified by `character(0)`
+      (the default) and cannot be destroyed this way: calling `destroy()` with
+      no `namespace` on the root session is an error, since the root session is
+      torn down via `close()`."
       if (length(namespace) == 0) {
         stop(
           "`$destroy()` cannot be called on the root ShinySession without a `namespace`. Pass a module `namespace` to tear down that scope (e.g. `session$destroy(\"my_module\")`), or call `close()` to tear down the whole session.",

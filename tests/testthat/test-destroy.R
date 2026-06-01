@@ -938,13 +938,14 @@ test_that("makeScope rejects reserved namespace '..root'", {
   expect_error(session$makeScope("..root"), "reserved")
 })
 
-test_that("makeScope rejects an empty-string namespace", {
+test_that("makeScope rejects empty-string and NA namespaces", {
   session <- MockShinySession$new()
-  expect_error(session$makeScope(""), "non-empty string")
+  expect_error(session$makeScope(""), "non-empty, non-NA string")
+  expect_error(session$makeScope(NA_character_), "non-empty, non-NA string")
   # `callModule()` doesn't validate `id`, so guard that entry point too.
   expect_error(
     callModule(function(input, output, session) NULL, "", session = session),
-    "non-empty string"
+    "non-empty, non-NA string"
   )
   # `character(0)` (the root) is still accepted.
   expect_no_error(session$makeScope(character(0)))

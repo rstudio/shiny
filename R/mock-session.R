@@ -321,8 +321,7 @@ MockShinySession <- R6Class(
     #'   callback.
     #' @param callback The callback to invoke on destroy.
     onDestroy = function(callback) {
-      # Use sentinel key since fastmap disallows empty string keys
-      ns <- "..root"
+      ns <- destroyNsRoot
       if (!private$destroyCallbacksByNs$containsKey(ns)) {
         private$destroyCallbacksByNs$set(ns, Callbacks$new())
       }
@@ -554,9 +553,10 @@ MockShinySession <- R6Class(
     #' @param namespace Character vector indicating a namespace.
     #' @return A new session proxy.
     makeScope = function(namespace) {
-      if (identical(namespace, "..root")) {
+      if (identical(namespace, destroyNsRoot)) {
         stop(
-          "The module namespace '..root' is reserved for internal use.",
+          "The module namespace '", destroyNsRoot,
+          "' is reserved for internal use.",
           call. = FALSE
         )
       }
@@ -770,7 +770,7 @@ MockShinySession <- R6Class(
     getOrCreateDestroyCallbacks = function(ns) {
       # `character(0)` is the root; also fold in `""` since fastmap can't use
       # an empty-string key.
-      if (length(ns) == 0 || !nzchar(ns)) ns <- "..root"
+      if (length(ns) == 0 || !nzchar(ns)) ns <- destroyNsRoot
       if (!private$destroyCallbacksByNs$containsKey(ns)) {
         private$destroyCallbacksByNs$set(ns, Callbacks$new())
       }
@@ -805,7 +805,7 @@ MockShinySession <- R6Class(
       if (length(matching) > 0L) {
         # Sort deepest-first (most separators first); root sentinel always last
         depths <- nchar(gsub(paste0("[^", ns.sep, "]"), "", matching))
-        isRootSentinel <- matching == "..root"
+        isRootSentinel <- matching == destroyNsRoot
         matching <- matching[order(-depths, isRootSentinel, matching)]
 
         for (ns in matching) {

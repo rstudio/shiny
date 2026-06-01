@@ -438,6 +438,12 @@ NS <- function(namespace, id = NULL) {
 #' @export
 ns.sep <- "-"
 
+# Sentinel key under which root-level (non-namespaced) destroy callbacks are
+# stored. It must be a non-zero-length character string because it is used as a
+# fastmap key, and fastmap disallows "" (and NA) keys. The leading dots also
+# keep it from colliding with a real module namespace (which `makeScope()`
+# additionally guards against).
+destroyNsRoot <- "..root"
 
 # Validate the user-supplied `namespace` passed to `session$destroy(namespace)`.
 # Must be a single, non-empty, non-NA string. Checked at the public boundary,
@@ -812,13 +818,10 @@ ShinySession <- R6Class(
       invisible()
     },
 
-    # Sentinel key for root-level destroy callbacks (fastmap disallows empty string keys)
-    destroyNsRoot = "..root",
-
     destroyNsKey = function(ns) {
       # `character(0)` is the root; also fold in `""` since fastmap can't use
       # an empty-string key.
-      if (length(ns) == 0 || !nzchar(ns)) private$destroyNsRoot else ns
+      if (length(ns) == 0 || !nzchar(ns)) destroyNsRoot else ns
     },
 
     getOrCreateDestroyCallbacks = function(ns) {
@@ -852,7 +855,7 @@ ShinySession <- R6Class(
       if (length(matching) > 0L) {
         # Sort deepest-first (most separators first); root sentinel always last
         depths <- nchar(gsub(paste0("[^", ns.sep, "]"), "", matching))
-        isRootSentinel <- matching == private$destroyNsRoot
+        isRootSentinel <- matching == destroyNsRoot
         matching <- matching[order(-depths, isRootSentinel, matching)]
 
         for (ns in matching) {
@@ -1020,9 +1023,9 @@ ShinySession <- R6Class(
       self
     },
     makeScope = function(namespace) {
-      if (identical(namespace, private$destroyNsRoot)) {
+      if (identical(namespace, destroyNsRoot)) {
         stop(
-          "The module namespace '", private$destroyNsRoot,
+          "The module namespace '", destroyNsRoot,
           "' is reserved for internal use.",
           call. = FALSE
         )

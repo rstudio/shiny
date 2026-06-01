@@ -321,11 +321,7 @@ MockShinySession <- R6Class(
     #'   callback.
     #' @param callback The callback to invoke on destroy.
     onDestroy = function(callback) {
-      ns <- destroyNsRoot
-      if (!private$destroyCallbacksByNs$containsKey(ns)) {
-        private$destroyCallbacksByNs$set(ns, Callbacks$new())
-      }
-      private$destroyCallbacksByNs$get(ns)$register(callback)
+      private$getOrCreateDestroyCallbacks(character(0))$register(callback)
     },
     #' @description Destroys a module session scope. On the root session, a
     #'   `namespace` is required: `session$destroy(namespace)` tears down the
@@ -334,7 +330,10 @@ MockShinySession <- R6Class(
     #' @param namespace Optional module `namespace` whose scope should be destroyed.
     destroy = function(namespace = character(0)) {
       if (length(namespace) == 0) {
-        stop("`$destroy()` cannot be called on the root session without a `namespace`. Pass a module `namespace` to tear down that scope (e.g. `session$destroy(\"my_module\")`), or call `$destroy()` on a module session.")
+        stop(
+          "`$destroy()` cannot be called on the root session without a `namespace`. Pass a module `namespace` to tear down that scope (e.g. `session$destroy(\"my_module\")`), or call `close()` to tear down the whole session.",
+          call. = FALSE
+        )
       }
       validateDestroyNamespace(namespace)
       self$makeScope(namespace)$destroy()
@@ -787,7 +786,7 @@ MockShinySession <- R6Class(
       # The root scope can only be torn down via `close()` (allowRoot = TRUE).
       if (isRoot && !allowRoot) {
         stop(
-          "`$destroy()` cannot be called on the root session without a `namespace`. Pass a module `namespace` to tear down that scope (e.g. `session$destroy(\"my_module\")`), or call `$destroy()` on a module session.",
+          "`$destroy()` cannot be called on the root session without a `namespace`. Pass a module `namespace` to tear down that scope (e.g. `session$destroy(\"my_module\")`), or call `close()` to tear down the whole session.",
           call. = FALSE
         )
       }

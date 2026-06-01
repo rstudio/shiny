@@ -451,7 +451,8 @@ destroyNsRoot <- "..root"
 validateDestroyNamespace <- function(namespace) {
   if (!is.character(namespace) || length(namespace) != 1L || is.na(namespace) || !nzchar(namespace)) {
     stop(
-      "Invalid `namespace`: ", paste0(namespace, collapse = ", "),
+      "Invalid `namespace`: ",
+      encodeString(paste0(format(namespace), collapse = ", "), quote = '"'),
       ". `namespace` must be a non-empty length 1 character vector.",
       call. = FALSE
     )

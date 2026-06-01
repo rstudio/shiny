@@ -1090,7 +1090,8 @@ ShinySession <- R6Class(
             dots <- eval(substitute(alist(...)))
           }
 
-          if (any_unnamed(dots)) stop("exportTestValues: all arguments must be named.")
+          if (any_unnamed(dots)) 
+            stop("exportTestValues: all arguments must be named.")
 
           names(dots) <- ns(names(dots))
 

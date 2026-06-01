@@ -767,9 +767,9 @@ MockShinySession <- R6Class(
     # @param ns The namespace key.
     # @return A Callbacks object.
     getOrCreateDestroyCallbacks = function(ns) {
-      # `character(0)` is the root; also fold in `""` since fastmap can't use
-      # an empty-string key.
-      if (length(ns) == 0 || !nzchar(ns)) ns <- destroyNsRoot
+      # `character(0)` is the root; the sentinel keeps it out of fastmap, which
+      # disallows an empty-string key.
+      if (length(ns) == 0) ns <- destroyNsRoot
       if (!private$destroyCallbacksByNs$containsKey(ns)) {
         private$destroyCallbacksByNs$set(ns, Callbacks$new())
       }

@@ -820,9 +820,9 @@ ShinySession <- R6Class(
     },
 
     destroyNsKey = function(ns) {
-      # `character(0)` is the root; also fold in `""` since fastmap can't use
-      # an empty-string key.
-      if (length(ns) == 0 || !nzchar(ns)) destroyNsRoot else ns
+      # `character(0)` is the root; the sentinel keeps it out of fastmap, which
+      # disallows an empty-string key.
+      if (length(ns) == 0) destroyNsRoot else ns
     },
 
     getOrCreateDestroyCallbacks = function(ns) {

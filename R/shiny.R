@@ -1125,18 +1125,21 @@ ShinySession <- R6Class(
       )
 
       # Given a char vector, return a logical vector indicating which of those
-      # strings are names of things in the namespace.
+      # strings are names of things in the namespace. For the root scope (a
+      # length-0 namespace) everything is in scope, since there is no prefix.
       filterNamespace <- function(x) {
+        if (length(namespace) == 0) return(rep_len(TRUE, length(x)))
         nsString <- paste0(namespace, ns.sep)
         substr(x, 1, nchar(nsString)) == nsString
       }
 
       # Given a char vector of namespaced names, return a char vector of corresponding
-      # names with namespace prefix removed.
+      # names with namespace prefix removed. The root scope has no prefix to strip.
       unNamespace <- function(x) {
         if (!all(filterNamespace(x))) {
           stop("x contains strings(s) that do not have namespace prefix ", namespace)
         }
+        if (length(namespace) == 0) return(x)
 
         nsString <- paste0(namespace, ns.sep)
         substring(x, nchar(nsString) + 1)
@@ -1164,7 +1167,9 @@ ShinySession <- R6Class(
           scopeState$values[[scopedName]] <- state$values[[origName]]
         })
 
-        if (!is.null(state$dir)) {
+        # The root scope shares the top-level bookmark dir; only a real
+        # (non-empty) namespace gets a subdir.
+        if (!is.null(state$dir) && length(namespace) > 0) {
           dir <- file.path(state$dir, namespace)
           if (dirExists(dir))
             scopeState$dir <- dir
@@ -1183,13 +1188,18 @@ ShinySession <- R6Class(
 
         scopeState <- ShinySaveState$new(scope$input, scope$getBookmarkExclude())
 
-        # Create subdir for this scope
+        # Create subdir for this scope. The root scope (length-0 namespace)
+        # shares the top-level dir rather than getting its own subdir.
         if (!is.null(state$dir)) {
-          scopeState$dir <- file.path(state$dir, namespace)
-          if (!dirExists(scopeState$dir)) {
-            res <- dir.create(scopeState$dir)
-            if (res == FALSE) {
-              stop("Error creating subdirectory for scope ", namespace)
+          if (length(namespace) == 0) {
+            scopeState$dir <- state$dir
+          } else {
+            scopeState$dir <- file.path(state$dir, namespace)
+            if (!dirExists(scopeState$dir)) {
+              res <- dir.create(scopeState$dir)
+              if (res == FALSE) {
+                stop("Error creating subdirectory for scope ", namespace)
+              }
             }
           }
         }

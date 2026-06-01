@@ -460,6 +460,26 @@ validateDestroyNamespace <- function(namespace) {
   invisible(namespace)
 }
 
+# Validate a namespace passed to `makeScope()`. The root (length 0: `NULL` or
+# `character(0)`) is allowed; "" / NA are rejected (they can't be a fastmap key,
+# and `NS("")` yields a stray `-`); the reserved sentinel is rejected too.
+validateScopeNamespace <- function(namespace) {
+  if (identical(namespace, destroyNsRoot)) {
+    stop(
+      "The module namespace '", destroyNsRoot,
+      "' is reserved for internal use.",
+      call. = FALSE
+    )
+  }
+  if (length(namespace) == 1L && (is.na(namespace) || !nzchar(namespace))) {
+    stop(
+      "A module namespace must be a non-empty, non-NA string; use `NULL` for the root scope.",
+      call. = FALSE
+    )
+  }
+  invisible(namespace)
+}
+
 #' @include utils.R
 ShinySession <- R6Class(
   'ShinySession',
@@ -1024,21 +1044,7 @@ ShinySession <- R6Class(
       self
     },
     makeScope = function(namespace) {
-      if (identical(namespace, destroyNsRoot)) {
-        stop(
-          "The module namespace '", destroyNsRoot,
-          "' is reserved for internal use.",
-          call. = FALSE
-        )
-      }
-      # A length-0 namespace (`NULL` or `character(0)`) is the root; "" / NA are
-      # not valid (they can't be a fastmap key, and `NS("")` yields a stray `-`).
-      if (length(namespace) == 1L && (is.na(namespace) || !nzchar(namespace))) {
-        stop(
-          "A module namespace must be a non-empty, non-NA string; use `NULL` for the root scope.",
-          call. = FALSE
-        )
-      }
+      validateScopeNamespace(namespace)
       ns <- NS(namespace)
       # The scope's own namespace, captured because the proxy `destroy()` below
       # has a `namespace` parameter that would otherwise shadow it.

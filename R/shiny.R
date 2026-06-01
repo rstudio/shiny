@@ -1316,8 +1316,8 @@ ShinySession <- R6Class(
       "Destroys a module session scope, cleaning up its reactive state and
       invoking its `onDestroy()` callbacks. `namespace` must be a non-empty,
       non-NA string naming a child module scope; `session$destroy(namespace)`
-      tears that scope down. The root scope is the absence of a namespace —
-      `NULL` (the default) or `character(0)` — and cannot be destroyed this
+      tears that scope down. The root scope is the absence of a namespace --
+      `NULL` (the default) or `character(0)` -- and cannot be destroyed this
       way: calling `destroy()` with no `namespace` on the root session is an
       error, since the root session is torn down via `close()`."
       if (length(namespace) == 0) {

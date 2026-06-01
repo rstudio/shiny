@@ -304,9 +304,15 @@ selectizeScripts <- function() {
 #' Create a select list that can be used to choose a single or multiple items
 #' from the column names of a data frame.
 #'
+#' `varSelectInput()` is a convenience wrapper around [selectInput()] for use
+#' with tidy evaluation: it returns the selected column name as a symbol
+#' (see "Server value" below) so the value can be spliced directly into
+#' tidy-evaluation contexts without wrapping it in [rlang::sym()]. If you
+#' don't need a symbol, use [selectInput()] instead.
+#'
 #' By default, `varSelectInput()` and `selectizeInput()` use the
 #' JavaScript library \pkg{selectize.js}
-#' (<https://selectize.dev/>) to instead of the basic
+#' (<https://selectize.dev/>) instead of the basic
 #' select input element. To use the standard HTML select input element, use
 #' `selectInput()` with `selectize=FALSE`.
 #'

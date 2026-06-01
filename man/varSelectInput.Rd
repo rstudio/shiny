@@ -55,9 +55,15 @@ Create a select list that can be used to choose a single or multiple items
 from the column names of a data frame.
 }
 \details{
+\code{varSelectInput()} is a convenience wrapper around \code{\link[=selectInput]{selectInput()}} for use
+with tidy evaluation: it returns the selected column name as a symbol
+(see "Server value" below) so the value can be spliced directly into
+tidy-evaluation contexts without wrapping it in \code{\link[rlang:sym]{rlang::sym()}}. If you
+don't need a symbol, use \code{\link[=selectInput]{selectInput()}} instead.
+
 By default, \code{varSelectInput()} and \code{selectizeInput()} use the
 JavaScript library \pkg{selectize.js}
-(\url{https://selectize.dev/}) to instead of the basic
+(\url{https://selectize.dev/}) instead of the basic
 select input element. To use the standard HTML select input element, use
 \code{selectInput()} with \code{selectize=FALSE}.
 }

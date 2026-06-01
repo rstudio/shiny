@@ -445,35 +445,27 @@ ns.sep <- "-"
 # additionally guards against).
 destroyNsRoot <- "..root"
 
-# Validate the user-supplied `namespace` passed to `session$destroy(namespace)`.
-# Must be a single, non-empty, non-NA string. Checked at the public boundary,
-# before `makeScope()` runs (which would otherwise choke on bad input).
-validateDestroyNamespace <- function(namespace) {
+# Validate a module `namespace`. A namespace must be a single, non-empty,
+# non-NA string and may not be the reserved sentinel. When `allow_root = TRUE`
+# (e.g. `makeScope()`), the root scope -- a length-0 `NULL` / `character(0)` --
+# is also accepted; the destroy entry points pass `allow_root = FALSE` because a
+# child scope must be named explicitly.
+validateNamespace <- function(namespace, allow_root = FALSE) {
+  if (allow_root && length(namespace) == 0) {
+    return(invisible(namespace))
+  }
   if (!is.character(namespace) || length(namespace) != 1L || is.na(namespace) || !nzchar(namespace)) {
     stop(
       "Invalid `namespace`: ",
       encodeString(paste0(format(namespace), collapse = ", "), quote = '"'),
-      ". `namespace` must be a non-empty length 1 character vector.",
+      ". A module namespace must be a non-empty, non-NA string; use `NULL` for the root scope.",
       call. = FALSE
     )
   }
-  invisible(namespace)
-}
-
-# Validate a namespace passed to `makeScope()`. The root (length 0: `NULL` or
-# `character(0)`) is allowed; "" / NA are rejected (they can't be a fastmap key,
-# and `NS("")` yields a stray `-`); the reserved sentinel is rejected too.
-validateScopeNamespace <- function(namespace) {
   if (identical(namespace, destroyNsRoot)) {
     stop(
       "The module namespace '", destroyNsRoot,
       "' is reserved for internal use.",
-      call. = FALSE
-    )
-  }
-  if (length(namespace) == 1L && (is.na(namespace) || !nzchar(namespace))) {
-    stop(
-      "A module namespace must be a non-empty, non-NA string; use `NULL` for the root scope.",
       call. = FALSE
     )
   }
@@ -1044,7 +1036,7 @@ ShinySession <- R6Class(
       self
     },
     makeScope = function(namespace) {
-      validateScopeNamespace(namespace)
+      validateNamespace(namespace, allow_root = TRUE)
       ns <- NS(namespace)
       # The scope's own namespace, captured because the proxy `destroy()` below
       # has a `namespace` parameter that would otherwise shadow it.
@@ -1126,7 +1118,7 @@ ShinySession <- R6Class(
             private$invokeDestroyCallbacks(selfNamespace)
           } else {
             # Tear down a named child scope.
-            validateDestroyNamespace(namespace)
+            validateNamespace(namespace)
             self$makeScope(ns(namespace))$destroy()
           }
         }
@@ -1334,7 +1326,7 @@ ShinySession <- R6Class(
           call. = FALSE
         )
       }
-      validateDestroyNamespace(namespace)
+      validateNamespace(namespace)
       self$makeScope(namespace)$destroy()
     },
     onInputReceived = function(callback) {

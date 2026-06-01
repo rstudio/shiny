@@ -1031,6 +1031,14 @@ ShinySession <- R6Class(
           call. = FALSE
         )
       }
+      # `character(0)` is the root; an empty string is not a valid namespace
+      # (it can't be used as a fastmap key, and `NS(\"\")` yields a stray `-`).
+      if (length(namespace) == 1L && !nzchar(namespace)) {
+        stop(
+          "A module namespace must be a non-empty string; use `character(0)` for the root scope.",
+          call. = FALSE
+        )
+      }
       ns <- NS(namespace)
       # The scope's own namespace, captured because the proxy `destroy()` below
       # has a `namespace` parameter that would otherwise shadow it.

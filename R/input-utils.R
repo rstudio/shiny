@@ -2,18 +2,21 @@
 # caller. Produces a classed error that names both the calling function and
 # the missing argument(s), e.g.
 #   `textInput()` is missing required argument: `label`.
-# `missing()` must be evaluated in the caller frame to avoid forcing the
-# unsupplied promise. When invoked via `do.call()`, `rlang::call_name()`
-# cannot recover the original function name and we fall back to "function".
-check_required <- function(..., call = rlang::caller_env()) {
-  args <- rlang::enquos(...)
-  missing_args <- character()
-  for (i in seq_along(args)) {
-    name <- rlang::as_name(args[[i]])
-    if (eval(call("missing", as.name(name)), envir = call)) {
-      missing_args <- c(missing_args, name)
-    }
-  }
+#
+# `frame` is the function frame whose arguments are inspected; `missing()` is
+# evaluated there to avoid forcing the unsupplied promise. `call` is the call
+# blamed in the error and is normally the same frame. Wrapper functions that
+# delegate to a constructor (e.g. `selectizeInput()` -> `selectInput()`) pass
+# their own environment as `call` so the error names the function the user
+# actually called rather than the inner constructor. When `call` has no
+# associated call (e.g. invocation via `do.call()`), we fall back to
+# "function".
+check_required <- function(..., frame = rlang::caller_env(), call = frame) {
+  names <- vapply(rlang::ensyms(...), rlang::as_string, character(1))
+  is_missing <- vapply(names, function(name) {
+    eval(as.call(list(quote(missing), as.name(name))), envir = frame)
+  }, logical(1))
+  missing_args <- names[is_missing]
   if (!length(missing_args)) return(invisible())
 
   fn <- rlang::call_name(rlang::frame_call(call)) %||% "function"

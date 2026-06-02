@@ -13,7 +13,8 @@ selectInput(
   multiple = FALSE,
   selectize = TRUE,
   width = NULL,
-  size = NULL
+  size = NULL,
+  error_call = environment()
 )
 
 selectizeInput(inputId, ..., options = NULL, width = NULL)
@@ -45,6 +46,12 @@ see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
 will result in a taller box. Not compatible with \code{selectize=TRUE}.
 Normally, when \code{multiple=FALSE}, a select input will be a drop-down list,
 but when \code{size} is set, it will be a box instead.}
+
+\item{error_call}{Used internally to produce error messages that point at
+the function the user called. Wrapper functions (e.g. \code{\link[=selectizeInput]{selectizeInput()}}
+and \code{\link[=varSelectizeInput]{varSelectizeInput()}}) pass their own environment so that errors
+about missing required arguments are attributed to the wrapper rather
+than the inner constructor. You should not normally need to set this.}
 
 \item{...}{Arguments passed to \code{selectInput()}.}
 

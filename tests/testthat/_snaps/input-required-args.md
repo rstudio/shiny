@@ -73,10 +73,26 @@
 ---
 
     Code
+      selectizeInput("id")
+    Condition
+      Error in `selectizeInput()`:
+      ! `selectizeInput()` is missing required arguments: `label` and `choices`.
+
+---
+
+    Code
       varSelectInput("id", "Label")
     Condition
       Error in `varSelectInput()`:
       ! `varSelectInput()` is missing required argument: `data`.
+
+---
+
+    Code
+      varSelectizeInput("id")
+    Condition
+      Error in `varSelectizeInput()`:
+      ! `varSelectizeInput()` is missing required arguments: `label` and `data`.
 
 ---
 

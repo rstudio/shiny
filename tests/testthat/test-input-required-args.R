@@ -50,9 +50,27 @@ test_that("explicit NULL/NA satisfies required args (documented opt-out)", {
   expect_silent(actionButton("id", NULL))
 })
 
+test_that("selectize wrappers attribute missing-arg errors to themselves", {
+  # selectizeInput()/varSelectizeInput() delegate to selectInput()/
+  # varSelectInput(), but the error must name the function the user called,
+  # not the inner constructor (#1423).
+  expect_error(
+    selectizeInput("id"),
+    "`selectizeInput\\(\\)` is missing required arguments: `label` and `choices`",
+    class = "shiny_missing_arg_error"
+  )
+  expect_error(
+    varSelectizeInput("id"),
+    "`varSelectizeInput\\(\\)` is missing required arguments: `label` and `data`",
+    class = "shiny_missing_arg_error"
+  )
+  # Server-side selectize (choices supplied as NULL) is unaffected.
+  expect_s3_class(selectizeInput("id", "Label", choices = NULL), "shiny.tag")
+})
+
 test_that("happy paths still construct a shiny.tag without error", {
   expect_tag <- function(x) {
-    expect_s3_class(x, c("shiny.tag", "shiny.tag.list"), exact = FALSE)
+    expect_s3_class(x, "shiny.tag")
   }
   expect_tag(textInput("id", "Label"))
   expect_tag(textAreaInput("id", "Label"))
@@ -81,7 +99,9 @@ test_that("missing required input args produce informative errors", {
   expect_snapshot(error = TRUE, checkboxGroupInput("id"))
   expect_snapshot(error = TRUE, radioButtons("id"))
   expect_snapshot(error = TRUE, selectInput("id", "Label"))
+  expect_snapshot(error = TRUE, selectizeInput("id"))
   expect_snapshot(error = TRUE, varSelectInput("id", "Label"))
+  expect_snapshot(error = TRUE, varSelectizeInput("id"))
   expect_snapshot(error = TRUE, dateInput("id"))
   expect_snapshot(error = TRUE, dateRangeInput("id"))
   expect_snapshot(error = TRUE, fileInput("id"))

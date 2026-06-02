@@ -42,8 +42,9 @@ The syntax of these functions is similar to the functions that created the
 inputs in the first place. For example, \code{\link{numericInput}()} and
 \code{updateNumericInput()} take a similar set of arguments.
 
-Any arguments with NULL values will be ignored; they will not result in any
-changes to the input object on the client.
+Arguments with \code{NULL} values are generally ignored: they will not
+result in any changes to the input object on the client. See the
+per-argument documentation for any exceptions.
 
 For \code{\link{radioButtons}()}, \code{\link{checkboxGroupInput}()} and
 \code{\link{selectInput}()}, the set of choices can be cleared by using

@@ -30,6 +30,8 @@
 
 * Updated default HTTP headers for better security. Shiny now sends `X-Content-Type-Options: nosniff` instead of the legacy `X-UA-Compatible` header. This removes outdated Internet Explorer–specific behavior and adds a modern safeguard that prevents browsers from misinterpreting file types. (#4385)
 
+* Clarified the `selected` argument docs for `updateSelectInput()`, `updateSelectizeInput()`, `updateVarSelectInput()`, `updateCheckboxGroupInput()`, and `updateRadioButtons()`: when `choices` is also being updated, `selected = NULL` resets the selection (or, for `updateRadioButtons()`, picks the first choice) rather than preserving it. (#2144)
+
 ## Bug fixes
 
 * Loading shiny no longer creates `.Random.seed` in the global environment as a side effect. (#4382)

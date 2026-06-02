@@ -29,9 +29,12 @@ this argument is provided, then \code{choiceNames} and \code{choiceValues} must 
 be provided, and vice-versa. The values should be strings; other types
 (such as logicals and numbers) will be coerced to strings.}
 
-\item{selected}{The initially selected value. If not specified, then it
-defaults to the first item in \code{choices}. To start with no items selected,
-use \code{character(0)}.}
+\item{selected}{The value that should be selected. The default of \code{NULL}
+does not preserve the current selection when \code{choices} (or \code{choiceValues})
+is also being updated: as with \code{\link[=radioButtons]{radioButtons()}} itself, it defaults to the
+first choice. To preserve the current selection across a \code{choices} update,
+pass \code{selected = input$id} explicitly. To start with no item selected,
+pass \code{selected = character(0)}.}
 
 \item{inline}{If \code{TRUE}, render the choices inline (i.e. horizontally)}
 
@@ -56,8 +59,9 @@ The syntax of these functions is similar to the functions that created the
 inputs in the first place. For example, \code{\link{numericInput}()} and
 \code{updateNumericInput()} take a similar set of arguments.
 
-Any arguments with NULL values will be ignored; they will not result in any
-changes to the input object on the client.
+Arguments with \code{NULL} values are generally ignored: they will not
+result in any changes to the input object on the client. See the
+per-argument documentation for any exceptions.
 
 For \code{\link{radioButtons}()}, \code{\link{checkboxGroupInput}()} and
 \code{\link{selectInput}()}, the set of choices can be cleared by using

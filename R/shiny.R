@@ -1334,10 +1334,25 @@ ShinySession <- R6Class(
 
       if (close) self$close()
     },
-    close = function() {
-      if (!self$closed) {
+    close = function(hard = FALSE, message = NULL) {
+      if (self$closed) return(invisible())
+
+      if (isTRUE(hard)) {
+        private$wasHardClose <- TRUE
+        effectiveMessage <- message %||%
+          private$hardDisconnectMessage %||%
+          "This app has closed."
+        # Send the closed-overlay text via the existing custom-message channel
+        # before closing the socket. WebSocket message ordering is FIFO so the
+        # client receives this and stashes the text before the close arrives.
+        private$sendMessage(custom = list(
+          hardDisconnectConfig = list(message = effectiveMessage)
+        ))
+        private$websocket$close(code = 4001L, reason = "shiny-hard-disconnect")
+      } else {
         private$websocket$close()
       }
+      invisible()
     },
     wsClosed = function() {
       self$closed <- TRUE

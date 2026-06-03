@@ -125,6 +125,8 @@ test_that("wsClosed after hard close clears root inputs, clientData, downloads, 
   ws <- FakeWebSocket$new()
   session <- ShinySession$new(ws)
 
+  session$.__enclos_env__$private$.input$set("test_input", 42)
+  session$.__enclos_env__$private$.clientData$set("test_cd", "hello")
   session$files$set("file1", list())
   session$downloads$set("dl1", list())
 

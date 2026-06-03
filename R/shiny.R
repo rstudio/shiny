@@ -1369,6 +1369,8 @@ ShinySession <- R6Class(
       if (isTRUE(private$wasHardClose)) {
         # Hard close: also clear the root-level Maps that the destroy walk
         # intentionally skips for the soft path.
+        # destroyByPrefix("") wipes all keys and fires the right invalidations
+        # without marking the container itself as destroyed (which destroy() would do).
         private$.input$destroyByPrefix("")
         private$.clientData$destroyByPrefix("")
         self$files$clear()

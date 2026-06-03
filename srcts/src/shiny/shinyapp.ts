@@ -894,7 +894,7 @@ class ShinyApp {
       }
     });
 
-    addCustomMessageHandler(
+    addMessageHandler(
       "hardDisconnectConfig",
       (message: { message: string }) => {
         this.$hardDisconnectMessage = message.message;

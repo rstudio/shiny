@@ -6976,7 +6976,7 @@ ${duplicateIdMsg}`;
             throw "Invalid value for allowReconnect: " + message;
         }
       });
-      addCustomMessageHandler(
+      addMessageHandler(
         "hardDisconnectConfig",
         (message) => {
           this.$hardDisconnectMessage = message.message;

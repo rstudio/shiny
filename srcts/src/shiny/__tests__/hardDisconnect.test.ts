@@ -7,8 +7,9 @@ import test from "node:test";
 // DOM coverage is deferred to integration testing.
 //
 // This file covers the non-DOM contract: the hardDisconnectConfig message
-// handler (registered in ShinyApp._init via addCustomMessageHandler) is
-// expected to stash `message.message` onto `$hardDisconnectMessage`.
+// handler (registered in ShinyApp._init via addMessageHandler as a top-level
+// internal protocol message) is expected to stash `message.message` onto
+// `$hardDisconnectMessage`.
 //
 // The handler body from shinyapp.ts is:
 //   (message: { message: string }) => {

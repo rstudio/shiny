@@ -50,7 +50,7 @@ test_that("session$close() with no args performs a soft close (backward compatib
   expect_null(ws$closeReason)
   expect_false(session$.__enclos_env__$private$wasHardClose)
   # No hardDisconnectConfig should have been sent
-  expect_length(fake_ws_messages_with(ws, "custom"), 0L)
+  expect_length(fake_ws_messages_with(ws, "hardDisconnectConfig"), 0L)
 })
 
 test_that("session$close(hard = TRUE) sends hardDisconnectConfig and uses code 4001", {
@@ -62,10 +62,10 @@ test_that("session$close(hard = TRUE) sends hardDisconnectConfig and uses code 4
   session$close(hard = TRUE, message = "All done.")
 
   # hardDisconnectConfig sent before close
-  customs <- fake_ws_messages_with(ws, "custom")
-  expect_length(customs, 1L)
+  configs <- fake_ws_messages_with(ws, "hardDisconnectConfig")
+  expect_length(configs, 1L)
   expect_identical(
-    customs[[1L]]$custom$hardDisconnectConfig$message,
+    configs[[1L]]$hardDisconnectConfig$message,
     "All done."
   )
 
@@ -84,9 +84,9 @@ test_that("session$close(hard = TRUE) falls back to hardDisconnectMessage when m
 
   session$close(hard = TRUE)
 
-  customs <- fake_ws_messages_with(ws, "custom")
+  configs <- fake_ws_messages_with(ws, "hardDisconnectConfig")
   expect_identical(
-    customs[[1L]]$custom$hardDisconnectConfig$message,
+    configs[[1L]]$hardDisconnectConfig$message,
     "App default text"
   )
 })
@@ -99,9 +99,9 @@ test_that("session$close(hard = TRUE) uses framework default when no message is 
 
   session$close(hard = TRUE)
 
-  customs <- fake_ws_messages_with(ws, "custom")
+  configs <- fake_ws_messages_with(ws, "hardDisconnectConfig")
   expect_identical(
-    customs[[1L]]$custom$hardDisconnectConfig$message,
+    configs[[1L]]$hardDisconnectConfig$message,
     "This app has closed."
   )
 })

@@ -483,6 +483,9 @@ ShinySession <- R6Class(
     getBookmarkExcludeFunsNextId = 0L,
     timingRecorder = 'ShinyServerTimingRecorder',
 
+    hardDisconnectMessage = NULL,  # character(1) or NULL; default closed-overlay text
+    wasHardClose = FALSE,          # set by close(hard = TRUE) so wsClosed knows
+
     testMode = FALSE,                # Are we running in test mode?
     testExportExprs = list(),
     outputValues = list(),           # Saved output values (for testing mode)
@@ -954,6 +957,8 @@ ShinySession <- R6Class(
       private$restoredCallbacks <- Callbacks$new()
 
       private$testMode <- getShinyOption("testmode", default = FALSE)
+      private$hardDisconnectMessage <- getShinyOption("hardDisconnectMessage", default = NULL)
+      private$wasHardClose <- FALSE
       private$enableTestSnapshot()
 
       # This `withReactiveDomain` is used only to satisfy the reactlog, so that

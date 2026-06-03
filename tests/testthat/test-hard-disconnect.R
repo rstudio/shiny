@@ -17,3 +17,26 @@ test_that("shinyApp() defaults hardDisconnectMessage to NULL", {
   )
   expect_null(app$appOptions$hardDisconnectMessage)
 })
+
+test_that("ShinySession reads hardDisconnectMessage from shinyOptions at init", {
+  withr::with_options(list(), {
+    shiny::shinyOptions(hardDisconnectMessage = "Bye!")
+    ws <- FakeWebSocket$new()
+    session <- ShinySession$new(ws)
+    expect_identical(
+      session$.__enclos_env__$private$hardDisconnectMessage,
+      "Bye!"
+    )
+    expect_false(session$.__enclos_env__$private$wasHardClose)
+  })
+})
+
+test_that("ShinySession defaults hardDisconnectMessage to NULL", {
+  withr::with_options(list(), {
+    # Clear any leftover option from a previous test
+    shiny::shinyOptions(hardDisconnectMessage = NULL)
+    ws <- FakeWebSocket$new()
+    session <- ShinySession$new(ws)
+    expect_null(session$.__enclos_env__$private$hardDisconnectMessage)
+  })
+})

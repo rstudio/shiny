@@ -72,7 +72,8 @@
 #' }
 #' @export
 shinyApp <- function(ui, server, onStart=NULL, options=list(),
-                     uiPattern="/", enableBookmarking=NULL) {
+                     uiPattern="/", enableBookmarking=NULL,
+                     hardDisconnectMessage = NULL) {
   if (!is.function(server)) {
     stop("`server` must be a function", call. = FALSE)
   }
@@ -94,6 +95,10 @@ shinyApp <- function(ui, server, onStart=NULL, options=list(),
   # Store the appDir and bookmarking-related options, so that we can read them
   # from within the app.
   appOptions <- captureAppOptions()
+
+  # Carry hard-disconnect settings into appOptions so they become shinyOptions
+  # via applyCapturedAppOptions() when the app starts.
+  appOptions$hardDisconnectMessage <- hardDisconnectMessage
 
   structure(
     list(

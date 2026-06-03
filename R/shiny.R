@@ -1366,6 +1366,14 @@ ShinySession <- R6Class(
         })
       })
       private$invokeDestroyCallbacks("")
+      if (isTRUE(private$wasHardClose)) {
+        # Hard close: also clear the root-level Maps that the destroy walk
+        # intentionally skips for the soft path.
+        private$.input$destroyByPrefix("")
+        private$.clientData$destroyByPrefix("")
+        self$files$clear()
+        self$downloads$clear()
+      }
     },
     isClosed = function() {
       return(self$closed)

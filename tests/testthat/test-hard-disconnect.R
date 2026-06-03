@@ -105,3 +105,54 @@ test_that("session$close(hard = TRUE) uses framework default when no message is 
     "This app has closed."
   )
 })
+
+test_that("wsClosed after soft close leaves root Maps in place", {
+  ws <- FakeWebSocket$new()
+  session <- ShinySession$new(ws)
+
+  # Populate Maps with sentinel entries so we can detect cleanup
+  session$files$set("file1", list())
+  session$downloads$set("dl1", list())
+
+  session$close()
+  session$wsClosed()
+
+  expect_true(session$files$containsKey("file1"))
+  expect_true(session$downloads$containsKey("dl1"))
+})
+
+test_that("wsClosed after hard close clears root inputs, clientData, downloads, files", {
+  ws <- FakeWebSocket$new()
+  session <- ShinySession$new(ws)
+
+  session$files$set("file1", list())
+  session$downloads$set("dl1", list())
+
+  session$close(hard = TRUE, message = "bye")
+  session$wsClosed()
+
+  expect_false(session$files$containsKey("file1"))
+  expect_false(session$downloads$containsKey("dl1"))
+  expect_length(isolate(session$.__enclos_env__$private$.input$names()), 0L)
+  expect_length(isolate(session$.__enclos_env__$private$.clientData$names()), 0L)
+})
+
+test_that("onSessionEnded runs before hard cleanup (callback sees live state)", {
+  ws <- FakeWebSocket$new()
+  session <- ShinySession$new(ws)
+
+  session$files$set("sentinel", list(payload = "still here"))
+
+  observedFiles <- NULL
+  session$onSessionEnded(function() {
+    # At the moment this fires, files should still be populated.
+    observedFiles <<- session$files$keys()
+  })
+
+  session$close(hard = TRUE)
+  session$wsClosed()
+
+  expect_true("sentinel" %in% observedFiles)
+  # And after wsClosed completes, the file is cleaned up.
+  expect_false(session$files$containsKey("sentinel"))
+})

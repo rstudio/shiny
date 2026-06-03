@@ -141,6 +141,10 @@ with no arguments continues to behave exactly as today.
 
 ### Idle timeout: `hardDisconnectAfter`
 
+The idle timeout is implemented in Shiny itself, not delegated to the
+hosting platform. See "Why Shiny implements this" at the end of this
+section for the rationale.
+
 When `hardDisconnectAfter = N` is set, the session tracks the time of
 the last incoming websocket message from the client. A timer (using
 `later::later`) checks periodically; if `now - lastClientActivity > N`,
@@ -174,6 +178,46 @@ shinyApp(
   hardDisconnectMessage = "Your session ended after 10 minutes of inactivity."
 )
 ```
+
+#### Why Shiny implements this (rather than delegating to the platform)
+
+A reasonable alternative would be to pass the timeout to Shiny Server
+/ Connect via a handshake header and let the platform enforce it.
+Looking at shiny-server's architecture (`lib/scheduler/worker-entry.js`),
+the platform tracks only **connection counts** per worker (`httpConn`,
+`sockConn`, `pendingConn`). Its `app_idle_timeout` config starts a
+worker-reap timer only when those counts reach zero — it has no
+mechanism today to detect "the websocket is open but the user is
+inactive." Adding that would require per-session activity tracking,
+frame inspection, and per-session timers in the proxy layer; a
+substantial new mechanism in shiny-server.
+
+In Shiny, by contrast, every incoming client message already lands at
+a single point (`ws$onMessage` in `R/server.R`). Updating a timestamp
+there is one line, and a `later::later` polling callback is trivial.
+The work is small where it belongs (in the R session, which actually
+sees user activity) and large where it doesn't (in the proxy, which
+intentionally doesn't).
+
+Additional reasons:
+
+- **Works locally.** `runApp()` has no platform; Shiny-side
+  implementation gives `hardDisconnectAfter` the same meaning in dev
+  and prod.
+- **Policy travels with the app.** The author specifies the timeout
+  in `shinyApp()`; behavior doesn't depend on per-deployment platform
+  config.
+- **The hard-close UX needs Shiny-side participation anyway.** The
+  `hardDisconnectConfig` custom message carrying the author's idle
+  text has to come from R. If the platform drove the close, Shiny
+  would still need a way to deliver the message in time, which
+  re-introduces machinery.
+
+If platform-side optimization ever becomes desirable (e.g., for
+extremely high-density deployments where per-session timers in R
+add measurable overhead), a future change can add a hint header so
+the platform can elide the R-side timer. The R-side detection
+remains the source of truth either way.
 
 ### Typical usage: author-triggered end-of-session
 
@@ -546,18 +590,29 @@ platforms that implement the contract.
 >    `downloads`, `files`, and the `SessionProxy` reference are all
 >    released immediately.
 >
-> **What we'd like Shiny Server / Connect to do.** One change:
+> **What we'd like Shiny Server / Connect to do.** One change.
 >
-> **Treat websocket close code `4001` as authoritative "release this
-> worker, no grace period."** On receipt of `4001`:
-> - Release any reconnect token associated with the session.
-> - Do not hold the R worker warm for a follow-up reconnect.
-> - Apply the platform's normal worker-recycling logic as if the
->   grace period had already elapsed.
+> **Treat websocket close code `4001` as equivalent to
+> `app_idle_timeout = 0` for this worker.** Today, when a session's
+> websocket closes, the scheduler decrements `sockConn`. If counts
+> reach zero, `WorkerEntry.startIdleTimer()` schedules a worker reap
+> after `idleTimeout` milliseconds. The ask is: when the closing
+> websocket carries close code `4001`, skip the wait — treat it as
+> if `idleTimeout` were `0` for this worker, so the reap fires
+> immediately and any reconnect token tied to the session is
+> released.
+>
+> Pointer to the relevant code: `lib/scheduler/worker-entry.js`,
+> specifically the `release()` method (which calls
+> `startIdleTimer()`) and the `startIdleTimer()` method itself.
+> The change is small in scope — propagate the close code from the
+> socket close event through to the scheduler so `startIdleTimer()`
+> can short-circuit to immediate emission of `idletimeout` when the
+> code is `4001`.
 >
 > No other close codes need to change behavior; the existing
-> grace-period flow for normal closes is exactly the right thing
-> when an author hasn't opted in to hard close.
+> `app_idle_timeout` grace-period flow for normal closes is exactly
+> the right thing when an author hasn't opted in to hard close.
 >
 > **What we are *not* asking the platform to do.**
 >
@@ -582,12 +637,23 @@ platforms that implement the contract.
 >
 > **Open questions for the platform team:**
 >
-> - Does Connect's session-pool behavior already have a "no grace"
->   path we'd be turning on, or does this require a new code path?
+> - For Shiny Server: confirming the proposed touch points in
+>   `lib/scheduler/worker-entry.js` are the right ones, and whether
+>   the close-code propagation should happen in the scheduler or
+>   one layer up in the proxy (`lib/proxy/`).
+> - For Connect: does the session-pool behavior already have a "no
+>   grace" path we'd be turning on, or does this require a new code
+>   path? The shiny-server-shaped fix won't translate directly.
 > - Any preference on the close-code value? `4001` is a Shiny
 >   choice; we can move it.
 > - Versioning: do we need a Shiny minimum version on the platform
 >   side to begin honoring the code?
+> - Activity-driven (rather than connection-driven) idle timeouts
+>   are *not* part of this ask. Shiny implements them in R because
+>   the proxy doesn't have a natural seam for per-session activity
+>   tracking. If platform teams want to optimize this later, that's
+>   a separate conversation; the close-code change above is the
+>   only thing this design depends on.
 
 ## Open questions
 

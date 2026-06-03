@@ -36,6 +36,12 @@
 #'   `"disable"`. The default value, `NULL`, will respect the setting from
 #'   any previous calls to  [enableBookmarking()]. See [enableBookmarking()]
 #'   for more information on bookmarking your app.
+#' @param hardDisconnectMessage A character string used as the default text
+#'   for the closed-state overlay shown after a hard session close (e.g.,
+#'   `session$close(hard = TRUE)`). When `NULL` (default), each
+#'   `session$close(hard = TRUE)` falls back to the framework default
+#'   `"This app has closed."`. The per-call `message` argument on
+#'   `session$close()` overrides this.
 #' @return An object that represents the app. Printing the object or passing it
 #'   to [runApp()] will run the app.
 #'

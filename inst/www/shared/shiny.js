@@ -6355,6 +6355,7 @@ ${duplicateIdMsg}`;
       this.$activeRequests = {};
       this.$nextRequestId = 0;
       this.$allowReconnect = false;
+      this.$hardDisconnectMessage = null;
       this.scheduledReconnect = void 0;
       // How long should we wait before trying the next reconnection?
       // The delay will increase with subsequent attempts.
@@ -6943,6 +6944,12 @@ ${duplicateIdMsg}`;
             throw "Invalid value for allowReconnect: " + message;
         }
       });
+      addCustomMessageHandler(
+        "hardDisconnectConfig",
+        (message) => {
+          this.$hardDisconnectMessage = message.message;
+        }
+      );
       addMessageHandler("custom", async (message) => {
         const shinyOnCustomMessage = getShinyOnCustomMessage();
         if (shinyOnCustomMessage) await shinyOnCustomMessage(message);

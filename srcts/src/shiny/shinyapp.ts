@@ -156,6 +156,7 @@ class ShinyApp {
   $nextRequestId = 0;
 
   $allowReconnect: boolean | "force" = false;
+  $hardDisconnectMessage: string | null = null;
 
   constructor() {
     this._init();
@@ -850,6 +851,13 @@ class ShinyApp {
           throw "Invalid value for allowReconnect: " + message;
       }
     });
+
+    addCustomMessageHandler(
+      "hardDisconnectConfig",
+      (message: { message: string }) => {
+        this.$hardDisconnectMessage = message.message;
+      },
+    );
 
     addMessageHandler("custom", async (message: { [key: string]: unknown }) => {
       // For old-style custom messages - should deprecate and migrate to new

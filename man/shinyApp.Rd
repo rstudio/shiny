@@ -12,7 +12,8 @@ shinyApp(
   onStart = NULL,
   options = list(),
   uiPattern = "/",
-  enableBookmarking = NULL
+  enableBookmarking = NULL,
+  hardDisconnectMessage = NULL
 )
 
 shinyAppDir(appDir, options = list())

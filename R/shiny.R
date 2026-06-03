@@ -108,6 +108,38 @@ workerId <- local({
 #'   attempt to reconnect. The only reason to use `"force"` is for testing
 #'   on a local connection (without Shiny Server or Connect).
 #' }
+#' \item{close(hard = FALSE, message = NULL)}{
+#'   Closes the session. By default, performs a soft close: the websocket is
+#'   shut down and Shiny tears down output observers and reactive scopes, but
+#'   leaves the root `inputs`, `clientData`, `downloads`, and `files`
+#'   collections in place. When `hard = TRUE`, performs a complete teardown:
+#'   sends a closed-overlay message to the browser, closes the websocket with
+#'   application close code `4001` (which hosting platforms can recognize as
+#'   "do not hold this worker for reconnect"), and additionally clears the
+#'   four root-level collections.
+#'
+#'   `message` overrides the default closed-overlay text for this call; when
+#'   `NULL` it falls back to `shinyApp(hardDisconnectMessage = ...)`, then to
+#'   `"This app has closed."`. Only meaningful when `hard = TRUE`.
+#'
+#'   Typical hard-close pattern, paired with a confirmation modal:
+#'
+#'   ```
+#'   observeEvent(input$submit, {
+#'     showModal(modalDialog(
+#'       "Your responses have been recorded. This app will close shortly.",
+#'       footer = NULL, easyClose = FALSE
+#'     ))
+#'     later::later(
+#'       ~ session$close(hard = TRUE, message = "Thanks!"),
+#'       delay = 3
+#'     )
+#'   })
+#'   ```
+#'
+#'   See also `onSessionEnded` (callbacks run before close completes) and
+#'   `destroy` (module-scope teardown without ending the session).
+#' }
 #' \item{clientData}{
 #'   A [reactiveValues()] object that contains information about the client.
 #'   \itemize{

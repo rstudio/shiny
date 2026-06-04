@@ -3,9 +3,17 @@ import $import from "jquery";
 /**
  * Resolve the jQuery instance bound to the current window.
  *
- * In a browser `window.jQuery` is already the bound instance.  In a
- * Node/happy-dom test environment the package exports a factory that must
- * be called with the current window to produce a bound instance.
+ * In the browser bundle, esbuild rewrites `import $import from "jquery"`
+ * to `window.jQuery` (see `srcts/build/shiny.ts`), so `$import` and
+ * `window.jQuery` reference the same already-bound instance. In a
+ * Node/happy-dom test environment the package exports a factory that
+ * must be called with the current window to produce a bound instance;
+ * the factory path below handles that case.
+ *
+ * This function is only invoked from adapter functions, which are only
+ * reached when `hasJQuery()` in `./index.ts` has already confirmed that
+ * `window.jQuery` is a function — the `?? $import` fallback is therefore
+ * unreachable in normal flow and is present only as a defensive default.
  */
 function getJQuery(): JQueryStatic {
   const win = (globalThis as any).window as { jQuery?: unknown } | undefined;
@@ -22,10 +30,13 @@ function getJQuery(): JQueryStatic {
  * jQuery adapter for `dom/query`.
  *
  * Preserves jQuery selector extensions (e.g. `:visible`) for callers that
- * happen to use them. Note that jQuery only takes `Document | Element` as
- * a `find()` context, so we coerce `DocumentFragment` to its first element
- * child where needed — Shiny's call sites all pass Document or Element
- * scopes in practice.
+ * happen to use them.
+ *
+ * Note: jQuery's `find()` only accepts `Document | Element` as context.
+ * Shiny's call sites all pass `Document | Element` in practice, so we
+ * cast `ParentNode` to `Document | Element` without coercion. Passing a
+ * `DocumentFragment` is not supported and may behave inconsistently with
+ * the native adapter.
  */
 export function select(scope: ParentNode, selector: string): Element[] {
   const $ = getJQuery();

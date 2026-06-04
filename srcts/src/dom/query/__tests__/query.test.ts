@@ -65,6 +65,12 @@ runDualPath("closest returns null when no ancestor matches", () => {
   assert.equal(out, null);
 });
 
+runDualPath("closest returns the element itself when it matches", () => {
+  const span = (globalThis as any).document.querySelector("span[data-x='1']") as Element;
+  const out = closest(span, ".inner");
+  assert.equal(out, span);
+});
+
 runDualPath("matches returns true when element matches selector", () => {
   const span = (globalThis as any).document.querySelector("span[data-x='1']") as Element;
   assert.equal(matches(span, ".inner"), true);

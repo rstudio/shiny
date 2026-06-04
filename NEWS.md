@@ -10,6 +10,14 @@
   also destroy a child module scope by id with `session$destroy(id)`, so it
   can tear down a module using the same id it used to insert the UI (#4372).
 
+* `session$close()` now accepts `hard = TRUE` and `message = ...` arguments
+  for performing a complete session teardown: it clears the root `inputs`,
+  `clientData`, `downloads`, and `files` collections, closes the websocket
+  with application close code `4001` (which hosting platforms can recognize
+  as "do not hold this worker for reconnect"), and renders a distinct
+  closed-state overlay in the browser. The default closed-overlay text can
+  be set app-wide via `shinyApp(hardDisconnectMessage = ...)`.
+
 * New `startApp()` runs a Shiny app in non-blocking mode, returning a
   `ShinyAppHandle` object with `stop()`, `status()`, `url()`, and `result()`
   methods. When a new app is started, any previously running non-blocking app

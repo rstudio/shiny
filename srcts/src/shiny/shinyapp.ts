@@ -156,6 +156,7 @@ class ShinyApp {
   $nextRequestId = 0;
 
   $allowReconnect: boolean | "force" = false;
+  $hardDisconnectMessage: string | null = null;
 
   constructor() {
     this._init();
@@ -260,9 +261,22 @@ class ShinyApp {
     // Called when a successfully-opened websocket is closed, or when an
     // attempt to open a connection fails.
     socket.onclose = (e) => {
+      // Hard-disconnect close code from the server: short-circuit the
+      // reconnect logic and enter the closed state.
+      if (e.code === 4001) {
+        if (hasOpened) {
+          $(document).trigger({
+            type: "shiny:disconnected",
+            // @ts-expect-error; Can not remove info on a established, malformed Event object
+            socket: socket,
+          });
+        }
+        this.$enterClosedState();
+        this.$removeSocket();
+        return;
+      }
+
       const restarting = e.code === 1012; // Uvicorn sets this code when autoreloading
-      // These things are needed only if we've successfully opened the
-      // websocket.
       if (hasOpened) {
         $(document).trigger({
           type: "shiny:disconnected",
@@ -348,6 +362,35 @@ class ShinyApp {
       },
     };
   })();
+
+  $enterClosedState(): void {
+    const message = this.$hardDisconnectMessage ?? "This app has closed.";
+
+    // Render the closed-state overlay (distinct from #shiny-disconnected-overlay).
+    if ($("#shiny-closed-overlay").length === 0) {
+      const overlay = $(
+        '<div id="shiny-closed-overlay" role="alert" aria-live="assertive"></div>',
+      );
+      overlay.text(message);
+      $(document.body).append(overlay);
+    }
+    // Remove the disconnected overlay if it raced in.
+    $("#shiny-disconnected-overlay").remove();
+
+    // Stop any scheduled reconnect.
+    clearTimeout(this.scheduledReconnect);
+
+    // Notify the page and any iframe parent that the session is closed
+    // (distinct from the existing "disconnected" notification).
+    $(document).trigger({
+      type: "shiny:closed",
+      // @ts-expect-error; we are deliberately stuffing data onto Event
+      detail: { message },
+    });
+    if (window.parent) {
+      window.parent.postMessage("closed", "*");
+    }
+  }
 
   onDisconnected(reloading = false): void {
     // Add gray-out overlay, if not already present
@@ -850,6 +893,13 @@ class ShinyApp {
           throw "Invalid value for allowReconnect: " + message;
       }
     });
+
+    addMessageHandler(
+      "hardDisconnectConfig",
+      (message: { message: string }) => {
+        this.$hardDisconnectMessage = message.message;
+      },
+    );
 
     addMessageHandler("custom", async (message: { [key: string]: unknown }) => {
       // For old-style custom messages - should deprecate and migrate to new

@@ -108,6 +108,38 @@ workerId <- local({
 #'   attempt to reconnect. The only reason to use `"force"` is for testing
 #'   on a local connection (without Shiny Server or Connect).
 #' }
+#' \item{close(hard = FALSE, message = NULL)}{
+#'   Closes the session. By default, performs a soft close: the websocket is
+#'   shut down and Shiny tears down output observers and reactive scopes, but
+#'   leaves the root `inputs`, `clientData`, `downloads`, and `files`
+#'   collections in place. When `hard = TRUE`, performs a complete teardown:
+#'   sends a closed-overlay message to the browser, closes the websocket with
+#'   application close code `4001` (which hosting platforms can recognize as
+#'   "do not hold this worker for reconnect"), and additionally clears the
+#'   four root-level collections.
+#'
+#'   `message` overrides the default closed-overlay text for this call; when
+#'   `NULL` it falls back to `shinyApp(hardDisconnectMessage = ...)`, then to
+#'   `"This app has closed."`. Only meaningful when `hard = TRUE`.
+#'
+#'   Typical hard-close pattern, paired with a confirmation modal:
+#'
+#'   ```
+#'   observeEvent(input$submit, {
+#'     showModal(modalDialog(
+#'       "Your responses have been recorded. This app will close shortly.",
+#'       footer = NULL, easyClose = FALSE
+#'     ))
+#'     later::later(
+#'       ~ session$close(hard = TRUE, message = "Thanks!"),
+#'       delay = 3
+#'     )
+#'   })
+#'   ```
+#'
+#'   See also `onSessionEnded` (callbacks run before close completes) and
+#'   `destroy` (module-scope teardown without ending the session).
+#' }
 #' \item{clientData}{
 #'   A [reactiveValues()] object that contains information about the client.
 #'   \itemize{
@@ -482,6 +514,9 @@ ShinySession <- R6Class(
     getBookmarkExcludeFuns = list(),
     getBookmarkExcludeFunsNextId = 0L,
     timingRecorder = 'ShinyServerTimingRecorder',
+
+    hardDisconnectMessage = NULL,  # character(1) or NULL; default closed-overlay text
+    wasHardClose = FALSE,          # set by close(hard = TRUE) so wsClosed knows
 
     testMode = FALSE,                # Are we running in test mode?
     testExportExprs = list(),
@@ -954,6 +989,8 @@ ShinySession <- R6Class(
       private$restoredCallbacks <- Callbacks$new()
 
       private$testMode <- getShinyOption("testmode", default = FALSE)
+      private$hardDisconnectMessage <- getShinyOption("hardDisconnectMessage", default = NULL)
+      private$wasHardClose <- FALSE
       private$enableTestSnapshot()
 
       # This `withReactiveDomain` is used only to satisfy the reactlog, so that
@@ -1329,10 +1366,25 @@ ShinySession <- R6Class(
 
       if (close) self$close()
     },
-    close = function() {
-      if (!self$closed) {
+    close = function(hard = FALSE, message = NULL) {
+      if (self$closed) return(invisible())
+
+      if (isTRUE(hard)) {
+        private$wasHardClose <- TRUE
+        effectiveMessage <- message %||%
+          private$hardDisconnectMessage %||%
+          "This app has closed."
+        # Send the closed-overlay text as a top-level protocol message before
+        # closing the socket. WebSocket message ordering is FIFO so the client
+        # receives this and stashes the text before the close arrives.
+        private$sendMessage(
+          hardDisconnectConfig = list(message = effectiveMessage)
+        )
+        private$websocket$close(code = 4001L, reason = "shiny-hard-disconnect")
+      } else {
         private$websocket$close()
       }
+      invisible()
     },
     wsClosed = function() {
       self$closed <- TRUE
@@ -1346,6 +1398,16 @@ ShinySession <- R6Class(
         })
       })
       private$invokeDestroyCallbacks("")
+      if (isTRUE(private$wasHardClose)) {
+        # Hard close: also clear the root-level Maps that the destroy walk
+        # intentionally skips for the soft path.
+        # destroyByPrefix("") wipes all keys and fires the right invalidations
+        # without marking the container itself as destroyed (which destroy() would do).
+        private$.input$destroyByPrefix("")
+        private$.clientData$destroyByPrefix("")
+        self$files$clear()
+        self$downloads$clear()
+      }
     },
     isClosed = function() {
       return(self$closed)

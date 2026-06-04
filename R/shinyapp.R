@@ -36,6 +36,12 @@
 #'   `"disable"`. The default value, `NULL`, will respect the setting from
 #'   any previous calls to  [enableBookmarking()]. See [enableBookmarking()]
 #'   for more information on bookmarking your app.
+#' @param hardDisconnectMessage A character string used as the default text
+#'   for the closed-state overlay shown after a hard session close (e.g.,
+#'   `session$close(hard = TRUE)`). When `NULL` (default), each
+#'   `session$close(hard = TRUE)` falls back to the framework default
+#'   `"This app has closed."`. The per-call `message` argument on
+#'   `session$close()` overrides this.
 #' @return An object that represents the app. Printing the object or passing it
 #'   to [runApp()] will run the app.
 #'
@@ -72,7 +78,8 @@
 #' }
 #' @export
 shinyApp <- function(ui, server, onStart=NULL, options=list(),
-                     uiPattern="/", enableBookmarking=NULL) {
+                     uiPattern="/", enableBookmarking=NULL,
+                     hardDisconnectMessage = NULL) {
   if (!is.function(server)) {
     stop("`server` must be a function", call. = FALSE)
   }
@@ -94,6 +101,10 @@ shinyApp <- function(ui, server, onStart=NULL, options=list(),
   # Store the appDir and bookmarking-related options, so that we can read them
   # from within the app.
   appOptions <- captureAppOptions()
+
+  # Carry hard-disconnect settings into appOptions so they become shinyOptions
+  # via applyCapturedAppOptions() when the app starts.
+  appOptions$hardDisconnectMessage <- hardDisconnectMessage
 
   structure(
     list(

@@ -6355,6 +6355,7 @@ ${duplicateIdMsg}`;
       this.$activeRequests = {};
       this.$nextRequestId = 0;
       this.$allowReconnect = false;
+      this.$hardDisconnectMessage = null;
       this.scheduledReconnect = void 0;
       // How long should we wait before trying the next reconnection?
       // The delay will increase with subsequent attempts.
@@ -6541,6 +6542,18 @@ ${duplicateIdMsg}`;
         this.taskQueue.enqueue(async () => await this.dispatchMessage(e4.data));
       };
       socket.onclose = (e4) => {
+        if (e4.code === 4001) {
+          if (hasOpened) {
+            (0, import_jquery39.default)(document).trigger({
+              type: "shiny:disconnected",
+              // @ts-expect-error; Can not remove info on a established, malformed Event object
+              socket
+            });
+          }
+          this.$enterClosedState();
+          this.$removeSocket();
+          return;
+        }
         const restarting = e4.code === 1012;
         if (hasOpened) {
           (0, import_jquery39.default)(document).trigger({
@@ -6587,6 +6600,26 @@ ${duplicateIdMsg}`;
       this.scheduledReconnect = window.setTimeout(() => {
         this.reconnect();
       }, delay);
+    }
+    $enterClosedState() {
+      const message = this.$hardDisconnectMessage ?? "This app has closed.";
+      if ((0, import_jquery39.default)("#shiny-closed-overlay").length === 0) {
+        const overlay = (0, import_jquery39.default)(
+          '<div id="shiny-closed-overlay" role="alert" aria-live="assertive"></div>'
+        );
+        overlay.text(message);
+        (0, import_jquery39.default)(document.body).append(overlay);
+      }
+      (0, import_jquery39.default)("#shiny-disconnected-overlay").remove();
+      clearTimeout(this.scheduledReconnect);
+      (0, import_jquery39.default)(document).trigger({
+        type: "shiny:closed",
+        // @ts-expect-error; we are deliberately stuffing data onto Event
+        detail: { message }
+      });
+      if (window.parent) {
+        window.parent.postMessage("closed", "*");
+      }
     }
     onDisconnected(reloading = false) {
       if ((0, import_jquery39.default)("#shiny-disconnected-overlay").length === 0) {
@@ -6943,6 +6976,12 @@ ${duplicateIdMsg}`;
             throw "Invalid value for allowReconnect: " + message;
         }
       });
+      addMessageHandler(
+        "hardDisconnectConfig",
+        (message) => {
+          this.$hardDisconnectMessage = message.message;
+        }
+      );
       addMessageHandler("custom", async (message) => {
         const shinyOnCustomMessage = getShinyOnCustomMessage();
         if (shinyOnCustomMessage) await shinyOnCustomMessage(message);

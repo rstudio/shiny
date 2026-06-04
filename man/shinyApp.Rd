@@ -12,7 +12,8 @@ shinyApp(
   onStart = NULL,
   options = list(),
   uiPattern = "/",
-  enableBookmarking = NULL
+  enableBookmarking = NULL,
+  hardDisconnectMessage = NULL
 )
 
 shinyAppDir(appDir, options = list())
@@ -49,6 +50,13 @@ expression in order for the match to be considered successful.}
 \code{"disable"}. The default value, \code{NULL}, will respect the setting from
 any previous calls to  \code{\link[=enableBookmarking]{enableBookmarking()}}. See \code{\link[=enableBookmarking]{enableBookmarking()}}
 for more information on bookmarking your app.}
+
+\item{hardDisconnectMessage}{A character string used as the default text
+for the closed-state overlay shown after a hard session close (e.g.,
+\code{session$close(hard = TRUE)}). When \code{NULL} (default), each
+\code{session$close(hard = TRUE)} falls back to the framework default
+\code{"This app has closed."}. The per-call \code{message} argument on
+\code{session$close()} overrides this.}
 
 \item{appDir}{Path to directory that contains a Shiny app (i.e. a server.R
 file and either ui.R or www/index.html)}

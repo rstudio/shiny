@@ -107,6 +107,24 @@ html.autoreload-enabled #shiny-disconnected-overlay.reloading {
   }
 }
 
+#shiny-closed-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.92);
+  color: #222;
+  font-size: 1.125rem;
+  line-height: 1.5;
+  padding: 2rem;
+  text-align: center;
+  z-index: 99999;
+  // Distinguish from the disconnected overlay (grey-out) — fully opaque card,
+  // not a transient haze.
+  pointer-events: auto;
+}
+
 .table.shiny-table {
   @include table-padding($left: 12px, $right: 12px);
 }

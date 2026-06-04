@@ -1,3 +1,4 @@
+// shiny:jquery-allowed -- awaiting dom/* migration (see .claude/specs/2026-06-03-jquery-wrapper-design.md)
 import type { EventPriority } from "../../inputPolicies/inputPolicy";
 import type { RatePolicyModes } from "../../inputPolicies/inputRateDecorator";
 import type { BindScope } from "../../shiny/bind";

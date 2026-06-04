@@ -1,3 +1,4 @@
+// shiny:jquery-allowed -- awaiting dom/* migration (see .claude/specs/2026-06-03-jquery-wrapper-design.md)
 function disableDrag(
   $el: JQuery<HTMLElement>,
   $img: JQuery<HTMLElement>,

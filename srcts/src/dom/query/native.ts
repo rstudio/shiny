@@ -1,6 +1,6 @@
 /**
  * Native (DOM-only) adapter for `dom/query`.
- * No jQuery imports or JQuery<> types may appear in this file.
+ * No jQuery imports or jQuery type references may appear in this file.
  */
 export function select(scope: ParentNode, selector: string): Element[] {
   return Array.from(scope.querySelectorAll(selector));

@@ -9,17 +9,19 @@ import { Window } from "happy-dom";
  * does not isolate state across calls, so a fresh window per test
  * avoids cross-test pollution.
  */
-export function setupDom(html = "<!doctype html><html><body></body></html>"): () => void {
+export function setupDom(
+  html = "<!doctype html><html><body></body></html>",
+): () => void {
   const win = new Window({ url: "http://localhost/" });
   // Parse the supplied HTML into the document.
-  win.document.write(html);
+  void win.document.write(html);
 
   const saved = {
     window: (globalThis as any).window,
     document: (globalThis as any).document,
-    HTMLElement: (globalThis as any).HTMLElement,
-    Element: (globalThis as any).Element,
-    Node: (globalThis as any).Node,
+    htmlElement: (globalThis as any).HTMLElement,
+    element: (globalThis as any).Element,
+    node: (globalThis as any).Node,
   };
 
   (globalThis as any).window = win;
@@ -32,11 +34,11 @@ export function setupDom(html = "<!doctype html><html><body></body></html>"): ()
     // Cancel any pending async work (timers, fetch, MutationObservers) on
     // the happy-dom window before restoring globals, so it cannot wake up
     // later and mutate state.
-    win.happyDOM.abort();
+    void win.happyDOM.abort();
     (globalThis as any).window = saved.window;
     (globalThis as any).document = saved.document;
-    (globalThis as any).HTMLElement = saved.HTMLElement;
-    (globalThis as any).Element = saved.Element;
-    (globalThis as any).Node = saved.Node;
+    (globalThis as any).HTMLElement = saved.htmlElement;
+    (globalThis as any).Element = saved.element;
+    (globalThis as any).Node = saved.node;
   };
 }

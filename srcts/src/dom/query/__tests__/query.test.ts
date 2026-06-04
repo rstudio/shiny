@@ -4,7 +4,7 @@ import { setupDom } from "../../testing/setupDom";
 import { withJQuery } from "../../testing/withJQuery";
 import { closest, matches, select } from "../index";
 
-const FIXTURE = `<!doctype html><html><body>
+const fixture = `<!doctype html><html><body>
   <div id="root">
     <div class="a outer">
       <span class="b inner" data-x="1">one</span>
@@ -18,7 +18,7 @@ const FIXTURE = `<!doctype html><html><body>
 
 function runDualPath(name: string, fn: () => void): void {
   void test(`${name} (jquery adapter)`, () => {
-    const teardown = setupDom(FIXTURE);
+    const teardown = setupDom(fixture);
     try {
       withJQuery(true, fn);
     } finally {
@@ -26,7 +26,7 @@ function runDualPath(name: string, fn: () => void): void {
     }
   });
   void test(`${name} (native adapter)`, () => {
-    const teardown = setupDom(FIXTURE);
+    const teardown = setupDom(fixture);
     try {
       withJQuery(false, fn);
     } finally {
@@ -51,28 +51,39 @@ runDualPath("select returns [] when nothing matches", () => {
   assert.deepEqual(out, []);
 });
 
-runDualPath("closest returns the nearest ancestor (or self) matching selector", () => {
-  const span = (globalThis as any).document.querySelector("span[data-x='2']") as Element;
-  const outer = closest(span, ".outer");
-  assert.ok(outer);
-  assert.equal(outer!.tagName, "DIV");
-  assert.ok(outer!.classList.contains("a"));
-});
+runDualPath(
+  "closest returns the nearest ancestor (or self) matching selector",
+  () => {
+    const span = (globalThis as any).document.querySelector(
+      "span[data-x='2']",
+    ) as Element;
+    const outer = closest(span, ".outer");
+    assert.ok(outer);
+    assert.equal(outer!.tagName, "DIV");
+    assert.ok(outer!.classList.contains("a"));
+  },
+);
 
 runDualPath("closest returns null when no ancestor matches", () => {
-  const span = (globalThis as any).document.querySelector("span[data-x='2']") as Element;
+  const span = (globalThis as any).document.querySelector(
+    "span[data-x='2']",
+  ) as Element;
   const out = closest(span, ".no-such-class");
   assert.equal(out, null);
 });
 
 runDualPath("closest returns the element itself when it matches", () => {
-  const span = (globalThis as any).document.querySelector("span[data-x='1']") as Element;
+  const span = (globalThis as any).document.querySelector(
+    "span[data-x='1']",
+  ) as Element;
   const out = closest(span, ".inner");
   assert.equal(out, span);
 });
 
 runDualPath("matches returns true when element matches selector", () => {
-  const span = (globalThis as any).document.querySelector("span[data-x='1']") as Element;
+  const span = (globalThis as any).document.querySelector(
+    "span[data-x='1']",
+  ) as Element;
   assert.equal(matches(span, ".inner"), true);
   assert.equal(matches(span, ".outer"), false);
 });

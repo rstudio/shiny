@@ -16,9 +16,9 @@ export class JQueryRequiredError extends Error {
     const where = binding ? ` (used by binding "${binding}")` : "";
     super(
       `Shiny feature "${feature}"${where} requires jQuery, ` +
-        `which is not loaded on this page. ` +
-        `Load jQuery 3.x before Shiny initializes, ` +
-        `or replace the binding with a native-compatible alternative.`,
+        "which is not loaded on this page. " +
+        "Load jQuery 3.x before Shiny initializes, " +
+        "or replace the binding with a native-compatible alternative.",
     );
     this.name = "JQueryRequiredError";
     this.feature = feature;

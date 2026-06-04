@@ -3,7 +3,9 @@ import test from "node:test";
 import { setupDom } from "../testing/setupDom";
 
 void test("setupDom installs window.document with a body", () => {
-  const teardown = setupDom("<!doctype html><html><body><div id=x></div></body></html>");
+  const teardown = setupDom(
+    "<!doctype html><html><body><div id=x></div></body></html>",
+  );
   try {
     assert.equal((globalThis as any).document.getElementById("x")?.id, "x");
   } finally {

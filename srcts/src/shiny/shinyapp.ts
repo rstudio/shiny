@@ -3,6 +3,7 @@ import $ from "jquery";
 import type { InputBinding } from "../bindings";
 import type { OutputBindingAdapter } from "../bindings/outputAdapter";
 import { showErrorInClientConsole } from "../components/errorConsole";
+import { select } from "../dom/query";
 import type {
   ShinyEventError,
   ShinyEventMessage,
@@ -601,7 +602,7 @@ class ShinyApp {
 
     const scope = { input: inputs, output: this.$values };
 
-    const conditionals = $(document).find("[data-display-if]");
+    const conditionals = select(document, "[data-display-if]");
 
     for (let i = 0; i < conditionals.length; i++) {
       const el = $(conditionals[i]);

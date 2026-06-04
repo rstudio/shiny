@@ -19,11 +19,13 @@ function getJQuery(): JQueryStatic {
   const win = (globalThis as any).window as { jQuery?: unknown } | undefined;
   const jq = win?.jQuery ?? $import;
   // If the export is still the factory (no .fn), call it with the window.
-  return (typeof (jq as any).fn === "object"
-    ? jq
-    : (jq as (w: Window & typeof globalThis) => JQueryStatic)(
-        win as Window & typeof globalThis,
-      )) as JQueryStatic;
+  return (
+    typeof (jq as any).fn === "object"
+      ? jq
+      : (jq as (w: Window & typeof globalThis) => JQueryStatic)(
+          win as Window & typeof globalThis,
+        )
+  ) as JQueryStatic;
 }
 
 /**

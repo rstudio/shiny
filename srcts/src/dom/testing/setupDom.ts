@@ -2,7 +2,8 @@ import { Window } from "happy-dom";
 
 /**
  * Install a fresh happy-dom Window onto Node's globals.
- * Returns a teardown function that restores prior values.
+ * Returns a teardown function that aborts any pending async work on the
+ * window (timers, fetch, MutationObservers) and restores prior values.
  *
  * Call once per test (e.g., in a `before` hook or inline) — happy-dom
  * does not isolate state across calls, so a fresh window per test
@@ -28,6 +29,10 @@ export function setupDom(html = "<!doctype html><html><body></body></html>"): ()
   (globalThis as any).Node = win.Node;
 
   return function teardownDom(): void {
+    // Cancel any pending async work (timers, fetch, MutationObservers) on
+    // the happy-dom window before restoring globals, so it cannot wake up
+    // later and mutate state.
+    win.happyDOM.abort();
     (globalThis as any).window = saved.window;
     (globalThis as any).document = saved.document;
     (globalThis as any).HTMLElement = saved.HTMLElement;

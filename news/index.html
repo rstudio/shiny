@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">shiny</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.13.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.14.0</span>
       </span>
     </div>
 
@@ -44,26 +44,26 @@
   <div class="col-md-9 contents">
     <div class="page-header">
       <h1 data-toc-skip>Changelog <small></small></h1>
-      <small>Source: <a href="https://github.com/rstudio/shiny/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/rstudio/shiny/blob/rc-v1.14.0/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
     <div class="section level2">
-<h2 class="page-header" data-toc-text="development version" id="shiny-development-version">shiny (development version)<a class="anchor" aria-label="anchor" href="#shiny-development-version"></a></h2>
+<h2 class="page-header" data-toc-text="1.14.0" id="shiny-1140">shiny 1.14.0<a class="anchor" aria-label="anchor" href="#shiny-1140"></a></h2>
 <div class="section level3">
-<h3 id="new-features-development-version">New features<a class="anchor" aria-label="anchor" href="#new-features-development-version"></a></h3>
-<ul><li><p><code>session$destroy()</code> and <code>session$onDestroy()</code> are now available on module session proxies to clean up “dangling reactivity” when dynamic module UI is removed. Calling <code>session$destroy()</code> invokes all registered <code>onDestroy()</code> callbacks for that scope and its descendants, tearing down reactive values, expressions, and observers. A parent can also destroy a child module scope by id with <code>session$destroy(id)</code>, so it can tear down a module using the same id it used to insert the UI (<a href="https://github.com/rstudio/shiny/issues/4372" class="external-link">#4372</a>).</p></li>
-<li><p>New <code><a href="../reference/startApp.html">startApp()</a></code> runs a Shiny app in non-blocking mode, returning a <code>ShinyAppHandle</code> object with <code><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop()</a></code>, <code><a href="https://mirai.r-lib.org/reference/status.html" class="external-link">status()</a></code>, <code><a href="https://rdrr.io/r/base/connections.html" class="external-link">url()</a></code>, and <code>result()</code> methods. When a new app is started, any previously running non-blocking app is automatically stopped. (<a href="https://github.com/rstudio/shiny/issues/4349" class="external-link">#4349</a>)</p></li>
+<h3 id="new-features-1-14-0">New features<a class="anchor" aria-label="anchor" href="#new-features-1-14-0"></a></h3>
+<ul><li><p>New <code><a href="../reference/startApp.html">startApp()</a></code> runs a Shiny app in non-blocking mode, returning a <code>ShinyAppHandle</code> object with <code><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop()</a></code>, <code><a href="https://mirai.r-lib.org/reference/status.html" class="external-link">status()</a></code>, <code><a href="https://rdrr.io/r/base/connections.html" class="external-link">url()</a></code>, and <code>result()</code> methods. When a new app is started, any previously running non-blocking app is automatically stopped. (<a href="https://github.com/rstudio/shiny/issues/4349" class="external-link">#4349</a>)</p></li>
+<li><p><code>session$destroy()</code> and <code>session$onDestroy()</code> are now available on module session proxies to clean up “dangling reactivity” when dynamic module UI is removed. Calling <code>session$destroy()</code> invokes all registered <code>onDestroy()</code> callbacks for that scope and its descendants, tearing down reactive values, expressions, and observers. A parent can also destroy a child module scope by id with <code>session$destroy(id)</code>, so it can tear down a module using the same id it used to insert the UI (<a href="https://github.com/rstudio/shiny/issues/4372" class="external-link">#4372</a>).</p></li>
 <li><p><code><a href="../reference/downloadButton.html">downloadButton()</a></code> and <code><a href="../reference/downloadButton.html">downloadLink()</a></code> gain a new <code>enabled</code> parameter. The default value, <code>"auto"</code>, automatically enables the button/link when the download is ready. To opt-into manual state management (e.g., <code>shinyjs::enable()</code>), set <code>enabled</code> to <code>FALSE</code> (or <code>TRUE</code>). (<a href="https://github.com/rstudio/shiny/issues/4119" class="external-link">#4119</a>)</p></li>
 </ul></div>
 <div class="section level3">
-<h3 id="improvements-development-version">Improvements<a class="anchor" aria-label="anchor" href="#improvements-development-version"></a></h3>
+<h3 id="improvements-1-14-0">Improvements<a class="anchor" aria-label="anchor" href="#improvements-1-14-0"></a></h3>
 <ul><li><p>Output resize/visibility detection now uses native browser observers (<code>ResizeObserver</code>, <code>IntersectionObserver</code>) instead of relying on jQuery <code>shown</code>/<code>hidden</code> events and <code>window.resize</code>. This makes Shiny’s client-side output-info pipeline (image/plot sizing, hidden-state tracking, theme reporting) work automatically in any layout — including CSS-only show/hide, third-party tab components, and non-Bootstrap frameworks — without requiring custom event hooks. This also introduces a <code>shiny:themechange</code> event for code that needs to trigger theme clientdata refreshes after changing surrounding visual theme context. (<a href="https://github.com/rstudio/shiny/issues/3682" class="external-link">#3682</a>)</p></li>
 <li><p><code><a href="../reference/conditionalPanel.html">conditionalPanel()</a></code> no longer briefly flashes its contents on app start when the condition is initially <code>FALSE</code>. (<a href="https://github.com/rstudio/shiny/issues/3505" class="external-link">#3505</a>)</p></li>
-<li><p>Removed <code>InputBinding.dispose()</code> from the JavaScript <code>InputBinding</code> class. This method was never called by Shiny’s runtime, so any overrides were dead code. Use <code>unsubscribe()</code> for cleanup logic instead. (<a href="https://github.com/rstudio/shiny/issues/4375" class="external-link">#4375</a>)</p></li>
 <li><p>Updated default HTTP headers for better security. Shiny now sends <code>X-Content-Type-Options: nosniff</code> instead of the legacy <code>X-UA-Compatible</code> header. This removes outdated Internet Explorer–specific behavior and adds a modern safeguard that prevents browsers from misinterpreting file types. (<a href="https://github.com/rstudio/shiny/issues/4385" class="external-link">#4385</a>)</p></li>
+<li><p>Removed <code>InputBinding.dispose()</code> from the JavaScript <code>InputBinding</code> class. This method was never called by Shiny’s runtime, so any overrides were dead code. Use <code>unsubscribe()</code> for cleanup logic instead. (<a href="https://github.com/rstudio/shiny/issues/4375" class="external-link">#4375</a>)</p></li>
 </ul></div>
 <div class="section level3">
-<h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>
+<h3 id="bug-fixes-1-14-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-14-0"></a></h3>
 <ul><li><p>Loading shiny no longer creates <code>.Random.seed</code> in the global environment as a side effect. (<a href="https://github.com/rstudio/shiny/issues/4382" class="external-link">#4382</a>)</p></li>
 <li><p><code><a href="../reference/validate.html">need()</a></code> now gives a clearer error when called without either a <code>message</code> or <code>label</code> argument, instead of the cryptic “argument "label" is missing, with no default”. (thanks <a href="https://github.com/chasemc" class="external-link">@chasemc</a> and <a href="https://github.com/sundrelingam" class="external-link">@sundrelingam</a>, <a href="https://github.com/rstudio/shiny/issues/2509" class="external-link">#2509</a>)</p></li>
 <li><p>Clarified <code><a href="../reference/varSelectInput.html">varSelectInput()</a></code> documentation to explain that the input returns a symbol for use with tidy evaluation, and fixed a grammatical typo. (<a href="https://github.com/rstudio/shiny/issues/2334" class="external-link">#2334</a>)</p></li>

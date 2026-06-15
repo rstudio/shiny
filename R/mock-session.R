@@ -371,7 +371,7 @@ MockShinySession <- R6Class(
       # paired tests in tests/testthat/test-destroy.R (search for this same
       # marker) and tests/testthat/test-test-server.R.
       #
-      # private$invokeDestroyCallbacks("")
+      # private$invokeDestroyCallbacks(allowRoot = TRUE)
       private$was_closed <- TRUE
     },
 

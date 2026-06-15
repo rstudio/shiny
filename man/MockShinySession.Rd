@@ -217,19 +217,21 @@ callback.
 \if{html}{\out{<a id="method-MockShinySession-destroy"></a>}}
 \if{latex}{\out{\hypertarget{method-MockShinySession-destroy}{}}}
 \subsection{\code{MockShinySession$destroy()}}{
-  Destroys a module session scope. On the root session, an
-\code{id} is required: \code{session$destroy(id)} tears down the child module
-scope of that \code{id}. Calling \code{destroy()} with no \code{id} on the root
-session is an error.
+  Destroys a module session scope. \code{namespace} must be a
+non-empty, non-NA string naming a child module scope. The root scope is
+the absence of a namespace -- \code{NULL} (the default) or \code{character(0)} --
+and cannot be destroyed this way: calling \code{destroy()} with no
+\code{namespace} on the root session is an error.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{MockShinySession$destroy(id = NULL)}
+    \preformatted{MockShinySession$destroy(namespace = NULL)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
     \if{html}{\out{<div class="arguments">}}
     \describe{
-      \item{\code{id}}{Optional module \code{id} whose scope should be destroyed.}
+      \item{\code{namespace}}{Module \code{namespace} (a non-empty, non-NA string) whose
+scope should be destroyed.}
     }
     \if{html}{\out{</div>}}
   }

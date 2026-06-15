@@ -438,15 +438,38 @@ NS <- function(namespace, id = NULL) {
 #' @export
 ns.sep <- "-"
 
+# Sentinel key under which root-level (non-namespaced) destroy callbacks are
+# stored. It must be a non-zero-length character string because it is used as a
+# fastmap key, and fastmap disallows "" (and NA) keys. The leading dots also
+# keep it from colliding with a real module namespace (which `makeScope()`
+# additionally guards against).
+destroyNsRoot <- "..root"
 
-# Validate the `id` passed to `session$destroy(id)`. Must be a single,
-# non-empty, non-NA string. The reserved `..root` sentinel is additionally
-# rejected by `makeScope()`.
-validateDestroyId <- function(id) {
-  if (!is.character(id) || length(id) != 1L || is.na(id) || !nzchar(id)) {
-    stop("`id` must be a single, non-empty string.", call. = FALSE)
+# Validate a module `namespace`. A namespace must be a single, non-empty,
+# non-NA string and may not be the reserved sentinel. When `allow_root = TRUE`
+# (e.g. `makeScope()`), the root scope -- a length-0 `NULL` / `character(0)` --
+# is also accepted; the destroy entry points pass `allow_root = FALSE` because a
+# child scope must be named explicitly.
+validateNamespace <- function(namespace, allow_root = FALSE) {
+  if (allow_root && length(namespace) == 0) {
+    return(invisible(namespace))
   }
-  invisible(id)
+  if (!is.character(namespace) || length(namespace) != 1L || is.na(namespace) || !nzchar(namespace)) {
+    stop(
+      "Invalid `namespace`: ",
+      encodeString(paste0(format(namespace), collapse = ", "), quote = '"'),
+      ". A module namespace must be a non-empty, non-NA string; use `NULL` for the root scope.",
+      call. = FALSE
+    )
+  }
+  if (identical(namespace, destroyNsRoot)) {
+    stop(
+      "The module namespace '", destroyNsRoot,
+      "' is reserved for internal use.",
+      call. = FALSE
+    )
+  }
+  invisible(namespace)
 }
 
 #' @include utils.R
@@ -808,11 +831,10 @@ ShinySession <- R6Class(
       invisible()
     },
 
-    # Sentinel key for root-level destroy callbacks (fastmap disallows empty string keys)
-    destroyNsRoot = "..root",
-
     destroyNsKey = function(ns) {
-      if (!nzchar(ns)) private$destroyNsRoot else ns
+      # The root scope (length 0: `NULL` or `character(0)`) maps to the sentinel
+      # key; fastmap can't use an empty-string key.
+      if (length(ns) == 0) destroyNsRoot else ns
     },
 
     getOrCreateDestroyCallbacks = function(ns) {
@@ -822,9 +844,18 @@ ShinySession <- R6Class(
       }
       private$destroyCallbacksByNs$get(key)
     },
-    invokeDestroyCallbacks = function(nsPrefix = "") {
+    invokeDestroyCallbacks = function(namespace = NULL, allowRoot = FALSE) {
+      isRoot <- length(namespace) == 0
+      # The root scope can only be torn down via `close()` (allowRoot = TRUE).
+      if (isRoot && !allowRoot) {
+        stop(
+          "`$destroy()` cannot be called on the root ShinySession without a `namespace`. Pass a module `namespace` to tear down that scope (e.g. `session$destroy(\"my_module\")`), or call `close()` to tear down the whole session.",
+          call. = FALSE
+        )
+      }
+
+      nsPrefix <- namespace
       allNs <- private$destroyCallbacksByNs$keys()
-      isRoot <- !nzchar(nsPrefix)
 
       if (!isRoot) {
         nsPrefixWithSep <- paste0(nsPrefix, ns.sep)
@@ -837,7 +868,7 @@ ShinySession <- R6Class(
       if (length(matching) > 0L) {
         # Sort deepest-first (most separators first); root sentinel always last
         depths <- nchar(gsub(paste0("[^", ns.sep, "]"), "", matching))
-        isRootSentinel <- matching == private$destroyNsRoot
+        isRootSentinel <- matching == destroyNsRoot
         matching <- matching[order(-depths, isRootSentinel, matching)]
 
         for (ns in matching) {
@@ -1005,14 +1036,11 @@ ShinySession <- R6Class(
       self
     },
     makeScope = function(namespace) {
-      if (identical(namespace, private$destroyNsRoot)) {
-        stop(
-          "The module namespace '", private$destroyNsRoot,
-          "' is reserved for internal use.",
-          call. = FALSE
-        )
-      }
+      validateNamespace(namespace, allow_root = TRUE)
       ns <- NS(namespace)
+      # The scope's own namespace, captured because the proxy `destroy()` below
+      # has a `namespace` parameter that would otherwise shadow it.
+      selfNamespace <- namespace
 
       # Private items for this scope. Can't be part of the scope object because
       # `$<-.session_proxy` doesn't allow assignment on overidden names.
@@ -1084,29 +1112,34 @@ ShinySession <- R6Class(
         onDestroy = function(callback) {
           private$getOrCreateDestroyCallbacks(namespace)$register(callback)
         },
-        destroy = function(id = NULL) {
-          if (is.null(id)) {
-            private$invokeDestroyCallbacks(namespace)
+        destroy = function(namespace = NULL) {
+          if (length(namespace) == 0) {
+            # Tear down this scope itself.
+            private$invokeDestroyCallbacks(selfNamespace)
           } else {
-            validateDestroyId(id)
-            self$makeScope(ns(id))$destroy()
+            # Tear down a named child scope.
+            validateNamespace(namespace)
+            self$makeScope(ns(namespace))$destroy()
           }
         }
       )
 
       # Given a char vector, return a logical vector indicating which of those
-      # strings are names of things in the namespace.
+      # strings are names of things in the namespace. For the root scope (a
+      # length-0 namespace) everything is in scope, since there is no prefix.
       filterNamespace <- function(x) {
+        if (length(namespace) == 0) return(rep_len(TRUE, length(x)))
         nsString <- paste0(namespace, ns.sep)
         substr(x, 1, nchar(nsString)) == nsString
       }
 
       # Given a char vector of namespaced names, return a char vector of corresponding
-      # names with namespace prefix removed.
+      # names with namespace prefix removed. The root scope has no prefix to strip.
       unNamespace <- function(x) {
         if (!all(filterNamespace(x))) {
           stop("x contains strings(s) that do not have namespace prefix ", namespace)
         }
+        if (length(namespace) == 0) return(x)
 
         nsString <- paste0(namespace, ns.sep)
         substring(x, nchar(nsString) + 1)
@@ -1134,7 +1167,9 @@ ShinySession <- R6Class(
           scopeState$values[[scopedName]] <- state$values[[origName]]
         })
 
-        if (!is.null(state$dir)) {
+        # The root scope shares the top-level bookmark dir; only a real
+        # (non-empty) namespace gets a subdir.
+        if (!is.null(state$dir) && length(namespace) > 0) {
           dir <- file.path(state$dir, namespace)
           if (dirExists(dir))
             scopeState$dir <- dir
@@ -1153,13 +1188,18 @@ ShinySession <- R6Class(
 
         scopeState <- ShinySaveState$new(scope$input, scope$getBookmarkExclude())
 
-        # Create subdir for this scope
+        # Create subdir for this scope. The root scope (length-0 namespace)
+        # shares the top-level dir rather than getting its own subdir.
         if (!is.null(state$dir)) {
-          scopeState$dir <- file.path(state$dir, namespace)
-          if (!dirExists(scopeState$dir)) {
-            res <- dir.create(scopeState$dir)
-            if (res == FALSE) {
-              stop("Error creating subdirectory for scope ", namespace)
+          if (length(namespace) == 0) {
+            scopeState$dir <- state$dir
+          } else {
+            scopeState$dir <- file.path(state$dir, namespace)
+            if (!dirExists(scopeState$dir)) {
+              res <- dir.create(scopeState$dir)
+              if (res == FALSE) {
+                stop("Error creating subdirectory for scope ", namespace)
+              }
             }
           }
         }
@@ -1280,20 +1320,24 @@ ShinySession <- R6Class(
       unregister the callback. For module sessions, use this to register
       cleanup logic that runs when the module's UI is removed and
       `session$destroy()` is called."
-      private$getOrCreateDestroyCallbacks("")$register(callback)
+      private$getOrCreateDestroyCallbacks(NULL)$register(callback)
     },
-    destroy = function(id = NULL) {
+    destroy = function(namespace = NULL) {
       "Destroys a module session scope, cleaning up its reactive state and
-      invoking its `onDestroy()` callbacks. On the root session, an
-      `id` is required: `session$destroy(id)` tears down the
-      child module scope of that `id`. Calling `destroy()`
-      with no `id` on the root session is an error; the root session
-      is torn down via `close()`."
-      if (is.null(id)) {
-        stop("`$destroy()` cannot be called on the root ShinySession without an `id`. Pass a module `id` to tear down that scope (e.g. `session$destroy(\"my_module\")`), or call `$destroy()` on a module session.")
+      invoking its `onDestroy()` callbacks. `namespace` must be a non-empty,
+      non-NA string naming a child module scope; `session$destroy(namespace)`
+      tears that scope down. The root scope is the absence of a namespace --
+      `NULL` (the default) or `character(0)` -- and cannot be destroyed this
+      way: calling `destroy()` with no `namespace` on the root session is an
+      error, since the root session is torn down via `close()`."
+      if (length(namespace) == 0) {
+        stop(
+          "`$destroy()` cannot be called on the root ShinySession without a `namespace`. Pass a module `namespace` to tear down that scope (e.g. `session$destroy(\"my_module\")`), or call `close()` to tear down the whole session.",
+          call. = FALSE
+        )
       }
-      validateDestroyId(id)
-      self$makeScope(id)$destroy()
+      validateNamespace(namespace)
+      self$makeScope(namespace)$destroy()
     },
     onInputReceived = function(callback) {
       "Registers the given callback to be invoked when the session receives
@@ -1345,7 +1389,7 @@ ShinySession <- R6Class(
           private$closedCallbacks$invoke(onError = printError, ..stacktraceon = TRUE)
         })
       })
-      private$invokeDestroyCallbacks("")
+      private$invokeDestroyCallbacks(allowRoot = TRUE)
     },
     isClosed = function() {
       return(self$closed)

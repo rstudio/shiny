@@ -59,8 +59,14 @@ this case, the outermost names will be used as the group labels (leveraging
 the \verb{<optgroup>} HTML tag) for the elements in the respective sublist. See
 the example section for a small demo of this feature.}
 
-\item{selected}{The initially selected value (or multiple values if \code{multiple = TRUE}). If not specified then defaults to the first value for
-single-select lists and no values for multiple select lists.}
+\item{selected}{The values that should be selected. The default of \code{NULL}
+does not preserve the current selection when the set of options is also
+being updated (via \code{choices}, or \code{data} for the \code{varSelect} variants): the
+options are re-rendered with none selected, except for server-side
+single-select \code{updateSelectizeInput()}, which selects the first option. To
+preserve the current selection across such an update, pass
+\code{selected = input$id} explicitly. To clear the selection, pass
+\code{selected = character(0)}.}
 
 \item{options}{A list of options. See the documentation of \pkg{selectize.js}(\url{https://selectize.dev/docs/usage})
 for possible options (character option values inside \code{\link[base:I]{base::I()}} will
@@ -86,8 +92,9 @@ The syntax of these functions is similar to the functions that created the
 inputs in the first place. For example, \code{\link{numericInput}()} and
 \code{updateNumericInput()} take a similar set of arguments.
 
-Any arguments with NULL values will be ignored; they will not result in any
-changes to the input object on the client.
+Arguments with \code{NULL} values are generally ignored: they will not
+result in any changes to the input object on the client. See the
+per-argument documentation for any exceptions.
 
 For \code{\link{radioButtons}()}, \code{\link{checkboxGroupInput}()} and
 \code{\link{selectInput}()}, the set of choices can be cleared by using

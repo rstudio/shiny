@@ -522,6 +522,12 @@ updateInputOptions <- function(session, inputId, label = NULL, choices = NULL,
 #'
 #' @template update-input
 #' @inheritParams checkboxGroupInput
+#' @param selected The values that should be checked. The default of `NULL`
+#'   does not preserve the current selection when `choices` (or `choiceValues`)
+#'   is also being updated: the new checkboxes are rendered with none checked.
+#'   To preserve the current selection across a `choices` update, pass
+#'   `selected = input$id` explicitly. To clear the selection, pass
+#'   `selected = character(0)`.
 #'
 #' @seealso [checkboxGroupInput()]
 #'
@@ -572,6 +578,12 @@ updateCheckboxGroupInput <- function(session = getDefaultReactiveDomain(), input
 #'
 #' @template update-input
 #' @inheritParams radioButtons
+#' @param selected The value that should be selected. The default of `NULL`
+#'   does not preserve the current selection when `choices` (or `choiceValues`)
+#'   is also being updated: as with [radioButtons()] itself, it defaults to the
+#'   first choice. To preserve the current selection across a `choices` update,
+#'   pass `selected = input$id` explicitly. To start with no item selected,
+#'   pass `selected = character(0)`.
 #'
 #' @seealso [radioButtons()]
 #'
@@ -623,6 +635,14 @@ updateRadioButtons <- function(session = getDefaultReactiveDomain(), inputId, la
 #'
 #' @template update-input
 #' @inheritParams selectInput
+#' @param selected The values that should be selected. The default of `NULL`
+#'   does not preserve the current selection when the set of options is also
+#'   being updated (via `choices`, or `data` for the `varSelect` variants): the
+#'   options are re-rendered with none selected, except for server-side
+#'   single-select `updateSelectizeInput()`, which selects the first option. To
+#'   preserve the current selection across such an update, pass
+#'   `selected = input$id` explicitly. To clear the selection, pass
+#'   `selected = character(0)`.
 #'
 #' @seealso [selectInput()] [varSelectInput()]
 #'

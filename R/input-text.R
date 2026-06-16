@@ -53,6 +53,8 @@ textInput <- function(
   rlang::check_dots_empty()
   updateOn <- rlang::arg_match(updateOn)
 
+  check_required(inputId, label)
+
   value <- restoreInput(id = inputId, default = value)
 
   div(

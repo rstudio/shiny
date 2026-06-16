@@ -29,6 +29,8 @@
 #' @export
 checkboxInput <- function(inputId, label, value = FALSE, width = NULL) {
 
+  check_required(inputId, label)
+
   value <- restoreInput(id = inputId, default = value)
 
   inputTag <- tags$input(id = inputId, type="checkbox", class = "shiny-input-checkbox")

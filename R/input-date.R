@@ -96,6 +96,8 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
   language = "en", width = NULL, autoclose = TRUE,
   datesdisabled = NULL, daysofweekdisabled = NULL) {
 
+  check_required(inputId, label)
+
   value <- dateYMD(value, "value")
   min <- dateYMD(min, "min")
   max <- dateYMD(max, "max")

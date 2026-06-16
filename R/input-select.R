@@ -37,6 +37,11 @@
 #'   will result in a taller box. Not compatible with `selectize=TRUE`.
 #'   Normally, when `multiple=FALSE`, a select input will be a drop-down list,
 #'   but when `size` is set, it will be a box instead.
+#' @param error_call Used internally to produce error messages that point at
+#'   the function the user called. Wrapper functions (e.g. [selectizeInput()]
+#'   and [varSelectizeInput()]) pass their own environment so that errors
+#'   about missing required arguments are attributed to the wrapper rather
+#'   than the inner constructor. You should not normally need to set this.
 #' @return A select list control that can be added to a UI definition.
 #'
 #' @family input elements
@@ -87,7 +92,9 @@
 #' @export
 selectInput <- function(inputId, label, choices, selected = NULL,
   multiple = FALSE, selectize = TRUE, width = NULL,
-  size = NULL) {
+  size = NULL, error_call = environment()) {
+
+  check_required(inputId, label, choices, call = error_call)
 
   selected <- restoreInput(id = inputId, default = selected)
 
@@ -196,7 +203,8 @@ needOptgroup <- function(choices) {
 selectizeInput <- function(inputId, ..., options = NULL, width = NULL) {
   selectizeIt(
     inputId,
-    selectInput(inputId, ..., selectize = FALSE, width = width),
+    selectInput(inputId, ..., selectize = FALSE, width = width,
+      error_call = environment()),
     options
   )
 }
@@ -376,8 +384,10 @@ selectizeScripts <- function() {
 varSelectInput <- function(
   inputId, label, data, selected = NULL,
   multiple = FALSE, selectize = TRUE, width = NULL,
-  size = NULL
+  size = NULL, error_call = environment()
 ) {
+  check_required(inputId, label, data, call = error_call)
+
   # no place holders
   choices <- colnames(data)
 
@@ -431,7 +441,8 @@ varSelectInput <- function(
 varSelectizeInput <- function(inputId, ..., options = NULL, width = NULL) {
   selectizeIt(
     inputId,
-    varSelectInput(inputId, ..., selectize = FALSE, width = width),
+    varSelectInput(inputId, ..., selectize = FALSE, width = width,
+      error_call = environment()),
     options
   )
 }

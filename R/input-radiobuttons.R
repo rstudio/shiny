@@ -89,6 +89,8 @@
 radioButtons <- function(inputId, label, choices = NULL, selected = NULL,
   inline = FALSE, width = NULL, choiceNames = NULL, choiceValues = NULL) {
 
+  check_required(inputId, label)
+
   args <- normalizeChoicesArgs(choices, choiceNames, choiceValues)
 
   selected <- restoreInput(id = inputId, default = selected)

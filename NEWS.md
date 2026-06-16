@@ -38,6 +38,12 @@
 
 * Updated default HTTP headers for better security. Shiny now sends `X-Content-Type-Options: nosniff` instead of the legacy `X-UA-Compatible` header. This removes outdated Internet Explorer–specific behavior and adds a modern safeguard that prevents browsers from misinterpreting file types. (#4385)
 
+* Input constructors (e.g., `textInput()`, `sliderInput()`, `selectInput()`,
+  `actionButton()`) now report which function and which argument were missing
+  when a required argument is omitted, rather than surfacing a downstream
+  message like `argument "label" is missing, with no default`.
+  (thanks @daattali, #1423)
+
 ## Bug fixes
 
 * Loading shiny no longer creates `.Random.seed` in the global environment as a side effect. (#4382)

@@ -42,6 +42,8 @@ passwordInput <- function(
   rlang::check_dots_empty()
   updateOn <- rlang::arg_match(updateOn)
 
+  check_required(inputId, label)
+
   div(
     class = "form-group shiny-input-container",
     style = css(width = validateCssUnit(width)),

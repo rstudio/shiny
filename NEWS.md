@@ -48,6 +48,14 @@
   returns a symbol for use with tidy evaluation, and fixed a grammatical
   typo. (#2334)
 
+## Internal
+
+* Internal: Added `srcts/src/dom/` capability-oriented wrapper around jQuery as
+  the first step of a long-term jQuery removal effort. Step 1 introduces
+  `dom/query` (selection helpers with native and jQuery adapters, dispatched at
+  call time) and extends the build-time `_jquery.ts` check to fence jQuery
+  imports inside adapter files. No user-facing API changes in this release.
+
 # shiny 1.13.0
 
 ## New features

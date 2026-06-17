@@ -45,6 +45,7 @@
     "eslint-plugin-prettier": "5.x",
     "eslint-plugin-unicorn": "56.x",
     "fs-readdir-recursive": "1.x",
+    "happy-dom": "^15.11.7",
     "jquery": "3.7.1",
     "lodash": "4.x",
     "postcss": "8.x",

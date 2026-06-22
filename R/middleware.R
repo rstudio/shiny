@@ -226,7 +226,7 @@ staticHandler <- function(root) {
       return(NULL)
 
     content.type <- getContentType(abs.path)
-    response.content <- readBin(abs.path, 'raw', n=file.info(abs.path)$size)
+    response.content <- readBin(abs.path, 'raw', n=file.size(abs.path))
     return(httpResponse(200, content.type, response.content))
   })
 }
@@ -456,7 +456,7 @@ getResponseContentLength <- function(response, deleteOwnedContent) {
     if (deleteOwnedContent && isTRUE(response$content$owned)) {
       on.exit(unlink(response$content$file, recursive = FALSE, force = FALSE), add = TRUE)
     }
-    file.info(response$content$file)$size
+    file.size(response$content$file)
   } else {
     warning("HEAD request for unexpected content class ", class(response$content)[[1]])
     NULL

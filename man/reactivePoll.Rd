@@ -63,7 +63,7 @@ function(input, output, session) {
     # This function returns the time that log_file was last modified
     checkFunc = function() {
       if (file.exists(log_file))
-        file.info(log_file)$mtime[1]
+        file.mtime(log_file[1])
       else
         ""
     },

@@ -26,6 +26,7 @@
 ^package\.json$
 ^tsconfig\.json$
 ^package-lock\.json$
+^tsconfig\.eslint\.json$
 ^node_modules$
 ^coverage$
 ^.ignore$

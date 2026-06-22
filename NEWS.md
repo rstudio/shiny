@@ -1,6 +1,11 @@
-# shiny (development version)
+# shiny 1.14.0
 
 ## New features
+
+* New `startApp()` runs a Shiny app in non-blocking mode, returning a
+  `ShinyAppHandle` object with `stop()`, `status()`, `url()`, and `result()`
+  methods. When a new app is started, any previously running non-blocking app
+  is automatically stopped. (#4349)
 
 * `session$destroy()` and `session$onDestroy()` are now available on
   module session proxies to clean up "dangling reactivity" when dynamic
@@ -10,12 +15,10 @@
   also destroy a child module scope by id with `session$destroy(id)`, so it
   can tear down a module using the same id it used to insert the UI (#4372).
 
-* New `startApp()` runs a Shiny app in non-blocking mode, returning a
-  `ShinyAppHandle` object with `stop()`, `status()`, `url()`, and `result()`
-  methods. When a new app is started, any previously running non-blocking app
-  is automatically stopped. (#4349)
-
-* `downloadButton()` and `downloadLink()` gain a new `enabled` parameter. The default value, `"auto"`, automatically enables the button/link when the download is ready. To opt-into manual state management (e.g., `shinyjs::enable()`), set `enabled` to `FALSE` (or `TRUE`). (#4119)
+* `downloadButton()` and `downloadLink()` gain a new `enabled` parameter. The
+  default value, `"auto"`, automatically enables the button/link when the
+  download is ready. To opt-into manual state management (e.g.,
+  `shinyjs::enable()`), set `enabled` to `FALSE` (or `TRUE`). (#4119)
 
 ## Improvements
 
@@ -32,17 +35,24 @@
 * `conditionalPanel()` no longer briefly flashes its contents on app start
   when the condition is initially `FALSE`. (#3505)
 
+* Updated default HTTP headers for better security. Shiny now sends
+  `X-Content-Type-Options: nosniff` instead of the legacy `X-UA-Compatible`
+  header. This removes outdated Internet Explorer–specific behavior and adds a
+  modern safeguard that prevents browsers from misinterpreting file types.
+  (#4385)
+
 * Removed `InputBinding.dispose()` from the JavaScript `InputBinding` class.
   This method was never called by Shiny's runtime, so any overrides were dead
   code. Use `unsubscribe()` for cleanup logic instead. (#4375)
 
-* Updated default HTTP headers for better security. Shiny now sends `X-Content-Type-Options: nosniff` instead of the legacy `X-UA-Compatible` header. This removes outdated Internet Explorer–specific behavior and adds a modern safeguard that prevents browsers from misinterpreting file types. (#4385)
-
 ## Bug fixes
 
-* Loading shiny no longer creates `.Random.seed` in the global environment as a side effect. (#4382)
+* Loading shiny no longer creates `.Random.seed` in the global environment as a
+  side effect. (#4382)
 
-* `need()` now gives a clearer error when called without either a `message` or `label` argument, instead of the cryptic "argument \"label\" is missing, with no default". (thanks @chasemc and @sundrelingam, #2509)
+* `need()` now gives a clearer error when called without either a `message` or
+  `label` argument, instead of the cryptic "argument \"label\" is missing, with
+  no default". (thanks @chasemc and @sundrelingam, #2509)
 
 * Clarified `varSelectInput()` documentation to explain that the input
   returns a symbol for use with tidy evaluation, and fixed a grammatical
@@ -865,7 +875,7 @@ This release features plot caching, an important new tool for improving performa
 
 * Upgrade FontAwesome from 4.7.0 to 5.3.1 and made `icon` tags browsable, which means they will display in a web browser or RStudio viewer by default (#2186). Note that if your application or library depends on FontAwesome directly using custom CSS, you may need to make some or all of the changes recommended in [Upgrade from Version 4](https://docs-v5.fontawesome.com/web/setup/upgrade-from-v4). Font Awesome icons can also now be used in static R Markdown documents.
 
-* Address #174: Added `datesdisabled` and `daysofweekdisabled` as new parameters to `dateInput()`. This resolves #174 and exposes the underlying arguments of [Bootstrap Datepicker](http://bootstrap-datepicker.readthedocs.io/en/latest/options.html#datesdisabled). `datesdisabled` expects a character vector with values in `yyyy/mm/dd` format and `daysofweekdisabled` expects an integer vector with day interger ids (Sunday=0, Saturday=6). The default value for both is `NULL`, which leaves all days selectable. Thanks, @nathancday! (#2147)
+* Address #174: Added `datesdisabled` and `daysofweekdisabled` as new parameters to `dateInput()`. This resolves #174 and exposes the underlying arguments of [Bootstrap Datepicker](https://bootstrap-datepicker.readthedocs.io/en/latest/options.html). `datesdisabled` expects a character vector with values in `yyyy/mm/dd` format and `daysofweekdisabled` expects an integer vector with day interger ids (Sunday=0, Saturday=6). The default value for both is `NULL`, which leaves all days selectable. Thanks, @nathancday! (#2147)
 
 * Support for selecting variables of a data frame with the output values to be used within tidy evaluation.  Added functions: `varSelectInput`, `varSelectizeInput`, `updateVarSelectInput`, `updateVarSelectizeInput`. (#2091)
 

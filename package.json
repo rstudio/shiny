@@ -5,7 +5,7 @@
     "url": "git+https://github.com/rstudio/shiny.git"
   },
   "name": "@posit/shiny",
-  "version": "1.14.0",
+  "version": "1.14.0-alpha.9000",
   "license": "MIT",
   "main": "",
   "browser": "",

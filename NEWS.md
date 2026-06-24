@@ -62,6 +62,8 @@
   returns a symbol for use with tidy evaluation, and fixed a grammatical
   typo. (#2334)
 
+* Closed #2884 (`selectInput()` turns `NA` into `"NA"`) by adding an option `keepNA` to `selectInput()` while maintaining previous behavior with default value `keepNA = FALSE`. (#3594)
+
 # shiny 1.13.0
 
 ## New features

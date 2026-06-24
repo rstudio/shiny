@@ -289,14 +289,13 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
   )
 }
 
-# Start a reactive observer that continually monitors dir for changes to files
-# that have the extensions: r, htm, html, js, css, png, jpg, jpeg, gif. Case is
-# ignored when checking extensions. If any changes are detected, all connected
-# Shiny sessions are reloaded.
+# Start a {watcher} file watcher that continually monitors dir for changes to
+# files that have the extensions: r, htm, html, js, css, png, jpg, jpeg, gif.
+# Case is ignored when checking extensions. If any changes are detected, all
+# connected Shiny sessions are reloaded.
 #
-# Use options(shiny.autoreload = TRUE) to enable this behavior. Since monitoring
-# for changes is expensive (we are polling for mtimes here, nothing fancy) this
-# feature is intended only for development.
+# Use options(shiny.autoreload = TRUE) to enable this behavior. This feature is
+# intended only for development.
 #
 # You can customize the file patterns Shiny will monitor by setting the
 # shiny.autoreload.pattern option. For example, to monitor only ui.R:
@@ -313,72 +312,30 @@ initAutoReloadMonitor <- function(dir) {
     ".*\\.(r|html?|js|css|png|jpe?g|gif)$"
   )
 
-  
-  if (is_installed("watcher")) {
-    check_for_update <- function(paths) {
-      paths <- grep(
-        filePattern,
-        paths,
-        ignore.case = TRUE,
-        value = TRUE
-      )
-      
-      if (length(paths) == 0) {
-        return()
-      }
-      
-      cachedAutoReloadLastChanged$set()
-      autoReloadCallbacks$invoke()
-    }
-    
-    # [garrick, 2025-02-20] Shiny <= v1.10.0 used `invalidateLater()` with an
-    # autoreload.interval in ms. {watcher} instead uses a latency parameter in
-    # seconds, which serves a similar purpose and that I'm keeping for backcompat.
-    latency <- getOption("shiny.autoreload.interval", 250) / 1000
-    watcher <- watcher::watcher(dir, check_for_update, latency = latency)
-    watcher$start()
-    onStop(watcher$stop)
-  } else {
-    # Fall back to legacy observer behavior
-    if (!is_false(getOption("shiny.autoreload.legacy_warning", TRUE))) {
-      cli::cli_warn(
-        c(
-          "Using legacy autoreload file watching. Please install {.pkg watcher} for a more performant autoreload file watcher.",
-          "i" = "Set {.run options(shiny.autoreload.legacy_warning = FALSE)} to suppress this warning."
-        ),
-        .frequency = "regularly",
-        .frequency_id = "shiny.autoreload.legacy_warning"
-      )
+  check_for_update <- function(paths) {
+    paths <- grep(
+      filePattern,
+      paths,
+      ignore.case = TRUE,
+      value = TRUE
+    )
+
+    if (length(paths) == 0) {
+      return()
     }
 
-    lastValue <- NULL
-    observeLabel <- paste0("File Auto-Reload - '", basename(dir), "'")
-    watcher <- observe(label = observeLabel, {
-      files <- sort_c(
-        list.files(dir, pattern = filePattern, recursive = TRUE, ignore.case = TRUE)
-      )
-      times <- file.info(files)$mtime
-      names(times) <- files
-  
-      if (is.null(lastValue)) {
-        # First run
-        lastValue <<- times
-      } else if (!identical(lastValue, times)) {
-        # We've changed!
-        lastValue <<- times
-        cachedAutoReloadLastChanged$set()
-        autoReloadCallbacks$invoke()
-      }
-  
-      invalidateLater(getOption("shiny.autoreload.interval", 500))
-    })
-  
-    onStop(watcher$destroy)
-  
-    watcher$destroy
+    cachedAutoReloadLastChanged$set()
+    autoReloadCallbacks$invoke()
   }
 
-  invisible(watcher)
+  # [garrick, 2025-02-20] Shiny <= v1.10.0 used `invalidateLater()` with an
+  # autoreload.interval in ms. {watcher} instead uses a latency parameter in
+  # seconds, which serves a similar purpose and that I'm keeping for backcompat.
+  latency <- getOption("shiny.autoreload.interval", 250) / 1000
+  watcher <- watcher::watcher(dir, check_for_update, latency = latency)
+  watcher$start()
+
+  invisible(watcher$stop)
 }
 
 #' Load an app's supporting R files

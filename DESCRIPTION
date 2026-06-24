@@ -97,6 +97,7 @@ Imports:
     sourcetools,
     tools,
     utils,
+    watcher (>= 0.2.0),
     withr,
     xtable
 Suggests:
@@ -119,7 +120,6 @@ Suggests:
     shinytest2,
     showtext,
     testthat (>= 3.2.1),
-    watcher,
     yaml
 Config/Needs/check: shinyjs
 Config/roxygen2/version: 8.0.0

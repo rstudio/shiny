@@ -540,27 +540,32 @@ test_that("session$destroy(id) does not leak bookmark-exclude callbacks", {
   expect_equal(session$getBookmarkExclude(), before)
 })
 
-test_that("MockShinySession$close() invokes destroy callbacks", {
-  session <- MockShinySession$new()
-  called <- FALSE
-  session$onDestroy(function() called <<- TRUE)
-  session$close()
-  expect_true(called)
-})
-
-test_that("MockShinySession$close() fires destroy callbacks deepest-first", {
-  session <- MockShinySession$new()
-  parent <- session$makeScope("parent")
-  child <- parent$makeScope("child")
-
-  order <- character(0)
-  session$onDestroy(function() order <<- c(order, "root"))
-  parent$onDestroy(function() order <<- c(order, "parent"))
-  child$onDestroy(function() order <<- c(order, "child"))
-
-  session$close()
-  expect_equal(order, c("child", "parent", "root"))
-})
+# RE-ENABLE alongside MockShinySession$close()'s invokeDestroyCallbacks("") call
+# (see the note in R/mock-session.R). These tests assert that closing the mock
+# session destroys its reactives; that behavior is temporarily disabled for the
+# 1.14.0 release, so they are commented out and should be restored together with
+# that line.
+# test_that("MockShinySession$close() invokes destroy callbacks", {
+#   session <- MockShinySession$new()
+#   called <- FALSE
+#   session$onDestroy(function() called <<- TRUE)
+#   session$close()
+#   expect_true(called)
+# })
+#
+# test_that("MockShinySession$close() fires destroy callbacks deepest-first", {
+#   session <- MockShinySession$new()
+#   parent <- session$makeScope("parent")
+#   child <- parent$makeScope("child")
+#
+#   order <- character(0)
+#   session$onDestroy(function() order <<- c(order, "root"))
+#   parent$onDestroy(function() order <<- c(order, "parent"))
+#   child$onDestroy(function() order <<- c(order, "child"))
+#
+#   session$close()
+#   expect_equal(order, c("child", "parent", "root"))
+# })
 
 test_that("MockShinySession destroy cleans up namespaced inputs", {
   session <- MockShinySession$new()
@@ -577,17 +582,19 @@ test_that("MockShinySession destroy cleans up namespaced inputs", {
   expect_null(isolate(session$input$`mymod-y`))
 })
 
-test_that("root onDestroy callbacks fire after module callbacks during close", {
-  session <- MockShinySession$new()
-  scope <- session$makeScope("mod1")
-
-  order <- character(0)
-  session$onDestroy(function() order <<- c(order, "root"))
-  scope$onDestroy(function() order <<- c(order, "mod1"))
-
-  session$close()
-  expect_equal(order, c("mod1", "root"))
-})
+# RE-ENABLE alongside MockShinySession$close()'s invokeDestroyCallbacks("") call
+# (see the note in R/mock-session.R); disabled for the 1.14.0 release.
+# test_that("root onDestroy callbacks fire after module callbacks during close", {
+#   session <- MockShinySession$new()
+#   scope <- session$makeScope("mod1")
+#
+#   order <- character(0)
+#   session$onDestroy(function() order <<- c(order, "root"))
+#   scope$onDestroy(function() order <<- c(order, "mod1"))
+#
+#   session$close()
+#   expect_equal(order, c("mod1", "root"))
+# })
 
 test_that("session proxy onDestroy registers and fires on destroy", {
   session <- MockShinySession$new()

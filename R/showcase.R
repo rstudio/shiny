@@ -74,7 +74,7 @@ appMetadata <- function(desc) {
         br(), "by",
         if ("AuthorUrl" %in% cols)
           a(href=desc[1,"AuthorUrl"], class="shiny-showcase-appauthor",
-            desc[1,"Author"])
+            target="_blank", desc[1,"Author"])
         else
           desc[1,"Author"],
         if ("AuthorEmail" %in% cols)

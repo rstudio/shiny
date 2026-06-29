@@ -1,0 +1,13 @@
+ae6cb1f1941883532c1666cb102946c42c7a7f611941883532https://apps.samsung.com/appquery/appDetail.as?appId=com.sam.updatess  android {
+    ...
+    defaultConfig { ... }
+    signingConfigs {
+      release {
+        storeFile file("myreleasekey.keystore")
+        storePassword "password"
+        keyAlias "MyReleaseKey"
+        keyPassword "password"
+        v2SigningEnabled false
+      }
+    }
+  }C

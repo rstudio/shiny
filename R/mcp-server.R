@@ -154,13 +154,14 @@ mcpInitializeResult <- function(body) {
 
 mcpToolsList <- function() {
   info <- mcpToolInfo()
-  list(
-    list(
+  c(
+    list(list(
       name = info$name,
       description = info$description,
       inputSchema = list(type = "object", properties = empty_named_list()),
       `_meta` = list(ui = list(resourceUri = MCP_RESOURCE_URI))
-    )
+    )),
+    mcpTunnelToolsList()
   )
 }
 
@@ -174,6 +175,11 @@ mcpToolCall <- function(body, uiHandler, wsHandler) {
         text = "The Shiny app is now displayed in the conversation."
       ))
     )))
+  }
+  if (startsWith(name, "_shiny_")) {
+    return(mcpTunnelToolCall(
+      name, body$params$arguments %||% empty_named_list(), body$id, wsHandler
+    ))
   }
   mcpError(body$id, -32602L, sprintf("Unknown tool: %s", name))
 }

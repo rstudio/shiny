@@ -1,10 +1,24 @@
 library(shiny)
 
 options(shiny.mcp = TRUE)
+options(shiny.mcp.tool = list(
+  name = "open_shiny_app",
+  description = paste(
+    "Open the interactive demo dashboard. Optionally pass `note` (shown in",
+    "the app) and `n` (initial number of observations, 10-500)."
+  ),
+  inputSchema = list(
+    type = "object",
+    properties = list(
+      note = list(type = "string", description = "A note to show in the app"),
+      n = list(type = "integer", description = "Initial observations (10-500)")
+    )
+  )
+))
 
 shinyApp(
   ui = fluidPage(
-    titlePanel("MCP demo — Phase 2"),
+    titlePanel("MCP demo — session API"),
     sidebarLayout(
       sidebarPanel(
         sliderInput("n", "Observations", 10, 500, 100),
@@ -15,9 +29,11 @@ shinyApp(
         ),
         fileInput("file", "Upload a CSV"),
         downloadButton("dl", "Download sample CSV"),
-        actionButton("add", "Add dynamic panel")
+        actionButton("add", "Add dynamic panel"),
+        actionButton("tell", "Tell the model about this data")
       ),
       mainPanel(
+        strong(textOutput("note")),
         plotOutput("hist"),
         textOutput("txt"),
         tags$hr(),
@@ -27,13 +43,37 @@ shinyApp(
     )
   ),
   server = function(input, output, session) {
+    # Arguments the model passed to the tool
+    observe({
+      ti <- mcpToolInput()
+      if (!is.null(ti$n)) {
+        updateSliderInput(session, "n", value = ti$n)
+      }
+    })
+    output$note <- renderText({
+      note <- mcpToolInput()$note
+      if (is.null(note)) "" else paste("Note from the model:", note)
+    })
+
     output$hist <- renderPlot(hist(rnorm(input$n), col = "steelblue"))
     output$txt <- renderText(paste("n =", input$n))
 
-    updateSelectizeInput(
-      session, "state",
-      choices = state.name, server = TRUE
-    )
+    # Keep the model's context up to date as the user explores
+    observe({
+      mcpUpdateModelContext(
+        text = sprintf("The user is viewing a histogram of %d observations.", input$n),
+        data = list(n = input$n)
+      )
+    })
+
+    observeEvent(input$tell, {
+      mcpSendMessage(sprintf(
+        "Please describe what a histogram of %d draws from rnorm() typically looks like.",
+        input$n
+      ))
+    })
+
+    updateSelectizeInput(session, "state", choices = state.name, server = TRUE)
 
     output$uploaded <- renderTable({
       req(input$file)

@@ -11,9 +11,12 @@
   selectize, and dynamically inserted HTML dependencies) are tunneled too,
   the host's theme and style variables are applied to the app, and assets
   referenced by `url()` in stylesheets (e.g. icon webfonts) are embedded as
-  data URIs so they render inside the sandbox. Customize
-  the model-visible tool with `options(shiny.mcp.tool = list(name=,
-  description=))`. (#4404)
+  data URIs so they render inside the sandbox. Customize the model-visible
+  tool with `options(shiny.mcp.tool = list(name=, description=,
+  inputSchema=))`. New session API: `isMcpSession()`, `mcpToolInput()`,
+  `mcpHostContext()`, `mcpUpdateModelContext()`, and `mcpSendMessage()` let
+  apps react to the model's tool arguments and host theme, keep the model's
+  context up to date, and send messages to the conversation. (#4404)
 
 * `{watcher}` is now a required dependency and is always used for autoreload file watching, so it no longer needs to be installed separately. The legacy polling-based file watcher has been removed. (#4403)
 

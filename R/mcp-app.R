@@ -6,19 +6,6 @@
 # Shiny's websocket with the postMessage tunnel) is injected at the end of
 # <body>.
 
-# Is this session connected through the MCP Apps tunnel? (Marker set on the
-# fake websocket request by McpConnection; see mcp-tunnel.R.)
-isMcpSession <- function(session) {
-  req <- tryCatch(suppressWarnings(session$request), error = function(e) NULL)
-  if (is.null(req)) {
-    return(FALSE)
-  }
-  identical(
-    tryCatch(req$HTTP_MCP_TUNNEL, error = function(e) NULL),
-    "1"
-  )
-}
-
 # Convert a file-based htmlDependency into one whose scripts/stylesheets are
 # inline <script>/<style> tags in `head`. Used for dynamic UI in MCP
 # sessions: the sandboxed iframe cannot fetch `src`/`href` URLs, but the

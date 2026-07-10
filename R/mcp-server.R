@@ -23,7 +23,9 @@ mcpToolInfo <- function() {
     description = opt$description %||% paste(
       "Open the interactive Shiny application so the user can view and",
       "interact with it. Call this when the user wants to see the app."
-    )
+    ),
+    inputSchema = opt$inputSchema %||%
+      list(type = "object", properties = empty_named_list())
   )
 }
 
@@ -158,7 +160,7 @@ mcpToolsList <- function() {
     list(list(
       name = info$name,
       description = info$description,
-      inputSchema = list(type = "object", properties = empty_named_list()),
+      inputSchema = info$inputSchema,
       `_meta` = list(ui = list(resourceUri = MCP_RESOURCE_URI))
     )),
     mcpTunnelToolsList()

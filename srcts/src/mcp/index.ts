@@ -138,6 +138,12 @@ function initShinyMcpBridge(): void {
     .connect()
     .then(() => {
       applyHostContext(app.getHostContext());
+      // Make the initial context available to session$clientData right
+      // away (mcpHostContext() on the R side).
+      setShinyInput(
+        ".clientdata_mcp_host_context",
+        JSON.stringify(app.getHostContext() ?? {}),
+      );
     })
     .catch((err) => {
       console.error("shiny-mcp-bridge: failed to connect to MCP host:", err);

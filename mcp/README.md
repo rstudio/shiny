@@ -27,6 +27,16 @@ traffic tunneled over postMessage → `tools/call`).
   font fallback formats (ttf/otf/eot) are intentionally left un-inlined —
   browsers never fetch them once the inlined woff2 loads — keeping the
   resource ~2.3 MB instead of ~5 MB.
+- **Session API (exported, experimental):** `isMcpSession()`,
+  `mcpToolInput()` (parsed tool arguments, reactive), `mcpHostContext()`
+  (theme/locale/display mode, reactive), `mcpUpdateModelContext(text=, data=)`
+  (updates the model's context; no-op outside MCP), and `mcpSendMessage(text)`
+  (user-role chat message). Tool arguments are declared via
+  `options(shiny.mcp.tool = list(name=, description=, inputSchema=))`.
+  See `man/mcp-session.Rd` and `demo-app/app.R`; verified E2E in basic-host
+  (`screenshot-e2e-session-api.png`: tool input moves the slider and shows a
+  note; the host's Model Context panel tracks the app; `ui/message` logged
+  by the host).
 
 Implementation lives in `R/mcp-server.R`, `R/mcp-tunnel.R`, `R/mcp-app.R`,
 `R/html-deps.R` (processDeps hook), `srcts/src/mcp/` (built to
@@ -60,8 +70,7 @@ open "http://localhost:8090/?server=shiny&tool=open_shiny_app&call=true"
 
 ## Backlog (Phase 3+)
 
-User-facing API design (author-declared tools, `session$mcp$…` accessors
-instead of `.clientdata_mcp_*` / custom messages), stdio transport for local
-desktop hosts, direct-connect `wss://` fast path where hosts honor CSP,
-display modes (fullscreen/pip), and upstreaming resources/`_meta`/async
-support to {mcptools}.
+Additional author-declared tools (beyond the single app tool), stdio
+transport for local desktop hosts, direct-connect `wss://` fast path where
+hosts honor CSP, display modes (fullscreen/pip), and upstreaming
+resources/`_meta`/async support to {mcptools}.

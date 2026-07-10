@@ -52,3 +52,65 @@ test_that("escapeScriptContent defuses closing script tags", {
     'var a = "<\\/script>";'
   )
 })
+
+test_that("mcpInlineDependency inlines file-based scripts and stylesheets", {
+  dir <- withr::local_tempdir()
+  writeLines("window.__mcp_test__ = 1;", file.path(dir, "dep.js"))
+  writeLines(".mcp-test { color: red; }", file.path(dir, "dep.css"))
+  dep <- htmltools::htmlDependency(
+    "mcptestdep", "1.0",
+    src = c(file = dir),
+    script = "dep.js",
+    stylesheet = "dep.css",
+    head = "<script>window.__mcp_head__ = 1;</script>"
+  )
+
+  inlined <- mcpInlineDependency(dep)
+  expect_null(inlined$script)
+  expect_null(inlined$stylesheet)
+  expect_match(inlined$head, "window.__mcp_test__ = 1;", fixed = TRUE)
+  expect_match(inlined$head, ".mcp-test { color: red; }", fixed = TRUE)
+  expect_match(inlined$head, "window.__mcp_head__ = 1;", fixed = TRUE)
+  expect_null(inlined$src$file)
+
+  # href-only dependencies fall back to createWebDependency behavior
+  href_dep <- htmltools::htmlDependency(
+    "mcphrefdep", "1.0",
+    src = c(href = "https://example.com/lib"),
+    script = "lib.js"
+  )
+  passthrough <- mcpInlineDependency(href_dep)
+  expect_equal(passthrough$src$href, "https://example.com/lib")
+})
+
+test_that("processDeps inlines dependencies for MCP tunnel sessions", {
+  dir <- withr::local_tempdir()
+  writeLines("window.__mcp_dyn__ = 1;", file.path(dir, "dyn.js"))
+  dep <- htmltools::htmlDependency(
+    "mcpdyndep", "1.0",
+    src = c(file = dir),
+    script = "dyn.js"
+  )
+  tag <- htmltools::attachDependencies(htmltools::div("hi"), dep)
+
+  ui <- fluidPage(textOutput("out"))
+  server <- function(input, output) {}
+  app <- shinyApp(ui, server)
+  handlers <- createAppHandlers(app$httpHandler, function() server)
+  con_res <- mcpTunnelToolCall("_shiny_connect", empty_named_list(), 1, handlers$ws)
+  cid <- con_res$result$structuredContent$connectionId
+  session <- appsByToken$values()[[length(appsByToken$values())]]
+  expect_true(isMcpSession(session))
+
+  res <- processDeps(tag, session)
+  dyn <- Filter(function(d) d$name == "mcpdyndep", res$deps)[[1]]
+  expect_match(dyn$head, "window.__mcp_dyn__ = 1;", fixed = TRUE)
+  expect_null(dyn$script)
+
+  mcpTunnelToolCall("_shiny_close", list(connectionId = cid), 2, handlers$ws)
+})
+
+test_that("processDeps is unchanged for regular sessions", {
+  session <- MockShinySession$new()
+  expect_false(isMcpSession(session))
+})

@@ -46,9 +46,16 @@ processDeps <- function(tags, session) {
   tags <- utils::getFromNamespace("tagify", "htmltools")(tags)
   ui <- takeSingletons(tags, session$singletons, desingleton = FALSE)$ui
   ui <- surroundSingletons(ui)
+  # Sessions running inside an MCP Apps sandbox can't fetch dependency
+  # files over HTTP, so inline them instead (see mcp-app.R).
+  processDep <- if (isMcpSession(session)) {
+    mcpInlineDependency
+  } else {
+    createWebDependency
+  }
   dependencies <- lapply(
     resolveDependencies(findDependencies(ui, tagify = FALSE)),
-    createWebDependency
+    processDep
   )
   names(dependencies) <- NULL
 

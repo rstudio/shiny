@@ -6,6 +6,72 @@
 # Shiny's websocket with the postMessage tunnel) is injected at the end of
 # <body>.
 
+# Is this session connected through the MCP Apps tunnel? (Marker set on the
+# fake websocket request by McpConnection; see mcp-tunnel.R.)
+isMcpSession <- function(session) {
+  req <- tryCatch(suppressWarnings(session$request), error = function(e) NULL)
+  if (is.null(req)) {
+    return(FALSE)
+  }
+  identical(
+    tryCatch(req$HTTP_MCP_TUNNEL, error = function(e) NULL),
+    "1"
+  )
+}
+
+# Convert a file-based htmlDependency into one whose scripts/stylesheets are
+# inline <script>/<style> tags in `head`. Used for dynamic UI in MCP
+# sessions: the sandboxed iframe cannot fetch `src`/`href` URLs, but the
+# client executes `head` content (appendExtraHeadContent in
+# srcts/src/shiny/render.ts uses jQuery, which runs inline scripts).
+mcpInlineDependency <- function(dependency) {
+  if (is.null(dependency)) {
+    return(NULL)
+  }
+  root <- dependency$src$file
+  if (is.null(root)) {
+    # Nothing to inline (href-only); serve as usual.
+    return(createWebDependency(dependency))
+  }
+  if (!is.null(dependency$package)) {
+    root <- system_file(root, package = dependency$package)
+  }
+
+  script_files <- vapply(
+    dependency$script %||% character(0),
+    function(s) if (is.list(s)) s$src %||% "" else s,
+    character(1)
+  )
+  parts <- character(0)
+  for (f in script_files) {
+    path <- file.path(root, f)
+    if (nzchar(f) && file.exists(path)) {
+      parts <- c(parts, paste0(
+        "<script>\n", escapeScriptContent(readAssetText(path)), "\n</script>"
+      ))
+    }
+  }
+  for (f in dependency$stylesheet %||% character(0)) {
+    path <- file.path(root, f)
+    if (file.exists(path)) {
+      parts <- c(parts, paste0(
+        "<style>\n", escapeStyleContent(readAssetText(path)), "\n</style>"
+      ))
+    }
+  }
+  if (!is.null(dependency$head)) {
+    parts <- c(parts, dependency$head)
+  }
+
+  htmltools::htmlDependency(
+    name = dependency$name,
+    version = dependency$version,
+    src = c(href = "_mcp_inline"),
+    head = paste(parts, collapse = "\n"),
+    all_files = FALSE
+  )
+}
+
 mcpFakePageRequest <- function() {
   req <- new.env(parent = emptyenv())
   req$REQUEST_METHOD <- "GET"

@@ -22,6 +22,9 @@ McpConnection <- R6::R6Class(
       req$PATH_INFO <- "/websocket/"
       req$QUERY_STRING <- ""
       req$REQUEST_METHOD <- "GET"
+      # Marks sessions created over the MCP tunnel (see isMcpSession()), so
+      # e.g. processDeps() can inline dynamic dependencies for the sandbox.
+      req$HTTP_MCP_TUNNEL <- "1"
       self$request <- req
     },
 
@@ -202,6 +205,121 @@ mcpToolErrorResult <- function(id, text) {
   ))
 }
 
+# Stateful Rook input stream over an in-memory raw vector. The upload
+# handler reads in 64KB chunks until it gets an empty read, so this must
+# consume rather than replay.
+mcpRookInput <- function(bytes) {
+  pos <- 0L
+  total <- length(bytes)
+  list(
+    read = function(l = -1L) {
+      if (pos >= total) {
+        return(raw(0))
+      }
+      n <- if (l < 0) total - pos else min(l, total - pos)
+      out <- bytes[(pos + 1L):(pos + n)]
+      pos <<- pos + as.integer(n)
+      out
+    },
+    read_lines = function(n = -1L) {
+      stop("read_lines is not supported for MCP-tunneled requests")
+    },
+    rewind = function() {
+      pos <<- 0L
+      invisible()
+    }
+  )
+}
+
+# HTTP-shaped requests from the app iframe, executed against the in-process
+# handlers that serve Shiny's side channels: /session/* (uploads, downloads,
+# dataobj), shiny's own www dir, and registered resource paths. These are
+# package-level handlers, so no per-app state is needed. The app's UI page
+# handler is intentionally absent (the page is served via resources/read),
+# as is the httpuv-level staticPaths machinery (an app's www/ dir is not
+# reachable here).
+mcpTunnelHttpChain <- function() {
+  joinHandlers(c(
+    sessionHandler,
+    system_file("www", package = "shiny"),
+    resourcePathHandler
+  ))
+}
+
+mcpHttpToolCall <- function(params, id) {
+  conn <- mcpConnGet(params$connectionId)
+  if (is.null(conn) || conn$isClosed()) {
+    return(mcpToolErrorResult(id, "Unknown or closed connectionId"))
+  }
+  conn$lastActivity <- Sys.time()
+
+  path <- params$path %||% "/"
+  if (!startsWith(path, "/")) {
+    path <- paste0("/", path)
+  }
+  query <- ""
+  qpos <- regexpr("?", path, fixed = TRUE)
+  if (qpos > 0) {
+    query <- substr(path, qpos + 1L, nchar(path))
+    path <- substr(path, 1L, qpos - 1L)
+  }
+
+  body <- if (is.null(params$body)) {
+    raw(0)
+  } else {
+    jsonlite::base64_dec(params$body)
+  }
+
+  req <- new.env(parent = emptyenv())
+  req$REQUEST_METHOD <- toupper(params$method %||% "GET")
+  req$SCRIPT_NAME <- ""
+  req$PATH_INFO <- path
+  req$QUERY_STRING <- query
+  req$CONTENT_LENGTH <- length(body)
+  req$rook.input <- mcpRookInput(body)
+  for (nm in names(params$headers %||% list())) {
+    value <- params$headers[[nm]]
+    key <- gsub("-", "_", toupper(nm), fixed = TRUE)
+    if (identical(key, "CONTENT_TYPE")) {
+      req$CONTENT_TYPE <- value
+    } else {
+      assign(paste0("HTTP_", key), value, envir = req)
+    }
+  }
+
+  handler <- mcpTunnelHttpChain()
+  hybrid_chain(handler(req), function(resp) {
+    if (is.null(resp)) {
+      resp <- httpResponse(404L, "text/plain", "Not found")
+    }
+    mcpSerializeHttpResponse(id, resp)
+  })
+}
+
+mcpSerializeHttpResponse <- function(id, resp) {
+  content <- resp$content
+  if (is.character(content)) {
+    content <- charToRaw(enc2utf8(paste(content, collapse = "\n")))
+  } else if (is.list(content) && !is.null(content$file)) {
+    bytes <- readBin(content$file, "raw", n = file.info(content$file)$size)
+    if (isTRUE(content$owned)) {
+      unlink(content$file)
+    }
+    content <- bytes
+  }
+  headers <- as.list(resp$headers)
+  headers[["Content-Type"]] <- resp$content_type
+  mcpToolResult(
+    id,
+    list(
+      status = resp$status,
+      headers = headers,
+      body = jsonlite::base64_enc(content)
+    ),
+    "http"
+  )
+}
+
 mcpTunnelToolsList <- function() {
   app_only <- list(ui = list(visibility = list("app")))
   conn_arg <- list(connectionId = list(type = "string"))
@@ -241,6 +359,21 @@ mcpTunnelToolsList <- function() {
         required = list("connectionId")
       ),
       `_meta` = app_only
+    ),
+    list(
+      name = "_shiny_http",
+      description = "Internal: perform an HTTP request against the Shiny app.",
+      inputSchema = list(
+        type = "object",
+        properties = c(conn_arg, list(
+          method = list(type = "string"),
+          path = list(type = "string"),
+          headers = list(type = "object"),
+          body = list(type = "string", description = "base64")
+        )),
+        required = list("connectionId", "method", "path")
+      ),
+      `_meta` = app_only
     )
   )
 }
@@ -273,6 +406,9 @@ mcpTunnelToolCall <- function(name, params, id, wsHandler) {
     return(promises::then(conn$receiveFrames(timeoutSecs), function(res) {
       mcpToolResult(id, res, "frames")
     }))
+  }
+  if (identical(name, "_shiny_http")) {
+    return(mcpHttpToolCall(params, id))
   }
   if (identical(name, "_shiny_close")) {
     conn$notifyClosed()

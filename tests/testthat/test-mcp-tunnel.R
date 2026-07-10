@@ -143,3 +143,99 @@ test_that("tools/list over the endpoint includes tunnel tools marked app-only", 
   connect_tool <- out$result$tools[[which(tool_names == "_shiny_connect")]]
   expect_equal(unlist(connect_tool$`_meta`$ui$visibility), "app")
 })
+
+test_that("mcpRookInput consumes bytes in chunks", {
+  input <- mcpRookInput(as.raw(1:10))
+  expect_equal(input$read(4), as.raw(1:4))
+  expect_equal(input$read(4), as.raw(5:8))
+  expect_equal(input$read(4), as.raw(9:10))
+  expect_equal(input$read(4), raw(0))
+  input$rewind()
+  expect_equal(input$read(), as.raw(1:10))
+  expect_equal(input$read(), raw(0))
+})
+
+test_that("_shiny_http serves static assets and 404s through the app chain", {
+  ui <- fluidPage(textOutput("out"))
+  server <- function(input, output) {}
+  app <- shinyApp(ui, server)
+  handlers <- createAppHandlers(app$httpHandler, function() server)
+
+  con_res <- mcpTunnelToolCall("_shiny_connect", empty_named_list(), 1, handlers$ws)
+  cid <- con_res$result$structuredContent$connectionId
+
+  res <- wait_for_result(mcpHttpToolCall(
+    list(connectionId = cid, method = "GET", path = "/shared/shiny.min.js"),
+    2
+  ))
+  sc <- res$result$structuredContent
+  expect_equal(sc$status, 200L)
+  body <- jsonlite::base64_dec(sc$body)
+  expect_gt(length(body), 10000)
+
+  res404 <- wait_for_result(mcpHttpToolCall(
+    list(connectionId = cid, method = "GET", path = "/nope/missing.js"),
+    3
+  ))
+  expect_equal(res404$result$structuredContent$status, 404L)
+
+  bad <- mcpHttpToolCall(list(connectionId = "bogus", method = "GET", path = "/x"), 4)
+  expect_true(isTRUE(bad$result$isError))
+})
+
+test_that("_shiny_http serves session downloads with headers", {
+  # registerDownload() builds URLs with workerId(), which is only set by
+  # runApp()-style startup; give it the standard empty value for this test.
+  suppressWarnings(workerId(""))
+  ui <- fluidPage(downloadButton("dl", "Get CSV"))
+  server <- function(input, output, session) {
+    output$dl <- downloadHandler(
+      filename = "data.csv",
+      content = function(file) writeLines("a,b\n1,2", file),
+      contentType = "text/csv"
+    )
+  }
+  app <- shinyApp(ui, server)
+  handlers <- createAppHandlers(app$httpHandler, function() server)
+
+  con_res <- mcpTunnelToolCall("_shiny_connect", empty_named_list(), 1, handlers$ws)
+  cid <- con_res$result$structuredContent$connectionId
+
+  init <- as.character(jsonlite::toJSON(
+    list(method = "init", data = list(
+      .clientdata_url_search = "",
+      .clientdata_output_dl_hidden = FALSE
+    )),
+    auto_unbox = TRUE
+  ))
+  mcpTunnelToolCall(
+    "_shiny_send",
+    list(connectionId = cid, frames = list(list(data = init, binary = FALSE))),
+    2, handlers$ws
+  )
+
+  # Wait for the download href (sent as a value for output dl)
+  href <- NULL
+  end <- Sys.time() + 10
+  while (is.null(href) && Sys.time() < end) {
+    pump_shiny(0.1)
+    rec <- wait_for_result(mcpTunnelToolCall(
+      "_shiny_receive", list(connectionId = cid, timeoutSecs = 0.2), 3, handlers$ws
+    ))
+    for (f in rec$result$structuredContent$frames) {
+      m <- regmatches(f$data, regexpr("session/[^\"]+/download/[^\"]+", f$data))
+      if (length(m) > 0) href <- m[[1]]
+    }
+  }
+  expect_false(is.null(href))
+
+  res <- wait_for_result(mcpHttpToolCall(
+    list(connectionId = cid, method = "GET", path = paste0("/", href)),
+    4
+  ))
+  sc <- res$result$structuredContent
+  expect_equal(sc$status, 200L)
+  expect_equal(rawToChar(jsonlite::base64_dec(sc$body)), "a,b\n1,2\n")
+  hdrs <- sc$headers
+  expect_match(hdrs[["Content-Disposition"]], "data.csv")
+})

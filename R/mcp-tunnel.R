@@ -163,14 +163,13 @@ mcpConnRemove <- function(id) {
 # Periodically close connections whose client stopped polling (e.g. the
 # iframe was destroyed without `ui/resource-teardown`). Healthy clients
 # long-poll at least every ~15s, so 60s of silence means the client is gone.
-mcpSweepScheduled <- FALSE
 mcpScheduleSweep <- function() {
-  if (mcpSweepScheduled) {
+  if (isTRUE(.globals$mcpSweepScheduled)) {
     return(invisible())
   }
-  utils::assignInMyNamespace("mcpSweepScheduled", TRUE)
+  .globals$mcpSweepScheduled <- TRUE
   later::later(function() {
-    utils::assignInMyNamespace("mcpSweepScheduled", FALSE)
+    .globals$mcpSweepScheduled <- FALSE
     now <- Sys.time()
     for (id in mcpConnections$keys()) {
       conn <- mcpConnections$get(id)

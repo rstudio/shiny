@@ -1,5 +1,16 @@
 # shiny (development version)
 
+* Experimental support for serving a Shiny app as an MCP App (the Model
+  Context Protocol Apps extension, SEP-1865). Setting `options(shiny.mcp =
+  TRUE)` before the app starts mounts an MCP endpoint at `/mcp` on the app's
+  own port; MCP hosts that support the Apps extension (Claude, Claude
+  Desktop, VS Code Copilot, MCPJam, ...) can then call the app's tool and
+  render the live, fully reactive application in a sandboxed iframe, with
+  Shiny's websocket traffic tunneled over the host's postMessage channel.
+  Customize the model-visible tool with `options(shiny.mcp.tool =
+  list(name=, description=))`. Not yet supported inside the sandboxed
+  iframe: file upload/download and server-side DataTables/selectize. (#4404)
+
 * `{watcher}` is now a required dependency and is always used for autoreload file watching, so it no longer needs to be installed separately. The legacy polling-based file watcher has been removed. (#4403)
 
 # shiny 1.14.0

@@ -42,6 +42,20 @@ traffic tunneled over postMessage → `tools/call`).
   protocol (don't `cat()` to it; `message()` is fine), no Windows support
   (non-blocking stdin), and terminal Claude Code still doesn't render the
   iframe UI — tools/resources only.
+- **Direct-connect fast path:** the resource declares the app's origin in
+  `_meta.ui.csp.connectDomains` (derived from the request's
+  `Host`/`X-Forwarded-Proto`; local httpuv origin for stdio), and the bridge
+  tries a real WebSocket (`<origin>/websocket/?mcp=1`, 2.5 s timeout) before
+  falling back to the tunnel. Verified in basic-host:
+  `__shinyMcpTransport__ === "direct"` with full reactivity; HTTP side
+  channels stay tunneled (no CORS exposure), via connectionId-less
+  `_shiny_http`. Disable with `options(shiny.mcp.direct = FALSE)`.
+  Sub-path deployments always fall back (origin can't express a path).
+- **Display modes:** the app declares
+  `options(shiny.mcp.displayModes = ...)` (default: inline, fullscreen,
+  pip) and can call `mcpRequestDisplayMode("fullscreen")`; the resulting
+  mode arrives via `mcpHostContext()$displayMode`. Unit-tested; basic-host
+  doesn't implement display modes, so not yet E2E-verified on a real host.
 - **Author-declared tools:** `options(shiny.mcp.tools = list(list(name=,
   description=, inputSchema=, handler=)))` exposes plain R functions as
   model-callable MCP tools alongside the app tool. Handlers run in the
@@ -80,6 +94,8 @@ Implementation lives in `R/mcp-server.R`, `R/mcp-tunnel.R`, `R/mcp-app.R`,
 | `screenshot-e2e-phase2.png` | Phase 2 E2E proof: upload + dynamic UI + selectize + theme | — |
 | `screenshot-e2e-css-fonts.png` | CSS url() inlining proof: FontAwesome glyph renders in the sandbox | — |
 | `screenshot-e2e-session-api.png` | Session API proof: tool input + Model Context panel | — |
+| `mcptools-upstream-notes.md` | Gaps {mcptools} would need to close to host this (candidate upstream issues) | — |
+| `QUESTIONS.md` | Open decisions for Barret, with context | — |
 
 ## Quick start
 
@@ -92,8 +108,7 @@ mcp/run-mcp-host.sh
 open "http://localhost:8090/?server=shiny&tool=open_shiny_app&call=true"
 ```
 
-## Backlog (Phase 3+)
+## Backlog
 
-Direct-connect `wss://` fast path
-where hosts honor CSP, display modes (fullscreen/pip), and upstreaming
-resources/`_meta`/async support to {mcptools}.
+Upstreaming resources/`_meta`/async support to {mcptools} (see
+`mcptools-upstream-notes.md`), and the open decisions in `QUESTIONS.md`.

@@ -28,6 +28,7 @@
     "lit": "3.2.x"
   },
   "devDependencies": {
+    "@modelcontextprotocol/ext-apps": "^1.7.4",
     "@selectize/selectize": "https://github.com/selectize/selectize.js.git#e3f2e0b4aa251375bc21b5fcd8ca7d374a921f08",
     "@types/highlightjs": "9.x",
     "@types/jqueryui": "1.12.24",
@@ -58,9 +59,10 @@
   },
   "scripts": {
     "watch": "npm run bundle_shiny -- --watch",
-    "build": "npm run build_shiny && npm run bundle_extras && npm run bundle_external_libs",
+    "build": "npm run build_shiny && npm run bundle_extras && npm run bundle_external_libs && npm run bundle_mcp",
     "build_shiny": "npm run checks && npm run bundle_shiny",
     "bundle_shiny": "tsx srcts/build/shiny.ts",
+    "bundle_mcp": "tsx srcts/build/mcp-bridge.ts",
     "bundle_external_libs": "tsx srcts/build/external_libs.ts",
     "bundle_extras": "tsx srcts/build/extras.ts",
     "checks": "npm run lint && npm run build_types && npm run test_types && npm run coverage && npm run circular",

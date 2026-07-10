@@ -185,9 +185,24 @@ mcpToolCall <- function(body, uiHandler, wsHandler) {
 }
 
 mcpResourcesList <- function() {
-  list()
+  list(list(
+    uri = MCP_RESOURCE_URI,
+    name = "Shiny application",
+    description = "The interactive Shiny application UI.",
+    mimeType = MCP_RESOURCE_MIME,
+    `_meta` = list(ui = list(prefersBorder = TRUE))
+  ))
 }
 
 mcpResourcesRead <- function(body, uiHandler) {
-  mcpError(body$id, -32602L, "Unknown resource")
+  uri <- body$params$uri %||% ""
+  if (!identical(uri, MCP_RESOURCE_URI)) {
+    return(mcpError(body$id, -32602L, sprintf("Unknown resource: %s", uri)))
+  }
+  html <- renderMcpAppHtml(uiHandler)
+  mcpResult(body$id, list(contents = list(list(
+    uri = MCP_RESOURCE_URI,
+    mimeType = MCP_RESOURCE_MIME,
+    text = html
+  ))))
 }

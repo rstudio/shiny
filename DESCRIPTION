@@ -180,6 +180,7 @@ Collate:
     'mcp-app.R'
     'mcp-server.R'
     'mcp-session.R'
+    'mcp-stdio.R'
     'mcp-tunnel.R'
     'middleware-shiny.R'
     'middleware.R'

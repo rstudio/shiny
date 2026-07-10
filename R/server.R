@@ -309,10 +309,21 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
     return(TRUE)
   }
 
+  mcpHandler <- NULL
+  if (mcpEnabled()) {
+    uiHandler <- joinHandlers(httpHandlers)
+    mcpHandler <- mcpHttpHandler(uiHandler, wsHandler)
+    # Also used by the stdio transport (see mcp-stdio.R); late-bound via
+    # .globals so app restarts pick up the current handlers.
+    .globals$mcpDispatch <- function(body) {
+      mcpDispatch(body, uiHandler, wsHandler)
+    }
+  }
+
   appHandlers <- list(
     http = joinHandlers(c(
       sessionHandler,
-      if (mcpEnabled()) mcpHttpHandler(joinHandlers(httpHandlers), wsHandler),
+      mcpHandler,
       httpHandlers,
       sys.www.root,
       resourcePathHandler,
@@ -393,6 +404,12 @@ startHttpuvApp <- function(appObj, port, host, quiet) {
   appHandlers <- createAppHandlers(appObj$httpHandler, appObj$serverFuncSource)
   handlerManager$addHandler(appHandlers$http, "/", tail = TRUE)
   handlerManager$addWSHandler(appHandlers$ws, "/", tail = TRUE)
+
+  if (mcpEnabled() && mcpStdioEnabled() && is.null(.globals$mcpStdioStop)) {
+    .globals$mcpStdioStop <- mcpStdioStart(function(body) {
+      .globals$mcpDispatch(body)
+    })
+  }
 
   httpuvApp <- handlerManager$createHttpuvApp()
   httpuvApp$staticPaths <- c(

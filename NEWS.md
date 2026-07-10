@@ -19,7 +19,12 @@
   context up to date, and send messages to the conversation. Apps can also
   expose additional model-callable R functions with
   `options(shiny.mcp.tools = list(list(name=, description=, inputSchema=,
-  handler=)))`. (#4404)
+  handler=)))`. Adding `options(shiny.mcp.stdio = TRUE)` also speaks MCP
+  over stdin/stdout, so local desktop hosts can launch the app process
+  directly, e.g. `claude mcp add my-app -- Rscript -e
+  "options(shiny.mcp=TRUE, shiny.mcp.stdio=TRUE);
+  shiny::runApp('app', launch.browser=FALSE)"` (not supported on Windows;
+  stdout is reserved for the protocol). (#4404)
 
 * `{watcher}` is now a required dependency and is always used for autoreload file watching, so it no longer needs to be installed separately. The legacy polling-based file watcher has been removed. (#4403)
 

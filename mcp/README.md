@@ -27,6 +27,21 @@ traffic tunneled over postMessage → `tools/call`).
   font fallback formats (ttf/otf/eot) are intentionally left un-inlined —
   browsers never fetch them once the inlined woff2 loads — keeping the
   resource ~2.3 MB instead of ~5 MB.
+- **Stdio transport:** `options(shiny.mcp.stdio = TRUE)` additionally speaks
+  newline-delimited JSON-RPC over stdin/stdout (non-blocking stdin polled
+  from the `later` loop, coexisting with httpuv), so local hosts can launch
+  the app process directly:
+
+  ```sh
+  claude mcp add shiny-demo -- Rscript -e \
+    "options(shiny.mcp=TRUE, shiny.mcp.stdio=TRUE); shiny::runApp('path/to/app', launch.browser=FALSE)"
+  ```
+
+  Verified E2E: `claude --print` launched the demo app over stdio and called
+  `get_sample_stats` successfully. Caveats: stdout is reserved for the
+  protocol (don't `cat()` to it; `message()` is fine), no Windows support
+  (non-blocking stdin), and terminal Claude Code still doesn't render the
+  iframe UI — tools/resources only.
 - **Author-declared tools:** `options(shiny.mcp.tools = list(list(name=,
   description=, inputSchema=, handler=)))` exposes plain R functions as
   model-callable MCP tools alongside the app tool. Handlers run in the
@@ -63,6 +78,8 @@ Implementation lives in `R/mcp-server.R`, `R/mcp-tunnel.R`, `R/mcp-app.R`,
 | `run-mcp-host.sh` | Start script for the basic-host (host :8090, sandbox :8081) | — |
 | `screenshot-e2e-basic-host.png` | Phase 1 E2E proof: demo app reactive inside the sandboxed iframe | — |
 | `screenshot-e2e-phase2.png` | Phase 2 E2E proof: upload + dynamic UI + selectize + theme | — |
+| `screenshot-e2e-css-fonts.png` | CSS url() inlining proof: FontAwesome glyph renders in the sandbox | — |
+| `screenshot-e2e-session-api.png` | Session API proof: tool input + Model Context panel | — |
 
 ## Quick start
 
@@ -77,6 +94,6 @@ open "http://localhost:8090/?server=shiny&tool=open_shiny_app&call=true"
 
 ## Backlog (Phase 3+)
 
-Stdio transport for local desktop hosts, direct-connect `wss://` fast path
+Direct-connect `wss://` fast path
 where hosts honor CSP, display modes (fullscreen/pip), and upstreaming
 resources/`_meta`/async support to {mcptools}.

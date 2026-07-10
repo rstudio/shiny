@@ -67,6 +67,36 @@ Outside of an MCP session, \code{mcpUpdateModelContext()} and
 \code{mcpSendMessage()} do nothing and return \code{FALSE}, so apps can call them
 unconditionally.
 }
+\section{Additional tools}{
+
+Beyond the tool that opens the app, authors can expose plain R functions
+as MCP tools the model may call directly, via
+\code{options(shiny.mcp.tools = list(...))}. Each tool is a list with a
+\code{name}, a \code{description}, an optional \code{inputSchema} (JSON Schema as a
+nested list), and a \code{handler} function that receives the parsed
+arguments as a named list. Handlers run in the server R process outside
+of any Shiny session and may return a character vector (sent as text), a
+list (sent as JSON \code{structuredContent}), or a promise. Errors are
+reported to the model as tool errors.
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{options(shiny.mcp.tools = list(
+  list(
+    name = "get_sample_stats",
+    description = "Summary statistics for a normal sample of size n.",
+    inputSchema = list(
+      type = "object",
+      properties = list(n = list(type = "integer")),
+      required = list("n")
+    ),
+    handler = function(args) \{
+      x <- rnorm(args$n)
+      list(n = args$n, mean = mean(x), sd = stats::sd(x))
+    \}
+  )
+))
+}\if{html}{\out{</div>}}
+}
+
 \examples{
 \dontrun{
 options(shiny.mcp = TRUE)

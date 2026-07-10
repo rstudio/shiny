@@ -16,7 +16,10 @@
   inputSchema=))`. New session API: `isMcpSession()`, `mcpToolInput()`,
   `mcpHostContext()`, `mcpUpdateModelContext()`, and `mcpSendMessage()` let
   apps react to the model's tool arguments and host theme, keep the model's
-  context up to date, and send messages to the conversation. (#4404)
+  context up to date, and send messages to the conversation. Apps can also
+  expose additional model-callable R functions with
+  `options(shiny.mcp.tools = list(list(name=, description=, inputSchema=,
+  handler=)))`. (#4404)
 
 * `{watcher}` is now a required dependency and is always used for autoreload file watching, so it no longer needs to be installed separately. The legacy polling-based file watcher has been removed. (#4403)
 

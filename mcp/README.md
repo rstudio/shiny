@@ -27,6 +27,13 @@ traffic tunneled over postMessage → `tools/call`).
   font fallback formats (ttf/otf/eot) are intentionally left un-inlined —
   browsers never fetch them once the inlined woff2 loads — keeping the
   resource ~2.3 MB instead of ~5 MB.
+- **Author-declared tools:** `options(shiny.mcp.tools = list(list(name=,
+  description=, inputSchema=, handler=)))` exposes plain R functions as
+  model-callable MCP tools alongside the app tool. Handlers run in the
+  server R process (no session), may return character/list/promise, and
+  errors surface as MCP tool errors. Invalid or name-colliding specs are
+  skipped with a warning. Verified E2E in basic-host (`get_sample_stats`
+  in the demo app).
 - **Session API (exported, experimental):** `isMcpSession()`,
   `mcpToolInput()` (parsed tool arguments, reactive), `mcpHostContext()`
   (theme/locale/display mode, reactive), `mcpUpdateModelContext(text=, data=)`
@@ -70,7 +77,6 @@ open "http://localhost:8090/?server=shiny&tool=open_shiny_app&call=true"
 
 ## Backlog (Phase 3+)
 
-Additional author-declared tools (beyond the single app tool), stdio
-transport for local desktop hosts, direct-connect `wss://` fast path where
-hosts honor CSP, display modes (fullscreen/pip), and upstreaming
+Stdio transport for local desktop hosts, direct-connect `wss://` fast path
+where hosts honor CSP, display modes (fullscreen/pip), and upstreaming
 resources/`_meta`/async support to {mcptools}.

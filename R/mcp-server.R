@@ -156,14 +156,110 @@ mcpInitializeResult <- function(body) {
 
 mcpToolsList <- function() {
   info <- mcpToolInfo()
-  c(
+  # unname: a partially named list would serialize as a JSON object rather
+  # than the array that tools/list requires.
+  unname(c(
     list(list(
       name = info$name,
       description = info$description,
       inputSchema = info$inputSchema,
       `_meta` = list(ui = list(resourceUri = MCP_RESOURCE_URI))
     )),
-    mcpTunnelToolsList()
+    mcpTunnelToolsList(),
+    lapply(mcpAuthorTools(warn = TRUE), function(tool) {
+      list(
+        name = tool$name,
+        description = tool$description,
+        inputSchema = tool$inputSchema %||%
+          list(type = "object", properties = empty_named_list())
+      )
+    })
+  ))
+}
+
+# Author-declared tools from options(shiny.mcp.tools = list(...)). Each spec
+# is a list with `name`, `description`, optional `inputSchema`, and a
+# `handler` function taking the (parsed) arguments as a named list. Handlers
+# run in the server R process without a session and may return a promise.
+# Invalid specs are skipped (reported once, from tools/list).
+mcpAuthorTools <- function(warn = FALSE) {
+  specs <- getOption("shiny.mcp.tools", list())
+  reserved <- c(
+    mcpToolInfo()$name,
+    vapply(mcpTunnelToolsList(), function(t) t$name, character(1))
+  )
+  out <- list()
+  for (spec in specs) {
+    problem <- if (!is.list(spec) || !is.character(spec$name %||% NULL)) {
+      "it has no `name`"
+    } else if (spec$name %in% reserved) {
+      sprintf("the name '%s' is reserved", spec$name)
+    } else if (!is.function(spec$handler %||% NULL)) {
+      "its `handler` is not a function"
+    } else if (!is.character(spec$description %||% NULL)) {
+      "it has no `description`"
+    }
+    if (!is.null(problem)) {
+      if (warn) {
+        warning(
+          "Ignoring a tool in options(shiny.mcp.tools) because ", problem,
+          if (is.character(spec$name %||% NULL)) sprintf(" ('%s')", spec$name),
+          call. = FALSE
+        )
+      }
+      next
+    }
+    out[[spec$name]] <- spec
+  }
+  out
+}
+
+# Convert a handler's return value into an MCP CallToolResult.
+mcpAuthorToolResult <- function(id, value) {
+  if (is.null(value)) {
+    return(mcpResult(id, list(
+      content = list(list(type = "text", text = "ok"))
+    )))
+  }
+  if (is.character(value) || is.numeric(value) || is.logical(value)) {
+    return(mcpResult(id, list(
+      content = list(list(
+        type = "text",
+        text = paste(as.character(value), collapse = "\n")
+      ))
+    )))
+  }
+  if (is.list(value)) {
+    json <- as.character(jsonlite::toJSON(
+      value,
+      auto_unbox = TRUE, null = "null", force = TRUE
+    ))
+    return(mcpResult(id, list(
+      content = list(list(type = "text", text = json)),
+      structuredContent = value
+    )))
+  }
+  mcpResult(id, list(
+    content = list(list(type = "text", text = paste(
+      utils::capture.output(print(value)),
+      collapse = "\n"
+    )))
+  ))
+}
+
+mcpAuthorToolCall <- function(tool, params, id) {
+  args <- params$arguments %||% empty_named_list()
+  hybrid_chain(
+    tryCatch(tool$handler(args), error = function(e) e),
+    function(value) {
+      if (inherits(value, "condition")) {
+        return(mcpToolErrorResult(id, conditionMessage(value)))
+      }
+      mcpAuthorToolResult(id, value)
+    },
+    catch = function(e) {
+      mcpToolErrorResult(id, conditionMessage(e))
+    }
   )
 }
 
@@ -182,6 +278,10 @@ mcpToolCall <- function(body, uiHandler, wsHandler) {
     return(mcpTunnelToolCall(
       name, body$params$arguments %||% empty_named_list(), body$id, wsHandler
     ))
+  }
+  authorTool <- mcpAuthorTools()[[name]]
+  if (!is.null(authorTool)) {
+    return(mcpAuthorToolCall(authorTool, body$params, body$id))
   }
   mcpError(body$id, -32602L, sprintf("Unknown tool: %s", name))
 }

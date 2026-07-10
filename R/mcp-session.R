@@ -26,6 +26,35 @@
 #' `mcpSendMessage()` do nothing and return `FALSE`, so apps can call them
 #' unconditionally.
 #'
+#' @section Additional tools:
+#' Beyond the tool that opens the app, authors can expose plain R functions
+#' as MCP tools the model may call directly, via
+#' `options(shiny.mcp.tools = list(...))`. Each tool is a list with a
+#' `name`, a `description`, an optional `inputSchema` (JSON Schema as a
+#' nested list), and a `handler` function that receives the parsed
+#' arguments as a named list. Handlers run in the server R process outside
+#' of any Shiny session and may return a character vector (sent as text), a
+#' list (sent as JSON `structuredContent`), or a promise. Errors are
+#' reported to the model as tool errors.
+#'
+#' ```r
+#' options(shiny.mcp.tools = list(
+#'   list(
+#'     name = "get_sample_stats",
+#'     description = "Summary statistics for a normal sample of size n.",
+#'     inputSchema = list(
+#'       type = "object",
+#'       properties = list(n = list(type = "integer")),
+#'       required = list("n")
+#'     ),
+#'     handler = function(args) {
+#'       x <- rnorm(args$n)
+#'       list(n = args$n, mean = mean(x), sd = stats::sd(x))
+#'     }
+#'   )
+#' ))
+#' ```
+#'
 #' @param text A character string. For `mcpUpdateModelContext()`, the
 #'   human/model-readable context text; for `mcpSendMessage()`, the message
 #'   to send to the chat.

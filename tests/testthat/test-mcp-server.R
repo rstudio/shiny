@@ -78,3 +78,23 @@ test_that("tool name and description are configurable", {
     }
   )
 })
+
+test_that("createAppHandlers mounts /mcp only when enabled", {
+  ui <- fluidPage("hello mcp")
+  app <- shinyApp(ui, function(input, output) {})
+  make_handler <- function() {
+    h <- createAppHandlers(app$httpHandler, function() function(input, output) {})
+    h$http
+  }
+  withr::with_options(list(shiny.mcp = TRUE), {
+    resp <- wait_for_result(make_handler()(mcp_req(
+      list(jsonrpc = "2.0", id = 1, method = "ping")
+    )))
+    expect_equal(resp$status, 200L)
+  })
+  withr::with_options(list(shiny.mcp = FALSE), {
+    expect_null(make_handler()(mcp_req(
+      list(jsonrpc = "2.0", id = 1, method = "ping")
+    )))
+  })
+})

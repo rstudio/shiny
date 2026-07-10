@@ -7,9 +7,11 @@
   Desktop, VS Code Copilot, MCPJam, ...) can then call the app's tool and
   render the live, fully reactive application in a sandboxed iframe, with
   Shiny's websocket traffic tunneled over the host's postMessage channel.
-  Customize the model-visible tool with `options(shiny.mcp.tool =
-  list(name=, description=))`. Not yet supported inside the sandboxed
-  iframe: file upload/download and server-side DataTables/selectize. (#4404)
+  HTTP side channels (file upload/download, server-side DataTables and
+  selectize, and dynamically inserted HTML dependencies) are tunneled too,
+  and the host's theme and style variables are applied to the app. Customize
+  the model-visible tool with `options(shiny.mcp.tool = list(name=,
+  description=))`. (#4404)
 
 * `{watcher}` is now a required dependency and is always used for autoreload file watching, so it no longer needs to be installed separately. The legacy polling-based file watcher has been removed. (#4403)
 

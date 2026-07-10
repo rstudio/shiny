@@ -239,3 +239,21 @@ test_that("_shiny_http serves session downloads with headers", {
   hdrs <- sc$headers
   expect_match(hdrs[["Content-Disposition"]], "data.csv")
 })
+
+test_that("_shiny_http works without a connectionId (direct-connect sessions)", {
+  res <- wait_for_result(mcpTunnelToolCall(
+    "_shiny_http",
+    list(method = "GET", path = "/shared/shiny.min.css"),
+    1,
+    function(ws) TRUE
+  ))
+  expect_equal(res$result$structuredContent$status, 200L)
+
+  bad <- mcpTunnelToolCall(
+    "_shiny_http",
+    list(connectionId = "nope", method = "GET", path = "/x"),
+    2,
+    function(ws) TRUE
+  )
+  expect_true(isTRUE(bad$result$isError))
+})

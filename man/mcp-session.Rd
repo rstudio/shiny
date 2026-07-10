@@ -7,6 +7,7 @@
 \alias{mcpHostContext}
 \alias{mcpUpdateModelContext}
 \alias{mcpSendMessage}
+\alias{mcpRequestDisplayMode}
 \title{Interact with the MCP host from a Shiny app}
 \usage{
 isMcpSession(session = getDefaultReactiveDomain())
@@ -22,6 +23,11 @@ mcpUpdateModelContext(
 )
 
 mcpSendMessage(text, session = getDefaultReactiveDomain())
+
+mcpRequestDisplayMode(
+  mode = c("inline", "fullscreen", "pip"),
+  session = getDefaultReactiveDomain()
+)
 }
 \arguments{
 \item{session}{The Shiny session object.}
@@ -32,6 +38,12 @@ to send to the chat.}
 
 \item{data}{An optional named list of structured, machine-readable
 context data (serialized as JSON).}
+
+\item{mode}{The display mode to request: \code{"inline"}, \code{"fullscreen"}, or
+\code{"pip"}. The host may decline; observe \code{mcpHostContext()$displayMode}
+for the mode actually in effect. Declare the modes the app supports
+with \code{options(shiny.mcp.displayModes = c("inline", "fullscreen"))}
+(default: all three).}
 }
 \value{
 \code{isMcpSession()} returns \code{TRUE} or \code{FALSE}. \code{mcpToolInput()} and

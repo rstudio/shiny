@@ -115,10 +115,17 @@ isMcpSession <- function(session = getDefaultReactiveDomain()) {
   if (is.null(req)) {
     return(FALSE)
   }
-  identical(
+  # Tunneled sessions carry a marker on the fake websocket request;
+  # direct-connect sessions (a real WebSocket opened by the MCP bridge)
+  # identify themselves with ?mcp=1 on the websocket URL.
+  if (identical(
     tryCatch(req$HTTP_MCP_TUNNEL, error = function(e) NULL),
     "1"
-  )
+  )) {
+    return(TRUE)
+  }
+  query <- tryCatch(req$QUERY_STRING, error = function(e) NULL)
+  is.character(query) && grepl("(^\\??|&)mcp=1(&|$)", query)
 }
 
 #' @rdname mcp-session
@@ -188,5 +195,24 @@ mcpSendMessage <- function(
     role = "user",
     content = list(list(type = "text", text = text))
   ))
+  invisible(TRUE)
+}
+
+#' @param mode The display mode to request: `"inline"`, `"fullscreen"`, or
+#'   `"pip"`. The host may decline; observe `mcpHostContext()$displayMode`
+#'   for the mode actually in effect. Declare the modes the app supports
+#'   with `options(shiny.mcp.displayModes = c("inline", "fullscreen"))`
+#'   (default: all three).
+#' @rdname mcp-session
+#' @export
+mcpRequestDisplayMode <- function(
+  mode = c("inline", "fullscreen", "pip"),
+  session = getDefaultReactiveDomain()
+) {
+  mode <- match.arg(mode)
+  if (!isMcpSession(session)) {
+    return(invisible(FALSE))
+  }
+  session$sendCustomMessage("shiny.mcp.requestDisplayMode", list(mode = mode))
   invisible(TRUE)
 }

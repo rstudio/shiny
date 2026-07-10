@@ -66,7 +66,7 @@ mcpFakePageRequest <- function() {
   req
 }
 
-renderMcpAppHtml <- function(uiHandler) {
+renderMcpAppHtml <- function(uiHandler, config = NULL) {
   resp <- uiHandler(mcpFakePageRequest())
   if (is.null(resp) || !inherits(resp, "httpResponse")) {
     stop("Unable to render the app UI for the MCP app resource")
@@ -77,7 +77,21 @@ renderMcpAppHtml <- function(uiHandler) {
     Encoding(html) <- "UTF-8"
   }
   html <- inlineHtmlAssets(html)
-  sub("</body>", paste0(mcpBridgeScript(), "\n</body>"), html, fixed = TRUE)
+
+  scripts <- mcpBridgeScript()
+  if (length(config) > 0) {
+    config_json <- jsonlite::toJSON(
+      config,
+      auto_unbox = TRUE, null = "null", force = TRUE
+    )
+    scripts <- paste0(
+      "<script>window.__shinyMcpConfig__ = ",
+      escapeScriptContent(as.character(config_json)),
+      ";</script>\n",
+      scripts
+    )
+  }
+  sub("</body>", paste0(scripts, "\n</body>"), html, fixed = TRUE)
 }
 
 mcpBridgeScript <- function() {

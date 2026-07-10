@@ -247,11 +247,17 @@ mcpTunnelHttpChain <- function() {
 }
 
 mcpHttpToolCall <- function(params, id) {
-  conn <- mcpConnGet(params$connectionId)
-  if (is.null(conn) || conn$isClosed()) {
-    return(mcpToolErrorResult(id, "Unknown or closed connectionId"))
+  # connectionId is optional: direct-connect sessions (real WebSocket) still
+  # route HTTP side channels through this tool but have no tunnel
+  # connection. Session endpoints are guarded by their unguessable tokens.
+  cid <- params$connectionId
+  if (!is.null(cid) && nzchar(cid %||% "")) {
+    conn <- mcpConnGet(cid)
+    if (is.null(conn) || conn$isClosed()) {
+      return(mcpToolErrorResult(id, "Unknown or closed connectionId"))
+    }
+    conn$lastActivity <- Sys.time()
   }
-  conn$lastActivity <- Sys.time()
 
   path <- params$path %||% "/"
   if (!startsWith(path, "/")) {
@@ -371,7 +377,7 @@ mcpTunnelToolsList <- function() {
           headers = list(type = "object"),
           body = list(type = "string", description = "base64")
         )),
-        required = list("connectionId", "method", "path")
+        required = list("method", "path")
       ),
       `_meta` = app_only
     )
@@ -387,6 +393,12 @@ mcpTunnelToolCall <- function(name, params, id, wsHandler) {
     }
     mcpConnRegister(conn)
     return(mcpToolResult(id, list(connectionId = conn$id), "connected"))
+  }
+
+  if (identical(name, "_shiny_http")) {
+    # Handles its own (optional) connectionId: direct-connect sessions
+    # have no tunnel connection.
+    return(mcpHttpToolCall(params, id))
   }
 
   conn <- mcpConnGet(params$connectionId)
@@ -406,9 +418,6 @@ mcpTunnelToolCall <- function(name, params, id, wsHandler) {
     return(promises::then(conn$receiveFrames(timeoutSecs), function(res) {
       mcpToolResult(id, res, "frames")
     }))
-  }
-  if (identical(name, "_shiny_http")) {
-    return(mcpHttpToolCall(params, id))
   }
   if (identical(name, "_shiny_close")) {
     conn$notifyClosed()

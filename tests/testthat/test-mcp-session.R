@@ -157,3 +157,24 @@ test_that("tool inputSchema is configurable via options", {
     }
   )
 })
+
+test_that("mcpRequestDisplayMode sends the bridge message", {
+  sess <- mcp_start_session(
+    fluidPage(),
+    function(input, output, session) {
+      observeEvent(input$go, {
+        mcpRequestDisplayMode("fullscreen")
+      })
+    },
+    initData = list(go = 0)
+  )
+  mcp_drain_frames(sess)
+  mcp_send_update(sess, list(go = 1))
+  frames <- paste(mcp_drain_frames(sess), collapse = "\n")
+  expect_match(frames, "shiny.mcp.requestDisplayMode", fixed = TRUE)
+  expect_match(frames, "fullscreen", fixed = TRUE)
+  mcpTunnelToolCall("_shiny_close", list(connectionId = sess$cid), 9, sess$handlers$ws)
+
+  expect_false(mcpRequestDisplayMode("pip", session = MockShinySession$new()))
+  expect_error(mcpRequestDisplayMode("cinema", session = MockShinySession$new()))
+})

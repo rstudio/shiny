@@ -16,6 +16,39 @@ mcpEnabled <- function() {
   isTRUE(getOption("shiny.mcp", FALSE))
 }
 
+# Direct-connect fast path: declare the app's origin in the resource CSP so
+# spec-compliant hosts let the iframe open a real WebSocket to the app,
+# skipping the tools/call tunnel for reactivity. The bridge feature-detects
+# and falls back to the tunnel, so this is safe to leave on even for hosts
+# that ignore declared CSP (e.g. claude.ai today).
+mcpDirectEnabled <- function() {
+  isTRUE(getOption("shiny.mcp.direct", TRUE))
+}
+
+mcpDisplayModes <- function() {
+  modes <- getOption("shiny.mcp.displayModes", c("inline", "fullscreen", "pip"))
+  modes <- intersect(as.character(modes), c("inline", "fullscreen", "pip"))
+  if (length(modes) == 0) modes <- "inline"
+  modes
+}
+
+# The app's externally reachable origin, derived from the request that the
+# MCP host made to us (works locally and behind https tunnels/proxies).
+# Falls back to the local httpuv origin (stdio transport has no request).
+mcpRequestOrigin <- function(req) {
+  host <- tryCatch(req$HTTP_HOST, error = function(e) NULL)
+  if (is.null(host) || !nzchar(host %||% "")) {
+    return(.globals$mcpLocalOrigin)
+  }
+  proto <- tryCatch(req$HTTP_X_FORWARDED_PROTO, error = function(e) NULL)
+  proto <- (proto %||% "http")
+  sprintf("%s://%s", proto, host)
+}
+
+mcpWsOrigin <- function(origin) {
+  sub("^http", "ws", origin)
+}
+
 mcpToolInfo <- function() {
   opt <- getOption("shiny.mcp.tool", list())
   list(
@@ -100,7 +133,7 @@ mcpHttpHandler <- function(uiHandler, wsHandler) {
     }
 
     out <- tryCatch(
-      mcpDispatch(body, uiHandler, wsHandler),
+      mcpDispatch(body, uiHandler, wsHandler, req = req),
       error = function(e) mcpError(body$id, -32603L, conditionMessage(e))
     )
     if (is.null(out)) {
@@ -114,7 +147,7 @@ mcpHttpHandler <- function(uiHandler, wsHandler) {
   }
 }
 
-mcpDispatch <- function(body, uiHandler, wsHandler) {
+mcpDispatch <- function(body, uiHandler, wsHandler, req = NULL) {
   method <- body$method
   if (!is.character(method) || length(method) != 1) {
     return(mcpError(body$id, -32600L, "Invalid Request"))
@@ -129,7 +162,7 @@ mcpDispatch <- function(body, uiHandler, wsHandler) {
     "tools/list" = mcpResult(body$id, list(tools = mcpToolsList())),
     "tools/call" = mcpToolCall(body, uiHandler, wsHandler),
     "resources/list" = mcpResult(body$id, list(resources = mcpResourcesList())),
-    "resources/read" = mcpResourcesRead(body, uiHandler),
+    "resources/read" = mcpResourcesRead(body, uiHandler, req),
     mcpError(body$id, -32601L, "Method not found")
   )
 }
@@ -296,15 +329,30 @@ mcpResourcesList <- function() {
   ))
 }
 
-mcpResourcesRead <- function(body, uiHandler) {
+mcpResourcesRead <- function(body, uiHandler, req = NULL) {
   uri <- body$params$uri %||% ""
   if (!identical(uri, MCP_RESOURCE_URI)) {
     return(mcpError(body$id, -32602L, sprintf("Unknown resource: %s", uri)))
   }
-  html <- renderMcpAppHtml(uiHandler)
+
+  origin <- if (mcpDirectEnabled()) mcpRequestOrigin(req)
+  config <- dropNulls(list(
+    directOrigin = origin,
+    displayModes = as.list(mcpDisplayModes())
+  ))
+
+  ui_meta <- list(prefersBorder = TRUE)
+  if (!is.null(origin)) {
+    ui_meta$csp <- list(
+      connectDomains = list(origin, mcpWsOrigin(origin))
+    )
+  }
+
+  html <- renderMcpAppHtml(uiHandler, config = config)
   mcpResult(body$id, list(contents = list(list(
     uri = MCP_RESOURCE_URI,
     mimeType = MCP_RESOURCE_MIME,
-    text = html
+    text = html,
+    `_meta` = list(ui = ui_meta)
   ))))
 }

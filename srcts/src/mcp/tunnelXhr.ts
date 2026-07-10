@@ -186,11 +186,12 @@ export function createTunnelXhrClass(
         if (encoded.error) throw new Error(encoded.error);
         const connectionId = await opts.getConnectionId();
         const args: { [key: string]: unknown } = {
-          connectionId,
           method: this.reqMethod,
           path: this.tunnelPath,
           headers: this.reqHeaders,
         };
+        // Empty id = direct-connect session (no tunnel connection to tie to)
+        if (connectionId) args.connectionId = connectionId;
         if (encoded.b64 !== null) args.body = encoded.b64;
 
         const result = (await opts.callTool(

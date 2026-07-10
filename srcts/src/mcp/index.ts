@@ -26,6 +26,7 @@ import {
   applyHostFonts,
   applyHostStyleVariables,
 } from "@modelcontextprotocol/ext-apps";
+import { McpHybridWebSocket } from "./hybridSocket";
 import type { ToolCaller } from "./tunnelSocket";
 import { McpTunnelWebSocket } from "./tunnelSocket";
 import { createTunnelXhrClass } from "./tunnelXhr";
@@ -117,6 +118,22 @@ function installDownloadInterceptor(xhrClass: typeof XMLHttpRequest): void {
   );
 }
 
+type ShinyMcpConfig = {
+  directOrigin?: string;
+  displayModes?: Array<"inline" | "fullscreen" | "pip">;
+};
+
+function getConfig(): ShinyMcpConfig {
+  return (
+    (
+      window as unknown as {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        __shinyMcpConfig__?: ShinyMcpConfig;
+      }
+    ).__shinyMcpConfig__ ?? {}
+  );
+}
+
 function initShinyMcpBridge(): void {
   const shiny = getShiny();
   if (!shiny) {
@@ -125,11 +142,21 @@ function initShinyMcpBridge(): void {
     );
     return;
   }
+  const config = getConfig();
 
-  const app = new App({
-    name: "shiny",
-    version: process.env.SHINY_VERSION ?? "0.0.0",
-  });
+  const app = new App(
+    {
+      name: "shiny",
+      version: process.env.SHINY_VERSION ?? "0.0.0",
+    },
+    {
+      availableDisplayModes: config.displayModes ?? [
+        "inline",
+        "fullscreen",
+        "pip",
+      ],
+    },
+  );
 
   // Kick off the ui/initialize handshake immediately, but install
   // createSocket synchronously: Shiny's DOM-ready init may run before the
@@ -163,15 +190,45 @@ function initShinyMcpBridge(): void {
     return (result.structuredContent ?? {}) as { [key: string]: unknown };
   };
 
-  let socket: McpTunnelWebSocket | null = null;
-  let resolveFirstSocket!: (s: McpTunnelWebSocket) => void;
-  const firstSocket = new Promise<McpTunnelWebSocket>((resolve) => {
-    resolveFirstSocket = resolve;
+  // Direct-connect fast path: the resource CSP declared the app's origin,
+  // so try a real WebSocket first and fall back to the tunnel (see
+  // hybridSocket.ts). The ?mcp=1 marker lets the server treat direct
+  // sessions as MCP sessions (isMcpSession()).
+  const directWsUrl = config.directOrigin
+    ? config.directOrigin.replace(/^http/, "ws") + "/websocket/?mcp=1"
+    : null;
+
+  let socket: McpHybridWebSocket | null = null;
+  // Resolves with the tunnel connectionId, or "" when connected directly
+  // (HTTP side channels then call _shiny_http without a connectionId).
+  let resolveConnection!: (id: string) => void;
+  const connectionId = new Promise<string>((resolve) => {
+    resolveConnection = resolve;
   });
 
   shiny.createSocket = () => {
-    socket = new McpTunnelWebSocket(callTool);
-    resolveFirstSocket(socket);
+    let tunnel: McpTunnelWebSocket | null = null;
+    socket = new McpHybridWebSocket({
+      directWsUrl,
+      makeTunnel: () => {
+        tunnel = new McpTunnelWebSocket(callTool);
+        return tunnel;
+      },
+      onTransport: (kind) => {
+        (
+          window as unknown as {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            __shinyMcpTransport__?: string;
+          }
+        ).__shinyMcpTransport__ = kind;
+        console.log("shiny-mcp-bridge: connected via", kind);
+        if (kind === "direct") {
+          resolveConnection("");
+        } else {
+          void tunnel?.whenConnected.then(resolveConnection);
+        }
+      },
+    });
     // shinyapp.ts assigns onopen/onmessage/onclose right after
     // createSocket() returns; defer start so they're in place.
     const s = socket;
@@ -180,13 +237,11 @@ function initShinyMcpBridge(): void {
   };
 
   // Tunnel HTTP side channels (uploads, DataTables/selectize ajax, restyle
-  // XHRs) through _shiny_http on the session's connection.
+  // XHRs) through _shiny_http; these stay tunneled even for direct-connect
+  // sessions (cross-origin XHR to the app would require CORS).
   const tunnelXhrClass = createTunnelXhrClass({
     callTool,
-    getConnectionId: async () => {
-      const s = await firstSocket;
-      return await s.whenConnected;
-    },
+    getConnectionId: () => connectionId,
     nativeXhr: window.XMLHttpRequest,
   });
   window.XMLHttpRequest = tunnelXhrClass;
@@ -245,6 +300,28 @@ function initShinyMcpBridge(): void {
           .sendMessage(message as Parameters<typeof app.sendMessage>[0])
           .catch((err) =>
             console.warn("shiny-mcp-bridge: sendMessage failed:", err),
+          ),
+      );
+    });
+    s.addCustomMessageHandler("shiny.mcp.requestDisplayMode", (message) => {
+      void connected.then(() =>
+        app
+          .requestDisplayMode(
+            message as Parameters<typeof app.requestDisplayMode>[0],
+          )
+          .then((result) => {
+            // Reflect the (possibly declined) resulting mode back into
+            // session$clientData via the merged host context.
+            setShinyInput(
+              ".clientdata_mcp_host_context",
+              JSON.stringify({
+                ...(app.getHostContext() ?? {}),
+                displayMode: result.mode,
+              }),
+            );
+          })
+          .catch((err) =>
+            console.warn("shiny-mcp-bridge: requestDisplayMode failed:", err),
           ),
       );
     });

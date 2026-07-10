@@ -484,6 +484,12 @@ startHttpuvApp <- function(appObj, port, host, quiet) {
         hostString <- paste0("[", hostString, "]")
       message('\n', 'Listening on http://', hostString, ':', port)
     }
+    if (mcpEnabled()) {
+      # Fallback origin for the direct-connect fast path when there's no
+      # HTTP request to derive it from (stdio transport).
+      localHost <- if (host %in% c("0.0.0.0", "::")) "127.0.0.1" else host
+      .globals$mcpLocalOrigin <- sprintf("http://%s:%s", localHost, port)
+    }
     return(startServer(host, port, httpuvApp))
   } else if (is.character(port)) {
     if (!quiet) {

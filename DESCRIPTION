@@ -179,6 +179,7 @@ Collate:
     'knitr.R'
     'middleware-shiny.R'
     'middleware.R'
+    'mcp-server.R'
     'timer.R'
     'shiny.R'
     'mock-session.R'

@@ -114,3 +114,85 @@ test_that("processDeps is unchanged for regular sessions", {
   session <- MockShinySession$new()
   expect_false(isMcpSession(session))
 })
+
+test_that("rewriteCssUrls inlines local url() refs and leaves the rest", {
+  dir <- withr::local_tempdir()
+  dir.create(file.path(dir, "css"))
+  dir.create(file.path(dir, "webfonts"))
+  writeBin(as.raw(c(0x77, 0x4F, 0x46, 0x32)), file.path(dir, "webfonts", "fa.woff2"))
+  writeBin(as.raw(1:4), file.path(dir, "css", "img.png"))
+
+  css <- paste(
+    "@font-face { src: url(../webfonts/fa.woff2?v=6.4#frag) format('woff2'); }",
+    ".a { background: url('img.png'); }",
+    ".b { background: url(\"data:image/png;base64,AAAA\"); }",
+    ".c { fill: url(#gradient); }",
+    ".d { background: url(https://example.com/x.png); }",
+    ".e { background: url(missing.png); }",
+    sep = "\n"
+  )
+  out <- rewriteCssUrls(css, file.path(dir, "css"))
+
+  # Local files (including ../ paths with query/fragment) become data: URIs
+  expect_match(out, "url\\(\"data:font/woff2;base64,d09GMg==\"\\)")
+  expect_match(out, "url\\(\"data:image/png;base64,AQIDBA==\"\\)")
+  # data:, fragment-only, absolute, and missing refs are untouched
+  expect_match(out, "url(\"data:image/png;base64,AAAA\")", fixed = TRUE)
+  expect_match(out, "url(#gradient)", fixed = TRUE)
+  expect_match(out, "url(https://example.com/x.png)", fixed = TRUE)
+  expect_match(out, "url(missing.png)", fixed = TRUE)
+})
+
+test_that("stylesheet inlining rewrites url() refs (page + dynamic deps)", {
+  dir <- withr::local_tempdir()
+  dir.create(file.path(dir, "fonts"))
+  writeBin(as.raw(c(0x77, 0x4F, 0x46, 0x32)), file.path(dir, "fonts", "f.woff2"))
+  writeBin(as.raw(c(0x00, 0x01, 0x00, 0x00)), file.path(dir, "fonts", "f.ttf"))
+  writeLines(
+    paste0(
+      "@font-face { font-family: x; ",
+      "src: url(fonts/f.woff2) format('woff2'), ",
+      "url(fonts/f.ttf) format('truetype'); }"
+    ),
+    file.path(dir, "style.css")
+  )
+  dep <- htmltools::htmlDependency(
+    "mcpfontdep", "1.0",
+    src = c(file = dir),
+    stylesheet = "style.css"
+  )
+
+  inlined <- mcpInlineDependency(dep)
+  expect_match(inlined$head, "data:font/woff2;base64,d09GMg==", fixed = TRUE)
+  expect_false(grepl("url(fonts/f.woff2)", inlined$head, fixed = TRUE))
+  # Legacy fallback formats are left alone (never fetched once woff2 loads)
+  expect_match(inlined$head, "url(fonts/f.ttf)", fixed = TRUE)
+})
+
+test_that("resources/read inlines fontawesome webfonts for icon() apps", {
+  ui <- fluidPage(downloadButton("dl", "Get"))
+  app <- shinyApp(ui, function(input, output) {})
+  withr::with_options(list(shiny.mcp = TRUE), {
+    handlers <- createAppHandlers(
+      app$httpHandler,
+      function() function(input, output) {}
+    )
+    out <- mcp_post(handlers$http, "resources/read",
+      params = list(uri = "ui://shiny/app")
+    )
+    html <- out$result$contents[[1]]$text
+    # The fontawesome stylesheet references ../webfonts/*.woff2; those must
+    # now be data: URIs rather than unreachable relative URLs. (Legacy .ttf
+    # fallback refs stay as-is; browsers never fetch them once woff2 loads.)
+    expect_match(html, "data:font/woff2;base64,")
+    expect_false(grepl("url\\([\"']?\\.\\./webfonts/[^)\"']*\\.woff2", html))
+  })
+})
+
+test_that("rewriteCssUrls produces single-line data URIs for large files", {
+  dir <- withr::local_tempdir()
+  writeBin(as.raw(rep(1:255, 40)), file.path(dir, "big.woff2"))
+  out <- rewriteCssUrls("a { src: url(big.woff2); }", dir)
+  expect_match(out, "data:font/woff2;base64,")
+  expect_false(grepl("[\r\n]", out))
+})

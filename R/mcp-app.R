@@ -54,9 +54,7 @@ mcpInlineDependency <- function(dependency) {
   for (f in dependency$stylesheet %||% character(0)) {
     path <- file.path(root, f)
     if (file.exists(path)) {
-      parts <- c(parts, paste0(
-        "<style>\n", escapeStyleContent(readAssetText(path)), "\n</style>"
-      ))
+      parts <- c(parts, inlineStylesheetFile(path))
     }
   }
   if (!is.null(dependency$head)) {
@@ -112,6 +110,73 @@ readAssetText <- function(file) {
   txt
 }
 
+# Rewrite relative `url(...)` references in a stylesheet to data: URIs,
+# resolving them against the stylesheet's directory on disk. Once a
+# stylesheet is inlined into the single-file MCP app resource, its relative
+# URLs (fonts, background images — e.g. fontawesome's ../webfonts/*.woff2)
+# would resolve against the sandbox origin and 404. The referenced files are
+# part of the app's own dependencies, so embedding them is safe.
+#
+# Left untouched: data:/blob: URIs, absolute and protocol-relative URLs,
+# fragment-only refs (SVG paint servers like url(#gradient)), and paths that
+# don't resolve to an existing file.
+rewriteCssUrls <- function(css, cssDir) {
+  # perl = TRUE: TRE fails on backreferences to groups that matched the
+  # empty string (unquoted url(...) refs); PCRE handles them.
+  pattern <- "url\\(\\s*(['\"]?)([^'\")]+)\\1\\s*\\)"
+  matches <- gregexpr(pattern, css, ignore.case = TRUE, perl = TRUE)
+  cache <- new.env(parent = emptyenv())
+
+  regmatches(css, matches) <- list(vapply(
+    regmatches(css, matches)[[1]],
+    function(token) {
+      ref <- trimws(sub(pattern, "\\2", token, ignore.case = TRUE, perl = TRUE))
+      if (grepl("^(data:|blob:|https?://|//|#)", ref, ignore.case = TRUE)) {
+        return(token)
+      }
+      path <- sub("[?#].*$", "", ref)
+      if (!nzchar(path)) {
+        return(token)
+      }
+      # Legacy font fallbacks: @font-face src lists are tried in order, so
+      # when the (inlined) woff2 loads, ttf/otf/eot are never fetched.
+      # Inlining them would double-to-triple the resource size for nothing.
+      if (grepl("\\.(ttf|otf|eot)$", path, ignore.case = TRUE)) {
+        return(token)
+      }
+      candidate <- file.path(cssDir, URLdecode(path))
+      if (!file.exists(candidate)) {
+        return(token)
+      }
+      candidate <- normalizePath(candidate)
+      cached <- cache[[candidate]]
+      if (!is.null(cached)) {
+        return(cached)
+      }
+      bytes <- readBin(candidate, "raw", n = file.info(candidate)$size)
+      # base64_enc() line-wraps long output; a raw newline inside a quoted
+      # CSS string is invalid and (in minified, single-line stylesheets)
+      # can swallow the rest of the sheet.
+      b64 <- gsub("[\r\n]", "", jsonlite::base64_enc(bytes))
+      out <- sprintf(
+        'url("data:%s;base64,%s")',
+        getContentType(candidate),
+        b64
+      )
+      cache[[candidate]] <- out
+      out
+    },
+    character(1),
+    USE.NAMES = FALSE
+  ))
+  css
+}
+
+inlineStylesheetFile <- function(file) {
+  css <- rewriteCssUrls(readAssetText(file), dirname(file))
+  paste0("<style>\n", escapeStyleContent(css), "\n</style>")
+}
+
 # `</script` anywhere inside an inline <script> terminates it, even inside a
 # JS string. `<\/script` is equivalent inside JS strings/regexes, where such
 # sequences virtually always live.
@@ -162,9 +227,7 @@ inlineHtmlAssets <- function(html) {
   inlineTagPattern(
     html,
     pattern = "<link[^>]*\\shref=\"([^\"]+)\"[^>]*/?>",
-    build = function(file) {
-      paste0("<style>\n", escapeStyleContent(readAssetText(file)), "\n</style>")
-    },
+    build = inlineStylesheetFile,
     onlyIf = function(tag) grepl("stylesheet", tag, fixed = TRUE)
   )
 }

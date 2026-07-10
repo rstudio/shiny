@@ -9,7 +9,9 @@
   Shiny's websocket traffic tunneled over the host's postMessage channel.
   HTTP side channels (file upload/download, server-side DataTables and
   selectize, and dynamically inserted HTML dependencies) are tunneled too,
-  and the host's theme and style variables are applied to the app. Customize
+  the host's theme and style variables are applied to the app, and assets
+  referenced by `url()` in stylesheets (e.g. icon webfonts) are embedded as
+  data URIs so they render inside the sandbox. Customize
   the model-visible tool with `options(shiny.mcp.tool = list(name=,
   description=))`. (#4404)
 

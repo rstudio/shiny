@@ -21,13 +21,17 @@ traffic tunneled over postMessage → `tools/call`).
   bridges. Verified in basic-host: upload, dynamic panel, server-side
   selectize, theme toggle (`screenshot-e2e-phase2.png`).
 
+- **CSS assets:** relative `url()` refs inside inlined stylesheets (webfonts,
+  background images) are rewritten to `data:` URIs, so icon fonts like
+  FontAwesome render in the sandbox (`screenshot-e2e-css-fonts.png`). Legacy
+  font fallback formats (ttf/otf/eot) are intentionally left un-inlined —
+  browsers never fetch them once the inlined woff2 loads — keeping the
+  resource ~2.3 MB instead of ~5 MB.
+
 Implementation lives in `R/mcp-server.R`, `R/mcp-tunnel.R`, `R/mcp-app.R`,
 `R/html-deps.R` (processDeps hook), `srcts/src/mcp/` (built to
 `inst/www/shared/shiny-mcp-bridge.js`), with tests in
 `tests/testthat/test-mcp-*.R` and `srcts/src/mcp/__tests__/`.
-
-Known cosmetic gap: `url()` references inside inlined CSS (e.g. FontAwesome
-webfonts) 404 in the sandbox, so some icon glyphs don't render.
 
 ## Contents
 
@@ -59,5 +63,5 @@ open "http://localhost:8090/?server=shiny&tool=open_shiny_app&call=true"
 User-facing API design (author-declared tools, `session$mcp$…` accessors
 instead of `.clientdata_mcp_*` / custom messages), stdio transport for local
 desktop hosts, direct-connect `wss://` fast path where hosts honor CSP,
-display modes (fullscreen/pip), inlining CSS `url()` assets (fonts/images) as
-data URIs, and upstreaming resources/`_meta`/async support to {mcptools}.
+display modes (fullscreen/pip), and upstreaming resources/`_meta`/async
+support to {mcptools}.

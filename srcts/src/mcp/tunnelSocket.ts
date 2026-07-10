@@ -42,6 +42,13 @@ export class McpTunnelWebSocket {
   onerror: ((event: unknown) => void) | null = null;
 
   private connectionId: string | null = null;
+  private resolveConnected!: (id: string) => void;
+
+  // Resolves with the connectionId once the tunnel session is open (used by
+  // the XHR tunnel, which shares the session's connection).
+  readonly whenConnected: Promise<string> = new Promise((resolve) => {
+    this.resolveConnected = resolve;
+  });
 
   constructor(private callTool: ToolCaller) {}
 
@@ -50,6 +57,7 @@ export class McpTunnelWebSocket {
       const result = await this.callTool("_shiny_connect", {});
       this.connectionId = String(result.connectionId);
       this.readyState = 1; // OPEN
+      this.resolveConnected(this.connectionId);
       this.onopen?.();
       void this._pollLoop();
     } catch (err) {

@@ -82,7 +82,6 @@ mcpDirectBase <- function(req) {
 # next to the app, requiring an exact host match against the serving
 # request. Sources, in order:
 # - {rsconnect} records:      rsconnect/**/*.dcf            (field `url`)
-# - Quarto publish records:   _publish.yml                  (field `url`)
 # - Posit Publisher records:  .posit/publish/deployments/*.toml (`direct_url`)
 mcpDeployedUrl <- function(appDir, host) {
   if (is.null(host) || !nzchar(host %||% "")) {
@@ -90,7 +89,6 @@ mcpDeployedUrl <- function(appDir, host) {
   }
   candidates <- c(
     mcpRsconnectRecordUrls(appDir),
-    mcpQuartoPublishUrls(appDir),
     mcpPublisherRecordUrls(appDir)
   )
   for (url in candidates) {
@@ -117,35 +115,6 @@ mcpRsconnectRecordUrls <- function(appDir) {
       error = function(e) NA_character_
     )
   }, character(1), USE.NAMES = FALSE)
-}
-
-# _publish.yml is a list of publish records: each entry has a `source` plus
-# one provider key (connect, quarto-pub, ...) holding records with the full
-# content `url`.
-mcpQuartoPublishUrls <- function(appDir) {
-  path <- file.path(appDir, "_publish.yml")
-  if (!file.exists(path) || !requireNamespace("yaml", quietly = TRUE)) {
-    return(character(0))
-  }
-  entries <- tryCatch(yaml::read_yaml(path), error = function(e) NULL)
-  if (!is.list(entries)) {
-    return(character(0))
-  }
-  urls <- character(0)
-  for (entry in entries) {
-    if (!is.list(entry)) next
-    for (key in setdiff(names(entry), "source")) {
-      records <- entry[[key]]
-      if (!is.list(records)) next
-      for (record in records) {
-        url <- record$url
-        if (is.character(url) && nzchar(url)) {
-          urls <- c(urls, url)
-        }
-      }
-    }
-  }
-  urls
 }
 
 # Posit Publisher's deployment records are TOML; extract `direct_url`

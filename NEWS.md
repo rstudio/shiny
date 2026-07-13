@@ -31,8 +31,8 @@
   URL is path-aware, so apps deployed under a sub-path (e.g. Posit
   Connect's `/content/<guid>`) connect directly too — derived from
   `options(shiny.mcp.origin=)`, Connect's `X-RSC-Request` header, or a
-  deployment record next to the app (rsconnect `.dcf`, Quarto
-  `_publish.yml`, or Posit Publisher `.toml`). Apps can also request
+  deployment record next to the app (rsconnect `.dcf` or Posit Publisher
+  `.toml`). Apps can also request
   fullscreen/picture-in-picture with `mcpRequestDisplayMode()`. (#4407)
 
 * `{watcher}` is now a required dependency and is always used for autoreload file watching, so it no longer needs to be installed separately. The legacy polling-based file watcher has been removed. (#4403)

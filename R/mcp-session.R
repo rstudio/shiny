@@ -33,8 +33,8 @@
 #' is derived, in order, from: `options(shiny.mcp.origin = )` (a full base
 #' URL, which may include a path); Posit Connect's `X-RSC-Request` header;
 #' a deployment record next to the app whose URL matches the serving host
-#' (rsconnect's `rsconnect/**/*.dcf`, Quarto's `_publish.yml`, or Posit
-#' Publisher's `.posit/publish/deployments/*.toml`) — so apps deployed
+#' (rsconnect's `rsconnect/**/*.dcf` or Posit Publisher's
+#' `.posit/publish/deployments/*.toml`) — so apps deployed
 #' under a sub-path such as `/content/<guid>` work without configuration;
 #' or the origin of the MCP request itself. Set
 #' `options(shiny.mcp.direct = FALSE)` to always use the tunnel.

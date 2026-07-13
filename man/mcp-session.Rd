@@ -87,8 +87,8 @@ falling back to the tools/call tunnel automatically. The websocket URL
 is derived, in order, from: \code{options(shiny.mcp.origin = )} (a full base
 URL, which may include a path); Posit Connect's \code{X-RSC-Request} header;
 a deployment record next to the app whose URL matches the serving host
-(rsconnect's \verb{rsconnect/**/*.dcf}, Quarto's \verb{_publish.yml}, or Posit
-Publisher's \verb{.posit/publish/deployments/*.toml}) — so apps deployed
+(rsconnect's \verb{rsconnect/**/*.dcf} or Posit Publisher's
+\verb{.posit/publish/deployments/*.toml}) — so apps deployed
 under a sub-path such as \verb{/content/<guid>} work without configuration;
 or the origin of the MCP request itself. Set
 \code{options(shiny.mcp.direct = FALSE)} to always use the tunnel.

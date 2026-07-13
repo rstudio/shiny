@@ -49,8 +49,9 @@ traffic tunneled over postMessage → `tools/call`).
   Connect `/content/<guid>`) connect directly: priority is
   `options(shiny.mcp.origin=)` → Connect's `X-RSC-Request` header → a
   host-matched deployment record written at deploy time (rsconnect's
-  `rsconnect/**/*.dcf` `url`, Quarto's `_publish.yml` `url`, or Posit
-  Publisher's `.posit/publish/deployments/*.toml` `direct_url`) → request
+  `rsconnect/**/*.dcf` `url` or Posit Publisher's
+  `.posit/publish/deployments/*.toml` `direct_url`; Quarto's `_publish.yml`
+  was considered and dropped) → request
   `Host` + `X-Forwarded-Proto` → local httpuv origin (stdio). Deployment
   records are only trusted when their host matches the serving request, so
   local runs of deployed app dirs never point the iframe at production. Verified in

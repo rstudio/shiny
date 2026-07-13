@@ -164,6 +164,10 @@ reference:
       - registerInputHandler
       - removeInputHandler
       - markRenderFunction
+  - title: MCP Apps
+    desc: Serve Shiny apps as MCP Apps and interact with the MCP host (experimental).
+    contents:
+      - mcp-session
   - title: Utility functions
     desc: Miscellaneous utilities that may be useful to advanced users or when extending Shiny.
     contents:

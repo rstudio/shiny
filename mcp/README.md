@@ -48,11 +48,12 @@ traffic tunneled over postMessage → `tools/call`).
   tunnel. The base URL is **path-aware** so sub-path deployments (Posit
   Connect `/content/<guid>`) connect directly: priority is
   `options(shiny.mcp.origin=)` → Connect's `X-RSC-Request` header → a
-  host-matched rsconnect deployment record (`rsconnect/**/*.dcf` `url`
-  field, the files written at deploy time) → request `Host` +
-  `X-Forwarded-Proto` → local httpuv origin (stdio). Deployment records are
-  only trusted when their host matches the serving request, so local runs
-  of deployed app dirs never point the iframe at production. Verified in
+  host-matched deployment record written at deploy time (rsconnect's
+  `rsconnect/**/*.dcf` `url`, Quarto's `_publish.yml` `url`, or Posit
+  Publisher's `.posit/publish/deployments/*.toml` `direct_url`) → request
+  `Host` + `X-Forwarded-Proto` → local httpuv origin (stdio). Deployment
+  records are only trusted when their host matches the serving request, so
+  local runs of deployed app dirs never point the iframe at production. Verified in
   basic-host (`__shinyMcpTransport__ === "direct"`) and at the wire level
   for the Connect header/record paths. HTTP side channels stay tunneled (no
   CORS exposure) via connectionId-less `_shiny_http`. Disable with

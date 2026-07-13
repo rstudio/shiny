@@ -296,3 +296,52 @@ test_that("resources/read uses the path-aware base: origin-only CSP, full direct
     }
   )
 })
+
+test_that("mcpDeployedUrl reads Quarto _publish.yml records", {
+  skip_if_not_installed("yaml")
+  dir <- withr::local_tempdir()
+  writeLines(
+    c(
+      "- source: project",
+      "  connect:",
+      "    - id: 3bb5f59f-524a-45a5-9508-77e29a1e8bf0",
+      "      url: 'https://connect.example.com/content/3bb5f59f/'",
+      "- source: project",
+      "  quarto-pub:",
+      "    - id: other",
+      "      url: 'https://barret.quarto.pub/mydoc/'"
+    ),
+    file.path(dir, "_publish.yml")
+  )
+  expect_equal(
+    mcpDeployedUrl(dir, "connect.example.com"),
+    "https://connect.example.com/content/3bb5f59f"
+  )
+  expect_equal(
+    mcpDeployedUrl(dir, "barret.quarto.pub"),
+    "https://barret.quarto.pub/mydoc"
+  )
+  expect_null(mcpDeployedUrl(dir, "127.0.0.1:7788"))
+})
+
+test_that("mcpDeployedUrl reads Posit Publisher deployment records", {
+  dir <- withr::local_tempdir()
+  rec_dir <- file.path(dir, ".posit", "publish", "deployments")
+  dir.create(rec_dir, recursive = TRUE)
+  writeLines(
+    c(
+      "$schema = 'https://cdn.posit.co/publisher/schemas/posit-publishing-record-schema-v3.json'",
+      "server_type = 'connect'",
+      "server_url = 'https://connect.example.com'",
+      "id = 'abc-123'",
+      "dashboard_url = 'https://connect.example.com/connect/#/apps/abc-123'",
+      "direct_url = 'https://connect.example.com/content/abc-123/'"
+    ),
+    file.path(rec_dir, "deployment-A1B2.toml")
+  )
+  expect_equal(
+    mcpDeployedUrl(dir, "connect.example.com"),
+    "https://connect.example.com/content/abc-123"
+  )
+  expect_null(mcpDeployedUrl(dir, "other.example.com"))
+})

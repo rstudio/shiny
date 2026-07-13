@@ -78,12 +78,32 @@ mcpDirectBase <- function(req) {
   sprintf("%s://%s", proto, host)
 }
 
-# Look up the deployed URL for this app from the rsconnect deployment
-# records, requiring an exact host match against the serving request.
+# Look up the deployed URL for this app from deployment records written
+# next to the app, requiring an exact host match against the serving
+# request. Sources, in order:
+# - {rsconnect} records:      rsconnect/**/*.dcf            (field `url`)
+# - Quarto publish records:   _publish.yml                  (field `url`)
+# - Posit Publisher records:  .posit/publish/deployments/*.toml (`direct_url`)
 mcpDeployedUrl <- function(appDir, host) {
   if (is.null(host) || !nzchar(host %||% "")) {
     return(NULL)
   }
+  candidates <- c(
+    mcpRsconnectRecordUrls(appDir),
+    mcpQuartoPublishUrls(appDir),
+    mcpPublisherRecordUrls(appDir)
+  )
+  for (url in candidates) {
+    if (!is.character(url) || is.na(url) || !nzchar(url)) next
+    url_host <- sub("^https?://([^/]+).*$", "\\1", url)
+    if (identical(url_host, host)) {
+      return(sub("/+$", "", url))
+    }
+  }
+  NULL
+}
+
+mcpRsconnectRecordUrls <- function(appDir) {
   records <- tryCatch(
     list.files(
       file.path(appDir, "rsconnect"),
@@ -91,18 +111,68 @@ mcpDeployedUrl <- function(appDir, host) {
     ),
     error = function(e) character(0)
   )
-  for (record in records) {
-    url <- tryCatch(
+  vapply(records, function(record) {
+    tryCatch(
       unname(read.dcf(record, fields = "url")[1, "url"]),
       error = function(e) NA_character_
     )
-    if (is.na(url) || !nzchar(url)) next
-    url_host <- sub("^https?://([^/]+).*$", "\\1", url)
-    if (identical(url_host, host)) {
-      return(sub("/+$", "", url))
+  }, character(1), USE.NAMES = FALSE)
+}
+
+# _publish.yml is a list of publish records: each entry has a `source` plus
+# one provider key (connect, quarto-pub, ...) holding records with the full
+# content `url`.
+mcpQuartoPublishUrls <- function(appDir) {
+  path <- file.path(appDir, "_publish.yml")
+  if (!file.exists(path) || !requireNamespace("yaml", quietly = TRUE)) {
+    return(character(0))
+  }
+  entries <- tryCatch(yaml::read_yaml(path), error = function(e) NULL)
+  if (!is.list(entries)) {
+    return(character(0))
+  }
+  urls <- character(0)
+  for (entry in entries) {
+    if (!is.list(entry)) next
+    for (key in setdiff(names(entry), "source")) {
+      records <- entry[[key]]
+      if (!is.list(records)) next
+      for (record in records) {
+        url <- record$url
+        if (is.character(url) && nzchar(url)) {
+          urls <- c(urls, url)
+        }
+      }
     }
   }
-  NULL
+  urls
+}
+
+# Posit Publisher's deployment records are TOML; extract `direct_url`
+# ("the link to use when accessing a deployed ...") without a TOML parser.
+mcpPublisherRecordUrls <- function(appDir) {
+  records <- tryCatch(
+    list.files(
+      file.path(appDir, ".posit", "publish", "deployments"),
+      pattern = "\\.toml$", full.names = TRUE
+    ),
+    error = function(e) character(0)
+  )
+  urls <- character(0)
+  for (record in records) {
+    lines <- tryCatch(
+      readLines(record, warn = FALSE),
+      error = function(e) character(0)
+    )
+    hits <- regmatches(
+      lines,
+      regexpr("^\\s*direct_url\\s*=\\s*['\"]([^'\"]+)['\"]", lines)
+    )
+    for (hit in hits) {
+      urls <- c(urls, sub("^\\s*direct_url\\s*=\\s*['\"]([^'\"]+)['\"].*$", "\\1", hit))
+    }
+  }
+  urls
 }
 
 # CSP source expressions are origins; extract one from a (possibly

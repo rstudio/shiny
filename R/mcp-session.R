@@ -32,11 +32,12 @@
 #' falling back to the tools/call tunnel automatically. The websocket URL
 #' is derived, in order, from: `options(shiny.mcp.origin = )` (a full base
 #' URL, which may include a path); Posit Connect's `X-RSC-Request` header;
-#' an rsconnect deployment record (`rsconnect/**/*.dcf`) whose URL matches
-#' the serving host — so apps deployed under a sub-path such as
-#' `/content/<guid>` work without configuration; or the origin of the MCP
-#' request itself. Set `options(shiny.mcp.direct = FALSE)` to always use
-#' the tunnel.
+#' a deployment record next to the app whose URL matches the serving host
+#' (rsconnect's `rsconnect/**/*.dcf`, Quarto's `_publish.yml`, or Posit
+#' Publisher's `.posit/publish/deployments/*.toml`) — so apps deployed
+#' under a sub-path such as `/content/<guid>` work without configuration;
+#' or the origin of the MCP request itself. Set
+#' `options(shiny.mcp.direct = FALSE)` to always use the tunnel.
 #'
 #' @section Additional tools:
 #' Beyond the tool that opens the app, authors can expose plain R functions

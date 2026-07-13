@@ -40,14 +40,74 @@ if (backends.length === 0) {
 
 const log = (...msg) => console.error("[shiny-mcp-gateway]", ...msg);
 
-async function callBackend(url, method, params, id = 0) {
+// Sticky-session cookies per backend. shinyapps.io (and similar platforms)
+// pin a client to one app instance via a session cookie; without it,
+// consecutive _shiny_* calls could hit different instances and lose the
+// Shiny session.
+const cookieJar = new Map();
+
+function rememberCookies(url, res) {
+  const setCookies =
+    typeof res.headers.getSetCookie === "function"
+      ? res.headers.getSetCookie()
+      : [res.headers.get("set-cookie")].filter(Boolean);
+  if (setCookies.length === 0) return;
+  const jar = cookieJar.get(url) ?? new Map();
+  for (const line of setCookies) {
+    const [pair] = line.split(";");
+    const eq = pair.indexOf("=");
+    if (eq > 0) jar.set(pair.slice(0, eq).trim(), pair.slice(eq + 1).trim());
+  }
+  cookieJar.set(url, jar);
+}
+
+function cookieHeader(url) {
+  const jar = cookieJar.get(url);
+  if (!jar || jar.size === 0) return {};
+  const value = [...jar].map(([k, v]) => `${k}=${v}`).join("; ");
+  return { cookie: value };
+}
+
+async function postBackend(url, method, params, id) {
   const res = await fetch(url, {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": "application/json", ...cookieHeader(url) },
     body: JSON.stringify({ jsonrpc: "2.0", id, method, params }),
   });
+  rememberCookies(url, res);
   if (!res.ok) throw new Error(`${url} ${method} -> HTTP ${res.status}`);
   return res.json();
+}
+
+// Hosted platforms cold-start a sleeping app on GET but reject POST with
+// e.g. 405 (observed on shinyapps.io). On failure, GET the app's base URL
+// to wake it, then retry the POST with backoff.
+async function wakeBackend(url) {
+  const base = url.replace(/\/mcp\/?$/, "/");
+  try {
+    const res = await fetch(base, { headers: cookieHeader(url) });
+    rememberCookies(url, res);
+  } catch {
+    /* the retry loop will surface persistent failures */
+  }
+}
+
+async function callBackend(url, method, params, id = 0) {
+  const delays = [0, 1000, 3000, 8000];
+  let lastErr;
+  for (const delay of delays) {
+    if (delay > 0) {
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+    try {
+      return await postBackend(url, method, params, id);
+    } catch (err) {
+      lastErr = err;
+      log(`${method} failed (${err.message}); waking ${url}`);
+      await wakeBackend(url);
+    }
+  }
+  throw lastErr;
 }
 
 // name -> backend URL, uri -> backend URL. Rebuilt on demand.
@@ -185,10 +245,16 @@ if (port !== null) {
     log(`HTTP on http://127.0.0.1:${port}/mcp for ${backends.length} app(s)`);
   });
 } else {
+  let pending = 0;
+  let stdinClosed = false;
+  const maybeExit = () => {
+    if (stdinClosed && pending === 0) process.exit(0);
+  };
   const rl = createInterface({ input: process.stdin, terminal: false });
   rl.on("line", (line) => {
     line = line.trim();
     if (!line) return;
+    pending++;
     void (async () => {
       let response = null;
       try {
@@ -200,9 +266,17 @@ if (port !== null) {
           error: { code: -32700, message: "Parse error: " + err.message },
         };
       }
-      if (response !== null) process.stdout.write(JSON.stringify(response) + "\n");
+      if (response !== null) {
+        process.stdout.write(JSON.stringify(response) + "\n");
+      }
+      pending--;
+      maybeExit();
     })();
   });
-  rl.on("close", () => process.exit(0));
+  // Drain in-flight requests before exiting on stdin close.
+  rl.on("close", () => {
+    stdinClosed = true;
+    maybeExit();
+  });
   log(`stdio gateway for ${backends.length} app(s)`);
 }

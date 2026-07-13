@@ -56,7 +56,10 @@ custom-message bridges).
 
 **The sub-path caveat — ✅ resolved 2026-07-13.** Implemented per Barret's
 request: the direct-connect base is now path-aware, derived from (in order)
-`options(shiny.mcp.origin=)`, Posit Connect's `X-RSC-Request` header, a
+`options(shiny.mcp.origin=)`, Posit Connect's `RStudio-Connect-App-Base-Url`
+header (verified 2026-07-13 on a real connect.posit.it deployment — Connect
+does *not* send `X-RSC-Request` to Shiny content, though that header is
+still honored), a
 host-matched rsconnect deployment record (`rsconnect/**/*.dcf` `url` — the
 deployment output files), then the request origin. CSP still declares
 origins only (host sanitizers reject paths); the full base feeds the ws

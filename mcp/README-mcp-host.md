@@ -44,6 +44,57 @@ mcp/run-mcp-host.sh                      # defaults to :7788/mcp
 Then open <http://localhost:8090/?server=shiny&tool=open_shiny_app&call=true>
 (or plain <http://localhost:8090> and click Call Tool).
 
+## Showing the app in a real Claude session
+
+Claude Code (terminal) does **not** render MCP Apps iframes — use Claude
+Desktop (local) or claude.ai (deployed).
+
+### Claude Desktop (local, stdio)
+
+Add the app as a local stdio server in
+`~/Library/Application Support/Claude/claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "shiny-demo": {
+      "command": "Rscript",
+      "args": [
+        "-e",
+        "setwd('/ABSOLUTE/PATH/TO/shiny-repo'); pkgload::load_all(quiet = TRUE); options(shiny.mcp = TRUE, shiny.mcp.stdio = TRUE); shiny::runApp('mcp/demo-app', launch.browser = FALSE)"
+      ]
+    }
+  }
+}
+```
+
+Then fully restart Claude Desktop (Cmd-Q, not just close the window) and ask
+it to *"open the shiny app"* — it calls the `open_shiny_app` tool and the app
+renders inline in the conversation.
+
+Notes:
+
+- `pkgload::load_all()` is needed until this branch is installed as
+  {shiny}; once installed, replace it with `library(shiny)`.
+- Claude Desktop spawns servers without your login-shell `PATH` — if
+  `Rscript` isn't found, use its absolute path (`which Rscript`).
+- BOTH options are required: `shiny.mcp` enables the endpoint,
+  `shiny.mcp.stdio` speaks the protocol on stdin/stdout.
+- Never `cat()`/`print()` to stdout in the app at top level — stdout is the
+  protocol channel (`message()` is fine).
+- R startup can exceed host connect timeouts; for the `claude` CLI use
+  `MCP_TIMEOUT=120000`. Pre-warm `pkgload::load_all()` once so compilation
+  isn't paid at connect time.
+
+### claude.ai (web, deployed)
+
+Deploy the app (with `options(shiny.mcp = TRUE)` set in app.R / .Rprofile)
+somewhere with a public HTTPS URL — e.g. Posit Connect — then in claude.ai:
+Settings → Connectors → *Add custom connector* → URL
+`https://<your-app-url>/mcp`. The direct-connect fast path may be blocked
+there (claude.ai currently hardcodes the iframe CSP,
+anthropics/claude-ai-mcp#40); the postMessage tunnel still works.
+
 ## Gotchas
 
 - `SANDBOX_PORT` must stay 8081 — the sandbox URL is hardcoded in the built

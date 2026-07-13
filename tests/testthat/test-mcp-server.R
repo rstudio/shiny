@@ -203,7 +203,7 @@ test_that("invalid or colliding author tools are skipped with a warning", {
   })
 })
 
-test_that("mcpDirectBase honors option > X-RSC-Request > request origin", {
+test_that("mcpDirectBase honors option > Connect headers > request origin", {
   req <- new.env(parent = emptyenv())
   req$HTTP_HOST <- "connect.example.com"
   req$HTTP_X_FORWARDED_PROTO <- "https"
@@ -211,9 +211,15 @@ test_that("mcpDirectBase honors option > X-RSC-Request > request origin", {
   # Request-derived origin (no path information)
   expect_equal(mcpDirectBase(req), "https://connect.example.com")
 
-  # Connect forwards the full external URL of the request
+  # Connect forwards the full external URL of the request (API content)
   req$HTTP_X_RSC_REQUEST <- "https://connect.example.com/content/abc123/mcp"
   expect_equal(mcpDirectBase(req), "https://connect.example.com/content/abc123")
+
+  # Connect sends the app's base URL with every request to Shiny content;
+  # it wins over X-RSC-Request (needs no path surgery)
+  req$HTTP_RSTUDIO_CONNECT_APP_BASE_URL <-
+    "https://connect.example.com/content/def456/"
+  expect_equal(mcpDirectBase(req), "https://connect.example.com/content/def456")
 
   # Explicit option wins over everything, trailing slash normalized
   withr::with_options(

@@ -36,15 +36,18 @@ mcpDisplayModes <- function() {
 # Connect's /content/<guid>), for the direct-connect fast path. Priority:
 #
 # 1. options(shiny.mcp.origin) — explicit full URL, for nonstandard proxies.
-# 2. X-RSC-Request — Posit Connect forwards the full external URL of the
-#    request; strip the trailing /mcp to get the content base.
-# 3. rsconnect deployment records (rsconnect/**/*.dcf next to the app) —
+# 2. RStudio-Connect-App-Base-Url — Posit Connect sends the app's external
+#    base URL (https://<server>/content/<guid>) with every request it
+#    proxies to Shiny content. Verified against a real Connect deployment.
+# 3. X-RSC-Request — the full external URL of the request, sent by Connect
+#    to API content; strip the trailing /mcp to get the content base.
+# 4. rsconnect deployment records (rsconnect/**/*.dcf next to the app) —
 #    the "output files" written by deployment carry the content `url`. Only
 #    trusted when the record's host matches the request's Host header, so a
 #    local run of a deployed app dir never points the iframe at production.
-# 4. Origin derived from the request (Host + X-Forwarded-Proto) — right for
+# 5. Origin derived from the request (Host + X-Forwarded-Proto) — right for
 #    localhost and root-mounted https tunnels, but pathless.
-# 5. The local httpuv origin (stdio transport has no request).
+# 6. The local httpuv origin (stdio transport has no request).
 mcpDirectBase <- function(req) {
   reqHeader <- function(name) {
     value <- tryCatch(req[[name]], error = function(e) NULL)
@@ -55,6 +58,11 @@ mcpDirectBase <- function(req) {
   origin_opt <- getOption("shiny.mcp.origin", NULL)
   if (is.character(origin_opt) && nzchar(origin_opt)) {
     return(stripSlash(origin_opt))
+  }
+
+  connect_base <- reqHeader("HTTP_RSTUDIO_CONNECT_APP_BASE_URL")
+  if (!is.null(connect_base)) {
+    return(stripSlash(connect_base))
   }
 
   rsc <- reqHeader("HTTP_X_RSC_REQUEST")

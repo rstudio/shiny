@@ -31,7 +31,8 @@
 #' iframe connects over a real WebSocket for native-latency reactivity,
 #' falling back to the tools/call tunnel automatically. The websocket URL
 #' is derived, in order, from: `options(shiny.mcp.origin = )` (a full base
-#' URL, which may include a path); Posit Connect's `X-RSC-Request` header;
+#' URL, which may include a path); Posit Connect's
+#' `RStudio-Connect-App-Base-Url` (or `X-RSC-Request`) header;
 #' a deployment record next to the app whose URL matches the serving host
 #' (rsconnect's `rsconnect/**/*.dcf` or Posit Publisher's
 #' `.posit/publish/deployments/*.toml`) — so apps deployed

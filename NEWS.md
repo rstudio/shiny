@@ -28,7 +28,7 @@
   content security policy, the app connects over a real WebSocket for
   native-latency reactivity and falls back to the tunnel automatically
   (disable with `options(shiny.mcp.direct = FALSE)`); apps can also request
-  fullscreen/picture-in-picture with `mcpRequestDisplayMode()`. (#4404)
+  fullscreen/picture-in-picture with `mcpRequestDisplayMode()`. (#4407)
 
 * `{watcher}` is now a required dependency and is always used for autoreload file watching, so it no longer needs to be installed separately. The legacy polling-based file watcher has been removed. (#4403)
 

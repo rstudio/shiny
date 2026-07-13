@@ -33,6 +33,7 @@
 #' is derived, in order, from: `options(shiny.mcp.origin = )` (a full base
 #' URL, which may include a path); Posit Connect's
 #' `RStudio-Connect-App-Base-Url` (or `X-RSC-Request`) header;
+#' shinyapps.io's `X-Redx-Frontend-Name` header;
 #' a deployment record next to the app whose URL matches the serving host
 #' (rsconnect's `rsconnect/**/*.dcf` or Posit Publisher's
 #' `.posit/publish/deployments/*.toml`) — so apps deployed

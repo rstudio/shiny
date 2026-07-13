@@ -211,12 +211,17 @@ test_that("mcpDirectBase honors option > Connect headers > request origin", {
   # Request-derived origin (no path information)
   expect_equal(mcpDirectBase(req), "https://connect.example.com")
 
+  # shinyapps.io sends external host + path (schemeless) in
+  # X-Redx-Frontend-Name
+  req$HTTP_X_REDX_FRONTEND_NAME <- "barret.shinyapps.io/my-app/"
+  expect_equal(mcpDirectBase(req), "https://barret.shinyapps.io/my-app")
+
   # Connect forwards the full external URL of the request (API content)
   req$HTTP_X_RSC_REQUEST <- "https://connect.example.com/content/abc123/mcp"
   expect_equal(mcpDirectBase(req), "https://connect.example.com/content/abc123")
 
   # Connect sends the app's base URL with every request to Shiny content;
-  # it wins over X-RSC-Request (needs no path surgery)
+  # it wins over everything but the option (needs no path surgery)
   req$HTTP_RSTUDIO_CONNECT_APP_BASE_URL <-
     "https://connect.example.com/content/def456/"
   expect_equal(mcpDirectBase(req), "https://connect.example.com/content/def456")
@@ -226,6 +231,18 @@ test_that("mcpDirectBase honors option > Connect headers > request origin", {
     list(shiny.mcp.origin = "https://other.example.com/apps/dash/"),
     expect_equal(mcpDirectBase(req), "https://other.example.com/apps/dash")
   )
+})
+
+test_that("mcpDirectBase ignores empty headers and prefers X-Forwarded-Host", {
+  req <- new.env(parent = emptyenv())
+  req$HTTP_HOST <- "127.0.0.1:34599"
+  req$HTTP_X_FORWARDED_PROTO <- "https"
+  # shinyapps.io sends this header with an empty value to Shiny content
+  req$HTTP_RSTUDIO_CONNECT_APP_BASE_URL <- ""
+
+  # the internal Host is replaced by the forwarded external host
+  req$HTTP_X_FORWARDED_HOST <- "barret.shinyapps.io"
+  expect_equal(mcpDirectBase(req), "https://barret.shinyapps.io")
 })
 
 test_that("mcpDeployedUrl finds a host-matched rsconnect deployment record", {

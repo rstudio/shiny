@@ -49,7 +49,9 @@ traffic tunneled over postMessage → `tools/call`).
   Connect `/content/<guid>`) connect directly: priority is
   `options(shiny.mcp.origin=)` → Connect's `RStudio-Connect-App-Base-Url`
   header (what Connect actually sends to Shiny content, verified on a real
-  deployment; `X-RSC-Request` also honored for API content) → a
+  deployment; `X-RSC-Request` also honored for API content) →
+  shinyapps.io's `X-Redx-Frontend-Name` header (schemeless host + path,
+  verified on a real deployment) → a
   host-matched deployment record written at deploy time (rsconnect's
   `rsconnect/**/*.dcf` `url` or Posit Publisher's
   `.posit/publish/deployments/*.toml` `direct_url`; Quarto's `_publish.yml`

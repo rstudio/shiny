@@ -87,6 +87,7 @@ falling back to the tools/call tunnel automatically. The websocket URL
 is derived, in order, from: \code{options(shiny.mcp.origin = )} (a full base
 URL, which may include a path); Posit Connect's
 \code{RStudio-Connect-App-Base-Url} (or \code{X-RSC-Request}) header;
+shinyapps.io's \code{X-Redx-Frontend-Name} header;
 a deployment record next to the app whose URL matches the serving host
 (rsconnect's \verb{rsconnect/**/*.dcf} or Posit Publisher's
 \verb{.posit/publish/deployments/*.toml}) — so apps deployed

@@ -41,13 +41,17 @@ mcpDisplayModes <- function() {
 #    proxies to Shiny content. Verified against a real Connect deployment.
 # 3. X-RSC-Request — the full external URL of the request, sent by Connect
 #    to API content; strip the trailing /mcp to get the content base.
-# 4. rsconnect deployment records (rsconnect/**/*.dcf next to the app) —
+# 4. X-Redx-Frontend-Name — shinyapps.io sends the external host + path
+#    (no scheme, e.g. "barret.shinyapps.io/my-app/"); combine with
+#    X-Forwarded-Proto. Verified against a real shinyapps.io deployment.
+# 5. rsconnect deployment records (rsconnect/**/*.dcf next to the app) —
 #    the "output files" written by deployment carry the content `url`. Only
 #    trusted when the record's host matches the request's Host header, so a
 #    local run of a deployed app dir never points the iframe at production.
-# 5. Origin derived from the request (Host + X-Forwarded-Proto) — right for
-#    localhost and root-mounted https tunnels, but pathless.
-# 6. The local httpuv origin (stdio transport has no request).
+# 6. Origin derived from the request (X-Forwarded-Host falling back to
+#    Host, + X-Forwarded-Proto) — right for localhost and root-mounted
+#    https tunnels, but pathless.
+# 7. The local httpuv origin (stdio transport has no request).
 mcpDirectBase <- function(req) {
   reqHeader <- function(name) {
     value <- tryCatch(req[[name]], error = function(e) NULL)
@@ -70,7 +74,14 @@ mcpDirectBase <- function(req) {
     return(stripSlash(sub("/mcp/?$", "", rsc)))
   }
 
-  host <- reqHeader("HTTP_HOST")
+  proto <- reqHeader("HTTP_X_FORWARDED_PROTO") %||% "http"
+
+  redx <- reqHeader("HTTP_X_REDX_FRONTEND_NAME")
+  if (!is.null(redx)) {
+    return(stripSlash(sprintf("%s://%s", proto, redx)))
+  }
+
+  host <- reqHeader("HTTP_X_FORWARDED_HOST") %||% reqHeader("HTTP_HOST")
   deployed <- mcpDeployedUrl(
     getShinyOption("appDir", default = getwd()),
     host
@@ -82,7 +93,6 @@ mcpDirectBase <- function(req) {
   if (is.null(host)) {
     return(.globals$mcpLocalOrigin)
   }
-  proto <- reqHeader("HTTP_X_FORWARDED_PROTO") %||% "http"
   sprintf("%s://%s", proto, host)
 }
 

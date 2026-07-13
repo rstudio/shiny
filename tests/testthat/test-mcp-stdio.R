@@ -99,14 +99,21 @@ test_that("stdio transport works end to end in a real subprocess", {
     file.path(app_dir, "app.R")
   )
 
-  # Load the development version of shiny in the subprocess (the installed
-  # version won't have the MCP code while this feature is on a branch).
+  # The subprocess must run THIS version of shiny. Under R CMD check the
+  # installed package is the one being checked, so library(shiny) suffices;
+  # under devtools::test() the sources must be load_all()'d instead.
   pkg_dir <- normalizePath(testthat::test_path("../.."), winslash = "/")
+  bootstrap <- if (file.exists(file.path(pkg_dir, "DESCRIPTION")) &&
+    requireNamespace("pkgload", quietly = TRUE)) {
+    sprintf("suppressMessages(pkgload::load_all('%s', quiet = TRUE))", pkg_dir)
+  } else {
+    "library(shiny)"
+  }
   px <- processx::process$new(
     file.path(R.home("bin"), "Rscript"),
     args = c("-e", sprintf(
-      "suppressMessages(pkgload::load_all('%s', quiet = TRUE)); shiny::runApp('%s', launch.browser = FALSE)",
-      pkg_dir, app_dir
+      "%s; shiny::runApp('%s', launch.browser = FALSE)",
+      bootstrap, app_dir
     )),
     stdin = "|", stdout = "|", stderr = "|"
   )

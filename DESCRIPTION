@@ -113,6 +113,8 @@ Suggests:
     markdown,
     mirai,
     otelsdk (>= 0.2.0),
+    pkgload,
+    processx,
     ragg,
     reactlog (>= 1.0.0),
     rmarkdown,

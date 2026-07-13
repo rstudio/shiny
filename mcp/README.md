@@ -105,6 +105,7 @@ Implementation lives in `R/mcp-server.R`, `R/mcp-tunnel.R`, `R/mcp-app.R`,
 
 | File | What it is | Source of truth |
 |---|---|---|
+| `architecture.md` | **How the system as built works** — start here | — |
 | `research-notes.md` | Protocol research, Shiny transport seams, the three candidate architectures + recommendation | `.context/mcp-apps-research.md` |
 | `design-spec.md` | Approved Phase 1 design | `docs/superpowers/specs/2026-07-10-shiny-mcp-apps-design.md` |
 | `implementation-plan-phase1.md` | Phase 1 task-by-task plan (executed) | `docs/superpowers/plans/2026-07-10-shiny-mcp-apps-phase1.md` |

@@ -122,6 +122,7 @@ Implementation lives in `R/mcp-server.R`, `R/mcp-tunnel.R`, `R/mcp-app.R`,
 | `screenshot-e2e-css-fonts.png` | CSS url() inlining proof: FontAwesome glyph renders in the sandbox | — |
 | `screenshot-e2e-session-api.png` | Session API proof: tool input + Model Context panel | — |
 | `mcptools-upstream-notes.md` | Gaps {mcptools} would need to close to host this (candidate upstream issues) | — |
+| `comparison-shinymcp.md` | How this compares to JamesHWade/shinymcp (team-shareable) | — |
 | `QUESTIONS.md` | Open decisions for Barret, with context | — |
 
 ## Quick start

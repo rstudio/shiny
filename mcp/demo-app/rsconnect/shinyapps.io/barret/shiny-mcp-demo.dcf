@@ -1,0 +1,10 @@
+name: shiny-mcp-demo
+title:
+username: barret
+account: barret
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 17606832
+bundleId: 12261506
+url: https://barret.shinyapps.io/shiny-mcp-demo/
+version: 1

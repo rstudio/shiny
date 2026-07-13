@@ -29,9 +29,14 @@ shinyApp(
       sidebarPanel(
         selectInput("xvar", "X", vars, selected = "wt"),
         selectInput("yvar", "Y", vars, selected = "mpg"),
-        checkboxInput("smooth", "Add trend line", TRUE)
+        checkboxInput("smooth", "Add trend line", TRUE),
+        # Dynamic-dependency demo: plotly's JS/CSS are not part of the page
+        # until this is checked; in MCP sessions they arrive inlined over
+        # the reactive channel (the sandbox can't fetch them over HTTP).
+        checkboxInput("show_plotly", "Show interactive (plotly) plot", FALSE)
       ),
       mainPanel(
+        uiOutput("plotly_ui"),
         plotOutput("scatter"),
         textOutput("cor")
       )
@@ -56,6 +61,25 @@ shinyApp(
       if (isTRUE(input$smooth)) {
         abline(stats::lm(y ~ x), col = "tomato", lwd = 2)
       }
+    })
+
+    output$plotly_ui <- renderUI({
+      req(input$show_plotly)
+      plotly::plotlyOutput("plotly_scatter", height = "300px")
+    })
+
+    output$plotly_scatter <- plotly::renderPlotly({
+      req(input$show_plotly)
+      plotly::plot_ly(
+        mtcars,
+        x = ~ get(input$xvar), y = ~ get(input$yvar),
+        type = "scatter", mode = "markers",
+        text = rownames(mtcars)
+      ) |>
+        plotly::layout(
+          xaxis = list(title = input$xvar),
+          yaxis = list(title = input$yvar)
+        )
     })
 
     output$cor <- renderText({

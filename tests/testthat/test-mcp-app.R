@@ -273,3 +273,36 @@ test_that("isMcpSession recognizes direct websocket connections via ?mcp=1", {
   req2$QUERY_STRING <- ""
   expect_false(isMcpSession(list(request = req2)))
 })
+
+test_that("createWebDependency inlines file-based deps for MCP sessions", {
+  dir <- withr::local_tempdir()
+  writeLines("console.log('widget');", file.path(dir, "w.js"))
+  writeLines(".w { color: red; }", file.path(dir, "w.css"))
+  dep <- htmltools::htmlDependency(
+    "testwidget", "1.0",
+    src = c(file = dir),
+    script = "w.js", stylesheet = "w.css"
+  )
+
+  # Outside an MCP session: normal resource-path behavior
+  plain <- createWebDependency(dep)
+  expect_equal(plain$src$href, "testwidget-1.0")
+
+  # Inside an MCP session (e.g. {htmlwidgets} calling it directly for
+  # render-time deps): diverted to the inline representation
+  req <- new.env(parent = emptyenv())
+  req$HTTP_MCP_TUNNEL <- "1"
+  fake_session <- list(request = req)
+  inlined <- withReactiveDomain(fake_session, createWebDependency(dep))
+  expect_equal(inlined$src$href, "_mcp_inline")
+  expect_match(inlined$head, "console.log('widget');", fixed = TRUE)
+  expect_match(inlined$head, ".w { color: red; }", fixed = TRUE)
+
+  # href-only deps fall through untouched (no infinite recursion)
+  href_dep <- htmltools::htmlDependency(
+    "cdn", "1.0",
+    src = c(href = "https://cdn.example.com"), script = "x.js"
+  )
+  passed <- withReactiveDomain(fake_session, createWebDependency(href_dep))
+  expect_equal(passed$src$href, "https://cdn.example.com")
+})

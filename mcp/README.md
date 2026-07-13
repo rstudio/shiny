@@ -77,6 +77,14 @@ traffic tunneled over postMessage → `tools/call`).
   errors surface as MCP tool errors. Invalid or name-colliding specs are
   skipped with a warning. Verified E2E in basic-host (`get_sample_stats`
   in the demo app).
+- **Multi-app gateway (one connector, many apps):** each app sets a unique
+  `options(shiny.mcp.appId = "<id>")`, which namespaces its internal
+  `_shiny_*` tools (`demo_shiny_connect`, ...) and publishes its resource
+  as `ui://shiny/<appId>`; `gateway/shiny-mcp-gateway.mjs` (zero-dep Node,
+  stdio or `--port` HTTP) then merges several app endpoints into a single
+  MCP server. E2E verified in basic-host with `demo-app` + `demo-app2`
+  behind one gateway, including full tunnel reactivity
+  (`screenshot-e2e-gateway.png`); see `gateway/README.md`.
 - **Session API (exported, experimental):** `isMcpSession()`,
   `mcpToolInput()` (parsed tool arguments, reactive), `mcpHostContext()`
   (theme/locale/display mode, reactive), `mcpUpdateModelContext(text=, data=)`
@@ -102,6 +110,10 @@ Implementation lives in `R/mcp-server.R`, `R/mcp-tunnel.R`, `R/mcp-app.R`,
 | `implementation-plan-phase1.md` | Phase 1 task-by-task plan (executed) | `docs/superpowers/plans/2026-07-10-shiny-mcp-apps-phase1.md` |
 | `implementation-plan-phase2.md` | Phase 2 task-by-task plan (executed) | `docs/superpowers/plans/2026-07-10-shiny-mcp-apps-phase2.md` |
 | `demo-app/app.R` | Demo app (slider/plot, upload, download, server-side selectize, dynamic UI) with MCP enabled | `.context/mcp-demo/app.R` |
+| `demo-app2/app.R` | Second demo app (mtcars explorer, appId `cars`) for the multi-app gateway | — |
+| `gateway/shiny-mcp-gateway.mjs` | Zero-dep Node gateway merging several Shiny MCP endpoints into one server | — |
+| `gateway/README.md` | Gateway usage + design | — |
+| `screenshot-e2e-gateway.png` | Gateway E2E proof: two apps behind one connector | — |
 | `README-mcp-host.md` | How to run the ext-apps basic-host against a Shiny app, with all gotchas | — |
 | `run-mcp-host.sh` | Start script for the basic-host (host :8090, sandbox :8081) | — |
 | `screenshot-e2e-basic-host.png` | Phase 1 E2E proof: demo app reactive inside the sandboxed iframe | — |

@@ -32,6 +32,50 @@ mcpDisplayModes <- function() {
   modes
 }
 
+# Optional app identity, for gateways that merge several Shiny MCP
+# endpoints behind a single MCP server. When set, the internal `_shiny_*`
+# tool names are prefixed ("sales" -> "sales_shiny_connect") and the app
+# resource is published as ui://shiny/<appId>, so tools and resources from
+# different apps never collide at the gateway.
+mcpAppId <- function() {
+  id <- getOption("shiny.mcp.appId", NULL)
+  if (!is.character(id) || length(id) != 1 || is.na(id) || !nzchar(id)) {
+    return(NULL)
+  }
+  if (!grepl("^[A-Za-z0-9_-]+$", id)) {
+    if (!isTRUE(.globals$mcpAppIdWarned)) {
+      .globals$mcpAppIdWarned <- TRUE
+      warning(
+        "Ignoring options(shiny.mcp.appId): ",
+        "it may only contain letters, digits, '_' and '-'"
+      )
+    }
+    return(NULL)
+  }
+  id
+}
+
+mcpResourceUri <- function() {
+  id <- mcpAppId()
+  if (is.null(id)) MCP_RESOURCE_URI else paste0("ui://shiny/", id)
+}
+
+# "_shiny_connect" -> "<appId>_shiny_connect" when an appId is set.
+mcpTunnelToolName <- function(base) {
+  id <- mcpAppId()
+  if (is.null(id)) base else paste0(id, base)
+}
+
+# Inverse of mcpTunnelToolName(): strip the appId prefix from an incoming
+# tools/call name so dispatch can match the canonical `_shiny_*` names.
+mcpTunnelLocalName <- function(name) {
+  id <- mcpAppId()
+  if (!is.null(id) && startsWith(name, paste0(id, "_shiny_"))) {
+    return(substring(name, nchar(id) + 1))
+  }
+  name
+}
+
 # The app's externally reachable base URL (may include a path, e.g. Posit
 # Connect's /content/<guid>), for the direct-connect fast path. Priority:
 #
@@ -320,7 +364,7 @@ mcpToolsList <- function() {
       name = info$name,
       description = info$description,
       inputSchema = info$inputSchema,
-      `_meta` = list(ui = list(resourceUri = MCP_RESOURCE_URI))
+      `_meta` = list(ui = list(resourceUri = mcpResourceUri()))
     )),
     mcpTunnelToolsList(),
     lapply(mcpAuthorTools(warn = TRUE), function(tool) {
@@ -431,9 +475,13 @@ mcpToolCall <- function(body, uiHandler, wsHandler) {
       ))
     )))
   }
-  if (startsWith(name, "_shiny_")) {
+  localName <- mcpTunnelLocalName(name)
+  if (startsWith(localName, "_shiny_")) {
     return(mcpTunnelToolCall(
-      name, body$params$arguments %||% empty_named_list(), body$id, wsHandler
+      localName,
+      body$params$arguments %||% empty_named_list(),
+      body$id,
+      wsHandler
     ))
   }
   authorTool <- mcpAuthorTools()[[name]]
@@ -445,7 +493,7 @@ mcpToolCall <- function(body, uiHandler, wsHandler) {
 
 mcpResourcesList <- function() {
   list(list(
-    uri = MCP_RESOURCE_URI,
+    uri = mcpResourceUri(),
     name = "Shiny application",
     description = "The interactive Shiny application UI.",
     mimeType = MCP_RESOURCE_MIME,
@@ -455,12 +503,13 @@ mcpResourcesList <- function() {
 
 mcpResourcesRead <- function(body, uiHandler, req = NULL) {
   uri <- body$params$uri %||% ""
-  if (!identical(uri, MCP_RESOURCE_URI)) {
+  if (!identical(uri, mcpResourceUri())) {
     return(mcpError(body$id, -32602L, sprintf("Unknown resource: %s", uri)))
   }
 
   base <- if (mcpDirectEnabled()) mcpDirectBase(req)
   config <- dropNulls(list(
+    appId = mcpAppId(),
     directBase = base,
     displayModes = as.list(mcpDisplayModes())
   ))
@@ -475,7 +524,7 @@ mcpResourcesRead <- function(body, uiHandler, req = NULL) {
 
   html <- renderMcpAppHtml(uiHandler, config = config)
   mcpResult(body$id, list(contents = list(list(
-    uri = MCP_RESOURCE_URI,
+    uri = mcpResourceUri(),
     mimeType = MCP_RESOURCE_MIME,
     text = html,
     `_meta` = list(ui = ui_meta)

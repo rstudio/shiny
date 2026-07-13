@@ -331,13 +331,13 @@ mcpTunnelToolsList <- function() {
   conn_arg <- list(connectionId = list(type = "string"))
   list(
     list(
-      name = "_shiny_connect",
+      name = mcpTunnelToolName("_shiny_connect"),
       description = "Internal: open a Shiny session for the app iframe.",
       inputSchema = list(type = "object", properties = empty_named_list()),
       `_meta` = app_only
     ),
     list(
-      name = "_shiny_send",
+      name = mcpTunnelToolName("_shiny_send"),
       description = "Internal: deliver client frames to the Shiny session.",
       inputSchema = list(
         type = "object",
@@ -347,7 +347,7 @@ mcpTunnelToolsList <- function() {
       `_meta` = app_only
     ),
     list(
-      name = "_shiny_receive",
+      name = mcpTunnelToolName("_shiny_receive"),
       description = "Internal: long-poll for frames from the Shiny session.",
       inputSchema = list(
         type = "object",
@@ -357,7 +357,7 @@ mcpTunnelToolsList <- function() {
       `_meta` = app_only
     ),
     list(
-      name = "_shiny_close",
+      name = mcpTunnelToolName("_shiny_close"),
       description = "Internal: close the Shiny session.",
       inputSchema = list(
         type = "object",
@@ -367,7 +367,7 @@ mcpTunnelToolsList <- function() {
       `_meta` = app_only
     ),
     list(
-      name = "_shiny_http",
+      name = mcpTunnelToolName("_shiny_http"),
       description = "Internal: perform an HTTP request against the Shiny app.",
       inputSchema = list(
         type = "object",

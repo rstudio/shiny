@@ -1,6 +1,8 @@
 library(shiny)
 
 options(shiny.mcp = TRUE)
+# Unique identity so a multi-app gateway can merge this app with others
+options(shiny.mcp.appId = "demo")
 options(shiny.mcp.tool = list(
   name = "open_shiny_app",
   description = paste(

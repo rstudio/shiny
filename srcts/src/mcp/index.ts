@@ -119,6 +119,9 @@ function installDownloadInterceptor(xhrClass: typeof XMLHttpRequest): void {
 }
 
 type ShinyMcpConfig = {
+  // Set via options(shiny.mcp.appId=): namespaces the internal `_shiny_*`
+  // tool names so a gateway can merge several Shiny apps into one server.
+  appId?: string;
   directBase?: string;
   displayModes?: Array<"inline" | "fullscreen" | "pip">;
 };
@@ -179,7 +182,14 @@ function initShinyMcpBridge(): void {
 
   const callTool: ToolCaller = async (name, args) => {
     await connected;
-    const result = await app.callServerTool({ name, arguments: args });
+    // The server namespaces its internal tools when an appId is set, so a
+    // multi-app gateway can route each iframe's calls to the right app.
+    const fullName =
+      config.appId && name.startsWith("_shiny_") ? config.appId + name : name;
+    const result = await app.callServerTool({
+      name: fullName,
+      arguments: args,
+    });
     if (result.isError) {
       const content = result.content as
         | Array<{ type: string; text?: string }>

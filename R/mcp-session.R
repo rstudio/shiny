@@ -41,6 +41,15 @@
 #' or the origin of the MCP request itself. Set
 #' `options(shiny.mcp.direct = FALSE)` to always use the tunnel.
 #'
+#' @section Multiple apps behind one server:
+#' A gateway can merge several Shiny MCP endpoints into a single MCP
+#' server, so one connector exposes many apps. For that to work each app
+#' must set a unique `options(shiny.mcp.appId = "<id>")` (letters, digits,
+#' `_`, `-`): the app's internal tunnel tools are then prefixed with the
+#' id and its UI resource is published as `ui://shiny/<id>`, so tools and
+#' resources from different apps do not collide when merged. App-facing
+#' tool names must also be unique across the merged apps.
+#'
 #' @section Additional tools:
 #' Beyond the tool that opens the app, authors can expose plain R functions
 #' as MCP tools the model may call directly, via

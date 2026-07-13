@@ -35,7 +35,10 @@
   header, or a
   deployment record next to the app (rsconnect `.dcf` or Posit Publisher
   `.toml`). Apps can also request
-  fullscreen/picture-in-picture with `mcpRequestDisplayMode()`. (#4407)
+  fullscreen/picture-in-picture with `mcpRequestDisplayMode()`. Setting a
+  unique `options(shiny.mcp.appId=)` per app namespaces each app's
+  internal tools and resource URI so a gateway can merge several Shiny
+  apps into a single MCP server (one connector, many apps). (#4407)
 
 * `{watcher}` is now a required dependency and is always used for autoreload file watching, so it no longer needs to be installed separately. The legacy polling-based file watcher has been removed. (#4403)
 

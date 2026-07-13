@@ -233,6 +233,36 @@ test_that("mcpDirectBase honors option > Connect headers > request origin", {
   )
 })
 
+test_that("shiny.mcp.appId namespaces internal tools and the resource", {
+  withr::local_options(list(shiny.mcp.appId = "sales"))
+
+  expect_equal(mcpResourceUri(), "ui://shiny/sales")
+  expect_equal(mcpTunnelToolName("_shiny_connect"), "sales_shiny_connect")
+  expect_equal(mcpTunnelLocalName("sales_shiny_http"), "_shiny_http")
+  # names that don't carry the prefix pass through unchanged
+  expect_equal(mcpTunnelLocalName("_shiny_http"), "_shiny_http")
+  expect_equal(mcpTunnelLocalName("sales_tool"), "sales_tool")
+
+  tool_names <- vapply(mcpToolsList(), function(t) t$name, character(1))
+  expect_true("sales_shiny_connect" %in% tool_names)
+  expect_false("_shiny_connect" %in% tool_names)
+  # the app tool advertises the namespaced resource
+  app_tool <- mcpToolsList()[[1]]
+  expect_equal(app_tool$`_meta`$ui$resourceUri, "ui://shiny/sales")
+  expect_equal(mcpResourcesList()[[1]]$uri, "ui://shiny/sales")
+})
+
+test_that("invalid shiny.mcp.appId is ignored", {
+  .globals$mcpAppIdWarned <- NULL
+  withr::defer(.globals$mcpAppIdWarned <- NULL)
+  withr::local_options(list(shiny.mcp.appId = "not ok!"))
+  expect_warning(id <- mcpAppId(), "shiny.mcp.appId")
+  expect_null(id)
+  # warns only once
+  expect_silent(expect_null(mcpAppId()))
+  expect_equal(mcpResourceUri(), "ui://shiny/app")
+})
+
 test_that("mcpDirectBase ignores empty headers and prefers X-Forwarded-Host", {
   req <- new.env(parent = emptyenv())
   req$HTTP_HOST <- "127.0.0.1:34599"

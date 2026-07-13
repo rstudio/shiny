@@ -26,6 +26,18 @@
 #' `mcpSendMessage()` do nothing and return `FALSE`, so apps can call them
 #' unconditionally.
 #'
+#' @section Deployment and the direct-connect fast path:
+#' On hosts that honor the declared content security policy, the app's
+#' iframe connects over a real WebSocket for native-latency reactivity,
+#' falling back to the tools/call tunnel automatically. The websocket URL
+#' is derived, in order, from: `options(shiny.mcp.origin = )` (a full base
+#' URL, which may include a path); Posit Connect's `X-RSC-Request` header;
+#' an rsconnect deployment record (`rsconnect/**/*.dcf`) whose URL matches
+#' the serving host — so apps deployed under a sub-path such as
+#' `/content/<guid>` work without configuration; or the origin of the MCP
+#' request itself. Set `options(shiny.mcp.direct = FALSE)` to always use
+#' the tunnel.
+#'
 #' @section Additional tools:
 #' Beyond the tool that opens the app, authors can expose plain R functions
 #' as MCP tools the model may call directly, via

@@ -202,3 +202,97 @@ test_that("invalid or colliding author tools are skipped with a warning", {
     expect_equal(sum(tool_names == "_shiny_send"), 1)
   })
 })
+
+test_that("mcpDirectBase honors option > X-RSC-Request > request origin", {
+  req <- new.env(parent = emptyenv())
+  req$HTTP_HOST <- "connect.example.com"
+  req$HTTP_X_FORWARDED_PROTO <- "https"
+
+  # Request-derived origin (no path information)
+  expect_equal(mcpDirectBase(req), "https://connect.example.com")
+
+  # Connect forwards the full external URL of the request
+  req$HTTP_X_RSC_REQUEST <- "https://connect.example.com/content/abc123/mcp"
+  expect_equal(mcpDirectBase(req), "https://connect.example.com/content/abc123")
+
+  # Explicit option wins over everything, trailing slash normalized
+  withr::with_options(
+    list(shiny.mcp.origin = "https://other.example.com/apps/dash/"),
+    expect_equal(mcpDirectBase(req), "https://other.example.com/apps/dash")
+  )
+})
+
+test_that("mcpDeployedUrl finds a host-matched rsconnect deployment record", {
+  dir <- withr::local_tempdir()
+  rec <- file.path(dir, "rsconnect", "connect.example.com", "barret")
+  dir.create(rec, recursive = TRUE)
+  write.dcf(
+    data.frame(
+      name = "myapp",
+      server = "connect.example.com",
+      url = "https://connect.example.com/content/abc123/"
+    ),
+    file.path(rec, "myapp.dcf")
+  )
+  rec2 <- file.path(dir, "rsconnect", "shinyapps.io", "barret")
+  dir.create(rec2, recursive = TRUE)
+  write.dcf(
+    data.frame(
+      name = "myapp",
+      server = "shinyapps.io",
+      url = "https://barret.shinyapps.io/myapp/"
+    ),
+    file.path(rec2, "myapp.dcf")
+  )
+
+  # Host match picks the right record and strips the trailing slash
+  expect_equal(
+    mcpDeployedUrl(dir, "connect.example.com"),
+    "https://connect.example.com/content/abc123"
+  )
+  expect_equal(
+    mcpDeployedUrl(dir, "barret.shinyapps.io"),
+    "https://barret.shinyapps.io/myapp"
+  )
+  # No match (e.g. running locally): never use a deployment record
+  expect_null(mcpDeployedUrl(dir, "127.0.0.1:7788"))
+  expect_null(mcpDeployedUrl(dir, NULL))
+  # No records at all
+  expect_null(mcpDeployedUrl(withr::local_tempdir(), "connect.example.com"))
+})
+
+test_that("resources/read uses the path-aware base: origin-only CSP, full directBase", {
+  ui <- fluidPage("hi")
+  app <- shinyApp(ui, function(input, output) {})
+  withr::with_options(
+    list(
+      shiny.mcp = TRUE,
+      shiny.mcp.origin = "https://connect.example.com/content/abc123/"
+    ),
+    {
+      handlers <- createAppHandlers(
+        app$httpHandler,
+        function() function(input, output) {}
+      )
+      req <- mcp_req(list(
+        jsonrpc = "2.0", id = 1, method = "resources/read",
+        params = list(uri = "ui://shiny/app")
+      ))
+      out <- jsonlite::parse_json(rawToChar(as_bytes(
+        wait_for_result(handlers$http(req))$content
+      )))
+      csp <- unlist(out$result$contents[[1]]$`_meta`$ui$csp$connectDomains)
+      # CSP entries are origins only (host CSP sanitizers reject paths)
+      expect_setequal(
+        csp,
+        c("https://connect.example.com", "wss://connect.example.com")
+      )
+      # ...but the bridge gets the full base including the path
+      expect_match(
+        out$result$contents[[1]]$text,
+        '"directBase":"https://connect.example.com/content/abc123"',
+        fixed = TRUE
+      )
+    }
+  )
+})

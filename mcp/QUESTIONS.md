@@ -54,13 +54,14 @@ tells the *sandbox* it may connect; it doesn't open anything new on the app.
 The `?mcp=1` marker only switches session behavior (dependency inlining,
 custom-message bridges).
 
-**The sub-path caveat.** An origin can't express a path, so apps served
-under a prefix (Posit Connect's `/content/abc/`) build the wrong ws URL and
-always fall back — worst case paying the 2.5 s probe. If that case matters,
-the clean fix is an explicit override, e.g.
-`options(shiny.mcp.origin = "https://connect.example.com/content/abc")`,
-used verbatim for both the CSP declaration and the ws URL. Small change;
-say the word.
+**The sub-path caveat — ✅ resolved 2026-07-13.** Implemented per Barret's
+request: the direct-connect base is now path-aware, derived from (in order)
+`options(shiny.mcp.origin=)`, Posit Connect's `X-RSC-Request` header, a
+host-matched rsconnect deployment record (`rsconnect/**/*.dcf` `url` — the
+deployment output files), then the request origin. CSP still declares
+origins only (host sanitizers reject paths); the full base feeds the ws
+URL. Records require a Host match so local runs of deployed app dirs can't
+split-brain against production.
 
 **When to set FALSE:** deterministic tunnel-only transport for debugging, or
 sub-path/unreachable deployments where the probe is known-futile.

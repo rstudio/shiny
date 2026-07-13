@@ -119,7 +119,7 @@ function installDownloadInterceptor(xhrClass: typeof XMLHttpRequest): void {
 }
 
 type ShinyMcpConfig = {
-  directOrigin?: string;
+  directBase?: string;
   displayModes?: Array<"inline" | "fullscreen" | "pip">;
 };
 
@@ -194,8 +194,8 @@ function initShinyMcpBridge(): void {
   // so try a real WebSocket first and fall back to the tunnel (see
   // hybridSocket.ts). The ?mcp=1 marker lets the server treat direct
   // sessions as MCP sessions (isMcpSession()).
-  const directWsUrl = config.directOrigin
-    ? config.directOrigin.replace(/^http/, "ws") + "/websocket/?mcp=1"
+  const directWsUrl = config.directBase
+    ? config.directBase.replace(/^http/, "ws") + "/websocket/?mcp=1"
     : null;
 
   let socket: McpHybridWebSocket | null = null;

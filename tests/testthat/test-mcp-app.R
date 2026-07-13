@@ -232,7 +232,7 @@ test_that("resources/read declares connectDomains derived from the request", {
     # Config injected into the page for the bridge
     html <- out2$result$contents[[1]]$text
     expect_match(html, "__shinyMcpConfig__", fixed = TRUE)
-    expect_match(html, '"directOrigin":"http://127.0.0.1:7788"', fixed = TRUE)
+    expect_match(html, '"directBase":"http://127.0.0.1:7788"', fixed = TRUE)
   })
 })
 
@@ -259,7 +259,7 @@ test_that("shiny.mcp.direct = FALSE omits CSP and directOrigin", {
       regexpr("__shinyMcpConfig__ = \\{[^;]*", html)
     )
     expect_length(config_json, 1)
-    expect_false(grepl('"directOrigin"', config_json, fixed = TRUE))
+    expect_false(grepl('"directBase"', config_json, fixed = TRUE))
   })
 })
 

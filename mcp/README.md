@@ -43,14 +43,20 @@ traffic tunneled over postMessage → `tools/call`).
   (non-blocking stdin), and terminal Claude Code still doesn't render the
   iframe UI — tools/resources only.
 - **Direct-connect fast path:** the resource declares the app's origin in
-  `_meta.ui.csp.connectDomains` (derived from the request's
-  `Host`/`X-Forwarded-Proto`; local httpuv origin for stdio), and the bridge
-  tries a real WebSocket (`<origin>/websocket/?mcp=1`, 2.5 s timeout) before
-  falling back to the tunnel. Verified in basic-host:
-  `__shinyMcpTransport__ === "direct"` with full reactivity; HTTP side
-  channels stay tunneled (no CORS exposure), via connectionId-less
-  `_shiny_http`. Disable with `options(shiny.mcp.direct = FALSE)`.
-  Sub-path deployments always fall back (origin can't express a path).
+  `_meta.ui.csp.connectDomains`, and the bridge tries a real WebSocket
+  (`<base>/websocket/?mcp=1`, 2.5 s timeout) before falling back to the
+  tunnel. The base URL is **path-aware** so sub-path deployments (Posit
+  Connect `/content/<guid>`) connect directly: priority is
+  `options(shiny.mcp.origin=)` → Connect's `X-RSC-Request` header → a
+  host-matched rsconnect deployment record (`rsconnect/**/*.dcf` `url`
+  field, the files written at deploy time) → request `Host` +
+  `X-Forwarded-Proto` → local httpuv origin (stdio). Deployment records are
+  only trusted when their host matches the serving request, so local runs
+  of deployed app dirs never point the iframe at production. Verified in
+  basic-host (`__shinyMcpTransport__ === "direct"`) and at the wire level
+  for the Connect header/record paths. HTTP side channels stay tunneled (no
+  CORS exposure) via connectionId-less `_shiny_http`. Disable with
+  `options(shiny.mcp.direct = FALSE)`.
 - **Display modes:** the app declares
   `options(shiny.mcp.displayModes = ...)` (default: inline, fullscreen,
   pip) and can call `mcpRequestDisplayMode("fullscreen")`; the resulting

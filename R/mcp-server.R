@@ -32,17 +32,84 @@ mcpDisplayModes <- function() {
   modes
 }
 
-# The app's externally reachable origin, derived from the request that the
-# MCP host made to us (works locally and behind https tunnels/proxies).
-# Falls back to the local httpuv origin (stdio transport has no request).
-mcpRequestOrigin <- function(req) {
-  host <- tryCatch(req$HTTP_HOST, error = function(e) NULL)
-  if (is.null(host) || !nzchar(host %||% "")) {
+# The app's externally reachable base URL (may include a path, e.g. Posit
+# Connect's /content/<guid>), for the direct-connect fast path. Priority:
+#
+# 1. options(shiny.mcp.origin) — explicit full URL, for nonstandard proxies.
+# 2. X-RSC-Request — Posit Connect forwards the full external URL of the
+#    request; strip the trailing /mcp to get the content base.
+# 3. rsconnect deployment records (rsconnect/**/*.dcf next to the app) —
+#    the "output files" written by deployment carry the content `url`. Only
+#    trusted when the record's host matches the request's Host header, so a
+#    local run of a deployed app dir never points the iframe at production.
+# 4. Origin derived from the request (Host + X-Forwarded-Proto) — right for
+#    localhost and root-mounted https tunnels, but pathless.
+# 5. The local httpuv origin (stdio transport has no request).
+mcpDirectBase <- function(req) {
+  reqHeader <- function(name) {
+    value <- tryCatch(req[[name]], error = function(e) NULL)
+    if (is.character(value) && nzchar(value %||% "")) value else NULL
+  }
+  stripSlash <- function(x) sub("/+$", "", x)
+
+  origin_opt <- getOption("shiny.mcp.origin", NULL)
+  if (is.character(origin_opt) && nzchar(origin_opt)) {
+    return(stripSlash(origin_opt))
+  }
+
+  rsc <- reqHeader("HTTP_X_RSC_REQUEST")
+  if (!is.null(rsc)) {
+    return(stripSlash(sub("/mcp/?$", "", rsc)))
+  }
+
+  host <- reqHeader("HTTP_HOST")
+  deployed <- mcpDeployedUrl(
+    getShinyOption("appDir", default = getwd()),
+    host
+  )
+  if (!is.null(deployed)) {
+    return(deployed)
+  }
+
+  if (is.null(host)) {
     return(.globals$mcpLocalOrigin)
   }
-  proto <- tryCatch(req$HTTP_X_FORWARDED_PROTO, error = function(e) NULL)
-  proto <- (proto %||% "http")
+  proto <- reqHeader("HTTP_X_FORWARDED_PROTO") %||% "http"
   sprintf("%s://%s", proto, host)
+}
+
+# Look up the deployed URL for this app from the rsconnect deployment
+# records, requiring an exact host match against the serving request.
+mcpDeployedUrl <- function(appDir, host) {
+  if (is.null(host) || !nzchar(host %||% "")) {
+    return(NULL)
+  }
+  records <- tryCatch(
+    list.files(
+      file.path(appDir, "rsconnect"),
+      pattern = "\\.dcf$", recursive = TRUE, full.names = TRUE
+    ),
+    error = function(e) character(0)
+  )
+  for (record in records) {
+    url <- tryCatch(
+      unname(read.dcf(record, fields = "url")[1, "url"]),
+      error = function(e) NA_character_
+    )
+    if (is.na(url) || !nzchar(url)) next
+    url_host <- sub("^https?://([^/]+).*$", "\\1", url)
+    if (identical(url_host, host)) {
+      return(sub("/+$", "", url))
+    }
+  }
+  NULL
+}
+
+# CSP source expressions are origins; extract one from a (possibly
+# path-bearing) base URL.
+mcpBaseOrigin <- function(base) {
+  m <- regmatches(base, regexpr("^https?://[^/]+", base))
+  if (length(m) == 0) base else m
 }
 
 mcpWsOrigin <- function(origin) {
@@ -335,14 +402,15 @@ mcpResourcesRead <- function(body, uiHandler, req = NULL) {
     return(mcpError(body$id, -32602L, sprintf("Unknown resource: %s", uri)))
   }
 
-  origin <- if (mcpDirectEnabled()) mcpRequestOrigin(req)
+  base <- if (mcpDirectEnabled()) mcpDirectBase(req)
   config <- dropNulls(list(
-    directOrigin = origin,
+    directBase = base,
     displayModes = as.list(mcpDisplayModes())
   ))
 
   ui_meta <- list(prefersBorder = TRUE)
-  if (!is.null(origin)) {
+  if (!is.null(base)) {
+    origin <- mcpBaseOrigin(base)
     ui_meta$csp <- list(
       connectDomains = list(origin, mcpWsOrigin(origin))
     )

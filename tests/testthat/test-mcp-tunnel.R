@@ -191,7 +191,9 @@ test_that("_shiny_http serves session downloads with headers", {
   server <- function(input, output, session) {
     output$dl <- downloadHandler(
       filename = "data.csv",
-      content = function(file) writeLines("a,b\n1,2", file),
+      # writeBin, not writeLines: the latter opens `file` in text mode, so
+      # on Windows every \n becomes \r\n and the body assertion below fails.
+      content = function(file) writeBin(charToRaw("a,b\n1,2\n"), file),
       contentType = "text/csv"
     )
   }

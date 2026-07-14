@@ -131,7 +131,11 @@ test_that("message logger appears", {
 test_that("reactlog_version is as expected", {
   expect_match(
     packageDescription("shiny")$Suggests,
-    # The space between reactlog and the version number can include \n
-    sprintf("\\breactlog\\s+\\Q(>= %s)\\E", reactlog_min_version)
+    # R rewraps the installed DESCRIPTION, so any of the spaces (including
+    # the one inside the version requirement) can be a newline + indent
+    sprintf(
+      "\\breactlog\\s+\\(>=\\s+%s\\)",
+      gsub(".", "\\.", reactlog_min_version, fixed = TRUE)
+    )
   )
 })

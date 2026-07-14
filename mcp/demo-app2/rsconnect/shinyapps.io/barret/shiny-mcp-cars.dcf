@@ -1,0 +1,10 @@
+name: shiny-mcp-cars
+title: Shiny MCP cars demo
+username: barret
+account: barret
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 17606973
+bundleId: 12261515
+url: https://barret.shinyapps.io/shiny-mcp-cars/
+version: 1

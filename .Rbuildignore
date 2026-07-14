@@ -38,3 +38,5 @@
 ^LICENSE\.md$
 ^docs$
 ^\.context$
+^mcp$
+^\.playwright-mcp$

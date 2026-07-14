@@ -24,6 +24,19 @@ createWebDependency <- function(dependency, scrubFile = TRUE) {
   if (!inherits(dependency, "html_dependency"))
     stop("Unexpected non-html_dependency type")
 
+  # Packages like {htmlwidgets} call createWebDependency() directly for
+  # render-time dependencies, bypassing processDeps(). Inside an MCP Apps
+  # sandbox those URLs can't be fetched, so divert file-based dependencies
+  # to the inline representation. (href-only dependencies fall through:
+  # mcpInlineDependency() would send them right back here.)
+  if (
+    !is.null(dependency$src$file) &&
+      is.null(dependency$src$href) &&
+      isMcpSession(getDefaultReactiveDomain())
+  ) {
+    return(mcpInlineDependency(dependency))
+  }
+
   if (is.null(dependency$src$href)) {
     prefix <- paste(dependency$name, "-", dependency$version, sep = "")
     addResourcePath(prefix, dependency$src$file)
@@ -46,9 +59,16 @@ processDeps <- function(tags, session) {
   tags <- utils::getFromNamespace("tagify", "htmltools")(tags)
   ui <- takeSingletons(tags, session$singletons, desingleton = FALSE)$ui
   ui <- surroundSingletons(ui)
+  # Sessions running inside an MCP Apps sandbox can't fetch dependency
+  # files over HTTP, so inline them instead (see mcp-app.R).
+  processDep <- if (isMcpSession(session)) {
+    mcpInlineDependency
+  } else {
+    createWebDependency
+  }
   dependencies <- lapply(
     resolveDependencies(findDependencies(ui, tagify = FALSE)),
-    createWebDependency
+    processDep
   )
   names(dependencies) <- NULL
 

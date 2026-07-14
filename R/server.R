@@ -142,180 +142,194 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
   # denied (403 response for HTTP, and instant close for websocket).
   checkSharedSecret <- loadSharedSecret()
 
+  wsHandler <- function(ws) {
+    if (!checkSharedSecret(ws$request$HTTP_SHINY_SHARED_SECRET)) {
+      ws$close()
+      return(TRUE)
+    }
+
+    if (identical(ws$request$PATH_INFO, "/autoreload/")) {
+      if (!get_devmode_option("shiny.autoreload", FALSE)) {
+        ws$close()
+        return(TRUE)
+      }
+
+      callbackHandle <- autoReloadCallbacks$register(function() {
+        ws$send("autoreload")
+        ws$close()
+      })
+      ws$onClose(function() {
+        callbackHandle()
+      })
+      return(TRUE)
+    }
+
+    if (!is.null(getOption("shiny.observer.error", NULL))) {
+      warning(
+        call. = FALSE,
+        "options(shiny.observer.error) is no longer supported; please unset it!"
+      )
+      stopApp()
+    }
+
+    shinysession <- ShinySession$new(ws)
+    appsByToken$set(shinysession$token, shinysession)
+    shinysession$setShowcase(.globals$showcaseDefault)
+
+    messageHandler <- function(binary, msg) {
+      withReactiveDomain(shinysession, {
+        # To ease transition from websockets-based code. Should remove once we're stable.
+        if (is.character(msg))
+          msg <- charToRaw(msg)
+
+        traceOption <- getOption('shiny.trace', FALSE)
+        if (isTRUE(traceOption) || traceOption == "recv") {
+          if (binary)
+            message("RECV ", '$$binary data$$')
+          else
+            message("RECV ", rawToChar(msg))
+        }
+
+        if (isEmptyMessage(msg))
+          return()
+
+        msg <- decodeMessage(msg)
+
+        # Set up a restore context from .clientdata_url_search before
+        # handling all the input values, because the restore context may be
+        # used by an input handler (like the one for "shiny.file"). This
+        # should only happen once, when the app starts.
+        if (is.null(shinysession$restoreContext)) {
+          bookmarkStore <- getShinyOption("bookmarkStore", default = "disable")
+          if (bookmarkStore == "disable") {
+            # If bookmarking is disabled, use empty context
+            shinysession$restoreContext <- RestoreContext$new()
+          } else {
+            # If there's bookmarked state, save it on the session object
+            shinysession$restoreContext <- RestoreContext$new(msg$data$.clientdata_url_search)
+            shinysession$createBookmarkObservers()
+          }
+        }
+
+
+        msg$data <- applyInputHandlers(msg$data)
+
+        switch(
+          msg$method,
+          init = {
+
+            serverFunc <- withReactiveDomain(NULL, serverFuncSource())
+            if (!identicalFunctionBodies(serverFunc, appvars$server)) {
+              appvars$server <- serverFunc
+              if (!is.null(appvars$server))
+              {
+                # Tag this function as the Shiny server function. A debugger may use this
+                # tag to give this function special treatment.
+                # It's very important that it's appvars$server itself and NOT a copy that
+                # is invoked, otherwise new breakpoints won't be picked up.
+                attr(appvars$server, "shinyServerFunction") <- TRUE
+                registerDebugHook("server", appvars, "Server Function")
+              }
+            }
+
+            # Check for switching into/out of showcase mode
+            if (.globals$showcaseOverride &&
+                exists(".clientdata_url_search", where = msg$data)) {
+              mode <- showcaseModeOfQuerystring(msg$data$.clientdata_url_search)
+              if (!is.null(mode))
+                shinysession$setShowcase(mode)
+            }
+
+            # In shinysession$createBookmarkObservers() above, observers may be
+            # created, which puts the shiny session in busyCount > 0 state. That
+            # prevents the manageInputs here from taking immediate effect, by
+            # default. The manageInputs here needs to take effect though, because
+            # otherwise the bookmark observers won't find the clientData they are
+            # looking for. So use `now = TRUE` to force the changes to be
+            # immediate.
+            #
+            # FIXME: break createBookmarkObservers into two separate steps, one
+            # before and one after manageInputs, and put the observer creation
+            # in the latter. Then add an assertion that busyCount == 0L when
+            # this manageInputs is called.
+            shinysession$manageInputs(msg$data, now = TRUE)
+
+            # The client tells us what singletons were rendered into
+            # the initial page
+            if (!is.null(msg$data$.clientdata_singletons)) {
+              shinysession$singletons <- strsplit(
+                msg$data$.clientdata_singletons, ',')[[1]]
+            }
+
+            local({
+              args <- argsForServerFunc(serverFunc, shinysession)
+
+              withReactiveDomain(shinysession, {
+                otel_span_session_start(domain = shinysession, {
+
+                  do.call(
+                    # No corresponding ..stacktraceoff; the server func is pure
+                    # user code
+                    wrapFunctionLabel(appvars$server, "server",
+                      ..stacktraceon = TRUE
+                    ),
+                    args
+                  )
+
+                })
+              })
+
+            })
+          },
+          update = {
+            shinysession$manageInputs(msg$data)
+          },
+          shinysession$dispatch(msg)
+        )
+        # The HTTP_GUID, if it exists, is for Shiny Server reporting purposes
+        shinysession$startTiming(ws$request$HTTP_GUID)
+        shinysession$requestFlush()
+
+        # Make httpuv return control to Shiny quickly, instead of waiting
+        # for the usual timeout
+        httpuv::interrupt()
+      })
+    }
+    ws$onMessage(function(binary, msg) {
+      # If unhandled errors occur, make sure they get properly logged
+      withLogErrors(messageHandler(binary, msg))
+    })
+
+    ws$onClose(function() {
+      shinysession$wsClosed()
+      appsByToken$remove(shinysession$token)
+      appsNeedingFlush$remove(shinysession$token)
+    })
+
+    return(TRUE)
+  }
+
+  mcpHandler <- NULL
+  if (mcpEnabled()) {
+    uiHandler <- joinHandlers(httpHandlers)
+    mcpHandler <- mcpHttpHandler(uiHandler, wsHandler)
+    # Also used by the stdio transport (see mcp-stdio.R); late-bound via
+    # .globals so app restarts pick up the current handlers.
+    .globals$mcpDispatch <- function(body) {
+      mcpDispatch(body, uiHandler, wsHandler)
+    }
+  }
+
   appHandlers <- list(
     http = joinHandlers(c(
       sessionHandler,
+      mcpHandler,
       httpHandlers,
       sys.www.root,
       resourcePathHandler,
       reactLogHandler
     )),
-    ws = function(ws) {
-      if (!checkSharedSecret(ws$request$HTTP_SHINY_SHARED_SECRET)) {
-        ws$close()
-        return(TRUE)
-      }
-
-      if (identical(ws$request$PATH_INFO, "/autoreload/")) {
-        if (!get_devmode_option("shiny.autoreload", FALSE)) {
-          ws$close()
-          return(TRUE)
-        }
-
-        callbackHandle <- autoReloadCallbacks$register(function() {
-          ws$send("autoreload")
-          ws$close()
-        })
-        ws$onClose(function() {
-          callbackHandle()
-        })
-        return(TRUE)
-      }
-
-      if (!is.null(getOption("shiny.observer.error", NULL))) {
-        warning(
-          call. = FALSE,
-          "options(shiny.observer.error) is no longer supported; please unset it!"
-        )
-        stopApp()
-      }
-
-      shinysession <- ShinySession$new(ws)
-      appsByToken$set(shinysession$token, shinysession)
-      shinysession$setShowcase(.globals$showcaseDefault)
-
-      messageHandler <- function(binary, msg) {
-        withReactiveDomain(shinysession, {
-          # To ease transition from websockets-based code. Should remove once we're stable.
-          if (is.character(msg))
-            msg <- charToRaw(msg)
-
-          traceOption <- getOption('shiny.trace', FALSE)
-          if (isTRUE(traceOption) || traceOption == "recv") {
-            if (binary)
-              message("RECV ", '$$binary data$$')
-            else
-              message("RECV ", rawToChar(msg))
-          }
-
-          if (isEmptyMessage(msg))
-            return()
-
-          msg <- decodeMessage(msg)
-
-          # Set up a restore context from .clientdata_url_search before
-          # handling all the input values, because the restore context may be
-          # used by an input handler (like the one for "shiny.file"). This
-          # should only happen once, when the app starts.
-          if (is.null(shinysession$restoreContext)) {
-            bookmarkStore <- getShinyOption("bookmarkStore", default = "disable")
-            if (bookmarkStore == "disable") {
-              # If bookmarking is disabled, use empty context
-              shinysession$restoreContext <- RestoreContext$new()
-            } else {
-              # If there's bookmarked state, save it on the session object
-              shinysession$restoreContext <- RestoreContext$new(msg$data$.clientdata_url_search)
-              shinysession$createBookmarkObservers()
-            }
-          }
-
-
-          msg$data <- applyInputHandlers(msg$data)
-
-          switch(
-            msg$method,
-            init = {
-
-              serverFunc <- withReactiveDomain(NULL, serverFuncSource())
-              if (!identicalFunctionBodies(serverFunc, appvars$server)) {
-                appvars$server <- serverFunc
-                if (!is.null(appvars$server))
-                {
-                  # Tag this function as the Shiny server function. A debugger may use this
-                  # tag to give this function special treatment.
-                  # It's very important that it's appvars$server itself and NOT a copy that
-                  # is invoked, otherwise new breakpoints won't be picked up.
-                  attr(appvars$server, "shinyServerFunction") <- TRUE
-                  registerDebugHook("server", appvars, "Server Function")
-                }
-              }
-
-              # Check for switching into/out of showcase mode
-              if (.globals$showcaseOverride &&
-                  exists(".clientdata_url_search", where = msg$data)) {
-                mode <- showcaseModeOfQuerystring(msg$data$.clientdata_url_search)
-                if (!is.null(mode))
-                  shinysession$setShowcase(mode)
-              }
-
-              # In shinysession$createBookmarkObservers() above, observers may be
-              # created, which puts the shiny session in busyCount > 0 state. That
-              # prevents the manageInputs here from taking immediate effect, by
-              # default. The manageInputs here needs to take effect though, because
-              # otherwise the bookmark observers won't find the clientData they are
-              # looking for. So use `now = TRUE` to force the changes to be
-              # immediate.
-              #
-              # FIXME: break createBookmarkObservers into two separate steps, one
-              # before and one after manageInputs, and put the observer creation
-              # in the latter. Then add an assertion that busyCount == 0L when
-              # this manageInputs is called.
-              shinysession$manageInputs(msg$data, now = TRUE)
-
-              # The client tells us what singletons were rendered into
-              # the initial page
-              if (!is.null(msg$data$.clientdata_singletons)) {
-                shinysession$singletons <- strsplit(
-                  msg$data$.clientdata_singletons, ',')[[1]]
-              }
-
-              local({
-                args <- argsForServerFunc(serverFunc, shinysession)
-
-                withReactiveDomain(shinysession, {
-                  otel_span_session_start(domain = shinysession, {
-
-                    do.call(
-                      # No corresponding ..stacktraceoff; the server func is pure
-                      # user code
-                      wrapFunctionLabel(appvars$server, "server",
-                        ..stacktraceon = TRUE
-                      ),
-                      args
-                    )
-
-                  })
-                })
-
-              })
-            },
-            update = {
-              shinysession$manageInputs(msg$data)
-            },
-            shinysession$dispatch(msg)
-          )
-          # The HTTP_GUID, if it exists, is for Shiny Server reporting purposes
-          shinysession$startTiming(ws$request$HTTP_GUID)
-          shinysession$requestFlush()
-
-          # Make httpuv return control to Shiny quickly, instead of waiting
-          # for the usual timeout
-          httpuv::interrupt()
-        })
-      }
-      ws$onMessage(function(binary, msg) {
-        # If unhandled errors occur, make sure they get properly logged
-        withLogErrors(messageHandler(binary, msg))
-      })
-
-      ws$onClose(function() {
-        shinysession$wsClosed()
-        appsByToken$remove(shinysession$token)
-        appsNeedingFlush$remove(shinysession$token)
-      })
-
-      return(TRUE)
-    }
+    ws = wsHandler
   )
   return(appHandlers)
 }
@@ -391,14 +405,22 @@ startHttpuvApp <- function(appObj, port, host, quiet) {
   handlerManager$addHandler(appHandlers$http, "/", tail = TRUE)
   handlerManager$addWSHandler(appHandlers$ws, "/", tail = TRUE)
 
+  if (mcpEnabled() && mcpStdioEnabled() && is.null(.globals$mcpStdioStop)) {
+    .globals$mcpStdioStop <- mcpStdioStart(function(body) {
+      .globals$mcpDispatch(body)
+    })
+  }
+
   httpuvApp <- handlerManager$createHttpuvApp()
   httpuvApp$staticPaths <- c(
     appObj$staticPaths,
-    list(
+    dropNulls(list(
       # Always handle /session URLs dynamically, even if / is a static path.
       "session" = excludeStaticPath(),
+      # Same for /mcp when the MCP Apps endpoint is enabled.
+      "mcp" = if (mcpEnabled()) excludeStaticPath(),
       "shared" = system_file(package = "shiny", "www", "shared")
-    ),
+    )),
     .globals$resourcePaths
   )
 
@@ -461,6 +483,12 @@ startHttpuvApp <- function(appObj, port, host, quiet) {
       if (httpuv::ipFamily(host) == 6L)
         hostString <- paste0("[", hostString, "]")
       message('\n', 'Listening on http://', hostString, ':', port)
+    }
+    if (mcpEnabled()) {
+      # Fallback origin for the direct-connect fast path when there's no
+      # HTTP request to derive it from (stdio transport).
+      localHost <- if (host %in% c("0.0.0.0", "::")) "127.0.0.1" else host
+      .globals$mcpLocalOrigin <- sprintf("http://%s:%s", localHost, port)
     }
     return(startServer(host, port, httpuvApp))
   } else if (is.character(port)) {

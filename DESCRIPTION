@@ -113,6 +113,8 @@ Suggests:
     markdown,
     mirai,
     otelsdk (>= 0.2.0),
+    pkgload,
+    processx,
     ragg,
     reactlog (>= 1.0.0),
     rmarkdown,
@@ -177,6 +179,11 @@ Collate:
     'insert-ui.R'
     'jqueryui.R'
     'knitr.R'
+    'mcp-app.R'
+    'mcp-server.R'
+    'mcp-session.R'
+    'mcp-stdio.R'
+    'mcp-tunnel.R'
     'middleware-shiny.R'
     'middleware.R'
     'timer.R'

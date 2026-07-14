@@ -39,3 +39,4 @@
 ^docs$
 ^\.context$
 ^mcp$
+^\.playwright-mcp$

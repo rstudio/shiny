@@ -24,3 +24,4 @@ madge.svg
 .claude/settings.local.json
 /docs/
 .context
+.playwright-mcp/

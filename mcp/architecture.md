@@ -75,8 +75,9 @@ the closure `createAppHandlers()` stashes in `.globals$mcpDispatch`.
     plain R functions exposed to the model, run sessionless in the server
     process (character → text content, list → structuredContent, promises
     supported, errors → `isError`). The ellmer→JSON-Schema conversion
-    mirrors `mcptools::tool_as_json()`. Reserved/colliding names are
-    skipped with a one-time warning.
+    mirrors `mcptools::tool_as_json()`. `registerMcpTool()` validates
+    eagerly — a reserved/colliding name or a non-`ellmer::tool()` argument
+    causes a hard `stop()` at registration time.
 - **One resource**: `ui://shiny/app` (or `ui://shiny/<appId>`, see
   gateway section), mime `text/html;profile=mcp-app`.
 
@@ -218,11 +219,13 @@ A single MCP connector can front several Shiny apps:
 | `shiny.mcp` | mount `/mcp` (master switch) |
 | `shiny.mcp.stdio` | also speak JSON-RPC on stdin/stdout |
 | `shiny.mcp.tool` | name/description/inputSchema of the app tool |
-| `registerMcpTool(ellmer::tool(...))` | author-declared model-callable tools |
 | `shiny.mcp.appId` | namespace internal tools + resource URI (gateway) |
 | `shiny.mcp.direct` | direct-connect fast path (default TRUE) |
 | `shiny.mcp.origin` | explicit external base URL (proxy override) |
 | `shiny.mcp.displayModes` | subset of inline/fullscreen/pip |
+
+Author tools are registered via `registerMcpTool(ellmer::tool(...))`, not
+through an option.
 
 ## File map
 

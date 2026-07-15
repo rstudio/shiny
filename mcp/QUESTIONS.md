@@ -6,8 +6,8 @@ each item.
 ## 1. Naming (`mcp*` functions, `shiny.mcp.*` options) — ✅ leave as is
 
 No renames. Surface: options `shiny.mcp`, `shiny.mcp.stdio`,
-`shiny.mcp.direct`, `shiny.mcp.tool`, `shiny.mcp.tools`,
-`shiny.mcp.displayModes`; exports `isMcpSession()`, `mcpToolInput()`,
+`shiny.mcp.direct`, `shiny.mcp.tool`, `shiny.mcp.displayModes`;
+function `registerMcpTool()`; exports `isMcpSession()`, `mcpToolInput()`,
 `mcpHostContext()`, `mcpUpdateModelContext()`, `mcpSendMessage()`,
 `mcpRequestDisplayMode()`.
 

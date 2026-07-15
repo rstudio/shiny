@@ -2,7 +2,7 @@
 
 * `{watcher}` is now a required dependency and is always used for autoreload file watching, so it no longer needs to be installed separately. The legacy polling-based file watcher has been removed. (#4403)
 
-* The `Listening on http://…` startup message is now printed only after the listening socket has been bound, so the announced URL is guaranteed to be accepting connections. Previously the message could be emitted just before the bind, leaving a window (widened under load) where the advertised port refused connections. (#4400)
+* The `Listening on http://…` startup message is now printed only after the listening socket has been bound, so the announced URL is guaranteed to be accepting connections. Previously the message could be emitted just before the bind, leaving a window (widened under load) where the advertised port refused connections. (thanks @nbenn, #4400)
 
 # shiny 1.14.0
 

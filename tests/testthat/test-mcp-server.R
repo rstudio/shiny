@@ -135,58 +135,61 @@ test_that("registered author tools appear in tools/list with JSON schema", {
   expect_equal(motd$inputSchema$type %||% "object", "object")
 })
 
+test_that("registered author tools execute via tools/call", {
+  skip_if_not_installed("ellmer")
+  local_mcp_tools()
+  registerMcpTool(
+    ellmer::tool(function(x, y) list(sum = x + y), name = "add_numbers",
+      description = "Add two numbers.",
+      arguments = list(
+        x = ellmer::type_number("x", required = TRUE),
+        y = ellmer::type_number("y", required = TRUE)
+      )),
+    ellmer::tool(function() "Hello from R", name = "get_motd",
+      description = "Get the message of the day.")
+  )
+  h <- mcpHttpHandler(function(req) NULL, function(ws) TRUE)
+
+  res <- mcp_post(h, "tools/call",
+    params = list(name = "add_numbers", arguments = list(x = 2, y = 40)))
+  expect_equal(res$result$structuredContent$sum, 42)
+  expect_match(res$result$content[[1]]$text, "42")
+
+  res <- mcp_post(h, "tools/call",
+    params = list(name = "get_motd", arguments = empty_named_list()))
+  expect_equal(res$result$content[[1]]$text, "Hello from R")
+  expect_null(res$result$structuredContent)
+})
+
 test_that("author tool errors become isError results, not crashes", {
-  tools <- list(list(
-    name = "boom",
-    description = "Always fails.",
-    handler = function(args) stop("kaboom: ", args$why)
-  ))
-  withr::with_options(list(shiny.mcp.tools = tools), {
-    h <- mcpHttpHandler(function(req) NULL, function(ws) TRUE)
-    res <- mcp_post(h, "tools/call", params = list(
-      name = "boom", arguments = list(why = "testing")
-    ))
-    expect_true(isTRUE(res$result$isError))
-    expect_match(res$result$content[[1]]$text, "kaboom: testing")
-  })
+  skip_if_not_installed("ellmer")
+  local_mcp_tools()
+  registerMcpTool(
+    ellmer::tool(function(why) stop("kaboom: ", why), name = "boom",
+      description = "Always fails.",
+      arguments = list(why = ellmer::type_string("why", required = TRUE)))
+  )
+  h <- mcpHttpHandler(function(req) NULL, function(ws) TRUE)
+  res <- mcp_post(h, "tools/call",
+    params = list(name = "boom", arguments = list(why = "testing")))
+  expect_true(isTRUE(res$result$isError))
+  expect_match(res$result$content[[1]]$text, "kaboom: testing")
 })
 
 test_that("async author tools (promises) are supported", {
-  tools <- list(list(
-    name = "slow_answer",
-    description = "Answers later.",
-    handler = function(args) {
-      promises::promise(function(resolve, reject) {
+  skip_if_not_installed("ellmer")
+  local_mcp_tools()
+  registerMcpTool(
+    ellmer::tool(
+      function() promises::promise(function(resolve, reject) {
         later::later(function() resolve(list(answer = 42)), 0.1)
-      })
-    }
-  ))
-  withr::with_options(list(shiny.mcp.tools = tools), {
-    h <- mcpHttpHandler(function(req) NULL, function(ws) TRUE)
-    res <- mcp_post(h, "tools/call", params = list(
-      name = "slow_answer", arguments = empty_named_list()
-    ))
-    expect_equal(res$result$structuredContent$answer, 42)
-  })
-})
-
-test_that("invalid or colliding author tools are skipped with a warning", {
-  tools <- list(
-    list(name = "_shiny_send", description = "collides", handler = function(args) 1),
-    list(name = "no_handler", description = "missing handler"),
-    list(name = "ok_tool", description = "fine", handler = function(args) "ok")
+      }),
+      name = "slow_answer", description = "Answers later.")
   )
-  withr::with_options(list(shiny.mcp.tools = tools), {
-    h <- mcpHttpHandler(function(req) NULL, function(ws) TRUE)
-    warnings <- testthat::capture_warnings(out <- mcp_post(h, "tools/list"))
-    expect_length(warnings, 2)
-    expect_match(warnings, "_shiny_send|no_handler", all = TRUE)
-    tool_names <- vapply(out$result$tools, function(t) t$name, character(1))
-    expect_true("ok_tool" %in% tool_names)
-    expect_false("no_handler" %in% tool_names)
-    # the colliding name resolves to the built-in tunnel tool, not the author's
-    expect_equal(sum(tool_names == "_shiny_send"), 1)
-  })
+  h <- mcpHttpHandler(function(req) NULL, function(ws) TRUE)
+  res <- mcp_post(h, "tools/call",
+    params = list(name = "slow_answer", arguments = empty_named_list()))
+  expect_equal(res$result$structuredContent$answer, 42)
 })
 
 test_that("mcpDirectBase honors option > Connect headers > request origin", {

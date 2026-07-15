@@ -439,9 +439,9 @@ mcpAuthorToolResult <- function(id, value) {
 }
 
 mcpAuthorToolCall <- function(tool, params, id) {
-  args <- params$arguments %||% empty_named_list()
+  args <- params$arguments %||% list()
   hybrid_chain(
-    tryCatch(tool$handler(args), error = function(e) e),
+    tryCatch(rlang::exec(tool, !!!args), error = function(e) e),
     function(value) {
       if (inherits(value, "condition")) {
         return(mcpToolErrorResult(id, conditionMessage(value)))

@@ -70,13 +70,14 @@ traffic tunneled over postMessage → `tools/call`).
   pip) and can call `mcpRequestDisplayMode("fullscreen")`; the resulting
   mode arrives via `mcpHostContext()$displayMode`. Unit-tested; basic-host
   doesn't implement display modes, so not yet E2E-verified on a real host.
-- **Author-declared tools:** `options(shiny.mcp.tools = list(list(name=,
-  description=, inputSchema=, handler=)))` exposes plain R functions as
-  model-callable MCP tools alongside the app tool. Handlers run in the
-  server R process (no session), may return character/list/promise, and
-  errors surface as MCP tool errors. Invalid or name-colliding specs are
-  skipped with a warning. Verified E2E in basic-host (`get_sample_stats`
-  in the demo app).
+- **Author-declared tools:** `registerMcpTool(ellmer::tool(...))` exposes
+  plain R functions as model-callable MCP tools alongside the app tool.
+  Handlers run in the server R process (no session), may return
+  character/list/promise, and errors surface as MCP tool errors.
+  `registerMcpTool()` validates eagerly — a reserved/colliding name or a
+  non-`ellmer::tool()` argument causes a hard `stop()` at registration
+  time. ellmer (>= 0.4.0) is a Suggests dependency required for author
+  tools. Verified E2E in basic-host (`get_sample_stats` in the demo app).
 - **Multi-app gateway (one connector, many apps):** each app sets a unique
   `options(shiny.mcp.appId = "<id>")`, which namespaces its internal
   `_shiny_*` tools (`demo_shiny_connect`, ...) and publishes its resource

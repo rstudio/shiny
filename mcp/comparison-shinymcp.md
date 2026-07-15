@@ -36,7 +36,7 @@ Compared versions (2026-07-13):
 | App↔server channel | Tunneled websocket over `tools/call` long-poll, or direct WebSocket fast path | One `tools/call` per (debounced) input change |
 | State | Server-side reactive session per viewer | Stateless between calls (state lives in input values) |
 | Outputs | Everything Shiny can render (plots, htmlwidgets, dynamic UI, uploads, downloads, server-side selectize/DT) | What a tool returns: text, base64 PNG, HTML/table components |
-| Tool definitions | `options(shiny.mcp.tool/tools)` (plain lists) | ellmer `tool()` objects (typed arguments) |
+| Tool definitions | app tool: `options(shiny.mcp.tool)` (plain list); author tools: `registerMcpTool(ellmer::tool())` (see `design-register-mcp-tool.md`) | ellmer `tool()` objects (typed arguments) |
 | Model-callable tools | The app tool + author-declared extras; the *session* is not model-drivable | Every tool is model-callable by design; same tools drive the UI |
 | Non-Apps MCP clients | Author tools + app tool work as text; UI needs an Apps host | **Degrades gracefully everywhere** — tools work as ordinary text tools |
 | Model context updates | `mcpUpdateModelContext()` — author opt-in, arbitrary content | Bridge auto-reports current input state on interaction |
@@ -93,9 +93,12 @@ Neither bet dominates. They're answers to different questions:
    their host could in principle render our apps too, since both follow
    the ext-apps postMessage spec.
 4. **ellmer `tool()` reuse** gives typed schemas for free and matches the
-   ecosystem direction (mcptools is also ellmer-based). Our
-   `options(shiny.mcp.tools=)` lists are deliberately dependency-free but
-   could accept ellmer tools as an alternative input.
+   ecosystem direction (mcptools is also ellmer-based). **Adopted** for
+   author tools: `options(shiny.mcp.tools=)` is being replaced by
+   `registerMcpTool(ellmer::tool())`, using the same ellmer→JSON-Schema
+   conversion as `mcptools::tool_as_json()` — see
+   `design-register-mcp-tool.md`. The app-opening tool
+   (`options(shiny.mcp.tool)`) stays a plain list for now.
 5. **Apps-spec version**: their bridge targets the `2026-01-26` revision;
    our bundled `@modelcontextprotocol/ext-apps` SDK should be checked
    against the same revision before CRAN.

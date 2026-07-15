@@ -17,9 +17,8 @@
   `mcpHostContext()`, `mcpUpdateModelContext()`, and `mcpSendMessage()` let
   apps react to the model's tool arguments and host theme, keep the model's
   context up to date, and send messages to the conversation. Apps can also
-  expose additional model-callable R functions with
-  `options(shiny.mcp.tools = list(list(name=, description=, inputSchema=,
-  handler=)))`. Adding `options(shiny.mcp.stdio = TRUE)` also speaks MCP
+  expose additional model-callable tools with `registerMcpTool()`, using
+  `ellmer::tool()` definitions. Adding `options(shiny.mcp.stdio = TRUE)` also speaks MCP
   over stdin/stdout, so local desktop hosts can launch the app process
   directly, e.g. `claude mcp add my-app -- Rscript -e
   "options(shiny.mcp=TRUE, shiny.mcp.stdio=TRUE);

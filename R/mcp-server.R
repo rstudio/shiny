@@ -367,52 +367,42 @@ mcpToolsList <- function() {
       `_meta` = list(ui = list(resourceUri = mcpResourceUri()))
     )),
     mcpTunnelToolsList(),
-    lapply(mcpAuthorTools(warn = TRUE), function(tool) {
-      list(
-        name = tool$name,
-        description = tool$description,
-        inputSchema = tool$inputSchema %||%
-          list(type = "object", properties = empty_named_list())
-      )
+    lapply(mcpAuthorTools(), function(tool) {
+      dropNulls(list(
+        name = S7::prop(tool, "name"),
+        title = S7::prop(tool, "annotations")$title,
+        description = S7::prop(tool, "description"),
+        inputSchema = mcpToolInputSchema(tool)
+      ))
     })
   ))
 }
 
-# Author-declared tools from options(shiny.mcp.tools = list(...)). Each spec
-# is a list with `name`, `description`, optional `inputSchema`, and a
-# `handler` function taking the (parsed) arguments as a named list. Handlers
-# run in the server R process without a session and may return a promise.
-# Invalid specs are skipped (reported once, from tools/list).
-mcpAuthorTools <- function(warn = FALSE) {
-  specs <- getOption("shiny.mcp.tools", list())
-  reserved <- c(
+mcpReservedToolNames <- function() {
+  c(
     mcpToolInfo()$name,
     vapply(mcpTunnelToolsList(), function(t) t$name, character(1))
   )
-  out <- list()
-  for (spec in specs) {
-    problem <- if (!is.list(spec) || !is.character(spec$name %||% NULL)) {
-      "it has no `name`"
-    } else if (spec$name %in% reserved) {
-      sprintf("the name '%s' is reserved", spec$name)
-    } else if (!is.function(spec$handler %||% NULL)) {
-      "its `handler` is not a function"
-    } else if (!is.character(spec$description %||% NULL)) {
-      "it has no `description`"
-    }
-    if (!is.null(problem)) {
-      if (warn) {
-        warning(
-          "Ignoring a tool in options(shiny.mcp.tools) because ", problem,
-          if (is.character(spec$name %||% NULL)) sprintf(" ('%s')", spec$name),
-          call. = FALSE
-        )
-      }
-      next
-    }
-    out[[spec$name]] <- spec
+}
+
+# Author-declared tools registered via registerMcpTool(). Named list of
+# ellmer::ToolDef objects, keyed by tool name; validation happens eagerly at
+# registration time.
+mcpAuthorTools <- function() {
+  .globals$mcpAuthorTools %||% list()
+}
+
+# Convert an ellmer ToolDef's typed @arguments into a JSON Schema list for
+# tools/list. Mirrors mcptools::tool_as_json() so the two stay aligned: a
+# dummy provider drives ellmer's provider-agnostic base as_json() method.
+mcpToolInputSchema <- function(tool) {
+  as_json <- getNamespace("ellmer")[["as_json"]]
+  schema <- as_json(ellmer::Provider("dummy", "dummy", "dummy"), S7::prop(tool, "arguments"))
+  schema$description <- NULL
+  if (is.null(schema$properties)) {
+    schema$properties <- empty_named_list()
   }
-  out
+  dropNulls(schema)
 }
 
 # Convert a handler's return value into an MCP CallToolResult.
@@ -449,9 +439,9 @@ mcpAuthorToolResult <- function(id, value) {
 }
 
 mcpAuthorToolCall <- function(tool, params, id) {
-  args <- params$arguments %||% empty_named_list()
+  args <- params$arguments %||% list()
   hybrid_chain(
-    tryCatch(tool$handler(args), error = function(e) e),
+    tryCatch(rlang::exec(tool, !!!args), error = function(e) e),
     function(value) {
       if (inherits(value, "condition")) {
         return(mcpToolErrorResult(id, conditionMessage(value)))

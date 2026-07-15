@@ -5,6 +5,6 @@ account: barret
 server: connect.posit.it
 hostUrl: https://connect.posit.it/__api__
 appId: 18705
-bundleId: 1218234
+bundleId: 1221644
 url: https://connect.posit.it/content/49fa26ca-53cf-491d-a9ee-ab0b5c29673b/
 version: 1

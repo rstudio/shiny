@@ -1,5 +1,6 @@
 # A scope where we can put mutable global state
 .globals <- new.env(parent = emptyenv())
+.globals$mcpAuthorTools <- list()
 
 .onLoad <- function(libname, pkgname) {
   # R's lazy-loading package scheme causes the private seed to be cached in the

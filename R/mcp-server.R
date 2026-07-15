@@ -382,6 +382,15 @@ mcpToolsList <- function() {
 # is a list with `name`, `description`, optional `inputSchema`, and a
 # `handler` function taking the (parsed) arguments as a named list. Handlers
 # run in the server R process without a session and may return a promise.
+# Tool names an author may not reuse: the app-opening tool and the internal
+# _shiny_* tunnel tools.
+mcpReservedToolNames <- function() {
+  c(
+    mcpToolInfo()$name,
+    vapply(mcpTunnelToolsList(), function(t) t$name, character(1))
+  )
+}
+
 # Invalid specs are skipped (reported once, from tools/list).
 mcpAuthorTools <- function(warn = FALSE) {
   specs <- getOption("shiny.mcp.tools", list())
@@ -411,6 +420,12 @@ mcpAuthorTools <- function(warn = FALSE) {
       next
     }
     out[[spec$name]] <- spec
+  }
+  # Include tools registered via registerMcpTool() (keyed by name,
+  # last-write-wins over option-based tools with the same name).
+  registered <- .globals$mcpAuthorTools
+  for (nm in names(registered)) {
+    out[[nm]] <- registered[[nm]]
   }
   out
 }

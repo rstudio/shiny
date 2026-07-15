@@ -1,5 +1,13 @@
 # Helpers for MCP Apps tests (test-mcp-*.R)
 
+# Reset registered MCP author tools around a test (registerMcpTool() writes
+# to process-global .globals$mcpAuthorTools).
+local_mcp_tools <- function(env = parent.frame()) {
+  old <- .globals$mcpAuthorTools
+  withr::defer(.globals$mcpAuthorTools <- old, envir = env)
+  .globals$mcpAuthorTools <- list()
+}
+
 fakeRookInput <- function(bytes) {
   list(read = function(...) bytes, rewind = function() NULL)
 }

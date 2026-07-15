@@ -17,7 +17,7 @@ test_that("registerMcpTool() stores ellmer tools by name (last-write-wins)", {
       arguments = list(n = ellmer::type_integer("n", required = TRUE)))
   )
   expect_length(mcpAuthorTools(), 1)
-  expect_equal(mcpAuthorTools()[["echo_n"]]@description, "Echo 2n.")
+  expect_equal(S7::prop(mcpAuthorTools()[["echo_n"]], "description"), "Echo 2n.")
 })
 
 test_that("registerMcpTool() accepts multiple tools in one call", {

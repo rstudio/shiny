@@ -5,6 +5,6 @@ account: barret
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 17606973
-bundleId: 12261515
+bundleId: 12272715
 url: https://barret.shinyapps.io/shiny-mcp-cars/
 version: 1

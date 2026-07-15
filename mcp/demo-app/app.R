@@ -19,28 +19,22 @@ options(shiny.mcp.tool = list(
 ))
 
 # Additional model-callable tools that run in the server R process
-options(shiny.mcp.tools = list(
-  list(
-    name = "get_sample_stats",
-    description = "Summary statistics for a fresh normal sample of size n.",
-    inputSchema = list(
-      type = "object",
-      properties = list(
-        n = list(type = "integer", description = "Sample size (>= 2)")
-      ),
-      required = list("n")
-    ),
-    handler = function(args) {
-      x <- rnorm(max(2, args$n))
+registerMcpTool(
+  ellmer::tool(
+    function(n) {
+      x <- rnorm(max(2, n))
       list(
         n = length(x),
         mean = round(mean(x), 4),
         sd = round(stats::sd(x), 4),
         range = round(range(x), 4)
       )
-    }
+    },
+    name = "get_sample_stats",
+    description = "Summary statistics for a fresh normal sample of size n.",
+    arguments = list(n = ellmer::type_integer("Sample size (>= 2)", required = TRUE))
   )
-))
+)
 
 shinyApp(
   ui = fluidPage(

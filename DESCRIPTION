@@ -119,6 +119,7 @@ Suggests:
     ragg,
     reactlog (>= 1.0.0),
     rmarkdown,
+    S7,
     sass,
     shinytest2,
     showtext,

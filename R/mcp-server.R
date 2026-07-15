@@ -369,9 +369,9 @@ mcpToolsList <- function() {
     mcpTunnelToolsList(),
     lapply(mcpAuthorTools(), function(tool) {
       dropNulls(list(
-        name = tool@name,
-        title = tool@annotations$title,
-        description = tool@description,
+        name = S7::prop(tool, "name"),
+        title = S7::prop(tool, "annotations")$title,
+        description = S7::prop(tool, "description"),
         inputSchema = mcpToolInputSchema(tool)
       ))
     })
@@ -397,7 +397,7 @@ mcpAuthorTools <- function() {
 # dummy provider drives ellmer's provider-agnostic base as_json() method.
 mcpToolInputSchema <- function(tool) {
   as_json <- getNamespace("ellmer")[["as_json"]]
-  schema <- as_json(ellmer::Provider("dummy", "dummy", "dummy"), tool@arguments)
+  schema <- as_json(ellmer::Provider("dummy", "dummy", "dummy"), S7::prop(tool, "arguments"))
   schema$description <- NULL
   if (is.null(schema$properties)) {
     schema$properties <- empty_named_list()

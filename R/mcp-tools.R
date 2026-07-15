@@ -53,7 +53,7 @@ registerMcpTool <- function(...) {
         call. = FALSE
       )
     }
-    name <- tool@name
+    name <- S7::prop(tool, "name")
     if (name %in% reserved) {
       stop(
         "Cannot register an MCP tool named '", name, "': that name is ",

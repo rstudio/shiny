@@ -456,17 +456,19 @@ startHttpuvApp <- function(appObj, port, host, quiet) {
   )
 
   if (is.numeric(port) || is.integer(port)) {
+    # `startServer()` binds the socket synchronously, so only announce the URL
+    # after it returns. Otherwise the "Listening on" line (used as a readiness
+    # signal by shinytest2 and log watchers) can advertise a port that is not
+    # yet accepting connections (#4400).
+    server <- startServer(host, port, httpuvApp)
     if (!quiet) {
       hostString <- host
       if (httpuv::ipFamily(host) == 6L)
         hostString <- paste0("[", hostString, "]")
       message('\n', 'Listening on http://', hostString, ':', port)
     }
-    return(startServer(host, port, httpuvApp))
+    return(server)
   } else if (is.character(port)) {
-    if (!quiet) {
-      message('\n', 'Listening on domain socket ', port)
-    }
     mask <- attr(port, 'mask')
     if (is.null(mask)) {
       stop("`port` is not a valid domain socket (missing `mask` attribute). ",
@@ -474,7 +476,11 @@ startHttpuvApp <- function(appObj, port, host, quiet) {
            "configuration (and not domain sockets), then `port` must ",
            "be numeric, not a string.")
     }
-    return(startPipeServer(port, mask, httpuvApp))
+    server <- startPipeServer(port, mask, httpuvApp)
+    if (!quiet) {
+      message('\n', 'Listening on domain socket ', port)
+    }
+    return(server)
   }
 }
 

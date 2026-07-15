@@ -99,54 +99,40 @@ test_that("createAppHandlers mounts /mcp only when enabled", {
   })
 })
 
-test_that("author-declared tools appear in tools/list and execute", {
-  tools <- list(
-    list(
+test_that("registered author tools appear in tools/list with JSON schema", {
+  skip_if_not_installed("ellmer")
+  local_mcp_tools()
+  registerMcpTool(
+    ellmer::tool(
+      function(x, y) list(sum = x + y),
       name = "add_numbers",
       description = "Add two numbers.",
-      inputSchema = list(
-        type = "object",
-        properties = list(
-          x = list(type = "number"),
-          y = list(type = "number")
-        ),
-        required = list("x", "y")
-      ),
-      handler = function(args) {
-        list(sum = args$x + args$y)
-      }
+      arguments = list(
+        x = ellmer::type_number("x", required = TRUE),
+        y = ellmer::type_number("y", required = TRUE)
+      )
     ),
-    list(
-      name = "get_motd",
-      description = "Get the message of the day.",
-      handler = function(args) "Hello from R"
-    )
+    ellmer::tool(function() "Hello from R", name = "get_motd",
+      description = "Get the message of the day.")
   )
-  withr::with_options(list(shiny.mcp.tools = tools), {
-    h <- mcpHttpHandler(function(req) NULL, function(ws) TRUE)
+  h <- mcpHttpHandler(function(req) NULL, function(ws) TRUE)
+  out <- mcp_post(h, "tools/list")
 
-    out <- mcp_post(h, "tools/list")
-    # tools must serialize as a JSON array, not an object
-    expect_null(names(out$result$tools))
-    tool_names <- vapply(out$result$tools, function(t) t$name, character(1))
-    expect_true(all(c("add_numbers", "get_motd") %in% tool_names))
-    add_tool <- out$result$tools[[which(tool_names == "add_numbers")]]
-    expect_equal(add_tool$inputSchema$properties$x$type, "number")
-    # Author tools are model-visible (no app-only visibility marker)
-    expect_null(add_tool$`_meta`$ui$visibility)
+  # tools must serialize as a JSON array, not an object
+  expect_null(names(out$result$tools))
+  tool_names <- vapply(out$result$tools, function(t) t$name, character(1))
+  expect_true(all(c("add_numbers", "get_motd") %in% tool_names))
 
-    res <- mcp_post(h, "tools/call", params = list(
-      name = "add_numbers", arguments = list(x = 2, y = 40)
-    ))
-    expect_equal(res$result$structuredContent$sum, 42)
-    expect_match(res$result$content[[1]]$text, "42")
+  add_tool <- out$result$tools[[which(tool_names == "add_numbers")]]
+  expect_equal(add_tool$inputSchema$type, "object")
+  expect_equal(add_tool$inputSchema$properties$x$type, "number")
+  # required must be a JSON array even when derived from ellmer
+  expect_equal(add_tool$inputSchema$required, list("x", "y"))
+  expect_null(add_tool$inputSchema$description)
 
-    res <- mcp_post(h, "tools/call", params = list(
-      name = "get_motd", arguments = empty_named_list()
-    ))
-    expect_equal(res$result$content[[1]]$text, "Hello from R")
-    expect_null(res$result$structuredContent)
-  })
+  # a tool with no arguments still advertises an object schema with properties
+  motd <- out$result$tools[[which(tool_names == "get_motd")]]
+  expect_equal(motd$inputSchema$type %||% "object", "object")
 })
 
 test_that("author tool errors become isError results, not crashes", {

@@ -85,7 +85,7 @@ This will automatically add the package to the dependencies in `package.json`, a
 
 Periodically, it's good to upgrade the packages to a recent version. There's two ways of doing this, depending on your intention:
 
-1. Use `npm outdated` to see outdated dependencies based on the version range specified in the `package.json` file. Npm packages use [semantic versioning](https://docs.npmjs.com/about-semantic-versioning), i.e. each version is writen with a maximum of 3 dot-separated numbers such that: `major.minor.patch`. For example in the version `3.1.4`, 3 is the major version number, 1 is the minor version number and 4 is the patch version number. Please use an `x` to denote where packages can automatically bump their version. For example, `3.1.x` will accept any patch version for `3.1`. Or `3.x` to accept any v3 minor version.
+1. Use `npm outdated` to see outdated dependencies based on the version range specified in the `package.json` file. Npm packages use [semantic versioning](https://docs.npmjs.com/about-semantic-versioning), i.e. each version is written with a maximum of 3 dot-separated numbers such that: `major.minor.patch`. For example in the version `3.1.4`, 3 is the major version number, 1 is the minor version number and 4 is the patch version number. Please use an `x` to denote where packages can automatically bump their version. For example, `3.1.x` will accept any patch version for `3.1`. Or `3.x` to accept any v3 minor version.
 
 2. Use `npm update [package]` to upgrade a single named package to the version specified by the latest tag (potentially upgrading the package across major versions).
 
@@ -153,7 +153,7 @@ All config files are located in the root folder to avoid opening two separate VS
   * Used by `prettier` to know how to adjust code when a file is saved in VSCode or within `eslint`'s linting process.
 * `package.json`
   * Contains useful scripts that can be run by `npm` via `npm run SCRIPTNAME`.
-  * The scripts described below are inteded for developer use. All other scripts are means to an end.
+  * The scripts described below are intended for developer use. All other scripts are means to an end.
     * `npm run watch` - Watch `srcts/src` for changes and rebuild the JavaScript files.
     * `npm run build` - Build `shiny.js` and `shiny.min.js` in `inst/www/shared`. Both files will have a corresponding sourcemap
     * `npm run lint` - Fix all TypeScript lints using [`eslint`](https://eslint.org/) and [`prettier`](https://prettier.io/)
@@ -184,7 +184,7 @@ Both JavaScript files will produce a sourcemap (`**.js.map`) that the browser wi
 
 ### Exported types
 
-`./extras/globalShiny.ts` contains global declarations to define `window.Shiny`, a globally available `Shiny` variable, and a globally available `ShinyClass` type. This file is in a parallel folder to `./src` to avoid `Shiny` from being globally accessable within the source code. However, this file is the default type definition when the Type definitions are installed by external developers.
+`./extras/globalShiny.ts` contains global declarations to define `window.Shiny`, a globally available `Shiny` variable, and a globally available `ShinyClass` type. This file is in a parallel folder to `./src` to avoid `Shiny` from being globally accessible within the source code. However, this file is the default type definition when the Type definitions are installed by external developers.
 
 ### GitHub Actions
 

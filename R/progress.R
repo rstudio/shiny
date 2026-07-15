@@ -208,7 +208,7 @@ Progress <- R6Class(
 #' @param expr The work to be done. This expression should contain calls to
 #'   [setProgress()] or [incProgress()].
 #' @param min The value that represents the starting point of the progress bar.
-#'   Must be less tham `max`. Default is 0.
+#'   Must be less than `max`. Default is 0.
 #' @param max The value that represents the end of the progress bar. Must be
 #'   greater than `min`. Default is 1.
 #' @param amount For `incProgress`, the amount to increment the status bar.

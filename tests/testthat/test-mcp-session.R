@@ -139,23 +139,17 @@ test_that("mcpUpdateModelContext validates input and no-ops outside MCP", {
   expect_error(mcpUpdateModelContext(session = mock), "text.*data|data.*text")
 })
 
-test_that("tool inputSchema is configurable via options", {
-  schema <- list(
-    type = "object",
-    properties = list(note = list(type = "string", description = "A note")),
-    required = list("note")
+test_that("tool inputSchema is configurable via arguments", {
+  skip_if_not_installed("ellmer")
+  local_mcp_config(
+    arguments = list(note = ellmer::type_string("A note", required = TRUE))
   )
-  withr::with_options(
-    list(shiny.mcp.tool = list(inputSchema = schema)),
-    {
-      h <- mcpHttpHandler(function(req) NULL, function(ws) TRUE)
-      out <- mcp_post(h, "tools/list")
-      tool_names <- vapply(out$result$tools, function(t) t$name, character(1))
-      app_tool <- out$result$tools[[which(tool_names == "open_shiny_app")]]
-      expect_equal(app_tool$inputSchema$properties$note$type, "string")
-      expect_equal(unlist(app_tool$inputSchema$required), "note")
-    }
-  )
+  h <- mcpHttpHandler(function(req) NULL, function(ws) TRUE)
+  out <- mcp_post(h, "tools/list")
+  tool_names <- vapply(out$result$tools, function(t) t$name, character(1))
+  app_tool <- out$result$tools[[which(tool_names == "open_shiny_app")]]
+  expect_equal(app_tool$inputSchema$properties$note$type, "string")
+  expect_equal(unlist(app_tool$inputSchema$required), "note")
 })
 
 test_that("mcpRequestDisplayMode sends the bridge message", {

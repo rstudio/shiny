@@ -63,20 +63,16 @@ test_that("tools/list includes the visible app tool with ui metadata", {
 })
 
 test_that("tool name and description are configurable", {
-  withr::with_options(
-    list(shiny.mcp.tool = list(name = "show_dashboard", description = "Show it")),
-    {
-      h <- mcpHttpHandler(function(req) NULL, function(ws) TRUE)
-      out <- mcp_post(h, "tools/list")
-      tool_names <- vapply(out$result$tools, function(t) t$name, character(1))
-      expect_true("show_dashboard" %in% tool_names)
+  local_mcp_config(appId = "dashboard", description = "Show it")
+  h <- mcpHttpHandler(function(req) NULL, function(ws) TRUE)
+  out <- mcp_post(h, "tools/list")
+  tool_names <- vapply(out$result$tools, function(t) t$name, character(1))
+  expect_true("open_dashboard_app" %in% tool_names)
 
-      called <- mcp_post(h, "tools/call",
-        params = list(name = "show_dashboard", arguments = empty_named_list())
-      )
-      expect_match(called$result$content[[1]]$text, "displayed")
-    }
+  called <- mcp_post(h, "tools/call",
+    params = list(name = "open_dashboard_app", arguments = empty_named_list())
   )
+  expect_match(called$result$content[[1]]$text, "displayed")
 })
 
 test_that("createAppHandlers mounts /mcp only when enabled", {
@@ -86,17 +82,16 @@ test_that("createAppHandlers mounts /mcp only when enabled", {
     h <- createAppHandlers(app$httpHandler, function() function(input, output) {})
     h$http
   }
-  withr::with_options(list(shiny.mcp = TRUE), {
-    resp <- wait_for_result(make_handler()(mcp_req(
-      list(jsonrpc = "2.0", id = 1, method = "ping")
-    )))
-    expect_equal(resp$status, 200L)
-  })
-  withr::with_options(list(shiny.mcp = FALSE), {
-    expect_null(make_handler()(mcp_req(
-      list(jsonrpc = "2.0", id = 1, method = "ping")
-    )))
-  })
+  local_mcp_config()
+  resp <- wait_for_result(make_handler()(mcp_req(
+    list(jsonrpc = "2.0", id = 1, method = "ping")
+  )))
+  expect_equal(resp$status, 200L)
+
+  local_mcp_config(enabled = FALSE)
+  expect_null(make_handler()(mcp_req(
+    list(jsonrpc = "2.0", id = 1, method = "ping")
+  )))
 })
 
 test_that("registered author tools appear in tools/list with JSON schema", {
@@ -215,15 +210,13 @@ test_that("mcpDirectBase honors option > Connect headers > request origin", {
     "https://connect.example.com/content/def456/"
   expect_equal(mcpDirectBase(req), "https://connect.example.com/content/def456")
 
-  # Explicit option wins over everything, trailing slash normalized
-  withr::with_options(
-    list(shiny.mcp.origin = "https://other.example.com/apps/dash/"),
-    expect_equal(mcpDirectBase(req), "https://other.example.com/apps/dash")
-  )
+  # Explicit origin wins over everything, trailing slash normalized
+  local_mcp_config(origin = "https://other.example.com/apps/dash/")
+  expect_equal(mcpDirectBase(req), "https://other.example.com/apps/dash")
 })
 
-test_that("shiny.mcp.appId namespaces internal tools and the resource", {
-  withr::local_options(list(shiny.mcp.appId = "sales"))
+test_that("appId namespaces internal tools and the resource", {
+  local_mcp_config(appId = "sales")
 
   expect_equal(mcpResourceUri(), "ui://shiny/sales")
   expect_equal(mcpTunnelToolName("_shiny_connect"), "sales_shiny_connect")
@@ -239,17 +232,6 @@ test_that("shiny.mcp.appId namespaces internal tools and the resource", {
   app_tool <- mcpToolsList()[[1]]
   expect_equal(app_tool$`_meta`$ui$resourceUri, "ui://shiny/sales")
   expect_equal(mcpResourcesList()[[1]]$uri, "ui://shiny/sales")
-})
-
-test_that("invalid shiny.mcp.appId is ignored", {
-  .globals$mcpAppIdWarned <- NULL
-  withr::defer(.globals$mcpAppIdWarned <- NULL)
-  withr::local_options(list(shiny.mcp.appId = "not ok!"))
-  expect_warning(id <- mcpAppId(), "shiny.mcp.appId")
-  expect_null(id)
-  # warns only once
-  expect_silent(expect_null(mcpAppId()))
-  expect_equal(mcpResourceUri(), "ui://shiny/app")
 })
 
 test_that("mcpDirectBase ignores empty headers and prefers X-Forwarded-Host", {
@@ -306,36 +288,29 @@ test_that("mcpDeployedUrl finds a host-matched rsconnect deployment record", {
 test_that("resources/read uses the path-aware base: origin-only CSP, full directBase", {
   ui <- fluidPage("hi")
   app <- shinyApp(ui, function(input, output) {})
-  withr::with_options(
-    list(
-      shiny.mcp = TRUE,
-      shiny.mcp.origin = "https://connect.example.com/content/abc123/"
-    ),
-    {
-      handlers <- createAppHandlers(
-        app$httpHandler,
-        function() function(input, output) {}
-      )
-      req <- mcp_req(list(
-        jsonrpc = "2.0", id = 1, method = "resources/read",
-        params = list(uri = "ui://shiny/app")
-      ))
-      out <- jsonlite::parse_json(rawToChar(as_bytes(
-        wait_for_result(handlers$http(req))$content
-      )))
-      csp <- unlist(out$result$contents[[1]]$`_meta`$ui$csp$connectDomains)
-      # CSP entries are origins only (host CSP sanitizers reject paths)
-      expect_setequal(
-        csp,
-        c("https://connect.example.com", "wss://connect.example.com")
-      )
-      # ...but the bridge gets the full base including the path
-      expect_match(
-        out$result$contents[[1]]$text,
-        '"directBase":"https://connect.example.com/content/abc123"',
-        fixed = TRUE
-      )
-    }
+  local_mcp_config(origin = "https://connect.example.com/content/abc123/")
+  handlers <- createAppHandlers(
+    app$httpHandler,
+    function() function(input, output) {}
+  )
+  req <- mcp_req(list(
+    jsonrpc = "2.0", id = 1, method = "resources/read",
+    params = list(uri = "ui://shiny/app")
+  ))
+  out <- jsonlite::parse_json(rawToChar(as_bytes(
+    wait_for_result(handlers$http(req))$content
+  )))
+  csp <- unlist(out$result$contents[[1]]$`_meta`$ui$csp$connectDomains)
+  # CSP entries are origins only (host CSP sanitizers reject paths)
+  expect_setequal(
+    csp,
+    c("https://connect.example.com", "wss://connect.example.com")
+  )
+  # ...but the bridge gets the full base including the path
+  expect_match(
+    out$result$contents[[1]]$text,
+    '"directBase":"https://connect.example.com/content/abc123"',
+    fixed = TRUE
   )
 })
 

@@ -4,36 +4,35 @@ test_that("resources/list and resources/read serve a self-contained app page", {
     plotOutput("p")
   )
   app <- shinyApp(ui, function(input, output) {})
-  withr::with_options(list(shiny.mcp = TRUE), {
-    handlers <- createAppHandlers(
-      app$httpHandler,
-      function() function(input, output) {}
-    )
-    h <- handlers$http
+  local_mcp_config()
+  handlers <- createAppHandlers(
+    app$httpHandler,
+    function() function(input, output) {}
+  )
+  h <- handlers$http
 
-    out <- mcp_post(h, "resources/list")
-    res <- out$result$resources[[1]]
-    expect_equal(res$uri, "ui://shiny/app")
-    expect_equal(res$mimeType, "text/html;profile=mcp-app")
+  out <- mcp_post(h, "resources/list")
+  res <- out$result$resources[[1]]
+  expect_equal(res$uri, "ui://shiny/app")
+  expect_equal(res$mimeType, "text/html;profile=mcp-app")
 
-    out <- mcp_post(h, "resources/read", params = list(uri = "ui://shiny/app"))
-    content <- out$result$contents[[1]]
-    expect_equal(content$mimeType, "text/html;profile=mcp-app")
-    html <- content$text
+  out <- mcp_post(h, "resources/read", params = list(uri = "ui://shiny/app"))
+  content <- out$result$contents[[1]]
+  expect_equal(content$mimeType, "text/html;profile=mcp-app")
+  html <- content$text
 
-    # All scripts and stylesheets inlined: no external file refs remain
-    expect_false(grepl("<script[^>]+src=", html))
-    expect_false(grepl("<link[^>]+href=", html))
-    # Bridge script injected
-    expect_match(html, "shiny-mcp-bridge", fixed = TRUE)
-    # App UI present
-    expect_match(html, "sliderInput|shiny-plot-output|slider")
-    # jquery + shiny.js payloads inlined
-    expect_match(html, "jQuery", fixed = TRUE)
+  # All scripts and stylesheets inlined: no external file refs remain
+  expect_false(grepl("<script[^>]+src=", html))
+  expect_false(grepl("<link[^>]+href=", html))
+  # Bridge script injected
+  expect_match(html, "shiny-mcp-bridge", fixed = TRUE)
+  # App UI present
+  expect_match(html, "sliderInput|shiny-plot-output|slider")
+  # jquery + shiny.js payloads inlined
+  expect_match(html, "jQuery", fixed = TRUE)
 
-    out <- mcp_post(h, "resources/read", params = list(uri = "ui://nope"))
-    expect_equal(out$error$code, -32602L)
-  })
+  out <- mcp_post(h, "resources/read", params = list(uri = "ui://nope"))
+  expect_equal(out$error$code, -32602L)
 })
 
 test_that("resolveAssetFile maps registered resource paths and shared dir", {
@@ -172,21 +171,20 @@ test_that("stylesheet inlining rewrites url() refs (page + dynamic deps)", {
 test_that("resources/read inlines fontawesome webfonts for icon() apps", {
   ui <- fluidPage(downloadButton("dl", "Get"))
   app <- shinyApp(ui, function(input, output) {})
-  withr::with_options(list(shiny.mcp = TRUE), {
-    handlers <- createAppHandlers(
-      app$httpHandler,
-      function() function(input, output) {}
-    )
-    out <- mcp_post(handlers$http, "resources/read",
-      params = list(uri = "ui://shiny/app")
-    )
-    html <- out$result$contents[[1]]$text
-    # The fontawesome stylesheet references ../webfonts/*.woff2; those must
-    # now be data: URIs rather than unreachable relative URLs. (Legacy .ttf
-    # fallback refs stay as-is; browsers never fetch them once woff2 loads.)
-    expect_match(html, "data:font/woff2;base64,")
-    expect_false(grepl("url\\([\"']?\\.\\./webfonts/[^)\"']*\\.woff2", html))
-  })
+  local_mcp_config()
+  handlers <- createAppHandlers(
+    app$httpHandler,
+    function() function(input, output) {}
+  )
+  out <- mcp_post(handlers$http, "resources/read",
+    params = list(uri = "ui://shiny/app")
+  )
+  html <- out$result$contents[[1]]$text
+  # The fontawesome stylesheet references ../webfonts/*.woff2; those must
+  # now be data: URIs rather than unreachable relative URLs. (Legacy .ttf
+  # fallback refs stay as-is; browsers never fetch them once woff2 loads.)
+  expect_match(html, "data:font/woff2;base64,")
+  expect_false(grepl("url\\([\"']?\\.\\./webfonts/[^)\"']*\\.woff2", html))
 })
 
 test_that("rewriteCssUrls produces single-line data URIs for large files", {
@@ -200,67 +198,65 @@ test_that("rewriteCssUrls produces single-line data URIs for large files", {
 test_that("resources/read declares connectDomains derived from the request", {
   ui <- fluidPage("hi")
   app <- shinyApp(ui, function(input, output) {})
-  withr::with_options(list(shiny.mcp = TRUE), {
-    handlers <- createAppHandlers(
-      app$httpHandler,
-      function() function(input, output) {}
-    )
-    h <- handlers$http
+  local_mcp_config()
+  handlers <- createAppHandlers(
+    app$httpHandler,
+    function() function(input, output) {}
+  )
+  h <- handlers$http
 
-    req <- mcp_req(list(
-      jsonrpc = "2.0", id = 1, method = "resources/read",
-      params = list(uri = "ui://shiny/app")
-    ))
-    req$HTTP_HOST <- "myapp.example.com"
-    req$HTTP_X_FORWARDED_PROTO <- "https"
-    out <- jsonlite::parse_json(rawToChar(as_bytes(wait_for_result(h(req))$content)))
-    csp <- out$result$contents[[1]]$`_meta`$ui$csp
-    domains <- unlist(csp$connectDomains)
-    expect_true("https://myapp.example.com" %in% domains)
-    expect_true("wss://myapp.example.com" %in% domains)
+  req <- mcp_req(list(
+    jsonrpc = "2.0", id = 1, method = "resources/read",
+    params = list(uri = "ui://shiny/app")
+  ))
+  req$HTTP_HOST <- "myapp.example.com"
+  req$HTTP_X_FORWARDED_PROTO <- "https"
+  out <- jsonlite::parse_json(rawToChar(as_bytes(wait_for_result(h(req))$content)))
+  csp <- out$result$contents[[1]]$`_meta`$ui$csp
+  domains <- unlist(csp$connectDomains)
+  expect_true("https://myapp.example.com" %in% domains)
+  expect_true("wss://myapp.example.com" %in% domains)
 
-    # Plain http host -> ws scheme
-    req2 <- mcp_req(list(
-      jsonrpc = "2.0", id = 2, method = "resources/read",
-      params = list(uri = "ui://shiny/app")
-    ))
-    req2$HTTP_HOST <- "127.0.0.1:7788"
-    out2 <- jsonlite::parse_json(rawToChar(as_bytes(wait_for_result(h(req2))$content)))
-    domains2 <- unlist(out2$result$contents[[1]]$`_meta`$ui$csp$connectDomains)
-    expect_true(all(c("http://127.0.0.1:7788", "ws://127.0.0.1:7788") %in% domains2))
+  # Plain http host -> ws scheme
+  req2 <- mcp_req(list(
+    jsonrpc = "2.0", id = 2, method = "resources/read",
+    params = list(uri = "ui://shiny/app")
+  ))
+  req2$HTTP_HOST <- "127.0.0.1:7788"
+  out2 <- jsonlite::parse_json(rawToChar(as_bytes(wait_for_result(h(req2))$content)))
+  domains2 <- unlist(out2$result$contents[[1]]$`_meta`$ui$csp$connectDomains)
+  expect_true(all(c("http://127.0.0.1:7788", "ws://127.0.0.1:7788") %in% domains2))
 
-    # Config injected into the page for the bridge
-    html <- out2$result$contents[[1]]$text
-    expect_match(html, "__shinyMcpConfig__", fixed = TRUE)
-    expect_match(html, '"directBase":"http://127.0.0.1:7788"', fixed = TRUE)
-  })
+  # Config injected into the page for the bridge
+  html <- out2$result$contents[[1]]$text
+  expect_match(html, "__shinyMcpConfig__", fixed = TRUE)
+  expect_match(html, '"directBase":"http://127.0.0.1:7788"', fixed = TRUE)
 })
 
-test_that("shiny.mcp.direct = FALSE omits CSP and directOrigin", {
+test_that("direct = FALSE omits CSP and directOrigin", {
   ui <- fluidPage("hi")
   app <- shinyApp(ui, function(input, output) {})
-  withr::with_options(list(shiny.mcp = TRUE, shiny.mcp.direct = FALSE), {
-    handlers <- createAppHandlers(
-      app$httpHandler,
-      function() function(input, output) {}
-    )
-    req <- mcp_req(list(
-      jsonrpc = "2.0", id = 1, method = "resources/read",
-      params = list(uri = "ui://shiny/app")
-    ))
-    req$HTTP_HOST <- "127.0.0.1:7788"
-    out <- jsonlite::parse_json(rawToChar(as_bytes(wait_for_result(handlers$http(req))$content)))
-    expect_null(out$result$contents[[1]]$`_meta`$ui$csp)
-    # The injected config object must not carry a directOrigin (the bridge
-    # bundle source mentions the name, so scope the check to the config)
-    html <- out$result$contents[[1]]$text
-    config_json <- regmatches(
-      html,
-      regexpr("__shinyMcpConfig__ = \\{[^;]*", html)
-    )
-    expect_length(config_json, 1)
-    expect_false(grepl('"directBase"', config_json, fixed = TRUE))
-  })
+  local_mcp_config(direct = FALSE)
+  handlers <- createAppHandlers(
+    app$httpHandler,
+    function() function(input, output) {}
+  )
+  req <- mcp_req(list(
+    jsonrpc = "2.0", id = 1, method = "resources/read",
+    params = list(uri = "ui://shiny/app")
+  ))
+  req$HTTP_HOST <- "127.0.0.1:7788"
+  out <- jsonlite::parse_json(rawToChar(as_bytes(wait_for_result(handlers$http(req))$content)))
+  expect_null(out$result$contents[[1]]$`_meta`$ui$csp)
+  # The injected config object must not carry a directOrigin (the bridge
+  # bundle source mentions the name, so scope the check to the config)
+  html <- out$result$contents[[1]]$text
+  config_json <- regmatches(
+    html,
+    regexpr("__shinyMcpConfig__ = \\{[^;]*", html)
+  )
+  expect_length(config_json, 1)
+  expect_false(grepl('"directBase"', config_json, fixed = TRUE))
 })
 
 test_that("isMcpSession recognizes direct websocket connections via ?mcp=1", {

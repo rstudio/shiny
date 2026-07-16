@@ -93,7 +93,7 @@ test_that("stdio transport works end to end in a real subprocess", {
   writeLines(
     c(
       'library(shiny)',
-      'options(shiny.mcp = TRUE, shiny.mcp.stdio = TRUE)',
+      'shiny::mcpConfigure(stdio = TRUE)',
       'shinyApp(fluidPage("hi"), function(input, output) {})'
     ),
     file.path(app_dir, "app.R")

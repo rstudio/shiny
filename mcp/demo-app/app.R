@@ -1,22 +1,16 @@
 library(shiny)
 
-options(shiny.mcp = TRUE)
-# Unique identity so a multi-app gateway can merge this app with others
-options(shiny.mcp.appId = "demo")
-options(shiny.mcp.tool = list(
-  name = "open_shiny_app",
+mcpConfigure(
+  appId = "demo",
   description = paste(
     "Open the interactive demo dashboard. Optionally pass `note` (shown in",
     "the app) and `n` (initial number of observations, 10-500)."
   ),
-  inputSchema = list(
-    type = "object",
-    properties = list(
-      note = list(type = "string", description = "A note to show in the app"),
-      n = list(type = "integer", description = "Initial observations (10-500)")
-    )
+  arguments = list(
+    note = ellmer::type_string("A note to show in the app"),
+    n    = ellmer::type_integer("Initial observations (10-500)")
   )
-))
+)
 
 # Additional model-callable tools that run in the server R process
 registerMcpTool(
@@ -65,13 +59,13 @@ shinyApp(
   server = function(input, output, session) {
     # Arguments the model passed to the tool
     observe({
-      ti <- mcpToolInput()
+      ti <- mcpUpdates()
       if (!is.null(ti$n)) {
         updateSliderInput(session, "n", value = ti$n)
       }
     })
     output$note <- renderText({
-      note <- mcpToolInput()$note
+      note <- mcpUpdates()$note
       if (is.null(note)) "" else paste("Note from the model:", note)
     })
 

@@ -3,8 +3,8 @@
 #' @description
 #' `r lifecycle::badge("experimental")`
 #'
-#' When a Shiny app is served as an MCP App (by setting
-#' `options(shiny.mcp = TRUE)` before the app starts), it renders inside an
+#' When a Shiny app is served as an MCP App (by calling
+#' `mcpConfigure()` before the app starts), it renders inside an
 #' MCP host's conversation (e.g. Claude, Claude Desktop, VS Code Copilot)
 #' and can exchange information with the host:
 #'
@@ -30,7 +30,7 @@
 #' On hosts that honor the declared content security policy, the app's
 #' iframe connects over a real WebSocket for native-latency reactivity,
 #' falling back to the tools/call tunnel automatically. The websocket URL
-#' is derived, in order, from: `options(shiny.mcp.origin = )` (a full base
+#' is derived, in order, from: `mcpConfigure(origin = )` (a full base
 #' URL, which may include a path); Posit Connect's
 #' `RStudio-Connect-App-Base-Url` (or `X-RSC-Request`) header;
 #' shinyapps.io's `X-Redx-Frontend-Name` header;
@@ -39,12 +39,12 @@
 #' `.posit/publish/deployments/*.toml`) — so apps deployed
 #' under a sub-path such as `/content/<guid>` work without configuration;
 #' or the origin of the MCP request itself. Set
-#' `options(shiny.mcp.direct = FALSE)` to always use the tunnel.
+#' `mcpConfigure(direct = FALSE)` to always use the tunnel.
 #'
 #' @section Multiple apps behind one server:
 #' A gateway can merge several Shiny MCP endpoints into a single MCP
 #' server, so one connector exposes many apps. For that to work each app
-#' must set a unique `options(shiny.mcp.appId = "<id>")` (letters, digits,
+#' must set a unique `mcpConfigure(appId = "<id>")` (letters, digits,
 #' `_`, `-`): the app's internal tunnel tools are then prefixed with the
 #' id and its UI resource is published as `ui://shiny/<id>`, so tools and
 #' resources from different apps do not collide when merged. App-facing
@@ -71,34 +71,19 @@
 #'
 #' @examples
 #' \dontrun{
-#' options(shiny.mcp = TRUE)
-#' options(shiny.mcp.tool = list(
-#'   name = "open_sales_dashboard",
+#' mcpConfigure(
+#'   appId = "sales",
 #'   description = "Show the interactive sales dashboard.",
-#'   inputSchema = list(
-#'     type = "object",
-#'     properties = list(
-#'       region = list(type = "string", description = "Region to focus on")
-#'     )
-#'   )
-#' ))
+#'   arguments = list(region = ellmer::type_string("Region to focus on"))
+#' )
 #'
 #' server <- function(input, output, session) {
-#'   # React to arguments the model passed to the tool
+#'   # Post-open updates from the model
 #'   observe({
 #'     region <- mcpUpdates()$region
-#'     if (!is.null(region)) {
-#'       updateSelectInput(session, "region", selected = region)
-#'     }
+#'     if (!is.null(region)) updateSelectInput(session, "region", selected = region)
 #'   })
-#'
-#'   # Keep the model informed about what the user is looking at
-#'   observe({
-#'     mcpUpdateModelContext(
-#'       text = paste("The user is viewing region", input$region),
-#'       data = list(region = input$region)
-#'     )
-#'   })
+#'   mcpUpdateModelContext(text = paste("Viewing", input$region))
 #' }
 #' }
 #'
@@ -201,7 +186,7 @@ mcpSendMessage <- function(
 #' @param mode The display mode to request: `"inline"`, `"fullscreen"`, or
 #'   `"pip"`. The host may decline; observe `mcpHostContext()$displayMode`
 #'   for the mode actually in effect. Declare the modes the app supports
-#'   with `options(shiny.mcp.displayModes = c("inline", "fullscreen"))`
+#'   with `mcpConfigure(displayModes = c("inline", "fullscreen"))`
 #'   (default: all three).
 #' @rdname mcp-session
 #' @export

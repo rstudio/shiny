@@ -61,7 +61,7 @@ Add the app as a local stdio server in
       "command": "Rscript",
       "args": [
         "-e",
-        "setwd('/ABSOLUTE/PATH/TO/shiny-repo'); pkgload::load_all(quiet = TRUE); options(shiny.mcp = TRUE, shiny.mcp.stdio = TRUE); shiny::runApp('mcp/demo-app', launch.browser = FALSE)"
+        "setwd('/ABSOLUTE/PATH/TO/shiny-repo'); pkgload::load_all(quiet = TRUE); shiny::mcpConfigure(stdio = TRUE); shiny::runApp('mcp/demo-app', launch.browser = FALSE)"
       ]
     }
   }
@@ -78,8 +78,8 @@ Notes:
   {shiny}; once installed, replace it with `library(shiny)`.
 - Claude Desktop spawns servers without your login-shell `PATH` — if
   `Rscript` isn't found, use its absolute path (`which Rscript`).
-- BOTH options are required: `shiny.mcp` enables the endpoint,
-  `shiny.mcp.stdio` speaks the protocol on stdin/stdout.
+- `mcpConfigure(stdio = TRUE)` enables both the endpoint and the stdio
+  protocol on stdin/stdout.
 - Never `cat()`/`print()` to stdout in the app at top level — stdout is the
   protocol channel (`message()` is fine).
 - R startup can exceed host connect timeouts; for the `claude` CLI use
@@ -88,7 +88,7 @@ Notes:
 
 ### claude.ai (web, deployed)
 
-Deploy the app (with `options(shiny.mcp = TRUE)` set in app.R / .Rprofile)
+Deploy the app (with `mcpConfigure()` called in app.R / .Rprofile)
 somewhere with a public HTTPS URL — e.g. Posit Connect — then in claude.ai:
 Settings → Connectors → *Add custom connector* → URL
 `https://<your-app-url>/mcp`. The direct-connect fast path may be blocked

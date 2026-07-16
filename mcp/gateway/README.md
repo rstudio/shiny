@@ -7,11 +7,11 @@ apps.
 
 ## Requirements
 
-Each backend app must set a **unique** `options(shiny.mcp.appId = "<id>")`
+Each backend app must set a **unique** `mcpConfigure(appId = "<id>")`
 (letters/digits/`_`/`-`). This namespaces the app's internal `_shiny_*`
 tunnel tools (`demo_shiny_connect`, ...) and publishes its UI resource as
 `ui://shiny/<appId>`, so the gateway can route each iframe's traffic to the
-right app. App-facing tool names (`options(shiny.mcp.tool/tools)`) must
+right app. App-facing tool names (`mcpConfigure(description = )`) must
 also be unique across apps.
 
 ## Usage
@@ -62,6 +62,6 @@ Claude Desktop entry (`claude_desktop_config.json`):
 basic-host → gateway (`--port 7790`) → `mcp/demo-app` (appId `demo`) +
 `mcp/demo-app2` (appId `cars`): merged 13 tools + 2 resources; both apps
 render via `open_shiny_app` / `open_cars_app`; the cars app ran with
-`shiny.mcp.direct=FALSE` to prove full reactivity through the gateway over
+`mcpConfigure(direct=FALSE)` to prove full reactivity through the gateway over
 the namespaced tunnel tools (selectize change re-rendered plot + cor text).
 See `../screenshot-e2e-gateway.png`.

@@ -1,12 +1,12 @@
 # Experimental support for serving a Shiny app as an MCP App (SEP-1865).
 #
-# When `options(shiny.mcp = TRUE)` is set before the app starts, a Model
-# Context Protocol endpoint (JSON-RPC over streamable HTTP, JSON responses)
-# is mounted at `/mcp` on the app's own httpuv server. MCP hosts that
-# support the Apps extension (`io.modelcontextprotocol/ui`) can then call
-# the app's tool and render the live application in a sandboxed iframe;
-# reactivity is tunneled over postMessage -> tools/call (see mcp-tunnel.R
-# and srcts/src/mcp/).
+# When `mcpConfigure()` is called before the app starts, a Model Context
+# Protocol endpoint (JSON-RPC over streamable HTTP, JSON responses) is
+# mounted at `/mcp` on the app's own httpuv server. MCP hosts that support
+# the Apps extension (`io.modelcontextprotocol/ui`) can then call the app's
+# tool and render the live application in a sandboxed iframe; reactivity is
+# tunneled over postMessage -> tools/call (see mcp-tunnel.R and
+# srcts/src/mcp/).
 
 MCP_PROTOCOL_VERSIONS <- c("2024-11-05", "2025-03-26", "2025-06-18")
 MCP_RESOURCE_URI <- "ui://shiny/app"
@@ -58,7 +58,7 @@ mcpTunnelLocalName <- function(name) {
 # The app's externally reachable base URL (may include a path, e.g. Posit
 # Connect's /content/<guid>), for the direct-connect fast path. Priority:
 #
-# 1. options(shiny.mcp.origin) — explicit full URL, for nonstandard proxies.
+# 1. mcpConfigure(origin=) — explicit full URL, for nonstandard proxies.
 # 2. RStudio-Connect-App-Base-Url — Posit Connect sends the app's external
 #    base URL (https://<server>/content/<guid>) with every request it
 #    proxies to Shiny content. Verified against a real Connect deployment.

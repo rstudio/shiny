@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Replace `options(shiny.mcp.tools = list(...))` with an exported `registerMcpTool()` function that accepts `ellmer::tool()` objects as MCP author-tool definitions.
+**Goal:** Replace the former tools option with an exported `registerMcpTool()` function that accepts `ellmer::tool()` objects as MCP author-tool definitions.
 
 **Architecture:** Author tools are stored in process-global `.globals$mcpAuthorTools` (named list keyed by tool name). `registerMcpTool()` validates and registers `ellmer::ToolDef` objects eagerly. `tools/list` converts each ToolDef's typed `@arguments` to JSON Schema via the same dummy-provider `as_json()` path `mcptools` uses; `tools/call` invokes the ToolDef with `rlang::exec()`. Return-value handling is unchanged.
 
@@ -10,8 +10,8 @@
 
 ## Global Constraints
 
-- Scope is **author tools only**. The app-opening tool (`options(shiny.mcp.tool)`, read by `mcpToolInfo()`) and every other `shiny.mcp.*` option stay unchanged.
-- `options(shiny.mcp.tools = ...)` is **removed entirely** — no fallback. `registerMcpTool()` is the only path.
+- Scope is **author tools only**. The app-opening tool (configured via `mcpConfigure(description=, arguments=)`, read by `mcpToolInfo()`) and other config stay unchanged.
+- The former tools option is **removed entirely** — no fallback. `registerMcpTool()` is the only path.
 - `ellmer` is a **Suggests** dependency, pinned `>= 0.4.0`. Gate use with `rlang::check_installed("ellmer")`.
 - Reuse the `mcptools::tool_as_json()` conversion verbatim (`getNamespace("ellmer")[["as_json"]]` + a dummy `ellmer::Provider()`) to stay upstream-aligned.
 - Registration is **last-write-wins by name** (no error on duplicate, no `force` arg).
@@ -145,7 +145,7 @@ Create `R/mcp-tools.R`:
 #' @description
 #' `r lifecycle::badge("experimental")`
 #'
-#' When a Shiny app is served as an MCP App (`options(shiny.mcp = TRUE)`),
+#' When a Shiny app is served as an MCP App (via `mcpConfigure()`),
 #' `registerMcpTool()` exposes plain R functions as MCP tools the model may
 #' call directly, in addition to the tool that opens the app. Define each
 #' tool with [ellmer::tool()] and register it at the top level of your
@@ -153,7 +153,7 @@ Create `R/mcp-tools.R`:
 #'
 #' ```r
 #' library(shiny)
-#' options(shiny.mcp = TRUE)
+#' mcpConfigure()
 #'
 #' registerMcpTool(
 #'   ellmer::tool(
@@ -181,7 +181,7 @@ Create `R/mcp-tools.R`:
 #'
 #' @return Invisibly, `NULL`.
 #'
-#' @seealso [mcpToolInput()] and the other `mcp*` session helpers.
+#' @seealso [mcpUpdates()] and the other `mcp*` session helpers.
 #' @export
 registerMcpTool <- function(...) {
   rlang::check_installed("ellmer", "to define MCP tools with `ellmer::tool()`.")
@@ -480,7 +480,7 @@ Expected: PASS (all remaining tests in the file).
 - [ ] **Step 5: Full MCP test sweep**
 
 Run: `R -q -e 'pkgload::load_all(); testthat::test_dir("tests/testthat", filter = "mcp")'`
-Expected: PASS — confirms no other MCP test referenced `shiny.mcp.tools`.
+Expected: PASS — confirms no other MCP test referenced the old tools option.
 
 - [ ] **Step 6: Commit**
 
@@ -503,7 +503,7 @@ git commit -m "feat: invoke registered ellmer tools on MCP tools/call"
 
 - [ ] **Step 1: Rewrite the "Additional tools" section**
 
-In `R/mcp-session.R`, **replace** the `@section Additional tools:` block (currently describing `options(shiny.mcp.tools = list(...))` and its `list(name, description, inputSchema, handler)` example, lines ~53-80) with:
+In `R/mcp-session.R`, **replace** the `@section Additional tools:` block (which formerly described the old tools option and its `list(name, description, inputSchema, handler)` example, lines ~53-80) with:
 
 ```r
 #' @section Additional tools:
@@ -543,7 +543,7 @@ Expected: no `checkRd` warnings.
 
 ```bash
 git add R/mcp-session.R tools/documentation/pkgdown.yml NEWS.md man/
-git commit -m "docs: document registerMcpTool() and drop shiny.mcp.tools option"
+git commit -m "docs: document registerMcpTool() and drop old tools option"
 ```
 
 ---
@@ -551,7 +551,7 @@ git commit -m "docs: document registerMcpTool() and drop shiny.mcp.tools option"
 ### Task 5: Migrate demo apps and architecture notes
 
 **Files:**
-- Modify: `mcp/demo-app/app.R` (and any file setting `options(shiny.mcp.tools = ...)`)
+- Modify: `mcp/demo-app/app.R` (and any file using the old tools option)
 - Modify: `mcp/demo-app2/app.R` (same)
 - Modify: `mcp/architecture.md` (author-tools description)
 
@@ -559,23 +559,16 @@ git commit -m "docs: document registerMcpTool() and drop shiny.mcp.tools option"
 
 - [ ] **Step 1: Find the option usages in the demos**
 
-Run: `grep -rn "shiny.mcp.tools" mcp/`
+Run: `grep -rn "mcp.tools" mcp/`
 Expected: hits in `mcp/demo-app` and/or `mcp/demo-app2`. Record each block.
 
-- [ ] **Step 2: Rewrite each `options(shiny.mcp.tools = ...)` as `registerMcpTool()`**
+- [ ] **Step 2: Rewrite each old tools option as `registerMcpTool()`**
 
 For each demo, convert the option's `list(name=, description=, inputSchema=, handler=)` spec into `registerMcpTool(ellmer::tool(<handler-body>, name=, description=, arguments=<ellmer types>))`. Example (get_sample_stats), replacing:
 
 ```r
-options(shiny.mcp.tools = list(list(
-  name = "get_sample_stats",
-  description = "Summary statistics for a normal sample of size n.",
-  inputSchema = list(type = "object",
-    properties = list(n = list(type = "integer")), required = list("n")),
-  handler = function(args) {
-    x <- rnorm(args$n); list(n = args$n, mean = mean(x), sd = stats::sd(x))
-  }
-)))
+# (old API, now removed — formerly set tools via an option; now use
+# registerMcpTool(ellmer::tool(...)) instead)
 ```
 
 with:
@@ -595,18 +588,18 @@ Convert `demo-app2`'s tool(s) the same way (map each `inputSchema` property to t
 
 - [ ] **Step 3: Smoke-test one demo boots and lists the tool**
 
-Run: `grep -rn "shiny.mcp.tools" mcp/`
+Run: `grep -rn "mcp.tools" mcp/`
 Expected: no matches remaining.
 
 Run (from repo root, adjust app path):
 ```bash
-R -q -e 'pkgload::load_all(); options(shiny.mcp = TRUE); source("mcp/demo-app/app.R", local = new.env()); cat(vapply(shiny:::mcpAuthorTools(), function(t) t@name, character(1)), "\n")'
+R -q -e 'pkgload::load_all(); mcpConfigure(); source("mcp/demo-app/app.R", local = new.env()); cat(vapply(shiny:::mcpAuthorTools(), function(t) t@name, character(1)), "\n")'
 ```
 Expected: prints the demo's tool name(s) (e.g. `get_sample_stats`), confirming `registerMcpTool()` ran at source time.
 
 - [ ] **Step 4: Update `mcp/architecture.md`**
 
-In `mcp/architecture.md`, update the two author-tool references (the bullet near line 74 and the table row near line 220) from `options(shiny.mcp.tools = list(...))` to `registerMcpTool(ellmer::tool(...))`, noting the ellmer→JSON-Schema conversion mirrors `mcptools::tool_as_json()`.
+In `mcp/architecture.md`, update the two author-tool references (the bullet near line 74 and the table row near line 220) to use `registerMcpTool(ellmer::tool(...))`, noting the ellmer→JSON-Schema conversion mirrors `mcptools::tool_as_json()`.
 
 - [ ] **Step 5: Commit**
 

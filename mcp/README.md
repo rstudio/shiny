@@ -6,10 +6,10 @@ Keep these in sync with the sources listed below.
 
 ## Status (2026-07-10)
 
-Phases 1 and 2 are implemented and E2E-verified. With `options(shiny.mcp =
-TRUE)`, a Shiny app serves an MCP endpoint at `/mcp` on its own port, and MCP
-Apps hosts render the live, reactive app in a sandboxed iframe (websocket
-traffic tunneled over postMessage → `tools/call`).
+Phases 1 and 2 are implemented and E2E-verified. With `mcpConfigure()`, a
+Shiny app serves an MCP endpoint at `/mcp` on its own port, and MCP Apps
+hosts render the live, reactive app in a sandboxed iframe (websocket traffic
+tunneled over postMessage → `tools/call`).
 
 - **Phase 1:** endpoint, session tunnel, single-file `ui://shiny/app`
   resource, `Shiny.createSocket` bridge. Inputs/outputs/plots/dynamic UI.
@@ -27,14 +27,14 @@ traffic tunneled over postMessage → `tools/call`).
   font fallback formats (ttf/otf/eot) are intentionally left un-inlined —
   browsers never fetch them once the inlined woff2 loads — keeping the
   resource ~2.3 MB instead of ~5 MB.
-- **Stdio transport:** `options(shiny.mcp.stdio = TRUE)` additionally speaks
+- **Stdio transport:** `mcpConfigure(stdio = TRUE)` additionally speaks
   newline-delimited JSON-RPC over stdin/stdout (non-blocking stdin polled
   from the `later` loop, coexisting with httpuv), so local hosts can launch
   the app process directly:
 
   ```sh
   claude mcp add shiny-demo -- Rscript -e \
-    "options(shiny.mcp=TRUE, shiny.mcp.stdio=TRUE); shiny::runApp('path/to/app', launch.browser=FALSE)"
+    "shiny::mcpConfigure(stdio = TRUE); shiny::runApp('path/to/app', launch.browser=FALSE)"
   ```
 
   Verified E2E: `claude --print` launched the demo app over stdio and called
@@ -47,7 +47,7 @@ traffic tunneled over postMessage → `tools/call`).
   (`<base>/websocket/?mcp=1`, 2.5 s timeout) before falling back to the
   tunnel. The base URL is **path-aware** so sub-path deployments (Posit
   Connect `/content/<guid>`) connect directly: priority is
-  `options(shiny.mcp.origin=)` → Connect's `RStudio-Connect-App-Base-Url`
+  `mcpConfigure(origin=)` → Connect's `RStudio-Connect-App-Base-Url`
   header (what Connect actually sends to Shiny content, verified on a real
   deployment; `X-RSC-Request` also honored for API content) →
   shinyapps.io's `X-Redx-Frontend-Name` header (schemeless host + path,
@@ -64,9 +64,9 @@ traffic tunneled over postMessage → `tools/call`).
   basic-host (`__shinyMcpTransport__ === "direct"`) and against a real
   connect.posit.it deployment. HTTP side channels stay tunneled (no
   CORS exposure) via connectionId-less `_shiny_http`. Disable with
-  `options(shiny.mcp.direct = FALSE)`.
+  `mcpConfigure(direct = FALSE)`.
 - **Display modes:** the app declares
-  `options(shiny.mcp.displayModes = ...)` (default: inline, fullscreen,
+  `mcpConfigure(displayModes = ...)` (default: inline, fullscreen,
   pip) and can call `mcpRequestDisplayMode("fullscreen")`; the resulting
   mode arrives via `mcpHostContext()$displayMode`. Unit-tested; basic-host
   doesn't implement display modes, so not yet E2E-verified on a real host.
@@ -79,19 +79,20 @@ traffic tunneled over postMessage → `tools/call`).
   time. ellmer (>= 0.4.0) is a Suggests dependency required for author
   tools. Verified E2E in basic-host (`get_sample_stats` in the demo app).
 - **Multi-app gateway (one connector, many apps):** each app sets a unique
-  `options(shiny.mcp.appId = "<id>")`, which namespaces its internal
-  `_shiny_*` tools (`demo_shiny_connect`, ...) and publishes its resource
-  as `ui://shiny/<appId>`; `gateway/shiny-mcp-gateway.mjs` (zero-dep Node,
+  `mcpConfigure(appId = "<id>")`, which namespaces its internal `_shiny_*`
+  tools (`demo_shiny_connect`, ...) and publishes its resource as
+  `ui://shiny/<appId>`; `gateway/shiny-mcp-gateway.mjs` (zero-dep Node,
   stdio or `--port` HTTP) then merges several app endpoints into a single
   MCP server. E2E verified in basic-host with `demo-app` + `demo-app2`
   behind one gateway, including full tunnel reactivity
   (`screenshot-e2e-gateway.png`); see `gateway/README.md`.
 - **Session API (exported, experimental):** `isMcpSession()`,
-  `mcpToolInput()` (parsed tool arguments, reactive), `mcpHostContext()`
-  (theme/locale/display mode, reactive), `mcpUpdateModelContext(text=, data=)`
-  (updates the model's context; no-op outside MCP), and `mcpSendMessage(text)`
-  (user-role chat message). Tool arguments are declared via
-  `options(shiny.mcp.tool = list(name=, description=, inputSchema=))`.
+  `mcpUpdates()` (post-open arguments from the model, reactive),
+  `mcpHostContext()` (theme/locale/display mode, reactive),
+  `mcpUpdateModelContext(text=, data=)` (updates the model's context;
+  no-op outside MCP), and `mcpSendMessage(text)` (user-role chat message).
+  Tool arguments are declared via
+  `mcpConfigure(description = , arguments = list(...))`.
   See `man/mcp-session.Rd` and `demo-app/app.R`; verified E2E in basic-host
   (`screenshot-e2e-session-api.png`: tool input moves the slider and shows a
   note; the host's Model Context panel tracks the app; `ui/message` logged

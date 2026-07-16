@@ -1,13 +1,13 @@
 # Stdio transport for the MCP Apps endpoint (see mcp-server.R).
 #
-# With `options(shiny.mcp = TRUE, shiny.mcp.stdio = TRUE)`, the running app
-# also speaks MCP over stdin/stdout — newline-delimited JSON-RPC, the
-# framing local desktop hosts (Claude Desktop, `claude mcp add` without
-# --transport http) use when they launch a server process themselves:
+# With `mcpConfigure(stdio = TRUE)`, the running app also speaks MCP over
+# stdin/stdout — newline-delimited JSON-RPC, the framing local desktop
+# hosts (Claude Desktop, `claude mcp add` without --transport http) use
+# when they launch a server process themselves:
 #
 #   { "mcpServers": { "my-app": {
 #       "command": "Rscript",
-#       "args": ["-e", "options(shiny.mcp=TRUE, shiny.mcp.stdio=TRUE); shiny::runApp('path/to/app', launch.browser=FALSE)"]
+#       "args": ["-e", "mcpConfigure(stdio = TRUE); shiny::runApp('path/to/app', launch.browser=FALSE)"]
 #   } } }
 #
 # stdin is read non-blockingly from a `later`-scheduled poll loop, so it

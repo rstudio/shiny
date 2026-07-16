@@ -15,14 +15,14 @@ Invisibly, \code{NULL}.
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 
-When a Shiny app is served as an MCP App (\code{options(shiny.mcp = TRUE)}),
+When a Shiny app is served as an MCP App (via \code{mcpConfigure()}),
 \code{registerMcpTool()} exposes plain R functions as MCP tools the model may
 call directly, in addition to the tool that opens the app. Define each
 tool with \code{\link[ellmer:tool]{ellmer::tool()}} and register it at the top level of your
 \code{app.R}, before the app starts:
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{library(shiny)
-options(shiny.mcp = TRUE)
+mcpConfigure()
 
 registerMcpTool(
   ellmer::tool(
@@ -47,5 +47,5 @@ registered replaces it. A tool may not use a name reserved by Shiny's MCP
 server (the app-opening tool or the internal \verb{_shiny_*} tunnel tools).
 }
 \seealso{
-\code{\link[=mcpToolInput]{mcpToolInput()}} and the other \verb{mcp*} session helpers.
+\code{\link[=mcpUpdates]{mcpUpdates()}} and the other \verb{mcp*} session helpers.
 }

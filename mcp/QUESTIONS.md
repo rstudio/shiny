@@ -3,15 +3,15 @@
 Barret's decisions, with follow-up state. Original context preserved below
 each item.
 
-## 1. Naming (`mcp*` functions, `shiny.mcp.*` options) — ✅ leave as is
+## 1. Naming (`mcp*` functions) — ✅ resolved
 
-No renames. Surface: options `shiny.mcp`, `shiny.mcp.stdio`,
-`shiny.mcp.direct`, `shiny.mcp.tool`, `shiny.mcp.displayModes`;
-function `registerMcpTool()`; exports `isMcpSession()`, `mcpToolInput()`,
+Configuration now uses `mcpConfigure()` (replaces the former options-based
+surface). Exports: `mcpConfigure()`,
+`registerMcpTool()`; session helpers `isMcpSession()`, `mcpUpdates()`,
 `mcpHostContext()`, `mcpUpdateModelContext()`, `mcpSendMessage()`,
 `mcpRequestDisplayMode()`.
 
-## 2. `shiny.mcp.direct = TRUE` default — ℹ️ explanation requested (below); default unchanged pending review
+## 2. `mcpConfigure(direct = TRUE)` default — ℹ️ explanation requested (below); default unchanged pending review
 
 **What it does.** When the host reads `ui://shiny/app`, shiny declares the
 app's origin in the resource's `_meta.ui.csp.connectDomains` (both `http(s)`
@@ -56,7 +56,7 @@ custom-message bridges).
 
 **The sub-path caveat — ✅ resolved 2026-07-13.** Implemented per Barret's
 request: the direct-connect base is now path-aware, derived from (in order)
-`options(shiny.mcp.origin=)`, Posit Connect's `RStudio-Connect-App-Base-Url`
+`mcpConfigure(origin=)`, Posit Connect's `RStudio-Connect-App-Base-Url`
 header (verified 2026-07-13 on a real connect.posit.it deployment — Connect
 does *not* send `X-RSC-Request` to Shiny content, though that header is
 still honored), a

@@ -2,10 +2,10 @@
 // A minimal MCP gateway that merges several Shiny MCP endpoints into one
 // MCP server, so a single connector exposes many Shiny apps.
 //
-// Each backend Shiny app should set options(shiny.mcp.appId = "<unique>")
+// Each backend Shiny app should call mcpConfigure(appId = "<unique>")
 // so its internal `_shiny_*` tunnel tools and its ui://shiny/<appId>
 // resource don't collide with the other apps'. App-facing tool names
-// (options(shiny.mcp.tool/tools)) must also be unique across apps.
+// (mcpConfigure(description = )) must also be unique across apps.
 //
 // Usage:
 //   stdio (Claude Desktop):
@@ -128,7 +128,7 @@ async function refreshRoutes() {
       for (const tool of tools.result?.tools ?? []) {
         if (toolRoutes.has(tool.name)) {
           log(`duplicate tool '${tool.name}' from ${url} ignored; set a`,
-            "unique options(shiny.mcp.appId/tool) per app");
+            "unique mcpConfigure(appId=) per app");
           continue;
         }
         toolRoutes.set(tool.name, url);

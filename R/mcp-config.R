@@ -1,5 +1,5 @@
-# MCP App configuration. Replaces the former options(shiny.mcp.*): a single
-# validated entry point that stores a defaulted config list in .globals$mcp.
+# MCP App configuration. A single validated entry point that stores a
+# defaulted config list in .globals$mcp.
 # An app is served over MCP only if it calls mcpConfigure(enabled = TRUE)
 # (the default); with no call at all, MCP is never enabled.
 

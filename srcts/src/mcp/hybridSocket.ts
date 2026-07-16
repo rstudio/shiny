@@ -37,8 +37,15 @@ export class McpHybridWebSocket implements SocketEvents {
   onclose: ((event: { code: number }) => void) | null = null;
   onerror: ((event: unknown) => void) | null = null;
 
+  // When set, the encoded restore string is injected into the first outgoing
+  // `method:"init"` frame's `data` object as `.clientdata_mcp_restore`.
+  // This ensures the R-side RestoreContext receives the value on the init
+  // message (not as a later input update which arrives too late).
+  pendingRestore: string | null = null;
+
   private transport: WebSocket | McpTunnelWebSocket | null = null;
   private closedEarly = false;
+  private initInjected = false;
 
   constructor(private opts: HybridSocketOptions) {}
 
@@ -67,6 +74,23 @@ export class McpHybridWebSocket implements SocketEvents {
 
   send(data: string | ArrayBuffer): void {
     if (this.readyState !== 1 || !this.transport) return;
+    // Inject pendingRestore into the init frame (once only).
+    if (!this.initInjected && this.pendingRestore && typeof data === "string") {
+      try {
+        const frame = JSON.parse(data) as {
+          method?: string;
+          data?: Record<string, unknown>;
+        };
+        if (frame.method === "init" && frame.data) {
+          this.initInjected = true;
+          frame.data[".clientdata_mcp_restore"] = this.pendingRestore;
+          this.transport.send(JSON.stringify(frame));
+          return;
+        }
+      } catch {
+        // Not valid JSON — forward unchanged
+      }
+    }
     this.transport.send(data);
   }
 

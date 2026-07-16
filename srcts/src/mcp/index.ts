@@ -170,6 +170,7 @@ function initShinyMcpBridge(): void {
   // ontoolinput was never seen before start (timeout case).
   let toolInputSeen = false;
   let socketStarted = false;
+  let pendingRestoreValue: string | null = null;
 
   // Promise that resolves when the first ontoolinput arrives (or on timeout).
   // We gate socket start on this so the restore value is set before Shiny's
@@ -185,9 +186,11 @@ function initShinyMcpBridge(): void {
   app.ontoolinput = (params) => {
     const args = params.arguments ?? {};
     if (!toolInputSeen && !socketStarted) {
-      // First tool input before socket start: encode for RestoreContext
+      // First tool input before socket start: encode for RestoreContext.
+      // Store the encoded string so it can be injected into the init frame
+      // by the hybrid socket (setShinyInput would arrive too late).
       toolInputSeen = true;
-      setShinyInput(".clientdata_mcp_restore", encodeMcpRestore(args));
+      pendingRestoreValue = encodeMcpRestore(args);
       resolveInitArgs();
     } else {
       // Subsequent tool input (or first arriving after socket already started):
@@ -289,6 +292,9 @@ function initShinyMcpBridge(): void {
       );
       void Promise.race([initArgsReady, timeout]).then(() => {
         socketStarted = true;
+        if (pendingRestoreValue) {
+          s.pendingRestore = pendingRestoreValue;
+        }
         void s.start();
       });
     }, 0);

@@ -13,6 +13,12 @@ MCP_RESOURCE_URI <- "ui://shiny/app"
 MCP_RESOURCE_MIME <- "text/html;profile=mcp-app"
 
 mcpEnabled <- function() {
+  # New path: mcpConfigure() stores config in .globals$mcp
+
+  if (!is.null(.globals$mcp)) {
+    return(isTRUE(.globals$mcp$enabled))
+  }
+  # Legacy path: options(shiny.mcp = TRUE)
   isTRUE(getOption("shiny.mcp", FALSE))
 }
 

@@ -30,6 +30,7 @@ import { McpHybridWebSocket } from "./hybridSocket";
 import type { ToolCaller } from "./tunnelSocket";
 import { McpTunnelWebSocket } from "./tunnelSocket";
 import { createTunnelXhrClass } from "./tunnelXhr";
+import { encodeMcpRestore } from "./restore";
 
 type ShinyGlobal = {
   createSocket?: () => unknown;
@@ -161,6 +162,41 @@ function initShinyMcpBridge(): void {
     },
   );
 
+  // --- Init-vs-update routing for ontoolinput ---
+  // The FIRST ontoolinput (opening arguments from the host) is encoded into
+  // the restore clientdata so Shiny's RestoreContext can apply initial input
+  // values flash-free. Subsequent tool inputs feed the reactive mcpUpdates()
+  // channel. Once the socket has started, any tool input is an update even if
+  // ontoolinput was never seen before start (timeout case).
+  let toolInputSeen = false;
+  let socketStarted = false;
+
+  // Promise that resolves when the first ontoolinput arrives (or on timeout).
+  // We gate socket start on this so the restore value is set before Shiny's
+  // init message.
+  let resolveInitArgs!: () => void;
+  const initArgsReady = new Promise<void>((resolve) => {
+    resolveInitArgs = resolve;
+  });
+
+  // Register ontoolinput BEFORE connect() per ext-apps docs: one-shot events
+  // may fire immediately after the handshake, so handlers must be in place
+  // before connect() is called to avoid missing notifications.
+  app.ontoolinput = (params) => {
+    const args = params.arguments ?? {};
+    if (!toolInputSeen && !socketStarted) {
+      // First tool input before socket start: encode for RestoreContext
+      toolInputSeen = true;
+      setShinyInput(".clientdata_mcp_restore", encodeMcpRestore(args));
+      resolveInitArgs();
+    } else {
+      // Subsequent tool input (or first arriving after socket already started):
+      // route to the reactive mcpUpdates() channel
+      toolInputSeen = true;
+      setShinyInput(".clientdata_mcp_tool_input", JSON.stringify(args));
+    }
+  };
+
   // Kick off the ui/initialize handshake immediately, but install
   // createSocket synchronously: Shiny's DOM-ready init may run before the
   // handshake completes, and tool calls must wait for connect() anyway.
@@ -241,8 +277,21 @@ function initShinyMcpBridge(): void {
     });
     // shinyapp.ts assigns onopen/onmessage/onclose right after
     // createSocket() returns; defer start so they're in place.
+    // Gate on initArgsReady: wait for the first ontoolinput (opening args)
+    // OR a 150ms timeout. 150ms is long enough for the host to deliver
+    // tool-input after the handshake (typically <50ms round-trip) but short
+    // enough not to visibly stall app startup if no args are sent (plain
+    // open / non-tool-call scenario).
     const s = socket;
-    setTimeout(() => void s.start(), 0);
+    setTimeout(() => {
+      const timeout = new Promise<void>((resolve) =>
+        setTimeout(resolve, 150),
+      );
+      void Promise.race([initArgsReady, timeout]).then(() => {
+        socketStarted = true;
+        void s.start();
+      });
+    }, 0);
     return socket;
   };
 
@@ -264,13 +313,6 @@ function initShinyMcpBridge(): void {
     setShinyInput(
       ".clientdata_mcp_host_context",
       JSON.stringify(app.getHostContext() ?? {}),
-    );
-  };
-
-  app.ontoolinput = (params) => {
-    setShinyInput(
-      ".clientdata_mcp_tool_input",
-      JSON.stringify(params.arguments ?? {}),
     );
   };
 

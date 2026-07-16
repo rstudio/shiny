@@ -13,13 +13,7 @@ MCP_RESOURCE_URI <- "ui://shiny/app"
 MCP_RESOURCE_MIME <- "text/html;profile=mcp-app"
 
 mcpEnabled <- function() {
-  # New path: mcpConfigure() stores config in .globals$mcp
-
-  if (!is.null(.globals$mcp)) {
-    return(isTRUE(.globals$mcp$enabled))
-  }
-  # Legacy path: options(shiny.mcp = TRUE)
-  isTRUE(getOption("shiny.mcp", FALSE))
+  isTRUE(.globals$mcp$enabled)
 }
 
 # Direct-connect fast path: declare the app's origin in the resource CSP so
@@ -28,37 +22,16 @@ mcpEnabled <- function() {
 # and falls back to the tunnel, so this is safe to leave on even for hosts
 # that ignore declared CSP (e.g. claude.ai today).
 mcpDirectEnabled <- function() {
-  isTRUE(getOption("shiny.mcp.direct", TRUE))
+  isTRUE(.globals$mcp$direct)
 }
 
 mcpDisplayModes <- function() {
-  modes <- getOption("shiny.mcp.displayModes", c("inline", "fullscreen", "pip"))
-  modes <- intersect(as.character(modes), c("inline", "fullscreen", "pip"))
-  if (length(modes) == 0) modes <- "inline"
-  modes
+  .globals$mcp$displayModes %||% "inline"
 }
 
-# Optional app identity, for gateways that merge several Shiny MCP
-# endpoints behind a single MCP server. When set, the internal `_shiny_*`
-# tool names are prefixed ("sales" -> "sales_shiny_connect") and the app
-# resource is published as ui://shiny/<appId>, so tools and resources from
-# different apps never collide at the gateway.
+# Optional app identity (validated in mcpConfigure()).
 mcpAppId <- function() {
-  id <- getOption("shiny.mcp.appId", NULL)
-  if (!is.character(id) || length(id) != 1 || is.na(id) || !nzchar(id)) {
-    return(NULL)
-  }
-  if (!grepl("^[A-Za-z0-9_-]+$", id)) {
-    if (!isTRUE(.globals$mcpAppIdWarned)) {
-      .globals$mcpAppIdWarned <- TRUE
-      warning(
-        "Ignoring options(shiny.mcp.appId): ",
-        "it may only contain letters, digits, '_' and '-'"
-      )
-    }
-    return(NULL)
-  }
-  id
+  .globals$mcp$appId
 }
 
 mcpResourceUri <- function() {
@@ -109,7 +82,7 @@ mcpDirectBase <- function(req) {
   }
   stripSlash <- function(x) sub("/+$", "", x)
 
-  origin_opt <- getOption("shiny.mcp.origin", NULL)
+  origin_opt <- .globals$mcp$origin
   if (is.character(origin_opt) && nzchar(origin_opt)) {
     return(stripSlash(origin_opt))
   }
@@ -224,15 +197,13 @@ mcpWsOrigin <- function(origin) {
 }
 
 mcpToolInfo <- function() {
-  opt <- getOption("shiny.mcp.tool", list())
   list(
-    name = opt$name %||% "open_shiny_app",
-    description = opt$description %||% paste(
+    name = mcpToolName(),
+    description = .globals$mcp$description %||% paste(
       "Open the interactive Shiny application so the user can view and",
       "interact with it. Call this when the user wants to see the app."
     ),
-    inputSchema = opt$inputSchema %||%
-      list(type = "object", properties = empty_named_list())
+    inputSchema = mcpArgumentsSchema(.globals$mcp$arguments)
   )
 }
 

@@ -17,7 +17,7 @@
 # which goes to stderr). Not supported on Windows (non-blocking stdin).
 
 mcpStdioEnabled <- function() {
-  isTRUE(getOption("shiny.mcp.stdio", FALSE))
+  isTRUE(.globals$mcp$stdio)
 }
 
 mcpStdioHandleLine <- function(line, dispatch, write) {

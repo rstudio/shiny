@@ -50,3 +50,31 @@ test_that("arguments must be a named list of ellmer types", {
   mcpConfigure(arguments = list(n = ellmer::type_integer("bins")))
   expect_named(.globals$mcp$arguments, "n")
 })
+
+test_that("accessors read the stored config", {
+  withr::defer(.globals$mcp <- NULL)
+  mcpConfigure(
+    appId = "cars", description = "Show the cars app.",
+    direct = FALSE, displayModes = "inline", origin = "https://x.example/app",
+    stdio = TRUE
+  )
+  expect_true(mcpEnabled())
+  expect_true(mcpStdioEnabled())
+  expect_equal(mcpAppId(), "cars")
+  expect_false(mcpDirectEnabled())
+  expect_equal(mcpDisplayModes(), "inline")
+  info <- mcpToolInfo()
+  expect_equal(info$name, "open_cars_app")
+  expect_equal(info$description, "Show the cars app.")
+})
+
+test_that("mcpToolInfo() falls back to defaults and builds schema", {
+  skip_if_not_installed("ellmer")
+  withr::defer(.globals$mcp <- NULL)
+  mcpConfigure(arguments = list(n = ellmer::type_integer("bins")))
+  info <- mcpToolInfo()
+  expect_equal(info$name, "open_shiny_app")
+  expect_match(info$description, "interactive Shiny application")
+  expect_equal(info$inputSchema$type, "object")
+  expect_true("n" %in% names(info$inputSchema$properties))
+})

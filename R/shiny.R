@@ -1948,12 +1948,18 @@ ShinySession <- R6Class(
         return()
       }
 
+      self$createRestoreObservers()
+
       withReactiveDomain(self, {
         # This observer fires when the bookmark button is clicked.
         observeEvent(self$input[["._bookmark_"]], {
           self$doBookmark()
         })
+      }) # withReactiveDomain
+    },
 
+    createRestoreObservers = function() {
+      withReactiveDomain(self, {
         # If there was an error initializing the current restore context, show
         # notification in the client.
         observe({

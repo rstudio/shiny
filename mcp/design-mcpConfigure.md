@@ -2,7 +2,7 @@
 
 - **Date:** 2026-07-15
 - **Branch:** `schloerke/thimphu` (targets `origin/mcp`)
-- **Status:** approved design, ready for implementation plan
+- **Status:** implemented (Phase A + Phase B complete)
 - **Scope:** one PR, implemented in two internal phases (A then B)
 
 ## Problem
@@ -299,7 +299,8 @@ flash-free via `RestoreContext` while still supporting live re-steering.
   `mcpToolInput()` → `mcpUpdates()` rename + docs/tests. Arguments still surface
   via the reactive channel exactly as `mcpToolInput()` did, so behavior is
   unchanged; only the configuration surface and the reactive's name change.
-- **Phase B — init via `RestoreContext`.** Route opening arguments through the
-  restore context (R + JS bridge), so init is flash-free and `mcpUpdates()`
-  becomes post-init-only. Lands as its own commit(s) in the same PR, referencing
-  this spec.
+- **Phase B — init via `RestoreContext` (IMPLEMENTED).** Opening arguments are
+  routed through the restore context (R + JS bridge), so init is flash-free and
+  `mcpUpdates()` is post-init-only. Server-side allow-list filtering
+  (`mcpFilterArguments`, `mcpFilterRestore`) ensures only declared argument names
+  reach the app on both the init and post-init paths.

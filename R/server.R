@@ -202,7 +202,8 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
         if (is.null(shinysession$restoreContext)) {
           bookmarkStore <- getShinyOption("bookmarkStore", default = "disable")
           mcpRestore <- if (mcpEnabled()) msg$data$.clientdata_mcp_restore else NULL
-          if (!is.null(mcpRestore) && nzchar(mcpRestore)) {
+          mcpRestore <- if (!is.null(mcpRestore)) mcpFilterRestore(mcpRestore) else ""
+          if (nzchar(mcpRestore)) {
             # MCP opening args: restore inputs flash-free without requiring the app
             # to enable bookmarking. Build an active restore context and register
             # only the restore-side observers (no save-to-bookmark behavior).

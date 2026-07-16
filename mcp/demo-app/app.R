@@ -57,16 +57,29 @@ shinyApp(
     )
   ),
   server = function(input, output, session) {
-    # Arguments the model passed to the tool
+    # --- Init path (restore) ---
+    # Input-backed args like `n` auto-restore via RestoreContext: the slider
+    # is *constructed* at the model's value (no flash). No author code needed.
+    # For non-input state like `note`, use onRestore:
+    initNote <- reactiveVal("")
+    onRestore(function(state) {
+      n <- state$input$get("note")
+      if (!is.null(n)) initNote(paste("Note from the model:", n))
+    })
+
+    # --- Post-init path (mcpUpdates) ---
+    # After the app is open, the model can re-steer via mcpUpdates().
     observe({
       ti <- mcpUpdates()
       if (!is.null(ti$n)) {
         updateSliderInput(session, "n", value = ti$n)
       }
+      if (!is.null(ti$note)) {
+        initNote(paste("Note from the model:", ti$note))
+      }
     })
     output$note <- renderText({
-      note <- mcpUpdates()$note
-      if (is.null(note)) "" else paste("Note from the model:", note)
+      initNote()
     })
 
     output$hist <- renderPlot(hist(rnorm(input$n), col = "steelblue"))

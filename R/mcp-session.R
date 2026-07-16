@@ -119,7 +119,7 @@ mcpUpdates <- function(session = getDefaultReactiveDomain()) {
   if (is.null(session)) {
     stop("mcpUpdates() must be called from within a Shiny session")
   }
-  mcpParseClientData(session$clientData$mcp_tool_input)
+  mcpFilterArguments(mcpParseClientData(session$clientData$mcp_tool_input))
 }
 
 #' @rdname mcp-session

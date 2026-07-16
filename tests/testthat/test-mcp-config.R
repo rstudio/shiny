@@ -68,6 +68,46 @@ test_that("accessors read the stored config", {
   expect_equal(info$description, "Show the cars app.")
 })
 
+test_that("only declared arguments are kept", {
+  skip_if_not_installed("ellmer")
+  withr::defer(.globals$mcp <- NULL)
+  mcpConfigure(arguments = list(n = ellmer::type_integer("bins")))
+  expect_equal(mcpFilterArguments(list(n = 5, evil = "x")), list(n = 5))
+})
+
+test_that("with no declared arguments nothing passes the filter", {
+  withr::defer(.globals$mcp <- NULL)
+  mcpConfigure()
+  expect_equal(mcpFilterArguments(list(n = 5)), list())
+})
+
+test_that("mcpFilterRestore drops undeclared keys from restore string", {
+  skip_if_not_installed("ellmer")
+  withr::defer(.globals$mcp <- NULL)
+  mcpConfigure(arguments = list(n = ellmer::type_integer("bins")))
+  # Restore string with declared 'n' and undeclared 'evil'
+  qs <- "_inputs_&n=200&evil=%22bad%22"
+  filtered <- mcpFilterRestore(qs)
+  expect_equal(filtered, "_inputs_&n=200")
+})
+
+test_that("mcpFilterRestore returns empty string when no args declared", {
+  withr::defer(.globals$mcp <- NULL)
+  mcpConfigure()
+  expect_equal(mcpFilterRestore("_inputs_&n=200"), "")
+})
+
+test_that("mcpFilterRestore returns empty string for arg-less open", {
+  skip_if_not_installed("ellmer")
+  withr::defer(.globals$mcp <- NULL)
+  mcpConfigure(arguments = list(n = ellmer::type_integer("bins")))
+  # Arg-less open encodes to "_inputs_&" — nothing after the prefix
+
+  expect_equal(mcpFilterRestore("_inputs_&"), "")
+  expect_equal(mcpFilterRestore("_inputs_"), "")
+  expect_equal(mcpFilterRestore(""), "")
+})
+
 test_that("mcpToolInfo() falls back to defaults and builds schema", {
   skip_if_not_installed("ellmer")
   withr::defer(.globals$mcp <- NULL)

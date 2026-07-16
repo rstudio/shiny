@@ -64,6 +64,12 @@ test_that("isMcpSession distinguishes tunnel sessions from others", {
 })
 
 test_that("mcpUpdates returns parsed tool arguments reactively", {
+  skip_if_not_installed("ellmer")
+  withr::defer(.globals$mcp <- NULL)
+  mcpConfigure(arguments = list(
+    note = ellmer::type_string("a note"),
+    n    = ellmer::type_integer("count")
+  ))
   observed <- list()
   sess <- mcp_start_session(
     fluidPage(),

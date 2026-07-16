@@ -10,10 +10,10 @@
 #'
 #' * `isMcpSession()` reports whether the current session is connected
 #'   through an MCP host (as opposed to a regular browser).
-#' * `mcpToolInput()` returns the arguments the model supplied when it
-#'   called the app's tool, as a named list (reactive read). Declare the
-#'   expected arguments with
-#'   `options(shiny.mcp.tool = list(inputSchema = ...))`.
+#' * `mcpUpdates()` returns arguments the model supplies *after* the app is
+#'   open (a reactive read; initial arguments are applied via input/bookmark
+#'   restoration — see `mcpConfigure(arguments = )`). Declare the allowed
+#'   arguments with `mcpConfigure(arguments = list(...))`.
 #' * `mcpHostContext()` returns the host's context (theme, locale, display
 #'   mode, ...) as a named list (reactive read).
 #' * `mcpUpdateModelContext()` updates the model's context for future
@@ -63,7 +63,7 @@
 #' @param session The Shiny session object.
 #'
 #' @return
-#' `isMcpSession()` returns `TRUE` or `FALSE`. `mcpToolInput()` and
+#' `isMcpSession()` returns `TRUE` or `FALSE`. `mcpUpdates()` and
 #' `mcpHostContext()` return a named list, or `NULL` when nothing has been
 #' received (they must be called within a reactive context).
 #' `mcpUpdateModelContext()` and `mcpSendMessage()` invisibly return `TRUE`
@@ -86,7 +86,7 @@
 #' server <- function(input, output, session) {
 #'   # React to arguments the model passed to the tool
 #'   observe({
-#'     region <- mcpToolInput()$region
+#'     region <- mcpUpdates()$region
 #'     if (!is.null(region)) {
 #'       updateSelectInput(session, "region", selected = region)
 #'     }
@@ -130,9 +130,9 @@ isMcpSession <- function(session = getDefaultReactiveDomain()) {
 
 #' @rdname mcp-session
 #' @export
-mcpToolInput <- function(session = getDefaultReactiveDomain()) {
+mcpUpdates <- function(session = getDefaultReactiveDomain()) {
   if (is.null(session)) {
-    stop("mcpToolInput() must be called from within a Shiny session")
+    stop("mcpUpdates() must be called from within a Shiny session")
   }
   mcpParseClientData(session$clientData$mcp_tool_input)
 }

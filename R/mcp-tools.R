@@ -39,7 +39,7 @@
 #'
 #' @return Invisibly, `NULL`.
 #'
-#' @seealso [mcpToolInput()] and the other `mcp*` session helpers.
+#' @seealso [mcpUpdates()] and the other `mcp*` session helpers.
 #' @export
 registerMcpTool <- function(...) {
   rlang::check_installed("ellmer", "to define MCP tools with `ellmer::tool()`.")

@@ -63,13 +63,13 @@ test_that("isMcpSession distinguishes tunnel sessions from others", {
   mcpTunnelToolCall("_shiny_close", list(connectionId = sess$cid), 9, sess$handlers$ws)
 })
 
-test_that("mcpToolInput returns parsed tool arguments reactively", {
+test_that("mcpUpdates returns parsed tool arguments reactively", {
   observed <- list()
   sess <- mcp_start_session(
     fluidPage(),
     function(input, output, session) {
       observe({
-        val <- mcpToolInput()
+        val <- mcpUpdates()
         if (!is.null(val)) observed[[length(observed) + 1]] <<- val
       })
     }

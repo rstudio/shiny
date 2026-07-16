@@ -74,7 +74,7 @@ To produce a restore string from tool-call arguments `{n: 200, note: "hi"}`:
 
 ## Unknown 3: ext-apps initial-tool-input API
 
-**Verdict: DEFINITIVE — initial args are available synchronously after `connect()` resolves, BEFORE `ontoolinput` fires.**
+**Verdict: DEFINITIVE — there is NO synchronous API for the opening arguments. `hostContext.toolInfo` carries only the tool *definition* (schema), not the call arguments. The arguments arrive only via the async `ontoolinput` notification ("one-shot event") shortly after the handshake. Therefore B3 must register `ontoolinput` before `connect()` and gate Shiny's socket start on the first `ontoolinput` (or a short timeout fallback) — the promise-gated approach (strategy 2 below).**
 
 ### Evidence from the types and API
 

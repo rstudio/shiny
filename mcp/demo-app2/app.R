@@ -39,12 +39,12 @@ shinyApp(
   ),
   server = function(input, output, session) {
     observe({
-      ti <- mcpUpdates()
-      if (!is.null(ti$xvar) && ti$xvar %in% vars) {
-        updateSelectInput(session, "xvar", selected = ti$xvar)
+      args <- mcpUpdates()
+      if (!is.null(args$xvar) && args$xvar %in% vars) {
+        updateSelectInput(session, "xvar", selected = args$xvar)
       }
-      if (!is.null(ti$yvar) && ti$yvar %in% vars) {
-        updateSelectInput(session, "yvar", selected = ti$yvar)
+      if (!is.null(args$yvar) && args$yvar %in% vars) {
+        updateSelectInput(session, "yvar", selected = args$yvar)
       }
     })
 

@@ -70,12 +70,12 @@ shinyApp(
     # --- Post-init path (mcpUpdates) ---
     # After the app is open, the model can re-steer via mcpUpdates().
     observe({
-      ti <- mcpUpdates()
-      if (!is.null(ti$n)) {
-        updateSliderInput(session, "n", value = ti$n)
+      args <- mcpUpdates()
+      if (!is.null(args$n)) {
+        updateSliderInput(session, "n", value = args$n)
       }
-      if (!is.null(ti$note)) {
-        initNote(paste("Note from the model:", ti$note))
+      if (!is.null(args$note)) {
+        initNote(paste("Note from the model:", args$note))
       }
     })
     output$note <- renderText({

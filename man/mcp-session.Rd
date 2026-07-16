@@ -62,10 +62,12 @@ and can exchange information with the host:
 \itemize{
 \item \code{isMcpSession()} reports whether the current session is connected
 through an MCP host (as opposed to a regular browser).
-\item \code{mcpUpdates()} returns arguments the model supplies \emph{after} the app is
-open (a reactive read; initial arguments are applied via input/bookmark
-restoration — see \code{mcpConfigure(arguments = )}). Declare the allowed
-arguments with \code{mcpConfigure(arguments = list(...))}.
+\item \code{mcpUpdates()} returns the arguments the model supplied when it opened
+the app (a reactive read), filtered to the arguments declared with
+\code{mcpConfigure(arguments = list(...))}. Apply them from a single
+\code{observe()} with the usual \code{updateXxxInput()} functions. Hosts render a
+fresh instance for each tool call, so the same observer handles both the
+initial open and any later re-open.
 \item \code{mcpHostContext()} returns the host's context (theme, locale, display
 mode, ...) as a named list (reactive read).
 \item \code{mcpUpdateModelContext()} updates the model's context for future

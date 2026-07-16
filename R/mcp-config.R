@@ -136,41 +136,12 @@ mcpToolName <- function() {
 # JSON Schema published as the tool's inputSchema. Mirrors
 # mcpToolInputSchema() (R/mcp-server.R) so the two conversions stay aligned.
 # Keep only arguments the app declared in mcpConfigure(arguments = ).
-# Used as the allow-list filter on both the init (restore) and post-init
-# (mcpUpdates) paths.
+# The allow-list filter for the arguments the model supplies via mcpUpdates().
 mcpFilterArguments <- function(args) {
   if (is.null(args)) return(NULL)
   declared <- names(.globals$mcp$arguments)
   if (is.null(declared)) return(list())
   args[intersect(names(args), declared)]
-}
-
-# Filter a restore query string (grammar: "_inputs_&<name>=<url-encoded JSON>&...")
-# down to the declared argument names. Returns the filtered string, or "" if
-# nothing survives (caller should skip the restore branch).
-mcpFilterRestore <- function(queryString) {
-  if (is.null(queryString) || !nzchar(queryString)) return("")
-  declared <- names(.globals$mcp$arguments)
-  if (is.null(declared) || length(declared) == 0) return("")
-
-  # Strip leading "_inputs_&" or "_inputs_" prefix
-  qs <- sub("^_inputs_&?", "", queryString)
-  if (!nzchar(qs)) return("")
-
-  # Parse key=value pairs
-  pairs <- strsplit(qs, "&")[[1]]
-  pairs <- pairs[nzchar(pairs)]
-  if (length(pairs) == 0) return("")
-
-  # Extract names (URL-decoded)
-  pair_names <- vapply(pairs, function(p) {
-    httpuv::decodeURIComponent(sub("=.*$", "", p))
-  }, character(1), USE.NAMES = FALSE)
-
-  keep <- pair_names %in% declared
-  if (!any(keep)) return("")
-
-  paste0("_inputs_&", paste(pairs[keep], collapse = "&"))
 }
 
 mcpArgumentsSchema <- function(arguments) {

@@ -1,5 +1,11 @@
 # Spike: init-args-via-RestoreContext — Findings
 
+> **Outcome (historical): the RestoreContext approach was abandoned.** These
+> notes established that the R-side mechanism *could* work, but subsequent
+> real-host testing showed init-arg widget auto-restore is unreachable for MCP
+> and hosts re-render per tool call. Arguments now flow through a single
+> `mcpUpdates()` channel. See `limitations.md` for the decision.
+
 ## Unknown 1: Restore-observer gating
 
 **Conclusion:** Confirmed. `onRestore`/`onRestored` observers are registered ONLY inside

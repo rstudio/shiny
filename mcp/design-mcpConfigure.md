@@ -2,7 +2,9 @@
 
 - **Date:** 2026-07-15
 - **Branch:** `schloerke/thimphu` (targets `origin/mcp`)
-- **Status:** implemented (Phase A + Phase B complete)
+- **Status:** implemented (config API + single-channel `mcpUpdates()`; the
+  `RestoreContext` init path was tested against a real host and removed — see
+  `limitations.md`)
 - **Scope:** one PR, implemented in two internal phases (A then B)
 
 ## Problem
@@ -37,9 +39,10 @@ options outright — no deprecation shims.
 - Collapse the three-knob nested `tool` config: derive the tool name from
   `appId`, and express its declared arguments with `ellmer` types (matching
   `registerMcpTool()`), not ad-hoc lists.
-- Eliminate duplicated author code for "set initial state from the model" vs
-  "restore a bookmark" by routing the model's opening arguments through Shiny's
-  existing `RestoreContext`.
+- Deliver the model's arguments (on open and re-open) through a single reactive
+  `mcpUpdates()` channel the app applies in one observer. (An attempt to make
+  init args auto-restore widgets flash-free via `RestoreContext` was tested
+  against a real host and removed — see `limitations.md`.)
 
 ## Non-goals
 
@@ -182,65 +185,42 @@ behavior. (A future refinement could capture/clear per-app like
 
 ## Argument delivery: init vs. update
 
-The model can supply arguments at two moments, which map to two distinct Shiny
-mechanisms. The author's touchpoints differ accordingly.
+All arguments the model supplies — the opening arguments and any it supplies on
+a re-open — are delivered through a **single reactive channel, `mcpUpdates()`**.
 
-### Init — via `RestoreContext` (anti-flash)
+> **Note.** An earlier design tried to route the *initial* arguments through
+> Shiny's bookmark `RestoreContext` for flash-free widget restore, keeping
+> `mcpUpdates()` for post-init updates only. Testing against a real host proved
+> this unworkable: init-arg widget auto-restore is impossible (the UI is
+> rendered at `resources/read` before the arguments exist), hosts re-render a
+> fresh instance per tool call (so there is no "post-init"), and the two-channel
+> split raced. See `limitations.md`. The `RestoreContext` path was removed.
 
-When the model opens the app (`open_<appId>_app(n = 200)`), the whitelisted
-arguments are injected into the session's **`RestoreContext`** (see
-`R/bookmark-state.R`). This reuses Shiny's existing restoration machinery:
+### One channel: `mcpUpdates()`
 
-- Standard inputs auto-restore via `restoreInput(id, default)` (every input
-  widget calls it at construction). A slider `n` is *constructed* at 200 — no
-  observer, no visible jump from a default to the model's value (**this is why
-  we use RestoreContext: to avoid flashing stale state**).
-- Non-input state is available through `onRestore(function(state) ...)` /
-  `onRestored(...)`, exactly as bookmarking already works.
-
-An app that is already bookmarkable reuses its restore logic verbatim for MCP
-opens. Author writes nothing new for the init path of input-backed args.
-
-**Implementation approach (the trickiest part; to be detailed in the plan):**
-the MCP bridge must make the opening arguments available at *session start*,
-before the server function runs, so `RestoreContext` can consume them. The
-intended approach is to encode the whitelisted opening args into the session's
-restore context by reusing Shiny's bookmark URL-state encoding on the (tunneled
-or direct) websocket connection, then let the normal `RestoreContext` parse
-them. Key risk to resolve in the plan: ordering — the initial tool input from
-the host's `ui/initialize` handshake must be captured before `Shiny`'s socket
-start triggers session creation (the bridge already defers `socket.start()` via
-`setTimeout(..., 0)`; `srcts/src/mcp/index.ts`).
-
-### After-init — via `mcpUpdates()` (reactive)
-
-When the model changes an argument on the already-open app
-(`open_<appId>_app(n = 50)` again, routed by the host to the live iframe), there
-is no bookmark analog — restoration is a session-start-only concept. These
-post-init values arrive on the existing client-data channel
-(`.clientdata_mcp_tool_input`, set by the bridge's `ontoolinput`) and are read
-reactively.
-
-`mcpToolInput()` is **renamed to `mcpUpdates()`** to reflect this: after Phase B,
-init args flow through `RestoreContext`, so the reactive channel only ever
-carries *post-init updates*. The author wires them with the normal updaters:
+The bridge forwards every `ontoolinput` notification to
+`.clientdata_mcp_tool_input`; `mcpUpdates()` reads it reactively and filters to
+the declared `arguments`. Because the host renders a fresh instance for each
+tool call, the initial open and any re-open are the same event, so a single
+observer handles them:
 
 ```r
 observe({
-  n <- mcpUpdates()$n
-  if (!is.null(n)) updateSliderInput(session, "n", value = n)
+  args <- mcpUpdates()
+  if (!is.null(args$n))    updateSliderInput(session, "n", value = args$n)
+  if (!is.null(args$note)) showNote(args$note)
 })
 ```
 
-### Known tradeoff: non-input state is touched in two places
+`mcpToolInput()` is renamed to `mcpUpdates()`. A brief flash on open (widget
+default → the model's value) is unavoidable — flash-free restore is not
+reachable for MCP; see `limitations.md`.
 
-For input-backed args (`n`), init is free (auto-restore) and only the after-init
-updater is authored. For **non-input display state** (`note` rendered in a
-header), the author writes `onRestore()` for init *and* an `mcpUpdates()`
-observer for after-init. These two touchpoints are inherent — bookmarking has no
-live-update concept — but the author can factor the shared application logic
-into one helper called from both. This is an accepted cost of keeping init
-flash-free via `RestoreContext` while still supporting live re-steering.
+### Live re-steering of a running instance
+
+Not currently possible: the model can only call tools, and hosts re-render
+rather than update in place. An explicit server-side update tool is proposed in
+rstudio/shiny#4415.
 
 ## Removal / migration
 
@@ -271,8 +251,8 @@ flash-free via `RestoreContext` while still supporting live re-steering.
 - `R/mcp-server.R`, `R/mcp-app.R`, `R/mcp-stdio.R` — accessor rewrites + header
   comments.
 - `R/mcp-session.R`, `R/mcp-tools.R` — rename + docs.
-- `R/bookmark-state.R` and `srcts/src/mcp/index.ts` (+ rebuilt
-  `inst/www/shared/shiny-mcp-bridge.js`) — init-args-via-RestoreContext (Phase B).
+- `srcts/src/mcp/index.ts` (+ rebuilt `inst/www/shared/shiny-mcp-bridge.js`) —
+  `ontoolinput` → `.clientdata_mcp_tool_input`.
 - `tests/testthat/test-mcp-*.R` — see below.
 - `mcp/**`, `man/`, `NAMESPACE`, `NEWS.md`.
 
@@ -288,19 +268,14 @@ flash-free via `RestoreContext` while still supporting live re-steering.
 - Tool-naming test: `appId` derives `open_<appId>_app`; default `open_shiny_app`.
 - `arguments` → `inputSchema` conversion test (reuse the `mcpToolInputSchema`
   path).
-- Phase B: init args injected into `RestoreContext` restore inputs / surface in
-  `onRestore`; post-init values surface via `mcpUpdates()`; whitelist filtering
-  drops undeclared keys.
+- `mcpUpdates()` returns the model's arguments filtered to the declared
+  allow-list (undeclared keys dropped).
 
-## Implementation phasing (single PR)
+## Argument delivery — one reactive channel
 
-- **Phase A — config API refactor (no runtime behavior change).**
-  `mcpConfigure()` + `.globals$mcp` + accessor rewrites + option removal +
-  `mcpToolInput()` → `mcpUpdates()` rename + docs/tests. Arguments still surface
-  via the reactive channel exactly as `mcpToolInput()` did, so behavior is
-  unchanged; only the configuration surface and the reactive's name change.
-- **Phase B — init via `RestoreContext` (IMPLEMENTED).** Opening arguments are
-  routed through the restore context (R + JS bridge), so init is flash-free and
-  `mcpUpdates()` is post-init-only. Server-side allow-list filtering
-  (`mcpFilterArguments`, `mcpFilterRestore`) ensures only declared argument names
-  reach the app on both the init and post-init paths.
+Every `ontoolinput` (opening args and any re-open) is forwarded to
+`.clientdata_mcp_tool_input`; `mcpUpdates()` reads it reactively and filters to
+the declared `arguments`. A single `observe()` applies them. There is no
+`RestoreContext` path — see the note under "Argument delivery" above and
+`limitations.md` for why flash-free widget restore and per-`resourceUri` args
+were tested and abandoned.

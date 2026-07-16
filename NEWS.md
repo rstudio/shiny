@@ -41,7 +41,7 @@
 
 * MCP App support is now configured with `mcpConfigure()` instead of
   `options(shiny.mcp.*)`, and the session helper `mcpToolInput()` is renamed
-  to `mcpUpdates()`. (#XXXX)
+  to `mcpUpdates()`. (#4414)
 
 * `{watcher}` is now a required dependency and is always used for autoreload file watching, so it no longer needs to be installed separately. The legacy polling-based file watcher has been removed. (#4403)
 

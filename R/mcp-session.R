@@ -10,10 +10,12 @@
 #'
 #' * `isMcpSession()` reports whether the current session is connected
 #'   through an MCP host (as opposed to a regular browser).
-#' * `mcpUpdates()` returns arguments the model supplies *after* the app is
-#'   open (a reactive read; initial arguments are applied via input/bookmark
-#'   restoration — see `mcpConfigure(arguments = )`). Declare the allowed
-#'   arguments with `mcpConfigure(arguments = list(...))`.
+#' * `mcpUpdates()` returns the arguments the model supplied when it opened
+#'   the app (a reactive read), filtered to the arguments declared with
+#'   `mcpConfigure(arguments = list(...))`. Apply them from a single
+#'   `observe()` with the usual `updateXxxInput()` functions. Hosts render a
+#'   fresh instance for each tool call, so the same observer handles both the
+#'   initial open and any later re-open.
 #' * `mcpHostContext()` returns the host's context (theme, locale, display
 #'   mode, ...) as a named list (reactive read).
 #' * `mcpUpdateModelContext()` updates the model's context for future

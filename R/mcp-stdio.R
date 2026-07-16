@@ -67,7 +67,7 @@ mcpStdioSerialize <- function(payload) {
 mcpStdioStart <- function(dispatch, pollSecs = 0.05) {
   if (.Platform$OS.type == "windows") {
     warning(
-      "options(shiny.mcp.stdio) is not supported on Windows ",
+      "mcpConfigure(stdio = TRUE) is not supported on Windows ",
       "(non-blocking stdin); use the HTTP transport at /mcp instead.",
       call. = FALSE
     )

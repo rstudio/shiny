@@ -27,8 +27,12 @@ the model reads it to decide whether to open the app.}
 \item{arguments}{Optional named list of \pkg{ellmer} type objects (e.g.
 \code{\link[ellmer:type_integer]{ellmer::type_integer()}}) declaring the arguments the model may pass when
 opening the app. Published as the tool's input schema and used as an
-allow-list. Read within the app with \code{\link[=mcpUpdates]{mcpUpdates()}} (post-init) or via
-input/bookmark restoration (init).}
+allow-list. Read within the app with \code{\link[=mcpUpdates]{mcpUpdates()}} and apply them from a
+single \code{observe()} with the usual \code{updateXxxInput()} functions; the host
+renders a fresh instance per tool call, so the same observer handles both
+the initial open and any later re-open. There is no input/bookmark
+auto-restore of init args (a brief flash from the widget default to the
+model's value on open is unavoidable); see \link{mcp-session}.}
 
 \item{direct}{Whether to advertise the direct-connect fast path (default
 \code{TRUE}).}

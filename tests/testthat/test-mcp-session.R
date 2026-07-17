@@ -173,6 +173,10 @@ test_that("mcpUpdateModelContext and mcpSendMessage send bridge messages", {
   expect_match(frames, "shiny.mcp.updateModelContext", fixed = TRUE)
   expect_match(frames, "n is 42", fixed = TRUE)
   expect_match(frames, "structuredContent", fixed = TRUE)
+  # The framework stamps the session token into structuredContent; author data
+  # nests under `data`.
+  expect_match(frames, "\"session\"", fixed = TRUE)
+  expect_match(frames, "\"data\"", fixed = TRUE)
   expect_match(frames, "shiny.mcp.sendMessage", fixed = TRUE)
   expect_match(frames, "What does this mean?", fixed = TRUE)
   mcpTunnelToolCall("_shiny_close", list(connectionId = sess$cid), 9, sess$handlers$ws)

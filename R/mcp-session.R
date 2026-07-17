@@ -186,11 +186,15 @@ mcpUpdateModelContext <- function(
   if (!isMcpSession(session)) {
     return(invisible(FALSE))
   }
+  structured <- dropNulls(list(
+    session = session$token,
+    data = data
+  ))
   params <- dropNulls(list(
     content = if (!is.null(text)) {
       list(list(type = "text", text = text))
     },
-    structuredContent = data
+    structuredContent = structured
   ))
   session$sendCustomMessage("shiny.mcp.updateModelContext", params)
   invisible(TRUE)

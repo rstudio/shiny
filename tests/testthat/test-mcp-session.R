@@ -223,6 +223,38 @@ test_that("mcpRequestDisplayMode sends the bridge message", {
   expect_error(mcpRequestDisplayMode("cinema", session = MockShinySession$new()))
 })
 
+test_that("MCP sessions announce their token to the model on connect", {
+  skip_if_not_installed("ellmer")
+  withr::defer(.globals$mcp <- NULL)
+  mcpConfigure(appId = "clock", arguments = list(
+    label = ellmer::type_string("heading")
+  ))
+  token <- NULL
+  sess <- mcp_start_session(
+    fluidPage(),
+    function(input, output, session) {
+      token <<- session$token
+    }
+  )
+  frames <- paste(mcp_drain_frames(sess), collapse = "\n")
+  expect_match(frames, "shiny.mcp.updateModelContext", fixed = TRUE)
+  expect_match(frames, "update_clock_app", fixed = TRUE)
+  expect_match(frames, "connected", fixed = TRUE)
+  expect_match(frames, token, fixed = TRUE)
+
+  mcpTunnelToolCall("_shiny_close", list(connectionId = sess$cid), 9, sess$handlers$ws)
+})
+
+test_that("non-MCP and no-arguments sessions do not announce", {
+  # No mcpConfigure(arguments=...) => no announcement.
+  withr::defer(.globals$mcp <- NULL)
+  mcpConfigure(appId = "clock")  # enabled, but no arguments
+  sess <- mcp_start_session(fluidPage(), function(input, output, session) {})
+  frames <- paste(mcp_drain_frames(sess), collapse = "\n")
+  expect_no_match(frames, "shiny.mcp.updateModelContext", fixed = TRUE)
+  mcpTunnelToolCall("_shiny_close", list(connectionId = sess$cid), 9, sess$handlers$ws)
+})
+
 test_that("update_<appId>_app pushes args into the running session", {
   skip_if_not_installed("ellmer")
   withr::defer(.globals$mcp <- NULL)

@@ -219,6 +219,34 @@ mcpSendMessage <- function(
   invisible(TRUE)
 }
 
+# Tell the model, once per MCP session, the id it must pass to
+# update_<appId>_app to change THIS running instance in place. Sent after the
+# first flush (the client bridge is initialized by then) via the same
+# updateModelContext bridge channel. The token instruction is text so the
+# model knows to echo the id; the structured {session, state} carries it
+# machine-readably. Only meaningful when an update_* tool exists (arguments
+# declared) and this is an MCP session.
+mcpAnnounceSession <- function(session) {
+  session$onFlushed(
+    function() {
+      token <- session$token
+      instruction <- sprintf(
+        paste(
+          "This app instance's id is \"%s\". To change THIS instance in",
+          "place, call %s with session = \"%s\". Do not re-open the app to",
+          "change it."
+        ),
+        token, mcpUpdateToolName(), token
+      )
+      session$sendCustomMessage("shiny.mcp.updateModelContext", list(
+        content = list(list(type = "text", text = instruction)),
+        structuredContent = list(session = token, state = "connected")
+      ))
+    },
+    once = TRUE
+  )
+}
+
 #' @param mode The display mode to request: `"inline"`, `"fullscreen"`, or
 #'   `"pip"`. The host may decline; observe `mcpHostContext()$displayMode`
 #'   for the mode actually in effect. Declare the modes the app supports

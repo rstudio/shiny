@@ -25,8 +25,12 @@ MCP_DISPLAY_MODES <- c("inline", "fullscreen", "pip")
 #' @param arguments Optional named list of \pkg{ellmer} type objects (e.g.
 #'   [ellmer::type_integer()]) declaring the arguments the model may pass when
 #'   opening the app. Published as the tool's input schema and used as an
-#'   allow-list. Read within the app with [mcpUpdates()] (post-init) or via
-#'   input/bookmark restoration (init).
+#'   allow-list. Read within the app with [mcpUpdates()] and apply them from a
+#'   single `observe()` with the usual `updateXxxInput()` functions; the host
+#'   renders a fresh instance per tool call, so the same observer handles both
+#'   the initial open and any later re-open. There is no input/bookmark
+#'   auto-restore of init args (a brief flash from the widget default to the
+#'   model's value on open is unavoidable); see [mcp-session].
 #' @param direct Whether to advertise the direct-connect fast path (default
 #'   `TRUE`).
 #' @param displayModes Display modes the app supports; a subset of

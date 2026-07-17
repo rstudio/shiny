@@ -92,6 +92,27 @@
 #' @name mcp-session
 NULL
 
+# Server-pushed MCP updates, keyed by session token. Shared between
+# mcpUpdates() (a reactive read) and the update_<appId>_app tool handler (a
+# server-side write): both fetch the *same* reactiveVal for a given session so
+# a push invalidates the app's mcpUpdates() observer. Created lazily; removed
+# when the session ends.
+mcpSessionUpdates <- NULL
+on_load({
+  mcpSessionUpdates <- Map$new()
+})
+
+mcpServerUpdatesFor <- function(session) {
+  token <- session$token
+  rv <- mcpSessionUpdates$get(token)
+  if (is.null(rv)) {
+    rv <- reactiveVal(NULL, label = "mcpServerUpdates")
+    mcpSessionUpdates$set(token, rv)
+    session$onSessionEnded(function() mcpSessionUpdates$remove(token))
+  }
+  rv
+}
+
 #' @rdname mcp-session
 #' @export
 isMcpSession <- function(session = getDefaultReactiveDomain()) {
@@ -121,7 +142,16 @@ mcpUpdates <- function(session = getDefaultReactiveDomain()) {
   if (is.null(session)) {
     stop("mcpUpdates() must be called from within a Shiny session")
   }
-  mcpFilterArguments(mcpParseClientData(session$clientData$mcp_tool_input))
+  clientArgs <- mcpParseClientData(session$clientData$mcp_tool_input)
+  # Server-side pushes from update_<appId>_app overlay the client-delivered
+  # init args, per key (latest wins). Reading the reactiveVal registers the
+  # dependency so a push re-fires this observer.
+  serverArgs <- mcpServerUpdatesFor(session)()
+  if (is.null(clientArgs) && is.null(serverArgs)) {
+    return(NULL)
+  }
+  merged <- utils::modifyList(clientArgs %||% list(), serverArgs %||% list())
+  mcpFilterArguments(merged)
 }
 
 #' @rdname mcp-session

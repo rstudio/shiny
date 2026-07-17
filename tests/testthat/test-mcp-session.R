@@ -94,6 +94,46 @@ test_that("mcpUpdates returns parsed tool arguments reactively", {
   mcpTunnelToolCall("_shiny_close", list(connectionId = sess$cid), 9, sess$handlers$ws)
 })
 
+test_that("mcpUpdates overlays server-pushed args on client init args", {
+  skip_if_not_installed("ellmer")
+  withr::defer(.globals$mcp <- NULL)
+  mcpConfigure(arguments = list(
+    note = ellmer::type_string("a note"),
+    n    = ellmer::type_integer("count")
+  ))
+  observed <- list()
+  token <- NULL
+  sess <- mcp_start_session(
+    fluidPage(),
+    function(input, output, session) {
+      token <<- session$token
+      observe({
+        val <- mcpUpdates()
+        if (length(val) > 0) observed[[length(observed) + 1]] <<- val
+      })
+    }
+  )
+  # Client delivers the initial open args.
+  mcp_send_update(sess, list(
+    .clientdata_mcp_tool_input = '{"note":"hello","n":3}'
+  ))
+  pump_shiny(0.3)
+  expect_equal(observed[[length(observed)]]$note, "hello")
+
+  # Server pushes a partial update; `n` must persist, `note` changes. Set the
+  # reactiveVal inside the session's domain, as the update handler does.
+  session <- appsByToken$get(token)
+  rv <- mcpServerUpdatesFor(session)
+  withReactiveDomain(session, rv(list(note = "world")))
+  session$requestFlush()
+  pump_shiny(0.3)
+  latest <- observed[[length(observed)]]
+  expect_equal(latest$note, "world")
+  expect_equal(latest$n, 3)
+
+  mcpTunnelToolCall("_shiny_close", list(connectionId = sess$cid), 9, sess$handlers$ws)
+})
+
 test_that("mcpHostContext returns parsed host context", {
   ctx <- NULL
   sess <- mcp_start_session(

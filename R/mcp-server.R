@@ -495,7 +495,8 @@ mcpUpdateAppCall <- function(params, id) {
   }
   pushed <- mcpFilterArguments(args[setdiff(names(args), "session")])
   withReactiveDomain(session, {
-    mcpServerUpdatesFor(session)(pushed)
+    rv <- mcpServerUpdatesFor(session)
+    rv(utils::modifyList(isolate(rv()) %||% list(), pushed))
   })
   session$requestFlush()
   mcpResult(id, list(content = list(list(

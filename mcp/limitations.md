@@ -103,5 +103,5 @@ distinguishing information (e.g. a label or purpose) in their
 |---|---|
 | Flash-free widget auto-restore of init args | Not possible — args aren't available at render time |
 | Args via a per-call `resourceUri` | Host ignores it; reads the static URI |
-| Live in-place update of a running app | Host re-renders per tool call; needs an update tool (#4415) |
+| Live in-place update of a running app | Implemented via `update_<appId>_app`; host-passthrough spike (section 4) and multi-instance targeting (section 5) remain |
 | Deterministic init channel | Achieved by using one channel (`mcpUpdates()`) for all args |

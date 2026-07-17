@@ -232,6 +232,12 @@ mcpSendMessage <- function(
 # model knows to echo the id; the structured {session, state} carries it
 # machine-readably. Only meaningful when an update_* tool exists (arguments
 # declared) and this is an MCP session.
+#
+# NOTE: this builds its own shiny.mcp.updateModelContext payload rather than
+# calling mcpUpdateModelContext() because the announcement needs the reserved
+# `state` key in structuredContent (not the author-facing `data` key). If the
+# envelope shape of mcpUpdateModelContext() changes, this must be updated
+# independently.
 mcpAnnounceSession <- function(session) {
   session$onFlushed(
     function() {

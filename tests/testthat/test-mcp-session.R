@@ -285,6 +285,54 @@ test_that("update_<appId>_app pushes args into the running session", {
   expect_false(isTRUE(res$result$isError))
   pump_shiny(0.3)
   expect_equal(observed[[length(observed)]]$note, "pushed")
+  # Undeclared keys are filtered out before the push.
+  expect_null(observed[[length(observed)]]$bogus)
+
+  mcpTunnelToolCall("_shiny_close", list(connectionId = sess$cid), 9, sess$handlers$ws)
+})
+
+test_that("update_<appId>_app accumulates successive pushes", {
+  skip_if_not_installed("ellmer")
+  withr::defer(.globals$mcp <- NULL)
+  mcpConfigure(appId = "demo", arguments = list(
+    note = ellmer::type_string("a note"),
+    n    = ellmer::type_integer("count")
+  ))
+  observed <- list()
+  token <- NULL
+  sess <- mcp_start_session(
+    fluidPage(),
+    function(input, output, session) {
+      token <<- session$token
+      observe({
+        val <- mcpUpdates()
+        if (length(val) > 0) observed[[length(observed) + 1]] <<- val
+      })
+    }
+  )
+  pump_shiny(0.2)
+
+  h <- mcpHttpHandler(function(req) NULL, sess$handlers$ws)
+  # First push: set `n`.
+  res1 <- mcp_post(h, "tools/call", params = list(
+    name = "update_demo_app",
+    arguments = list(session = token, n = 5)
+  ))
+  expect_false(isTRUE(res1$result$isError))
+  pump_shiny(0.3)
+  expect_equal(observed[[length(observed)]]$n, 5)
+
+
+  # Second push: set `note`. The previously pushed `n` must persist.
+  res2 <- mcp_post(h, "tools/call", params = list(
+    name = "update_demo_app",
+    arguments = list(session = token, note = "hi")
+  ))
+  expect_false(isTRUE(res2$result$isError))
+  pump_shiny(0.3)
+  latest <- observed[[length(observed)]]
+  expect_equal(latest$note, "hi")
+  expect_equal(latest$n, 5)
 
   mcpTunnelToolCall("_shiny_close", list(connectionId = sess$cid), 9, sess$handlers$ws)
 })

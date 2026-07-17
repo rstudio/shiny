@@ -79,10 +79,12 @@ app instance's id is ...") via the `updateModelContext` bridge channel. For
 the text into the model's readable context so the model can echo the session id
 into `update_*(session = ...)`.
 
-**Status:** tested with the MCP Inspector (stdio transport) — the text arrives
-in the model's context. Needs a real host (claude.ai / Claude Desktop) spike to
-confirm end-to-end passthrough when using the Apps extension's iframe
-transport.
+**Status:** ✅ **Confirmed in Claude Desktop (2026-07-17).** The host forwards
+the announced session token into the model's context, and the model calls
+`update_<appId>_app` in place (rather than re-opening) to change the running
+instance. Also verified earlier with the MCP Inspector (stdio transport). Not
+yet spot-checked on claude.ai (web) — its iframe CSP handling differs, so the
+tunnel transport is expected to carry it, but confirm when convenient.
 
 ## 5. Multi-instance caveat
 
@@ -92,6 +94,12 @@ instance, the model must select the correct token. The model
 targets/loops per handle — it has no built-in mechanism to disambiguate beyond
 matching the text context (e.g. heading labels) the app provides via
 `mcpUpdateModelContext()`.
+
+**Status:** ✅ Exercised in Claude Desktop (2026-07-17): with two instances of
+the same app open, updating the *first* instance's label targeted the correct
+session token. This is not a server-side guarantee — the model chose correctly
+from context — so the caveat remains a theoretical risk, but it works in
+practice for the common case.
 
 **Mitigation:** apps that expect multiple simultaneous instances should include
 distinguishing information (e.g. a label or purpose) in their
@@ -103,5 +111,5 @@ distinguishing information (e.g. a label or purpose) in their
 |---|---|
 | Flash-free widget auto-restore of init args | Not possible — args aren't available at render time |
 | Args via a per-call `resourceUri` | Host ignores it; reads the static URI |
-| Live in-place update of a running app | Implemented via `update_<appId>_app`; host-passthrough spike (section 4) and multi-instance targeting (section 5) remain |
+| Live in-place update of a running app | Implemented via `update_<appId>_app`; host-passthrough (section 4) and multi-instance targeting (section 5) confirmed working in Claude Desktop 2026-07-17 |
 | Deterministic init channel | Achieved by using one channel (`mcpUpdates()`) for all args |

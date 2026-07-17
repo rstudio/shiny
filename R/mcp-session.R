@@ -3,17 +3,19 @@
 #' @description
 #' `r lifecycle::badge("experimental")`
 #'
-#' When a Shiny app is served as an MCP App (by setting
-#' `options(shiny.mcp = TRUE)` before the app starts), it renders inside an
+#' When a Shiny app is served as an MCP App (by calling
+#' `mcpConfigure()` before the app starts), it renders inside an
 #' MCP host's conversation (e.g. Claude, Claude Desktop, VS Code Copilot)
 #' and can exchange information with the host:
 #'
 #' * `isMcpSession()` reports whether the current session is connected
 #'   through an MCP host (as opposed to a regular browser).
-#' * `mcpToolInput()` returns the arguments the model supplied when it
-#'   called the app's tool, as a named list (reactive read). Declare the
-#'   expected arguments with
-#'   `options(shiny.mcp.tool = list(inputSchema = ...))`.
+#' * `mcpUpdates()` returns the arguments the model supplied when it opened
+#'   the app (a reactive read), filtered to the arguments declared with
+#'   `mcpConfigure(arguments = list(...))`. Apply them from a single
+#'   `observe()` with the usual `updateXxxInput()` functions. Hosts render a
+#'   fresh instance for each tool call, so the same observer handles both the
+#'   initial open and any later re-open.
 #' * `mcpHostContext()` returns the host's context (theme, locale, display
 #'   mode, ...) as a named list (reactive read).
 #' * `mcpUpdateModelContext()` updates the model's context for future
@@ -30,7 +32,7 @@
 #' On hosts that honor the declared content security policy, the app's
 #' iframe connects over a real WebSocket for native-latency reactivity,
 #' falling back to the tools/call tunnel automatically. The websocket URL
-#' is derived, in order, from: `options(shiny.mcp.origin = )` (a full base
+#' is derived, in order, from: `mcpConfigure(origin = )` (a full base
 #' URL, which may include a path); Posit Connect's
 #' `RStudio-Connect-App-Base-Url` (or `X-RSC-Request`) header;
 #' shinyapps.io's `X-Redx-Frontend-Name` header;
@@ -39,12 +41,12 @@
 #' `.posit/publish/deployments/*.toml`) — so apps deployed
 #' under a sub-path such as `/content/<guid>` work without configuration;
 #' or the origin of the MCP request itself. Set
-#' `options(shiny.mcp.direct = FALSE)` to always use the tunnel.
+#' `mcpConfigure(direct = FALSE)` to always use the tunnel.
 #'
 #' @section Multiple apps behind one server:
 #' A gateway can merge several Shiny MCP endpoints into a single MCP
 #' server, so one connector exposes many apps. For that to work each app
-#' must set a unique `options(shiny.mcp.appId = "<id>")` (letters, digits,
+#' must set a unique `mcpConfigure(appId = "<id>")` (letters, digits,
 #' `_`, `-`): the app's internal tunnel tools are then prefixed with the
 #' id and its UI resource is published as `ui://shiny/<id>`, so tools and
 #' resources from different apps do not collide when merged. App-facing
@@ -63,7 +65,7 @@
 #' @param session The Shiny session object.
 #'
 #' @return
-#' `isMcpSession()` returns `TRUE` or `FALSE`. `mcpToolInput()` and
+#' `isMcpSession()` returns `TRUE` or `FALSE`. `mcpUpdates()` and
 #' `mcpHostContext()` return a named list, or `NULL` when nothing has been
 #' received (they must be called within a reactive context).
 #' `mcpUpdateModelContext()` and `mcpSendMessage()` invisibly return `TRUE`
@@ -71,34 +73,19 @@
 #'
 #' @examples
 #' \dontrun{
-#' options(shiny.mcp = TRUE)
-#' options(shiny.mcp.tool = list(
-#'   name = "open_sales_dashboard",
+#' mcpConfigure(
+#'   appId = "sales",
 #'   description = "Show the interactive sales dashboard.",
-#'   inputSchema = list(
-#'     type = "object",
-#'     properties = list(
-#'       region = list(type = "string", description = "Region to focus on")
-#'     )
-#'   )
-#' ))
+#'   arguments = list(region = ellmer::type_string("Region to focus on"))
+#' )
 #'
 #' server <- function(input, output, session) {
-#'   # React to arguments the model passed to the tool
+#'   # Post-open updates from the model
 #'   observe({
-#'     region <- mcpToolInput()$region
-#'     if (!is.null(region)) {
-#'       updateSelectInput(session, "region", selected = region)
-#'     }
+#'     region <- mcpUpdates()$region
+#'     if (!is.null(region)) updateSelectInput(session, "region", selected = region)
 #'   })
-#'
-#'   # Keep the model informed about what the user is looking at
-#'   observe({
-#'     mcpUpdateModelContext(
-#'       text = paste("The user is viewing region", input$region),
-#'       data = list(region = input$region)
-#'     )
-#'   })
+#'   mcpUpdateModelContext(text = paste("Viewing", input$region))
 #' }
 #' }
 #'
@@ -130,11 +117,11 @@ isMcpSession <- function(session = getDefaultReactiveDomain()) {
 
 #' @rdname mcp-session
 #' @export
-mcpToolInput <- function(session = getDefaultReactiveDomain()) {
+mcpUpdates <- function(session = getDefaultReactiveDomain()) {
   if (is.null(session)) {
-    stop("mcpToolInput() must be called from within a Shiny session")
+    stop("mcpUpdates() must be called from within a Shiny session")
   }
-  mcpParseClientData(session$clientData$mcp_tool_input)
+  mcpFilterArguments(mcpParseClientData(session$clientData$mcp_tool_input))
 }
 
 #' @rdname mcp-session
@@ -201,7 +188,7 @@ mcpSendMessage <- function(
 #' @param mode The display mode to request: `"inline"`, `"fullscreen"`, or
 #'   `"pip"`. The host may decline; observe `mcpHostContext()$displayMode`
 #'   for the mode actually in effect. Declare the modes the app supports
-#'   with `options(shiny.mcp.displayModes = c("inline", "fullscreen"))`
+#'   with `mcpConfigure(displayModes = c("inline", "fullscreen"))`
 #'   (default: all three).
 #' @rdname mcp-session
 #' @export

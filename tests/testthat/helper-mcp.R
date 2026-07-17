@@ -1,5 +1,13 @@
 # Helpers for MCP Apps tests (test-mcp-*.R)
 
+# Set MCP config for the duration of the calling test, restoring the prior
+# .globals$mcp afterwards. Replaces the old withr::with_options(shiny.mcp*).
+local_mcp_config <- function(..., .env = parent.frame()) {
+  old <- .globals$mcp
+  withr::defer(.globals$mcp <- old, envir = .env)
+  mcpConfigure(...)
+}
+
 # Reset registered MCP author tools around a test (registerMcpTool() writes
 # to process-global .globals$mcpAuthorTools).
 local_mcp_tools <- function(env = parent.frame()) {

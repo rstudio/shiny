@@ -182,6 +182,7 @@ Collate:
     'jqueryui.R'
     'knitr.R'
     'mcp-app.R'
+    'mcp-config.R'
     'mcp-server.R'
     'mcp-session.R'
     'mcp-stdio.R'

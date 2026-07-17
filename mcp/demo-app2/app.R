@@ -3,22 +3,17 @@ library(shiny)
 # Second demo app: served behind the same MCP gateway as demo-app, to show
 # one connector exposing multiple Shiny apps. The appId keeps its internal
 # tunnel tools and resource URI distinct from the other apps'.
-options(shiny.mcp = TRUE)
-options(shiny.mcp.appId = "cars")
-options(shiny.mcp.tool = list(
-  name = "open_cars_app",
+mcpConfigure(
+  appId = "cars",
   description = paste(
     "Open the mtcars explorer app. Optionally pass `xvar` and `yvar`",
     "(column names of mtcars) to set the initial axes."
   ),
-  inputSchema = list(
-    type = "object",
-    properties = list(
-      xvar = list(type = "string", description = "X axis column of mtcars"),
-      yvar = list(type = "string", description = "Y axis column of mtcars")
-    )
+  arguments = list(
+    xvar = ellmer::type_string("X axis column of mtcars"),
+    yvar = ellmer::type_string("Y axis column of mtcars")
   )
-))
+)
 
 vars <- names(mtcars)
 
@@ -44,12 +39,12 @@ shinyApp(
   ),
   server = function(input, output, session) {
     observe({
-      ti <- mcpToolInput()
-      if (!is.null(ti$xvar) && ti$xvar %in% vars) {
-        updateSelectInput(session, "xvar", selected = ti$xvar)
+      args <- mcpUpdates()
+      if (!is.null(args$xvar) && args$xvar %in% vars) {
+        updateSelectInput(session, "xvar", selected = args$xvar)
       }
-      if (!is.null(ti$yvar) && ti$yvar %in% vars) {
-        updateSelectInput(session, "yvar", selected = ti$yvar)
+      if (!is.null(args$yvar) && args$yvar %in% vars) {
+        updateSelectInput(session, "yvar", selected = args$yvar)
       }
     })
 

@@ -2,7 +2,7 @@
 
 > **Status: executed 2026-07-10.** All tasks complete and E2E-verified (see screenshot-e2e-basic-host.png).
 
-**Goal:** A Shiny app started with `options(shiny.mcp = TRUE)` serves an MCP Apps (SEP-1865) endpoint at `/mcp` on its own httpuv port, so MCP hosts render the live app in a sandboxed iframe with reactivity tunneled over postMessage→tools/call.
+**Goal:** A Shiny app started with `mcpConfigure()` serves an MCP Apps (SEP-1865) endpoint at `/mcp` on its own httpuv port, so MCP hosts render the live app in a sandboxed iframe with reactivity tunneled over postMessage→tools/call.
 
 **Architecture:** A minimal JSON-RPC handler joins Shiny's existing per-app HTTP handler chain (promise-aware via `hybrid_chain`). A duck-typed fake "websocket" (`McpConnection`) feeds `createAppHandlers()$ws()` to create real `ShinySession`s; client frames arrive via a `_shiny_send` tool and server frames leave via a long-polled `_shiny_receive` tool. The `ui://shiny/app` resource is the rendered app page with all assets inlined plus a bundled bridge script that overrides `Shiny.createSocket`.
 
@@ -10,7 +10,7 @@
 
 ## Global Constraints
 
-- No new R package dependencies; no exported R functions in Phase 1 (gated by `options(shiny.mcp = TRUE)`, tool metadata via `options(shiny.mcp.tool = list(name=, description=))`).
+- No new R package dependencies; no exported R functions in Phase 1 (gated by `mcpConfigure()`, tool metadata via `mcpConfigure(description=, arguments=)`).
 - Resource URI is exactly `ui://shiny/app`; mimeType exactly `text/html;profile=mcp-app`.
 - Tool names: `open_shiny_app` (default, model-visible), `_shiny_connect`, `_shiny_send`, `_shiny_receive`, `_shiny_close` (app-only, `_meta.ui.visibility = ["app"]`).
 - Long-poll timeout 15 s; connection GC after 60 s inactivity.
@@ -138,14 +138,14 @@ named_list <- function(...) {
 }
 
 mcpEnabled <- function() {
-  isTRUE(getOption("shiny.mcp", FALSE))
+  isTRUE(.globals$mcp$enabled)
 }
 
 mcpToolInfo <- function() {
-  opt <- getOption("shiny.mcp.tool", list())
+  cfg <- .globals$mcp
   list(
-    name = opt$name %||% "open_shiny_app",
-    description = opt$description %||% paste(
+    name = cfg$appId %||% "open_shiny_app",
+    description = cfg$description %||% paste(
       "Open the interactive Shiny application so the user can view and",
       "interact with it. Call this when the user wants to see the app."
     )
@@ -305,7 +305,7 @@ mcpResourcesRead <- function(body, uiHandler) {
 
 **Interfaces:**
 - Consumes: `mcpEnabled()`, `mcpHttpHandler(uiHandler, wsHandler)` from Task 1.
-- Produces: when `options(shiny.mcp = TRUE)` at `createAppHandlers()` time, the returned `$http` handler serves `/mcp`; `startHttpuvApp` adds `"mcp" = excludeStaticPath()`.
+- Produces: when `mcpConfigure()` is called before `createAppHandlers()` time, the returned `$http` handler serves `/mcp`; `startHttpuvApp` adds `"mcp" = excludeStaticPath()`.
 
 - [x] **Step 1: Failing test** (append to `test-mcp-server.R`):
 
@@ -1227,7 +1227,7 @@ build({ ...opts, outfile: outDir + "shiny-mcp-bridge.js" });
 
 ```r
 library(shiny)
-options(shiny.mcp = TRUE)
+mcpConfigure()
 shinyApp(
   ui = fluidPage(
     titlePanel("MCP demo"),
@@ -1257,7 +1257,7 @@ Run: `Rscript -e 'shiny::runApp("/tmp/mcp-demo", port = 7788)'` (background).
 ### Task 7: NEWS + final checks
 
 - [x] **Step 1:** Add NEWS.md bullet under the development version:
-  `* Experimental: Shiny apps can be served as MCP Apps (SEP-1865). Setting options(shiny.mcp = TRUE) mounts a Model Context Protocol endpoint at /mcp that lets MCP hosts (Claude Desktop, VS Code, MCPJam, ...) render the live app in a sandboxed iframe. (#XXXX)`
+  `* Experimental: Shiny apps can be served as MCP Apps (SEP-1865). Calling mcpConfigure() mounts a Model Context Protocol endpoint at /mcp that lets MCP hosts (Claude Desktop, VS Code, MCPJam, ...) render the live app in a sandboxed iframe. (#XXXX)`
 - [x] **Step 2:** Run full R test suite (`devtools::test()`) and `npm run test_types`; fix regressions.
 - [x] **Step 3:** Commit — `git commit -am "docs(mcp): NEWS entry for experimental MCP Apps support"`.
 

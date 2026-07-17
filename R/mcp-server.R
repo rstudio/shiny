@@ -1,19 +1,19 @@
 # Experimental support for serving a Shiny app as an MCP App (SEP-1865).
 #
-# When `options(shiny.mcp = TRUE)` is set before the app starts, a Model
-# Context Protocol endpoint (JSON-RPC over streamable HTTP, JSON responses)
-# is mounted at `/mcp` on the app's own httpuv server. MCP hosts that
-# support the Apps extension (`io.modelcontextprotocol/ui`) can then call
-# the app's tool and render the live application in a sandboxed iframe;
-# reactivity is tunneled over postMessage -> tools/call (see mcp-tunnel.R
-# and srcts/src/mcp/).
+# When `mcpConfigure()` is called before the app starts, a Model Context
+# Protocol endpoint (JSON-RPC over streamable HTTP, JSON responses) is
+# mounted at `/mcp` on the app's own httpuv server. MCP hosts that support
+# the Apps extension (`io.modelcontextprotocol/ui`) can then call the app's
+# tool and render the live application in a sandboxed iframe; reactivity is
+# tunneled over postMessage -> tools/call (see mcp-tunnel.R and
+# srcts/src/mcp/).
 
 MCP_PROTOCOL_VERSIONS <- c("2024-11-05", "2025-03-26", "2025-06-18")
 MCP_RESOURCE_URI <- "ui://shiny/app"
 MCP_RESOURCE_MIME <- "text/html;profile=mcp-app"
 
 mcpEnabled <- function() {
-  isTRUE(getOption("shiny.mcp", FALSE))
+  isTRUE(.globals$mcp$enabled)
 }
 
 # Direct-connect fast path: declare the app's origin in the resource CSP so
@@ -22,37 +22,16 @@ mcpEnabled <- function() {
 # and falls back to the tunnel, so this is safe to leave on even for hosts
 # that ignore declared CSP (e.g. claude.ai today).
 mcpDirectEnabled <- function() {
-  isTRUE(getOption("shiny.mcp.direct", TRUE))
+  isTRUE(.globals$mcp$direct)
 }
 
 mcpDisplayModes <- function() {
-  modes <- getOption("shiny.mcp.displayModes", c("inline", "fullscreen", "pip"))
-  modes <- intersect(as.character(modes), c("inline", "fullscreen", "pip"))
-  if (length(modes) == 0) modes <- "inline"
-  modes
+  .globals$mcp$displayModes %||% "inline"
 }
 
-# Optional app identity, for gateways that merge several Shiny MCP
-# endpoints behind a single MCP server. When set, the internal `_shiny_*`
-# tool names are prefixed ("sales" -> "sales_shiny_connect") and the app
-# resource is published as ui://shiny/<appId>, so tools and resources from
-# different apps never collide at the gateway.
+# Optional app identity (validated in mcpConfigure()).
 mcpAppId <- function() {
-  id <- getOption("shiny.mcp.appId", NULL)
-  if (!is.character(id) || length(id) != 1 || is.na(id) || !nzchar(id)) {
-    return(NULL)
-  }
-  if (!grepl("^[A-Za-z0-9_-]+$", id)) {
-    if (!isTRUE(.globals$mcpAppIdWarned)) {
-      .globals$mcpAppIdWarned <- TRUE
-      warning(
-        "Ignoring options(shiny.mcp.appId): ",
-        "it may only contain letters, digits, '_' and '-'"
-      )
-    }
-    return(NULL)
-  }
-  id
+  .globals$mcp$appId
 }
 
 mcpResourceUri <- function() {
@@ -79,7 +58,7 @@ mcpTunnelLocalName <- function(name) {
 # The app's externally reachable base URL (may include a path, e.g. Posit
 # Connect's /content/<guid>), for the direct-connect fast path. Priority:
 #
-# 1. options(shiny.mcp.origin) — explicit full URL, for nonstandard proxies.
+# 1. mcpConfigure(origin=) — explicit full URL, for nonstandard proxies.
 # 2. RStudio-Connect-App-Base-Url — Posit Connect sends the app's external
 #    base URL (https://<server>/content/<guid>) with every request it
 #    proxies to Shiny content. Verified against a real Connect deployment.
@@ -103,7 +82,7 @@ mcpDirectBase <- function(req) {
   }
   stripSlash <- function(x) sub("/+$", "", x)
 
-  origin_opt <- getOption("shiny.mcp.origin", NULL)
+  origin_opt <- .globals$mcp$origin
   if (is.character(origin_opt) && nzchar(origin_opt)) {
     return(stripSlash(origin_opt))
   }
@@ -218,15 +197,13 @@ mcpWsOrigin <- function(origin) {
 }
 
 mcpToolInfo <- function() {
-  opt <- getOption("shiny.mcp.tool", list())
   list(
-    name = opt$name %||% "open_shiny_app",
-    description = opt$description %||% paste(
+    name = mcpToolName(),
+    description = .globals$mcp$description %||% paste(
       "Open the interactive Shiny application so the user can view and",
       "interact with it. Call this when the user wants to see the app."
     ),
-    inputSchema = opt$inputSchema %||%
-      list(type = "object", properties = empty_named_list())
+    inputSchema = mcpArgumentsSchema(.globals$mcp$arguments)
   )
 }
 

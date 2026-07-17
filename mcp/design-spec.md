@@ -130,8 +130,8 @@ stylesheets will not resolve; acceptable for MVP.
 
 ### Enabling (MVP, no committed API)
 
-`options(shiny.mcp = TRUE)` (read at `startHttpuvApp` time) enables the `/mcp` handler
-and resource. Optional `options(shiny.mcp.tool = list(name=, description=))`. Marked
+`mcpConfigure()` (called before the app starts) enables the `/mcp` handler
+and resource. Optional `mcpConfigure(description=, arguments=)`. Marked
 experimental; a real user-facing API (tool schemas, `session$mcp$…`,
 `ui/update-model-context`) is the agreed follow-up.
 

@@ -7,25 +7,8 @@
 ## Problem
 
 Shiny's MCP author tools — plain R functions the model may call directly —
-are currently declared by setting a process option:
-
-```r
-options(shiny.mcp.tools = list(
-  list(
-    name = "get_sample_stats",
-    description = "Summary statistics for a normal sample of size n.",
-    inputSchema = list(
-      type = "object",
-      properties = list(n = list(type = "integer")),
-      required = list("n")
-    ),
-    handler = function(args) {
-      x <- rnorm(args$n)
-      list(n = args$n, mean = mean(x), sd = stats::sd(x))
-    }
-  )
-))
-```
+were formerly declared by setting a process option (now removed). The old
+pattern required a raw JSON-Schema list and a `function(args)` handler.
 
 Two problems:
 
@@ -40,14 +23,12 @@ so the API can change with no deprecation burden.
 
 ## Scope
 
-**In scope (this PR):** author tools only — replace
-`options(shiny.mcp.tools = ...)` with a function that accepts
-`ellmer::tool()` objects.
+**In scope (this PR):** author tools only — replace the former tools
+option with a function that accepts `ellmer::tool()` objects.
 
 **Out of scope (another day):** the app-opening tool
-(`options(shiny.mcp.tool = ...)`) and every other `shiny.mcp.*` option
-(`shiny.mcp`, `appId`, `direct`, `displayModes`, `stdio`, `origin`) stay
-exactly as they are.
+(now `mcpConfigure(description=, arguments=)`) and other configuration
+were addressed separately via `mcpConfigure()`.
 
 ## Prior art
 
@@ -201,8 +182,7 @@ unless a tool has been registered — the conversion runs lazily from
   `tools/documentation/pkgdown.yml` under the "MCP Apps" section.
 - `NEWS.md` — note the author-tool API is `registerMcpTool()` +
   `ellmer::tool()` (fold into the #4407 entry).
-- `mcp/demo-app`, `mcp/demo-app2` — migrate `options(shiny.mcp.tools = ...)`
-  to `registerMcpTool()`.
+- `mcp/demo-app`, `mcp/demo-app2` — migrate to `registerMcpTool()`.
 - `mcp/architecture.md` and the `./mcp` mirrors — update the author-tools
   section (standing preference: keep repo-root `mcp/` docs current).
 
@@ -224,7 +204,7 @@ All MCP author-tool tests gated with `skip_if_not_installed("ellmer")`.
 ## Non-goals / explicit exclusions
 
 - No `force` argument, no `removeMcpTool()` (can be added later).
-- No `options(shiny.mcp.tools = ...)` fallback — the function is the only
+- No old tools-option fallback — the function is the only
   path.
 - No changes to the app-opening tool or any other `shiny.mcp.*` option.
 - No `ellmer::ContentToolResult` return-value handling.

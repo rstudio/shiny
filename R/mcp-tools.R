@@ -3,7 +3,7 @@
 #' @description
 #' `r lifecycle::badge("experimental")`
 #'
-#' When a Shiny app is served as an MCP App (`options(shiny.mcp = TRUE)`),
+#' When a Shiny app is served as an MCP App (via `mcpConfigure()`),
 #' `registerMcpTool()` exposes plain R functions as MCP tools the model may
 #' call directly, in addition to the tool that opens the app. Define each
 #' tool with [ellmer::tool()] and register it at the top level of your
@@ -11,7 +11,7 @@
 #'
 #' ```r
 #' library(shiny)
-#' options(shiny.mcp = TRUE)
+#' mcpConfigure()
 #'
 #' registerMcpTool(
 #'   ellmer::tool(
@@ -39,7 +39,7 @@
 #'
 #' @return Invisibly, `NULL`.
 #'
-#' @seealso [mcpToolInput()] and the other `mcp*` session helpers.
+#' @seealso [mcpUpdates()] and the other `mcp*` session helpers.
 #' @export
 registerMcpTool <- function(...) {
   rlang::check_installed("ellmer", "to define MCP tools with `ellmer::tool()`.")

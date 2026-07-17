@@ -161,6 +161,23 @@ function initShinyMcpBridge(): void {
     },
   );
 
+  // Every tool input — the opening arguments AND any later ones — feeds the
+  // reactive mcpUpdates() channel. MCP hosts render a fresh app instance per
+  // tool call (there is no in-place "update" the model can reach), so "open"
+  // and "re-open" are the same event; the app applies args in a single
+  // mcpUpdates() observer. We deliberately do NOT use Shiny's RestoreContext
+  // here — see mcp/limitations.md for why widget auto-restore isn't reachable.
+  //
+  // Register ontoolinput BEFORE connect() per ext-apps docs: one-shot events
+  // may fire immediately after the handshake, so the handler must be in place
+  // before connect() to avoid missing the notification.
+  app.ontoolinput = (params) => {
+    setShinyInput(
+      ".clientdata_mcp_tool_input",
+      JSON.stringify(params.arguments ?? {}),
+    );
+  };
+
   // Kick off the ui/initialize handshake immediately, but install
   // createSocket synchronously: Shiny's DOM-ready init may run before the
   // handshake completes, and tool calls must wait for connect() anyway.
@@ -264,13 +281,6 @@ function initShinyMcpBridge(): void {
     setShinyInput(
       ".clientdata_mcp_host_context",
       JSON.stringify(app.getHostContext() ?? {}),
-    );
-  };
-
-  app.ontoolinput = (params) => {
-    setShinyInput(
-      ".clientdata_mcp_tool_input",
-      JSON.stringify(params.arguments ?? {}),
     );
   };
 

@@ -24,7 +24,7 @@ code.
 ## Big picture
 
 ```
-options(shiny.mcp = TRUE)
+mcpConfigure()
 ┌─────────────────────────── R process ────────────────────────────┐
 │  httpuv (the app's normal port)                                  │
 │  ├── /            normal Shiny app (browser use unchanged)       │
@@ -47,7 +47,7 @@ Three transports, one dispatcher:
    (`R/mcp-server.R:mcpHttpHandler`). JSON responses only (no SSE);
    `GET /mcp` returns 405. CORS headers are sent on the `/mcp` endpoint
    only.
-2. **stdio** — `options(shiny.mcp.stdio = TRUE)` additionally speaks
+2. **stdio** — `mcpConfigure(stdio = TRUE)` additionally speaks
    newline-delimited JSON-RPC on stdin/stdout (`R/mcp-stdio.R`), so local
    hosts can launch the R process directly (`claude mcp add -- Rscript
    ...`). Non-blocking `file("stdin")` polled from the `later` loop
@@ -65,7 +65,7 @@ the closure `createAppHandlers()` stashes in `.globals$mcpDispatch`.
 
 - **Tools** (`mcpToolsList()`):
   - the *app tool* (default `open_shiny_app`; customizable via
-    `options(shiny.mcp.tool = list(name=, description=, inputSchema=))`)
+    `mcpConfigure(description=, arguments=)`)
     with `_meta.ui.resourceUri` pointing at the app resource — calling it
     makes the host render the iframe;
   - five *internal tunnel tools* `_shiny_connect/_send/_receive/_close/
@@ -142,9 +142,9 @@ website read app responses, so `_shiny_http` instead accepts a missing
 
 ## Session API (R/mcp-session.R, exported)
 
-`isMcpSession()`, `mcpToolInput()` (arguments the model passed, reactive
-via `session$clientData$mcp_tool_input`), `mcpHostContext()` (theme /
-locale / displayMode), `mcpUpdateModelContext(text=, data=)`,
+`isMcpSession()`, `mcpUpdates()` (post-open arguments from the model,
+reactive via `session$clientData$mcp_tool_input`), `mcpHostContext()`
+(theme / locale / displayMode), `mcpUpdateModelContext(text=, data=)`,
 `mcpSendMessage(text)`, `mcpRequestDisplayMode(mode)`. The outbound ones
 ride `session$sendCustomMessage("shiny.mcp.*")`; the bridge maps them to
 `app.updateModelContext()` / `sendMessage()` / `requestDisplayMode()` and
@@ -158,7 +158,7 @@ For the direct fast path the server must tell the sandbox where the app
 *externally* lives — behind proxies the request's `Host` is an internal
 `127.0.0.1:<port>`. `mcpDirectBase()` (R/mcp-server.R) resolves, in order:
 
-1. `options(shiny.mcp.origin=)` — explicit override, may include a path;
+1. `mcpConfigure(origin=)` — explicit override, may include a path;
 2. `RStudio-Connect-App-Base-Url` — what Posit Connect actually sends to
    Shiny content (verified on connect.posit.it; Connect does **not** send
    `X-RSC-Request` to Shiny content, and rsconnect never bundles its
@@ -179,13 +179,13 @@ For the direct fast path the server must tell the sandbox where the app
 
 CSP `connectDomains` gets origins only (host sanitizers reject paths); the
 full path-aware base feeds the websocket URL. Disable the fast path
-entirely with `options(shiny.mcp.direct = FALSE)`.
+entirely with `mcpConfigure(direct = FALSE)`.
 
 ## One connector, many apps (gateway + appId)
 
 A single MCP connector can front several Shiny apps:
 
-- Each app sets a unique `options(shiny.mcp.appId = "<id>")`
+- Each app sets a unique `mcpConfigure(appId = "<id>")`
   (`[A-Za-z0-9_-]+`). This prefixes the internal tunnel tools
   (`demo_shiny_connect`, ...) via `mcpTunnelToolName()` and publishes the
   resource as `ui://shiny/<id>` (`mcpResourceUri()`); incoming calls are
@@ -212,20 +212,21 @@ A single MCP connector can front several Shiny apps:
 - `mcpSendMessage()` sends `role: "user"` content — the host shows it as
   coming from the user; hosts may prompt.
 
-## Options reference
+## Configuration reference (`mcpConfigure()`)
 
-| Option | Effect |
+| Argument | Effect |
 |---|---|
-| `shiny.mcp` | mount `/mcp` (master switch) |
-| `shiny.mcp.stdio` | also speak JSON-RPC on stdin/stdout |
-| `shiny.mcp.tool` | name/description/inputSchema of the app tool |
-| `shiny.mcp.appId` | namespace internal tools + resource URI (gateway) |
-| `shiny.mcp.direct` | direct-connect fast path (default TRUE) |
-| `shiny.mcp.origin` | explicit external base URL (proxy override) |
-| `shiny.mcp.displayModes` | subset of inline/fullscreen/pip |
+| `enabled` | mount `/mcp` (master switch; default TRUE) |
+| `stdio` | also speak JSON-RPC on stdin/stdout |
+| `description` | description of the app-opening tool |
+| `arguments` | named list of ellmer types for the tool's inputSchema |
+| `appId` | namespace internal tools + resource URI (gateway) |
+| `direct` | direct-connect fast path (default TRUE) |
+| `origin` | explicit external base URL (proxy override) |
+| `displayModes` | subset of inline/fullscreen/pip |
 
 Author tools are registered via `registerMcpTool(ellmer::tool(...))`, not
-through an option.
+through `mcpConfigure()`.
 
 ## File map
 

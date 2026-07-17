@@ -167,6 +167,7 @@ reference:
   - title: MCP Apps
     desc: Serve Shiny apps as MCP Apps and interact with the MCP host (experimental).
     contents:
+      - mcpConfigure
       - mcp-session
       - registerMcpTool
   - title: Utility functions

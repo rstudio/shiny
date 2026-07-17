@@ -1,8 +1,8 @@
 # shiny (development version)
 
 * Experimental support for serving a Shiny app as an MCP App (the Model
-  Context Protocol Apps extension, SEP-1865). Setting `options(shiny.mcp =
-  TRUE)` before the app starts mounts an MCP endpoint at `/mcp` on the app's
+  Context Protocol Apps extension, SEP-1865). Calling `mcpConfigure()`
+  before the app starts mounts an MCP endpoint at `/mcp` on the app's
   own port; MCP hosts that support the Apps extension (Claude, Claude
   Desktop, VS Code Copilot, MCPJam, ...) can then call the app's tool and
   render the live, fully reactive application in a sandboxed iframe, with
@@ -12,32 +12,32 @@
   the host's theme and style variables are applied to the app, and assets
   referenced by `url()` in stylesheets (e.g. icon webfonts) are embedded as
   data URIs so they render inside the sandbox. Customize the model-visible
-  tool with `options(shiny.mcp.tool = list(name=, description=,
-  inputSchema=))`. New session API: `isMcpSession()`, `mcpToolInput()`,
-  `mcpHostContext()`, `mcpUpdateModelContext()`, and `mcpSendMessage()` let
-  apps react to the model's tool arguments and host theme, keep the model's
-  context up to date, and send messages to the conversation. Apps can also
-  expose additional model-callable tools with `registerMcpTool()`, using
-  `ellmer::tool()` definitions. Adding `options(shiny.mcp.stdio = TRUE)` also speaks MCP
-  over stdin/stdout, so local desktop hosts can launch the app process
-  directly, e.g. `claude mcp add my-app -- Rscript -e
-  "options(shiny.mcp=TRUE, shiny.mcp.stdio=TRUE);
+  tool with `mcpConfigure(description=, arguments=)`. New session API:
+  `isMcpSession()`, `mcpUpdates()`, `mcpHostContext()`,
+  `mcpUpdateModelContext()`, and `mcpSendMessage()` let apps react to the
+  model's tool arguments and host theme, keep the model's context up to
+  date, and send messages to the conversation. Apps can also expose
+  additional model-callable tools with `registerMcpTool()`, using
+  `ellmer::tool()` definitions. Adding `mcpConfigure(stdio = TRUE)` also
+  speaks MCP over stdin/stdout, so local desktop hosts can launch the app
+  process directly, e.g. `claude mcp add my-app -- Rscript -e
+  "shiny::mcpConfigure(stdio = TRUE);
   shiny::runApp('app', launch.browser=FALSE)"` (not supported on Windows;
   stdout is reserved for the protocol). On hosts that honor the declared
   content security policy, the app connects over a real WebSocket for
   native-latency reactivity and falls back to the tunnel automatically
-  (disable with `options(shiny.mcp.direct = FALSE)`). The websocket base
+  (disable with `mcpConfigure(direct = FALSE)`). The websocket base
   URL is path-aware, so apps deployed under a sub-path (e.g. Posit
   Connect's `/content/<guid>`) connect directly too — derived from
-  `options(shiny.mcp.origin=)`, Connect's `RStudio-Connect-App-Base-Url`
+  `mcpConfigure(origin=)`, Connect's `RStudio-Connect-App-Base-Url`
   (or `X-RSC-Request`) header, shinyapps.io's `X-Redx-Frontend-Name`
   header, or a
   deployment record next to the app (rsconnect `.dcf` or Posit Publisher
   `.toml`). Apps can also request
   fullscreen/picture-in-picture with `mcpRequestDisplayMode()`. Setting a
-  unique `options(shiny.mcp.appId=)` per app namespaces each app's
+  unique `mcpConfigure(appId=)` per app namespaces each app's
   internal tools and resource URI so a gateway can merge several Shiny
-  apps into a single MCP server (one connector, many apps). (#4407)
+  apps into a single MCP server (one connector, many apps). (#4407, #4414)
 
 * `{watcher}` is now a required dependency and is always used for autoreload file watching, so it no longer needs to be installed separately. The legacy polling-based file watcher has been removed. (#4403)
 

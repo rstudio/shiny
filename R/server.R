@@ -174,6 +174,9 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
 
     shinysession <- ShinySession$new(ws)
     appsByToken$set(shinysession$token, shinysession)
+    if (mcpEnabled() && mcpHasUpdateTool() && isMcpSession(shinysession)) {
+      mcpAnnounceSession(shinysession)
+    }
     shinysession$setShowcase(.globals$showcaseDefault)
 
     messageHandler <- function(binary, msg) {

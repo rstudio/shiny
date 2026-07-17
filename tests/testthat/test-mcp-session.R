@@ -94,6 +94,46 @@ test_that("mcpUpdates returns parsed tool arguments reactively", {
   mcpTunnelToolCall("_shiny_close", list(connectionId = sess$cid), 9, sess$handlers$ws)
 })
 
+test_that("mcpUpdates overlays server-pushed args on client init args", {
+  skip_if_not_installed("ellmer")
+  withr::defer(.globals$mcp <- NULL)
+  mcpConfigure(arguments = list(
+    note = ellmer::type_string("a note"),
+    n    = ellmer::type_integer("count")
+  ))
+  observed <- list()
+  token <- NULL
+  sess <- mcp_start_session(
+    fluidPage(),
+    function(input, output, session) {
+      token <<- session$token
+      observe({
+        val <- mcpUpdates()
+        if (length(val) > 0) observed[[length(observed) + 1]] <<- val
+      })
+    }
+  )
+  # Client delivers the initial open args.
+  mcp_send_update(sess, list(
+    .clientdata_mcp_tool_input = '{"note":"hello","n":3}'
+  ))
+  pump_shiny(0.3)
+  expect_equal(observed[[length(observed)]]$note, "hello")
+
+  # Server pushes a partial update; `n` must persist, `note` changes. Set the
+  # reactiveVal inside the session's domain, as the update handler does.
+  session <- appsByToken$get(token)
+  rv <- mcpServerUpdatesFor(session)
+  withReactiveDomain(session, rv(list(note = "world")))
+  session$requestFlush()
+  pump_shiny(0.3)
+  latest <- observed[[length(observed)]]
+  expect_equal(latest$note, "world")
+  expect_equal(latest$n, 3)
+
+  mcpTunnelToolCall("_shiny_close", list(connectionId = sess$cid), 9, sess$handlers$ws)
+})
+
 test_that("mcpHostContext returns parsed host context", {
   ctx <- NULL
   sess <- mcp_start_session(
@@ -133,6 +173,10 @@ test_that("mcpUpdateModelContext and mcpSendMessage send bridge messages", {
   expect_match(frames, "shiny.mcp.updateModelContext", fixed = TRUE)
   expect_match(frames, "n is 42", fixed = TRUE)
   expect_match(frames, "structuredContent", fixed = TRUE)
+  # The framework stamps the session token into structuredContent; author data
+  # nests under `data`.
+  expect_match(frames, "\"session\"", fixed = TRUE)
+  expect_match(frames, "\"data\"", fixed = TRUE)
   expect_match(frames, "shiny.mcp.sendMessage", fixed = TRUE)
   expect_match(frames, "What does this mean?", fixed = TRUE)
   mcpTunnelToolCall("_shiny_close", list(connectionId = sess$cid), 9, sess$handlers$ws)
@@ -177,4 +221,138 @@ test_that("mcpRequestDisplayMode sends the bridge message", {
 
   expect_false(mcpRequestDisplayMode("pip", session = MockShinySession$new()))
   expect_error(mcpRequestDisplayMode("cinema", session = MockShinySession$new()))
+})
+
+test_that("MCP sessions announce their token to the model on connect", {
+  skip_if_not_installed("ellmer")
+  withr::defer(.globals$mcp <- NULL)
+  mcpConfigure(appId = "clock", arguments = list(
+    label = ellmer::type_string("heading")
+  ))
+  token <- NULL
+  sess <- mcp_start_session(
+    fluidPage(),
+    function(input, output, session) {
+      token <<- session$token
+    }
+  )
+  frames <- paste(mcp_drain_frames(sess), collapse = "\n")
+  expect_match(frames, "shiny.mcp.updateModelContext", fixed = TRUE)
+  expect_match(frames, "update_clock_app", fixed = TRUE)
+  expect_match(frames, "connected", fixed = TRUE)
+  expect_match(frames, token, fixed = TRUE)
+
+  mcpTunnelToolCall("_shiny_close", list(connectionId = sess$cid), 9, sess$handlers$ws)
+})
+
+test_that("non-MCP and no-arguments sessions do not announce", {
+  # No mcpConfigure(arguments=...) => no announcement.
+  withr::defer(.globals$mcp <- NULL)
+  mcpConfigure(appId = "clock")  # enabled, but no arguments
+  sess <- mcp_start_session(fluidPage(), function(input, output, session) {})
+  frames <- paste(mcp_drain_frames(sess), collapse = "\n")
+  expect_no_match(frames, "shiny.mcp.updateModelContext", fixed = TRUE)
+  mcpTunnelToolCall("_shiny_close", list(connectionId = sess$cid), 9, sess$handlers$ws)
+})
+
+test_that("update_<appId>_app pushes args into the running session", {
+  skip_if_not_installed("ellmer")
+  withr::defer(.globals$mcp <- NULL)
+  mcpConfigure(appId = "demo", arguments = list(
+    note = ellmer::type_string("a note"),
+    n    = ellmer::type_integer("count")
+  ))
+  observed <- list()
+  token <- NULL
+  sess <- mcp_start_session(
+    fluidPage(),
+    function(input, output, session) {
+      token <<- session$token
+      observe({
+        val <- mcpUpdates()
+        if (length(val) > 0) observed[[length(observed) + 1]] <<- val
+      })
+    }
+  )
+  pump_shiny(0.2)
+
+  h <- mcpHttpHandler(function(req) NULL, sess$handlers$ws)
+  res <- mcp_post(h, "tools/call", params = list(
+    name = "update_demo_app",
+    # `session` and a non-declared key are filtered out before the push.
+    arguments = list(session = token, note = "pushed", bogus = "x")
+  ))
+  expect_false(isTRUE(res$result$isError))
+  pump_shiny(0.3)
+  expect_equal(observed[[length(observed)]]$note, "pushed")
+  # Undeclared keys are filtered out before the push.
+  expect_null(observed[[length(observed)]]$bogus)
+
+  mcpTunnelToolCall("_shiny_close", list(connectionId = sess$cid), 9, sess$handlers$ws)
+})
+
+test_that("update_<appId>_app accumulates successive pushes", {
+  skip_if_not_installed("ellmer")
+  withr::defer(.globals$mcp <- NULL)
+  mcpConfigure(appId = "demo", arguments = list(
+    note = ellmer::type_string("a note"),
+    n    = ellmer::type_integer("count")
+  ))
+  observed <- list()
+  token <- NULL
+  sess <- mcp_start_session(
+    fluidPage(),
+    function(input, output, session) {
+      token <<- session$token
+      observe({
+        val <- mcpUpdates()
+        if (length(val) > 0) observed[[length(observed) + 1]] <<- val
+      })
+    }
+  )
+  pump_shiny(0.2)
+
+  h <- mcpHttpHandler(function(req) NULL, sess$handlers$ws)
+  # First push: set `n`.
+  res1 <- mcp_post(h, "tools/call", params = list(
+    name = "update_demo_app",
+    arguments = list(session = token, n = 5)
+  ))
+  expect_false(isTRUE(res1$result$isError))
+  pump_shiny(0.3)
+  expect_equal(observed[[length(observed)]]$n, 5)
+
+
+  # Second push: set `note`. The previously pushed `n` must persist.
+  res2 <- mcp_post(h, "tools/call", params = list(
+    name = "update_demo_app",
+    arguments = list(session = token, note = "hi")
+  ))
+  expect_false(isTRUE(res2$result$isError))
+  pump_shiny(0.3)
+  latest <- observed[[length(observed)]]
+  expect_equal(latest$note, "hi")
+  expect_equal(latest$n, 5)
+
+  mcpTunnelToolCall("_shiny_close", list(connectionId = sess$cid), 9, sess$handlers$ws)
+})
+
+test_that("update_<appId>_app errors on unknown or missing session token", {
+  skip_if_not_installed("ellmer")
+  local_mcp_config(appId = "demo", arguments = list(
+    note = ellmer::type_string("a note")
+  ))
+  h <- mcpHttpHandler(function(req) NULL, function(ws) TRUE)
+
+  missing <- mcp_post(h, "tools/call", params = list(
+    name = "update_demo_app", arguments = list(note = "x")
+  ))
+  expect_true(missing$result$isError)
+
+  unknown <- mcp_post(h, "tools/call", params = list(
+    name = "update_demo_app",
+    arguments = list(session = "no-such-token", note = "x")
+  ))
+  expect_true(unknown$result$isError)
+  expect_match(unknown$result$content[[1]]$text, "no-such-token", fixed = TRUE)
 })

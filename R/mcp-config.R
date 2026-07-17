@@ -136,6 +136,14 @@ mcpToolName <- function() {
   if (is.null(id)) "open_shiny_app" else paste0("open_", id, "_app")
 }
 
+# update_shiny_app, or update_<appId>_app when an appId is configured. The
+# companion to mcpToolName(): the model calls this to change a running
+# instance in place instead of re-opening the app.
+mcpUpdateToolName <- function() {
+  id <- .globals$mcp$appId
+  if (is.null(id)) "update_shiny_app" else paste0("update_", id, "_app")
+}
+
 # Convert the configured `arguments` (named list of ellmer types) into the
 # JSON Schema published as the tool's inputSchema. Mirrors
 # mcpToolInputSchema() (R/mcp-server.R) so the two conversions stay aligned.

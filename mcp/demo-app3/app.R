@@ -47,7 +47,9 @@ shinyApp(
     running <- reactiveVal(TRUE)
     heading <- reactiveVal("Live clock")
 
-    # Restore any arguments the model passed when opening the app.
+    # Restore args on open AND apply later in-place updates: the model can call
+    # update_clock_app(session = ..., label = ...) to change this running
+    # instance without re-opening it. Both arrive through mcpUpdates().
     observe({
       args <- mcpUpdates()
       if (!is.null(args$label) && nzchar(args$label)) {

@@ -67,12 +67,18 @@ the app (a reactive read), filtered to the arguments declared with
 \code{mcpConfigure(arguments = list(...))}. Apply them from a single
 \code{observe()} with the usual \code{updateXxxInput()} functions. Hosts render a
 fresh instance for each tool call, so the same observer handles both the
-initial open and any later re-open.
+initial open and any later re-open. When \code{arguments} are declared,
+an \verb{update_<appId>_app} tool is auto-registered; the model can call it
+to push new argument values to a running instance (server-side), which
+also arrive through this same \code{mcpUpdates()} channel.
 \item \code{mcpHostContext()} returns the host's context (theme, locale, display
 mode, ...) as a named list (reactive read).
 \item \code{mcpUpdateModelContext()} updates the model's context for future
 conversation turns. Each call overwrites the previous update; the host
-typically delivers it with the user's next message.
+typically delivers it with the user's next message. On connect, the
+framework automatically announces the app instance's \code{session} id to
+the model (via \code{mcpAnnounceSession()}), so the model can target the
+running instance with \verb{update_<appId>_app(session = "<id>", ...)}.
 \item \code{mcpSendMessage()} sends a user-role message to the host's chat
 interface, which may trigger a model response.
 }

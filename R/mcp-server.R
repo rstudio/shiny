@@ -207,6 +207,34 @@ mcpToolInfo <- function() {
   )
 }
 
+# inputSchema for update_<appId>_app: the declared arguments allow-list plus a
+# required `session` string identifying the running instance to update.
+mcpUpdateToolInfo <- function() {
+  schema <- mcpArgumentsSchema(.globals$mcp$arguments)
+  schema$properties$session <- list(
+    type = "string",
+    description = paste(
+      "Id of the running app instance to update, as reported by the app when",
+      "it opened. Required."
+    )
+  )
+  schema$required <- as.list(unique(c(unlist(schema$required), "session")))
+  list(
+    name = mcpUpdateToolName(),
+    description = paste(
+      "Change parameters of the already-open app in place. Do NOT re-open the",
+      "app; use this to update the running instance identified by `session`."
+    ),
+    inputSchema = schema
+  )
+}
+
+# TRUE when a companion update_* tool should be published (author declared
+# arguments the model may push into a running session).
+mcpHasUpdateTool <- function() {
+  length(.globals$mcp$arguments) > 0
+}
+
 mcpCorsHeaders <- function() {
   list(
     "Access-Control-Allow-Origin" = "*",
@@ -334,6 +362,16 @@ mcpInitializeResult <- function(body) {
 
 mcpToolsList <- function() {
   info <- mcpToolInfo()
+  update_entry <- if (mcpHasUpdateTool()) {
+    upd <- mcpUpdateToolInfo()
+    list(list(
+      name = upd$name,
+      description = upd$description,
+      inputSchema = upd$inputSchema
+    ))
+  } else {
+    list()
+  }
   # unname: a partially named list would serialize as a JSON object rather
   # than the array that tools/list requires.
   unname(c(
@@ -343,6 +381,7 @@ mcpToolsList <- function() {
       inputSchema = info$inputSchema,
       `_meta` = list(ui = list(resourceUri = mcpResourceUri()))
     )),
+    update_entry,
     mcpTunnelToolsList(),
     lapply(mcpAuthorTools(), function(tool) {
       dropNulls(list(
@@ -358,6 +397,7 @@ mcpToolsList <- function() {
 mcpReservedToolNames <- function() {
   c(
     mcpToolInfo()$name,
+    if (mcpHasUpdateTool()) mcpUpdateToolName(),
     vapply(mcpTunnelToolsList(), function(t) t$name, character(1))
   )
 }
@@ -431,6 +471,40 @@ mcpAuthorToolCall <- function(tool, params, id) {
   )
 }
 
+# Handle a model call to update_<appId>_app: push the (allow-list-filtered)
+# arguments into the running session named by `session`, inside that session's
+# reactive domain so its mcpUpdates() observer re-fires.
+mcpUpdateAppCall <- function(params, id) {
+  args <- params$arguments %||% list()
+  token <- args$session
+  if (!is.character(token) || length(token) != 1 || !nzchar(token)) {
+    return(mcpToolErrorResult(
+      id,
+      "update requires a `session` id identifying the running app instance."
+    ))
+  }
+  session <- appsByToken$get(token)
+  if (is.null(session) || !isMcpSession(session)) {
+    return(mcpToolErrorResult(id, sprintf(
+      paste(
+        "No running app session with id '%s'. Open the app first, or use the",
+        "id the app reported for the instance you want to change."
+      ),
+      token
+    )))
+  }
+  pushed <- mcpFilterArguments(args[setdiff(names(args), "session")])
+  withReactiveDomain(session, {
+    rv <- mcpServerUpdatesFor(session)
+    rv(utils::modifyList(isolate(rv()) %||% list(), pushed))
+  })
+  session$requestFlush()
+  mcpResult(id, list(content = list(list(
+    type = "text",
+    text = "Updated the running app in place."
+  ))))
+}
+
 mcpToolCall <- function(body, uiHandler, wsHandler) {
   name <- body$params$name %||% ""
   info <- mcpToolInfo()
@@ -441,6 +515,9 @@ mcpToolCall <- function(body, uiHandler, wsHandler) {
         text = "The Shiny app is now displayed in the conversation."
       ))
     )))
+  }
+  if (mcpHasUpdateTool() && identical(name, mcpUpdateToolName())) {
+    return(mcpUpdateAppCall(body$params, body$id))
   }
   localName <- mcpTunnelLocalName(name)
   if (startsWith(localName, "_shiny_")) {

@@ -15,12 +15,18 @@
 #'   `mcpConfigure(arguments = list(...))`. Apply them from a single
 #'   `observe()` with the usual `updateXxxInput()` functions. Hosts render a
 #'   fresh instance for each tool call, so the same observer handles both the
-#'   initial open and any later re-open.
+#'   initial open and any later re-open. When `arguments` are declared,
+#'   an `update_<appId>_app` tool is auto-registered; the model can call it
+#'   to push new argument values to a running instance (server-side), which
+#'   also arrive through this same `mcpUpdates()` channel.
 #' * `mcpHostContext()` returns the host's context (theme, locale, display
 #'   mode, ...) as a named list (reactive read).
 #' * `mcpUpdateModelContext()` updates the model's context for future
 #'   conversation turns. Each call overwrites the previous update; the host
-#'   typically delivers it with the user's next message.
+#'   typically delivers it with the user's next message. On connect, the
+#'   framework automatically announces the app instance's `session` id to
+#'   the model (via `mcpAnnounceSession()`), so the model can target the
+#'   running instance with `update_<appId>_app(session = "<id>", ...)`.
 #' * `mcpSendMessage()` sends a user-role message to the host's chat
 #'   interface, which may trigger a model response.
 #'
@@ -92,6 +98,27 @@
 #' @name mcp-session
 NULL
 
+# Server-pushed MCP updates, keyed by session token. Shared between
+# mcpUpdates() (a reactive read) and the update_<appId>_app tool handler (a
+# server-side write): both fetch the *same* reactiveVal for a given session so
+# a push invalidates the app's mcpUpdates() observer. Created lazily; removed
+# when the session ends.
+mcpSessionUpdates <- NULL
+on_load({
+  mcpSessionUpdates <- Map$new()
+})
+
+mcpServerUpdatesFor <- function(session) {
+  token <- session$token
+  rv <- mcpSessionUpdates$get(token)
+  if (is.null(rv)) {
+    rv <- reactiveVal(NULL, label = "mcpServerUpdates")
+    mcpSessionUpdates$set(token, rv)
+    session$onSessionEnded(function() mcpSessionUpdates$remove(token))
+  }
+  rv
+}
+
 #' @rdname mcp-session
 #' @export
 isMcpSession <- function(session = getDefaultReactiveDomain()) {
@@ -121,7 +148,16 @@ mcpUpdates <- function(session = getDefaultReactiveDomain()) {
   if (is.null(session)) {
     stop("mcpUpdates() must be called from within a Shiny session")
   }
-  mcpFilterArguments(mcpParseClientData(session$clientData$mcp_tool_input))
+  clientArgs <- mcpParseClientData(session$clientData$mcp_tool_input)
+  # Server-side pushes from update_<appId>_app overlay the client-delivered
+  # init args, per key (latest wins). Reading the reactiveVal registers the
+  # dependency so a push re-fires this observer.
+  serverArgs <- mcpServerUpdatesFor(session)()
+  if (is.null(clientArgs) && is.null(serverArgs)) {
+    return(NULL)
+  }
+  merged <- utils::modifyList(clientArgs %||% list(), serverArgs %||% list())
+  mcpFilterArguments(merged)
 }
 
 #' @rdname mcp-session
@@ -156,11 +192,15 @@ mcpUpdateModelContext <- function(
   if (!isMcpSession(session)) {
     return(invisible(FALSE))
   }
+  structured <- dropNulls(list(
+    session = session$token,
+    data = data
+  ))
   params <- dropNulls(list(
     content = if (!is.null(text)) {
       list(list(type = "text", text = text))
     },
-    structuredContent = data
+    structuredContent = structured
   ))
   session$sendCustomMessage("shiny.mcp.updateModelContext", params)
   invisible(TRUE)
@@ -183,6 +223,40 @@ mcpSendMessage <- function(
     content = list(list(type = "text", text = text))
   ))
   invisible(TRUE)
+}
+
+# Tell the model, once per MCP session, the id it must pass to
+# update_<appId>_app to change THIS running instance in place. Sent after the
+# first flush (the client bridge is initialized by then) via the same
+# updateModelContext bridge channel. The token instruction is text so the
+# model knows to echo the id; the structured {session, state} carries it
+# machine-readably. Only meaningful when an update_* tool exists (arguments
+# declared) and this is an MCP session.
+#
+# NOTE: this builds its own shiny.mcp.updateModelContext payload rather than
+# calling mcpUpdateModelContext() because the announcement needs the reserved
+# `state` key in structuredContent (not the author-facing `data` key). If the
+# envelope shape of mcpUpdateModelContext() changes, this must be updated
+# independently.
+mcpAnnounceSession <- function(session) {
+  session$onFlushed(
+    function() {
+      token <- session$token
+      instruction <- sprintf(
+        paste(
+          "This app instance's id is \"%s\". To change THIS instance in",
+          "place, call %s with session = \"%s\". Do not re-open the app to",
+          "change it."
+        ),
+        token, mcpUpdateToolName(), token
+      )
+      session$sendCustomMessage("shiny.mcp.updateModelContext", list(
+        content = list(list(type = "text", text = instruction)),
+        structuredContent = list(session = token, state = "connected")
+      ))
+    },
+    once = TRUE
+  )
 }
 
 #' @param mode The display mode to request: `"inline"`, `"fullscreen"`, or

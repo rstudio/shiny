@@ -216,11 +216,23 @@ observe({
 default → the model's value) is unavoidable — flash-free restore is not
 reachable for MCP; see `limitations.md`.
 
-### Live re-steering of a running instance
+### Live re-steering of a running instance — `update_<appId>_app`
 
-Not currently possible: the model can only call tools, and hosts re-render
-rather than update in place. An explicit server-side update tool is proposed in
-rstudio/shiny#4415.
+Implemented in #4415. When `mcpConfigure(arguments = ...)` is declared, the
+framework auto-registers a companion `update_<appId>_app` tool (e.g.
+`update_clock_app` for `appId = "clock"`). The tool:
+
+1. Requires a `session` argument (the session token of the target instance).
+2. Accepts the same arguments declared in `mcpConfigure(arguments = ...)`.
+3. Pushes the new values server-side into the session's `mcpUpdates()`
+   reactiveVal (`mcpServerUpdatesFor(session)`), overlaying the original
+   client-delivered init args.
+4. The app's existing `observe({ args <- mcpUpdates(); ... })` fires with the
+   merged result — no code change needed in the app.
+
+On connect, `mcpAnnounceSession()` sends the session token to the model as both
+a text instruction and a `structuredContent { session, state }` payload, so the
+model knows which id to pass.
 
 ## Removal / migration
 

@@ -70,11 +70,46 @@ different channels purely by timing (session A → `mcpUpdates`, session B →
 **every** `ontoolinput` (opening and later) to the single `mcpUpdates()`
 channel.
 
+## 4. Host-passthrough spike: session token visibility
+
+**What needs verification:** the `mcpAnnounceSession()` call emits a
+`structuredContent { session, state }` envelope plus a text instruction ("This
+app instance's id is ...") via the `updateModelContext` bridge channel. For
+`update_<appId>_app` to work, the host must forward the `structuredContent` and
+the text into the model's readable context so the model can echo the session id
+into `update_*(session = ...)`.
+
+**Status:** ✅ **Confirmed in Claude Desktop (2026-07-17).** The host forwards
+the announced session token into the model's context, and the model calls
+`update_<appId>_app` in place (rather than re-opening) to change the running
+instance. Also verified earlier with the MCP Inspector (stdio transport). Not
+yet spot-checked on claude.ai (web) — its iframe CSP handling differs, so the
+tunnel transport is expected to carry it, but confirm when convenient.
+
+## 5. Multi-instance caveat
+
+When several instances of the same app are open simultaneously, the model
+receives one session-token announcement per instance. To update a specific
+instance, the model must select the correct token. The model
+targets/loops per handle — it has no built-in mechanism to disambiguate beyond
+matching the text context (e.g. heading labels) the app provides via
+`mcpUpdateModelContext()`.
+
+**Status:** ✅ Exercised in Claude Desktop (2026-07-17): with two instances of
+the same app open, updating the *first* instance's label targeted the correct
+session token. This is not a server-side guarantee — the model chose correctly
+from context — so the caveat remains a theoretical risk, but it works in
+practice for the common case.
+
+**Mitigation:** apps that expect multiple simultaneous instances should include
+distinguishing information (e.g. a label or purpose) in their
+`mcpUpdateModelContext()` text so the model can pair tokens to instances.
+
 ## Summary
 
 | Wanted | Reality |
 |---|---|
 | Flash-free widget auto-restore of init args | Not possible — args aren't available at render time |
 | Args via a per-call `resourceUri` | Host ignores it; reads the static URI |
-| Live in-place update of a running app | Host re-renders per tool call; needs an update tool (#4415) |
+| Live in-place update of a running app | Implemented via `update_<appId>_app`; host-passthrough (section 4) and multi-instance targeting (section 5) confirmed working in Claude Desktop 2026-07-17 |
 | Deterministic init channel | Achieved by using one channel (`mcpUpdates()`) for all args |

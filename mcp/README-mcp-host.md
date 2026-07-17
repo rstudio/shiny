@@ -61,7 +61,7 @@ Add the app as a local stdio server in
       "command": "Rscript",
       "args": [
         "-e",
-        "setwd('/ABSOLUTE/PATH/TO/shiny-repo'); pkgload::load_all(quiet = TRUE); shiny::mcpConfigure(stdio = TRUE); shiny::runApp('mcp/demo-app', launch.browser = FALSE)"
+        "setwd('/ABSOLUTE/PATH/TO/shiny-repo'); pkgload::load_all(quiet = TRUE); app <- source('mcp/demo-app/app.R')$value; cfg <- shiny:::.globals$mcp; cfg$stdio <- TRUE; do.call(shiny::mcpConfigure, cfg); shiny::runApp(app, launch.browser = FALSE)"
       ]
     }
   }
@@ -69,15 +69,29 @@ Add the app as a local stdio server in
 ```
 
 Then fully restart Claude Desktop (Cmd-Q, not just close the window) and ask
-it to *"open the shiny app"* — it calls the `open_shiny_app` tool and the app
+it to *"open the shiny app"* — it calls the `open_<appId>_app` tool and the app
 renders inline in the conversation.
 
 Notes:
 
+- `mcpConfigure()` stores a single config (last write wins) and the stdio
+  listener starts from it *after* `runApp()` sources `app.R`. So an app that
+  calls `mcpConfigure()` itself (like the demos) resets `stdio` to its default
+  `FALSE` — a top-level `shiny::mcpConfigure(stdio = TRUE)` before `runApp()`
+  would be clobbered. The pattern above instead sources `app.R` to build the
+  app object (running the app's own `mcpConfigure()`), then re-applies the
+  stored config with `stdio = TRUE` and runs the pre-built object, which
+  `runApp()` does not re-source. For an app that never calls `mcpConfigure()`,
+  the simpler `shiny::mcpConfigure(stdio = TRUE); shiny::runApp('app-dir')`
+  still works.
 - `pkgload::load_all()` is needed until this branch is installed as
   {shiny}; once installed, replace it with `library(shiny)`.
 - Claude Desktop spawns servers without your login-shell `PATH` — if
-  `Rscript` isn't found, use its absolute path (`which Rscript`).
+  `Rscript` isn't found, use its absolute path (`which Rscript`). But that
+  path must be **outside macOS TCC-protected folders** (`~/Documents`,
+  `~/Desktop`, `~/Downloads`): Desktop can't execute a binary living there
+  and fails with `Operation not permitted`. Use a framework/system R such as
+  `/usr/local/bin/Rscript` instead.
 - `mcpConfigure(stdio = TRUE)` enables both the endpoint and the stdio
   protocol on stdin/stdout.
 - Never `cat()`/`print()` to stdout in the app at top level — stdout is the

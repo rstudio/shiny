@@ -314,6 +314,44 @@ test_that("resources/read uses the path-aware base: origin-only CSP, full direct
   )
 })
 
+test_that("update_<appId>_app is listed only when arguments are declared", {
+  skip_if_not_installed("ellmer")
+
+  # No arguments: no update tool.
+  local_mcp_config(appId = "demo")
+  h <- mcpHttpHandler(function(req) NULL, function(ws) TRUE)
+  names_no_args <- vapply(
+    mcp_post(h, "tools/list")$result$tools, function(t) t$name, character(1)
+  )
+  expect_false("update_demo_app" %in% names_no_args)
+
+  # With arguments: update tool present, schema carries required `session`.
+  local_mcp_config(
+    appId = "demo",
+    arguments = list(note = ellmer::type_string("A note"))
+  )
+  tools <- mcp_post(h, "tools/list")$result$tools
+  nms <- vapply(tools, function(t) t$name, character(1))
+  expect_true("update_demo_app" %in% nms)
+
+  upd <- tools[[which(nms == "update_demo_app")]]
+  expect_equal(upd$inputSchema$properties$session$type, "string")
+  expect_equal(upd$inputSchema$properties$note$type, "string")
+  expect_true("session" %in% unlist(upd$inputSchema$required))
+  expect_match(upd$description, "in place", ignore.case = TRUE)
+})
+
+test_that("update tool name follows appId and reserves the name", {
+  skip_if_not_installed("ellmer")
+  local_mcp_config(arguments = list(x = ellmer::type_integer("x")))
+  expect_equal(mcpUpdateToolName(), "update_shiny_app")
+  expect_true("update_shiny_app" %in% mcpReservedToolNames())
+
+  local_mcp_config(appId = "clock", arguments = list(x = ellmer::type_integer("x")))
+  expect_equal(mcpUpdateToolName(), "update_clock_app")
+  expect_true("update_clock_app" %in% mcpReservedToolNames())
+})
+
 test_that("mcpDeployedUrl reads Posit Publisher deployment records", {
   dir <- withr::local_tempdir()
   rec_dir <- file.path(dir, ".posit", "publish", "deployments")

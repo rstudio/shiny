@@ -59,9 +59,8 @@ shinyApp(
   server = function(input, output, session) {
     initNote <- reactiveVal("")
 
-    # Apply the model's arguments in one observer. The host renders a fresh
-    # instance for every tool call, so this handles both the initial open and
-    # any later re-open with new arguments.
+    # Apply the model's arguments in one observer. Handles both the initial
+    # open and in-place updates via update_demo_app(session = ..., ...).
     observe({
       args <- mcpUpdates()
       if (!is.null(args$n)) {

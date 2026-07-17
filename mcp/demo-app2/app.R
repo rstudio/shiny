@@ -38,6 +38,7 @@ shinyApp(
     )
   ),
   server = function(input, output, session) {
+    # Handles both initial open and in-place updates via update_cars_app().
     observe({
       args <- mcpUpdates()
       if (!is.null(args$xvar) && args$xvar %in% vars) {

@@ -1,5 +1,11 @@
 # shiny (development version)
 
+* Shiny MCP Apps configured with `mcpConfigure(arguments = ...)` now
+  auto-register a companion `update_<appId>_app` tool. A model can call it to
+  update an already-open app instance in place (via `mcpUpdates()`) instead of
+  re-opening the app, targeting a specific instance by the `session` id the app
+  announces on connect. (#4415)
+
 * Experimental support for serving a Shiny app as an MCP App (the Model
   Context Protocol Apps extension, SEP-1865). Calling `mcpConfigure()`
   before the app starts mounts an MCP endpoint at `/mcp` on the app's

@@ -15,12 +15,18 @@
 #'   `mcpConfigure(arguments = list(...))`. Apply them from a single
 #'   `observe()` with the usual `updateXxxInput()` functions. Hosts render a
 #'   fresh instance for each tool call, so the same observer handles both the
-#'   initial open and any later re-open.
+#'   initial open and any later re-open. When `arguments` are declared,
+#'   an `update_<appId>_app` tool is auto-registered; the model can call it
+#'   to push new argument values to a running instance (server-side), which
+#'   also arrive through this same `mcpUpdates()` channel.
 #' * `mcpHostContext()` returns the host's context (theme, locale, display
 #'   mode, ...) as a named list (reactive read).
 #' * `mcpUpdateModelContext()` updates the model's context for future
 #'   conversation turns. Each call overwrites the previous update; the host
-#'   typically delivers it with the user's next message.
+#'   typically delivers it with the user's next message. On connect, the
+#'   framework automatically announces the app instance's `session` id to
+#'   the model (via `mcpAnnounceSession()`), so the model can target the
+#'   running instance with `update_<appId>_app(session = "<id>", ...)`.
 #' * `mcpSendMessage()` sends a user-role message to the host's chat
 #'   interface, which may trigger a model response.
 #'

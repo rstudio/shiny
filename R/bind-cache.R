@@ -670,7 +670,7 @@ bindCache.shiny.render.function.event <- bindCache.reactive.event
 
 #' @export
 bindCache.Observer <- function(x, ...) {
-  stop("Can't bindCache an observer, because observers exist for the side efects, not for their return values.")
+  stop("Can't bindCache an observer, because observers exist for the side effects, not for their return values.")
 }
 
 #' @export

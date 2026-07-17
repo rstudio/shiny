@@ -94,7 +94,7 @@ hoverOpts <- function(id, delay = 300,
 #'   it is still inside the image.
 #' @param direction The direction for brushing. If `"xy"`, the brush can be
 #'   drawn and moved in both x and y directions. If `"x"`, or `"y"`,
-#'   the brush wil work horizontally or vertically.
+#'   the brush will work horizontally or vertically.
 #' @param resetOnNew When a new image is sent to the browser (via
 #'   [renderImage()]), should the brush be reset? The default,
 #'   `FALSE`, is useful if you want to update the plot while keeping the

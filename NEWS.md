@@ -37,11 +37,7 @@
   fullscreen/picture-in-picture with `mcpRequestDisplayMode()`. Setting a
   unique `mcpConfigure(appId=)` per app namespaces each app's
   internal tools and resource URI so a gateway can merge several Shiny
-  apps into a single MCP server (one connector, many apps). (#4407)
-
-* MCP App support is now configured with `mcpConfigure()` instead of
-  `options(shiny.mcp.*)`, and the session helper `mcpToolInput()` is renamed
-  to `mcpUpdates()`. (#4414)
+  apps into a single MCP server (one connector, many apps). (#4407, #4414)
 
 * `{watcher}` is now a required dependency and is always used for autoreload file watching, so it no longer needs to be installed separately. The legacy polling-based file watcher has been removed. (#4403)
 

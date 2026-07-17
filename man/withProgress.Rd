@@ -38,7 +38,7 @@ incProgress(
 \code{\link[=setProgress]{setProgress()}} or \code{\link[=incProgress]{incProgress()}}.}
 
 \item{min}{The value that represents the starting point of the progress bar.
-Must be less tham \code{max}. Default is 0.}
+Must be less than \code{max}. Default is 0.}
 
 \item{max}{The value that represents the end of the progress bar. Must be
 greater than \code{min}. Default is 1.}

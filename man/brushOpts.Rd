@@ -48,7 +48,7 @@ it is still inside the image.}
 
 \item{direction}{The direction for brushing. If \code{"xy"}, the brush can be
 drawn and moved in both x and y directions. If \code{"x"}, or \code{"y"},
-the brush wil work horizontally or vertically.}
+the brush will work horizontally or vertically.}
 
 \item{resetOnNew}{When a new image is sent to the browser (via
 \code{\link[=renderImage]{renderImage()}}), should the brush be reset? The default,

@@ -49,7 +49,8 @@
 
     <div class="section level2">
 <h2 class="page-header" data-toc-text="development version" id="shiny-development-version">shiny (development version)<a class="anchor" aria-label="anchor" href="#shiny-development-version"></a></h2>
-<ul><li><p><a href="https://watcher.r-lib.org" class="external-link">watcher</a> is now a required dependency and is always used for autoreload file watching, so it no longer needs to be installed separately. The legacy polling-based file watcher has been removed. (<a href="https://github.com/rstudio/shiny/issues/4403" class="external-link">#4403</a>)</p></li>
+<ul><li><p>The <code>session$destroy()</code> parameter is now documented as <code>namespace</code> to match the implemented argument name. (<a href="https://github.com/rstudio/shiny/issues/4419" class="external-link">#4419</a>)</p></li>
+<li><p><a href="https://watcher.r-lib.org" class="external-link">watcher</a> is now a required dependency and is always used for autoreload file watching, so it no longer needs to be installed separately. The legacy polling-based file watcher has been removed. (<a href="https://github.com/rstudio/shiny/issues/4403" class="external-link">#4403</a>)</p></li>
 <li><p>The <code>Listening on http://…</code> startup message is now printed only after the listening socket has been bound, so the announced URL is guaranteed to be accepting connections. Previously the message could be emitted just before the bind, leaving a window (widened under load) where the advertised port refused connections. (thanks <a href="https://github.com/nbenn" class="external-link">@nbenn</a>, <a href="https://github.com/rstudio/shiny/issues/4400" class="external-link">#4400</a>)</p></li>
 </ul></div>
     <div class="section level2">

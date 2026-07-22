@@ -153,16 +153,16 @@ workerId <- local({
 #'   allowed for root sessions. For module session proxies, callbacks are
 #'   invoked when `session$destroy()` is called.
 #' }
-#' \item{destroy(id = NULL)}{
+#' \item{destroy(namespace = NULL)}{
 #'   Destroys a module session scope (and any descendant scopes) by invoking
 #'   all registered `onDestroy()` callbacks. This includes cleaning up all
 #'   reactive values, observers, and reactive expressions created within
 #'   that scope (and any descendant scopes).
 #'
-#'   Called with no `id` on a module session proxy (e.g. the `session`
+#'   Called with no `namespace` on a module session proxy (e.g. the `session`
 #'   inside [moduleServer()]), it destroys that module's own scope. Called
-#'   with an `id`, it destroys the child module scope of that `id` — this is
-#'   how a parent tears down a module it added, using the same id it used to
+#'   with a `namespace`, it destroys the child module scope of that `namespace` — this is
+#'   how a parent tears down a module it added, using the same namespace it used to
 #'   insert the UI:
 #'
 #'   ```
@@ -170,8 +170,8 @@ workerId <- local({
 #'   session$destroy("editor")
 #'   ```
 #'
-#'   On the root session an `id` is required; `session$destroy()` with no
-#'   `id` is an error (the root session is torn down via `close()`).
+#'   On the root session a `namespace` is required; `session$destroy()` with no
+#'   `namespace` is an error (the root session is torn down via `close()`).
 #' }
 #' \item{onEnded(callback)}{
 #'   Synonym for `onSessionEnded`.
@@ -322,11 +322,11 @@ workerId <- local({
 #' dynamically — without it, destroying one module could leak callbacks or
 #' invalidate reactive objects that belong to another part of the app.
 #'
-#' The parent that inserted the module's UI under an `id` can tear it down by
-#' that same `id`, without the module having to hand anything back:
+#' The parent that inserted the module's UI under a `namespace` can tear it down by
+#' that same `namespace`, without the module having to hand anything back:
 #'
 #' ```
-#' # In the parent server: insert, then later remove and destroy by id
+#' # In the parent server: insert, then later remove and destroy by namespace
 #' observeEvent(input$add, {
 #'   insertUI("#container", ui = myModuleUI("editor"))
 #'   myModuleServer("editor")
@@ -337,10 +337,10 @@ workerId <- local({
 #' })
 #' ```
 #'
-#' Inside the module, `session$destroy()` (with no `id`) destroys the module's
+#' Inside the module, `session$destroy()` (with no `namespace`) destroys the module's
 #' own scope. A module can expose this as a handle for callers that need to
 #' trigger teardown from somewhere that doesn't have the parent session or
-#' `id` (see the data ownership section below for an example).
+#' `namespace` (see the data ownership section below for an example).
 #'
 #' @section Module data ownership:
 #' The key rule: **data that must outlive a module should live outside it.**

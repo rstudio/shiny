@@ -79,9 +79,12 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
                         round = FALSE, ticks = TRUE, animate = FALSE,
                         width = NULL, sep = ",", pre = NULL, post = NULL,
                         timeFormat = NULL, timezone = NULL, dragRange = TRUE) {
-  validate_slider_value(min, max, value, "sliderInput")
 
-  dataType <- getSliderType(min, max, value)
+  # Force required arguments for maximally informative errors
+  inputId; label; min; max; value
+
+  validate_slider_value(min, max, value, "sliderInput")
+  dataType <- slider_type(value)
 
   if (is.null(timeFormat)) {
     timeFormat <- switch(dataType, date = "%F", datetime = "%F %T", number = NULL)
@@ -282,37 +285,45 @@ findStepSize <- function(min, max, step) {
   }
 }
 
+
 # Throw a warning if ever `value` is not in the [`min`, `max`] range
 validate_slider_value <- function(min, max, value, fun) {
-  if (length(min)   != 1 || is_na(min) ||
-      length(max)   != 1 || is_na(max) ||
-      length(value) <  1 || length(value) > 2 || any(is.na(value)))
-  {
-    stop(call. = FALSE,
-      sprintf("In %s(): `min`, `max`, and `value` cannot be NULL, NA, or empty.", fun)
+  if (!is_slider_type(min) || length(min) != 1 || is_na(min)) {
+    rlang::abort("sliderInput(min) must be a single number, Date, or POSIXct")
+  }
+  if (!is_slider_type(min) || length(max) != 1 || is_na(max)) {
+    rlang::abort("sliderInput(value) must be a single number, Date, or POSIXct")
+  }
+  if (!is_slider_type(value) || !length(value) %in% c(1, 2) || any(is_na(value))) {
+    rlang::abort(
+      "sliderInput(value) must be a single or pair of numbers, Dates, or POSIXcts"
     )
   }
 
-  if (min(value) < min) {
-    warning(call. = FALSE,
-      sprintf(
-        "In %s(): `value` should be greater than or equal to `min` (value = %s, min = %s).",
-        fun, paste(value, collapse = ", "), min
-      )
-    )
+  if (!identical(class(min), class(value)) || !identical(class(max), class(value))) {
+    rlang::abort(c(
+      "Type mismatch for `min`, `max`, and `value`.",
+      i = "All values must have same type: either numeric, Date, or POSIXt."
+    ))
   }
 
-  if (max(value) > max) {
-    warning(
-      noBreaks. = TRUE, call. = FALSE,
-      sprintf(
-        "In %s(): `value` should be less than or equal to `max` (value = %s, max = %s).",
-        fun, paste(value, collapse = ", "), max
-      )
-    )
+  if (min(value) < min || max(value) > max) {
+    rlang::abort("`value` does not lie within [min, max]")
   }
 }
 
+is_slider_type <- function(x) {
+  is.numeric(x) || inherits(x, "Date") || inherits(x, "POSIXct")
+}
+slider_type <- function(x) {
+  if (is.numeric(x)) {
+    "number"
+  } else if (inherits(x, "Date")) {
+    "date"
+  } else if (inherits(x, "POSIXct")) {
+    "datetime"
+  }
+}
 
 #' @rdname sliderInput
 #'

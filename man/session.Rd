@@ -61,24 +61,24 @@ after \code{session$onEnded()} callbacks. Note, \code{session$destroy()} is not
 allowed for root sessions. For module session proxies, callbacks are
 invoked when \code{session$destroy()} is called.
 }
-\item{destroy(id = NULL)}{
+\item{destroy(namespace = NULL)}{
 Destroys a module session scope (and any descendant scopes) by invoking
 all registered \code{onDestroy()} callbacks. This includes cleaning up all
 reactive values, observers, and reactive expressions created within
 that scope (and any descendant scopes).
 
-Called with no \code{id} on a module session proxy (e.g. the \code{session}
+Called with no \code{namespace} on a module session proxy (e.g. the \code{session}
 inside \code{\link[=moduleServer]{moduleServer()}}), it destroys that module's own scope. Called
-with an \code{id}, it destroys the child module scope of that \code{id} — this is
-how a parent tears down a module it added, using the same id it used to
+with a \code{namespace}, it destroys the child module scope of that \code{namespace} — this is
+how a parent tears down a module it added, using the same namespace it used to
 insert the UI:
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{removeUI(selector = "#editor")
 session$destroy("editor")
 }\if{html}{\out{</div>}}
 
-On the root session an \code{id} is required; \code{session$destroy()} with no
-\code{id} is an error (the root session is torn down via \code{close()}).
+On the root session a \code{namespace} is required; \code{session$destroy()} with no
+\code{namespace} is an error (the root session is torn down via \code{close()}).
 }
 \item{onEnded(callback)}{
 Synonym for \code{onSessionEnded}.
@@ -237,10 +237,10 @@ unaffected. This scoping is what makes modules safe to add and remove
 dynamically — without it, destroying one module could leak callbacks or
 invalidate reactive objects that belong to another part of the app.
 
-The parent that inserted the module's UI under an \code{id} can tear it down by
-that same \code{id}, without the module having to hand anything back:
+The parent that inserted the module's UI under a \code{namespace} can tear it down by
+that same \code{namespace}, without the module having to hand anything back:
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{# In the parent server: insert, then later remove and destroy by id
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# In the parent server: insert, then later remove and destroy by namespace
 observeEvent(input$add, \{
   insertUI("#container", ui = myModuleUI("editor"))
   myModuleServer("editor")
@@ -251,10 +251,10 @@ observeEvent(input$remove, \{
 \})
 }\if{html}{\out{</div>}}
 
-Inside the module, \code{session$destroy()} (with no \code{id}) destroys the module's
+Inside the module, \code{session$destroy()} (with no \code{namespace}) destroys the module's
 own scope. A module can expose this as a handle for callers that need to
 trigger teardown from somewhere that doesn't have the parent session or
-\code{id} (see the data ownership section below for an example).
+\code{namespace} (see the data ownership section below for an example).
 }
 
 \section{Module data ownership}{

@@ -342,92 +342,104 @@ import(httpuv)
 import(methods)
 import(mime)
 import(xtable)
-importFrom(fastmap,fastmap)
-importFrom(fastmap,is.key_missing)
-importFrom(fastmap,key_missing)
-importFrom(grDevices,dev.cur)
-importFrom(grDevices,dev.set)
-importFrom(htmltools,HTML)
-importFrom(htmltools,a)
-importFrom(htmltools,br)
-importFrom(htmltools,code)
-importFrom(htmltools,div)
-importFrom(htmltools,em)
-importFrom(htmltools,h1)
-importFrom(htmltools,h2)
-importFrom(htmltools,h3)
-importFrom(htmltools,h4)
-importFrom(htmltools,h5)
-importFrom(htmltools,h6)
-importFrom(htmltools,hr)
-importFrom(htmltools,htmlTemplate)
-importFrom(htmltools,img)
-importFrom(htmltools,includeCSS)
-importFrom(htmltools,includeHTML)
-importFrom(htmltools,includeMarkdown)
-importFrom(htmltools,includeScript)
-importFrom(htmltools,includeText)
-importFrom(htmltools,is.singleton)
-importFrom(htmltools,p)
-importFrom(htmltools,pre)
-importFrom(htmltools,singleton)
-importFrom(htmltools,span)
-importFrom(htmltools,strong)
-importFrom(htmltools,suppressDependencies)
-importFrom(htmltools,tag)
-importFrom(htmltools,tagAppendAttributes)
-importFrom(htmltools,tagAppendChild)
-importFrom(htmltools,tagAppendChildren)
-importFrom(htmltools,tagGetAttribute)
-importFrom(htmltools,tagHasAttribute)
-importFrom(htmltools,tagList)
-importFrom(htmltools,tagSetChildren)
-importFrom(htmltools,tags)
-importFrom(htmltools,validateCssUnit)
-importFrom(htmltools,withTags)
-importFrom(lifecycle,deprecated)
-importFrom(lifecycle,is_present)
-importFrom(promises,"%...!%")
-importFrom(promises,"%...>%")
-importFrom(promises,as.promise)
-importFrom(promises,hybrid_then)
-importFrom(promises,is.promise)
-importFrom(promises,is.promising)
-importFrom(promises,new_promise_domain)
-importFrom(promises,promise_reject)
-importFrom(promises,promise_resolve)
-importFrom(promises,with_promise_domain)
-importFrom(rlang,"%||%")
-importFrom(rlang,"fn_body<-")
-importFrom(rlang,"fn_fmls<-")
-importFrom(rlang,as_function)
-importFrom(rlang,as_quosure)
-importFrom(rlang,check_dots_empty)
-importFrom(rlang,check_dots_unnamed)
-importFrom(rlang,enexpr)
-importFrom(rlang,enquo)
-importFrom(rlang,enquo0)
-importFrom(rlang,enquos)
-importFrom(rlang,enquos0)
-importFrom(rlang,eval_tidy)
-importFrom(rlang,expr)
-importFrom(rlang,fn_body)
-importFrom(rlang,get_env)
-importFrom(rlang,get_expr)
-importFrom(rlang,inject)
-importFrom(rlang,is_false)
-importFrom(rlang,is_missing)
-importFrom(rlang,is_na)
-importFrom(rlang,is_quosure)
-importFrom(rlang,list2)
-importFrom(rlang,maybe_missing)
-importFrom(rlang,missing_arg)
-importFrom(rlang,new_function)
-importFrom(rlang,new_quosure)
-importFrom(rlang,pairlist2)
-importFrom(rlang,quo)
-importFrom(rlang,quo_get_expr)
-importFrom(rlang,quo_is_missing)
-importFrom(rlang,quo_set_env)
-importFrom(rlang,quo_set_expr)
-importFrom(rlang,zap_srcref)
+importFrom(fastmap,
+  fastmap,
+  is.key_missing,
+  key_missing
+)
+importFrom(grDevices,
+  dev.cur,
+  dev.set
+)
+importFrom(htmltools,
+  HTML,
+  a,
+  br,
+  code,
+  div,
+  em,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  hr,
+  htmlTemplate,
+  img,
+  includeCSS,
+  includeHTML,
+  includeMarkdown,
+  includeScript,
+  includeText,
+  is.singleton,
+  p,
+  pre,
+  singleton,
+  span,
+  strong,
+  suppressDependencies,
+  tag,
+  tagAppendAttributes,
+  tagAppendChild,
+  tagAppendChildren,
+  tagGetAttribute,
+  tagHasAttribute,
+  tagList,
+  tagSetChildren,
+  tags,
+  validateCssUnit,
+  withTags
+)
+importFrom(lifecycle,
+  deprecated,
+  is_present
+)
+importFrom(promises,
+  "%...!%",
+  "%...>%",
+  as.promise,
+  hybrid_then,
+  is.promise,
+  is.promising,
+  new_promise_domain,
+  promise_reject,
+  promise_resolve,
+  with_promise_domain
+)
+importFrom(rlang,
+  "%||%",
+  "fn_body<-",
+  "fn_fmls<-",
+  as_function,
+  as_quosure,
+  check_dots_empty,
+  check_dots_unnamed,
+  enexpr,
+  enquo,
+  enquo0,
+  enquos,
+  enquos0,
+  eval_tidy,
+  expr,
+  fn_body,
+  get_env,
+  get_expr,
+  inject,
+  is_false,
+  is_missing,
+  is_na,
+  is_quosure,
+  list2,
+  maybe_missing,
+  missing_arg,
+  new_function,
+  new_quosure,
+  pairlist2,
+  quo,
+  quo_get_expr,
+  quo_is_missing,
+  quo_set_env,
+  quo_set_expr,
+  zap_srcref
+)

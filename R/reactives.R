@@ -65,16 +65,35 @@ Dependents <- R6Class(
   )
 )
 
+# Is this domain being torn down because its client went away, as opposed to an
+# explicit `session$destroy(namespace)` on a still-running session?
+isClosedDomain <- function(domain) {
+  !is.null(domain) &&
+    is.function(domain$isClosed) &&
+    isTRUE(domain$isClosed())
+}
+
 # Helper to create an onDestroy wrapper closure that only captures the weakref,
 # avoiding accidental strong references to `self`/`private` from the enclosing
 # initialize() environment.
-make_weak_destroy_wrapper <- function(wr) {
+make_weak_destroy_wrapper <- function(wr, domain = NULL) {
   # force() is critical: without it, `wr` is a promise that retains a reference
   # to the calling environment (e.g., initialize()), which holds `self` strongly.
   # Forcing the promise replaces it with the evaluated value, breaking the
   # reference chain and allowing the weakref key to be GC'd.
   force(wr)
+  force(domain)
   function() {
+    # A whole-session close is not a destroy. Every consumer in the session is
+    # already gone (observers are destroyed via onEnded, outputs are suspended,
+    # and flushes are skipped once closed), so the reactive is left intact and
+    # reclaimed by ordinary garbage collection. Tearing it down here would
+    # instead poison async work that outlives the socket -- an ExtendedTask
+    # settling after a page refresh, a later() callback, an httr2 continuation
+    # -- with an unavoidable, racy `shiny.destroyed.error`.
+    if (isClosedDomain(domain)) {
+      return()
+    }
     obj <- rlang::wref_key(wr)
     if (!is.null(obj)) {
       obj$destroy()
@@ -126,7 +145,7 @@ ReactiveVal <- R6Class(
 
       if (!is.null(domain) && is.function(domain$onDestroy)) {
         wr <- rlang::new_weakref(key = self)
-        private$.destroyHandle <- domain$onDestroy(make_weak_destroy_wrapper(wr))
+        private$.destroyHandle <- domain$onDestroy(make_weak_destroy_wrapper(wr, domain))
       }
     },
     get = function() {
@@ -443,7 +462,7 @@ ReactiveValues <- R6Class(
       domain <- getDefaultReactiveDomain()
       if (!is.null(domain) && is.function(domain$onDestroy)) {
         wr <- rlang::new_weakref(key = self)
-        .destroyHandle <<- domain$onDestroy(make_weak_destroy_wrapper(wr))
+        .destroyHandle <<- domain$onDestroy(make_weak_destroy_wrapper(wr, domain))
       }
     },
 
@@ -1063,7 +1082,7 @@ Observable <- R6Class(
 
       if (!is.null(.domain) && is.function(.domain$onDestroy)) {
         wr <- rlang::new_weakref(key = self)
-        .destroyHandle <<- .domain$onDestroy(make_weak_destroy_wrapper(wr))
+        .destroyHandle <<- .domain$onDestroy(make_weak_destroy_wrapper(wr, .domain))
       }
     },
     getValue = function() {
@@ -1538,7 +1557,7 @@ Observer <- R6Class(
             .autoDestroyHandle <<- onReactiveDomainEnded(.domain, .onDomainEnded)
             if (is.function(.domain$onDestroy)) {
               wr <- rlang::new_weakref(key = self)
-              .autoDestroyOnDestroyHandle <<- .domain$onDestroy(make_weak_destroy_wrapper(wr))
+              .autoDestroyOnDestroyHandle <<- .domain$onDestroy(make_weak_destroy_wrapper(wr, .domain))
             }
           }
         }

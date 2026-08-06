@@ -60,6 +60,13 @@ For the root session, callbacks are invoked when the session closes,
 after \code{session$onEnded()} callbacks. Note, \code{session$destroy()} is not
 allowed for root sessions. For module session proxies, callbacks are
 invoked when \code{session$destroy()} is called.
+
+Closing a session is not the same as destroying a scope. \code{destroy()}
+tears down the scope's reactive values and expressions, so reading one
+afterwards is an error. When a session closes, they are instead left
+readable at their last value and reclaimed by garbage collection, so
+async work that outlives the connection (for example an \link{ExtendedTask}
+that settles after the user refreshes the page) does not error.
 }
 \item{destroy(namespace = NULL)}{
 Destroys a module session scope (and any descendant scopes) by invoking

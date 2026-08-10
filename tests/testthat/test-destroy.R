@@ -977,3 +977,219 @@ test_that("createMockDomain destroy is idempotent", {
   domain$destroy()
   expect_equal(count, 1L)
 })
+
+# ---- Soft teardown on whole-session close ---------------------------------
+#
+# Closing a session is not the same as destroying a module scope. When the
+# client goes away, every consumer in the session is already gone and the whole
+# object graph is about to be garbage collected, so reactives are left intact:
+# async work that outlives the socket (an ExtendedTask settling after a page
+# refresh, a `later()` callback, an httr2 continuation) must not be poisoned by
+# a `shiny.destroyed.error`. An explicit `session$destroy(ns)` on a live session
+# still tears down for real.
+
+test_that("session close leaves a reactiveVal readable at its last value", {
+  session <- MockShinySession$new()
+  withReactiveDomain(session, {
+    rv <- reactiveVal(10, label = "survives_close")
+  })
+  isolate(rv(42))
+
+  session$close()
+
+  isolate(expect_equal(rv(), 42))
+})
+
+test_that("session close leaves a reactiveVal writable", {
+  session <- MockShinySession$new()
+  withReactiveDomain(session, {
+    rv <- reactiveVal(10, label = "survives_close")
+  })
+
+  session$close()
+
+  expect_no_error(isolate(rv(99)))
+  isolate(expect_equal(rv(), 99))
+})
+
+test_that("session close leaves reactiveValues usable", {
+  session <- MockShinySession$new()
+  withReactiveDomain(session, {
+    rvs <- reactiveValues(x = 1)
+  })
+
+  session$close()
+
+  isolate(expect_equal(rvs$x, 1))
+  expect_no_error(isolate(rvs$x <- 2))
+  isolate(expect_equal(rvs$x, 2))
+})
+
+test_that("session close leaves a reactive expression usable", {
+  session <- MockShinySession$new()
+  withReactiveDomain(session, {
+    rv <- reactiveVal(10)
+    r <- reactive(rv() * 2)
+  })
+  isolate(expect_equal(r(), 20))
+
+  session$close()
+
+  isolate(expect_equal(r(), 20))
+})
+
+# A real ShinySession, driven by a websocket stub. MockShinySession is not
+# usable for the theme tests below: its `getCurrentTheme()` is a warn-noop, so
+# it never touches the session-scoped `Theme Counter` reactiveVal that the
+# original bug was reported against.
+createTestShinySession <- function() {
+  ShinySession$new(list(
+    request = list(),
+    send = function(json) invisible(NULL),
+    close = function() invisible(NULL),
+    onMessage = function(f) invisible(NULL),
+    onClose = function(f) invisible(NULL)
+  ))
+}
+
+# Settle pending promises and reactive flushes.
+pumpEvents <- function(times = 10) {
+  for (i in seq_len(times)) {
+    later::run_now()
+    flushReact()
+  }
+}
+
+test_that("session close leaves session$getCurrentTheme() readable", {
+  # The regression that motivated this: shinychat's streaming ExtendedTask
+  # resolves after a page refresh and reads the theme, which reads the
+  # session-scoped `Theme Counter` reactiveVal.
+  session <- createTestShinySession()
+  isolate(expect_no_error(session$getCurrentTheme()))
+
+  session$wsClosed()
+
+  expect_true(session$isClosed())
+  expect_no_error(isolate(session$getCurrentTheme()))
+})
+
+test_that("session close leaves the `Theme Counter` reactiveVal at its last value", {
+  session <- createTestShinySession()
+  themeCounter <- session$.__enclos_env__$private$currentThemeDependency
+  # Bump it the way `session$setCurrentTheme()` does, so the assertion after
+  # close distinguishes "kept its value" from "reset to its initial value".
+  isolate(themeCounter(themeCounter() + 1))
+  isolate(expect_equal(themeCounter(), 1))
+
+  session$wsClosed()
+
+  isolate(expect_equal(themeCounter(), 1))
+  expect_no_error(isolate(themeCounter(2)))
+  isolate(expect_equal(themeCounter(), 2))
+})
+
+test_that("an ExtendedTask settling after session close completes normally", {
+  # End-to-end shape of the reported bug: the task is still in flight when the
+  # user refreshes, and its promise settles against a closed session.
+  session <- createTestShinySession()
+  resolve <- NULL
+  withReactiveDomain(session, {
+    task <- ExtendedTask$new(function() {
+      promises::promise(function(res, rej) resolve <<- res)
+    })
+  })
+  withReactiveDomain(session, task$invoke())
+  pumpEvents()
+  expect_equal(isolate(task$status()), "running")
+
+  session$wsClosed()
+  resolve(42)
+
+  expect_no_error(pumpEvents())
+  expect_equal(isolate(task$status()), "success")
+  expect_equal(isolate(task$result()), 42)
+})
+
+test_that("an ExtendedTask settling after close can read the session theme", {
+  # The full reported chain: shinychat's stream task resolves post-refresh and
+  # calls chat_append() -> with_current_theme() -> bslib::bs_current_theme()
+  # -> session$getCurrentTheme() -> the `Theme Counter` reactiveVal.
+  session <- createTestShinySession()
+  resolve <- NULL
+  themeReadError <- NULL
+  withReactiveDomain(session, {
+    task <- ExtendedTask$new(function() {
+      promises::then(
+        promises::promise(function(res, rej) resolve <<- res),
+        function(value) {
+          themeReadError <<- tryCatch(
+            {
+              isolate(session$getCurrentTheme())
+              NA_character_
+            },
+            error = function(e) conditionMessage(e)
+          )
+          value
+        }
+      )
+    })
+  })
+  withReactiveDomain(session, task$invoke())
+  pumpEvents()
+
+  session$wsClosed()
+  resolve("streamed")
+  pumpEvents()
+
+  expect_true(is.na(themeReadError))
+  expect_equal(isolate(task$status()), "success")
+  expect_equal(isolate(task$result()), "streamed")
+})
+
+test_that("session close does not re-run observers", {
+  # Soft teardown must not resurrect the session: writes after close stay inert
+  # because observers were already destroyed when the domain ended.
+  session <- MockShinySession$new()
+  ran <- 0L
+  withReactiveDomain(session, {
+    rv <- reactiveVal(0)
+    observe({
+      rv()
+      ran <<- ran + 1L
+    })
+  })
+  flushReact()
+  expect_equal(ran, 1L)
+
+  session$close()
+  isolate(rv(1))
+  flushReact()
+
+  expect_equal(ran, 1L)
+})
+
+test_that("explicit destroy of a module scope still hard-destroys its reactives", {
+  # Contrast with close: an explicit `destroy()` on a live session means a
+  # later access is a genuine bug, so it must keep erroring.
+  session <- MockShinySession$new()
+  scope <- session$makeScope("mod1")
+  withReactiveDomain(scope, {
+    rv <- reactiveVal(10, label = "in_module")
+  })
+
+  session$destroy("mod1")
+
+  expect_error(isolate(rv()), class = "shiny.destroyed.error")
+})
+
+test_that("module reactives survive a root session close", {
+  session <- MockShinySession$new()
+  scope <- session$makeScope("mod1")
+  withReactiveDomain(scope, {
+    rv <- reactiveVal(10, label = "in_module")
+  })
+
+  session$close()
+
+  isolate(expect_equal(rv(), 10))
+})

@@ -347,6 +347,9 @@ MockShinySession <- R6Class(
     isClosed = function(){ private$was_closed },
     #' @description Closes the session
     close = function(){
+      # Mark closed first, mirroring `ShinySession$wsClosed()`: teardown needs
+      # to be able to tell a whole-session close from an explicit `destroy()`.
+      private$was_closed <- TRUE
       for (output in private$output) {
         output$suspend()
       }
@@ -354,7 +357,6 @@ MockShinySession <- R6Class(
         private$endedCBs$invoke(onError = printError, ..stacktraceon = TRUE)
       })
       private$invokeDestroyCallbacks(allowRoot = TRUE)
-      private$was_closed <- TRUE
     },
 
     #' @description Set input names to be excluded from bookmarking.

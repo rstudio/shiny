@@ -152,6 +152,13 @@ workerId <- local({
 #'   after `session$onEnded()` callbacks. Note, `session$destroy()` is not
 #'   allowed for root sessions. For module session proxies, callbacks are
 #'   invoked when `session$destroy()` is called.
+#'
+#'   Closing a session is not the same as destroying a scope. `destroy()`
+#'   tears down the scope's reactive values and expressions, so reading one
+#'   afterwards is an error. When a session closes, they are instead left
+#'   readable at their last value and reclaimed by garbage collection, so
+#'   async work that outlives the connection (for example an [ExtendedTask]
+#'   that settles after the user refreshes the page) does not error.
 #' }
 #' \item{destroy(namespace = NULL)}{
 #'   Destroys a module session scope (and any descendant scopes) by invoking
@@ -1316,10 +1323,16 @@ ShinySession <- R6Class(
     },
     onDestroy = function(callback) {
       "Registers a callback to be invoked when the session scope is destroyed
-      via `destroy()`. Returns a function that can be called to
-      unregister the callback. For module sessions, use this to register
-      cleanup logic that runs when the module's UI is removed and
-      `session$destroy()` is called."
+      via `destroy()`, and when the session itself closes. Returns a function
+      that can be called to unregister the callback. For module sessions, use
+      this to register cleanup logic that runs when the module's UI is removed
+      and `session$destroy()` is called.
+
+      Note that closing a session is not the same as destroying a scope. An
+      explicit `destroy()` tears down the scope's reactive values and
+      expressions, so reading one afterwards is an error. On close, they are
+      left readable at their last value and reclaimed by garbage collection,
+      so async work that outlives the connection does not error."
       private$getOrCreateDestroyCallbacks(NULL)$register(callback)
     },
     destroy = function(namespace = NULL) {

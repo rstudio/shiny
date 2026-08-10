@@ -118,7 +118,13 @@ Returns a function that can be called to unregister the callback.
 For the root session, callbacks are invoked when the session closes,
 after <code>session$onEnded()</code> callbacks. Note, <code>session$destroy()</code> is not
 allowed for root sessions. For module session proxies, callbacks are
-invoked when <code>session$destroy()</code> is called.</p></dd>
+invoked when <code>session$destroy()</code> is called.</p>
+<p>Closing a session is not the same as destroying a scope. <code>destroy()</code>
+tears down the scope's reactive values and expressions, so reading one
+afterwards is an error. When a session closes, they are instead left
+readable at their last value and reclaimed by garbage collection, so
+async work that outlives the connection (for example an <a href="ExtendedTask.html">ExtendedTask</a>
+that settles after the user refreshes the page) does not error.</p></dd>
 
 <dt>destroy(namespace = NULL)</dt>
 <dd><p>Destroys a module session scope (and any descendant scopes) by invoking

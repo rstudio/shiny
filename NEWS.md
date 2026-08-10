@@ -1,6 +1,6 @@
 # shiny (development version)
 
-* Fixed #4420: closing a session no longer destroys the reactive values and expressions created in it, so async work that outlives the connection does not error. Since 1.14.0, refreshing the page while an `ExtendedTask` (or any promise or `later()` callback) was in flight could raise ``Can't access reactive `Theme Counter`; its module session has been destroyed`` once it settled. Reactives are now left readable at their last value on close and reclaimed by garbage collection, while an explicit `session$destroy(namespace)` on a live session still tears them down. (#4421)
+* Fixed #4420: closing a session no longer destroys the reactive values and expressions created in it, so async work that outlives the connection does not error. Since 1.14.0, refreshing the page while an `ExtendedTask` (or any promise or `later()` callback) was in flight could raise ``Can't access reactive `<NAME>`; its module session has been destroyed`` once it settled. Reactives are now left readable at their last value on close and reclaimed by garbage collection, while an explicit `session$destroy(namespace)` on a live session still tears them down. (#4421)
 
 * The `session$destroy()` parameter is now documented as `namespace` to match the implemented argument name. (#4419)
 

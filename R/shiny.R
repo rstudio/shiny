@@ -162,9 +162,10 @@ workerId <- local({
 #' }
 #' \item{destroy(namespace = NULL)}{
 #'   Destroys a module session scope (and any descendant scopes) by invoking
-#'   all registered `onDestroy()` callbacks. This includes cleaning up all
-#'   reactive values, observers, and reactive expressions created within
-#'   that scope (and any descendant scopes).
+#'   all registered `onDestroy()` callbacks. An explicit `destroy()` cleans up
+#'   all reactive values, observers, and reactive expressions created within
+#'   that scope (and any descendant scopes). A session *close* is gentler with
+#'   reactives -- see `onDestroy()` above.
 #'
 #'   Called with no `namespace` on a module session proxy (e.g. the `session`
 #'   inside [moduleServer()]), it destroys that module's own scope. Called
@@ -178,7 +179,9 @@ workerId <- local({
 #'   ```
 #'
 #'   On the root session a `namespace` is required; `session$destroy()` with no
-#'   `namespace` is an error (the root session is torn down via `close()`).
+#'   `namespace` is an error. The root session ends via `close()`, which is not
+#'   a destroy: observers are torn down, but reactive values and expressions
+#'   are left readable at their last value.
 #' }
 #' \item{onEnded(callback)}{
 #'   Synonym for `onSessionEnded`.
@@ -351,9 +354,9 @@ workerId <- local({
 #'
 #' @section Module data ownership:
 #' The key rule: **data that must outlive a module should live outside it.**
-#' A reactive value created inside a module is destroyed with the module.
-#' A reactive value created in the caller's scope and passed in survives
-#' destruction.
+#' A reactive value created inside a module is destroyed when that module's
+#' scope is destroyed with `session$destroy()`. A reactive value created in the
+#' caller's scope and passed in survives destruction.
 #'
 #' Returning a reactive value from a module works when the module lives for
 #' the entire session. However, if you plan to call `session$destroy()`, the
@@ -853,10 +856,11 @@ ShinySession <- R6Class(
     },
     invokeDestroyCallbacks = function(namespace = NULL, allowRoot = FALSE) {
       isRoot <- length(namespace) == 0
-      # The root scope can only be torn down via `close()` (allowRoot = TRUE).
+      # Root-scope destroy callbacks are only dispatched from `close()`
+      # (allowRoot = TRUE), where the reactives themselves are left intact.
       if (isRoot && !allowRoot) {
         stop(
-          "`$destroy()` cannot be called on the root ShinySession without a `namespace`. Pass a module `namespace` to tear down that scope (e.g. `session$destroy(\"my_module\")`), or call `close()` to tear down the whole session.",
+          "`$destroy()` cannot be called on the root ShinySession without a `namespace`. Pass a module `namespace` to tear down that scope (e.g. `session$destroy(\"my_module\")`), or call `close()` to end the whole session (which is not a destroy: reactive values and expressions stay readable).",
           call. = FALSE
         )
       }
@@ -1342,10 +1346,12 @@ ShinySession <- R6Class(
       tears that scope down. The root scope is the absence of a namespace --
       `NULL` (the default) or `character(0)` -- and cannot be destroyed this
       way: calling `destroy()` with no `namespace` on the root session is an
-      error, since the root session is torn down via `close()`."
+      error. The root session ends via `close()`, which is not a destroy --
+      observers are torn down, but reactive values and expressions are left
+      readable at their last value."
       if (length(namespace) == 0) {
         stop(
-          "`$destroy()` cannot be called on the root ShinySession without a `namespace`. Pass a module `namespace` to tear down that scope (e.g. `session$destroy(\"my_module\")`), or call `close()` to tear down the whole session.",
+          "`$destroy()` cannot be called on the root ShinySession without a `namespace`. Pass a module `namespace` to tear down that scope (e.g. `session$destroy(\"my_module\")`), or call `close()` to end the whole session (which is not a destroy: reactive values and expressions stay readable).",
           call. = FALSE
         )
       }

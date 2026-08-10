@@ -316,9 +316,14 @@ MockShinySession <- R6Class(
     onEnded = function(sessionEndedCallback) {
       private$endedCBs$register(sessionEndedCallback)
     },
-    #' @description Registers a callback to be invoked when the session scope
-    #'   is destroyed. Returns a function that can be called to unregister the
-    #'   callback.
+    #' @description Registers a callback to be invoked when the session scope is
+    #'   destroyed via `destroy()`, and when the session itself closes. Returns a
+    #'   function that can be called to unregister the callback.
+    #'
+    #'   Note that closing a session is not the same as destroying a scope. An
+    #'   explicit `destroy()` tears down the scope's reactive values and
+    #'   expressions, so reading one afterwards is an error. On close, they are
+    #'   left readable at their last value, matching `ShinySession`.
     #' @param callback The callback to invoke on destroy.
     onDestroy = function(callback) {
       private$getOrCreateDestroyCallbacks(NULL)$register(callback)
@@ -333,7 +338,7 @@ MockShinySession <- R6Class(
     destroy = function(namespace = NULL) {
       if (length(namespace) == 0) {
         stop(
-          "`$destroy()` cannot be called on the root session without a `namespace`. Pass a module `namespace` to tear down that scope (e.g. `session$destroy(\"my_module\")`), or call `close()` to tear down the whole session.",
+          "`$destroy()` cannot be called on the root session without a `namespace`. Pass a module `namespace` to tear down that scope (e.g. `session$destroy(\"my_module\")`), or call `close()` to end the whole session (which is not a destroy: reactive values and expressions stay readable).",
           call. = FALSE
         )
       }
@@ -781,10 +786,11 @@ MockShinySession <- R6Class(
     # @param allowRoot Whether tearing down the root scope is permitted.
     invokeDestroyCallbacks = function(namespace = NULL, allowRoot = FALSE) {
       isRoot <- length(namespace) == 0
-      # The root scope can only be torn down via `close()` (allowRoot = TRUE).
+      # Root-scope destroy callbacks are only dispatched from `close()`
+      # (allowRoot = TRUE), where the reactives themselves are left intact.
       if (isRoot && !allowRoot) {
         stop(
-          "`$destroy()` cannot be called on the root session without a `namespace`. Pass a module `namespace` to tear down that scope (e.g. `session$destroy(\"my_module\")`), or call `close()` to tear down the whole session.",
+          "`$destroy()` cannot be called on the root session without a `namespace`. Pass a module `namespace` to tear down that scope (e.g. `session$destroy(\"my_module\")`), or call `close()` to end the whole session (which is not a destroy: reactive values and expressions stay readable).",
           call. = FALSE
         )
       }

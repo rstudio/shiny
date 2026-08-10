@@ -70,9 +70,10 @@ that settles after the user refreshes the page) does not error.
 }
 \item{destroy(namespace = NULL)}{
 Destroys a module session scope (and any descendant scopes) by invoking
-all registered \code{onDestroy()} callbacks. This includes cleaning up all
-reactive values, observers, and reactive expressions created within
-that scope (and any descendant scopes).
+all registered \code{onDestroy()} callbacks. An explicit \code{destroy()} cleans up
+all reactive values, observers, and reactive expressions created within
+that scope (and any descendant scopes). A session \emph{close} is gentler with
+reactives -- see \code{onDestroy()} above.
 
 Called with no \code{namespace} on a module session proxy (e.g. the \code{session}
 inside \code{\link[=moduleServer]{moduleServer()}}), it destroys that module's own scope. Called
@@ -85,7 +86,9 @@ session$destroy("editor")
 }\if{html}{\out{</div>}}
 
 On the root session a \code{namespace} is required; \code{session$destroy()} with no
-\code{namespace} is an error (the root session is torn down via \code{close()}).
+\code{namespace} is an error. The root session ends via \code{close()}, which is not
+a destroy: observers are torn down, but reactive values and expressions
+are left readable at their last value.
 }
 \item{onEnded(callback)}{
 Synonym for \code{onSessionEnded}.
@@ -267,9 +270,9 @@ trigger teardown from somewhere that doesn't have the parent session or
 \section{Module data ownership}{
 
 The key rule: \strong{data that must outlive a module should live outside it.}
-A reactive value created inside a module is destroyed with the module.
-A reactive value created in the caller's scope and passed in survives
-destruction.
+A reactive value created inside a module is destroyed when that module's
+scope is destroyed with \code{session$destroy()}. A reactive value created in the
+caller's scope and passed in survives destruction.
 
 Returning a reactive value from a module works when the module lives for
 the entire session. However, if you plan to call \code{session$destroy()}, the

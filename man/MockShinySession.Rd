@@ -196,9 +196,14 @@ user. Always \code{NULL} for a \code{MockShinySesion}.}
 \if{html}{\out{<a id="method-MockShinySession-onDestroy"></a>}}
 \if{latex}{\out{\hypertarget{method-MockShinySession-onDestroy}{}}}
 \subsection{\code{MockShinySession$onDestroy()}}{
-  Registers a callback to be invoked when the session scope
-is destroyed. Returns a function that can be called to unregister the
-callback.
+  Registers a callback to be invoked when the session scope is
+destroyed via \code{destroy()}, and when the session itself closes. Returns a
+function that can be called to unregister the callback.
+
+Note that closing a session is not the same as destroying a scope. An
+explicit \code{destroy()} tears down the scope's reactive values and
+expressions, so reading one afterwards is an error. On close, they are
+left readable at their last value, matching \code{ShinySession}.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{MockShinySession$onDestroy(callback)}

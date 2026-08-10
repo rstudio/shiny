@@ -121,6 +121,8 @@ Suggests:
     showtext,
     testthat (>= 3.2.1),
     yaml
+Remotes:
+    rstudio/bslib#1342
 Config/Needs/check: shinyjs
 Config/roxygen2/version: 8.1.0
 Config/testthat/edition: 3

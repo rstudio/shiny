@@ -128,9 +128,10 @@ that settles after the user refreshes the page) does not error.</p></dd>
 
 <dt>destroy(namespace = NULL)</dt>
 <dd><p>Destroys a module session scope (and any descendant scopes) by invoking
-all registered <code>onDestroy()</code> callbacks. This includes cleaning up all
-reactive values, observers, and reactive expressions created within
-that scope (and any descendant scopes).</p>
+all registered <code>onDestroy()</code> callbacks. An explicit <code>destroy()</code> cleans up
+all reactive values, observers, and reactive expressions created within
+that scope (and any descendant scopes). A session <em>close</em> is gentler with
+reactives – see <code>onDestroy()</code> above.</p>
 <p>Called with no <code>namespace</code> on a module session proxy (e.g. the <code>session</code>
 inside <code><a href="moduleServer.html">moduleServer()</a></code>), it destroys that module's own scope. Called
 with a <code>namespace</code>, it destroys the child module scope of that <code>namespace</code> — this is
@@ -139,7 +140,9 @@ insert the UI:</p>
 <p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">removeUI</span>(<span class="at">selector =</span> <span class="st">"#editor"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>session<span class="sc">$</span><span class="fu">destroy</span>(<span class="st">"editor"</span>)</span></code></pre><p></p></div>
 <p>On the root session a <code>namespace</code> is required; <code>session$destroy()</code> with no
-<code>namespace</code> is an error (the root session is torn down via <code><a href="https://rdrr.io/r/base/connections.html" class="external-link">close()</a></code>).</p></dd>
+<code>namespace</code> is an error. The root session ends via <code><a href="https://rdrr.io/r/base/connections.html" class="external-link">close()</a></code>, which is not
+a destroy: observers are torn down, but reactive values and expressions
+are left readable at their last value.</p></dd>
 
 <dt>onEnded(callback)</dt>
 <dd><p>Synonym for <code>onSessionEnded</code>.</p></dd>
@@ -312,9 +315,9 @@ trigger teardown from somewhere that doesn't have the parent session or
 
 
 <p>The key rule: <strong>data that must outlive a module should live outside it.</strong>
-A reactive value created inside a module is destroyed with the module.
-A reactive value created in the caller's scope and passed in survives
-destruction.</p>
+A reactive value created inside a module is destroyed when that module's
+scope is destroyed with <code>session$destroy()</code>. A reactive value created in the
+caller's scope and passed in survives destruction.</p>
 <p>Returning a reactive value from a module works when the module lives for
 the entire session. However, if you plan to call <code>session$destroy()</code>, the
 returned value will be destroyed and can no longer be read:</p>

@@ -270,9 +270,13 @@ user. Always <code>NULL</code> for a <code>MockShinySesion</code>.</p></dd>
 
 <p></p><hr><a id="method-MockShinySession-onDestroy"></a><div class="section">
 <h3 id="mockshinysession-ondestroy-"><code>MockShinySession$onDestroy()</code><a class="anchor" aria-label="anchor" href="#mockshinysession-ondestroy-"></a></h3>
-<p>Registers a callback to be invoked when the session scope
-is destroyed. Returns a function that can be called to unregister the
-callback.</p><div class="section">
+<p>Registers a callback to be invoked when the session scope is
+destroyed via <code>destroy()</code>, and when the session itself closes. Returns a
+function that can be called to unregister the callback.</p>
+<p>Note that closing a session is not the same as destroying a scope. An
+explicit <code>destroy()</code> tears down the scope's reactive values and
+expressions, so reading one afterwards is an error. On close, they are
+left readable at their last value, matching <code>ShinySession</code>.</p><div class="section">
 <h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MockShinySession</span><span class="op">$</span><span class="fu">onDestroy</span><span class="op">(</span><span class="va">callback</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">

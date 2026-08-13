@@ -96,6 +96,17 @@ class OutputProgressReporter {
     return result;
   }
 
+  // Forget everything we know about output state.
+  //
+  // Call this when the client is about to start a new session on the server
+  // (i.e., on reconnect). The new session restarts every output's lifecycle at
+  // INITIAL, so state left over from the previous session would make the next
+  // `recalculating` message look like an illegal transition.
+  reset(): void {
+    this.outputStates = new Map();
+    this.changedOutputs = new Map();
+  }
+
   // Returns whether the output is recalculating or not.
   isRecalculating(name: string): boolean {
     const state = this.#getState(name);

@@ -186,6 +186,11 @@ class ShinyApp {
     if (this.isConnected())
       throw "Attempted to reconnect, but already connected.";
 
+    // We're about to `init` a new session on the server, which restarts every
+    // output's progress lifecycle. Drop the state we accumulated for the
+    // previous session so those messages aren't seen as illegal transitions.
+    this.$outputProgress.reset();
+
     this.$socket = this.createSocket();
     this.$initialInput = $.extend({}, this.$inputValues);
     this.$updateConditionals();

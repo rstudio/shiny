@@ -6139,6 +6139,16 @@ ${duplicateIdMsg}`;
       this.changedOutputs = /* @__PURE__ */ new Map();
       return result;
     }
+    // Forget everything we know about output state.
+    //
+    // Call this when the client is about to start a new session on the server
+    // (i.e., on reconnect). The new session restarts every output's lifecycle at
+    // INITIAL, so state left over from the previous session would make the next
+    // `recalculating` message look like an illegal transition.
+    reset() {
+      this.outputStates = /* @__PURE__ */ new Map();
+      this.changedOutputs = /* @__PURE__ */ new Map();
+    }
     // Returns whether the output is recalculating or not.
     isRecalculating(name) {
       const state = __privateMethod(this, _OutputProgressReporter_instances, getState_fn).call(this, name);
@@ -6492,6 +6502,7 @@ ${duplicateIdMsg}`;
       clearTimeout(this.scheduledReconnect);
       if (this.isConnected())
         throw "Attempted to reconnect, but already connected.";
+      this.$outputProgress.reset();
       this.$socket = this.createSocket();
       this.$initialInput = import_jquery39.default.extend({}, this.$inputValues);
       this.$updateConditionals();

@@ -27,7 +27,7 @@ void test("a second render cycle without an invalidation is an illegal transitio
   // The output is now in the VALUE state, so `recalculating` has no legal edge.
   assert.throws(
     () => renderOnce(reporter, "out"),
-    /output 'out' is recalculating[\s\S]*unexpected state of: 'value'/
+    /output 'out' is recalculating[\s\S]*unexpected state of: 'value'/,
   );
 });
 

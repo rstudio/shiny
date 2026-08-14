@@ -10,6 +10,8 @@
   "licenseNote": {
     "bundled": [
       "@selectize/selectize",
+      "bootstrap-datepicker",
+      "jquery",
       "lit"
     ]
   },

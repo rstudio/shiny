@@ -7,6 +7,12 @@
   "name": "@posit/shiny",
   "version": "1.14.0-alpha.9000",
   "license": "MIT",
+  "licenseNote": {
+    "bundled": [
+      "@selectize/selectize",
+      "lit"
+    ]
+  },
   "main": "",
   "browser": "",
   "types": "srcts/types/extras/globalShiny.d.ts",

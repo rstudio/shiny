@@ -62,6 +62,8 @@ Authors@R: c(
            comment = "DataTables library"),
     person("Ivan", "Sagalaev", role = c("ctb", "cph"),
            comment = "highlight.js library"),
+    person(, "Google LLC", role = c("ctb", "cph"),
+           comment = "lit library"),
     person("R Core Team", role = c("ctb", "cph"),
            comment = "tar implementation from R")
   )

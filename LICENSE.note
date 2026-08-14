@@ -8,7 +8,6 @@ these components are included below):
 - bootstrap-accessibility-plugin, https://github.com/paypal/bootstrap-accessibility-plugin
 - selectize-plugin-a11y, https://github.com/SLMNBJ/selectize-plugin-a11y
 - ion.rangeSlider, https://github.com/IonDen/ion.rangeSlider
-- strftime for Javascript, https://github.com/samsonjs/strftime
 - DataTables, https://github.com/DataTables/DataTables
 - highlight.js, https://github.com/isagalaev/highlight.js
 - tar implementation from R, http://www.r-project.org/
@@ -23,6 +22,7 @@ below alongside the rest.
 * bootstrap-datepicker: Apache-2.0 (https://github.com/uxsolutions/bootstrap-datepicker)
 * jquery: MIT (https://github.com/jquery/jquery)
 * lit: BSD-3-Clause (https://github.com/lit/lit)
+* strftime: MIT (https://github.com/samsonjs/strftime)
 
 ### END bundled JavaScript dependencies
 

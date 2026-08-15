@@ -1,0 +1,25 @@
+name: Update website docs given new release tag
+
+on:
+  push:
+    branches:
+      - build_docs
+    tags:
+      - "v*"
+
+jobs:
+  trigger-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send repository dispatch event
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ secrets.SHINY_DEV_CENTER_GITHUB_TOKEN }}
+          script: |
+            await github.rest.repos.createDispatchEvent({
+              owner: 'rstudio',
+              repo: 'shiny-dev-center',
+              event_type: 'build-r-reference',
+              client_payload: {}
+            });

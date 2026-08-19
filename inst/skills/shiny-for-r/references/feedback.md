@@ -4,8 +4,8 @@
 
 Feedback that appears briefly and then goes away — toasts, dialogs, progress
 bars — is sent from the **server**, almost always from inside an
-`observeEvent()`. These are overlays that Shiny renders and dismisses for
-you. Do NOT fake a popup with `conditionalPanel()` + `renderUI()`, do NOT
+`observeEvent()`, as overlays that Shiny renders and dismisses for you.
+Do NOT fake a popup with `conditionalPanel()` + `renderUI()`, do NOT
 `stop()` in a render function for an error the user caused (that shows a
 scary red "Error:" box instead of a friendly message), and do NOT run a long
 loop with no visible sign of progress. Use the built-in overlays below.
@@ -108,22 +108,20 @@ shinyApp(ui, server)
 When the work spans multiple callbacks, use the R6 `Progress` class instead:
 `Progress$new(session, min =, max =)` creates the panel, `$set(value =,
 message =, detail =)`/`$inc(amount =)` update it, and `$close()` removes it —
-call `$close()` yourself (e.g. via `on.exit()`), since there's no enclosing
-scope to do it for you.
+call `$close()` yourself (e.g. via `on.exit()`).
 
 ## User-facing input errors: `validate()` versus `req()`
 
 Inside a `render*()` function, `validate(...)` checks a list of conditions
-and, on the first failure, stops execution and shows the message in place of
-the output — styled as ordinary text, not a red error. Build conditions with
+and, on the first failure, stops and shows the message in place of the
+output — styled as ordinary text, not a red error. Build conditions with
 `need(expr, message)`, which fails with `message` when `expr` isn't
 "truthy". Use `validate(need(...))` whenever the *user* needs to know what to
 fix.
 
 `req(...)` also stops on the first non-truthy value, but silently: no
-message, and the output just doesn't update. Use `req()` for values that
-aren't ready yet (an empty input at startup) rather than values that are
-wrong.
+message, output just doesn't update. Use `req()` for values not ready yet
+(an empty input at startup) rather than values that are wrong.
 
 ```r
 library(shiny)
@@ -160,9 +158,10 @@ shinyApp(ui, server)
   shows a red "Error:" box; use `validate(need(...))` for a friendly message.
 - Faking a popup with `conditionalPanel()` + `renderUI()` -> use
   `modalDialog()` / `showModal()` instead.
-- Calling `showNotification()`/`showModal()`/`Progress$new()` outside a
-  reactive context -> they need an active session; call from
-  `observeEvent()` or a render function.
+- Calling `showNotification()`/`showModal()`/`Progress$new()` without an
+  active session (e.g. a plain R script or the console) -> they rely on
+  `getDefaultReactiveDomain()`; they work fine at server top level or inside
+  a render function, not just `observeEvent()`.
 - Forgetting to capture the id from `showNotification()` -> can't remove or
   update it later.
 - A long loop with only `message()`/`cat()` for status -> the browser shows

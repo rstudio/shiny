@@ -48,13 +48,14 @@ card_header(
 ```
 
 `toolbar_input_button()` hides its label as a tooltip when an `icon` is
-supplied — always give it a meaningful label. Update controls from the
+supplied. Update controls from the
 server with `update_toolbar_input_button()`/`update_toolbar_input_select()`.
 
 ## KPI tiles: value_box
 
 A `value_box()` pairs a `title` with a prominent `value`, plus an optional
-`showcase` icon and context text.
+`showcase` icon and context text. `bsicons::bs_icon()` (from the small
+{bsicons} package) supplies Bootstrap icons for `showcase` and elsewhere.
 
 ```r
 # Partial snippet: inside a page_* function
@@ -68,9 +69,9 @@ value_box(
 ```
 
 Group value boxes with `layout_column_wrap(width = 1/3, fill = FALSE, ...)`
-so they keep a natural height instead of stretching. `showcase_layout`
+so they keep a natural height. `showcase_layout`
 (`showcase_left_center()`, `showcase_top_right()`, `showcase_bottom()`)
-controls showcase placement relative to the value.
+controls showcase placement.
 
 ## Secondary explanation: tooltip and popover
 

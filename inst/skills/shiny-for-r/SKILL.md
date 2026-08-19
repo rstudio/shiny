@@ -25,7 +25,7 @@ reference file before writing code** for that area.
 |---|---|---|
 | Reactivity | A value should recompute or an output update as inputs change; choosing between `reactive()`/`observe()`/`observeEvent()`; `req()`, `isolate()`, `bindEvent()`, timers, polling | `references/reactivity.md` |
 | Modules | A reusable, repeatable UI+server component; avoiding input/output id collisions across copies | `references/modules.md` |
-| Session lifecycle | Per-session cleanup (`session$onEnded()`), reading request headers/query string, flush hooks, per-session state | `references/session-lifecycle.md` |
+| Session lifecycle | Per-session cleanup (`onSessionEnded()`), flush hooks, unhandled errors, per-session vs app-level scope, `session$userData` | `references/session-lifecycle.md` |
 
 ## Async
 

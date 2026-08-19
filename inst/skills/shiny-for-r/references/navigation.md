@@ -62,7 +62,7 @@ active panel from other controls, such as a wizard's Next button. Use
 `tabPanelBody()`, not `tabPanel()`, for the panels in this mode:
 
 ```r
-# Partial snippet: inside a fluidPage() ui
+# Partial snippet: ui excerpt plus matching server code
 tabsetPanel(
   id = "wizard",
   type = "hidden",

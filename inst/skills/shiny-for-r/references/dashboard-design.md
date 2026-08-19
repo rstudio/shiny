@@ -14,12 +14,12 @@ component APIs (`page_sidebar()`, `layout_column_wrap()`, `card()`,
 
 Before writing UI code, identify the audience's decision, three to five
 headline metrics with a period or comparison ("Revenue, last 30 days vs.
-prior period" — not just "Revenue"), the few global filters that affect
-most of the page, the chart(s) that explain movement in those metrics, and
-the table for drilling into records. A conventional reading order is:
-title and status line, a row of KPIs, one or two primary charts, a
-detailed table. Use `page_sidebar()` for one shared workflow; reach for a
-navbar only when sections support genuinely different tasks.
+prior period" — not just "Revenue"), the few global filters affecting most
+of the page, the chart(s) explaining movement in those metrics, and the
+table for drilling into records. A conventional reading order is: title and
+status line, a row of KPIs, one or two primary charts, a detailed table.
+Use `page_sidebar()` for one shared workflow; reach for a navbar only when
+sections support genuinely different tasks.
 
 ## Information hierarchy: KPIs top, detail below
 
@@ -72,7 +72,7 @@ card's header, not the page-level sidebar.
 
 Pick a single bslib theme (or `_brand.yml` source) before styling
 individual cards, and reuse one accent color plus neutrals throughout.
-Give a category the same color everywhere, across charts and maps. Format
+Use the same color for a category everywhere. Format
 values before they reach the UI — `27.5%`, not `0.274991` — and keep marks
 readable in light and dark mode.
 

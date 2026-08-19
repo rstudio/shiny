@@ -58,15 +58,16 @@ shinyApp(ui, server)
 ## Hidden tabs driven entirely by the server
 
 Set `type = "hidden"` on `tabsetPanel()` to hide the tab strip and drive the
-active panel from other controls, such as a wizard's Next button:
+active panel from other controls, such as a wizard's Next button. Use
+`tabPanelBody()`, not `tabPanel()`, for the panels in this mode:
 
 ```r
 # Partial snippet: inside a fluidPage() ui
 tabsetPanel(
   id = "wizard",
   type = "hidden",
-  tabPanel("step1", "Step 1", actionButton("next1", "Next")),
-  tabPanel("step2", "Step 2", actionButton("submit", "Submit"))
+  tabPanelBody("step1", "Step 1", actionButton("next1", "Next")),
+  tabPanelBody("step2", "Step 2", actionButton("submit", "Submit"))
 )
 
 # Server
@@ -167,7 +168,7 @@ page_navbar(
 | `nav_panel(title, ...)` | bslib panel inside a `navset_*()` or `page_navbar()` |
 | `navset_card_tab()` / `navset_bar()` | bslib tab container / navbar-style container |
 | `nav_menu(title, ...)` | Dropdown of nav items |
-| `nav_select(id, value)` | bslib equivalent of `updateTabsetPanel()` |
+| `nav_select(id, selected)` | bslib equivalent of `updateTabsetPanel()` |
 
 ## Common mistakes
 

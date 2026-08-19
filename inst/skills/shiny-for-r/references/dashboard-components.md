@@ -12,8 +12,8 @@ reference covers the bslib components that fill a dashboard's body.
 
 `card()` groups related content behind a border. `card_header()` and
 `card_footer()` must be direct children; other children get wrapped in an
-implicit `card_body()`. Add `full_screen = TRUE` on cards with a plot, map,
-or table.
+implicit `card_body()`. Add `full_screen = TRUE` on cards with a plot or table.
+
 
 ```r
 # Partial snippet: inside a page_* function
@@ -33,7 +33,7 @@ stretch) to combine fixed and resizable regions.
 
 Page-wide filters belong in a sidebar; controls that change one card's
 display (period, grouping, sort order) belong in its `card_header()`, via
-`toolbar()`.
+`toolbar()`. Requires bslib >= 0.12.0.
 
 ```r
 # Partial snippet: inside a card()
@@ -70,7 +70,7 @@ value_box(
 Group value boxes with `layout_column_wrap(width = 1/3, fill = FALSE, ...)`
 so they keep a natural height instead of stretching. `showcase_layout`
 (`showcase_left_center()`, `showcase_top_right()`, `showcase_bottom()`)
-controls where the showcase sits relative to the value.
+controls showcase placement relative to the value.
 
 ## Secondary explanation: tooltip and popover
 
@@ -87,10 +87,10 @@ tooltip(
 ```
 
 `tooltip()` uses the last HTML element in its first argument as the trigger,
-so only the icon is hoverable in `span("Label", bsicons::bs_icon("info-circle"))`.
-`popover(trigger, title = , ...)` follows the same pattern but opens on
-click and can hold inputs. Give either an `id` to drive it via
-`toggle_tooltip()`/`update_tooltip()` or `toggle_popover()`/`update_popover()`.
+so only the icon is hoverable in `span("Label", bsicons::bs_icon("info"))`.
+`popover()` follows the same pattern but opens on click and can hold
+inputs. Give either an `id` to drive it via `toggle_tooltip()`/
+`toggle_popover()` or `update_tooltip()`/`update_popover()`.
 
 ## Collapsible sections: accordion
 
@@ -108,14 +108,14 @@ accordion(
 
 An `accordion()` that is an immediate child of `sidebar()` renders flush.
 Control panels from the server with `accordion_panel_open()`,
-`accordion_panel_close()`, and `accordion_panel_set()` (needs an `id`).
+`accordion_panel_close()`, `accordion_panel_set()` (needs an `id`).
 
 ## Specialized inputs
 
 - `input_switch(id, label)` — modern on/off toggle, alternative to `checkboxInput()`.
 - `input_dark_mode(id = "mode")` — toggles Bootstrap 5.3 light/dark mode.
 - `input_task_button(id, label)` — action button with a built-in busy state;
-  pair with `ExtendedTask` and `bind_task_button()` for slow operations.
+  pair with a long-running task object and `bind_task_button()` for slow work.
 
 ## A full dashboard: value boxes plus a full-screen card
 

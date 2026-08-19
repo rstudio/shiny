@@ -45,7 +45,9 @@ shinyApp(ui, server)
 
 `promise(function(resolve, reject) ...)` wraps any callback-based async
 operation. Calling `resolve(value)` fulfills the promise; `reject(error)`
-rejects it.
+rejects it. For CPU-bound work in another process, `mirai::mirai()` or
+`future::future()`/`promises::future_promise()` return promise-like objects
+that drop in wherever a `promise()` is expected.
 
 ## Chain steps with `then()` / `%...>%`
 
@@ -94,16 +96,6 @@ promises::promise_resolve(input$n) %...>% (function(n) {
 `catch()` and `finally()` compose with the base pipe (`|>`) since they take
 the promise as their first argument, just like `then()`.
 
-## Engines that produce promises
-
-{mirai} and {future} run code in a background process and hand back an
-object that behaves like a promise. `mirai::mirai(expr)` starts an
-expression on a mirai daemon; `future::future(expr)` (paired with
-`promises::future_promise()`) does the same on a future backend. Either one
-can replace the `promise()` call above when the slow work is CPU-bound R
-code rather than an I/O callback. Both are optional dependencies — reach for
-them only when plain callback-based promises are not a good fit.
-
 ## Quick reference
 
 | Function | Purpose |
@@ -114,8 +106,6 @@ them only when plain callback-based promises are not a good fit.
 | `%...>%` | Pipe shorthand for `then(p, onFulfilled = ...)` |
 | `promises::catch(p, onRejected)` | Handle a rejected promise |
 | `promises::finally(p, onFinally)` | Run cleanup regardless of outcome |
-| `mirai::mirai(expr)` | Run `expr` on a background mirai daemon, returns a promise-like object |
-| `future::future(expr)` | Run `expr` asynchronously via {future}, pair with `promises::future_promise()` |
 
 ## Common mistakes
 

@@ -64,7 +64,9 @@ blocks, so gate it behind `observeEvent()` or `bindEvent()` (as above) rather
 than calling it unconditionally. If `invoke()` is called while a previous run
 is still in progress, the new call is queued and starts only after the
 current run finishes — a single `ExtendedTask` never runs two invocations at
-once.
+once. `bslib::input_task_button()` plus `bind_task_button()` give you a
+button that disables itself automatically while the task it's bound to is
+running.
 
 ## Read status and result
 
@@ -79,21 +81,6 @@ output calling `task$result()` re-renders once the task finishes. Read both
 naively from a render function, `reactive()`, or `observe()` — not from
 `observeEvent()`, `eventReactive()`, `bindEvent()`, or `isolate()`, where the
 invalidation is ignored.
-
-## Pair with a task button
-
-{bslib}'s `input_task_button(id, label)` creates a button that disables
-itself and shows a busy label while work is in flight. `bind_task_button(task,
-task_button_id)` links an `ExtendedTask` to that button, so its state tracks
-the task automatically:
-
-```r
-# Partial snippet: inside a server function, after creating slow_square
-bslib::bind_task_button(slow_square, "run")
-```
-
-Binding only syncs the button's state — it does not invoke the task; still
-call `invoke()` from `observeEvent()`/`bindEvent()`.
 
 ## When to reach for `ExtendedTask`
 
@@ -112,8 +99,6 @@ polling, not a single long-running background operation.
 | `task$invoke(...)` | Start a run (non-blocking); queues if already running |
 | `task$status()` | Reactive read: `"initial"`/`"running"`/`"success"`/`"error"` |
 | `task$result()` | Reactive read of the latest result; errors/blanks appropriately |
-| `bslib::input_task_button(id, label)` | Button that shows busy state automatically |
-| `bslib::bind_task_button(task, task_button_id)` | Link a task's status to a task button |
 
 ## Common mistakes
 

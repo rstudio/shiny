@@ -45,6 +45,14 @@ For more examples and inspiration, check out the [Shiny User Gallery](https://sh
 
 For help with learning fundamental Shiny programming concepts, check out the [Mastering Shiny](https://mastering-shiny.org/) book and the [Shiny Tutorial](https://shiny.rstudio.com/tutorial/). The former is currently more up-to-date with modern Shiny features, whereas the latter takes a deeper, more visual, dive into fundamental concepts.
 
+## Agent Skill
+
+shiny ships an [Agent Skill](https://agentskills.io) at `system.file("skills", "shiny-for-r", package = "shiny")` to help coding agents write idiomatic Shiny for R apps. Agents using [btw](https://posit-dev.github.io/btw/) discover it automatically once shiny is attached. To copy it into a project for use with Claude Code and other skill-aware tools, run:
+
+```r
+btw::btw_skill_install_package("shiny")
+```
+
 ## Join the conversation
 
 If you want to chat about Shiny, meet other developers, or help us decide what to work on next, [join us on Discord](https://discord.com/invite/yMGCamUMnS).

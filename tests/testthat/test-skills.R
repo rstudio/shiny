@@ -68,7 +68,7 @@ test_that("shiny APIs documented in references still exist", {
     `dynamic-ui` = c("renderUI", "uiOutput", "insertUI", "removeUI", "conditionalPanel", "updateSelectInput", "updateCheckboxGroupInput", "updateSliderInput", "updateTextInput", "freezeReactiveValue"),
     `theming-assets` = c("includeCSS", "includeScript", "addResourcePath"),
     plots = c("renderPlot", "plotOutput", "nearPoints", "brushedPoints", "clickOpts", "hoverOpts", "brushOpts", "renderCachedPlot", "renderImage", "imageOutput"),
-    tables = c("renderTable", "tableOutput", "renderDataTable", "dataTableOutput"),
+    tables = c("renderTable", "tableOutput", "renderDataTable", "dataTableOutput", "submitButton", "debounce"),
     files = c("fileInput", "downloadHandler", "downloadButton", "downloadLink", "outputOptions"),
     feedback = c("showNotification", "removeNotification", "modalDialog", "modalButton", "showModal", "removeModal", "withProgress", "incProgress", "validate", "need"),
     bookmarking = c("enableBookmarking", "bookmarkButton", "onBookmark", "onBookmarked", "onRestore", "onRestored", "setBookmarkExclude", "updateQueryString", "reactiveValuesToList"),

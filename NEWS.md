@@ -4,7 +4,7 @@
   [Agent Skills](https://agentskills.io) convention. Coding agents using
   [btw](https://posit-dev.github.io/btw/) discover it automatically when
   shiny is attached; use `btw::btw_skill_install_package("shiny")` to copy
-  it into a project. (#XXXX)
+  it into a project. (#4427)
 
 * Fixed #4424: reconnecting no longer throws `the output is in an unexpected state of: 'value'` errors in the client console, and no longer drops the first output value the reconnected session sends. The client's output progress state machine kept the previous session's state across the reconnect, so the new session's `recalculating`/`recalculated`/value messages all looked like illegal transitions; since the state update runs before the message handlers, each throw also skipped the handler that would have rendered the value, leaving outputs showing the old session's results. (#4425)
 

@@ -25,6 +25,9 @@ createWebDependency <- function(dependency, scrubFile = TRUE) {
     stop("Unexpected non-html_dependency type")
 
   if (is.null(dependency$src$href)) {
+    if (!is.null(dependency$package) && !is.null(dependency$src$file)) {
+      dependency$src$file <- system.file(dependency$src$file, package = dependency$package)
+    }
     prefix <- paste(dependency$name, "-", dependency$version, sep = "")
     addResourcePath(prefix, dependency$src$file)
     dependency$src$href <- prefix

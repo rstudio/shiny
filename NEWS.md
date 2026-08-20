@@ -1,5 +1,11 @@
 # shiny (development version)
 
+* Added an agent skill (`inst/skills/shiny-for-r/`) following the
+  [Agent Skills](https://agentskills.io) convention. Coding agents using
+  [btw](https://posit-dev.github.io/btw/) discover it automatically when
+  shiny is attached; use `btw::btw_skill_install_package("shiny")` to copy
+  it into a project. (#4427)
+
 * Fixed #4424: reconnecting no longer throws `the output is in an unexpected state of: 'value'` errors in the client console, and no longer drops the first output value the reconnected session sends. The client's output progress state machine kept the previous session's state across the reconnect, so the new session's `recalculating`/`recalculated`/value messages all looked like illegal transitions; since the state update runs before the message handlers, each throw also skipped the handler that would have rendered the value, leaving outputs showing the old session's results. (#4425)
 
 * Fixed #4420: closing a session no longer destroys the reactive values and expressions created in it, so async work that outlives the connection does not error. Since 1.14.0, refreshing the page while an `ExtendedTask` (or any promise or `later()` callback) was in flight could raise ``Can't access reactive `<NAME>`; its module session has been destroyed`` once it settled. Reactives are now left readable at their last value on close and reclaimed by garbage collection, while an explicit `session$destroy(namespace)` on a live session still tears them down. (#4421, #4423)

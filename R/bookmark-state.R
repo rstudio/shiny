@@ -550,7 +550,8 @@ restoreInput <- function(id, default) {
 #' When `mode = "push"`, the function called is
 #' `window.history.pushState(null, null, queryString)`.
 #'
-#' @param queryString The new query string to show in the location bar.
+#' @param queryString The new query string to show in the location bar. "?" for
+#'   empty query arguments, "/" to reset to a clean URL.
 #' @param mode When the query string is updated, should the current history
 #'   entry be replaced (default), or should a new history entry be pushed onto
 #'   the history stack? The former should only be used in a live bookmarking

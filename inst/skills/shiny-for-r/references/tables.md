@@ -107,7 +107,9 @@ shinyApp(ui, server)
 - **Expecting sorting/search from `renderTable()`.** It is a plain static
   `<table>` — those interactions require {DT} or {reactable}.
 - **Re-rendering the whole table on every keystroke of a filter input.**
-  Gate the input with `submitButton()` (values only change on click), or wrap
-  it with `debounce(reactive(input$filter), 500)`; either way, filter inside
-  a `reactive()` so downstream renders share the filtered result instead of
-  recomputing it themselves.
+  Gate it reactively: `debounce(reactive(input$filter), 500)` waits for
+  typing to pause, `throttle()` caps the rate, and
+  `eventReactive(input$apply, ...)` (or `bindEvent()`) recomputes only when
+  an explicit button is clicked. Either way, filter inside one `reactive()`
+  so downstream renders share the result instead of recomputing it
+  themselves.

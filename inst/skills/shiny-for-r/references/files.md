@@ -142,7 +142,7 @@ shinyApp(ui, server)
 | `fileInput(inputId, label, multiple=, accept=)` | Upload control; server value is a data frame per row |
 | `input$<id>$datapath` | Path to the temp file holding uploaded bytes (use this, not `$name`) |
 | `downloadHandler(filename, content)` | Assign to `output`; writes bytes to `content`'s `file` argument |
-| `downloadButton()` / `downloadLink()` | UI trigger paired with a `downloadHandler()` output id |
+| `downloadButton(outputId, label, enabled = "auto")` / `downloadLink()` | UI trigger paired with a `downloadHandler()` output id |
 | `options(shiny.maxRequestSize = ...)` | Raise the 5 MB default upload size limit |
 
 ## Common mistakes
@@ -156,8 +156,11 @@ shinyApp(ui, server)
 - **`content` function returning a value instead of writing to `file`.**
   `downloadHandler()` ignores the return value — write the bytes to the
   `file` path you were given.
-- **Download button that never fires.** The `output` id assigned to
-  `downloadHandler()` must match the `downloadButton()`/`downloadLink()` id in
-  the UI.
+- **Download button that never fires, or stays greyed out.** The `output`
+  id assigned to `downloadHandler()` must match the `downloadButton()`/
+  `downloadLink()` id in the UI. Under the default `enabled = "auto"` the
+  button starts disabled and only enables once that handler registers, so a
+  mismatched id leaves it permanently disabled. Pass `enabled = TRUE` to
+  start enabled regardless, or `FALSE` to manage the state yourself.
 - **Trusting `accept=` to enforce file type.** It only hints the browser's
   picker; validate the uploaded file's extension/contents on the server.

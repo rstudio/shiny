@@ -63,13 +63,14 @@ class CounterBinding extends Shiny.InputBinding {
     return Number(el.dataset.value || 0);
   }
   subscribe(el, callback) {
-    el.addEventListener("click", () => {
+    // Namespace the handler so unsubscribe() can remove exactly this one.
+    $(el).on("click.counterBinding", () => {
       el.dataset.value = Number(el.dataset.value || 0) + 1;
       callback(true); // true = deferred send; false = send immediately
     });
   }
   unsubscribe(el) {
-    el.replaceWith(el.cloneNode(true));
+    $(el).off(".counterBinding");
   }
 }
 Shiny.inputBindings.register(new CounterBinding(), "myapp.counter");
@@ -168,3 +169,7 @@ a binding yourself.
   alone is enough if the only issue is the wrong R type.
 - **Forgetting `unsubscribe()`.** Leaves stale listeners attached when Shiny
   unbinds and rebinds the element.
+- **"Unsubscribing" by replacing the element** (`el.replaceWith(
+  el.cloneNode(true))`). That swaps the node out from under Shiny, which
+  still holds a reference to the original; detach the listener instead, via
+  a namespaced handler or an `AbortController` signal.

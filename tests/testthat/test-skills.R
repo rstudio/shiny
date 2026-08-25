@@ -74,13 +74,21 @@ test_that("every R chunk in the skill parses", {
 test_that("shiny APIs documented in references still exist", {
   # Explicit sync list: reference file -> exported shiny functions it documents.
   # When renaming an export, update the reference file AND this list.
+  #
+  # Every file in references/ appears here, so a new reference is not silently
+  # unguarded. Files that mostly document other packages (bslib in the two
+  # dashboard-* files, promises in async.md) still list the shiny exports they
+  # lean on.
   apis <- list(
     reactivity = c("reactive", "observe", "observeEvent", "eventReactive", "reactiveVal", "reactiveValues", "bindEvent", "req", "isolate", "invalidateLater", "reactivePoll", "reactiveFileReader", "bindCache"),
     modules = c("moduleServer", "NS"),
     `session-lifecycle` = c("onSessionEnded", "onStop", "onUnhandledError", "onFlush", "onFlushed"),
     `extended-tasks` = c("ExtendedTask"),
+    async = c("observe", "observeEvent", "renderText", "textOutput"),
     layouts = c("fluidPage", "sidebarLayout", "sidebarPanel", "mainPanel", "fluidRow", "column", "fillPage", "titlePanel", "wellPanel"),
     navigation = c("tabsetPanel", "tabPanel", "navbarPage", "navbarMenu", "navlistPanel", "tabPanelBody", "updateTabsetPanel", "updateNavbarPage", "updateNavlistPanel", "showTab", "hideTab"),
+    `dashboard-components` = c("plotOutput", "renderPlot", "selectInput", "sliderInput", "checkboxInput"),
+    `dashboard-design` = c("reactive", "selectInput"),
     `dynamic-ui` = c("renderUI", "uiOutput", "insertUI", "removeUI", "conditionalPanel", "updateSelectInput", "updateCheckboxGroupInput", "updateSliderInput", "updateTextInput", "freezeReactiveValue"),
     `theming-assets` = c("includeCSS", "includeScript", "addResourcePath"),
     plots = c("renderPlot", "plotOutput", "nearPoints", "brushedPoints", "clickOpts", "hoverOpts", "brushOpts", "renderCachedPlot", "renderImage", "imageOutput"),
@@ -94,6 +102,11 @@ test_that("shiny APIs documented in references still exist", {
     opentelemetry = c("withOtelCollect", "localOtelCollect"),
     ecosystem = c("reactlogShow")
   )
+  # A reference with no entry above would pass this test by doing nothing, so
+  # check the coverage itself.
+  refs <- sub("\\.md$", "", list.files(file.path(skill_dir(), "references")))
+  expect_setequal(names(apis), refs)
+
   exports <- getNamespaceExports("shiny")
   for (ref in names(apis)) {
     missing <- setdiff(apis[[ref]], exports)

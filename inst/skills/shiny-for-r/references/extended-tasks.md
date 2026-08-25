@@ -14,15 +14,22 @@ the session that kicked off the work still waits.)
 ## Create a task
 
 `ExtendedTask$new(func)` wraps a function that returns something
-`promises::as.promise()` understands — a `promises::promise`, or an object
-from {mirai} or {future}. Create it once, near the top of `server` (or a
-module server function), not inside a reactive. `func` must not read
-reactive inputs directly — they may have changed by run time — so pass any
-values it needs as arguments instead.
+`promises::as.promise()` understands. Reach for `mirai::mirai()`: it hands
+the expression to a background R process, so the heavy computation never
+touches the main one. (A plain `promises::promise`, or a
+`future::future()` wrapped in `promises::future_promise()`, is accepted
+too.) Create the task once, near the top of `server` (or a module server
+function), not inside a reactive. `func` must not read reactive inputs
+directly — they may have changed by run time — so pass any values it needs
+as arguments instead.
 
 ```r
 library(shiny)
-library(promises)
+library(mirai)
+
+# Persistent background processes for tasks to run in, released on exit.
+daemons(2)
+onStop(function() daemons(0))
 
 ui <- fluidPage(
   numericInput("n", "Number to square", 5),
@@ -33,9 +40,13 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   slow_square <- ExtendedTask$new(function(n) {
-    promise(function(resolve, reject) {
-      later::later(function() resolve(n * n), delay = 2)
-    })
+    mirai(
+      {
+        Sys.sleep(2) # pretend this is expensive
+        n * n
+      },
+      n = n # values `.expr` needs must be passed in explicitly
+    )
   })
 
   observeEvent(input$run, {
@@ -52,10 +63,11 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 ```
 
-In real apps, `func`'s body is usually `mirai::mirai(...)` or
-`future::future(...)` with `promises::future_promise()`, so the heavy
-computation runs off the main R process entirely. `later::later()`-based
-promises, as above, demonstrate the pattern without that extra dependency.
+`mirai()`'s expression evaluates in a separate process with its own global
+environment, so anything it references has to arrive through `...` (`n = n`
+above) rather than being captured from the enclosing scope. `daemons(n)`
+sets up persistent workers to reuse; without it each `mirai()` still runs
+off the main process, but pays to start a fresh one every time.
 
 ## Invoke from an event
 
@@ -95,7 +107,7 @@ polling, not a single long-running background operation.
 
 | Function | Purpose |
 |---|---|
-| `ExtendedTask$new(func)` | Create a task; `func` returns a promise (or mirai/future) |
+| `ExtendedTask$new(func)` | Create a task; `func` returns a `mirai()` (or any promise) |
 | `task$invoke(...)` | Start a run (non-blocking); queues if already running |
 | `task$status()` | Reactive read: `"initial"`/`"running"`/`"success"`/`"error"` |
 | `task$result()` | Reactive read of the latest result; errors/blanks appropriately |
@@ -108,6 +120,9 @@ polling, not a single long-running background operation.
 - Reading `input$x` inside the function passed to `ExtendedTask$new()` →
   the input may change before the background work runs; read it in the
   caller and pass it as an argument to `invoke()`.
+- Referring to a local variable inside `mirai()` without passing it in →
+  the expression runs in a separate process that never saw your globals;
+  supply it as a named argument (`n = n`) or via `.args`.
 - Calling `task$result()` inside `observeEvent()`, `eventReactive()`,
   `bindEvent()`, or `isolate()` → invalidation is ignored there; read it
   from a plain `reactive()`, `observe()`, or render function.

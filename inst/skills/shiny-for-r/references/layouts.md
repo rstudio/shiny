@@ -89,7 +89,7 @@ viewport; `card()` and `layout_columns()` are fill carriers by default. Set
 Value boxes should usually not fill — pass `fill = FALSE` to the wrapping
 `layout_column_wrap()`.
 
-## Legacy shiny layout functions
+## Superseded shiny layout functions
 
 Pre-bslib apps (or apps that must stay on Bootstrap 3) use `fluidPage()` with
 `sidebarLayout()` and the `fluidRow()`/`column()` grid:
@@ -130,9 +130,9 @@ shinyApp(ui, server)
 - `titlePanel(title)` — sets the browser title and a heading.
 - `wellPanel(...)` — gray-background grouping box; predecessor to `card()`.
 
-## Migrating legacy to bslib
+## Migrating to bslib
 
-| Legacy | bslib replacement | Why |
+| Superseded | bslib replacement | Why |
 |---|---|---|
 | `fluidPage()` | `page_sidebar()` / `page_navbar()` | Sidebar, filling, and a Bootstrap 5 theme by default |
 | `sidebarLayout(sidebarPanel(), mainPanel())` | `page_sidebar(sidebar = sidebar(...), ...)` | Collapsible sidebar |

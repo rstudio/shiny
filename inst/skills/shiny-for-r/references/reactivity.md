@@ -4,10 +4,11 @@
 
 Shiny builds a dependency graph automatically: reading a reactive source in
 a reactive context registers a dependency, so when the source changes,
-everything that read it re-runs. Do NOT recompute the same non-trivial work
-in every `render*()` output, and do NOT use `observe()` to push a computed
-value into an output — that inverts the flow. Outputs should *pull* a value
-from a `reactive()`.
+everything that read it re-runs. Two habits work against that grain: doing
+the same non-trivial work in several `render*()` outputs, which pays for it
+once per output, and using `observe()` to push a computed value into an
+output, which inverts the flow and hides the dependency. Compute once in a
+`reactive()` and let outputs *pull* from it.
 
 ## Cache a derived value: `reactive()`
 

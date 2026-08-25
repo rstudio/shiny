@@ -59,7 +59,7 @@ test_that("shiny APIs documented in references still exist", {
   # Explicit sync list: reference file -> exported shiny functions it documents.
   # When renaming an export, update the reference file AND this list.
   apis <- list(
-    reactivity = c("reactive", "observe", "observeEvent", "reactiveVal", "reactiveValues", "bindEvent", "req", "isolate", "invalidateLater", "reactivePoll", "reactiveFileReader", "bindCache"),
+    reactivity = c("reactive", "observe", "observeEvent", "eventReactive", "reactiveVal", "reactiveValues", "bindEvent", "req", "isolate", "invalidateLater", "reactivePoll", "reactiveFileReader", "bindCache"),
     modules = c("moduleServer", "NS"),
     `session-lifecycle` = c("onSessionEnded", "onStop", "onUnhandledError", "onFlush", "onFlushed"),
     `extended-tasks` = c("ExtendedTask"),

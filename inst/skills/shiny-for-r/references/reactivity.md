@@ -106,15 +106,23 @@ shinyApp(ui, server)
 ## Read without depending: `isolate()`
 
 Reads a reactive source without registering a dependency — useful when an
-observer reads a value it also writes, avoiding a self-invalidating loop.
+observer should re-run for one source but only needs the *current* value of
+another, and when an observer reads a value it also writes (avoiding a
+self-invalidating loop).
 
 ```r
 # Partial snippet: inside a server function
-observeEvent(input$go, {
-  seed <- isolate(input$seed)     # read, but don't depend on, seed
+observe({
+  input$go                        # depend on the button
+  seed <- isolate(input$seed)     # read seed, but don't re-run when it changes
   set.seed(seed)
 })
 ```
+
+`observeEvent()`, `eventReactive()`, and `bindEvent()` already evaluate their
+handler inside `isolate()`, so an extra `isolate()` in those bodies is a
+no-op — reach for it in `observe()`/`reactive()`/`render*()`, which do take
+dependencies on everything they read.
 
 ## Timers and streaming: `invalidateLater()`, `reactivePoll()`, `reactiveFileReader()`
 
@@ -178,3 +186,6 @@ slow_result <- reactive({
   with `req(input$x)`.
 - Wrapping every read in `isolate()` "to be safe" → updates stop firing;
   isolate only the reads that must not retrigger.
+- Adding `isolate()` inside an `observeEvent()`/`eventReactive()` handler →
+  redundant; those bodies already run isolated. Use it in `observe()`,
+  `reactive()`, or a `render*()` function instead.

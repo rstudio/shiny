@@ -65,7 +65,9 @@ options(shiny.trace = TRUE)
 For "why did/didn't this recompute," {reactlog} records every reactive
 read/write/invalidate as an interactive graph. Enable recording with
 `options(shiny.reactlog = TRUE)` before launching, then call
-`reactlog::reactlog_show()` after interacting with the app.
+`shiny::reactlogShow()` after interacting with the app — it defaults to the
+log Shiny just recorded, where `reactlog::reactlog_show()` requires you to
+pass one.
 
 ```r
 # Partial snippet: run before shinyApp(ui, server); requires the reactlog package
@@ -126,7 +128,7 @@ observe({
 | `options(shiny.error = browser)` | Drop into `browser()` automatically on error |
 | `options(shiny.fullstacktrace = TRUE)` | Show full (not shortened) stack traces |
 | `options(shiny.trace = TRUE)` | Print websocket messages between server and client |
-| `options(shiny.reactlog = TRUE)` + `reactlog::reactlog_show()` | Record and visualize the reactive graph |
+| `options(shiny.reactlog = TRUE)` + `shiny::reactlogShow()` | Record and visualize the reactive graph |
 | `req(x)` | Silently stop if `x` is missing/falsy |
 | `validate(need(cond, msg))` | Show `msg` in the output if `cond` is false |
 

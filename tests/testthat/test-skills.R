@@ -74,6 +74,7 @@ test_that("shiny APIs documented in references still exist", {
     bookmarking = c("enableBookmarking", "bookmarkButton", "onBookmark", "onBookmarked", "onRestore", "onRestored", "setBookmarkExclude", "updateQueryString", "reactiveValuesToList"),
     `custom-components` = c("registerInputHandler"),
     testing = c("testServer", "exportTestValues"),
+    debugging = c("req", "validate", "need", "reactlogShow"),
     opentelemetry = c("withOtelCollect", "localOtelCollect"),
     ecosystem = c("reactlogShow")
   )

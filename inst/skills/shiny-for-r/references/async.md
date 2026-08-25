@@ -45,9 +45,10 @@ shinyApp(ui, server)
 
 `promise(function(resolve, reject) ...)` wraps any callback-based async
 operation. Calling `resolve(value)` fulfills the promise; `reject(error)`
-rejects it. For CPU-bound work in another process, `mirai::mirai()` or
-`future::future()`/`promises::future_promise()` return promise-like objects
-that drop in wherever a `promise()` is expected.
+rejects it. For CPU-bound work, `mirai::mirai()` runs the expression in a
+background R process and returns an object that drops in wherever a
+`promise()` is expected; `future::future()` with
+`promises::future_promise()` does the same.
 
 ## Chain steps with `then()` / `%...>%`
 
@@ -117,7 +118,7 @@ the promise as their first argument, just like `then()`.
   `then()` are not base R; they come from {promises}.
 - Doing blocking I/O inside the resolve callback of `promise()` → defeats
   the purpose; only the scheduling/callback wiring should be synchronous,
-  the slow work should happen off the main R process (e.g. via {mirai} or
+  the slow work should happen off the main R process (`mirai::mirai()`, or
   {future}) or in a truly async callback API.
 - Letting an error inside a `%...>%` step propagate unhandled → attach
   `promises::catch()` to the chain so failures don't surface as a generic

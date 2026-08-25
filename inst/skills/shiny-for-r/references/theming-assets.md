@@ -91,10 +91,11 @@ shinyApp(ui, server)
 ## _brand.yml
 
 `bs_theme()` accepts a `brand` argument that auto-discovers a `_brand.yml`
-file (shared colors, fonts, logo) in the app directory or its parents.
+file (shared colors, fonts, logo), searching the app directory and each of
+its parents, including a `_brand/` or `brand/` subdirectory at every level.
 `brand = NULL` (default) applies it if found, no error if absent; `TRUE`
 requires the file; `FALSE` disables discovery; a string gives an explicit
-path.
+path; a list supplies brand settings inline.
 
 ```yaml
 # _brand.yml
@@ -112,7 +113,10 @@ typography:
 bs_theme(brand = TRUE)
 ```
 
-Brand.yml support needs a recent bslib; verified against bslib 0.12.0.
+Brand.yml support needs a recent bslib (verified against 0.12.0) *and* the
+{brand.yml} package, which bslib only lists in `Suggests`. Without it,
+`bs_theme(brand = TRUE)` fails with `The package "brand.yml" is required.`,
+so install it alongside bslib.
 
 ## Static assets
 
@@ -152,7 +156,10 @@ CSS and `www/` for assets theming can't express.
 - **Expecting `input_dark_mode()` to update `renderPlot()` output.**
   {thematic} reacts to `session$setCurrentTheme()`, not the client toggle.
 - **`_brand.yml` silently ignored.** Confirm it's named `_brand.yml`
-  (leading underscore) and sits in the app directory or a parent.
+  (leading underscore) and sits in the app directory, a parent, or a
+  `_brand/`/`brand/` subdirectory of either.
+- **`bs_theme(brand = TRUE)` erroring on a fresh machine.** The {brand.yml}
+  package is a bslib `Suggests`; install it explicitly.
 - **Passing `bs_theme()` anywhere but a page's `theme =`.** Only meaningful
   there or in `session$setCurrentTheme()`.
 - **Serving files from a directory without `addResourcePath()`.** Only

@@ -30,12 +30,15 @@ Spans:
 - `reactive_update` — one span per reactive flush cycle: starts when Shiny
   detects something needs recalculating, ends when there is nothing left to
   calculate (sync or async).
-- `reactive`, `observe`, `output` — one span per execution of a
-  `reactive()`, `observe()`, or `render*()` output, including any async
-  promise chain.
-- `reactive debounce`, `reactive throttle` — for `debounce()`d/`throttle()`d
-  reactives.
-- `reactiveFileReader`, `reactivePoll` — for those polling reactives.
+- `reactive <label>`, `observe <label>`, `output <label>` — one span per
+  execution of a `reactive()`, `observe()`, or `render*()` output, including
+  any async promise chain. The name is the kind plus the object's label, so
+  a named reactive reads `reactive myVal` and an anonymous observer reads
+  `observe <anonymous>`. `bindCache()`/`bindEvent()` variants add a suffix:
+  `reactive cache <label>`, `observe event <label>`.
+- Helper-built reactives keep the helper in the *label*, not the kind, so
+  they read `reactive debounce <label>`, `reactive throttle <label>`,
+  `reactive reactivePoll <label>`, `reactive reactiveFileReader <label>`.
 - `ExtendedTask` — wraps an `ExtendedTask`'s calculation, including its async
   chain.
 

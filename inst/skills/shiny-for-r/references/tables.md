@@ -45,13 +45,18 @@ tables a person can scan directly on the page.
 
 ## Larger or interactive tables: renderDataTable() status
 
-Shiny still ships `renderDataTable()`/`dataTableOutput()`, wrapping the
-JavaScript DataTables library, but its own documentation marks it
-**deprecated**: "This function is deprecated, use `DT::renderDT()` instead. It
-provides a superset of functionality, better performance, and better user
-experience." The help topic is also flagged internal (it no longer appears in
-the main function index). Do not reach for `renderDataTable()`/
-`dataTableOutput()` in new code — use the pointers below instead.
+Shiny still ships `renderDataTable()`/`dataTableOutput()`, but its own
+documentation marks them **deprecated**: "This function is deprecated, use
+`DT::renderDT()` instead. It provides a superset of functionality, better
+performance, and better user experience." The help topic is also flagged
+internal (it no longer appears in the main function index).
+
+Since shiny 1.8.1 they are also thin shims: when DT >= 0.32.1 is installed
+they emit a deprecation message and hand off to `DT::renderDT()`/
+`DT::DTOutput()`. Shiny's bundled legacy DataTables implementation runs only
+when DT is absent, or when you opt back in with
+`options(shiny.legacy.datatable = TRUE)`. Either way, call {DT} directly in
+new code rather than routing through the shim.
 
 ## Ecosystem pointers for interactive grids
 

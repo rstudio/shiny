@@ -180,8 +180,9 @@ slow_result <- reactive({
   the function itself.
 - Using `observe()` to compute a displayed value → effects return nothing;
   use `reactive()` and read it from a `render*()`.
-- Reading `input$x` outside a reactive context → "no reactive context"
-  error; read inside `reactive()`, `observe()`, `render*()`, or `isolate()`.
+- Reading `input$x` outside a reactive context → "Operation not allowed
+  without an active reactive context." Read inside `reactive()`,
+  `observe()`, `render*()`, or `isolate()`.
 - Missing `req()` on an empty input → errors or a spurious result; guard
   with `req(input$x)`.
 - Wrapping every read in `isolate()` "to be safe" → updates stop firing;

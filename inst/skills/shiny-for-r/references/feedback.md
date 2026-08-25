@@ -12,11 +12,12 @@ loop with no visible sign of progress. Use the built-in overlays below.
 
 ## Toast notifications
 
-`showNotification(ui, duration = 5, type = c("default", "message", "warning",
-"error"))` stacks a non-blocking message in a corner and auto-dismisses it
-after `duration` seconds (`NULL` keeps it up until removed). It returns an
-id; reuse that id to update the notification, or pass it to
-`removeNotification(id)` to dismiss it early.
+`showNotification(ui, action = NULL, duration = 5, closeButton = TRUE, id =
+NULL, type = c("default", "message", "warning", "error"))` stacks a
+non-blocking message in a corner and auto-dismisses it after `duration`
+seconds (`NULL` keeps it up until removed). It returns an id; reuse that id
+to update the notification, or pass it to `removeNotification(id)` to
+dismiss it early.
 
 ```r
 library(shiny)

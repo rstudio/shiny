@@ -32,7 +32,7 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 ```
 
-- `page_sidebar(sidebar, ...)` — single-page dashboard with sidebar and title.
+- `page_sidebar(..., sidebar = , title = )` — single-page dashboard with sidebar and title; the first positional argument is page content, so name `sidebar =`.
 - `page_navbar(...)` — multi-page app with a top navbar; pages are `nav_panel()`s.
 - `page_fillable(...)` — fills the viewport height; foundation the other two build on.
 - `page_fluid(...)` — full-width page that scrolls normally, no filling.
@@ -145,7 +145,7 @@ shinyApp(ui, server)
 
 | Function | Purpose |
 |---|---|
-| `page_sidebar(sidebar, ...)` | Single-page dashboard with sidebar + title |
+| `page_sidebar(..., sidebar = )` | Single-page dashboard with sidebar + title |
 | `page_navbar(...)` | Multi-page app with a top navbar |
 | `page_fillable(...)` | Viewport-filling page, no scrolling |
 | `page_fluid(...)` | Full-width scrolling page |

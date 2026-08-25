@@ -36,22 +36,26 @@ clears the others.
 
 ## Map interactions to data rows: nearPoints() / brushedPoints()
 
-`nearPoints(df, coordinfo, xvar, yvar, threshold = 5, maxpoints = NULL)`
-returns rows near a click/hover/dblclick event, sorted by distance;
-`brushedPoints(df, brush, xvar, yvar)` returns rows under a brush — both take
-an `input$<id>_*` value as `coordinfo`/`brush`. ggplot2 plots usually infer
+`nearPoints(df, coordinfo, xvar = NULL, yvar = NULL, panelvar1 = NULL,
+panelvar2 = NULL, threshold = 5, maxpoints = NULL, addDist = FALSE, allRows =
+FALSE)` returns rows near a click/hover/dblclick event, sorted by distance;
+`brushedPoints(df, brush, xvar = NULL, yvar = NULL, panelvar1 = NULL,
+panelvar2 = NULL, allRows = FALSE)` returns rows under a brush. Note the two
+`panelvar*` arguments sitting before `threshold`/`allRows` — name anything
+past `yvar` rather than passing it positionally. Both take an
+`input$<id>_*` value as `coordinfo`/`brush`. ggplot2 plots usually infer
 `xvar`/`yvar` automatically; base graphics need them supplied. `allRows =
 TRUE` returns every row with a `selected_` boolean column instead of
 filtering. See the full app below for both wired to a brushed scatter plot.
 
 ## Cache expensive plots: renderCachedPlot() / bindCache()
 
-`renderCachedPlot(expr, cacheKeyExpr, cache = "app")` re-executes `expr` only
-when `cacheKeyExpr` changes, retrieving a stored PNG otherwise — a shortcut
-for `renderPlot(expr) |> bindCache(...)`. Build the key from the same
-reactive inputs the plot depends on, since the key (not `expr`) controls
-re-execution. `cache = "app"` shares cached plots across all sessions;
-`cache = "session"` scopes caching to one user.
+`renderCachedPlot(expr, cacheKeyExpr, sizePolicy = , res = , cache = "app")`
+re-executes `expr` only when `cacheKeyExpr` changes, retrieving a stored PNG
+otherwise — a shortcut for `renderPlot(expr) |> bindCache(...)`. Build the
+key from the same reactive inputs the plot depends on, since the key (not
+`expr`) controls re-execution. `cache = "app"` shares cached plots across
+all sessions; `cache = "session"` scopes caching to one user.
 
 ```r
 # Partial snippet: plugs into a server function
@@ -122,8 +126,8 @@ shinyApp(ui, server)
 |---|---|
 | `renderPlot()` / `plotOutput()` | Draw a reactive plot |
 | `renderImage()` / `imageOutput()` | Serve a static or generated image file |
-| `nearPoints(df, coordinfo, xvar, yvar)` | Rows near a click/hover event |
-| `brushedPoints(df, brush, xvar, yvar)` | Rows under a brush |
+| `nearPoints(df, coordinfo, xvar = , yvar = , ...)` | Rows near a click/hover event |
+| `brushedPoints(df, brush, xvar = , yvar = , ...)` | Rows under a brush |
 | `renderCachedPlot(expr, cacheKeyExpr)` | Cache plot output on a cheap key |
 | `bindCache()` | Add caching to any `render*()`/`reactive()` |
 | `clickOpts()`, `hoverOpts()`, `brushOpts()` | Tune interaction behavior |

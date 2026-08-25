@@ -138,9 +138,9 @@ CSS and `www/` for assets theming can't express.
 
 | Function | Purpose |
 |---|---|
-| `bs_theme(preset, bg, fg, primary, base_font, font_scale, ...)` | Build a theme; pass to a page's `theme =` |
+| `bs_theme(version = , preset = , bg = , fg = , primary = , base_font = , ...)` | Build a theme; pass to a page's `theme =` |
 | `font_google(family, ...)` | Reference a Google Font in a theme |
-| `input_dark_mode(id)` / `toggle_dark_mode(mode)` | Client-side light/dark toggle, read/set |
+| `input_dark_mode(id = )` / `toggle_dark_mode(mode)` | Client-side light/dark toggle, read/set |
 | `session$setCurrentTheme(theme)` | Recompile and swap the active theme at runtime |
 | `thematic_shiny(font = "auto")` | Make server-rendered plots match the theme |
 | `bs_theme(brand = TRUE/FALSE/path)` | Apply a `_brand.yml` file's colors/fonts/logo |

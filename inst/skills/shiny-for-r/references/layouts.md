@@ -122,7 +122,8 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 ```
 
-- `fluidPage(...)` — full-width scrolling page; no sidebar, filling, or theming.
+- `fluidPage(...)` — full-width scrolling page; no sidebar or filling. It
+  does accept `theme = bs_theme(...)`, but is unthemed unless you pass one.
 - `sidebarLayout(sidebarPanel(...), mainPanel(...))` — two-region layout.
 - `fluidRow(column(width, ...), ...)` — 12-column grid; widths sum to at most 12.
 - `fillPage(...)` — viewport-filling page predating `page_fillable()`.
@@ -133,7 +134,7 @@ shinyApp(ui, server)
 
 | Legacy | bslib replacement | Why |
 |---|---|---|
-| `fluidPage()` | `page_sidebar()` / `page_navbar()` | Sidebar, filling, theming |
+| `fluidPage()` | `page_sidebar()` / `page_navbar()` | Sidebar, filling, and a Bootstrap 5 theme by default |
 | `sidebarLayout(sidebarPanel(), mainPanel())` | `page_sidebar(sidebar = sidebar(...), ...)` | Collapsible sidebar |
 | `fluidRow(column(...))` | `layout_columns()` / `layout_column_wrap()` | Works with filling |
 | `wellPanel()` | `card()` | Full-screen, headers/footers |

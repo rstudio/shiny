@@ -50,7 +50,18 @@ test_that("every R chunk in the skill parses", {
     for (s in starts) {
       e <- ends[ends > s][1]
       code <- paste(lines[(s + 1):(e - 1)], collapse = "\n")
-      expect_no_error(parse(text = code), message = sprintf("%s line %d", basename(f), s))
+      # `message =` on expect_no_error() filters which conditions count as a
+      # failure, so it cannot carry a "which chunk?" label; catch the error
+      # and put the location in `info` instead.
+      err <- tryCatch(parse(text = code), error = identity)
+      failed <- inherits(err, "error")
+      expect_false(
+        failed,
+        info = sprintf(
+          "%s line %d: %s",
+          basename(f), s, if (failed) conditionMessage(err) else ""
+        )
+      )
     }
   }
 })

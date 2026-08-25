@@ -36,7 +36,10 @@ test_that("SKILL.md frontmatter is valid for btw discovery", {
 
 test_that("SKILL.md links and reference files match one-to-one", {
   skill <- readLines(file.path(skill_dir(), "SKILL.md"))
-  linked <- unique(unlist(regmatches(skill, gregexpr("references/[a-z-]+\\.md", skill))))
+  # Keep the character class wide enough to match any file that could land in
+  # references/; a narrower one would report a new file as an orphan rather
+  # than as a link, which reads like the wrong failure.
+  linked <- unique(unlist(regmatches(skill, gregexpr("references/[a-zA-Z0-9._-]+\\.md", skill))))
   actual <- file.path("references", list.files(file.path(skill_dir(), "references")))
   expect_setequal(linked, actual)
 })

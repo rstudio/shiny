@@ -87,8 +87,10 @@ tooltip(
 )
 ```
 
-`tooltip()` uses the last HTML element in its first argument as the trigger,
-so only the icon is hoverable in `span("Label", bsicons::bs_icon("info"))`.
+When `trigger` renders as *several* top-level elements, only the last one is
+hoverable — `tooltip(tagList("Label", bsicons::bs_icon("info")), ...)` puts
+the tooltip on the icon alone. Wrap them in a single `span()` or `div()`
+when the whole thing should be the trigger.
 `popover()` follows the same pattern but opens on click and can hold
 inputs. Give either an `id` to drive it via `toggle_tooltip()`/
 `toggle_popover()` or `update_tooltip()`/`update_popover()`.

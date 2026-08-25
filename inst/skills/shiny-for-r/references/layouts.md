@@ -5,11 +5,11 @@
 Build page structure by composing {bslib} layout functions — `page_sidebar()`,
 `layout_columns()`, `card()` — instead of nesting `fluidRow()`/`column()`
 pyramids or hand-written `<div class="row">` markup. A three-card grid built
-from three nested `fluidRow(column(4, ...))` calls is fragile, doesn't
-participate in bslib's fill system, and takes more code than the single-call
-bslib equivalent. Start every app with one page function, then nest
-`sidebar()`, `layout_columns()`, and `card()` inside it. This reference
-covers modern bslib first, then the legacy shiny functions it replaces.
+as `fluidRow(column(4, ...), column(4, ...), column(4, ...))` is fragile,
+doesn't participate in bslib's fill system, and takes more code than the
+single-call bslib equivalent. Start every app with one page function, then
+nest `sidebar()`, `layout_columns()`, and `card()` inside it. This reference
+covers bslib first, then the shiny functions it supersedes.
 
 ## Choose a page function
 

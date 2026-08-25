@@ -94,9 +94,10 @@ test_that("shiny APIs documented in references still exist", {
   exports <- getNamespaceExports("shiny")
   for (ref in names(apis)) {
     missing <- setdiff(apis[[ref]], exports)
-    expect_length(missing, 0)
     if (length(missing)) {
       fail(sprintf("references/%s.md documents non-existent exports: %s", ref, toString(missing)))
+    } else {
+      succeed()
     }
   }
 })

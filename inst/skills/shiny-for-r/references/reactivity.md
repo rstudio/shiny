@@ -144,9 +144,11 @@ data <- reactivePoll(
 ## Cache across sessions: `bindCache()`
 
 Ordinary `reactive()` remembers only its most recent value; `bindCache()`
-remembers every value for a key and, by default (`cache = "app"`), shares it
-across sessions. Use the reactive's own expressions as the key; pair with
-`bindEvent()` to defer work until requested.
+keeps one entry per key and, by default (`cache = "app"`), shares them across
+sessions. The app cache is a bounded LRU `cachem::cache_mem()` (~200 MB by
+default), so old entries are evicted rather than kept forever — treat a hit
+as likely, not guaranteed. Use the reactive's own expressions as the key;
+pair with `bindEvent()` to defer work until requested.
 
 ```r
 # Partial snippet: inside a server function

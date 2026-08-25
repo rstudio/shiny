@@ -17,7 +17,13 @@ dependency, so changing that source re-runs everything that read it — you
 never call outputs or schedule updates yourself.
 
 This skill is an **index**. Find your task below and **read the linked
-reference file before writing code** for that area.
+reference file before writing code** for that area. Read the one or two
+references your task actually touches, not all of them.
+
+Not every corner of Shiny has a reference here — plain inputs
+(`selectInput()`, `actionButton()`, ...), deployment, and app performance
+tuning are not covered. For those, work from your own knowledge of the
+package and its help pages.
 
 ## Foundations
 
@@ -64,16 +70,11 @@ reference file before writing code** for that area.
 | Feedback | Toasts/notifications, modal dialogs, progress bars, and input validation sent from the server, typically inside `observeEvent()` | `references/feedback.md` |
 | Bookmarking | Saving/restoring app state via a shareable URL instead of a hand-built query string or custom persistence layer | `references/bookmarking.md` |
 
-## Theming & assets
+## Theming, assets & extending
 
 | Topic | Use when | Reference |
 |---|---|---|
 | Theming & assets | Setting `bslib::bs_theme()` Sass variables, `thematic` for plot theming, `brand.yml`, or adding custom CSS/JS/image assets | `references/theming-assets.md` |
-
-## Extending
-
-| Topic | Use when | Reference |
-|---|---|---|
 | Custom components | Integrating a third-party JS widget or bespoke interaction when no built-in input/output covers it | `references/custom-components.md` |
 
 ## Testing & observability
@@ -83,9 +84,4 @@ reference file before writing code** for that area.
 | Testing | Verifying server-side reactive logic with `testServer()` without starting a real Shiny process or browser | `references/testing.md` |
 | Debugging | Dropping into a real R debugger (`browser()`, error breakpoints) instead of `print()`-debugging a running reactive graph | `references/debugging.md` |
 | OpenTelemetry | Tracing sessions, flush cycles, and reactive/observer/output executions instead of log-scraping or ad hoc timing | `references/opentelemetry.md` |
-
-## Ecosystem
-
-| Topic | Use when | Reference |
-|---|---|---|
 | Ecosystem | Deciding whether a companion package (DT, plotly, leaflet, shinychat, shinytest2, etc.) already solves the problem before hand-rolling it | `references/ecosystem.md` |

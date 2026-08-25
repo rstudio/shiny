@@ -10,9 +10,9 @@ bespoke interaction. The anti-pattern this reference prevents is a
 opens a side channel by hand instead of registering with Shiny's client-side
 APIs (`Shiny.InputBinding`,
 `Shiny.OutputBinding`, `Shiny.addCustomMessageHandler`). Those give
-serialization, initial values, reconnects, and module namespacing for free;
-hand-rolled `<script>` tags get none of it and break once the element sits
-in a module or is re-rendered.
+serialization, initial values, reconnects, and automatic re-binding of
+elements inserted after page load for free; hand-rolled `<script>` tags get
+none of it and break once the element is re-rendered.
 
 ## Ship the JS/CSS: htmltools::htmlDependency()
 
@@ -27,13 +27,19 @@ and dedup break. See `?htmltools::htmlDependency` for the full argument list.
 The simplest custom input calls `Shiny.setInputValue("id", value)`, read as
 `input$id` server-side — but that only handles one instance and skips
 reconnect restoration. For a reusable element type, register a
-`Shiny.InputBinding` subclass so Shiny finds every matching element, restores
-values, and namespaces ids inside modules.
+`Shiny.InputBinding` subclass so Shiny finds every matching element and
+restores its value on reconnect.
+
+Bindings do not namespace ids for you: `getId(el)` reads the element's
+`data-input-id` or `id` attribute as-is. Inside a module the *UI author*
+must namespace the id, exactly as with a built-in input — pass
+`ns("counter")` rather than `"counter"`.
 
 ```r
 # Partial snippet: UI side of the "counter" input, paired with the JS below
 library(shiny)
 
+# Callers namespace the id themselves: counterInput(ns("counter"), "Clicks")
 counterInput <- function(id, label) {
   tagList(
     tags$button(
@@ -69,10 +75,10 @@ class CounterBinding extends Shiny.InputBinding {
 Shiny.inputBindings.register(new CounterBinding(), "myapp.counter");
 ```
 
-The server reads it like any input: `input$counter_id`. `find()` runs
-per-scope, so ids inside `renderUI()` fragments and modules are picked up for
-free; `unsubscribe()` undoes `subscribe()` (here, cloning the node drops its
-listener).
+The server reads it like any input: `input$counter` (or
+`session$ns("counter")`'s value inside a module). `find()` runs per-scope, so
+elements injected later by `renderUI()` or `insertUI()` are bound
+automatically; `unsubscribe()` undoes `subscribe()`.
 
 Outputs mirror this with `Shiny.OutputBinding`: `find()` locates placeholders,
 and `renderValue(el, data)` receives whatever `render*()` returned,
@@ -152,6 +158,8 @@ a binding yourself.
 - **`tags$script()` blobs grabbing `#id` elements directly.** Breaks after
   `renderUI()` re-renders the element, or once it moves inside a module —
   register a binding instead.
+- **Assuming a binding namespaces ids inside a module.** It reads the id
+  off the element; the UI function's caller must pass `ns("...")`.
 - **Output id/class doesn't match the binding's `find()`.** `renderValue()`
   never fires; keep the class equal to the selector used.
 - **`type` mismatch between `sendCustomMessage()` and

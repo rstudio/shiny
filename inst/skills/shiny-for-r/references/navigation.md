@@ -7,10 +7,13 @@ Group switchable content into a tab container instead of faking tabs with
 container gives you the tab strip, active styling, keyboard/ARIA behavior,
 and a server-readable selection for free; hand-rolled tab-switching logic
 duplicates all of that and drifts out of sync as panels are added. This
-reference covers legacy shiny navigation (`tabsetPanel()`, `navbarPage()`)
-and its bslib equivalents (`navset_*()`, `page_navbar()`).
+reference covers shiny's original navigation functions (`tabsetPanel()`,
+`navbarPage()`) and the bslib equivalents (`navset_*()`, `page_navbar()`)
+that supersede them. Reach for the bslib functions in new code: they are
+still fully supported, but the shiny ones no longer gain features and do not
+participate in bslib's fill system.
 
-## Legacy shiny: tabsetPanel and tabPanel
+## Superseded shiny: tabsetPanel and tabPanel
 
 `tabsetPanel()` holds `tabPanel()` children and renders a tab strip that
 shows one panel at a time. Give it an `id` to read the active panel's
@@ -159,10 +162,10 @@ page_navbar(
 
 | Function | Purpose |
 |---|---|
-| `tabsetPanel(..., id = , type = )` | Legacy tab container; `type = "hidden"` for server-driven tabs |
+| `tabsetPanel(..., id = , type = )` | Superseded tab container; `type = "hidden"` for server-driven tabs |
 | `tabPanel(title, ...)` | One panel inside `tabsetPanel()`/`navbarPage()` |
-| `navbarPage(title, ...)` | Legacy full-page navbar app |
-| `navlistPanel(...)` | Legacy vertical list navigation |
+| `navbarPage(title, ...)` | Superseded full-page navbar app; prefer `page_navbar()` |
+| `navlistPanel(...)` | Superseded vertical list navigation; prefer `navset_pill_list()` |
 | `updateTabsetPanel()` / `updateNavbarPage()` / `updateNavlistPanel()` | Switch the active panel from the server |
 | `showTab()` / `hideTab()` | Show or hide a panel without removing it |
 | `nav_panel(title, ...)` | bslib panel inside a `navset_*()` or `page_navbar()` |

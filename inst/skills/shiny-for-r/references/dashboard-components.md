@@ -33,7 +33,7 @@ stretch) to combine fixed and resizable regions.
 
 Page-wide filters belong in a sidebar; controls that change one card's
 display (period, grouping, sort order) belong in its `card_header()`, via
-`toolbar()`. Requires bslib >= 0.12.0.
+`toolbar()`. Requires bslib >= 0.11.0.
 
 ```r
 # Partial snippet: inside a card()

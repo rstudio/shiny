@@ -49,7 +49,9 @@ test_that("every R chunk in the skill parses", {
     ends <- grep("^```\\s*$", lines)
     for (s in starts) {
       e <- ends[ends > s][1]
-      code <- paste(lines[(s + 1):(e - 1)], collapse = "\n")
+      # An empty chunk (``` immediately after ```r) has no body; `(s + 1):(e -
+      # 1)` would count backwards and grab the fences themselves.
+      code <- if (e > s + 1) paste(lines[(s + 1):(e - 1)], collapse = "\n") else ""
       # `message =` on expect_no_error() filters which conditions count as a
       # failure, so it cannot carry a "which chunk?" label; catch the error
       # and put the location in `info` instead.

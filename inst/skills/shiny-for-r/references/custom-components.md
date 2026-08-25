@@ -103,6 +103,9 @@ registerInputHandler("myapp.roundedint", function(x, shinysession, name) {
 The binding's `getType(el)` must return the matching type string so Shiny
 applies the right handler; see `?registerInputHandler` for the argument
 contract and built-in types (`shiny.matrix`, `shiny.number`, `shiny.date`).
+Registering a type that already exists is an error — pass `force = TRUE` to
+overwrite, which is what you want when reloading a package during
+development.
 
 ## Server-to-client messages: sendCustomMessage()
 

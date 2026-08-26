@@ -18,6 +18,8 @@ skill_dir <- function() {
 }
 
 read_frontmatter <- function(path) {
+  # {yaml} is a Suggests, so it is absent from the depends-only check.
+  skip_if_not_installed("yaml")
   lines <- readLines(path)
   bounds <- which(lines == "---")
   yaml::yaml.load(paste(lines[(bounds[1] + 1):(bounds[2] - 1)], collapse = "\n"))

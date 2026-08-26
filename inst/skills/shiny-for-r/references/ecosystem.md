@@ -25,7 +25,7 @@ package and entry point, not how to use it.
 | {reactlog} | You need to see the reactive graph itself — what invalidated what, and in what order — to debug a reactivity puzzle. | `reactlog::reactlog_enable()` before running the app, then `shiny::reactlogShow()` |
 | {htmltools} | You're building custom UI components and need to construct or combine HTML tags, or bundle CSS/JS as a dependency. | `htmltools::tags` (or `tagList()`) for markup; `htmltools::htmlDependency()` for assets |
 | {mirai} | You need to run slow or CPU-bound work off the main R process, without blocking other sessions (or, with `ExtendedTask`, the current one). | `mirai::mirai()`, with `mirai::daemons()` to set up reusable background processes |
-| {promises} | You're composing async steps — chaining, error handling — around whatever produced the async value. | `promises::then()`/`%...>%`, `promises::catch()`; `future::future()` becomes a promise via `promises::future_promise()` |
+| {promises} | You're composing async steps — chaining, error handling — around whatever produced the async value. | `promises::then()` piped with `\|>`, plus `promises::catch()`; use `promises::future_promise()` to run {future} work as a promise |
 | {thematic} | You want your R plots (base, ggplot2, lattice) to automatically match the app's bslib theme, including dark mode. | `thematic::thematic_shiny()`, called once before the app runs |
 
 ## Common mistakes
@@ -44,6 +44,10 @@ package and entry point, not how to use it.
 - **Debugging a reactivity puzzle by adding `print()` calls everywhere.**
   {reactlog} shows the actual invalidation graph, usually faster than
   guessing from scattered log lines.
+- **Calling `future::future()` directly for background work.** It blocks
+  the main R process whenever every {future} worker is busy. Wrap it in
+  `promises::future_promise()`, which hands back a promise right away and
+  starts the work once a worker frees up.
 - **Restyling every plot function by hand to match dark mode.** Call
   `thematic::thematic_shiny()` once and let base R, ggplot2, and lattice
   plots pick up the app's theme automatically.

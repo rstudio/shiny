@@ -89,10 +89,7 @@ returns the value from the most recent invocation, on `"error"` it
 re-throws that error, and on `"initial"`/`"running"` it throws a silent
 error — like `req(FALSE)` — that blanks the output or, while running, shows
 a progress state. Reading either establishes a reactive dependency, so an
-output calling `task$result()` re-renders once the task finishes. Read both
-naively from a render function, `reactive()`, or `observe()` — not from
-`observeEvent()`, `eventReactive()`, `bindEvent()`, or `isolate()`, where the
-invalidation is ignored.
+output calling `task$result()` re-renders once the task finishes.
 
 ## When to reach for `ExtendedTask`
 

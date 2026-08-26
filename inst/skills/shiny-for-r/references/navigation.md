@@ -118,7 +118,7 @@ navbarPage(
 bslib replaces `tabsetPanel()` with `navset_*()` containers holding
 `nav_panel()` children, chosen by visual style: `navset_tab()` (classic
 bordered tabs), `navset_pill()` (rounded buttons), `navset_underline()`
-(underlined links, modern default), or `navset_card_tab()` (tabs wrapped in
+(underlined links), or `navset_card_tab()` (tabs wrapped in
 a card header — don't additionally wrap panel content in `card()`).
 
 ```r

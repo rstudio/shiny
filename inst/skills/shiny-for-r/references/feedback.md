@@ -159,10 +159,10 @@ shinyApp(ui, server)
   shows a red "Error:" box; use `validate(need(...))` for a friendly message.
 - Faking a popup with `conditionalPanel()` + `renderUI()` -> use
   `modalDialog()` / `showModal()` instead.
-- Calling `showNotification()`/`showModal()`/`Progress$new()` without an
-  active session (e.g. a plain R script or the console) -> they rely on
-  `getDefaultReactiveDomain()`; they work fine at server top level or inside
-  a render function, not just `observeEvent()`.
+- Calling `showNotification()`/`showModal()`/`Progress$new()` from a plain
+  R script or the console -> they error; they need an active session
+  (`getDefaultReactiveDomain()`). Anywhere inside `server` is fine — top
+  level, a render function, or an observer.
 - Forgetting to capture the id from `showNotification()` -> can't remove or
   update it later.
 - A long loop with only `message()`/`cat()` for status -> the browser shows

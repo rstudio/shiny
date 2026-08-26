@@ -151,7 +151,7 @@ shinyApp(ui, server)
   filename, not a location on disk — open `input$file$datapath` instead.
 - **Touching `input$file` with no guard.** It's `NULL` until a file is
   picked; wrap access in `req(input$file)`.
-- **Upload silently failing above 5 MB.** Raise
+- **Upload rejected above 5 MB.** Raise
   `options(shiny.maxRequestSize = ...)`.
 - **`content` function returning a value instead of writing to `file`.**
   `downloadHandler()` ignores the return value — write the bytes to the

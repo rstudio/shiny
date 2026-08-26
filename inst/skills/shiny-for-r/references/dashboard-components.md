@@ -14,7 +14,6 @@ reference covers the bslib components that fill a dashboard's body.
 `card_footer()` must be direct children; other children get wrapped in an
 implicit `card_body()`. Add `full_screen = TRUE` on cards with a plot or table.
 
-
 ```r
 # Partial snippet: inside a page_* function
 card(

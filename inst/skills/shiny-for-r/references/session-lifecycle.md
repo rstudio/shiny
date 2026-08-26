@@ -63,10 +63,13 @@ hard-destroys a specific module scope: reading from it afterward errors.
 
 ## React to errors: `onUnhandledError()`
 
-Registers a function called when an unhandled error occurs — one that would
-otherwise crash the app or surface as an "Error" output. It receives the
-error condition, and cannot prevent the app from closing; use it only to
-log or clean up.
+Registers a function called when an unhandled error occurs — one your own
+code didn't catch. Not all of these are equal: an error in a render
+function shows as an "Error" output and the session carries on, while an
+error in an observer is fatal and closes the session. The callback receives
+the error condition — fatal ones carry the class `shiny.error.fatal`, which
+is what the example below branches on. It cannot stop the error or keep a
+fatal one from closing the session; use it only to log or clean up.
 
 ```r
 library(shiny)
@@ -125,7 +128,7 @@ onSessionEnded(function() {
 |---|---|
 | `onSessionEnded(fun)` / `session$onSessionEnded(fun)` | Cleanup after the client disconnects |
 | `onStop(fun)` | Session cleanup inside `server`; app-exit cleanup outside it |
-| `onUnhandledError(fun)` | Log/react to an error that crashes the app or shows as "Error" |
+| `onUnhandledError(fun)` | Log/react to an unhandled error (fatal ones carry `shiny.error.fatal`) |
 | `session$onFlush(fun, once = TRUE)` | Run code just before output updates are sent |
 | `session$onFlushed(fun, once = TRUE)` | Run code just after output updates are sent |
 | `session$userData` | Per-session environment for arbitrary state |
@@ -142,9 +145,9 @@ onSessionEnded(function() {
 - Doing cleanup only in `global.R` or at the bottom of `app.R` → runs once
   per process, not per user; register per-session cleanup with
   `onSessionEnded()`.
-- Expecting `onUnhandledError()` to stop the app from closing → it cannot;
-  it is observation-only, for logging or cleanup around a failure already
-  happening.
+- Expecting `onUnhandledError()` to recover from the error or keep a fatal
+  one from closing the session → it cannot; it is observation-only, for
+  logging or cleanup around a failure already happening.
 - Reading `session$userData` before `server` has a `session` argument in
   scope → it only exists inside the server function; it is not part of
   `global.R`.

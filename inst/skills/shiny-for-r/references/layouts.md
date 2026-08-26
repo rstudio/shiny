@@ -125,7 +125,7 @@ shinyApp(ui, server)
 ```
 
 - `fluidPage(...)` — full-width scrolling page; no sidebar or filling. It
-  does accept `theme = bs_theme(...)`, but is unthemed unless you pass one.
+  uses legacy Bootstrap 3 styling unless you pass `theme = bs_theme(...)`.
 - `sidebarLayout(sidebarPanel(...), mainPanel(...))` — two-region layout.
 - `fluidRow(column(width, ...), ...)` — 12-column grid; widths sum to at most 12.
 - `fillPage(...)` — viewport-filling page predating `page_fillable()`.

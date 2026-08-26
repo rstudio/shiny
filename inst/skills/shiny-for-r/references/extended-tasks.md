@@ -16,8 +16,8 @@ the session that kicked off the work still waits.)
 `ExtendedTask$new(func)` wraps a function that returns something
 `promises::as.promise()` understands. Reach for `mirai::mirai()`: it hands
 the expression to a background R process, so the heavy computation never
-touches the main one. (A plain `promises::promise`, or a
-`future::future()` wrapped in `promises::future_promise()`, is accepted
+touches the main one. (A plain `promises::promise`,
+`promises::future_promise()`, or a `future::future()` object is accepted
 too.) Create the task once, near the top of `server` (or a module server
 function), not inside a reactive. `func` must not read reactive inputs
 directly — they may have changed by run time — so pass any values it needs
@@ -107,7 +107,7 @@ polling, not a single long-running background operation.
 
 | Function | Purpose |
 |---|---|
-| `ExtendedTask$new(func)` | Create a task; `func` returns a `mirai()` (or any promise) |
+| `ExtendedTask$new(func)` | Create a task; `func` returns a `mirai()` (or any promise-like object) |
 | `task$invoke(...)` | Start a run (non-blocking); queues if already running |
 | `task$status()` | Reactive read: `"initial"`/`"running"`/`"success"`/`"error"` |
 | `task$result()` | Reactive read of the latest result; errors/blanks appropriately |

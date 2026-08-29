@@ -13,6 +13,8 @@ dateInput(
   format = "yyyy-mm-dd",
   startview = "month",
   weekstart = 0,
+  minviewmode = "days",
+  maxviewmode = "centuries",
   language = "en",
   width = NULL,
   autoclose = TRUE,
@@ -43,6 +45,15 @@ Can be "month" (the default), "year", or "decade".}
 
 \item{weekstart}{Which day is the start of the week. Should be an integer
 from 0 (Sunday) to 6 (Saturday).}
+
+\item{minviewmode}{The minimum resolution available when selecting dates.
+Can be "days" (the default), "months", "years", "decades", or "centuries".
+This can restrict date selection to a month, a year, a decade, or a century.
+The selected date will correspond to the first day of the selected period.}
+
+\item{maxviewmode}{The maximum resolution available when selecting dates.
+Can be "days", "months", "years", "decades", or "centuries" (the default).
+This can restrict the ability to zoom out for quicker navigation.}
 
 \item{language}{The language used for month and day names. Default is "en".
 Other valid values include "ar", "az", "bg", "bs", "ca", "cs", "cy", "da",
@@ -121,7 +132,10 @@ ui <- fluidPage(
 
   # Disable specific dates.
   dateInput("date8", "Date:", value = "2012-02-29",
-            datesdisabled = c("2012-03-01", "2012-03-02"))
+            datesdisabled = c("2012-03-01", "2012-03-02")),
+
+  # Restrict user to selecting a month
+  dateInput("date9", "Date:", minviewmode = "months")
 )
 
 shinyApp(ui, server = function(input, output) { })

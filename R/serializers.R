@@ -68,6 +68,10 @@ serializeReactiveValues <- function(values, exclude, stateDir = NULL) {
   # actual values later.
   vals <- isolate(impl$names())
   vals <- setdiff(vals, exclude)
+
+  # Frozen values are pending an update and throw a "silent" error if read
+  # (see freezeReactiveValue()); skip them so they don't abort bookmarking.
+  vals <- Filter(function(name) !impl$isFrozen(name), vals)
   names(vals) <- vals
 
   # Get values and apply serializer functions

@@ -21,6 +21,7 @@ declare global {
     bsDatepicker(methodName: "getEndDate"): Date | 1e9999; // eslint-disable-line no-loss-of-precision
     bsDatepicker(methodName: string): void;
     bsDatepicker(methodName: string, params: Date | null): void;
+    bsDatepicker(methodName: "setDatesDisabled", params: Date[]): void;
   }
 }
 
@@ -97,6 +98,15 @@ class DateInputBindingBase extends InputBinding {
     }
     if ($input.data("max-date") !== undefined) {
       this._setMax($input[0], $input.data("max-date"));
+    }
+
+    // Disabled dates always use yyyy-mm-dd format (like min-date and
+    // max-date above), instead of bootstrap-datepicker's built-in support
+    // for data-date-dates-disabled, which parses strings using the current
+    // date format and would silently fail to match when `format` isn't
+    // yyyy-mm-dd (#4281).
+    if ($input.data("dates-disabled") !== undefined) {
+      this._setDatesDisabled($input[0], $input.data("dates-disabled"));
     }
   }
   protected _getLabelNode(el: HTMLElement): JQuery<HTMLElement> {
@@ -185,6 +195,23 @@ class DateInputBindingBase extends InputBinding {
     } else {
       $(el).bsDatepicker("setUTCDate", curValue);
     }
+  }
+  // Given an array of unambiguous date strings and/or Date objects, disable
+  // those dates on the datepicker. null/undefined entries are dropped.
+  protected _setDatesDisabled(
+    el: HTMLElement,
+    dates: Array<Date | string | null | undefined> | null,
+  ): void {
+    if (!dates) {
+      $(el).bsDatepicker("setDatesDisabled", []);
+      return;
+    }
+
+    const parsedDates = dates
+      .map((date) => (date == null ? null : this._newDate(date)))
+      .filter((date): date is Date => date !== null);
+
+    $(el).bsDatepicker("setDatesDisabled", parsedDates);
   }
   // Given a date string of format yyyy-mm-dd, return a Date object with
   // that date at 12AM UTC.

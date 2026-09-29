@@ -6,6 +6,7 @@ declare global {
         bsDatepicker(methodName: "getEndDate"): Date | 1e9999;
         bsDatepicker(methodName: string): void;
         bsDatepicker(methodName: string, params: Date | null): void;
+        bsDatepicker(methodName: "setDatesDisabled", params: Date[]): void;
     }
 }
 type DateReceiveMessageData = {
@@ -32,6 +33,7 @@ declare class DateInputBindingBase extends InputBinding {
     }): string;
     protected _setMin(el: HTMLElement, date: Date | null): void;
     protected _setMax(el: HTMLElement, date: Date | null): void;
+    protected _setDatesDisabled(el: HTMLElement, dates: Array<Date | string | null | undefined> | null): void;
     protected _newDate(date: Date | never | string): Date | null;
     protected _floorDateTime(date: Date): Date;
     protected _dateAsUTC(date: Date): Date;

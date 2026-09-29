@@ -1,5 +1,7 @@
 # shiny (development version)
 
+* Fixed #4026: bookmarking no longer errors with "Error bookmarking state" when a frozen input (via `freezeReactiveValue()`) is part of the state. Frozen inputs are now omitted from the saved state, since their value is pending an update and reading it during bookmarking raised a silent error that aborted `session$doBookmark()`. (#4435)
+
 * Added an agent skill (`inst/skills/shiny-for-r/`) following the
   [Agent Skills](https://agentskills.io) convention. Coding agents using
   [btw](https://posit-dev.github.io/btw/) discover it automatically when

@@ -1386,6 +1386,9 @@
     }
     initialize(el) {
       const $input = (0, import_jquery10.default)(el).find("input");
+      if ($input.data("dates-disabled") !== void 0) {
+        this._setDatesDisabled($input[0], $input.data("dates-disabled"));
+      }
       let date = $input.data("initial-date");
       if (date === void 0 || date === null) {
         date = this._floorDateTime(this._dateAsUTC(/* @__PURE__ */ new Date()));
@@ -1396,9 +1399,6 @@
       }
       if ($input.data("max-date") !== void 0) {
         this._setMax($input[0], $input.data("max-date"));
-      }
-      if ($input.data("dates-disabled") !== void 0) {
-        this._setDatesDisabled($input[0], $input.data("dates-disabled"));
       }
     }
     _getLabelNode(el) {

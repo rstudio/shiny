@@ -4,9 +4,9 @@ declare global {
         bsDatepicker(methodName: "getUTCDate"): Date;
         bsDatepicker(methodName: "getStartDate"): Date | -1e9999;
         bsDatepicker(methodName: "getEndDate"): Date | 1e9999;
+        bsDatepicker(methodName: "setDatesDisabled", params: Date[]): void;
         bsDatepicker(methodName: string): void;
         bsDatepicker(methodName: string, params: Date | null): void;
-        bsDatepicker(methodName: "setDatesDisabled", params: Date[]): void;
     }
 }
 type DateReceiveMessageData = {

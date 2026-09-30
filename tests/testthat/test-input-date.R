@@ -43,11 +43,11 @@ test_that("dateInput() datesdisabled attribute is not consumed by bootstrap-date
   )
 })
 
-test_that("dateInput() datesdisabled defaults to JSON null, not omitted", {
+test_that("dateInput() omits the datesdisabled attribute when unused", {
   tag <- dateInput("date8", "Date:")
   input_tag <- tag$children[[2]]
 
-  expect_identical(unclass(input_tag$attribs[["data-dates-disabled"]]), "null")
+  expect_null(input_tag$attribs[["data-dates-disabled"]])
 })
 
 test_that("dateInput() datesdisabled accepts Date objects", {

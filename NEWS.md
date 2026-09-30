@@ -1,11 +1,6 @@
 # shiny (development version)
 
-* Fixed #4281: `dateInput()`'s `datesdisabled` now works when `format` is not
-  the default `yyyy-mm-dd`. The disabled dates were sent to the client as a
-  `data-date-*` attribute, which bootstrap-datepicker parses itself using the
-  display format, so they silently failed to match unless `format` was left
-  at its default. They are now converted to real dates on the client the
-  same way `min`/`max` already are. (#4281)
+* Fixed #4281, #3251: `dateInput()`'s `datesdisabled` now works when `format` is not the default `yyyy-mm-dd`. The dates are now converted to real dates on the client, the same way `min`/`max` already are, instead of being parsed by bootstrap-datepicker with the display format. (#4434)
 
 * Added an agent skill (`inst/skills/shiny-for-r/`) following the
   [Agent Skills](https://agentskills.io) convention. Coding agents using

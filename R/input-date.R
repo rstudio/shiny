@@ -122,16 +122,10 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
                `data-max-date` = max,
                `data-initial-date` = value,
                `data-date-autoclose` = if (autoclose) "true" else "false",
-               # Note: this is intentionally not `data-date-dates-disabled`. Bootstrap
-               # datepicker automatically picks up `data-date-*` attributes and parses
-               # them itself using the (possibly non-default) display `format`, but
-               # `datesdisabled` is always in yyyy-mm-dd format (like `min`/`max`). Using
-               # a plain `data-dates-disabled` attribute lets the client-side binding
-               # parse it as yyyy-mm-dd and hand the datepicker real Date objects instead
-               # (see srcts/src/bindings/input/date.ts, and #4281).
+               # Not `data-date-*`: bootstrap-datepicker would parse it with the display
+               # `format`. Handled in date.ts instead, like min/max (#4281).
                `data-dates-disabled` =
-                   # Ensure NULL is not sent as `{}` but as 'null'
-                   jsonlite::toJSON(datesdisabled, null = 'null'),
+                   if (!is.null(datesdisabled)) jsonlite::toJSON(datesdisabled),
                `data-date-days-of-week-disabled` =
                    jsonlite::toJSON(daysofweekdisabled, null = 'null')
     ),

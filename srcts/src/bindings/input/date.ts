@@ -19,9 +19,9 @@ declare global {
     bsDatepicker(methodName: "getStartDate"): Date | -1e9999; // eslint-disable-line no-loss-of-precision
 
     bsDatepicker(methodName: "getEndDate"): Date | 1e9999; // eslint-disable-line no-loss-of-precision
+    bsDatepicker(methodName: "setDatesDisabled", params: Date[]): void;
     bsDatepicker(methodName: string): void;
     bsDatepicker(methodName: string, params: Date | null): void;
-    bsDatepicker(methodName: "setDatesDisabled", params: Date[]): void;
   }
 }
 
@@ -79,6 +79,16 @@ class DateInputBindingBase extends InputBinding {
     // on Dates as soon as possible so that we know we're always working with
     // consistent objects.
 
+    // Disabled dates always use yyyy-mm-dd format (like min-date and max-date
+    // below), instead of bootstrap-datepicker's built-in support for
+    // data-date-dates-disabled, which parses strings using the display format
+    // (#4281). This must run before setValue(): setDatesDisabled() calls
+    // update(), which re-parses the input's text with the display format and
+    // misreads 2-digit years (eternicode/bootstrap-datepicker#2010).
+    if ($input.data("dates-disabled") !== undefined) {
+      this._setDatesDisabled($input[0], $input.data("dates-disabled"));
+    }
+
     let date = $input.data("initial-date");
     // If initial_date is null, set to current date
 
@@ -98,15 +108,6 @@ class DateInputBindingBase extends InputBinding {
     }
     if ($input.data("max-date") !== undefined) {
       this._setMax($input[0], $input.data("max-date"));
-    }
-
-    // Disabled dates always use yyyy-mm-dd format (like min-date and
-    // max-date above), instead of bootstrap-datepicker's built-in support
-    // for data-date-dates-disabled, which parses strings using the current
-    // date format and would silently fail to match when `format` isn't
-    // yyyy-mm-dd (#4281).
-    if ($input.data("dates-disabled") !== undefined) {
-      this._setDatesDisabled($input[0], $input.data("dates-disabled"));
     }
   }
   protected _getLabelNode(el: HTMLElement): JQuery<HTMLElement> {

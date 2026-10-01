@@ -139,18 +139,6 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
     initialize = function(func) {
       private$func <- func
 
-      # Do not show these private reactive values in otel spans
-      with_no_otel_collect({
-        private$rv_status <- reactiveVal("initial", label = "ExtendedTask$private$status")
-        private$rv_value <- reactiveVal(NULL, label = "ExtendedTask$private$value")
-        private$rv_error <- reactiveVal(NULL, label = "ExtendedTask$private$error")
-      })
-
-      private$invocation_queue <- fastmap::fastqueue()
-
-      domain <- getDefaultReactiveDomain()
-
-      # Set a label for the reactive values for easier debugging
       # Go up an extra sys.call() to get the user's call to ExtendedTask$new()
       # The first sys.call() is to `initialize(...)`
       call_srcref <- get_call_srcref(-1)
@@ -158,6 +146,31 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
         call_srcref,
         defaultLabel = "<anonymous>"
       )
+
+      # Do not show these private reactive values in otel spans
+      with_no_otel_collect({
+        initial <- list(status = "initial", value = NULL, error = NULL)
+        # The label is the state's snapshot identity. An unassigned task has
+        # none, so it falls back to a positional id (rule 4 of the rules of
+        # reactives).
+        private$rv_state <- if (identical(label, "<anonymous>")) {
+          reactiveVal(initial)
+        } else {
+          reactiveVal(initial, label = paste0("ExtendedTask ", label))
+        }
+      })
+      # A snapshotted invocation cannot be resumed: its promise died with the
+      # process.
+      if (identical(isolate(private$rv_state())$status, "running")) {
+        private$rv_state(list(
+          status = "error", value = NULL,
+          error = simpleError("ExtendedTask was interrupted by a server restart; invoke it again")
+        ))
+      }
+
+      private$invocation_queue <- fastmap::fastqueue()
+
+      domain <- getDefaultReactiveDomain()
       private$otel_span_label <- otel_span_label_extended_task(label, domain = domain)
       private$otel_log_label_add_to_queue <- otel_log_label_extended_task_add_to_queue(label, domain = domain)
 
@@ -185,7 +198,7 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
       call <- rlang::caller_call(n = 0)
 
       if (
-        isolate(private$rv_status()) == "running" ||
+        isolate(private$rv_state()$status) == "running" ||
           private$invocation_queue$size() > 0
       ) {
         otel_log(
@@ -226,7 +239,7 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
     #' * `"error"`: An invocation completed with an error, which will be
     #'   re-thrown if you call the `result()` method
     status = function() {
-      private$rv_status()
+      private$rv_state()$status
     },
     #' @description
     #' Attempts to read the results of the most recent invocation. This is a
@@ -255,14 +268,15 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
     #' [observeEvent()], [eventReactive()], [bindEvent()], or [isolate()] as the
     #' invalidation will be ignored.
     result = function() {
-      switch (private$rv_status(),
+      st <- private$rv_state()
+      switch (st$status,
         running = req(FALSE, cancelOutput = "progress"),
-        success = if (private$rv_value()$visible) {
-          private$rv_value()$value
+        success = if (st$value$visible) {
+          st$value$value
         } else {
-          invisible(private$rv_value()$value)
+          invisible(st$value$value)
         },
-        error = stop(private$rv_error()),
+        error = stop(st$error),
         # default case (initial, cancelled)
         req(FALSE)
       )
@@ -270,10 +284,9 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
   ),
   private = list(
     func = NULL,
-    # reactive value with "initial"|"running"|"success"|"error"
-    rv_status = NULL,
-    rv_value = NULL,
-    rv_error = NULL,
+    # reactive value holding list(status, value, error), where status is
+    # "initial"|"running"|"success"|"error"
+    rv_state = NULL,
     invocation_queue = NULL,
 
     otel_span_label = NULL,
@@ -283,9 +296,7 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
     otel_span = NULL,
 
     do_invoke = function(args, call = NULL) {
-      private$rv_status("running")
-      private$rv_value(NULL)
-      private$rv_error(NULL)
+      private$rv_state(list(status = "running", value = NULL, error = NULL))
 
       p <- promise_resolve(
         maskReactiveContext(do.call(private$func, args))
@@ -326,13 +337,11 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
         parent = err,
         call = call
       )
-      private$rv_status("error")
-      private$rv_error(err)
+      private$rv_state(list(status = "error", value = NULL, error = err))
     },
 
     on_success = function(value) {
-      private$rv_status("success")
-      private$rv_value(value)
+      private$rv_state(list(status = "success", value = value, error = NULL))
     }
   )
 )

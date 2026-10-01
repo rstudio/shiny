@@ -335,7 +335,7 @@ as.tags.shiny.render.function <- function(x, ..., inline = FALSE) {
 
 # Get relevant attributes from a render function object.
 renderFunctionAttributes <- function(x) {
-  attrs <- c("outputFunc", "outputArgs", "hasExecuted", "cacheHint", "otelAttrs")
+  attrs <- c("outputFunc", "outputArgs", "hasExecuted", "cacheHint", "otelAttrs", "disableResume", "snapshotHashParts")
   names(attrs) <- attrs
   lapply(attrs, function(name) attr(x, name, exact = TRUE))
 }

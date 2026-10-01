@@ -95,13 +95,26 @@ shinyApp <- function(ui, server, onStart=NULL, options=list(),
   # from within the app.
   appOptions <- captureAppOptions()
 
+  uiHash <- local({
+    hash <- NULL
+    computed <- FALSE
+    function() {
+      if (!computed) {
+        hash <<- tryCatch(snapshot_ui_fingerprint(ui), error = function(e) NULL)
+        computed <<- TRUE
+      }
+      hash
+    }
+  })
+
   structure(
     list(
       httpHandler = httpHandler,
       serverFuncSource = serverFuncSource,
       onStart = onStart,
       options = options,
-      appOptions = appOptions
+      appOptions = appOptions,
+      uiHash = uiHash
     ),
     class = "shiny.appobj"
   )
@@ -221,6 +234,9 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
       # server.R.
       .globals$server <- NULL
       on.exit(.globals$server <- NULL, add = TRUE)
+      # enableResume() and disableResume() refuse to run here.
+      .globals$sourcingServerR <- TRUE
+      on.exit(.globals$sourcingServerR <- FALSE, add = TRUE)
       result <- sourceUTF8(serverR, envir = new.env(parent = sharedEnv))
       if (!is.null(.globals$server)) {
         result <- .globals$server[[1]]
@@ -283,7 +299,12 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
       serverFuncSource = serverFuncSource,
       onStart = onStart,
       onStop = onStop,
-      options = options
+      options = options,
+      uiHash = function() {
+        uiR <- file.path.ci(appDir, "ui.R")
+        if (!file.exists(uiR)) uiR <- file.path.ci(wwwDir, "index.html")
+        if (file.exists(uiR)) tryCatch(rlang::hash(readUTF8(uiR)), error = function(e) NULL)
+      }
     ),
     class = "shiny.appobj"
   )
@@ -526,7 +547,11 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
       serverFuncSource = dynServerFuncSource,
       onStart = onStart,
       onStop = onStop,
-      options = joinOptions(appObjOptions, options)
+      options = joinOptions(appObjOptions, options),
+      uiHash = function() {
+        h <- appObj()$uiHash
+        if (is.function(h)) h() else h
+      }
     ),
     class = "shiny.appobj"
   )

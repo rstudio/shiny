@@ -487,7 +487,8 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
   domain <- reactive_get_domain(x)
 
   # Convert the ... to a function that returns their evaluated values.
-  keyFunc <- quos_to_func(enquos0(...))
+  qs <- enquos0(...)
+  keyFunc <- quos_to_func(qs)
 
   valueFunc <- reactive_get_value_func(x)
   # Hash cache hint now -- this will be added to the key later on, to reduce the
@@ -497,6 +498,7 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
 
   x_classes <- class(x)
   x_otel_attrs <- attr(x, "observable", exact = TRUE)$.otelAttrs
+  x_snapshot_part <- if (!is.null(snapshot_registry(domain))) snapshot_wrapped_conductor_part(x)
 
   # Don't hold on to the reference for x, so that it can be GC'd
   rm(x)
@@ -517,6 +519,10 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
   })
 
   class(res) <- c("reactive.cache", class(res))
+  snapshot_set_conductor_parts(res, list(
+    value = x_snapshot_part,
+    cacheKey = snapshot_lazy(snapshot_deparse_quos, qs)
+  ))
 
   local({
     impl <- attr(res, "observable", exact = TRUE)
@@ -533,7 +539,8 @@ bindCache.reactiveExpr <- function(x, ..., cache = "app") {
 bindCache.shiny.render.function <- function(x, ..., cache = "app") {
   check_dots_unnamed()
 
-  keyFunc <- quos_to_func(enquos0(...))
+  qs <- enquos0(...)
+  keyFunc <- quos_to_func(qs)
 
   cacheHint <- rlang::hash(extractCacheHint(x))
 
@@ -554,6 +561,9 @@ bindCache.shiny.render.function <- function(x, ..., cache = "app") {
 
   # Passes over the otelAttrs from valueFunc to renderFunc
   renderFunc <- addAttributes(renderFunc, renderFunctionAttributes(valueFunc))
+  attr(renderFunc, "snapshotHashParts") <- c(attr(valueFunc, "snapshotHashParts", exact = TRUE), list(
+    cacheKey = snapshot_lazy(snapshot_deparse_quos, qs)
+  ))
   class(renderFunc) <- c("shiny.render.function.cache", class(valueFunc))
   renderFunc
 }
@@ -579,38 +589,51 @@ bindCache.shiny.renderPlot <- function(x, ...,
   # the same output for a slightly different img element size), it would result
   # in getting the (same) image from the cache and sending it to the client
   # again. This resize observer prevents that.
-  fitDims <- reactiveVal(NULL)
+  domain <- getDefaultReactiveDomain()
+  fitDims <- reactiveVal(NULL, label = "bindCache renderPlot fitDims")
+  outputName <- reactiveVal(NULL, label = "bindCache renderPlot outputName")
+
+  computeDims <- function(name, session) {
+    width  <- session$clientData[[paste0('output_', name, '_width')]]  %||% 0
+    height <- session$clientData[[paste0('output_', name, '_height')]] %||% 0
+    rect <- sizePolicy(c(width, height))
+    fitDims(list(width = rect[1], height = rect[2]))
+  }
+
+  # It waits for the output name, learned at first render, then tracks the
+  # element size through clientData.
   resizeObserverCreated <- FALSE
-  outputName <- NULL
-  ensureResizeObserver <- function() {
-    if (resizeObserverCreated)
-      return()
-
-    doResizeCheck <- function() {
-      if (is.null(outputName)) {
-        outputName <<- getCurrentOutputInfo()$name
-      }
-      session <- getDefaultReactiveDomain()
-
-      width  <- session$clientData[[paste0('output_', outputName, '_width')]]  %||% 0
-      height <- session$clientData[[paste0('output_', outputName, '_height')]] %||% 0
-
-      rect <- sizePolicy(c(width, height))
-      fitDims(list(width = rect[1], height = rect[2]))
-    }
-
-    # Run it once immediately, then set up the observer
-    isolate(doResizeCheck())
-
+  createResizeObserver <- function(domain) {
+    resizeObserverCreated <<- TRUE
     observe({
-      doResizeCheck()
-    }, label = "plot-resize")
+      name <- outputName()
+      if (is.null(name)) return()
+      computeDims(name, getDefaultReactiveDomain())
+    }, label = "plot-resize", domain = domain)
     # TODO: Make sure this observer gets GC'd if output$foo is replaced.
     # Currently, if you reassign output$foo, the observer persists until the
     # session ends. This is generally bad programming practice and should be
     # rare, but still, we should try to clean up properly.
+  }
 
-    resizeObserverCreated <<- TRUE
+  # Created eagerly when there is a session, so the output observer does not
+  # construct it on its first render (a constructor observer would re-run on
+  # every resume). Without one (e.g. bindCache() called outside the server
+  # function), it is created at first render, as before.
+  if (!is.null(domain)) createResizeObserver(domain)
+
+  # First run wins, so outputs sharing this render function don't keep
+  # overwriting each other's dims. It is still checked on the first run when
+  # set: a resume snapshot adopts `outputName` by occurrence order, so after
+  # plots are reordered it may hold another plot's name.
+  nameReconciled <- FALSE
+  reconcileName <- function(session) {
+    nameReconciled <<- TRUE
+    name <- getCurrentOutputInfo()$name
+    if (!identical(isolate(outputName()), name)) {
+      outputName(name)
+      isolate(computeDims(name, session))
+    }
   }
 
   renderFunc <- function(...) {
@@ -639,8 +662,11 @@ bindCache.shiny.renderPlot <- function(x, ...,
     renderFunc,
     ...,
     {
-      ensureResizeObserver()
       session <- getDefaultReactiveDomain()
+      if (!nameReconciled) reconcileName(session)
+      if (!resizeObserverCreated && !is.null(session)) {
+        createResizeObserver(session)
+      }
       if (is.null(session) || is.null(fitDims())) {
         req(FALSE)
       }

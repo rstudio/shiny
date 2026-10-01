@@ -210,6 +210,7 @@ bindEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE
 
   x_classes <- class(x)
   x_otel_attrs <- attr(x, "observable", exact = TRUE)$.otelAttrs
+  x_snapshot_part <- if (!is.null(snapshot_registry(domain))) snapshot_wrapped_conductor_part(x)
 
   # Don't hold on to the reference for x, so that it can be GC'd
   rm(x)
@@ -237,6 +238,11 @@ bindEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE
   })
 
   class(res) <- c("reactive.event", x_classes)
+  snapshot_set_conductor_parts(res, list(
+    value = x_snapshot_part,
+    event = snapshot_lazy(snapshot_deparse_quos, qs),
+    ignoreNULL = ignoreNULL, ignoreInit = ignoreInit
+  ))
 
   local({
     impl <- attr(res, "observable", exact = TRUE)
@@ -254,7 +260,8 @@ bindEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE
 
 #' @export
 bindEvent.shiny.render.function <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE) {
-  eventFunc <- quos_to_func(enquos0(...))
+  qs <- enquos0(...)
+  eventFunc <- quos_to_func(qs)
 
   valueFunc <- x
 
@@ -266,7 +273,7 @@ bindEvent.shiny.render.function <- function(x, ..., ignoreNULL = TRUE, ignoreIni
       function(value) {
         if (ignoreInit && !initialized) {
           initialized <<- TRUE
-          req(FALSE)
+          if (!snapshot_current_observer_adopted()) req(FALSE)
         }
 
         req(!ignoreNULL || !isNullEvent(value))
@@ -278,6 +285,10 @@ bindEvent.shiny.render.function <- function(x, ..., ignoreNULL = TRUE, ignoreIni
 
   # Passes over the otelAttrs from valueFunc to renderFunc
   renderFunc <- addAttributes(renderFunc, renderFunctionAttributes(valueFunc))
+  attr(renderFunc, "snapshotHashParts") <- c(attr(valueFunc, "snapshotHashParts", exact = TRUE), list(
+    event = snapshot_lazy(snapshot_deparse_quos, qs),
+    ignoreNULL = ignoreNULL, ignoreInit = ignoreInit
+  ))
   class(renderFunc) <- c("shiny.render.function.event", class(valueFunc))
   renderFunc
 }
@@ -297,8 +308,8 @@ bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
 
   # Note that because the observer will already have been logged by this point,
   # this updated label won't show up in the reactlog.
+  call_srcref <- get_call_srcref(-1)
   if (is.null(label)) {
-    call_srcref <- get_call_srcref(-1)
     x$.label <- rassignSrcrefToLabel(
       call_srcref,
       defaultLabel = as_default_label(
@@ -307,6 +318,19 @@ bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
     )
   } else {
     x$.label <- label
+  }
+
+  state <- x$.snapshot
+  if (!is.null(state)) {
+    state$hashParts <- c(state$hashParts, list(
+      event = snapshot_lazy(snapshot_deparse_quos, qs),
+      ignoreNULL = ignoreNULL, ignoreInit = ignoreInit, once = once
+    ))
+    if (!is.null(label)) {
+      state$label <- label
+    } else if (is.null(state$label)) {
+      state$label <- snapshot_assigned_label(call_srcref)
+    }
   }
 
   initialized <- FALSE
@@ -320,7 +344,9 @@ bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
         function(value) {
           if (ignoreInit && !initialized) {
             initialized <<- TRUE
-            return()
+            # An adopted observer already had its initial run in the previous
+            # session; this run is a real event.
+            if (!isTRUE(x$.snapshot$adopted)) return()
           }
 
           if (ignoreNULL && isNullEvent(value)) {
@@ -340,7 +366,6 @@ bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
   )
 
   class(x) <- c("Observer.event", class(x))
-  call_srcref <- get_call_srcref(-1)
   x$.otelAttrs <- append_otel_srcref_attrs(x$.otelAttrs, call_srcref, fn_name = "bindEvent")
 
   if (has_otel_collect("reactivity")) {

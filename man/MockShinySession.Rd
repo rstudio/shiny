@@ -64,6 +64,10 @@ user. Always \code{NULL} for a \code{MockShinySesion}.}
 \code{MockShinySession}.}
 
     \item{\code{options}}{A list containing session-level shinyOptions.}
+
+    \item{\code{.snapshotRegistry}}{For internal use: the resume snapshot registry.}
+
+    \item{\code{.resumeSettings}}{For internal use: the resume settings resolved at start.}
   }
   \if{html}{\out{</div>}}
 }
@@ -118,6 +122,8 @@ user. Always \code{NULL} for a \code{MockShinySesion}.}
     \item \href{#method-MockShinySession-onSessionEnded}{\code{MockShinySession$onSessionEnded()}}
     \item \href{#method-MockShinySession-registerDownload}{\code{MockShinySession$registerDownload()}}
     \item \href{#method-MockShinySession-getCurrentOutputInfo}{\code{MockShinySession$getCurrentOutputInfo()}}
+    \item \href{#method-MockShinySession-resumeReport}{\code{MockShinySession$resumeReport()}}
+    \item \href{#method-MockShinySession-onResumed}{\code{MockShinySession$onResumed()}}
     \item \href{#method-MockShinySession-clone}{\code{MockShinySession$clone()}}
   }
 }
@@ -762,7 +768,40 @@ executed.
   \subsection{Returns}{
     A list with with the \code{name} of the output. If no output is
 currently being executed, this will return \code{NULL}.
-output, or \code{NULL} if no output is currently executing.
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MockShinySession-resumeReport"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-resumeReport}{}}}
+\subsection{\code{MockShinySession$resumeReport()}}{
+  Returns the resume report for this session: one row per
+reactive node saying whether it would be restored when the session
+resumes and, if not, why. See \code{?session}.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{MockShinySession$resumeReport()}
+    \if{html}{\out{</div>}}
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MockShinySession-onResumed"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-onResumed}{}}}
+\subsection{\code{MockShinySession$onResumed()}}{
+  Registers a callback for when this session resumes (see
+\code{?session}). Returns a deregistration function.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{MockShinySession$onResumed(callback)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{callback}}{A function taking one argument, \code{info}.}
+    }
+    \if{html}{\out{</div>}}
   }
 }
 

@@ -28,7 +28,11 @@ declare class ShinyApp {
     config: {
         workerId: string;
         sessionId: string;
+        resumeToken?: string | null;
     } | null;
+    $resumeToken: string | null;
+    private $resumedParts;
+    private $connectingAsResume;
     $inputValues: InputValues;
     $initialInput: InputValues | null;
     $bindings: {
@@ -64,6 +68,7 @@ declare class ShinyApp {
     $scheduleReconnect(delay: Parameters<typeof setTimeout>[1]): void;
     reconnectDelay: {
         next: () => number;
+        exhausted: () => boolean;
         reset: () => void;
     };
     onDisconnected(reloading?: boolean): void;

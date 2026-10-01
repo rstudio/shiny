@@ -86,6 +86,10 @@ Context <- R6Class(
     .domain = NULL,
     .pid = NULL,
     .weak = NULL,
+    # Edge-recording state for resume snapshots (see
+    # snapshot_context_state()), or NULL: only the contexts of tracked
+    # observers and reactive() expressions record.
+    .snapshot = NULL,
 
     .otel_info = NULL,
 
@@ -276,6 +280,58 @@ getCurrentContext <- function() {
 hasCurrentContext <- function() {
   !is.null(.getReactiveEnvironment()$.currentContext) ||
     isTRUE(getOption("shiny.suppressMissingContextError"))
+}
+
+# What a recording context collects for the snapshot registry. An
+# environment, so edges append in place.
+# - upstream: the Dependents this context registered with, in registration
+#   order, from which the registry computes an observer's transitive source
+#   set. Holds them strongly; each holds its owner weakly.
+# - adoptable, reason: cleared by context_not_adoptable() when the context
+#   takes a dependency the snapshot cannot reproduce (invalidateLater(),
+#   reactiveTimer(), an untracked reactive, a session URL). Observers
+#   downstream of such a context are never adopted.
+# - adopted: set on the context of an adopted observer.
+# - settled: FALSE while the context runs and, if the run returns a promise,
+#   until that promise settles. Continuations run under this context through
+#   the promise domain and keep registering edges, so until then `upstream`
+#   is incomplete. Continuations that are not returned from the body are
+#   outside the reactive lifecycle and stay outside here. The context's owner
+#   (Observer$run(), Observable$.updateValue()) maintains it, not
+#   Context$run(), so that untracked runs pay nothing for it.
+snapshot_context_state <- function() {
+  state <- new.env(parent = emptyenv())
+  state$upstream <- list()
+  state$adoptable <- TRUE
+  state$reason <- NA_character_
+  state$adopted <- FALSE
+  state$settled <- TRUE
+  state
+}
+
+# Settles `state` once a run that produced `result` is over: now, or when a
+# returned promise settles.
+snapshot_settle <- function(state, result) {
+  # is.object() first: only classed objects can be promising.
+  if (is.object(result) && promises::is.promising(result)) {
+    settle <- function(...) state$settled <- TRUE
+    promises::then(result, onFulfilled = settle, onRejected = settle)
+  } else {
+    state$settled <- TRUE
+  }
+  invisible()
+}
+
+# A function, not a Context method: a context is created for every run, and
+# each R6 method adds to that cost. The first reason wins; a context that does
+# not record ignores it.
+context_not_adoptable <- function(ctx, reason) {
+  state <- ctx$.snapshot
+  if (!is.null(state) && state$adoptable) {
+    state$adoptable <- FALSE
+    state$reason <- reason
+  }
+  invisible()
 }
 
 getDummyContext <- function() {

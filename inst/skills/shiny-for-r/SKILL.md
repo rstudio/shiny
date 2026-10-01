@@ -32,6 +32,7 @@ package and its help pages.
 | Reactivity | A value should recompute or an output update as inputs change; choosing between `reactive()`/`observe()`/`observeEvent()`; `req()`, `isolate()`, `bindEvent()`, timers, polling | `references/reactivity.md` |
 | Modules | A reusable, repeatable UI+server component; avoiding input/output id collisions across copies | `references/modules.md` |
 | Session lifecycle | Per-session cleanup (`onSessionEnded()`), flush hooks, unhandled errors, per-session vs app-level scope, `session$userData` | `references/session-lifecycle.md` |
+| Resuming sessions | Keeping a user's state when the connection drops; `enableResume()`, `disableResume()`, `session$resumeReport()`, `onResumed()`; the five rules of reactives (`<<-` state, reactives created inside observers, reference objects in reactive values, labels, deriving with `eventReactive()`) | `references/resume.md` |
 
 ## Async
 

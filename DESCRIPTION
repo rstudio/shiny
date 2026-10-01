@@ -102,7 +102,10 @@ Imports:
     xtable
 Suggests:
     Cairo (>= 1.5-5),
+    callr,
+    chromote,
     coro (>= 1.1.0),
+    data.table,
     datasets,
     DT,
     dygraphs,
@@ -113,6 +116,7 @@ Suggests:
     markdown,
     mirai,
     otelsdk (>= 0.2.0),
+    pkgload,
     ragg,
     reactlog (>= 1.0.0),
     rmarkdown,
@@ -179,6 +183,9 @@ Collate:
     'knitr.R'
     'middleware-shiny.R'
     'middleware.R'
+    'resume-options.R'
+    'resume-serialize.R'
+    'resume-registry.R'
     'timer.R'
     'shiny.R'
     'mock-session.R'
@@ -201,6 +208,9 @@ Collate:
     'render-cached-plot.R'
     'render-plot.R'
     'render-table.R'
+    'resume-session.R'
+    'resume-store.R'
+    'resume.R'
     'run-url.R'
     'runapp.R'
     'serializers.R'

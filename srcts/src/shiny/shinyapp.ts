@@ -25,6 +25,7 @@ import {
 import { removeModal, showModal } from "./modal";
 import { removeNotification, showNotification } from "./notifications";
 import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
+import { retryDecision } from "./reconnectGate";
 import type { HtmlDep } from "./render";
 import { renderContentAsync, renderHtmlAsync } from "./render";
 import type { WherePosition } from "./singletons";
@@ -128,7 +129,25 @@ class ShinyApp {
   config: {
     workerId: string;
     sessionId: string;
+    resumeToken?: string | null;
   } | null = null;
+
+  // Token of the session we would resume from, issued in `config` only when
+  // resume is on for the app (so its presence is how the client knows). Kept
+  // in memory only; a page reload starts fresh in this release.
+  $resumeToken: string | null = null;
+
+  // Handlers only see their own key's value and the spec fixes the flat wire
+  // shape, so `from` and `dom` are stashed here for the `resumed` handler.
+  private $resumedParts: { from?: "reconnect"; dom?: "intact" } = {};
+
+  // Whether the current socket asked to resume. The reconnect attempt
+  // counter resets when the server answers (`resumed`, or `config`/`values`
+  // for a fresh session), not on socket open, so a server that drops the
+  // socket before answering still exhausts the attempts. Both answers come
+  // before the server function runs; R errors after them are handled by the
+  // server sending `allowReconnect: false` (see srcts/PROTOCOL.md).
+  private $connectingAsResume = false;
 
   // Cached input values
   $inputValues: InputValues = {};
@@ -186,7 +205,8 @@ class ShinyApp {
     if (this.isConnected())
       throw "Attempted to reconnect, but already connected.";
 
-    // We're about to `init` a new session on the server, which restarts every
+    // We're about to `resume` a new session on the server (or `init` one, if
+    // we never received a resume token), which restarts every
     // output's progress lifecycle. Drop the state we accumulated for the
     // previous session so those messages aren't seen as illegal transitions.
     this.$outputProgress.reset();
@@ -241,12 +261,28 @@ class ShinyApp {
 
       this.onConnected();
 
-      socket.send(
-        JSON.stringify({
-          method: "init",
-          data: this.$initialInput,
-        }),
-      );
+      this.$connectingAsResume = this.$resumeToken !== null;
+      if (this.$resumeToken !== null) {
+        // Reconnecting: ask the server to resume the previous session from its
+        // snapshot (or, failing that, from these inputs). See srcts/PROTOCOL.md.
+        socket.send(
+          JSON.stringify({
+            method: "resume",
+            data: {
+              token: this.$resumeToken,
+              dom: "intact",
+              inputs: this.$initialInput,
+            },
+          }),
+        );
+      } else {
+        socket.send(
+          JSON.stringify({
+            method: "init",
+            data: this.$initialInput,
+          }),
+        );
+      }
 
       while (this.$pendingMessages.length) {
         const msg = this.$pendingMessages.shift();
@@ -328,9 +364,14 @@ class ShinyApp {
   // How long should we wait before trying the next reconnection?
   // The delay will increase with subsequent attempts.
   // .next: Return the time to wait for next connection, and increment counter.
+  // .exhausted: Whether the attempt limit has been reached.
   // .reset: Reset the attempt counter.
   reconnectDelay = (function () {
     let attempts = 0;
+    // Give up after this many attempts (about a minute with the delays
+    // below); a server that is simply gone should not keep the tab
+    // polling forever.
+    const maxAttempts = 10;
     // Time to wait before each reconnection attempt. If we go through all of
     // these values, repeated use the last one. Add 500ms to each one so that
     // in the last 0.5s, it shows "..."
@@ -348,6 +389,9 @@ class ShinyApp {
         attempts++;
         return delays[i];
       },
+      exhausted: function () {
+        return attempts >= maxAttempts;
+      },
       reset: function () {
         attempts = 0;
       },
@@ -361,27 +405,28 @@ class ShinyApp {
     }
     $("#shiny-disconnected-overlay").toggleClass("reloading", reloading);
 
-    // To try a reconnect, both the app (this.$allowReconnect) and the
-    // server (this.$socket.allowReconnect) must allow reconnections, or
-    // session$allowReconnect("force") was called. The "force" option should
-    // only be used for testing.
-    if (
-      (this.$allowReconnect === true &&
-        this.$socket!.allowReconnect === true) ||
-      this.$allowReconnect === "force"
-    ) {
+    // srcts/PROTOCOL.md, "Client retry rule". After the last attempt of a
+    // resuming client, the overlay stays and the dialog goes.
+    const decision = retryDecision({
+      allow: this.$allowReconnect,
+      holdsToken: this.$resumeToken !== null,
+      shimAllows: this.$socket?.allowReconnect === true,
+      exhausted: this.reconnectDelay.exhausted(),
+    });
+    if (decision === "retry") {
       const delay = this.reconnectDelay.next();
 
       /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
       showReconnectDialog(delay);
       this.$scheduleReconnect(delay);
+    } else if (decision === "stop") {
+      hideReconnectDialog();
     }
   }
 
   onConnected(): void {
     $("#shiny-disconnected-overlay").remove();
     hideReconnectDialog();
-    this.reconnectDelay.reset();
   }
 
   // NB: Including blobs will cause IE to break!
@@ -725,6 +770,7 @@ class ShinyApp {
     // * However, `_sendMessagesToHandlers()` will adjust the `this` context to the same _`this`_.
 
     addMessageHandler("values", async (message: { [key: string]: any }) => {
+      if (!this.$connectingAsResume) this.reconnectDelay.reset();
       this._updateProgress();
 
       for (const key in message) {
@@ -873,15 +919,52 @@ class ShinyApp {
 
     addMessageHandler(
       "config",
-      (message: { workerId: string; sessionId: string; user?: string }) => {
+      (message: {
+        workerId: string;
+        sessionId: string;
+        user?: string;
+        resumeToken?: string | null;
+      }) => {
         this.config = {
           workerId: message.workerId,
           sessionId: message.sessionId,
+          resumeToken: message.resumeToken,
         };
+        this.$resumeToken = message.resumeToken ?? null;
+        if (this.$resumeToken === null) {
+          // A server with resume off answers `resume` as `init` and never
+          // sends `resumed`, so this `config` is its answer.
+          this.$connectingAsResume = false;
+        } else {
+          // Resume is on, and with it retrying, until the server ends the
+          // session for good with `allowReconnect: false`.
+          this.$allowReconnect = true;
+        }
         if (message.user) setShinyUser(message.user);
+        if (!this.$connectingAsResume) this.reconnectDelay.reset();
         $(document).trigger("shiny:sessioninitialized");
       },
     );
+
+    addMessageHandler("from", (message: "reconnect") => {
+      this.$resumedParts.from = message;
+    });
+
+    addMessageHandler("dom", (message: "intact") => {
+      this.$resumedParts.dom = message;
+    });
+
+    addMessageHandler("resumed", (message: "snapshot" | "inputs") => {
+      this.reconnectDelay.reset();
+      $(document).trigger({
+        type: "shiny:resumed",
+        // @ts-expect-error; Can not remove info on a established, malformed Event object
+        from: this.$resumedParts.from,
+        resumed: message,
+        dom: this.$resumedParts.dom,
+      });
+      this.$resumedParts = {};
+    });
 
     addMessageHandler("busy", (message: "busy" | "idle") => {
       if (message === "busy") {

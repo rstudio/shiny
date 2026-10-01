@@ -98,7 +98,8 @@ FileUploadContext <- R6Class(
   private = list(
     basedir = character(0),
     operations = 'Map',
-    ids = character(0)  # Keep track of all ids used for file uploads
+    ids = character(0),  # Keep track of all ids used for file uploads
+    adoptedDirs = character(0) # Upload dirs handed over by a resume snapshot
   ),
   public = list(
     initialize = function(dir=tempdir()) {
@@ -124,17 +125,25 @@ FileUploadContext <- R6Class(
     onJobFinished = function(jobId) {
       private$operations$remove(jobId)
     },
-    # Remove the directories containing file uploads; this is to be called when
-    # a session ends.
-    rmUploadDirs = function() {
-      # Make sure all_paths is underneath the tempdir()
+    # The upload directories this context created, after checking that they
+    # live under tempdir().
+    uploadDirs = function() {
       if (!grepl(normalizePath(tempdir()), normalizePath(private$basedir), fixed = TRUE)) {
         stop("Won't remove upload path ", private$basedir,
           "because it is not under tempdir(): ", tempdir())
       }
-
-      all_paths <- file.path(private$basedir, private$ids)
-      unlink(all_paths, recursive = TRUE)
+      c(file.path(private$basedir, private$ids), private$adoptedDirs)
+    },
+    # Takes ownership of upload directories created by an earlier session in
+    # this process whose snapshot this session adopted (`SnapshotStore$take()`).
+    adoptUploadDirs = function(dirs) {
+      private$adoptedDirs <- c(private$adoptedDirs, dirs)
+      invisible()
+    },
+    # Remove the directories containing file uploads; this is to be called when
+    # a session ends.
+    rmUploadDirs = function() {
+      unlink(self$uploadDirs(), recursive = TRUE)
     }
   )
 )

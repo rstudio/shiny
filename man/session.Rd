@@ -5,16 +5,21 @@
 \title{Session object}
 \value{
 \item{allowReconnect(value)}{
-If \code{value} is \code{TRUE} and run in a hosting environment (Shiny
-Server or Connect) with reconnections enabled,  then when the session ends
-due to the network connection closing, the client will attempt to
-reconnect to the server. If a reconnection is successful, the browser will
-send all the current input values to the new session on the server, and
-the server will recalculate any outputs and send them back to the client.
-If \code{value} is \code{FALSE}, reconnections will be disabled (this is
-the default state). If \code{"force"}, then the client browser will always
-attempt to reconnect. The only reason to use \code{"force"} is for testing
-on a local connection (without Shiny Server or Connect).
+Whether the browser retries after the connection to the server is lost.
+With resume on (see \code{\link[=enableResume]{enableResume()}}), it already does, and the new
+session resumes from the saved state: \code{TRUE} and \code{"force"} change
+nothing, and \code{FALSE} is an error (call \code{\link[=disableResume]{disableResume()}} to turn both
+off). With resume off: if \code{value} is \code{TRUE} and run in a hosting
+environment (Shiny Server or Connect) with reconnections enabled, then
+when the session ends due to the network connection closing, the client
+will attempt to reconnect to the server. If a reconnection is
+successful, the browser will send all the current input values to the
+new session on the server, and the server will recalculate any outputs
+and send them back to the client. If \code{value} is \code{FALSE}, reconnections
+will be disabled (this is the default state). If \code{"force"}, then the
+client browser will always attempt to reconnect. The only reason to use
+\code{"force"} is for testing on a local connection (without Shiny Server or
+Connect).
 }
 \item{clientData}{
 A \code{\link[=reactiveValues]{reactiveValues()}} object that contains information about the client.
@@ -105,6 +110,20 @@ or every time (if \code{once=FALSE}) Shiny flushes the reactive system.
 Returns a function that can be called with no arguments to cancel the
 registration.
 }
+\item{onResumed(callback)}{
+Registers a function to be called once when this session resumed a
+previous one (see \code{\link[=enableResume]{enableResume()}}), after the saved state has been
+applied and before the first reactive flush. \code{callback} receives \code{info},
+a list with \code{from} (\code{"reconnect"}: the connection dropped and the page
+stayed open), \code{resumed} (\code{"snapshot"} when the reactive state was
+restored from saved state, \code{"inputs"} when only the input values were
+replayed), and \code{dom} (\code{"intact"}). Inside the callback the app's own
+reactive values, \code{input} and \code{session$userData} already hold the
+restored values. Use it to rebuild state that lives outside the reactive
+graph, such as a database connection, when \code{info$resumed == "snapshot"}:
+the observer that created it did not run. Never called when a session
+starts normally. Returns a function that cancels the registration.
+}
 \item{onSessionEnded(callback)}{
 Registers a function to be called after the client has disconnected.
 Returns a function that can be called with no arguments to cancel the
@@ -113,6 +132,19 @@ registration.
 \item{output}{
 The session's \code{output} object (the same as is passed into the Shiny
 server function as an argument).
+}
+\item{resumeReport()}{
+Returns a data frame describing what resuming this session restores:
+one row per reactive node with \code{id}, \code{kind}, \code{label}, \code{namespace},
+\code{adoptable} (whether it is restored without running), \code{reason} (why
+not, or \code{NA}), and \code{hazard} (closure variables an observer assigns with
+\verb{<<-} or \code{assign()}, which a restored observer would leave at their
+initial values). Intended for tests and audits, for example
+\code{testServer(server, { r <- session$resumeReport(); stopifnot(all(r$adoptable | r$kind == "input")) })}
+(password inputs are never saved, so their \code{"input"} rows are not
+adoptable); after a resume the log line already names the nodes that
+ran. Empty in a session with resume off. See \code{\link[=enableResume]{enableResume()}} and
+\code{\link[=disableResume]{disableResume()}}.
 }
 \item{reactlog}{
 For internal use.

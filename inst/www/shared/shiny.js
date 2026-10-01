@@ -6124,6 +6124,18 @@ ${duplicateIdMsg}`;
     }
   };
 
+  // srcts/src/shiny/reconnectGate.ts
+  function retryDecision({
+    allow,
+    holdsToken,
+    shimAllows,
+    exhausted
+  }) {
+    const allowed = allow === "force" || allow === true && (holdsToken || shimAllows);
+    if (!allowed) return "never";
+    return holdsToken && exhausted ? "stop" : "retry";
+  }
+
   // srcts/src/shiny/outputProgress.ts
   var _OutputProgressReporter_instances, updateStateFromRecalculating_fn, updateStateFromFlush_fn, updateStateFromProgress_fn, updateStateFromValueOrError_fn, getState_fn, setState_fn;
   var OutputProgressReporter = class {
@@ -6348,6 +6360,20 @@ ${duplicateIdMsg}`;
       // other things tasks as well.
       this.taskQueue = new AsyncQueue();
       this.config = null;
+      // Token of the session we would resume from, issued in `config` only when
+      // resume is on for the app (so its presence is how the client knows). Kept
+      // in memory only; a page reload starts fresh in this release.
+      this.$resumeToken = null;
+      // Handlers only see their own key's value and the spec fixes the flat wire
+      // shape, so `from` and `dom` are stashed here for the `resumed` handler.
+      this.$resumedParts = {};
+      // Whether the current socket asked to resume. The reconnect attempt
+      // counter resets when the server answers (`resumed`, or `config`/`values`
+      // for a fresh session), not on socket open, so a server that drops the
+      // socket before answering still exhausts the attempts. Both answers come
+      // before the server function runs; R errors after them are handled by the
+      // server sending `allowReconnect: false` (see srcts/PROTOCOL.md).
+      this.$connectingAsResume = false;
       // Cached input values
       this.$inputValues = {};
       // Input values at initialization (and reconnect)
@@ -6369,9 +6395,11 @@ ${duplicateIdMsg}`;
       // How long should we wait before trying the next reconnection?
       // The delay will increase with subsequent attempts.
       // .next: Return the time to wait for next connection, and increment counter.
+      // .exhausted: Whether the attempt limit has been reached.
       // .reset: Reset the attempt counter.
       this.reconnectDelay = /* @__PURE__ */ function() {
         let attempts = 0;
+        const maxAttempts = 10;
         const delays = [1500, 1500, 2500, 2500, 5500, 5500, 10500];
         return {
           next: function() {
@@ -6381,6 +6409,9 @@ ${duplicateIdMsg}`;
             }
             attempts++;
             return delays[i5];
+          },
+          exhausted: function() {
+            return attempts >= maxAttempts;
           },
           reset: function() {
             attempts = 0;
@@ -6536,12 +6567,26 @@ ${duplicateIdMsg}`;
           socket
         });
         this.onConnected();
-        socket.send(
-          JSON.stringify({
-            method: "init",
-            data: this.$initialInput
-          })
-        );
+        this.$connectingAsResume = this.$resumeToken !== null;
+        if (this.$resumeToken !== null) {
+          socket.send(
+            JSON.stringify({
+              method: "resume",
+              data: {
+                token: this.$resumeToken,
+                dom: "intact",
+                inputs: this.$initialInput
+              }
+            })
+          );
+        } else {
+          socket.send(
+            JSON.stringify({
+              method: "init",
+              data: this.$initialInput
+            })
+          );
+        }
         while (this.$pendingMessages.length) {
           const msg = this.$pendingMessages.shift();
           socket.send(msg);
@@ -6604,16 +6649,23 @@ ${duplicateIdMsg}`;
         (0, import_jquery39.default)(document.body).append('<div id="shiny-disconnected-overlay"></div>');
       }
       (0, import_jquery39.default)("#shiny-disconnected-overlay").toggleClass("reloading", reloading);
-      if (this.$allowReconnect === true && this.$socket.allowReconnect === true || this.$allowReconnect === "force") {
+      const decision = retryDecision({
+        allow: this.$allowReconnect,
+        holdsToken: this.$resumeToken !== null,
+        shimAllows: this.$socket?.allowReconnect === true,
+        exhausted: this.reconnectDelay.exhausted()
+      });
+      if (decision === "retry") {
         const delay = this.reconnectDelay.next();
         showReconnectDialog(delay);
         this.$scheduleReconnect(delay);
+      } else if (decision === "stop") {
+        hideReconnectDialog();
       }
     }
     onConnected() {
       (0, import_jquery39.default)("#shiny-disconnected-overlay").remove();
       hideReconnectDialog();
-      this.reconnectDelay.reset();
     }
     // NB: Including blobs will cause IE to break!
     // TODO: Make blobs work with Internet Explorer
@@ -6853,6 +6905,7 @@ ${duplicateIdMsg}`;
     }
     _init() {
       addMessageHandler("values", async (message) => {
+        if (!this.$connectingAsResume) this.reconnectDelay.reset();
         this._updateProgress();
         for (const key in message) {
           if (hasOwnProperty(message, key)) {
@@ -6968,12 +7021,37 @@ ${duplicateIdMsg}`;
         (message) => {
           this.config = {
             workerId: message.workerId,
-            sessionId: message.sessionId
+            sessionId: message.sessionId,
+            resumeToken: message.resumeToken
           };
+          this.$resumeToken = message.resumeToken ?? null;
+          if (this.$resumeToken === null) {
+            this.$connectingAsResume = false;
+          } else {
+            this.$allowReconnect = true;
+          }
           if (message.user) setShinyUser(message.user);
+          if (!this.$connectingAsResume) this.reconnectDelay.reset();
           (0, import_jquery39.default)(document).trigger("shiny:sessioninitialized");
         }
       );
+      addMessageHandler("from", (message) => {
+        this.$resumedParts.from = message;
+      });
+      addMessageHandler("dom", (message) => {
+        this.$resumedParts.dom = message;
+      });
+      addMessageHandler("resumed", (message) => {
+        this.reconnectDelay.reset();
+        (0, import_jquery39.default)(document).trigger({
+          type: "shiny:resumed",
+          // @ts-expect-error; Can not remove info on a established, malformed Event object
+          from: this.$resumedParts.from,
+          resumed: message,
+          dom: this.$resumedParts.dom
+        });
+        this.$resumedParts = {};
+      });
       addMessageHandler("busy", (message) => {
         if (message === "busy") {
           (0, import_jquery39.default)(document.documentElement).addClass("shiny-busy");

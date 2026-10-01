@@ -85,6 +85,7 @@ test_that("shiny APIs documented in references still exist", {
     reactivity = c("reactive", "observe", "observeEvent", "eventReactive", "reactiveVal", "reactiveValues", "bindEvent", "req", "isolate", "invalidateLater", "reactivePoll", "reactiveFileReader", "bindCache"),
     modules = c("moduleServer", "NS"),
     `session-lifecycle` = c("onSessionEnded", "onStop", "onUnhandledError", "onFlush", "onFlushed"),
+    resume = c("enableResume", "disableResume", "reactiveVal", "reactiveValues", "observeEvent", "eventReactive"),
     `extended-tasks` = c("ExtendedTask"),
     async = c("observe", "observeEvent", "renderText", "textOutput"),
     layouts = c("fluidPage", "sidebarLayout", "sidebarPanel", "mainPanel", "fluidRow", "column", "fillPage", "titlePanel", "wellPanel"),

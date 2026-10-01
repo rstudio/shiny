@@ -156,6 +156,10 @@ reference:
       - setBookmarkExclude
       - showBookmarkUrlModal
       - onBookmark
+  - title: Resuming sessions
+    desc: Functions that control how sessions resume after an interruption.
+    contents:
+      - enableResume
   - title: Extending Shiny
     desc: Functions that are intended to be called by third-party packages that extend Shiny.
     contents:

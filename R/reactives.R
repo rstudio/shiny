@@ -8,15 +8,30 @@ Dependents <- R6Class(
   public = list(
     .reactId = character(0),
     .dependents = 'Map',
+    # The tracked reactive whose readers these are, for resume snapshots
+    # (see snapshot_owner()); NULL when that reactive is not tracked.
+    .snapshotOwner = NULL,
 
     initialize = function(reactId = NULL) {
       .reactId <<- reactId
       .dependents <<- Map$new()
     },
-    # ... ignored, use to be depLabel and depId, not used anymore
-    register = function(...) {
-      ctx <- getCurrentContext()
+    # ... ignored, use to be depLabel and depId, not used anymore. The
+    # snapshot registry passes `ctx` to wire an edge without a read.
+    register = function(..., ctx = NULL) {
+      # Not a default argument: a lazy default would be forced inside
+      # containsKey(), adding its frames to the missing-context error's trace.
+      if (is.null(ctx)) ctx <- getCurrentContext()
       if (!.dependents$containsKey(ctx$id)) {
+
+        state <- ctx$.snapshot
+        if (!is.null(state)) {
+          if (is.null(.snapshotOwner)) {
+            context_not_adoptable(ctx, "depends on a reactive the snapshot does not track (created outside the session)")
+          } else {
+            state$upstream[[length(state$upstream) + 1L]] <- self
+          }
+        }
 
         # must wrap in if statement as ctx react id could be NULL
         #   if options(shiny.suppressMissingContextError = TRUE)
@@ -131,8 +146,11 @@ ReactiveVal <- R6Class(
     .isRecordingOtel = FALSE, # Needs to be set by Shiny
     .otelLabel = NULL, # Needs to be set by Shiny
     .otelAttrs = NULL, # Needs to be set by Shiny
+    .snapshot = NULL, # Resume snapshot state when tracked; see snapshot_node_state()
 
-    initialize = function(value, label = NULL) {
+    # `identity` (see snapshot_source_label()) is evaluated only when the
+    # domain has a snapshot registry; without one the node is not tracked.
+    initialize = function(value, label = NULL, identity = NULL) {
       reactId <- nextGlobalReactId()
       private$reactId <- reactId
       private$value <- value
@@ -146,6 +164,15 @@ ReactiveVal <- R6Class(
       if (!is.null(domain) && is.function(domain$onDestroy)) {
         wr <- rlang::new_weakref(key = self)
         private$.destroyHandle <- domain$onDestroy(make_weak_destroy_wrapper(wr, domain))
+      }
+
+      reg <- snapshot_registry(domain)
+      if (!is.null(reg) && !is.null(identity)) {
+        snapshot_track_val(self, reg)
+        reg$registerSource(self, "reactiveVal", identity$label, identity$source, domain,
+          initial = value,
+          apply = function(record) private$value <- unserialize(record$bytes)
+        )
       }
     },
     get = function() {
@@ -173,6 +200,7 @@ ReactiveVal <- R6Class(
       }
       rLog$valueChange(private$reactId, value, domain)
       private$value <- value
+      if (!is.null(.snapshot)) .snapshot$registry$markDirty()
       private$dependents$invalidate()
       invisible(TRUE)
     },
@@ -291,6 +319,7 @@ ReactiveVal <- R6Class(
 #' @export
 reactiveVal <- function(value = NULL, label = NULL) {
   call_srcref <- get_call_srcref()
+  explicitLabel <- label
   if (missing(label)) {
     label <- rassignSrcrefToLabel(
       call_srcref,
@@ -298,7 +327,11 @@ reactiveVal <- function(value = NULL, label = NULL) {
     )
   }
 
-  rv <- ReactiveVal$new(value, label)
+  # `identity` stays a promise unless the node is tracked; sys.call() is
+  # still this call when it is forced.
+  rv <- ReactiveVal$new(value, label,
+    identity = snapshot_source_label(call_srcref, sys.call(), explicit = explicitLabel)
+  )
   if (!is.null(call_srcref)) {
     rv$.otelAttrs <- otel_srcref_attributes(call_srcref, fn_name = "reactiveVal")
   }
@@ -442,7 +475,7 @@ ReactiveValues <- R6Class(
     .otelAttrs = NULL, # Needs to be set by Shiny
     .destroyed = FALSE,
     .destroyHandle = NULL,
-
+    .snapshot = NULL, # Resume snapshot state when tracked; see snapshot_track_values()
 
     initialize = function(
       dedupe = TRUE,
@@ -473,11 +506,13 @@ ReactiveValues <- R6Class(
 
       if (!.dependents$containsKey(key)) {
         # If we got here, this is the first time someone has tried to access
-        # this key.
+        # this key. (snapshot_values_wire() does the same for a sentinel edge.)
         rLog$defineKey(.reactId, keyValue, key, .label, getCurrentContext()$.domain)
 
         reactKeyId <- rLog$keyIdStr(.reactId, key)
-        .dependents$set(key, Dependents$new(reactKeyId))
+        deps <- Dependents$new(reactKeyId)
+        if (!is.null(.snapshot)) deps$.snapshotOwner <- snapshot_owner(self, "key", key)
+        .dependents$set(key, deps)
       }
 
       # Register the "downstream" reactive which is accessing this value, so
@@ -549,6 +584,7 @@ ReactiveValues <- R6Class(
 
       # set the value for better logging
       .values$set(key, value)
+      if (!is.null(.snapshot)) .snapshot$registry$markDirty()
 
       # key has been depended upon
       if (.dependents$containsKey(key)) {
@@ -750,9 +786,14 @@ ReactiveValues <- R6Class(
 #' @param ... Objects that will be added to the reactivevalues object. All of
 #'   these objects must be named.
 #'
+#' @param .label An optional label used to identify this object across
+#'   sessions when a session resumes (see [enableResume()]). The
+#'   name is dotted because every other named argument is a value. Defaults
+#'   to the name it is assigned to when that can be determined.
+#'
 #' @seealso [isolate()] and [is.reactivevalues()].
 #' @export
-reactiveValues <- function(...) {
+reactiveValues <- function(..., .label = NULL) {
   args <- list2(...)
   if ((length(args) > 0) && (is.null(names(args)) || any(names(args) == "")))
     rlang::abort("All arguments passed to reactiveValues() must be named.")
@@ -763,6 +804,7 @@ reactiveValues <- function(...) {
   impl <- .subset2(values, 'impl')
 
   call_srcref <- get_call_srcref()
+  reg <- snapshot_registry(getDefaultReactiveDomain())
   if (!is.null(call_srcref)) {
     impl$.label <- rassignSrcrefToLabel(
       call_srcref,
@@ -774,6 +816,13 @@ reactiveValues <- function(...) {
   }
 
   impl$mset(args)
+  # After mset(), so a saved value wins over the constructor's initial value.
+  if (!is.null(reg)) {
+    snapshot_register_values(impl, reg,
+      snapshot_source_label(call_srcref, sys.call(), explicit = .label),
+      getDefaultReactiveDomain(), initial = args
+    )
+  }
 
   # Add otel collection after `$mset()` so that we don't log the initial values
   # Add otel collection after `.label` so that any logging uses the correct label
@@ -1047,6 +1096,10 @@ Observable <- R6Class(
     .isRecordingOtel = FALSE, # Needs to be set by Shiny
     .otelLabel = NULL, # Needs to be set by Shiny
     .otelAttrs = NULL, # Needs to be set by Shiny
+    # Resume snapshot state when tracked: snapshot_node_state() with
+    # `hashParts` (see snapshot_conductor_hash()) and the memoised `bodyHash`
+    # (see snapshot_body_hash()).
+    .snapshot = NULL,
 
     initialize = function(func, label = deparse(substitute(func)),
                           domain = getDefaultReactiveDomain(),
@@ -1083,6 +1136,13 @@ Observable <- R6Class(
       if (!is.null(.domain) && is.function(.domain$onDestroy)) {
         wr <- rlang::new_weakref(key = self)
         .destroyHandle <<- .domain$onDestroy(make_weak_destroy_wrapper(wr, .domain))
+      }
+
+      reg <- snapshot_registry(.domain)
+      if (!is.null(reg)) {
+        .dependents$.snapshotOwner <- snapshot_owner(self)
+        .snapshot <<- snapshot_node_state(reg, hashParts = NULL, bodyHash = NULL)
+        reg$noteConductor(fn_body(.origFunc))
       }
     },
     getValue = function() {
@@ -1137,6 +1197,7 @@ Observable <- R6Class(
           otelAttrs = c(.otelAttrs, otel_session_id_attrs(.domain))
         )
       )
+      if (!is.null(.snapshot)) ctx$.snapshot <- snapshot_context_state()
       .mostRecentCtxId <<- ctx$id
 
       # A Dependency object will have a weak reference to the context, which
@@ -1159,6 +1220,15 @@ Observable <- R6Class(
       wasRunning <- .running
       .running <<- TRUE
       on.exit(.running <<- wasRunning)
+
+      if (!is.null(.snapshot)) {
+        state <- ctx$.snapshot
+        state$settled <- FALSE
+        # By exit `.value` holds the run's value or its error. The reactive's
+        # own continuations still run under `ctx` and register edges on it, so
+        # a promise value keeps it unsettled until they are done.
+        on.exit(snapshot_settle(state, .value), add = TRUE)
+      }
 
       ctx$run(function() {
         result <- withCallingHandlers(
@@ -1405,6 +1475,13 @@ Observer <- R6Class(
     .isRecordingOtel = FALSE, # Needs to be set by Shiny
     .otelLabel = NULL, # Needs to be set by Shiny
     .otelAttrs = NULL, # Needs to be set by Shiny
+    # Resume snapshot state when tracked:
+    # snapshot_node_state() with the identity `kind` and `label`, the
+    # `hashParts` wrappers append to, the `hazard` closure variables the body
+    # assigns, and whether this observer `adopted` its record instead of
+    # running. Hash parts and hazards may be snapshot_lazy(); read them
+    # through snapshot_observer_parts() and snapshot_observer_hazards().
+    .snapshot = NULL,
 
     initialize = function(observerFunc, label, suspended = FALSE, priority = 0,
                           domain = getDefaultReactiveDomain(),
@@ -1437,8 +1514,24 @@ Observer <- R6Class(
       .reactId <<- nextGlobalReactId()
       rLog$defineObserver(.reactId, .label, .domain)
 
-      # Defer the first running of this until flushReact is called
-      .createContext()$invalidate()
+      reg <- snapshot_registry(.domain)
+      if (!is.null(reg)) {
+        .snapshot <<- snapshot_node_state(reg,
+          kind = "observer", label = NULL, hashParts = list(), hazard = character(0), adopted = FALSE
+        )
+        reg$registerObserver(self, .domain)
+      }
+
+      if (!is.null(reg) && reg$inAdoptMode()) {
+        # Adopt mode: create the context but do not
+        # schedule a run; the registry decides at commit whether this observer
+        # adopts its record or is invalidated to run at first flush.
+        .createContext()
+        reg$pendingAdopt(self)
+      } else {
+        # Defer the first running of this until flushReact is called
+        .createContext()$invalidate()
+      }
     },
     .createContext = function() {
       ctx <- Context$new(
@@ -1453,6 +1546,7 @@ Observer <- R6Class(
           otelAttrs = c(.otelAttrs, otel_session_id_attrs(.domain))
         )
       )
+      if (!is.null(.snapshot)) ctx$.snapshot <- snapshot_context_state()
       .prevId <<- ctx$id
 
       if (!is.null(.ctx)) {
@@ -1520,8 +1614,16 @@ Observer <- R6Class(
       return(ctx)
     },
     run = function() {
+      if (.execCount == 0L && !is.null(.snapshot)) .snapshot$registry$finalizeNodes(self)
       ctx <- .createContext()
       .execCount <<- .execCount + 1L
+      if (!is.null(.snapshot)) {
+        state <- ctx$.snapshot
+        state$settled <- FALSE
+        # returnValue() rather than capturing the result inline, which would
+        # add stack frames and alter pruned stack traces.
+        on.exit(snapshot_settle(state, returnValue(NULL)), add = TRUE)
+      }
       ctx$run(.func)
     },
     onInvalidate = function(callback) {
@@ -1734,6 +1836,7 @@ observe <- function(
 
   func <- installExprFunction(x, "func", env, quoted)
 
+  explicitLabel <- label
   call_srcref <- get_call_srcref()
   if (is.null(label)) {
     label <- rassignSrcrefToLabel(
@@ -1751,6 +1854,13 @@ observe <- function(
     autoDestroy = autoDestroy,
     ..stacktraceon = ..stacktraceon
   )
+  state <- o$.snapshot
+  if (!is.null(state)) {
+    state$label <- if (!is.null(explicitLabel)) explicitLabel else snapshot_assigned_label(call_srcref)
+    userBody <- snapshot_user_body(func)
+    state$hashParts <- list(body = snapshot_lazy(snapshot_deparse, userBody))
+    state$hazard <- snapshot_lazy(snapshot_hazards, userBody)
+  }
   if (!is.null(call_srcref)) {
     o$.otelAttrs <- otel_srcref_attributes(call_srcref, fn_name = "observe")
   }
@@ -1964,6 +2074,7 @@ reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain())
   return(function() {
     newValue <- Sys.time()
     ctx <- getCurrentContext()
+    context_not_adoptable(ctx, "depends on a timer (reactiveTimer())")
     if (!dependents$containsKey(ctx$id)) {
       dependents$set(ctx$id, ctx)
       ctx$onInvalidate(function() {
@@ -2032,6 +2143,7 @@ invalidateLater <- function(millis, session = getDefaultReactiveDomain()) {
   force(session)
 
   ctx <- getCurrentContext()
+  context_not_adoptable(ctx, "depends on a timer (invalidateLater())")
   rLog$invalidateLater(ctx$.reactId, ctx$id, millis, session)
 
   clear_on_ended_callback <- function() {}
@@ -2670,6 +2782,7 @@ observeEvent <- function(eventExpr, handlerExpr,
   eventQ <- exprToQuo(eventExpr, event.env, event.quoted)
   handlerQ <- exprToQuo(handlerExpr, handler.env, handler.quoted)
 
+  explicitLabel <- label
   call_srcref <- get_call_srcref()
   if (is.null(label)) {
     label <- rassignSrcrefToLabel(
@@ -2698,6 +2811,9 @@ observeEvent <- function(eventExpr, handlerExpr,
       x = handler
     ))
   })
+  if (!is.null(o$.snapshot)) {
+    o$.snapshot$label <- if (!is.null(explicitLabel)) explicitLabel else snapshot_assigned_label(call_srcref)
+  }
 
   if (!is.null(call_srcref)) {
     o$.otelAttrs <- otel_srcref_attributes(call_srcref, fn_name = "observeEvent")
@@ -2883,6 +2999,7 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
     defaultLabel = "<anonymous>"
   )
 
+  millisPart <- millis
   if (!is.function(millis)) {
     origMillis <- millis
     millis <- function() origMillis
@@ -2895,7 +3012,7 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
 
     # Responsible for tracking when r() changes.
     firstRun <- TRUE
-    observe(
+    tracker <- observe(
       label = sprintf("debounce %s tracker", label),
       domain = domain,
       priority = priority,
@@ -2904,11 +3021,12 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
           # During the first run we don't want to set `when`, as this will kick
           # off the timer. We only want to do that when we see `r()` change.
           firstRun <<- FALSE
-
-          # Ensure r() is called only after setting firstRun to FALSE since r()
-          # may throw an error
-          try(r(), silent = TRUE)
-          return()
+          if (!isTRUE(tracker$.snapshot$adopted)) {
+            # Ensure r() is called only after setting firstRun to FALSE since r()
+            # may throw an error
+            try(r(), silent = TRUE)
+            return()
+          }
         }
         # This ensures r() is still tracked after firstRun
         try(r(), silent = TRUE)
@@ -2919,6 +3037,11 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
         )
       }
     )
+    state <- tracker$.snapshot
+    if (!is.null(state)) {
+      millisPart <- if (is.function(millisPart)) snapshot_lazy(snapshot_deparse, body(millisPart)) else millisPart
+      state$hashParts <- c(state$hashParts, list(millis = millisPart))
+    }
 
     # This observer is the timer. It rests until `when` elapses, then touches
     # `trigger`.

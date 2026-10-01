@@ -348,3 +348,16 @@ test_that("markRenderFunction preserves user frames outside reactive domain", {
   expect_true("userFunc" %in% df$call)
 })
 
+test_that("a missing-context error comes straight from Dependents$register(), as on main", {
+  rv <- reactiveVal(1)
+  r <- reactive(1)
+  for (read in list(function() rv(), function() r())) {
+    res <- try(captureStackTraces(read()), silent = TRUE)
+    cond <- attr(res, "condition", exact = TRUE)
+    calls <- getCallNames(conditionStackTrace(cond))
+    i <- grep("dependents$register", calls, fixed = TRUE)
+    expect_length(i, 1)
+    expect_identical(calls[[i + 1L]], "getCurrentContext")
+  }
+})
+

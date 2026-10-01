@@ -97,16 +97,21 @@ workerId <- local({
 #'
 #' @return
 #' \item{allowReconnect(value)}{
-#'   If `value` is `TRUE` and run in a hosting environment (Shiny
-#'   Server or Connect) with reconnections enabled,  then when the session ends
-#'   due to the network connection closing, the client will attempt to
-#'   reconnect to the server. If a reconnection is successful, the browser will
-#'   send all the current input values to the new session on the server, and
-#'   the server will recalculate any outputs and send them back to the client.
-#'   If `value` is `FALSE`, reconnections will be disabled (this is
-#'   the default state). If `"force"`, then the client browser will always
-#'   attempt to reconnect. The only reason to use `"force"` is for testing
-#'   on a local connection (without Shiny Server or Connect).
+#'   Whether the browser retries after the connection to the server is lost.
+#'   With resume on (see [enableResume()]), it already does, and the new
+#'   session resumes from the saved state: `TRUE` and `"force"` change
+#'   nothing, and `FALSE` is an error (call [disableResume()] to turn both
+#'   off). With resume off: if `value` is `TRUE` and run in a hosting
+#'   environment (Shiny Server or Connect) with reconnections enabled, then
+#'   when the session ends due to the network connection closing, the client
+#'   will attempt to reconnect to the server. If a reconnection is
+#'   successful, the browser will send all the current input values to the
+#'   new session on the server, and the server will recalculate any outputs
+#'   and send them back to the client. If `value` is `FALSE`, reconnections
+#'   will be disabled (this is the default state). If `"force"`, then the
+#'   client browser will always attempt to reconnect. The only reason to use
+#'   `"force"` is for testing on a local connection (without Shiny Server or
+#'   Connect).
 #' }
 #' \item{clientData}{
 #'   A [reactiveValues()] object that contains information about the client.
@@ -198,6 +203,20 @@ workerId <- local({
 #'   Returns a function that can be called with no arguments to cancel the
 #'   registration.
 #' }
+#' \item{onResumed(callback)}{
+#'   Registers a function to be called once when this session resumed a
+#'   previous one (see [enableResume()]), after the saved state has been
+#'   applied and before the first reactive flush. `callback` receives `info`,
+#'   a list with `from` (`"reconnect"`: the connection dropped and the page
+#'   stayed open), `resumed` (`"snapshot"` when the reactive state was
+#'   restored from saved state, `"inputs"` when only the input values were
+#'   replayed), and `dom` (`"intact"`). Inside the callback the app's own
+#'   reactive values, `input` and `session$userData` already hold the
+#'   restored values. Use it to rebuild state that lives outside the reactive
+#'   graph, such as a database connection, when `info$resumed == "snapshot"`:
+#'   the observer that created it did not run. Never called when a session
+#'   starts normally. Returns a function that cancels the registration.
+#' }
 #' \item{onSessionEnded(callback)}{
 #'   Registers a function to be called after the client has disconnected.
 #'   Returns a function that can be called with no arguments to cancel the
@@ -206,6 +225,19 @@ workerId <- local({
 #' \item{output}{
 #'   The session's `output` object (the same as is passed into the Shiny
 #'   server function as an argument).
+#' }
+#' \item{resumeReport()}{
+#'   Returns a data frame describing what resuming this session restores:
+#'   one row per reactive node with `id`, `kind`, `label`, `namespace`,
+#'   `adoptable` (whether it is restored without running), `reason` (why
+#'   not, or `NA`), and `hazard` (closure variables an observer assigns with
+#'   `<<-` or `assign()`, which a restored observer would leave at their
+#'   initial values). Intended for tests and audits, for example
+#'   `testServer(server, { r <- session$resumeReport(); stopifnot(all(r$adoptable | r$kind == "input")) })`
+#'   (password inputs are never saved, so their `"input"` rows are not
+#'   adoptable); after a resume the log line already names the nodes that
+#'   ran. Empty in a session with resume off. See [enableResume()] and
+#'   [disableResume()].
 #' }
 #' \item{reactlog}{
 #'   For internal use.
@@ -483,6 +515,7 @@ validateNamespace <- function(namespace, allow_root = FALSE) {
 }
 
 #' @include utils.R
+#' @include resume-registry.R
 ShinySession <- R6Class(
   'ShinySession',
   private = list(
@@ -498,6 +531,8 @@ ShinySession <- R6Class(
     progressKeys = 'character',
     showcase   = FALSE,
     fileUploadContext = 'FileUploadContext',
+    resumeToken = NULL,
+    endedForGood = FALSE,
     .input      = 'ANY', # Internal ReactiveValues object for normal input sent from client
     .clientData = 'ANY', # Internal ReactiveValues object for other data sent from the client
     busyCount = 0L, # Number of observer callbacks that are pending. When 0, we are idle
@@ -598,8 +633,44 @@ ShinySession <- R6Class(
       # This is to be called from the initialization. It registers functions
       # that are called when a session ends.
 
-      # Clear file upload directories, if present
-      self$onSessionEnded(private$fileUploadContext$rmUploadDirs)
+      # Clear file upload directories, if present. When a resume snapshot
+      # was written for this session, the adopted input$<file> values point
+      # into them, so removal waits until that snapshot is deleted (adopted
+      # by a resume in this process) or expires.
+      self$onSessionEnded(function() {
+        reg <- self$.snapshotRegistry
+        if (is.null(reg) || !reg$wroteSnapshot()) {
+          private$fileUploadContext$rmUploadDirs()
+          return()
+        }
+        store <- reg$writerStore()
+        key <- reg$storeKey()
+        snapshot_retain_upload_dirs(
+          store, key, private$fileUploadContext$uploadDirs(),
+          snapshot_ttl
+        )
+        # Expired snapshots never trigger onDelete() through cachem; sweeping
+        # at each session end drains the callbacks of keys that are gone.
+        store$sweep()
+      })
+    },
+
+    # Creates this session's snapshot registry and writer. Only a session with
+    # resume on has one, so other sessions pay nothing for
+    # the feature.
+    startSnapshots = function() {
+      reg <- SnapshotRegistry$new(self)
+      # The store resolves at the first allowed write; a NULL store means its
+      # directory could not be created (one message per process) and
+      # this session never writes.
+      reg$configureWriter(
+        function() snapshot_store(),
+        snapshot_token_key(private$resumeToken),
+        function() !private$endedForGood,
+        self$.resumeSettings$debounce
+      )
+      self$.snapshotRegistry <- reg
+      reg
     },
 
     # Modules (scopes) call this to register a function that returns a vector
@@ -951,6 +1022,8 @@ ShinySession <- R6Class(
     user = NULL,
     groups = NULL,
     options = NULL,       # For session-specific shinyOptions()
+    .snapshotRegistry = NULL, # Resume snapshot registry; internal
+    .resumeSettings = NULL, # resume_settings() at session start; internal
 
     initialize = function(websocket) {
       private$websocket <- websocket
@@ -978,6 +1051,11 @@ ShinySession <- R6Class(
 
       self$input <- .createReactiveValues(private$.input, readonly=TRUE)
       self$clientData <- .createReactiveValues(private$.clientData, readonly=TRUE)
+      self$.resumeSettings <- resume_settings()
+      if (isTRUE(self$.resumeSettings$enabled)) {
+        private$resumeToken <- snapshot_token_new()
+        private$startSnapshots()
+      }
 
       self$output <- .createOutputWriter(self)
 
@@ -1024,7 +1102,8 @@ ShinySession <- R6Class(
         config = list(
           workerId = workerId(),
           sessionId = self$token,
-          user = self$user
+          user = self$user,
+          resumeToken = private$resumeToken
         )
       )
     },
@@ -1394,11 +1473,16 @@ ShinySession <- R6Class(
     },
     close = function() {
       if (!self$closed) {
+        # With resume on, a session the server ends (here, on a fatal error,
+        # or when the server function errors; see server.R) ends for good, or
+        # an app that errors resumes in a loop.
+        try(self$.endForGood())
         private$websocket$close()
       }
     },
     wsClosed = function() {
       self$closed <- TRUE
+      if (!is.null(self$.snapshotRegistry)) self$.snapshotRegistry$writeNow()
       for (output in private$.outputs) {
         output$suspend()
       }
@@ -1424,7 +1508,161 @@ ShinySession <- R6Class(
       if (!(identical(value, TRUE) || identical(value, FALSE) || identical(value, "force"))) {
         stop('value must be TRUE, FALSE, or "force"')
       }
+      if (isTRUE(self$.resumeSettings$enabled)) {
+        # With resume on the client already retries, and `allowReconnect:
+        # false` on the wire is reserved for .endForGood().
+        if (identical(value, FALSE)) {
+          stop("Reconnecting is part of resume; call disableResume() at the top level of the app to turn both off.", call. = FALSE)
+        }
+        return(invisible())
+      }
       private$write(toJSON(list(allowReconnect = value)))
+    },
+
+    # Ends the session for good: the client must not retry,
+    # no saved state may resume it, and nothing more is written, including
+    # the closing write in wsClosed(). With resume off there is no saved state
+    # and the client retries by main's rules, so this does nothing, as on main.
+    # It runs inside endOnError()'s calling handler, where an error would
+    # replace the app's own, so a failed delete is only reported.
+    .endForGood = function() {
+      if (private$endedForGood || !isTRUE(self$.resumeSettings$enabled)) return(invisible())
+      private$endedForGood <- TRUE
+      tryCatch(
+        self$.snapshotRegistry$deleteSnapshot(),
+        error = function(e) message("Saved state could not be deleted: ", conditionMessage(e))
+      )
+      private$write(toJSON(list(allowReconnect = FALSE)))
+      invisible()
+    },
+
+    # The `resume` branch of the WebSocket handler.
+    # `data` is the decoded message payload; `runServer` runs the app's
+    # server function. Every failure falls through to inputs-only resume.
+    .resumeSession = function(data, runServer) {
+      # server.R answers `resume` as `init` when resume is off, so the
+      # registry exists here.
+      reg <- self$.snapshotRegistry
+      info <- list(from = "reconnect", resumed = "snapshot", dom = "intact")
+      live <- snapshot_live_inputs(data$inputs)
+
+      # What manageInputs() does for init: session$onInputReceived()
+      # callbacks see the handler-applied live inputs, clientData keys
+      # prefixed as on the wire.
+      notifyInputs <- function(live) {
+        cd <- live$clientData
+        if (length(cd)) names(cd) <- paste0(".clientdata_", names(cd))
+        private$inputReceivedCallbacks$invoke(c(live$inputs, cd))
+      }
+
+      # `resumed` goes out just before the server function runs, so it is the
+      # first message after `config`; nothing after that point changes
+      # info$resumed.
+      ran <- FALSE
+      sendThenRun <- function(info) {
+        force(info)
+        function() {
+          ran <<- TRUE
+          self$.sendResumed(info)
+          runServer()
+        }
+      }
+
+      # `handled` is the handler-applied live set when an adoption attempt
+      # already applied handlers and notified onInputReceived().
+      fallThrough <- function(cause, handled = NULL) {
+        info$resumed <- "inputs"
+        if (is.null(handled)) {
+          # Seed before input handlers run: the shiny.file handler reads the
+          # restore context. resumeFromInputs() re-seeds
+          # with the handler-applied values.
+          snapshot_seed_restore_context(self, live$inputs)
+          handled <- snapshot_apply_handlers(live, self)
+          notifyInputs(handled)
+        }
+        reg$resumeFromInputs(handled, sendThenRun(info), info)
+        message(paste(snapshot_resume_log(NULL, info, cause), collapse = "\n"))
+        snapshot_resume_otel(self, info, NULL)
+        info
+      }
+
+      token <- data$token
+      if (!is.null(data$share) || !snapshot_token_valid(token)) return(fallThrough("malformed token"))
+      if (!identical(data$dom, "intact")) return(fallThrough("dom is not intact"))
+      store <- snapshot_store()
+      if (is.null(store)) return(fallThrough("store unavailable"))
+      key <- snapshot_token_key(token)
+      snapshot <- tryCatch(store$read(key), error = function(e) e)
+      if (inherits(snapshot, "error")) return(fallThrough(paste("snapshot unreadable:", conditionMessage(snapshot))))
+      if (is.null(snapshot)) return(fallThrough("no snapshot"))
+      shape <- snapshot_shape_problem(snapshot)
+      if (!is.null(shape)) return(fallThrough(paste("snapshot unreadable:", shape)))
+      mismatch <- tryCatch(
+        snapshot_identity_mismatch(snapshot, self, enforceUser = TRUE),
+        error = function(e) paste("identity check failed:", conditionMessage(e))
+      )
+      if (!is.null(mismatch)) return(fallThrough(mismatch))
+      # The page is intact but the app's UI changed (local restart after an
+      # edit, a deploy): adopting would leave stale static UI on screen. Ask
+      # the client to reload; this release treats the reload as a fresh
+      # start, the reload PR adopts the snapshot with dom = "fresh". The
+      # snapshot is left in place for that path and expires otherwise. The
+      # inputs-only resume below keeps this session valid until the socket
+      # closes.
+      uiNow <- tryCatch(snapshot_ui_hash(), error = function(e) NULL)
+      if (!is.null(uiNow) && !is.null(snapshot$identity$uiHash) && !identical(uiNow, snapshot$identity$uiHash)) {
+        private$sendMessage(reload = TRUE)
+        return(fallThrough("ui changed; reload requested"))
+      }
+      # Single use, which resolves a duplicated tab's race; adopt() writes
+      # this session's snapshot right after commit. take(), not
+      # delete(): delete() would unlink the upload directories the adopted
+      # input$<file> values point into, so this session owns them instead.
+      taken <- tryCatch(store$take(key), error = function(e) e)
+      if (inherits(taken, "error")) return(fallThrough(paste("snapshot could not be claimed:", conditionMessage(taken))))
+      private$fileUploadContext$adoptUploadDirs(taken)
+
+      snapshot_seed_restore_context(self, snapshot$inputs)  # before handlers
+      handled <- snapshot_apply_handlers(live, self)
+      notifyInputs(handled)
+      # An error before the server function runs falls back to inputs-only;
+      # one raised by it (user code) propagates as it does for init, so the
+      # server function never runs twice. adopt() leaves adopt mode on
+      # either exit. A calling handler plus a restart, rather than
+      # tryCatch(), keeps the server function's errors unwound normally.
+      failure <- withRestarts(
+        withCallingHandlers(
+          {
+            reg$adopt(snapshot, handled, sendThenRun(info), info)
+            NULL
+          },
+          error = function(e) if (!ran) invokeRestart("resumeFallback", e)
+        ),
+        resumeFallback = function(e) e
+      )
+      if (!is.null(failure)) {
+        return(fallThrough(paste("adoption failed:", conditionMessage(failure)), handled))
+      }
+      # After the first flush, because the fallback list is complete only
+      # once finishAdopt() (registered earlier, inside adopt()) has run.
+      self$onFlushed(function() {
+        outcome <- reg$adoptOutcome()
+        message(paste(snapshot_resume_log(outcome, info), collapse = "\n"))
+        snapshot_resume_otel(self, info, outcome)
+      }, once = TRUE)
+      info
+    },
+
+    .sendResumed = function(info) {
+      private$sendMessage(resumed = info$resumed, from = info$from, dom = info$dom)
+    },
+
+    resumeReport = function() {
+      snapshot_session_report(self)
+    },
+
+    onResumed = function(callback) {
+      snapshot_session_on_resumed(self, callback)
     },
 
     defineOutput = function(name, func, label) {
@@ -1448,6 +1686,7 @@ ShinySession <- R6Class(
         # previous output (if any) would continue to show in the client.
         func <- missingOutput
       }
+      renderFunc <- func
 
       if (is.function(func)) {
         # Extract any output attributes attached to the render function. These
@@ -1581,6 +1820,8 @@ ShinySession <- R6Class(
             }
           )
         }, suspended=private$shouldSuspend(name), label=label))
+
+        snapshot_define_output(obs, name, renderFunc)
 
         # If any output attributes were added to the render function attach
         # them to observer.
@@ -2425,7 +2666,7 @@ ShinySession <- R6Class(
       return(paste('data:', contentType, ';base64,', b64, sep=''))
     },
     registerDownload = function(name, filename, contentType, func) {
-
+      snapshot_uses_session_url()
       self$downloads$set(name, list(filename = filename,
                                contentType = contentType,
                                func = func))
@@ -2436,6 +2677,7 @@ ShinySession <- R6Class(
     },
     # register a data object on the server side (for datatable or selectize, etc)
     registerDataObj = function(name, data, filterFunc) {
+      snapshot_uses_session_url()
       # abusing downloads at the moment
       self$downloads$set(name, list(data = data, filter = filterFunc))
       return(sprintf('session/%s/dataobj/%s?w=%s&nonce=%s',

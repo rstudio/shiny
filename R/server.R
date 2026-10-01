@@ -203,12 +203,22 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
 
           msg <- decodeMessage(msg)
 
+          # Resume off for this app: a `resume` from an older page is
+          # answered as main answers a reconnect, with `init` and its inputs.
+          if (identical(msg$method, "resume") && !isTRUE(shinysession$.resumeSettings$enabled)) {
+            msg <- list(method = "init", data = msg$data$inputs %||% list())
+          }
+
+          isResume <- identical(msg$method, "resume")
+
           # Set up a restore context from .clientdata_url_search before
           # handling all the input values, because the restore context may be
           # used by an input handler (like the one for "shiny.file"). This
-          # should only happen once, when the app starts.
-          if (is.null(shinysession$restoreContext)) {
-            bookmarkStore <- getShinyOption("bookmarkStore", default = "disable")
+          # should only happen once, when the app starts. A `resume` message
+          # seeds its own context inside .resumeSession(),
+          # before input handlers run on its inputs.
+          bookmarkStore <- getShinyOption("bookmarkStore", default = "disable")
+          if (is.null(shinysession$restoreContext) && !isResume) {
             if (bookmarkStore == "disable") {
               # If bookmarking is disabled, use empty context
               shinysession$restoreContext <- RestoreContext$new()
@@ -219,34 +229,72 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
             }
           }
 
+          if (!isResume) {
+            msg$data <- applyInputHandlers(msg$data)
+          }
 
-          msg$data <- applyInputHandlers(msg$data)
+          # Everything the init branch does before and after running the server
+          # function, shared with the resume branch.
+          prepareServer <- function(inputs) {
+            serverFunc <- withReactiveDomain(NULL, serverFuncSource())
+            if (!identicalFunctionBodies(serverFunc, appvars$server)) {
+              appvars$server <- serverFunc
+              if (!is.null(appvars$server))
+              {
+                # Tag this function as the Shiny server function. A debugger may use this
+                # tag to give this function special treatment.
+                # It's very important that it's appvars$server itself and NOT a copy that
+                # is invoked, otherwise new breakpoints won't be picked up.
+                attr(appvars$server, "shinyServerFunction") <- TRUE
+                registerDebugHook("server", appvars, "Server Function")
+              }
+            }
+
+            # Check for switching into/out of showcase mode
+            if (.globals$showcaseOverride &&
+                exists(".clientdata_url_search", where = inputs)) {
+              mode <- showcaseModeOfQuerystring(inputs$.clientdata_url_search)
+              if (!is.null(mode))
+                shinysession$setShowcase(mode)
+            }
+
+            # The client tells us what singletons were rendered into
+            # the initial page
+            if (!is.null(inputs$.clientdata_singletons)) {
+              shinysession$singletons <- strsplit(
+                inputs$.clientdata_singletons, ',')[[1]]
+            }
+            serverFunc
+          }
+          runServerWith <- function(serverFunc) {
+            args <- argsForServerFunc(serverFunc, shinysession)
+
+            withReactiveDomain(shinysession, {
+              otel_span_session_start(domain = shinysession, {
+
+                do.call(
+                  # No corresponding ..stacktraceoff; the server func is pure
+                  # user code
+                  wrapFunctionLabel(appvars$server, "server",
+                    ..stacktraceon = TRUE
+                  ),
+                  args
+                )
+
+              })
+            })
+          }
+
+          # An error escaping init or resume makes httpuv close the socket;
+          # like session$close(), that ends the session for good.
+          endOnError <- function(expr) {
+            withCallingHandlers(expr, error = function(e) shinysession$.endForGood())
+          }
 
           switch(
             msg$method,
-            init = {
-
-              serverFunc <- withReactiveDomain(NULL, serverFuncSource())
-              if (!identicalFunctionBodies(serverFunc, appvars$server)) {
-                appvars$server <- serverFunc
-                if (!is.null(appvars$server))
-                {
-                  # Tag this function as the Shiny server function. A debugger may use this
-                  # tag to give this function special treatment.
-                  # It's very important that it's appvars$server itself and NOT a copy that
-                  # is invoked, otherwise new breakpoints won't be picked up.
-                  attr(appvars$server, "shinyServerFunction") <- TRUE
-                  registerDebugHook("server", appvars, "Server Function")
-                }
-              }
-
-              # Check for switching into/out of showcase mode
-              if (.globals$showcaseOverride &&
-                  exists(".clientdata_url_search", where = msg$data)) {
-                mode <- showcaseModeOfQuerystring(msg$data$.clientdata_url_search)
-                if (!is.null(mode))
-                  shinysession$setShowcase(mode)
-              }
+            init = endOnError({
+              serverFunc <- prepareServer(msg$data)
 
               # In shinysession$createBookmarkObservers() above, observers may be
               # created, which puts the shiny session in busyCount > 0 state. That
@@ -262,33 +310,16 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
               # this manageInputs is called.
               shinysession$manageInputs(msg$data, now = TRUE)
 
-              # The client tells us what singletons were rendered into
-              # the initial page
-              if (!is.null(msg$data$.clientdata_singletons)) {
-                shinysession$singletons <- strsplit(
-                  msg$data$.clientdata_singletons, ',')[[1]]
-              }
-
-              local({
-                args <- argsForServerFunc(serverFunc, shinysession)
-
-                withReactiveDomain(shinysession, {
-                  otel_span_session_start(domain = shinysession, {
-
-                    do.call(
-                      # No corresponding ..stacktraceoff; the server func is pure
-                      # user code
-                      wrapFunctionLabel(appvars$server, "server",
-                        ..stacktraceon = TRUE
-                      ),
-                      args
-                    )
-
-                  })
-                })
-
-              })
-            },
+              local({ runServerWith(serverFunc) })
+            }),
+            resume = endOnError({
+              serverFunc <- prepareServer(msg$data$inputs %||% list())
+              # Its observers read the restore context only when they run, at
+              # the first flush, by which time .resumeSession() has seeded an
+              # inactive one, so onRestore()/onRestored() stay silent.
+              if (bookmarkStore != "disable") shinysession$createBookmarkObservers()
+              shinysession$.resumeSession(msg$data, function() runServerWith(serverFunc))
+            }),
             update = {
               shinysession$manageInputs(msg$data)
             },
@@ -388,6 +419,14 @@ removeSubApp <- function(path) {
 
 startHttpuvApp <- function(appObj, port, host, quiet) {
   appHandlers <- createAppHandlers(appObj$httpHandler, appObj$serverFuncSource)
+  # Base R has no user-level SIGTERM handler; a hard kill loses at most the
+  # last quiet interval. On an orderly stop, write every live session's
+  # snapshot first.
+  onStop(function() {
+    for (session in appsByToken$values()) {
+      if (!is.null(session$.snapshotRegistry)) try(session$.snapshotRegistry$writeNow(), silent = TRUE)
+    }
+  }, session = NULL)
   handlerManager$addHandler(appHandlers$http, "/", tail = TRUE)
   handlerManager$addWSHandler(appHandlers$ws, "/", tail = TRUE)
 

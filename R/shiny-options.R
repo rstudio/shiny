@@ -295,10 +295,11 @@ shinyOptions <- function(...) {
 captureAppOptions <- function() {
   options <- list(
     appDir = getwd(),
-    bookmarkStore = getShinyOption("bookmarkStore")
+    bookmarkStore = getShinyOption("bookmarkStore"),
+    resume = getShinyOption("resume")
   )
 
-  shinyOptions(appDir = NULL, bookmarkStore = NULL)
+  shinyOptions(appDir = NULL, bookmarkStore = NULL, resume = NULL)
 
   options
 }

@@ -19,15 +19,18 @@ test_that("Captured options contain expected elements", {
 
   shinyOptions(bookmarkStore = 123)
   shinyOptions(appDir = normalizePath("../")) # stomped
+  shinyOptions(resume = list(enabled = FALSE))
   caps <- captureAppOptions()
 
-  expect_equal(sort(names(caps)), c("appDir", "bookmarkStore"))
+  expect_equal(sort(names(caps)), c("appDir", "bookmarkStore", "resume"))
   expect_equal(caps$appDir, getwd())
   expect_equal(caps$bookmarkStore, 123)
+  expect_equal(caps$resume, list(enabled = FALSE))
 
   # verify that options are reset
   expect_equal(getShinyOption("bookmarkStore"), NULL)
   expect_equal(getShinyOption("appDir"), NULL)
+  expect_equal(getShinyOption("resume"), NULL)
 })
 
 test_that("Capturing options at creation time", {

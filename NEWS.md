@@ -1,5 +1,27 @@
 # shiny (development version)
 
+* Shiny sessions can now resume after an interruption. While a session runs,
+  Shiny saves its state to server-side storage (the hosting platform's
+  bookmark storage when it provides one, otherwise
+  `tools::R_user_dir("shiny", "cache")`). When the connection drops and the
+  page stays open, the reconnected session resumes from that saved state:
+  `reactiveVal()`, `reactiveValues()`, `input` and `session$userData` keep
+  their values, observers do not run again, and only the inputs that changed
+  while disconnected are applied. Resume is on by default locally and off
+  under Shiny Server and Connect; an app turns it on or off with the new
+  `enableResume()` and `disableResume()`, and a platform with the
+  `SHINY_RESUME` environment variable. Also new: `disableResume(x)` to leave
+  one reactive out, `session$onResumed()`, `session$resumeReport()`,
+  `reactiveValues(.label)`, and the `resume` and `resumed` wire messages
+  documented in `srcts/PROTOCOL.md`. With resume on, the browser retries a
+  lost connection on any server, not only behind Shiny Server's connection
+  layer, and gives up after 10 attempts; `session$allowReconnect(TRUE)` has
+  nothing to add and `session$allowReconnect(FALSE)` is an error (use
+  `disableResume()`); a session the server ends itself (`session$close()`,
+  a fatal error, an error in the server function) is not retried. With
+  resume off, `allowReconnect()` and reconnecting work as before.
+  (#TBD-PR-NUMBER)
+
 * Added an agent skill (`inst/skills/shiny-for-r/`) following the
   [Agent Skills](https://agentskills.io) convention. Coding agents using
   [btw](https://posit-dev.github.io/btw/) discover it automatically when

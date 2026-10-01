@@ -162,6 +162,9 @@ makeExtraMethods <- function() {
     "showProgress",
     "updateQueryString"
   ), makeErrors(
+    .endForGood = "for internal use only",
+    .resumeSession = "for internal use only",
+    .sendResumed = "for internal use only",
     `@uploadEnd` = "for internal use only",
     `@uploadInit` = "for internal use only",
     createBookmarkObservers = "for internal use only",
@@ -207,6 +210,7 @@ addGeneratedInstanceMethods <- function(instance, methods = makeExtraMethods()) 
 #'   of [testServer()].
 #'
 #' @include timer.R
+#' @include resume-registry.R
 #' @export
 MockShinySession <- R6Class(
   'MockShinySession',
@@ -246,6 +250,10 @@ MockShinySession <- R6Class(
     user = NULL,
     #' @field options A list containing session-level shinyOptions.
     options = NULL,
+    #' @field .snapshotRegistry For internal use: the resume snapshot registry.
+    .snapshotRegistry = NULL,
+    #' @field .resumeSettings For internal use: the resume settings resolved at start.
+    .resumeSettings = NULL,
 
     #' @description Create a new MockShinySession.
     initialize = function() {
@@ -269,6 +277,8 @@ MockShinySession <- R6Class(
 
       # Create a read-only copy of the inputs reactive.
       self$input <- .createReactiveValues(private$.input, readonly = TRUE)
+      self$.resumeSettings <- resume_settings()
+      if (isTRUE(self$.resumeSettings$enabled)) self$.snapshotRegistry <- SnapshotRegistry$new(self)
 
       self$token <- createUniqueId(16)
 
@@ -511,6 +521,7 @@ MockShinySession <- R6Class(
             })
         })
       })
+      snapshot_define_output(obs, name, func)
       private$outs[[name]] <- list(obs = obs, func = func, promise = NULL)
     },
 
@@ -701,6 +712,7 @@ MockShinySession <- R6Class(
     #'   to that file path. (Reactive values and functions may be used from this
     #'   function.)
     registerDownload = function(name, filename, contentType, content) {
+      snapshot_uses_session_url()
       private$file_generators$set(self$ns(name), list(
         filename = if (is.function(filename)) filename else function() filename,
         content = content
@@ -713,6 +725,18 @@ MockShinySession <- R6Class(
     getCurrentOutputInfo = function() {
       name <- private$currentOutputName
       if (is.null(name)) NULL else list(name = name)
+    },
+    #' @description Returns the resume report for this session: one row per
+    #'   reactive node saying whether it would be restored when the session
+    #'   resumes and, if not, why. See `?session`.
+    resumeReport = function() {
+      snapshot_session_report(self)
+    },
+    #' @description Registers a callback for when this session resumes (see
+    #'   `?session`). Returns a deregistration function.
+    #' @param callback A function taking one argument, `info`.
+    onResumed = function(callback) {
+      snapshot_session_on_resumed(self, callback)
     }
   ),
   private = list(
@@ -763,7 +787,7 @@ MockShinySession <- R6Class(
     #   on demand when the output is accessed.
     file_generators = NULL,
     # @field currentOutputName Namespaced name of the currently executing
-    #'   output, or `NULL` if no output is currently executing.
+    #   output, or `NULL` if no output is currently executing.
     currentOutputName = NULL,
 
     # @description Get or create a Callbacks object for the given namespace.

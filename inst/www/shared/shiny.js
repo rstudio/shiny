@@ -1386,6 +1386,9 @@
     }
     initialize(el) {
       const $input = (0, import_jquery10.default)(el).find("input");
+      if ($input.data("dates-disabled") !== void 0) {
+        this._setDatesDisabled($input[0], $input.data("dates-disabled"));
+      }
       let date = $input.data("initial-date");
       if (date === void 0 || date === null) {
         date = this._floorDateTime(this._dateAsUTC(/* @__PURE__ */ new Date()));
@@ -1448,6 +1451,16 @@
       } else {
         (0, import_jquery10.default)(el).bsDatepicker("setUTCDate", curValue);
       }
+    }
+    // Given an array of unambiguous date strings and/or Date objects, disable
+    // those dates on the datepicker. null/undefined entries are dropped.
+    _setDatesDisabled(el, dates) {
+      if (!dates) {
+        (0, import_jquery10.default)(el).bsDatepicker("setDatesDisabled", []);
+        return;
+      }
+      const parsedDates = dates.map((date) => date == null ? null : this._newDate(date)).filter((date) => date !== null);
+      (0, import_jquery10.default)(el).bsDatepicker("setDatesDisabled", parsedDates);
     }
     // Given a date string of format yyyy-mm-dd, return a Date object with
     // that date at 12AM UTC.

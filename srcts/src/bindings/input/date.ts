@@ -19,6 +19,7 @@ declare global {
     bsDatepicker(methodName: "getStartDate"): Date | -1e9999; // eslint-disable-line no-loss-of-precision
 
     bsDatepicker(methodName: "getEndDate"): Date | 1e9999; // eslint-disable-line no-loss-of-precision
+    bsDatepicker(methodName: "setDatesDisabled", params: Date[]): void;
     bsDatepicker(methodName: string): void;
     bsDatepicker(methodName: string, params: Date | null): void;
   }
@@ -77,6 +78,16 @@ class DateInputBindingBase extends InputBinding {
     // does not carry timezone information, so we should call _floorDateTime()
     // on Dates as soon as possible so that we know we're always working with
     // consistent objects.
+
+    // Disabled dates always use yyyy-mm-dd format (like min-date and max-date
+    // below), instead of bootstrap-datepicker's built-in support for
+    // data-date-dates-disabled, which parses strings using the display format
+    // (#4281). This must run before setValue(): setDatesDisabled() calls
+    // update(), which re-parses the input's text with the display format and
+    // misreads 2-digit years (eternicode/bootstrap-datepicker#2010).
+    if ($input.data("dates-disabled") !== undefined) {
+      this._setDatesDisabled($input[0], $input.data("dates-disabled"));
+    }
 
     let date = $input.data("initial-date");
     // If initial_date is null, set to current date
@@ -185,6 +196,23 @@ class DateInputBindingBase extends InputBinding {
     } else {
       $(el).bsDatepicker("setUTCDate", curValue);
     }
+  }
+  // Given an array of unambiguous date strings and/or Date objects, disable
+  // those dates on the datepicker. null/undefined entries are dropped.
+  protected _setDatesDisabled(
+    el: HTMLElement,
+    dates: Array<Date | string | null | undefined> | null,
+  ): void {
+    if (!dates) {
+      $(el).bsDatepicker("setDatesDisabled", []);
+      return;
+    }
+
+    const parsedDates = dates
+      .map((date) => (date == null ? null : this._newDate(date)))
+      .filter((date): date is Date => date !== null);
+
+    $(el).bsDatepicker("setDatesDisabled", parsedDates);
   }
   // Given a date string of format yyyy-mm-dd, return a Date object with
   // that date at 12AM UTC.

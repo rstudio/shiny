@@ -225,7 +225,17 @@ workerId <- local({
 #' }
 #' \item{reload()}{
 #'   The equivalent of hitting the browser's Reload button. Only works if the
-#'   session is actually connected.
+#'   session is actually connected. With resume on (see [enableResume()]),
+#'   the reloaded page starts fresh: the session's saved state is discarded.
+#' }
+#' \item{resumeReport()}{
+#'   Returns a data frame describing what resuming this session restores:
+#'   one row per reactive value and input, with `kind` (`"reactiveVal"`,
+#'   `"reactiveValues"`, `"userData"`, `"input"`), `label`, `namespace`,
+#'   `adoptable` (whether it restores) and `reason` (why not, or `NA`).
+#'   Printing groups the rows by reason. Intended for tests and audits, e.g.
+#'   `testServer(server, { stopifnot(all(session$resumeReport()$adoptable)) })`.
+#'   Empty in a session with resume off. See [enableResume()].
 #' }
 #' \item{request}{
 #'   An environment that implements the [Rook

@@ -132,7 +132,17 @@ response.
 }
 \item{reload()}{
 The equivalent of hitting the browser's Reload button. Only works if the
-session is actually connected.
+session is actually connected. With resume on (see \code{\link[=enableResume]{enableResume()}}),
+the reloaded page starts fresh: the session's saved state is discarded.
+}
+\item{resumeReport()}{
+Returns a data frame describing what resuming this session restores:
+one row per reactive value and input, with \code{kind} (\code{"reactiveVal"},
+\code{"reactiveValues"}, \code{"userData"}, \code{"input"}), \code{label}, \code{namespace},
+\code{adoptable} (whether it restores) and \code{reason} (why not, or \code{NA}).
+Printing groups the rows by reason. Intended for tests and audits, e.g.
+\code{testServer(server, { stopifnot(all(session$resumeReport()$adoptable)) })}.
+Empty in a session with resume off. See \code{\link[=enableResume]{enableResume()}}.
 }
 \item{request}{
 An environment that implements the \href{https://github.com/jeffreyhorner/Rook#the-environment}{Rook specification} for

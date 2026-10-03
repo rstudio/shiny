@@ -15,6 +15,145 @@ enableResume(
 
 disableResume(x)
 }
+\arguments{
+\item{reload}{What a reload the user makes does: \code{"ask"}, \code{"resume"} or
+\code{"fresh"} (see "Reloading the page").}
+
+\item{appVersion}{\code{NULL}, or a string or number recorded with the saved
+state. Change it in a deploy that changes what the app's state means, so
+sessions saved by the previous version start fresh.}
+
+\item{maxSize}{Bytes; the total size of a session's saved state. Over it,
+the largest values block resume until the rest fit.}
+
+\item{maxNodeSize}{Bytes; a value whose serialized size exceeds this
+blocks resume.}
+
+\item{debounce}{Milliseconds of quiet after a change before the state is
+saved. While changes keep arriving it is saved at least every ten such
+intervals.}
+
+\item{x}{Optional. A reactive value, \code{reactiveValues()} object or observer
+to leave out of resume. Without it, \code{disableResume()} turns resume off
+for the app.}
+}
+\value{
+\code{enableResume()} and \code{disableResume()} return \code{NULL} invisibly;
+\code{disableResume(x)} returns \code{x} invisibly.
+}
 \description{
-Resume sessions after an interruption
+With resume on, Shiny saves each session's state as it goes, and a
+session that reconnects or reloads continues from it: \code{\link[=reactiveVal]{reactiveVal()}} and
+\code{\link[=reactiveValues]{reactiveValues()}} values with a label, \code{input}, uploaded files and
+\code{session$userData} come back; \code{\link[=observeEvent]{observeEvent()}} handlers whose events
+already happened do not fire again; \code{\link[=reactive]{reactive()}} expressions and outputs
+recompute. Inputs that changed while the page was disconnected are applied
+on top.
+
+\code{enableResume()} turns resume on for an app and configures it;
+\code{disableResume()} turns it off. Call either at the top level of \code{app.R}
+(before \code{\link[=shinyApp]{shinyApp()}}) or in \code{global.R}, not in \code{server.R} or inside the
+server function. Like \code{\link[=enableBookmarking]{enableBookmarking()}}, the call applies to the app
+created next; when an app calls both, the last call wins. Resume implies
+\code{session$allowReconnect(TRUE)} for the app's sessions; a session may still
+call \code{session$allowReconnect(FALSE)} to opt out, in which case it is
+neither retried nor resumed.
+
+\code{disableResume(x)} leaves one reactive out:
+\itemize{
+\item On a \code{\link[=reactiveVal]{reactiveVal()}} or \code{\link[=reactiveValues]{reactiveValues()}} object: its value is not
+saved and does not count against the all-or-nothing rule below; after a
+resume it holds its initial value.
+\item On an observer (\code{\link[=observe]{observe()}}, \code{\link[=observeEvent]{observeEvent()}}): its first run is not
+held back; it runs on resume exactly as on a fresh start, \code{ignoreInit}
+included. Use it on a handler whose job is to rebuild something outside
+the reactive graph.
+}
+}
+\section{Who decides}{
+
+Resolved once per app, first match wins:
+\enumerate{
+\item The app's last \code{enableResume()} or \code{disableResume()} call.
+\item The \code{SHINY_RESUME} environment variable (\code{TRUE} or \code{FALSE}), for a
+hosting platform that has verified its storage.
+\item Off.
+}
+}
+
+\section{What is saved}{
+
+Every \code{reactiveVal()} and \code{reactiveValues()} that has an identity: a
+\code{label} (\code{.label} for \code{reactiveValues()}), or the name it is assigned to
+(\code{count <- reactiveVal(0)}). A source with neither (one created in a loop,
+or in an installed package, which keeps no source references) blocks
+resume for the whole session until it is labelled or marked with
+\code{disableResume()}, and so does a value that cannot be serialized (a
+connection, an R6 object, a closure) or one over \code{maxNodeSize}. Saved
+state is restored all or nothing: when any source that should restore
+cannot, the session resumes from its inputs only and the log says why.
+\code{session$resumeReport()} lists every value and input with the reason it
+would not restore. Observers, outputs, reactive expressions, closure state
+(\verb{<<-}) and in-flight async work are never saved; see the rules of
+reactives in the \verb{shiny-for-r} skill's \code{references/resume.md} for where to
+keep them instead.
+}
+
+\section{Reloading the page}{
+
+\code{reload} says what a reload the user makes does. \code{"ask"} (the default)
+shows a small dialog before any session starts, offering \strong{Pick up where
+you left off} or \strong{Start fresh}. \code{"resume"} resumes and shows a
+notification with "Start fresh instead". \code{"fresh"} starts over.
+\code{session$reload()} always starts fresh, because every known use of it is
+as a reset. A reload Shiny makes itself, after a restart that changed the
+app's UI or during development with autoreload, resumes without asking.
+}
+
+\section{After an error}{
+
+An unhandled error in an observer still ends the session. With resume on,
+saving stops at the error so the last saved state is from just before it,
+and the page offers \strong{Resume}, which returns to that state, or \strong{Start
+over}. The user's last change may already have taken effect before the
+error. The dialog shows the error message unless
+\code{options(shiny.sanitize.errors = TRUE)}.
+}
+
+\section{Where saved state lives}{
+
+In the hosting platform's bookmark storage when it provides one, otherwise
+under \code{tools::R_user_dir("shiny", "cache")}; never in the app directory.
+Records are readable only by the owner, keyed by a 128-bit random token
+and the app's path, kept for 24 hours (a few minutes after the user
+navigates away on purpose), and the directory as a whole is capped at
+1 GiB and 1000 records. On Windows the token comes from the \code{openssl}
+package when it is installed and from R's random number generator
+otherwise. Whether a hosting platform's directory survives a restart of
+the R process is up to the platform; a container without a persistent
+volume resumes from inputs only after it restarts.
+}
+
+\examples{
+\dontrun{
+# app.R
+library(shiny)
+enableResume(reload = "resume", appVersion = "2")
+
+ui <- fluidPage(actionButton("plus", "+1"), textOutput("count"))
+server <- function(input, output, session) {
+  count <- reactiveVal(0)
+  observeEvent(input$plus, count(count() + 1))
+
+  # A connection cannot be saved: keep it in a reactive(), which recomputes.
+  conn <- reactive(file(tempfile(), open = "w"))
+
+  output$count <- renderText(count())
+}
+shinyApp(ui, server)
+}
+}
+\seealso{
+\link{session} for \code{session$resumeReport()}, \code{session$reload()} and
+\code{session$allowReconnect()}; \code{\link[=reactiveValues]{reactiveValues()}} for \code{.label}.
 }

@@ -97,6 +97,7 @@ test_that("shiny APIs documented in references still exist", {
     tables = c("renderTable", "tableOutput", "renderDataTable", "dataTableOutput", "debounce", "throttle", "eventReactive", "bindEvent"),
     files = c("fileInput", "downloadHandler", "downloadButton", "downloadLink", "outputOptions"),
     feedback = c("showNotification", "removeNotification", "modalDialog", "modalButton", "showModal", "removeModal", "withProgress", "incProgress", "validate", "need"),
+    resume = c("enableResume", "disableResume", "reactiveVal", "reactiveValues", "observeEvent", "renderUI", "testServer"),
     bookmarking = c("enableBookmarking", "bookmarkButton", "onBookmark", "onBookmarked", "onRestore", "onRestored", "setBookmarkExclude", "updateQueryString", "reactiveValuesToList"),
     `custom-components` = c("registerInputHandler"),
     testing = c("testServer", "exportTestValues"),

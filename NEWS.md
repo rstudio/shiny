@@ -12,6 +12,25 @@
   those platforms start retrying, `"force"` behaves exactly like `TRUE`, and
   retries are bounded everywhere. (#<PR number>)
 
+* New `enableResume()`: with it on, a session that reconnects or reloads
+  continues from its saved state. Labelled `reactiveVal()` and
+  `reactiveValues()` values, `input`, uploaded files and `session$userData`
+  come back; `observeEvent()` handlers whose events already happened do not
+  fire again; reactive expressions and outputs recompute. Saved state is
+  restored all or nothing: when a value cannot be saved (no label, not
+  serializable, over a size cap) the session resumes from its inputs and the
+  log says why; `session$resumeReport()` lists every value with its reason.
+  `enableResume(reload = )` decides what a page reload does (`"ask"`, the
+  default, lets the user choose; `"resume"`; `"fresh"`), `session$reload()`
+  now discards the saved state, `disableResume(x)` leaves one value or
+  observer out, and `reactiveValues(.label)` names an object across
+  sessions. After an unhandled error in an observer, the page offers
+  **Resume**, back to the state saved just before the error, or **Start
+  over**. Resume is off unless the app calls `enableResume()` or the
+  hosting platform sets `SHINY_RESUME=TRUE`; saved state lives in the
+  platform's bookmark storage or `tools::R_user_dir("shiny", "cache")`,
+  readable by the owner only, for 24 hours. (#<PR number>)
+
 * Added an agent skill (`inst/skills/shiny-for-r/`) following the
   [Agent Skills](https://agentskills.io) convention. Coding agents using
   [btw](https://posit-dev.github.io/btw/) discover it automatically when

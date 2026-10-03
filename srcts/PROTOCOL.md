@@ -70,3 +70,86 @@ Each retry opens a new socket and sends `resume` with the current inputs.
 The attempt count resets when the server answers (`config` or `values`),
 not when the socket opens, so a server that accepts the socket and drops it
 before answering still exhausts the attempts.
+
+### `config` additions (server → client, at socket open)
+
+```json
+{ "config": { "workerId": "...", "sessionId": "...", "user": "...",
+              "resumeToken": "<32 lowercase hex chars> | null",
+              "resumeReload": "ask" | "resume" | "fresh" } }
+```
+
+`resumeToken` identifies this session's saved state; `null` with resume off.
+Its presence tells the client the app allows reconnecting. `resumeReload`
+is the app's `enableResume(reload =)`; the client stashes both in
+`sessionStorage` so the next page can decide before it connects.
+
+### `resume` with a token
+
+```json
+{ "method": "resume",
+  "data": { "token": "<resumeToken>", "dom": "intact" | "fresh",
+            "inputs": { "...": "as init carries them" } } }
+```
+
+`dom` is `"intact"` on a reconnect and `"fresh"` on the first socket of a
+reloaded page. A `resume` with a token on a server with resume off is
+answered as `init` with its inputs (the rule above). With resume on the
+server reads the record, applies it under the all-or-nothing rule, and
+answers with `resumed`.
+
+### `resumed` (server → client, once, before the first `values`)
+
+```json
+{ "resumed": "snapshot" | "inputs", "inputs": { "<id>": value } }
+```
+
+`"snapshot"`: the saved state was restored. `"inputs"`: only the inputs were
+applied (no record, a mismatch, an incomplete record, or a value that could
+not restore; the server log names the cause). `inputs` is present on a
+fresh-page resume whenever a record supplied inputs, under either outcome,
+and maps each bound input whose reported value differs from the record's to
+the record's value, file inputs and `clientData` excluded. The client
+applies each through its binding (`setValue` if defined, else
+`receiveMessage({ value })`), teaches its no-resend filter the pushed
+values, re-reads every bound input and sends the ones that still differ as
+ordinary `update`s. The client fires the DOM event `shiny:resumed` with
+`resumed`.
+
+### The stash and the token
+
+The client keeps one `sessionStorage` entry per app path with the token it
+would resume. `config` normally rewrites it with the new session's token.
+After a socket that opened with `resume`, though, the client waits for
+`resumed` before it does, and a `reload` that arrives first pins the stash
+to the token being resumed. The UI-fingerprint check relies on this: the
+server answers that `resume` with a session of its own (and its own token)
+and a `reload`, and the reloaded page has to resume the record the server
+left, not the session that asked for the reload.
+
+### `unload` (client → server)
+
+`{ "method": "unload", "args": [], "tag": <n> }`, sent on `pagehide`. The
+record then gets a short lifetime (minutes) after the closing write instead
+of the full TTL.
+
+### `discardSnapshot` (client → server request)
+
+Deletes this session's record and stops further writes ("Start fresh").
+
+### `fatalError` (server → client)
+
+```json
+{ "fatalError": { "message": "<text, absent when sanitized>", "saved": true | false } }
+```
+
+Sent when an unhandled error in an observer ends the session, before
+`allowReconnect: false` and the close. `saved` says whether a record from
+before the error exists. The client shows a dialog with **Resume** (when
+`saved`) and **Start over**, does not retry, and keeps its stash through the
+close so Resume can reload into the saved state.
+
+### `reload` (server → client)
+
+`true`: reload, and the next page resumes without asking (the client marks
+its stash). `"fresh"`: drop the stash and reload (`session$reload()`).

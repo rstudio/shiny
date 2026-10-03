@@ -14,6 +14,7 @@ test_that("a source change marks the session dirty and a debounced write follows
   expect_null(store$read(key))
   s$elapse(999); expect_null(store$read(key))
   s$elapse(1); expect_identical(node_value(store$read(key)$sources[["|reactiveVal|v"]]), 2)
+  expect_null(store$read(key)$report)
 })
 
 test_that("an input change marks the session dirty on its own", {

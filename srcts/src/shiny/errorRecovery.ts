@@ -1,5 +1,5 @@
 // What the page does after the server reports a fatal observer error
-// (`fatalError`, spec 8). Pure, with injected dependencies; shinyapp.ts
+// (`fatalError`). Pure, with injected dependencies; shinyapp.ts
 // wires it to blockingDialog.ts.
 
 type FatalErrorMessage = { message?: unknown; saved?: unknown };
@@ -17,6 +17,9 @@ type RecoveryDeps = {
   resume: () => void;
   // Drops the stash and reloads.
   startOver: () => void;
+  // Whether the tab has a stash to resume with; without one, Resume would
+  // quietly start over.
+  canResume: () => boolean;
 };
 
 const recoveryTitle = "Something went wrong";
@@ -43,7 +46,9 @@ class ErrorRecovery {
     if (this.seen) return;
     this.seen = true;
     this.deps.greyOut();
-    this.deps.show(recoveryView(msg), (choice) => {
+    const view = recoveryView(msg);
+    if (view.saved && !this.deps.canResume()) view.saved = false;
+    this.deps.show(view, (choice) => {
       if (choice === "resume") this.deps.resume();
       else this.deps.startOver();
     });

@@ -2,15 +2,20 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  clearResumeStashServerInitiated,
   CrashLoopTracker,
   decideOnLoad,
   initResumeOnLoad,
+  markResumeStashServerInitiated,
   nextStash,
   readStash,
   removeStash,
+  resumedEffects,
   startFresh,
+  StashSync,
   takeLoadDecision,
   takeResumeNotice,
+  unloadOnPageHide,
   writeStash,
   type ResumeStash,
 } from "../resumeStash";
@@ -190,6 +195,72 @@ void test("a close within ten seconds of a fresh resume is a failure; outliving 
   now = 16000;
   assert.equal(t.survived(), true);
   assert.equal(t.closed(), false);
+  // The survival timer may fire a millisecond before Date.now() agrees.
+  t.resumed();
+  now = 16000 + 9999;
+  assert.equal(t.survived(), true);
+  t.closed();
+  assert.equal(t.survived(), false);
+});
+
+void test("the stash follows a new session at once, a resumed one at `resumed`", () => {
+  const s = new StashSync();
+  s.opened(false);
+  assert.deepEqual(s.config(true), { sync: true, reloadCancelled: false });
+  s.opened(true);
+  assert.deepEqual(s.config(true), { sync: false, reloadCancelled: false });
+  assert.equal(s.resumed(), true);
+  s.opened(true);
+  assert.deepEqual(s.config(false), { sync: true, reloadCancelled: false });
+});
+
+void test("a reload requested before `resumed` keeps the old token; a cancelled one is forgotten", () => {
+  const s = new StashSync();
+  s.opened(true);
+  s.config(true);
+  s.reload();
+  assert.equal(s.resumed(), false);
+  // The page is still here when the next socket's `config` arrives.
+  s.opened(true);
+  assert.deepEqual(s.config(true), { sync: false, reloadCancelled: true });
+  assert.equal(s.resumed(), true);
+  assert.deepEqual(s.config(true), { sync: true, reloadCancelled: false });
+});
+
+void test("only a fresh page restored from saved state is watched for a crash loop, and toasts only under `resume`", () => {
+  assert.deepEqual(resumedEffects(true, "snapshot", "resume"), {
+    watchCrashLoop: true,
+    toast: true,
+  });
+  assert.deepEqual(resumedEffects(true, "snapshot", "ask"), {
+    watchCrashLoop: true,
+    toast: false,
+  });
+  assert.deepEqual(resumedEffects(true, "inputs", "resume"), {
+    watchCrashLoop: false,
+    toast: false,
+  });
+  assert.deepEqual(resumedEffects(false, "snapshot", "resume"), {
+    watchCrashLoop: false,
+    toast: false,
+  });
+});
+
+void test("leaving the page sends `unload` unless the page may come back from the back/forward cache", () => {
+  assert.equal(unloadOnPageHide(false, "t"), true);
+  assert.equal(unloadOnPageHide(true, "t"), false);
+  assert.equal(unloadOnPageHide(false, null), false);
+});
+
+void test("a reload Shiny makes marks the stash; the mark can be taken back", () => {
+  const storage = memoryStorage();
+  writeStash(storage, "/app/", stash);
+  withWindow({ href: app, storage }, () => {
+    markResumeStashServerInitiated();
+    assert.equal(readStash(storage, "/app/")!.serverInitiated, true);
+    clearResumeStashServerInitiated();
+    assert.equal(readStash(storage, "/app/")!.serverInitiated, false);
+  });
 });
 
 void test("initResumeOnLoad hands out the decision once, clears the server-initiated flag, and leaves a crash-loop notice", () => {

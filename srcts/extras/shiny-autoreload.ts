@@ -61,7 +61,7 @@ async function initialize() {
   while (true) {
     try {
       if (await autoreload(wsUrl)) {
-        // The reloaded page resumes without asking (spec 2.3).
+        // The reloaded page resumes without asking.
         markResumeStashServerInitiated();
         window.location.reload();
         return;

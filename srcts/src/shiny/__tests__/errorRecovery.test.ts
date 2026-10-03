@@ -9,7 +9,7 @@ import {
   type RecoveryView,
 } from "../errorRecovery";
 
-function harness() {
+function harness(canResume = true) {
   const log: string[] = [];
   let shown: RecoveryView | null = null;
   let choose: ((c: "resume" | "fresh") => void) | null = null;
@@ -22,6 +22,7 @@ function harness() {
     greyOut: () => log.push("grey"),
     resume: () => log.push("resume"),
     startOver: () => log.push("start-over"),
+    canResume: () => canResume,
   });
   return {
     r,
@@ -62,6 +63,12 @@ void test("a fatal error greys the page and shows the dialog; Resume and Start o
   h2.r.fatalError({ saved: false });
   h2.choose("fresh");
   assert.deepEqual(h2.log, ["grey", "show", "start-over"]);
+});
+
+void test("Resume is offered only when the tab can resume", () => {
+  const h = harness(false);
+  h.r.fatalError({ message: "boom", saved: true });
+  assert.deepEqual(h.shown(), { message: "boom", saved: false });
 });
 
 void test("the error flow owns the close: no retry, and a second fatalError changes nothing", () => {

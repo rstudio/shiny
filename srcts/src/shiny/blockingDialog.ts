@@ -33,7 +33,10 @@ function showBlockingDialog(spec: DialogSpec): void {
   dialog.setAttribute("role", "alertdialog");
   dialog.setAttribute("aria-modal", "true");
   dialog.setAttribute("aria-labelledby", spec.id + "-title");
-  dialog.setAttribute("aria-describedby", spec.id + "-body");
+  dialog.setAttribute(
+    "aria-describedby",
+    (spec.detail ? spec.id + "-detail " : "") + spec.id + "-body",
+  );
 
   const title = document.createElement("h2");
   title.id = spec.id + "-title";
@@ -42,6 +45,7 @@ function showBlockingDialog(spec: DialogSpec): void {
 
   if (spec.detail) {
     const code = document.createElement("code");
+    code.id = spec.id + "-detail";
     code.className = "shiny-blocking-dialog-detail";
     code.textContent = spec.detail;
     dialog.appendChild(code);
@@ -54,6 +58,7 @@ function showBlockingDialog(spec: DialogSpec): void {
 
   const actions = document.createElement("div");
   actions.className = "shiny-blocking-dialog-actions";
+  let firstButton: HTMLButtonElement | null = null;
   for (const b of spec.buttons) {
     const button = document.createElement("button");
     button.type = "button";
@@ -63,6 +68,7 @@ function showBlockingDialog(spec: DialogSpec): void {
       b.style === "primary" ? "btn btn-primary" : "btn btn-link";
     button.addEventListener("click", b.onClick);
     actions.appendChild(button);
+    firstButton ??= button;
   }
   dialog.appendChild(actions);
   backdrop.appendChild(dialog);
@@ -74,7 +80,7 @@ function showBlockingDialog(spec: DialogSpec): void {
     }
   }
   document.body.appendChild(backdrop);
-  (actions.firstElementChild as HTMLElement | null)?.focus();
+  firstButton?.focus();
 }
 
 function hideBlockingDialog(id: string): void {

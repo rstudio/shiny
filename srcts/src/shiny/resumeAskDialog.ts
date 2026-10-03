@@ -1,5 +1,5 @@
 // Under enableResume(reload = "ask"): before any session starts, the user
-// decides (spec 2.3). Nothing is restored into the page until they do.
+// decides. Nothing is restored into the page until they do.
 import { hideBlockingDialog, showBlockingDialog } from "./blockingDialog";
 
 const askDialogId = "shiny-resume-ask";
@@ -14,7 +14,7 @@ function showResumeAskDialog(deps: {
   };
   showBlockingDialog({
     id: askDialogId,
-    title: "Pick up where you left off?",
+    title: "Welcome back",
     body: "This page has saved state from your last visit.",
     buttons: [
       {
@@ -33,4 +33,4 @@ function showResumeAskDialog(deps: {
   });
 }
 
-export { askDialogId, showResumeAskDialog };
+export { showResumeAskDialog };

@@ -4,7 +4,7 @@ import { isShinyInDevMode } from "../utils";
 import { showNotification } from "./notifications";
 
 // Under enableResume(reload = "resume") only: after a reload resumed from
-// saved state, say so and offer a clean session instead (spec 2.3).
+// saved state, say so and offer a clean session instead.
 async function showResumedToast(onStartFresh: () => void): Promise<void> {
   await showNotification({
     id: "resumed",

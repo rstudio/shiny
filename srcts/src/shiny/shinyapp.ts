@@ -41,13 +41,18 @@ import { renderContentAsync, renderHtmlAsync } from "./render";
 import type { PushedInputs } from "./resumePush";
 import type { ReloadMode } from "./resumeStash";
 import {
+  clearResumeStashServerInitiated,
   CrashLoopTracker,
   crashLoopWindowMs,
   discardResumeStash,
+  hasResumeStash,
   markResumeStashServerInitiated,
   refreshResumeStashUrl,
+  resumedEffects,
   startFresh,
+  StashSync,
   syncResumeStash,
+  unloadOnPageHide,
   updateResumeFailures,
 } from "./resumeStash";
 import { showResumedToast } from "./resumeToast";
@@ -153,8 +158,6 @@ class ShinyApp {
   config: {
     workerId: string;
     sessionId: string;
-    resumeToken?: string | null;
-    resumeReload?: ReloadMode;
   } | null = null;
 
   // Token of the session this one would resume, issued in `config` only
@@ -213,16 +216,7 @@ class ShinyApp {
   // `inputs` arrives as a sibling key of `resumed`; handlers see one key each.
   private $pendingPushedInputs: PushedInputs | null = null;
 
-  // Set when a `fatalError` arrives: the dialog, not the retry loop, decides
-  // what happens next.
-  private $fatalErrorSeen = false;
-
-  // After a `resume`, the stash keeps the token being resumed until the server
-  // says `resumed`: a `reload` that arrives first (the UI changed) is answered
-  // by a session with a token of its own and no saved state, and the reloaded
-  // page must resume the old record, not that session.
-  private $stashSyncPending = false;
-  private $reloadRequested = false;
+  private $stashSync = new StashSync();
 
   private $errorRecovery = new ErrorRecovery({
     greyOut: () => this.$addDisconnectedOverlay(),
@@ -259,6 +253,7 @@ class ShinyApp {
       discardResumeStash();
       window.location.reload();
     },
+    canResume: hasResumeStash,
   });
 
   constructor() {
@@ -273,10 +268,11 @@ class ShinyApp {
     this.$initialInput = initialInput;
     $.extend(this.$inputValues, initialInput);
 
-    // A deliberate navigation away: the record then lives minutes, not a day
-    // (spec 5.1). Best effort; the socket may already be gone.
-    window.addEventListener("pagehide", () => {
-      if (this.$resumeToken === null || !this.$socket) return;
+    // A deliberate navigation away: the record then lives minutes, not a day.
+    // Best effort; the socket may already be gone.
+    window.addEventListener("pagehide", (event) => {
+      if (!unloadOnPageHide(event.persisted, this.$resumeToken)) return;
+      if (!this.$socket) return;
       try {
         this.$socket.send(
           JSON.stringify({
@@ -405,7 +401,7 @@ class ShinyApp {
       // Only the first socket of a reloaded page has a fresh DOM.
       this.$resumedFresh = this.$resumeDom === "fresh";
       this.$resumeDom = "intact";
-      this.$stashSyncPending = resuming && this.$resumeToken !== null;
+      this.$stashSync.opened(resuming && this.$resumeToken !== null);
 
       while (this.$pendingMessages.length) {
         const msg = this.$pendingMessages.shift();
@@ -1011,7 +1007,9 @@ class ShinyApp {
       // The server says `false` when it ends the session itself, or when the
       // app opted this session out; either way the tab cannot resume it,
       // unless a fatal error's dialog is about to (Task 11 sets the flag).
-      if (message === false && !this.$fatalErrorSeen) discardResumeStash();
+      if (message === false && !this.$errorRecovery.ownsClose()) {
+        discardResumeStash();
+      }
     });
 
     addMessageHandler("custom", async (message: { [key: string]: unknown }) => {
@@ -1041,18 +1039,18 @@ class ShinyApp {
         this.config = {
           workerId: message.workerId,
           sessionId: message.sessionId,
-          resumeToken: message.resumeToken,
-          resumeReload: message.resumeReload,
         };
         this.$resumeToken = message.resumeToken ?? null;
         if (message.resumeReload) this.$resumeReload = message.resumeReload;
-        // enableResume() implies allowReconnect(TRUE) (spec 1.4).
+        // enableResume() implies allowReconnect(TRUE).
         if (this.$resumeToken !== null) this.$allowReconnect = true;
         // No token (resume off on the server): the stash goes at once. With a
         // token after a `resume`, it moves on to the new token at `resumed`.
-        if (this.$resumeToken === null || !this.$stashSyncPending) {
-          syncResumeStash(this.$resumeToken, this.$resumeReload);
-        }
+        const { sync, reloadCancelled } = this.$stashSync.config(
+          this.$resumeToken !== null,
+        );
+        if (reloadCancelled) clearResumeStashServerInitiated();
+        if (sync) syncResumeStash(this.$resumeToken, this.$resumeReload);
         if (message.user) setShinyUser(message.user);
         this.reconnectDelay.reset();
         $(document).trigger("shiny:sessioninitialized");
@@ -1067,11 +1065,8 @@ class ShinyApp {
 
     addMessageHandler("resumed", async (message: "snapshot" | "inputs") => {
       this.reconnectDelay.reset();
-      if (this.$stashSyncPending) {
-        this.$stashSyncPending = false;
-        if (!this.$reloadRequested) {
-          syncResumeStash(this.$resumeToken, this.$resumeReload);
-        }
+      if (this.$stashSync.resumed()) {
+        syncResumeStash(this.$resumeToken, this.$resumeReload);
       }
       const pushed = this.$pendingPushedInputs;
       const fresh = this.$resumedFresh;
@@ -1088,7 +1083,8 @@ class ShinyApp {
           }
         }
       }
-      if (fresh && message === "snapshot") {
+      const effects = resumedEffects(fresh, message, this.$resumeReload);
+      if (effects.watchCrashLoop) {
         this.$crashLoop.resumed();
         window.setTimeout(() => {
           try {
@@ -1102,13 +1098,13 @@ class ShinyApp {
             }
           }
         }, crashLoopWindowMs);
-        if (this.$resumeReload === "resume") {
-          showResumedToast(() => this.$startFresh()).catch((error: unknown) => {
-            if (isShinyInDevMode()) {
-              console.warn("[shiny] Could not show the resumed toast", error);
-            }
-          });
-        }
+      }
+      if (effects.toast) {
+        showResumedToast(() => this.$startFresh()).catch((error: unknown) => {
+          if (isShinyInDevMode()) {
+            console.warn("[shiny] Could not show the resumed toast", error);
+          }
+        });
       }
       $(document).trigger({
         type: "shiny:resumed",
@@ -1118,7 +1114,6 @@ class ShinyApp {
     });
 
     addMessageHandler("fatalError", (message: FatalErrorMessage) => {
-      this.$fatalErrorSeen = true;
       // A resumed page that crashes within ten seconds counts toward the guard.
       try {
         if (this.$crashLoop.closed()) updateResumeFailures((n) => n + 1);
@@ -1164,7 +1159,7 @@ class ShinyApp {
     addMessageHandler("reload", (message: true | "fresh") => {
       // `true`: a reload Shiny makes (the UI changed); the next page resumes
       // without asking. `"fresh"`: session$reload(), a reset.
-      this.$reloadRequested = true;
+      this.$stashSync.reload();
       if (message === "fresh") discardResumeStash();
       else markResumeStashServerInitiated();
       window.location.reload();

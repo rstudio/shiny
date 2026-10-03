@@ -36,13 +36,31 @@ declare class CrashLoopTracker {
     closed(): boolean;
     survived(): boolean;
 }
+declare class StashSync {
+    private pending;
+    private reloadPending;
+    opened(resuming: boolean): void;
+    config(hasToken: boolean): {
+        sync: boolean;
+        reloadCancelled: boolean;
+    };
+    reload(): void;
+    resumed(): boolean;
+}
+declare function resumedEffects(fresh: boolean, resumed: "snapshot" | "inputs", reload: ReloadMode): {
+    watchCrashLoop: boolean;
+    toast: boolean;
+};
+declare function unloadOnPageHide(persisted: boolean, token: string | null): boolean;
 declare function initResumeOnLoad(): void;
 declare function takeLoadDecision(): LoadDecision | null;
 declare function takeResumeNotice(): string | null;
 declare function syncResumeStash(token: string | null, reload: ReloadMode): void;
 declare function markResumeStashServerInitiated(): void;
+declare function clearResumeStashServerInitiated(): void;
+declare function hasResumeStash(): boolean;
 declare function refreshResumeStashUrl(): void;
 declare function updateResumeFailures(update: (failures: number) => number): void;
 declare function discardResumeStash(): void;
-export { CrashLoopTracker, crashLoopWindowMs, decideOnLoad, discardResumeStash, initResumeOnLoad, markResumeStashServerInitiated, nextStash, readStash, refreshResumeStashUrl, removeStash, startFresh, syncResumeStash, takeLoadDecision, takeResumeNotice, updateResumeFailures, writeStash, };
+export { CrashLoopTracker, StashSync, clearResumeStashServerInitiated, crashLoopWindowMs, decideOnLoad, discardResumeStash, hasResumeStash, initResumeOnLoad, markResumeStashServerInitiated, nextStash, readStash, refreshResumeStashUrl, removeStash, resumedEffects, startFresh, syncResumeStash, takeLoadDecision, takeResumeNotice, unloadOnPageHide, updateResumeFailures, writeStash, };
 export type { LoadDecision, ReloadMode, ResumeStash };

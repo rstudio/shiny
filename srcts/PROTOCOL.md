@@ -96,7 +96,10 @@ is the app's `enableResume(reload =)`; the client stashes both in
 reloaded page. A `resume` with a token on a server with resume off is
 answered as `init` with its inputs (the rule above). With resume on the
 server reads the record, applies it under the all-or-nothing rule, and
-answers with `resumed`.
+answers with `resumed`. One exception: on an `"intact"` page whose app UI
+has changed since the record was written, the server sends `reload: true`
+instead, does not run the server function, and sends no `resumed`; the
+session stays idle until the page goes away.
 
 ### `resumed` (server → client, once, before the first `values`)
 
@@ -125,11 +128,18 @@ After a socket that opened with `resume`, though, the client waits for
 to the token being resumed. The UI-fingerprint check relies on this: the
 server answers that `resume` with a session of its own (and its own token)
 and a `reload`, and the reloaded page has to resume the record the server
-left, not the session that asked for the reload.
+left, not the session that asked for the reload. If the page is still there
+at the next `config` (a `beforeunload` handler cancelled the reload), the
+client drops the pin and the stash's server-initiated mark.
+
+A socket that drops between `config` and `resumed` leaves the stash on the
+token it was resuming, a record the server has already claimed. The next
+`resume` then finds no record and the session resumes from inputs only.
 
 ### `unload` (client → server)
 
-`{ "method": "unload", "args": [], "tag": <n> }`, sent on `pagehide`. The
+`{ "method": "unload", "args": [], "tag": <n> }`, sent on `pagehide`,
+except when the page enters the back/forward cache (`persisted`). The
 record then gets a short lifetime (minutes) after the closing write instead
 of the full TTL.
 
@@ -146,7 +156,7 @@ Deletes this session's record and stops further writes ("Start fresh").
 Sent when an unhandled error in an observer ends the session, before
 `allowReconnect: false` and the close. `saved` says whether a record from
 before the error exists. The client shows a dialog with **Resume** (when
-`saved`) and **Start over**, does not retry, and keeps its stash through the
+`saved` and the tab has a stash to resume with) and **Start over**, does not retry, and keeps its stash through the
 close so Resume can reload into the saved state.
 
 ### `reload` (server → client)

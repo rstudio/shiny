@@ -1,4 +1,4 @@
-// The per-tab stash that ties a page to the session it can resume (spec 7.2).
+// The per-tab stash that ties a page to the session it can resume.
 // Everything above "Browser glue" is pure and unit-tested.
 
 type ReloadMode = "ask" | "resume" | "fresh";
@@ -145,12 +145,63 @@ class CrashLoopTracker {
     this.resumedAt = null;
     return at !== null && this.now() - at < crashLoopWindowMs;
   }
+  // Asked by a timer crashLoopWindowMs after resumed(). Only closed() ends
+  // the watch, so elapsed time is not checked again: the timer may fire a
+  // millisecond before the clock agrees.
   survived(): boolean {
-    return (
-      this.resumedAt !== null &&
-      this.now() - this.resumedAt >= crashLoopWindowMs
-    );
+    return this.resumedAt !== null;
   }
+}
+
+// When a session's `config` may point the stash at its token. After a
+// `resume`, the stash keeps the token being resumed until `resumed`: a
+// `reload` that comes first (the UI changed) is from a session with no saved
+// state of its own, and the reloaded page must resume the old record.
+class StashSync {
+  private pending = false;
+  private reloadPending = false;
+
+  // A socket opened; `resuming` when it sent `resume` with a token.
+  opened(resuming: boolean): void {
+    this.pending = resuming;
+  }
+  // `reloadCancelled`: a `reload` was asked for and the page is still here,
+  // so the reload did not happen (a beforeunload handler cancelled it).
+  config(hasToken: boolean): { sync: boolean; reloadCancelled: boolean } {
+    const reloadCancelled = this.reloadPending;
+
+    this.reloadPending = false;
+    return { sync: !hasToken || !this.pending, reloadCancelled };
+  }
+  reload(): void {
+    this.reloadPending = true;
+  }
+  // True when `resumed` should sync the stash.
+  resumed(): boolean {
+    const sync = this.pending && !this.reloadPending;
+
+    this.pending = false;
+    return sync;
+  }
+}
+
+// What `resumed` sets off. Only the first socket of a reloaded page (`fresh`)
+// restored from saved state is watched for a crash loop, and only under
+// enableResume(reload = "resume") does it say so in a toast.
+function resumedEffects(
+  fresh: boolean,
+  resumed: "snapshot" | "inputs",
+  reload: ReloadMode,
+): { watchCrashLoop: boolean; toast: boolean } {
+  const restored = fresh && resumed === "snapshot";
+  return { watchCrashLoop: restored, toast: restored && reload === "resume" };
+}
+
+// A page leaving for good tells the server, which then keeps the record for
+// minutes rather than a day. A page entering the back/forward cache
+// (`persisted`) may come back and resume.
+function unloadOnPageHide(persisted: boolean, token: string | null): boolean {
+  return !persisted && token !== null;
 }
 
 // ---- Browser glue ----------------------------------------------------------
@@ -227,6 +278,18 @@ function markResumeStashServerInitiated(): void {
   updateStash((s) => ({ ...s, serverInitiated: true }));
 }
 
+// After a reload Shiny asked for did not happen.
+function clearResumeStashServerInitiated(): void {
+  updateStash((s) => ({ ...s, serverInitiated: false }));
+}
+
+function hasResumeStash(): boolean {
+  const storage = browserStorage();
+  return (
+    storage !== null && readStash(storage, window.location.pathname) !== null
+  );
+}
+
 // The stash follows the page's own URL changes.
 function refreshResumeStashUrl(): void {
   updateStash((s) => ({ ...s, url: window.location.href }));
@@ -252,19 +315,24 @@ function browserStorage(): Storage | null {
 
 export {
   CrashLoopTracker,
+  StashSync,
+  clearResumeStashServerInitiated,
   crashLoopWindowMs,
   decideOnLoad,
   discardResumeStash,
+  hasResumeStash,
   initResumeOnLoad,
   markResumeStashServerInitiated,
   nextStash,
   readStash,
   refreshResumeStashUrl,
   removeStash,
+  resumedEffects,
   startFresh,
   syncResumeStash,
   takeLoadDecision,
   takeResumeNotice,
+  unloadOnPageHide,
   updateResumeFailures,
   writeStash,
 };

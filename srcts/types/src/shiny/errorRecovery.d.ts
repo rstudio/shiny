@@ -11,6 +11,7 @@ type RecoveryDeps = {
     greyOut: () => void;
     resume: () => void;
     startOver: () => void;
+    canResume: () => boolean;
 };
 declare const recoveryTitle = "Something went wrong";
 declare const recoveryBody = "Resume returns to the state saved just before the error. Your last change may already have taken effect.";

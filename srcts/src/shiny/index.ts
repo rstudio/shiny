@@ -662,7 +662,7 @@ class ShinyClass {
     });
 
     // We've collected all the initial values--start the server process!
-    // A reloaded page may resume the session its tab had (spec 2.3, 7.2).
+    // A reloaded page may resume the session its tab had.
     const decision = takeLoadDecision();
     const notice = takeResumeNotice();
 

@@ -6107,13 +6107,17 @@ ${duplicateIdMsg}`;
     dialog.setAttribute("role", "alertdialog");
     dialog.setAttribute("aria-modal", "true");
     dialog.setAttribute("aria-labelledby", spec.id + "-title");
-    dialog.setAttribute("aria-describedby", spec.id + "-body");
+    dialog.setAttribute(
+      "aria-describedby",
+      (spec.detail ? spec.id + "-detail " : "") + spec.id + "-body"
+    );
     const title = document.createElement("h2");
     title.id = spec.id + "-title";
     title.textContent = spec.title;
     dialog.appendChild(title);
     if (spec.detail) {
       const code = document.createElement("code");
+      code.id = spec.id + "-detail";
       code.className = "shiny-blocking-dialog-detail";
       code.textContent = spec.detail;
       dialog.appendChild(code);
@@ -6124,6 +6128,7 @@ ${duplicateIdMsg}`;
     dialog.appendChild(body);
     const actions = document.createElement("div");
     actions.className = "shiny-blocking-dialog-actions";
+    let firstButton = null;
     for (const b3 of spec.buttons) {
       const button = document.createElement("button");
       button.type = "button";
@@ -6132,6 +6137,7 @@ ${duplicateIdMsg}`;
       button.className = b3.style === "primary" ? "btn btn-primary" : "btn btn-link";
       button.addEventListener("click", b3.onClick);
       actions.appendChild(button);
+      firstButton ??= button;
     }
     dialog.appendChild(actions);
     backdrop.appendChild(dialog);
@@ -6142,7 +6148,7 @@ ${duplicateIdMsg}`;
       }
     }
     document.body.appendChild(backdrop);
-    actions.firstElementChild?.focus();
+    firstButton?.focus();
   }
   function hideBlockingDialog(id) {
     document.getElementById(id)?.remove();
@@ -6163,7 +6169,7 @@ ${duplicateIdMsg}`;
     };
     showBlockingDialog({
       id: askDialogId,
-      title: "Pick up where you left off?",
+      title: "Welcome back",
       body: "This page has saved state from your last visit.",
       buttons: [
         {
@@ -6311,10 +6317,46 @@ ${duplicateIdMsg}`;
       this.resumedAt = null;
       return at !== null && this.now() - at < crashLoopWindowMs;
     }
+    // Asked by a timer crashLoopWindowMs after resumed(). Only closed() ends
+    // the watch, so elapsed time is not checked again: the timer may fire a
+    // millisecond before the clock agrees.
     survived() {
-      return this.resumedAt !== null && this.now() - this.resumedAt >= crashLoopWindowMs;
+      return this.resumedAt !== null;
     }
   };
+  var StashSync = class {
+    constructor() {
+      this.pending = false;
+      this.reloadPending = false;
+    }
+    // A socket opened; `resuming` when it sent `resume` with a token.
+    opened(resuming) {
+      this.pending = resuming;
+    }
+    // `reloadCancelled`: a `reload` was asked for and the page is still here,
+    // so the reload did not happen (a beforeunload handler cancelled it).
+    config(hasToken) {
+      const reloadCancelled = this.reloadPending;
+      this.reloadPending = false;
+      return { sync: !hasToken || !this.pending, reloadCancelled };
+    }
+    reload() {
+      this.reloadPending = true;
+    }
+    // True when `resumed` should sync the stash.
+    resumed() {
+      const sync = this.pending && !this.reloadPending;
+      this.pending = false;
+      return sync;
+    }
+  };
+  function resumedEffects(fresh, resumed, reload) {
+    const restored = fresh && resumed === "snapshot";
+    return { watchCrashLoop: restored, toast: restored && reload === "resume" };
+  }
+  function unloadOnPageHide(persisted, token) {
+    return !persisted && token !== null;
+  }
   var pageDecision = null;
   var resumeNotice = null;
   function initResumeOnLoad() {
@@ -6372,6 +6414,13 @@ ${duplicateIdMsg}`;
   }
   function markResumeStashServerInitiated() {
     updateStash((s4) => ({ ...s4, serverInitiated: true }));
+  }
+  function clearResumeStashServerInitiated() {
+    updateStash((s4) => ({ ...s4, serverInitiated: false }));
+  }
+  function hasResumeStash() {
+    const storage = browserStorage();
+    return storage !== null && readStash(storage, window.location.pathname) !== null;
   }
   function refreshResumeStashUrl() {
     updateStash((s4) => ({ ...s4, url: window.location.href }));
@@ -6445,7 +6494,9 @@ ${duplicateIdMsg}`;
       if (this.seen) return;
       this.seen = true;
       this.deps.greyOut();
-      this.deps.show(recoveryView(msg), (choice) => {
+      const view = recoveryView(msg);
+      if (view.saved && !this.deps.canResume()) view.saved = false;
+      this.deps.show(view, (choice) => {
         if (choice === "resume") this.deps.resume();
         else this.deps.startOver();
       });
@@ -6772,15 +6823,7 @@ ${duplicateIdMsg}`;
       this.$crashLoop = new CrashLoopTracker(() => Date.now());
       // `inputs` arrives as a sibling key of `resumed`; handlers see one key each.
       this.$pendingPushedInputs = null;
-      // Set when a `fatalError` arrives: the dialog, not the retry loop, decides
-      // what happens next.
-      this.$fatalErrorSeen = false;
-      // After a `resume`, the stash keeps the token being resumed until the server
-      // says `resumed`: a `reload` that arrives first (the UI changed) is answered
-      // by a session with a token of its own and no saved state, and the reloaded
-      // page must resume the old record, not that session.
-      this.$stashSyncPending = false;
-      this.$reloadRequested = false;
+      this.$stashSync = new StashSync();
       this.$errorRecovery = new ErrorRecovery({
         greyOut: () => this.$addDisconnectedOverlay(),
         show: (view, choose) => {
@@ -6814,7 +6857,8 @@ ${duplicateIdMsg}`;
         startOver: () => {
           discardResumeStash();
           window.location.reload();
-        }
+        },
+        canResume: hasResumeStash
       });
       this.scheduledReconnect = void 0;
       // How long to wait before the next reconnection attempt, and whether the
@@ -6926,8 +6970,9 @@ ${duplicateIdMsg}`;
       this.$socket = this.createSocket();
       this.$initialInput = initialInput;
       import_jquery40.default.extend(this.$inputValues, initialInput);
-      window.addEventListener("pagehide", () => {
-        if (this.$resumeToken === null || !this.$socket) return;
+      window.addEventListener("pagehide", (event) => {
+        if (!unloadOnPageHide(event.persisted, this.$resumeToken)) return;
+        if (!this.$socket) return;
         try {
           this.$socket.send(
             JSON.stringify({
@@ -7014,7 +7059,7 @@ ${duplicateIdMsg}`;
         );
         this.$resumedFresh = this.$resumeDom === "fresh";
         this.$resumeDom = "intact";
-        this.$stashSyncPending = resuming && this.$resumeToken !== null;
+        this.$stashSync.opened(resuming && this.$resumeToken !== null);
         while (this.$pendingMessages.length) {
           const msg = this.$pendingMessages.shift();
           socket.send(msg);
@@ -7445,7 +7490,9 @@ ${duplicateIdMsg}`;
           default:
             throw "Invalid value for allowReconnect: " + message;
         }
-        if (message === false && !this.$fatalErrorSeen) discardResumeStash();
+        if (message === false && !this.$errorRecovery.ownsClose()) {
+          discardResumeStash();
+        }
       });
       addMessageHandler("custom", async (message) => {
         const shinyOnCustomMessage = getShinyOnCustomMessage();
@@ -7461,16 +7508,16 @@ ${duplicateIdMsg}`;
         (message) => {
           this.config = {
             workerId: message.workerId,
-            sessionId: message.sessionId,
-            resumeToken: message.resumeToken,
-            resumeReload: message.resumeReload
+            sessionId: message.sessionId
           };
           this.$resumeToken = message.resumeToken ?? null;
           if (message.resumeReload) this.$resumeReload = message.resumeReload;
           if (this.$resumeToken !== null) this.$allowReconnect = true;
-          if (this.$resumeToken === null || !this.$stashSyncPending) {
-            syncResumeStash(this.$resumeToken, this.$resumeReload);
-          }
+          const { sync, reloadCancelled } = this.$stashSync.config(
+            this.$resumeToken !== null
+          );
+          if (reloadCancelled) clearResumeStashServerInitiated();
+          if (sync) syncResumeStash(this.$resumeToken, this.$resumeReload);
           if (message.user) setShinyUser(message.user);
           this.reconnectDelay.reset();
           (0, import_jquery40.default)(document).trigger("shiny:sessioninitialized");
@@ -7481,11 +7528,8 @@ ${duplicateIdMsg}`;
       });
       addMessageHandler("resumed", async (message) => {
         this.reconnectDelay.reset();
-        if (this.$stashSyncPending) {
-          this.$stashSyncPending = false;
-          if (!this.$reloadRequested) {
-            syncResumeStash(this.$resumeToken, this.$resumeReload);
-          }
+        if (this.$stashSync.resumed()) {
+          syncResumeStash(this.$resumeToken, this.$resumeReload);
         }
         const pushed = this.$pendingPushedInputs;
         const fresh = this.$resumedFresh;
@@ -7500,7 +7544,8 @@ ${duplicateIdMsg}`;
             }
           }
         }
-        if (fresh && message === "snapshot") {
+        const effects = resumedEffects(fresh, message, this.$resumeReload);
+        if (effects.watchCrashLoop) {
           this.$crashLoop.resumed();
           window.setTimeout(() => {
             try {
@@ -7514,13 +7559,13 @@ ${duplicateIdMsg}`;
               }
             }
           }, crashLoopWindowMs);
-          if (this.$resumeReload === "resume") {
-            showResumedToast(() => this.$startFresh()).catch((error) => {
-              if (isShinyInDevMode()) {
-                console.warn("[shiny] Could not show the resumed toast", error);
-              }
-            });
-          }
+        }
+        if (effects.toast) {
+          showResumedToast(() => this.$startFresh()).catch((error) => {
+            if (isShinyInDevMode()) {
+              console.warn("[shiny] Could not show the resumed toast", error);
+            }
+          });
         }
         (0, import_jquery40.default)(document).trigger({
           type: "shiny:resumed",
@@ -7529,7 +7574,6 @@ ${duplicateIdMsg}`;
         });
       });
       addMessageHandler("fatalError", (message) => {
-        this.$fatalErrorSeen = true;
         try {
           if (this.$crashLoop.closed()) updateResumeFailures((n4) => n4 + 1);
         } catch (error) {
@@ -7562,7 +7606,7 @@ ${duplicateIdMsg}`;
         }
       );
       addMessageHandler("reload", (message) => {
-        this.$reloadRequested = true;
+        this.$stashSync.reload();
         if (message === "fresh") discardResumeStash();
         else markResumeStashServerInitiated();
         window.location.reload();

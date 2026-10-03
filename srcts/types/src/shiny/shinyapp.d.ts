@@ -31,8 +31,6 @@ declare class ShinyApp {
     config: {
         workerId: string;
         sessionId: string;
-        resumeToken?: string | null;
-        resumeReload?: ReloadMode;
     } | null;
     $resumeToken: string | null;
     $resumeDom: "intact" | "fresh";
@@ -64,9 +62,7 @@ declare class ShinyApp {
     $applyResumedInputs: ((values: PushedInputs) => Promise<void>) | null;
     private $crashLoop;
     private $pendingPushedInputs;
-    private $fatalErrorSeen;
-    private $stashSyncPending;
-    private $reloadRequested;
+    private $stashSync;
     private $errorRecovery;
     constructor();
     connect(initialInput: InputValues): void;

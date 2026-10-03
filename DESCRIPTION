@@ -207,6 +207,7 @@ Collate:
     'render-plot.R'
     'render-table.R'
     'resume-options.R'
+    'resume-serialize.R'
     'resume.R'
     'run-url.R'
     'runapp.R'

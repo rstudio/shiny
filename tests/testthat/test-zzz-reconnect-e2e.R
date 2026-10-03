@@ -20,7 +20,7 @@ wait_for_new_process <- function(b, old_pid_text) {
 
 test_that("allowReconnect(TRUE) reconnects on a plain socket and keeps restoreInput()-aware UI values", {
   skip_on_cran()
-  e <- e2e_session(env = c(E2E_ALLOW = "1"))
+  e <- e2e_session(env = c(SHINY_RESUME = "FALSE", E2E_ALLOW = "1"))
   b <- e$browser
   for (i in 1:3) click_until(b, "#plus", "#count", paste("Count:", i))
   e2e_set_text(b, "txt", "typed")
@@ -44,7 +44,7 @@ test_that("allowReconnect(TRUE) reconnects on a plain socket and keeps restoreIn
 
 test_that("without allowReconnect() the client does not retry", {
   skip_on_cran()
-  e <- e2e_session()
+  e <- e2e_session(env = c(SHINY_RESUME = "FALSE"))
   b <- e$browser
   e$process$kill()
   e2e_wait_until(function() !e2e_port_open(e$port), what = "port to close")
@@ -55,7 +55,7 @@ test_that("without allowReconnect() the client does not retry", {
 
 test_that("after ten failed attempts the notification goes and the overlay stays", {
   skip_on_cran()
-  e <- e2e_session(env = c(E2E_ALLOW = "1"))
+  e <- e2e_session(env = c(SHINY_RESUME = "FALSE", E2E_ALLOW = "1"))
   b <- e$browser
   e$process$kill()
   e2e_wait_until(function() !e2e_port_open(e$port), what = "port to close")
@@ -75,7 +75,7 @@ test_that("after ten failed attempts the notification goes and the overlay stays
 
 test_that("a bookmark URL is not re-restored on reconnect", {
   skip_on_cran()
-  e <- e2e_session(env = c(E2E_ALLOW = "1", E2E_BOOKMARK = "1"),
+  e <- e2e_session(env = c(SHINY_RESUME = "FALSE", E2E_ALLOW = "1", E2E_BOOKMARK = "1"),
                    path = "/?_inputs_&txt=%22bm%22", ready = "#txtout", ready_text = "Text: bm")
   b <- e$browser
   expect_identical(e2e_js(b, "document.getElementById('txt').value"), "bm")

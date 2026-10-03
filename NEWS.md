@@ -1893,7 +1893,7 @@ Along with the release of Shiny 0.11, we've packaged up some Bootstrap 3 themes 
 
 * Added `type` parameter to `tabsetPanel()` to enable the use of pill style tabs in addition to the standard ones.
 
-* Added `position` paramter to `tabsetPanel()` to enable positioning of tabs above, below, left, or right of tab content.
+* Added `position` parameter to `tabsetPanel()` to enable positioning of tabs above, below, left, or right of tab content.
 
 * Added `fluidPage()` and `fixedPage()` functions as well as related row and column layout functions for creating arbitrary bootstrap grid layouts.
 

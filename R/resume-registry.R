@@ -37,9 +37,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
         return(private$orphan(entry, "created inside a reactive()", counted = FALSE))
       }
       if (is.null(identity$label)) {
-        self$devmodeInform(paste0("no-label:", kind, ":", entry$ns), sprintf(
-          "A %s() created in namespace '%s' has no label, so the session cannot resume it. Assign it to a name or give it a label (rule 1 of the rules of reactives).",
-          kind, entry$ns))
+        # Reported when the record is taken: disableResume() comes after construction.
         return(private$orphan(entry, "no label", counted = TRUE))
       }
       id <- paste(entry$ns, kind, identity$label, sep = "|")
@@ -81,9 +79,10 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
 
     # Rule 4 of the rules of reactives: a restored source written during the
     # first flush by an observer that ran again is probably being
-    # accumulated into twice.
-    noteWrite = function(label) {
+    # accumulated into twice. `state` is the source's `.snapshot`.
+    noteWrite = function(state, label) {
       if (!identical(private$phase, "restoring") || !hasCurrentContext()) return(invisible())
+      if (isTRUE(state$skip) || !isTRUE(state$id %in% private$applied)) return(invisible())
       # isolate() opens its own context (type "isolate"), and that is how an
       # observer usually writes: observe({ input$x; isolate(count(count() + 1)) }).
       if (!getCurrentContext()$.reactType %in% c("observer", "isolate")) return(invisible())
@@ -234,6 +233,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
         }
         addRow(entry$kind, entry$label, entry$ns, FALSE, entry$reason)
         if (isTRUE(entry$counted)) block(paste(entry$ns, entry$kind, entry$label %||% "<unnamed>", sep = "|"), entry$reason)
+        if (identical(entry$reason, "no label")) private$informNoLabel(entry)
       }
 
       # Total cap: the largest sources are blocked until the rest fit (spec 3.4).
@@ -326,6 +326,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       }
       for (entry in private$orphans) {
         if (isTRUE(entry$counted) && !isTRUE(entry$node$.snapshot$skip)) {
+          if (identical(entry$reason, "no label")) private$informNoLabel(entry)
           private$trip(paste(entry$ns, entry$kind, entry$label %||% "<unnamed>", sep = "|"), entry$node, entry$reason)
         }
       }
@@ -414,6 +415,12 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       entry$counted <- counted
       private$orphans[[length(private$orphans) + 1L]] <- entry
       invisible(NULL)
+    },
+
+    informNoLabel = function(entry) {
+      self$devmodeInform(paste0("no-label:", entry$kind, ":", entry$ns), sprintf(
+        "A %s() created in namespace '%s' has no label, so the session cannot resume it. Assign it to a name or give it a label (rule 1 of the rules of reactives).",
+        entry$kind, entry$ns))
     },
 
     insideConductor = function() {

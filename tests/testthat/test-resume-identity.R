@@ -119,3 +119,20 @@ test_that("Shiny's own sources are marked internal and never reported", {
   expect_length(rec$sources, 0)
   expect_false(any(grepl("debounce|throttle|cookie", rec$report$label)))
 })
+
+test_that("devmode names an unlabelled source only if it is still unmarked when the record is taken", {
+  seen <- character(0)
+  local_mocked_bindings(devmode_inform = function(message, ...) seen <<- c(seen, message))
+  s <- snapshot_session(function(input, output, session) {
+    marked <- lapply(1, function(i) disableResume(reactiveVal(i)))
+    output$p <- renderPlot(plot(1)) |> bindCache(1)
+  })
+  s$.snapshotRegistry$snapshot()
+  expect_false(any(grepl("has no label", seen)))
+  s2 <- snapshot_session(function(input, output, session) {
+    vals <- lapply(1, function(i) reactiveVal(i))
+  })
+  expect_false(any(grepl("has no label", seen)))
+  s2$.snapshotRegistry$snapshot()
+  expect_match(seen, "has no label", all = FALSE)
+})

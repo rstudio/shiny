@@ -185,3 +185,19 @@ test_that("internal sources that share a label do not trip the gate or block the
   expect_null(rt$outcome$cause)
   expect_equal(isolate(rt$second$env$count()), 2)
 })
+
+test_that("rule 4 is not raised for writes to sources that were not restored", {
+  server <- function(input, output, session) {
+    secret <- reactiveVal(0); disableResume(secret)
+    count <- reactiveVal(0)
+    observeEvent(input$plus, count(count() + 1))
+    slow <- debounce(reactive(input$plus), 50)
+    observe({ input$plus; isolate(secret(secret() + 1)) })
+    output$txt <- renderText(paste(count(), slow()))
+  }
+  seen <- character(0)
+  local_mocked_bindings(devmode_inform = function(message, ...) seen <<- c(seen, message))
+  rt <- snapshot_roundtrip(server, function(s) for (i in 1:2) s$setInputs(plus = i))
+  expect_identical(rt$outcome$resumed, "snapshot")
+  expect_false(any(grepl("first flush", seen)))
+})

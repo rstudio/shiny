@@ -185,7 +185,7 @@ ReactiveVal <- R6Class(
       private$value <- value
       if (!is.null(.snapshot)) {
         .snapshot$registry$markDirty()
-        .snapshot$registry$noteWrite(private$label)
+        .snapshot$registry$noteWrite(.snapshot, private$label)
       }
       private$dependents$invalidate()
       invisible(TRUE)
@@ -569,7 +569,7 @@ ReactiveValues <- R6Class(
 
       if (!is.null(.snapshot)) {
         .snapshot$registry$markDirty()
-        .snapshot$registry$noteWrite(.label)
+        .snapshot$registry$noteWrite(.snapshot, .label)
       }
 
       # key has been depended upon

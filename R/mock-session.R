@@ -246,6 +246,9 @@ MockShinySession <- R6Class(
     user = NULL,
     #' @field options A list containing session-level shinyOptions.
     options = NULL,
+    #' @field .resumeSettings The app's resume settings, resolved at session
+    #'   start. For internal use.
+    .resumeSettings = NULL,
 
     #' @description Create a new MockShinySession.
     initialize = function() {
@@ -269,6 +272,8 @@ MockShinySession <- R6Class(
 
       # Create a read-only copy of the inputs reactive.
       self$input <- .createReactiveValues(private$.input, readonly = TRUE)
+
+      self$.resumeSettings <- resume_settings()
 
       self$token <- createUniqueId(16)
 

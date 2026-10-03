@@ -208,6 +208,7 @@ Collate:
     'render-table.R'
     'resume-options.R'
     'resume-serialize.R'
+    'resume-store.R'
     'resume.R'
     'run-url.R'
     'runapp.R'

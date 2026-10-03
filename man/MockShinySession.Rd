@@ -64,6 +64,9 @@ user. Always \code{NULL} for a \code{MockShinySesion}.}
 \code{MockShinySession}.}
 
     \item{\code{options}}{A list containing session-level shinyOptions.}
+
+    \item{\code{.resumeSettings}}{The app's resume settings, resolved at session
+start. For internal use.}
   }
   \if{html}{\out{</div>}}
 }

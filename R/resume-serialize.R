@@ -1,6 +1,14 @@
 #' @include utils.R
 NULL
 
+snapshot_deparse <- function(x) {
+  paste(deparse(zap_srcref(x), width.cutoff = 500L), collapse = "\n")
+}
+
+snapshot_hash_expr <- function(x) {
+  rlang::hash(snapshot_deparse(x))
+}
+
 # Assignment-derived name from the call's srcref, or NULL when there is none.
 snapshot_assigned_label <- function(call_srcref) {
   label <- rassignSrcrefToLabel(call_srcref, defaultLabel = NA_character_)

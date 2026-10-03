@@ -103,6 +103,7 @@ test_that("malformed, unknown and mismatched tokens fall through to inputs-only 
   spy <- new_spy("obs", "txt")
   cases <- list(
     list(data = intact("../etc", list()), cause = "malformed token"),
+    list(data = list(dom = "intact", inputs = list()), cause = "no token"),
     list(data = intact(snapshot_token_new(), list()), cause = "no saved state"),
     list(data = list(token = snapshot_token_new(), dom = "sideways", inputs = list()), cause = "unknown dom")
   )
@@ -195,6 +196,24 @@ test_that("inputs-only resume seeds an inactive RestoreContext; a fresh page wit
   expect_true(res2$session$restoreContext$active)
   expect_identical(restored, "bm")
   expect_equal(spy$restore, 1)
+})
+
+test_that("a fresh page without a record restores a bookmarked file; an intact page drops it", {
+  local_snapshot_store_dir()
+  stateDir <- withr::local_tempdir()
+  saveRDS(list(), file.path(stateDir, "input.rds"))
+  writeLines("bookmarked", file.path(stateDir, "0.txt"))
+  shinyOptions(bookmarkStore = "server", load.interface = function(id, callback) callback(stateDir))
+  withr::defer(shinyOptions(bookmarkStore = NULL, load.interface = NULL))
+  inputs <- list(`f:shiny.file` = list(name = "a.txt", size = 11, type = "text/plain", datapath = "0.txt"),
+                 .clientdata_url_search = "?_state_id_=abc")
+  server <- function(input, output, session) NULL
+  res <- resume_real(server, list(token = snapshot_token_new(), dom = "fresh", inputs = inputs))
+  f <- isolate(res$session$input$f)
+  expect_identical(f$name, "a.txt")
+  expect_identical(readLines(f$datapath), "bookmarked")
+  res2 <- resume_real(server, intact(snapshot_token_new(), inputs))
+  expect_null(isolate(res2$session$input$f))
 })
 
 test_that("passwords are never saved and never pushed, and come back from the live client", {

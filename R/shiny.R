@@ -1551,11 +1551,16 @@ ShinySession <- R6Class(
         # restores a bookmark in its URL.
         bookmark <- if (fresh) snapshot_bookmark_restore_context(live$clientData$url_search)
         if (is.null(handled)) {
-          # A `data-restore` the GET path rendered into a fileInput() points
-          # into record files that are gone when the record is.
-          restores <- grepl(":shiny\\.file$", names(live$inputs) %||% character(0))
-          live$inputs[restores] <- list(NULL)
-          if (is.null(bookmark)) snapshot_seed_restore_context(self, live$inputs) else self$restoreContext <- bookmark
+          # A `:shiny.file` value is a `data-restore` the GET path rendered
+          # from a bookmark into a fileInput(). Its files are in the
+          # bookmark's directory, which only the bookmark's context knows.
+          if (is.null(bookmark)) {
+            restores <- grepl(":shiny\\.file$", names(live$inputs) %||% character(0))
+            live$inputs[restores] <- list(NULL)
+            snapshot_seed_restore_context(self, live$inputs)
+          } else {
+            self$restoreContext <- bookmark
+          }
           handled <- snapshot_apply_handlers(live, self)
           notifyInputs(handled)
         } else if (!is.null(bookmark)) {
@@ -1569,6 +1574,7 @@ ShinySession <- R6Class(
       }
 
       token <- data$token
+      if (is.null(token)) return(fallThrough("no token"))
       if (!snapshot_token_valid(token)) return(fallThrough("malformed token"))
       if (!fresh && !identical(data$dom, "intact")) return(fallThrough("unknown dom"))
       store <- snapshot_store()

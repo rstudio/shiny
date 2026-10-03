@@ -9,6 +9,9 @@ $shiny-input-panel-bg:              #f5f5f5 !default;
 $shiny-input-panel-border:          1px solid #e3e3e3 !default;
 $shiny-input-panel-border-radius:   2px !default;
 $shiny-text-output-border-radius:   null !default;
+$shiny-dialog-bg:                  #fff !default;
+$shiny-dialog-color:               #333 !default;
+$shiny-dialog-border-radius:        6px !default;
 $notification-bg-color:             #e8e8e8 !default;
 $notification-color:                #333 !default;
 $notification-border:               1px solid #ccc !default;
@@ -104,6 +107,43 @@ html.autoreload-enabled #shiny-disconnected-overlay.reloading {
 @keyframes fadeIn {
   to {
     opacity: 0.1;
+  }
+}
+
+// Above the overlay (99998) and the notification panel (99999).
+.shiny-blocking-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background-color: rgba(black, 0.3);
+}
+
+.shiny-blocking-dialog {
+  background-color: $shiny-dialog-bg;
+  color: $shiny-dialog-color;
+  @include border-radius-shim($shiny-dialog-border-radius);
+  box-shadow: 0 0.5rem 1.5rem rgba(black, 0.3);
+  width: 100%;
+  max-width: 32rem;
+  padding: 1.5rem;
+  h2 { font-size: 1.25rem; margin: 0 0 0.75rem; }
+  .shiny-blocking-dialog-detail {
+    display: block;
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin-bottom: 0.75rem;
+    font-size: 0.875em;
+  }
+  .shiny-blocking-dialog-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
   }
 }
 

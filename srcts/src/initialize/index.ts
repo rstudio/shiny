@@ -3,6 +3,7 @@ import { disableFormSubmission } from "./disableForm";
 import { trackHistory } from "./history";
 
 import { ShinyClass } from "../shiny";
+import { initResumeOnLoad } from "../shiny/resumeStash";
 import { setUserAgent } from "../utils/userAgent";
 import { windowUserAgent } from "../window/userAgent";
 
@@ -15,6 +16,9 @@ function init(): void {
   if (window.Shiny) {
     throw new Error("Trying to create window.Shiny, but it already exists!");
   }
+  // Reads this tab's stash before anything renders, so the load decision
+  // (resume, ask, or start fresh) is made once, up front.
+  initResumeOnLoad();
   Shiny = window.Shiny = new ShinyClass();
   setUserAgent(windowUserAgent()); // before determineBrowserInfo()
 

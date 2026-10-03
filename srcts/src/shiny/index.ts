@@ -51,6 +51,12 @@ import {
   renderHtml,
   renderHtmlAsync,
 } from "./render";
+import { showResumeAskDialog } from "./resumeAskDialog";
+import {
+  discardResumeStash,
+  takeLoadDecision,
+  takeResumeNotice,
+} from "./resumeStash";
 import { sendOutputInfoFns } from "./sendOutputInfo";
 import { addCustomMessageHandler, ShinyApp, type Handler } from "./shinyapp";
 import { registerNames as singletonsRegisterNames } from "./singletons";
@@ -611,8 +617,33 @@ class ShinyClass {
     });
 
     // We've collected all the initial values--start the server process!
-    inputsNoResend.reset(initialValues);
-    shinyapp.connect(initialValues);
+    // A reloaded page may resume the session its tab had (spec 2.3, 7.2).
+    const decision = takeLoadDecision();
+    const notice = takeResumeNotice();
+
+    if (notice !== null && isShinyInDevMode()) {
+      console.warn("[shiny] " + notice);
+    }
+    const connect = (): void => {
+      inputsNoResend.reset(initialValues);
+      shinyapp.connect(initialValues);
+    };
+
+    if (decision?.kind === "ask") {
+      showResumeAskDialog({
+        onPickUp: () => {
+          shinyapp.$resumeFromPage(decision.token);
+          connect();
+        },
+        onStartFresh: () => {
+          discardResumeStash();
+          connect();
+        },
+      });
+    } else {
+      if (decision?.kind === "resume") shinyapp.$resumeFromPage(decision.token);
+      connect();
+    }
     $(document).one("shiny:connected", () => {
       initDeferredIframes();
     });

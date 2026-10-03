@@ -1,5 +1,7 @@
 /* eslint-disable unicorn/filename-case */
 
+import { markResumeStashServerInitiated } from "../src/shiny/resumeStash";
+
 document.documentElement.classList.add("autoreload-enabled");
 
 const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
@@ -59,6 +61,8 @@ async function initialize() {
   while (true) {
     try {
       if (await autoreload(wsUrl)) {
+        // The reloaded page resumes without asking (spec 2.3).
+        markResumeStashServerInitiated();
         window.location.reload();
         return;
       }

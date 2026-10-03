@@ -29,6 +29,14 @@ import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
 import { retryDecision } from "./reconnectGate";
 import type { HtmlDep } from "./render";
 import { renderContentAsync, renderHtmlAsync } from "./render";
+import type { ReloadMode } from "./resumeStash";
+import {
+  discardResumeStash,
+  markResumeStashServerInitiated,
+  refreshResumeStashUrl,
+  startFresh,
+  syncResumeStash,
+} from "./resumeStash";
 import type { WherePosition } from "./singletons";
 
 import { OutputProgressReporter } from "./outputProgress";
@@ -131,7 +139,21 @@ class ShinyApp {
   config: {
     workerId: string;
     sessionId: string;
+    resumeToken?: string | null;
+    resumeReload?: ReloadMode;
   } | null = null;
+
+  // Token of the session this one would resume, issued in `config` only
+  // when resume is on for the app; its presence is how the client knows.
+  // The tab also keeps it in sessionStorage so a reload can resume.
+  $resumeToken: string | null = null;
+
+  // `dom` of the next `resume`: "fresh" for the first socket of a reloaded
+  // page, "intact" for every reconnect.
+  $resumeDom: "intact" | "fresh" = "intact";
+
+  // The app's enableResume(reload =), from `config`.
+  $resumeReload: ReloadMode = "ask";
 
   // Cached input values
   $inputValues: InputValues = {};
@@ -164,6 +186,14 @@ class ShinyApp {
   // belongs to a reconnect and opens with `resume` instead of `init`.
   private $reconnecting = false;
 
+  // True for the first socket of a reloaded page that resumes its tab's
+  // session (read by the `resumed` handler in Task 10).
+  private $resumedFresh = false;
+
+  // Set when a `fatalError` arrives: the dialog, not the retry loop, decides
+  // what happens next (Task 11).
+  private $fatalErrorSeen = false;
+
   constructor() {
     this._init();
   }
@@ -175,6 +205,23 @@ class ShinyApp {
     this.$socket = this.createSocket();
     this.$initialInput = initialInput;
     $.extend(this.$inputValues, initialInput);
+
+    // A deliberate navigation away: the record then lives minutes, not a day
+    // (spec 5.1). Best effort; the socket may already be gone.
+    window.addEventListener("pagehide", () => {
+      if (this.$resumeToken === null || !this.$socket) return;
+      try {
+        this.$socket.send(
+          JSON.stringify({
+            method: "unload",
+            args: [],
+            tag: this.$nextRequestId++,
+          }),
+        );
+      } catch {
+        // Nothing to do: the record keeps its TTL.
+      }
+    });
 
     this.$updateConditionals();
   }
@@ -202,6 +249,26 @@ class ShinyApp {
     this.$socket = this.createSocket();
     this.$initialInput = $.extend({}, this.$inputValues);
     this.$updateConditionals();
+  }
+
+  // A reloaded page resumes the session its tab had; called before connect().
+  $resumeFromPage(token: string): void {
+    this.$resumeToken = token;
+    this.$resumeDom = "fresh";
+  }
+
+  // "Start fresh instead" / "Start fresh": discard on the server, drop the
+  // stash, reload.
+  $startFresh(): void {
+    startFresh({
+      request: (done) =>
+        this.makeRequest("discardSnapshot", [], done, done, undefined),
+      discardStash: discardResumeStash,
+      reload: () => window.location.reload(),
+      setTimer: (f, ms) => {
+        window.setTimeout(f, ms);
+      },
+    });
   }
 
   createSocket(): ShinyWebSocket {
@@ -249,15 +316,28 @@ class ShinyApp {
 
       this.onConnected();
 
-      // A reconnecting client says so, so the server seeds restoreInput()
-      // from these inputs instead of the URL's bookmark. See srcts/PROTOCOL.md.
+      // Reconnecting, or a reloaded page resuming its tab's session: `resume`
+      // with the token when we hold one (srcts/PROTOCOL.md).
+      const resuming = this.$reconnecting || this.$resumeToken !== null;
+
       socket.send(
         JSON.stringify(
-          this.$reconnecting
-            ? { method: "resume", data: { inputs: this.$initialInput } }
+          resuming
+            ? {
+                method: "resume",
+                data: {
+                  inputs: this.$initialInput,
+                  ...(this.$resumeToken !== null
+                    ? { token: this.$resumeToken, dom: this.$resumeDom }
+                    : {}),
+                },
+              }
             : { method: "init", data: this.$initialInput },
         ),
       );
+      // Only the first socket of a reloaded page has a fresh DOM.
+      this.$resumedFresh = this.$resumeDom === "fresh";
+      this.$resumeDom = "intact";
 
       while (this.$pendingMessages.length) {
         const msg = this.$pendingMessages.shift();
@@ -841,6 +921,10 @@ class ShinyApp {
         default:
           throw "Invalid value for allowReconnect: " + message;
       }
+      // The server says `false` when it ends the session itself, or when the
+      // app opted this session out; either way the tab cannot resume it,
+      // unless a fatal error's dialog is about to (Task 11 sets the flag).
+      if (message === false && !this.$fatalErrorSeen) discardResumeStash();
     });
 
     addMessageHandler("custom", async (message: { [key: string]: unknown }) => {
@@ -860,11 +944,24 @@ class ShinyApp {
 
     addMessageHandler(
       "config",
-      (message: { workerId: string; sessionId: string; user?: string }) => {
+      (message: {
+        workerId: string;
+        sessionId: string;
+        user?: string;
+        resumeToken?: string | null;
+        resumeReload?: ReloadMode;
+      }) => {
         this.config = {
           workerId: message.workerId,
           sessionId: message.sessionId,
+          resumeToken: message.resumeToken,
+          resumeReload: message.resumeReload,
         };
+        this.$resumeToken = message.resumeToken ?? null;
+        if (message.resumeReload) this.$resumeReload = message.resumeReload;
+        // enableResume() implies allowReconnect(TRUE) (spec 1.4).
+        if (this.$resumeToken !== null) this.$allowReconnect = true;
+        syncResumeStash(this.$resumeToken, this.$resumeReload);
         if (message.user) setShinyUser(message.user);
         this.reconnectDelay.reset();
         $(document).trigger("shiny:sessioninitialized");
@@ -902,10 +999,12 @@ class ShinyApp {
       },
     );
 
-    addMessageHandler("reload", (message: true) => {
+    addMessageHandler("reload", (message: true | "fresh") => {
+      // `true`: a reload Shiny makes (the UI changed); the next page resumes
+      // without asking. `"fresh"`: session$reload(), a reset.
+      if (message === "fresh") discardResumeStash();
+      else markResumeStashServerInitiated();
       window.location.reload();
-      return;
-      message; // eslint-disable-line @typescript-eslint/no-unused-expressions
     });
 
     addMessageHandler(
@@ -1351,6 +1450,7 @@ class ShinyApp {
         if (message.mode === "replace") {
           // @ts-expect-error; No title value being supplied
           window.history.replaceState(null, null, message.queryString);
+          refreshResumeStashUrl();
           return;
         }
 
@@ -1385,6 +1485,7 @@ class ShinyApp {
         else relURL += oldQS + message.queryString; // leave old QS if it exists
         // @ts-expect-error; No title value being supplied
         window.history.pushState(null, null, relURL);
+        refreshResumeStashUrl();
 
         // for the case when message.queryString has both a query string
         // and a hash (`what = "hash"` allows us to trigger the

@@ -6088,6 +6088,239 @@ ${duplicateIdMsg}`;
     remove2("reconnect");
   }
 
+  // srcts/src/shiny/blockingDialog.ts
+  var inertMark = "data-shiny-dialog-inert";
+  function showBlockingDialog(spec) {
+    hideBlockingDialog(spec.id);
+    const backdrop = document.createElement("div");
+    backdrop.id = spec.id;
+    backdrop.className = "shiny-blocking-dialog-backdrop";
+    const dialog = document.createElement("div");
+    dialog.className = "shiny-blocking-dialog";
+    dialog.setAttribute("role", "alertdialog");
+    dialog.setAttribute("aria-modal", "true");
+    dialog.setAttribute("aria-labelledby", spec.id + "-title");
+    dialog.setAttribute("aria-describedby", spec.id + "-body");
+    const title = document.createElement("h2");
+    title.id = spec.id + "-title";
+    title.textContent = spec.title;
+    dialog.appendChild(title);
+    if (spec.detail) {
+      const code = document.createElement("code");
+      code.className = "shiny-blocking-dialog-detail";
+      code.textContent = spec.detail;
+      dialog.appendChild(code);
+    }
+    const body = document.createElement("p");
+    body.id = spec.id + "-body";
+    body.textContent = spec.body;
+    dialog.appendChild(body);
+    const actions = document.createElement("div");
+    actions.className = "shiny-blocking-dialog-actions";
+    for (const b3 of spec.buttons) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.dataset.choice = b3.choice;
+      button.textContent = b3.label;
+      button.className = b3.style === "primary" ? "btn btn-primary" : "btn btn-link";
+      button.addEventListener("click", b3.onClick);
+      actions.appendChild(button);
+    }
+    dialog.appendChild(actions);
+    backdrop.appendChild(dialog);
+    for (const el of Array.from(document.body.children)) {
+      if (!el.hasAttribute("inert")) {
+        el.setAttribute("inert", "");
+        el.setAttribute(inertMark, spec.id);
+      }
+    }
+    document.body.appendChild(backdrop);
+    actions.firstElementChild?.focus();
+  }
+  function hideBlockingDialog(id) {
+    document.getElementById(id)?.remove();
+    for (const el of Array.from(
+      document.querySelectorAll("[" + inertMark + '="' + id + '"]')
+    )) {
+      el.removeAttribute("inert");
+      el.removeAttribute(inertMark);
+    }
+  }
+
+  // srcts/src/shiny/resumeAskDialog.ts
+  var askDialogId = "shiny-resume-ask";
+  function showResumeAskDialog(deps) {
+    const choose = (f3) => () => {
+      hideBlockingDialog(askDialogId);
+      f3();
+    };
+    showBlockingDialog({
+      id: askDialogId,
+      title: "Pick up where you left off?",
+      body: "This page has saved state from your last visit.",
+      buttons: [
+        {
+          label: "Pick up where you left off",
+          style: "primary",
+          choice: "pickup",
+          onClick: choose(deps.onPickUp)
+        },
+        {
+          label: "Start fresh",
+          style: "link",
+          choice: "fresh",
+          onClick: choose(deps.onStartFresh)
+        }
+      ]
+    });
+  }
+
+  // srcts/src/shiny/resumeStash.ts
+  var crashLoopLimit = 2;
+  var reloadModes = ["ask", "resume", "fresh"];
+  function decideOnLoad(stash, href) {
+    if (stash === null) return { kind: "fresh", discard: null };
+    if (href !== stash.url) return { kind: "fresh", discard: "url" };
+    if (stash.failures >= crashLoopLimit)
+      return { kind: "fresh", discard: "crash-loop" };
+    if (stash.serverInitiated) return { kind: "resume", token: stash.token };
+    if (stash.reload === "resume") return { kind: "resume", token: stash.token };
+    if (stash.reload === "fresh")
+      return { kind: "fresh", discard: "reload-fresh" };
+    return { kind: "ask", token: stash.token };
+  }
+  function nextStash(old, token, reload, href) {
+    if (token === null) return null;
+    return {
+      token,
+      url: href,
+      reload,
+      serverInitiated: false,
+      failures: old?.failures ?? 0
+    };
+  }
+  function readStash(storage, pathname) {
+    try {
+      const raw = storage.getItem(stashKey(pathname));
+      if (raw === null) return null;
+      const parsed = JSON.parse(raw);
+      if (typeof parsed !== "object" || parsed === null) return null;
+      const s4 = parsed;
+      if (typeof s4.token !== "string" || typeof s4.url !== "string") return null;
+      return {
+        token: s4.token,
+        url: s4.url,
+        reload: reloadModes.includes(s4.reload) ? s4.reload : "ask",
+        serverInitiated: s4.serverInitiated === true,
+        failures: typeof s4.failures === "number" ? s4.failures : 0
+      };
+    } catch {
+      return null;
+    }
+  }
+  function writeStash(storage, pathname, stash) {
+    try {
+      storage.setItem(stashKey(pathname), JSON.stringify(stash));
+    } catch {
+    }
+  }
+  function removeStash(storage, pathname) {
+    try {
+      storage.removeItem(stashKey(pathname));
+    } catch {
+    }
+  }
+  function stashKey(pathname) {
+    return "shiny-resume:" + pathname;
+  }
+  function startFresh(deps, timeoutMs = 2e3) {
+    let finished = false;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      deps.discardStash();
+      deps.reload();
+    };
+    deps.setTimer(finish, timeoutMs);
+    try {
+      deps.request(finish);
+    } catch {
+      finish();
+    }
+  }
+  var pageDecision = null;
+  var resumeNotice = null;
+  function initResumeOnLoad() {
+    try {
+      const storage = browserStorage();
+      const pathname = window.location.pathname;
+      const stash = storage ? readStash(storage, pathname) : null;
+      const decision = decideOnLoad(stash, window.location.href);
+      window.addEventListener("popstate", refreshResumeStashUrl);
+      window.addEventListener("hashchange", refreshResumeStashUrl);
+      if (storage && stash) {
+        if (decision.kind === "fresh" && decision.discard !== null) {
+          if (decision.discard === "crash-loop") {
+            resumeNotice = "This page's resumed session ended within seconds twice, so it was loaded fresh instead.";
+          }
+          removeStash(storage, pathname);
+        } else if (stash.serverInitiated) {
+          writeStash(storage, pathname, { ...stash, serverInitiated: false });
+        }
+      }
+      pageDecision = decision;
+    } catch {
+      pageDecision = { kind: "fresh", discard: null };
+    }
+  }
+  function takeLoadDecision() {
+    const taken = pageDecision;
+    pageDecision = null;
+    return taken;
+  }
+  function takeResumeNotice() {
+    const notice = resumeNotice;
+    resumeNotice = null;
+    return notice;
+  }
+  function syncResumeStash(token, reload) {
+    const storage = browserStorage();
+    if (!storage) return;
+    const pathname = window.location.pathname;
+    const stash = nextStash(
+      readStash(storage, pathname),
+      token,
+      reload,
+      window.location.href
+    );
+    if (stash === null) removeStash(storage, pathname);
+    else writeStash(storage, pathname, stash);
+  }
+  function updateStash(update) {
+    const storage = browserStorage();
+    if (!storage) return;
+    const pathname = window.location.pathname;
+    const stash = readStash(storage, pathname);
+    if (stash !== null) writeStash(storage, pathname, update(stash));
+  }
+  function markResumeStashServerInitiated() {
+    updateStash((s4) => ({ ...s4, serverInitiated: true }));
+  }
+  function refreshResumeStashUrl() {
+    updateStash((s4) => ({ ...s4, url: window.location.href }));
+  }
+  function discardResumeStash() {
+    const storage = browserStorage();
+    if (storage) removeStash(storage, window.location.pathname);
+  }
+  function browserStorage() {
+    try {
+      return window.sessionStorage;
+    } catch {
+      return null;
+    }
+  }
+
   // srcts/src/shiny/shinyapp.ts
   var import_jquery39 = __toESM(require_jquery());
 
@@ -6379,6 +6612,15 @@ ${duplicateIdMsg}`;
       // other things tasks as well.
       this.taskQueue = new AsyncQueue();
       this.config = null;
+      // Token of the session this one would resume, issued in `config` only
+      // when resume is on for the app; its presence is how the client knows.
+      // The tab also keeps it in sessionStorage so a reload can resume.
+      this.$resumeToken = null;
+      // `dom` of the next `resume`: "fresh" for the first socket of a reloaded
+      // page, "intact" for every reconnect.
+      this.$resumeDom = "intact";
+      // The app's enableResume(reload =), from `config`.
+      this.$resumeReload = "ask";
       // Cached input values
       this.$inputValues = {};
       // Input values at initialization (and reconnect)
@@ -6399,6 +6641,12 @@ ${duplicateIdMsg}`;
       // True once reconnect() has been called: every socket after the first
       // belongs to a reconnect and opens with `resume` instead of `init`.
       this.$reconnecting = false;
+      // True for the first socket of a reloaded page that resumes its tab's
+      // session (read by the `resumed` handler in Task 10).
+      this.$resumedFresh = false;
+      // Set when a `fatalError` arrives: the dialog, not the retry loop, decides
+      // what happens next (Task 11).
+      this.$fatalErrorSeen = false;
       this.scheduledReconnect = void 0;
       // How long to wait before the next reconnection attempt, and whether the
       // attempts have run out. Reset when the server answers, not on socket open.
@@ -6509,6 +6757,19 @@ ${duplicateIdMsg}`;
       this.$socket = this.createSocket();
       this.$initialInput = initialInput;
       import_jquery39.default.extend(this.$inputValues, initialInput);
+      window.addEventListener("pagehide", () => {
+        if (this.$resumeToken === null || !this.$socket) return;
+        try {
+          this.$socket.send(
+            JSON.stringify({
+              method: "unload",
+              args: [],
+              tag: this.$nextRequestId++
+            })
+          );
+        } catch {
+        }
+      });
       this.$updateConditionals();
     }
     isConnected() {
@@ -6523,6 +6784,23 @@ ${duplicateIdMsg}`;
       this.$socket = this.createSocket();
       this.$initialInput = import_jquery39.default.extend({}, this.$inputValues);
       this.$updateConditionals();
+    }
+    // A reloaded page resumes the session its tab had; called before connect().
+    $resumeFromPage(token) {
+      this.$resumeToken = token;
+      this.$resumeDom = "fresh";
+    }
+    // "Start fresh instead" / "Start fresh": discard on the server, drop the
+    // stash, reload.
+    $startFresh() {
+      startFresh({
+        request: (done) => this.makeRequest("discardSnapshot", [], done, done, void 0),
+        discardStash: discardResumeStash,
+        reload: () => window.location.reload(),
+        setTimer: (f3, ms) => {
+          window.setTimeout(f3, ms);
+        }
+      });
     }
     createSocket() {
       const createSocketFunc = getShinyCreateWebsocket() || (() => {
@@ -6553,11 +6831,20 @@ ${duplicateIdMsg}`;
           socket
         });
         this.onConnected();
+        const resuming = this.$reconnecting || this.$resumeToken !== null;
         socket.send(
           JSON.stringify(
-            this.$reconnecting ? { method: "resume", data: { inputs: this.$initialInput } } : { method: "init", data: this.$initialInput }
+            resuming ? {
+              method: "resume",
+              data: {
+                inputs: this.$initialInput,
+                ...this.$resumeToken !== null ? { token: this.$resumeToken, dom: this.$resumeDom } : {}
+              }
+            } : { method: "init", data: this.$initialInput }
           )
         );
+        this.$resumedFresh = this.$resumeDom === "fresh";
+        this.$resumeDom = "intact";
         while (this.$pendingMessages.length) {
           const msg = this.$pendingMessages.shift();
           socket.send(msg);
@@ -6975,6 +7262,7 @@ ${duplicateIdMsg}`;
           default:
             throw "Invalid value for allowReconnect: " + message;
         }
+        if (message === false && !this.$fatalErrorSeen) discardResumeStash();
       });
       addMessageHandler("custom", async (message) => {
         const shinyOnCustomMessage = getShinyOnCustomMessage();
@@ -6990,8 +7278,14 @@ ${duplicateIdMsg}`;
         (message) => {
           this.config = {
             workerId: message.workerId,
-            sessionId: message.sessionId
+            sessionId: message.sessionId,
+            resumeToken: message.resumeToken,
+            resumeReload: message.resumeReload
           };
+          this.$resumeToken = message.resumeToken ?? null;
+          if (message.resumeReload) this.$resumeReload = message.resumeReload;
+          if (this.$resumeToken !== null) this.$allowReconnect = true;
+          syncResumeStash(this.$resumeToken, this.$resumeReload);
           if (message.user) setShinyUser(message.user);
           this.reconnectDelay.reset();
           (0, import_jquery39.default)(document).trigger("shiny:sessioninitialized");
@@ -7020,9 +7314,9 @@ ${duplicateIdMsg}`;
         }
       );
       addMessageHandler("reload", (message) => {
+        if (message === "fresh") discardResumeStash();
+        else markResumeStashServerInitiated();
         window.location.reload();
-        return;
-        message;
       });
       addMessageHandler(
         "shiny-insert-ui",
@@ -7260,6 +7554,7 @@ ${duplicateIdMsg}`;
         (message) => {
           if (message.mode === "replace") {
             window.history.replaceState(null, null, message.queryString);
+            refreshResumeStashUrl();
             return;
           }
           let what = null;
@@ -7274,6 +7569,7 @@ ${duplicateIdMsg}`;
           if (what === "query") relURL += message.queryString;
           else relURL += oldQS + message.queryString;
           window.history.pushState(null, null, relURL);
+          refreshResumeStashUrl();
           if (message.queryString.indexOf("#") !== -1) what = "hash";
           if (window.location.hash !== oldHash) what = "hash";
           if (what === "hash") (0, import_jquery39.default)(document).trigger("hashchange");
@@ -7658,8 +7954,30 @@ ${duplicateIdMsg}`;
           registerDependency(match[1], match[2]);
         }
       });
-      inputsNoResend.reset(initialValues);
-      shinyapp.connect(initialValues);
+      const decision = takeLoadDecision();
+      const notice = takeResumeNotice();
+      if (notice !== null && isShinyInDevMode()) {
+        console.warn("[shiny] " + notice);
+      }
+      const connect = () => {
+        inputsNoResend.reset(initialValues);
+        shinyapp.connect(initialValues);
+      };
+      if (decision?.kind === "ask") {
+        showResumeAskDialog({
+          onPickUp: () => {
+            shinyapp.$resumeFromPage(decision.token);
+            connect();
+          },
+          onStartFresh: () => {
+            discardResumeStash();
+            connect();
+          }
+        });
+      } else {
+        if (decision?.kind === "resume") shinyapp.$resumeFromPage(decision.token);
+        connect();
+      }
       (0, import_jquery40.default)(document).one("shiny:connected", () => {
         initDeferredIframes();
       });
@@ -7739,6 +8057,7 @@ ${duplicateIdMsg}`;
     if (window.Shiny) {
       throw new Error("Trying to create window.Shiny, but it already exists!");
     }
+    initResumeOnLoad();
     Shiny = window.Shiny = new ShinyClass();
     setUserAgent(windowUserAgent());
     determineBrowserInfo();

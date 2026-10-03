@@ -2,6 +2,7 @@ import type { OutputBindingAdapter } from "../bindings/outputAdapter";
 import type { UploadEndValue, UploadInitValue } from "../file/fileProcessor";
 import { AsyncQueue } from "../utils/asyncQueue";
 import { ReconnectDelay } from "./reconnectDelay";
+import type { ReloadMode } from "./resumeStash";
 import { OutputProgressReporter } from "./outputProgress";
 type ResponseValue = UploadEndValue | UploadInitValue;
 type Handler = (message: any) => Promise<void> | void;
@@ -29,7 +30,12 @@ declare class ShinyApp {
     config: {
         workerId: string;
         sessionId: string;
+        resumeToken?: string | null;
+        resumeReload?: ReloadMode;
     } | null;
+    $resumeToken: string | null;
+    $resumeDom: "intact" | "fresh";
+    $resumeReload: ReloadMode;
     $inputValues: InputValues;
     $initialInput: InputValues | null;
     $bindings: {
@@ -53,11 +59,15 @@ declare class ShinyApp {
     $nextRequestId: number;
     $allowReconnect: boolean | "force";
     private $reconnecting;
+    private $resumedFresh;
+    private $fatalErrorSeen;
     constructor();
     connect(initialInput: InputValues): void;
     isConnected(): boolean;
     private scheduledReconnect;
     reconnect(): void;
+    $resumeFromPage(token: string): void;
+    $startFresh(): void;
     createSocket(): ShinyWebSocket;
     startActionQueueLoop(): Promise<void>;
     sendInput(values: InputValues): void;

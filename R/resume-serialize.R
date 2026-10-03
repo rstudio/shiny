@@ -26,11 +26,16 @@ snapshot_source_label <- function(call_srcref, explicit = NULL) {
   list(label = NULL, source = "none")
 }
 
-# The body of the user's function behind a label wrapper (see
+# The body of the user's function behind any number of label wrappers (see
 # wrapFunctionLabel(), which keeps the original in "wrappedFunc").
 snapshot_user_body <- function(func) {
-  wrapped <- attr(func, "wrappedFunc", exact = TRUE)
-  fn_body(if (is.function(wrapped)) wrapped else func)
+  # Wrappers nest (observe() wraps the user's code, observeEvent() wraps that).
+  repeat {
+    wrapped <- attr(func, "wrappedFunc", exact = TRUE)
+    if (!is.function(wrapped)) break
+    func <- wrapped
+  }
+  fn_body(func)
 }
 
 # Names assigned with `<<-` or assign("name", ...) anywhere in `expr`.

@@ -310,6 +310,8 @@ bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
   }
 
   initialized <- FALSE
+  hazards <- NULL
+  registry <- snapshot_registry(x$.domain)
 
   x$.func <- wrapFunctionLabel(
     name = x$.label,
@@ -318,9 +320,25 @@ bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
       hybrid_chain(
         eventFunc(),
         function(value) {
-          if (ignoreInit && !initialized) {
+          if (!initialized) {
             initialized <<- TRUE
-            return()
+            if (ignoreInit) return()
+            # A resumed session: this event already happened in the session
+            # this one continues, so the first run is held back unless the
+            # handler is marked or assigns closure variables (spec 4.2). The
+            # event expression was evaluated above, so the dependency stands.
+            if (!is.null(registry) && registry$skippingInits()) {
+              if (isTRUE(x$.resumeSkip)) {
+                registry$noteInitRan(x$.label, "disableResume()")
+              } else {
+                if (is.null(hazards)) hazards <<- snapshot_hazards(snapshot_user_body(valueFunc))
+                if (length(hazards) == 0L) {
+                  registry$noteInitSkipped(x$.label)
+                  return()
+                }
+                registry$noteInitRan(x$.label, "assigns closure variables")
+              }
+            }
           }
 
           if (ignoreNULL && isNullEvent(value)) {

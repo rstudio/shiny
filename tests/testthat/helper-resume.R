@@ -76,3 +76,31 @@ snapshot_eval_no_srcref <- function(text, env = parent.frame()) {
   for (e in exprs) eval(e, env)
   invisible(env)
 }
+
+# Runs `server` in a mock session, drives it, takes its record, resumes a
+# second mock session from it (through serialize(), as the store would), and
+# returns everything a test needs. `live` is what the returning client
+# reports (default: what the record has).
+snapshot_roundtrip <- function(server, drive = function(session) NULL, live = NULL, fresh = FALSE,
+                               second = MockShinySession$new()) {
+  first <- snapshot_session(server)
+  drive(first)
+  first$flushReact()
+  drain_later()
+  record <- first$.snapshotRegistry$snapshot()
+  record$identity <- snapshot_identity(first)
+  record <- unserialize(serialize(record, NULL))
+  reset_spies()
+  server <- capture_env(server)
+  outcome <- second$.snapshotRegistry$resume(
+    record,
+    live = list(inputs = live %||% record$inputs, clientData = list(), fileInputs = character(0)),
+    fresh = fresh,
+    run = function() withMockContext(second, server(input = second$input, output = second$output, session = second))
+  )
+  # Changed live inputs apply after the first flush, so their dependents run in the second.
+  second$flushReact()
+  second$flushReact()
+  list(first = first, second = second, record = record, outcome = second$.snapshotRegistry$outcome(),
+       report = second$resumeReport())
+}

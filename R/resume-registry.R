@@ -77,7 +77,9 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     # accumulated into twice.
     noteWrite = function(label) {
       if (!identical(private$phase, "restoring") || !hasCurrentContext()) return(invisible())
-      if (!identical(getCurrentContext()$.reactType, "observer")) return(invisible())
+      # isolate() opens its own context (type "isolate"), and that is how an
+      # observer usually writes: observe({ input$x; isolate(count(count() + 1)) }).
+      if (!getCurrentContext()$.reactType %in% c("observer", "isolate")) return(invisible())
       self$devmodeInform(paste0("rule4:", label), sprintf(
         "`%s` was written during the first flush of a resumed session by an observer that ran again. If that observer accumulates into it, use observeEvent(), whose handler is held back on resume (rule 4 of the rules of reactives).",
         label))
@@ -276,10 +278,94 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       invisible()
     },
 
-    # ---- resuming (spec 4.1 steps 2-6); filled in by Task 6 ------------
+    # ---- resuming (spec 4.1 steps 2-6) ---------------------------------
 
-    resume = function(record, live, fresh, run) stop("Task 6 implements resume()"),
-    finishResume = function() invisible(),
+    # Steps 2-4 of spec 4.1. `record` is a complete record whose identity
+    # checks passed; `live` the client's handler-applied inputs; `run` runs
+    # the server function once. The caller seeds the RestoreContext before
+    # and sends `resumed` after. Returns the outcome; step 6 runs after the
+    # first flush.
+    resume = function(record, live, fresh, run) {
+      private$records <- record$sources
+      private$initials <- list()
+      private$applied <- character(0)
+      private$trips <- list()
+      private$liveSet <- live
+      private$recordInputs <- record$inputs
+      private$recordClientData <- record$clientData
+      private$fresh <- isTRUE(fresh)
+      private$updated <- character(0)
+      private$skipped <- character(0)
+      private$reran <- list()
+      private$outcomeValue <- NULL
+      private$phase <- "constructing"
+      completed <- FALSE
+      on.exit(if (!completed) private$leave(), add = TRUE)
+
+      # Step 2: the record's inputs, then the client's live clientData.
+      private$setInputs(record$inputs, force = FALSE)
+      private$setClientData(live$clientData, force = FALSE)
+
+      # Step 3: constructors apply their records as the server function runs.
+      run()
+
+      # Step 4: verify. A marked source that got a record (it was unmarked
+      # when the record was written) goes back to its initial value; an
+      # unmarked source without an identity blocks.
+      for (id in private$applied) {
+        entry <- private$entries[[id]]
+        if (!is.null(entry) && isTRUE(entry$node$.snapshot$skip)) private$revertOne(entry, id)
+      }
+      for (entry in private$orphans) {
+        if (isTRUE(entry$counted) && !isTRUE(entry$node$.snapshot$skip)) {
+          private$trip(paste(entry$ns, entry$kind, entry$label %||% "<unnamed>", sep = "|"), entry$reason)
+        }
+      }
+      cause <- private$gateCause()
+      if (!is.null(cause)) {
+        private$revertAll()
+        private$phase <- "idle"           # every handler runs at the first flush
+        private$outcomeValue <- list(resumed = "inputs", cause = cause,
+                                     values = 0L, inputs = length(record$inputs))
+      } else {
+        ud <- private$session$userData
+        for (name in names(record$userData)) assign(name, record$userData[[name]], envir = ud)
+        private$phase <- "restoring"
+        private$outcomeValue <- list(resumed = "snapshot", cause = NULL,
+                                     values = length(private$applied), inputs = length(record$inputs))
+        # The record we read was deleted (single use); write our own now
+        # rather than after the debounce. A no-op without a writer (Mock).
+        self$writeNow()
+      }
+      private$session$onFlushed(function() self$finishResume(), once = TRUE)
+      completed <- TRUE
+      private$outcomeValue
+    },
+
+    # Step 6. On an intact page, the client's inputs that differ from the
+    # record's are applied now, skipping names an `update` changed since
+    # step 2. On a fresh page only clientData and inputs the record lacks:
+    # the widgets' reported values are defaults, not user changes.
+    finishResume = function() {
+      live <- private$liveSet
+      if (is.null(live)) return(invisible())
+      changed <- list()
+      for (name in names(live$inputs)) {
+        if (name %in% live$fileInputs || name %in% private$updated) next
+        if (private$fresh && name %in% names(private$recordInputs)) next
+        if (!identical(live$inputs[[name]], private$recordInputs[[name]])) changed[name] <- list(live$inputs[[name]])
+      }
+      private$setInputs(changed, force = TRUE)
+      changedCd <- list()
+      for (name in names(live$clientData)) {
+        if (!identical(live$clientData[[name]], private$recordClientData[[name]])) changedCd[name] <- list(live$clientData[[name]])
+      }
+      private$setClientData(changedCd, force = TRUE)
+      private$outcomeValue$skipped <- private$skipped
+      private$outcomeValue$reran <- private$reran
+      private$leave()
+      invisible()
+    },
     skippingInits = function() identical(private$phase, "restoring"),
     restoring = function() private$phase %in% c("constructing", "restoring"),
     noteUpdated = function(names) {
@@ -310,7 +396,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
 
     # resuming
     phase = "idle",      # "idle" | "constructing" (server function running) | "restoring" (verified; first flush)
-    records = NULL, initials = NULL, applied = character(0), gateCause = NULL,
+    records = NULL, initials = NULL, applied = character(0), trips = list(),
     liveSet = NULL, recordInputs = NULL, recordClientData = NULL, fresh = FALSE,
     updated = character(0), skipped = character(0), reran = list(), outcomeValue = NULL,
 
@@ -406,11 +492,25 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       out
     },
 
-    # ---- resume internals (used by Task 6) ----
+    # ---- resume internals ----
 
+    # A source without a usable record trips the gate. Trips are collected
+    # and judged at verify: a Shiny-internal source is marked only after its
+    # constructor returned, so it cannot be told apart here.
     trip = function(id, reason) {
-      if (is.null(private$gateCause)) private$gateCause <- sprintf("%s (%s)", id, reason)
+      private$trips[[length(private$trips) + 1L]] <- list(id = id, reason = reason)
       invisible()
+    },
+
+    # The first trip that counts (its source was not marked since), as the
+    # cause text, or NULL.
+    gateCause = function() {
+      for (t in private$trips) {
+        entry <- private$entries[[t$id]]
+        if (!is.null(entry) && isTRUE(entry$node$.snapshot$skip)) next
+        return(sprintf("%s (%s)", t$id, t$reason))
+      }
+      NULL
     },
 
     # A record that cannot be applied (corrupt bytes, a class whose package

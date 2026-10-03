@@ -75,3 +75,11 @@ test_that("snapshot_hazards() finds <<- and assign() targets", {
   expect_identical(snapshot_hazards(expr), c("a", "b", "d", "g"))
   expect_identical(snapshot_hazards(quote(x <- 1)), character(0))
 })
+
+test_that("snapshot_user_body() sees through nested label wrappers", {
+  inner <- function() { conn <<- "open" }
+  once <- wrapFunctionLabel(inner, "first")
+  twice <- wrapFunctionLabel(once, "second")
+  expect_identical(snapshot_user_body(twice), body(inner))
+  expect_identical(snapshot_user_body(inner), body(inner))
+})

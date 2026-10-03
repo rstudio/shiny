@@ -6427,6 +6427,37 @@ ${duplicateIdMsg}`;
     }
   };
 
+  // srcts/src/shiny/errorRecovery.ts
+  var recoveryTitle = "Something went wrong";
+  var recoveryBody = "Resume returns to the state saved just before the error. Your last change may already have taken effect.";
+  function recoveryView(msg) {
+    return {
+      message: typeof msg.message === "string" ? msg.message : null,
+      saved: msg.saved === true
+    };
+  }
+  var ErrorRecovery = class {
+    constructor(deps) {
+      this.seen = false;
+      this.deps = deps;
+    }
+    fatalError(msg) {
+      if (this.seen) return;
+      this.seen = true;
+      this.deps.greyOut();
+      this.deps.show(recoveryView(msg), (choice) => {
+        if (choice === "resume") this.deps.resume();
+        else this.deps.startOver();
+      });
+    }
+    // True once a fatalError arrived: the socket close that follows belongs to
+    // the error flow, so the caller neither retries nor removes the dialog, and
+    // the stash is kept for Resume.
+    ownsClose() {
+      return this.seen;
+    }
+  };
+
   // srcts/src/shiny/reconnectDelay.ts
   var delays = [1500, 1500, 2500, 2500, 5500, 5500, 10500];
   var maxAttempts = 10;
@@ -6742,8 +6773,43 @@ ${duplicateIdMsg}`;
       // `inputs` arrives as a sibling key of `resumed`; handlers see one key each.
       this.$pendingPushedInputs = null;
       // Set when a `fatalError` arrives: the dialog, not the retry loop, decides
-      // what happens next (Task 11).
+      // what happens next.
       this.$fatalErrorSeen = false;
+      this.$errorRecovery = new ErrorRecovery({
+        greyOut: () => this.$addDisconnectedOverlay(),
+        show: (view, choose) => {
+          const buttons = [];
+          if (view.saved) {
+            buttons.push({
+              label: "Resume",
+              style: "primary",
+              choice: "resume",
+              onClick: () => choose("resume")
+            });
+          }
+          buttons.push({
+            label: "Start over",
+            style: view.saved ? "link" : "primary",
+            choice: "fresh",
+            onClick: () => choose("fresh")
+          });
+          showBlockingDialog({
+            id: "shiny-fatal-error",
+            title: recoveryTitle,
+            detail: view.message,
+            body: recoveryBody,
+            buttons
+          });
+        },
+        resume: () => {
+          markResumeStashServerInitiated();
+          window.location.reload();
+        },
+        startOver: () => {
+          discardResumeStash();
+          window.location.reload();
+        }
+      });
       this.scheduledReconnect = void 0;
       // How long to wait before the next reconnection attempt, and whether the
       // attempts have run out. Reset when the server answers, not on socket open.
@@ -7008,11 +7074,15 @@ ${duplicateIdMsg}`;
         this.reconnect();
       }, delay);
     }
-    onDisconnected(reloading = false) {
+    $addDisconnectedOverlay() {
       if ((0, import_jquery40.default)("#shiny-disconnected-overlay").length === 0) {
         (0, import_jquery40.default)(document.body).append('<div id="shiny-disconnected-overlay"></div>');
       }
+    }
+    onDisconnected(reloading = false) {
+      this.$addDisconnectedOverlay();
       (0, import_jquery40.default)("#shiny-disconnected-overlay").toggleClass("reloading", reloading);
+      if (this.$errorRecovery.ownsClose()) return;
       const decision = retryDecision({
         allow: this.$allowReconnect,
         exhausted: this.reconnectDelay.exhausted()
@@ -7442,6 +7512,17 @@ ${duplicateIdMsg}`;
           // @ts-expect-error; Can not remove info on a established, malformed Event object
           resumed: message
         });
+      });
+      addMessageHandler("fatalError", (message) => {
+        this.$fatalErrorSeen = true;
+        try {
+          if (this.$crashLoop.closed()) updateResumeFailures((n4) => n4 + 1);
+        } catch (error) {
+          if (isShinyInDevMode()) {
+            console.warn("[shiny] Could not count the failed resume", error);
+          }
+        }
+        this.$errorRecovery.fatalError(message);
       });
       addMessageHandler("busy", (message) => {
         if (message === "busy") {

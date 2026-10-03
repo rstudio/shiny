@@ -65,6 +65,7 @@ declare class ShinyApp {
     private $crashLoop;
     private $pendingPushedInputs;
     private $fatalErrorSeen;
+    private $errorRecovery;
     constructor();
     connect(initialInput: InputValues): void;
     isConnected(): boolean;
@@ -79,6 +80,7 @@ declare class ShinyApp {
     $removeSocket(): void;
     $scheduleReconnect(delay: Parameters<typeof setTimeout>[1]): void;
     reconnectDelay: ReconnectDelay;
+    $addDisconnectedOverlay(): void;
     onDisconnected(reloading?: boolean): void;
     onConnected(): void;
     makeRequest(method: string, args: unknown[], onSuccess: OnSuccessRequest, onError: OnErrorRequest, blobs: Array<ArrayBuffer | Blob | string> | undefined): void;

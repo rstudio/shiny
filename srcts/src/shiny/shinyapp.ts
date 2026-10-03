@@ -20,6 +20,9 @@ import {
 import { AsyncQueue } from "../utils/asyncQueue";
 import { isQt } from "../utils/browser";
 import { indirectEval } from "../utils/eval";
+import { showBlockingDialog } from "./blockingDialog";
+import type { FatalErrorMessage } from "./errorRecovery";
+import { ErrorRecovery, recoveryBody, recoveryTitle } from "./errorRecovery";
 import {
   getShinyCreateWebsocket,
   getShinyOnCustomMessage,
@@ -211,8 +214,45 @@ class ShinyApp {
   private $pendingPushedInputs: PushedInputs | null = null;
 
   // Set when a `fatalError` arrives: the dialog, not the retry loop, decides
-  // what happens next (Task 11).
+  // what happens next.
   private $fatalErrorSeen = false;
+
+  private $errorRecovery = new ErrorRecovery({
+    greyOut: () => this.$addDisconnectedOverlay(),
+    show: (view, choose) => {
+      const buttons = [];
+
+      if (view.saved) {
+        buttons.push({
+          label: "Resume",
+          style: "primary" as const,
+          choice: "resume",
+          onClick: () => choose("resume"),
+        });
+      }
+      buttons.push({
+        label: "Start over",
+        style: view.saved ? ("link" as const) : ("primary" as const),
+        choice: "fresh",
+        onClick: () => choose("fresh"),
+      });
+      showBlockingDialog({
+        id: "shiny-fatal-error",
+        title: recoveryTitle,
+        detail: view.message,
+        body: recoveryBody,
+        buttons,
+      });
+    },
+    resume: () => {
+      markResumeStashServerInitiated();
+      window.location.reload();
+    },
+    startOver: () => {
+      discardResumeStash();
+      window.location.reload();
+    },
+  });
 
   constructor() {
     this._init();
@@ -452,12 +492,19 @@ class ShinyApp {
   // attempts have run out. Reset when the server answers, not on socket open.
   reconnectDelay = new ReconnectDelay();
 
-  onDisconnected(reloading = false): void {
-    // Add gray-out overlay, if not already present
+  $addDisconnectedOverlay(): void {
     if ($("#shiny-disconnected-overlay").length === 0) {
       $(document.body).append('<div id="shiny-disconnected-overlay"></div>');
     }
+  }
+
+  onDisconnected(reloading = false): void {
+    // Add gray-out overlay, if not already present
+    this.$addDisconnectedOverlay();
     $("#shiny-disconnected-overlay").toggleClass("reloading", reloading);
+
+    // The dialog decides what happens next; no retry.
+    if (this.$errorRecovery.ownsClose()) return;
 
     // srcts/PROTOCOL.md, "Client retry rule". After the last attempt the
     // overlay stays and the notification goes.
@@ -1050,6 +1097,19 @@ class ShinyApp {
         // @ts-expect-error; Can not remove info on a established, malformed Event object
         resumed: message,
       });
+    });
+
+    addMessageHandler("fatalError", (message: FatalErrorMessage) => {
+      this.$fatalErrorSeen = true;
+      // A resumed page that crashes within ten seconds counts toward the guard.
+      try {
+        if (this.$crashLoop.closed()) updateResumeFailures((n) => n + 1);
+      } catch (error) {
+        if (isShinyInDevMode()) {
+          console.warn("[shiny] Could not count the failed resume", error);
+        }
+      }
+      this.$errorRecovery.fatalError(message);
     });
 
     addMessageHandler("busy", (message: "busy" | "idle") => {

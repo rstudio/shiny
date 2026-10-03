@@ -87,7 +87,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       # observer usually writes: observe({ input$x; isolate(count(count() + 1)) }).
       if (!getCurrentContext()$.reactType %in% c("observer", "isolate")) return(invisible())
       self$devmodeInform(paste0("rule4:", label), sprintf(
-        "`%s` was written during the first flush of a resumed session by an observer that ran again. If that observer accumulates into it, use observeEvent(), whose handler is held back on resume (rule 4 of the rules of reactives).",
+        "`%s` was written during the first flush of a resumed session by an observer that ran again. If that observer accumulates into it, use observeEvent(), whose handler is held back on resume (rule 4 of the rules of reactives in ?enableResume).",
         label))
       invisible()
     },
@@ -413,7 +413,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
 
     informNoLabel = function(entry) {
       self$devmodeInform(paste0("no-label:", entry$kind, ":", entry$ns), sprintf(
-        "A %s() created in namespace '%s' has no label, so the session cannot resume it. Assign it to a name or give it a label (rule 1 of the rules of reactives).",
+        "A %s() created in namespace '%s' has no label, so the session cannot resume it. Assign it to a name or give it a label (rule 1 of the rules of reactives in ?enableResume).",
         entry$kind, entry$ns))
     },
 

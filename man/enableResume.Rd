@@ -64,10 +64,11 @@ neither retried nor resumed.
 \item On a \code{\link[=reactiveVal]{reactiveVal()}} or \code{\link[=reactiveValues]{reactiveValues()}} object: its value is not
 saved and does not count against the all-or-nothing rule below; after a
 resume it holds its initial value.
-\item On an observer (\code{\link[=observe]{observe()}}, \code{\link[=observeEvent]{observeEvent()}}): its first run is not
-held back; it runs on resume exactly as on a fresh start, \code{ignoreInit}
-included. Use it on a handler whose job is to rebuild something outside
-the reactive graph.
+\item On an observer made with \code{\link[=observeEvent]{observeEvent()}} or \code{\link[=bindEvent]{bindEvent()}}: its first
+run is not held back; it runs on resume exactly as on a fresh start,
+\code{ignoreInit} included. Use it on a handler whose job is to rebuild
+something outside the reactive graph. A plain \code{\link[=observe]{observe()}} always runs on
+resume, so marking one changes nothing.
 }
 }
 \section{Who decides}{
@@ -94,9 +95,40 @@ state is restored all or nothing: when any source that should restore
 cannot, the session resumes from its inputs only and the log says why.
 \code{session$resumeReport()} lists every value and input with the reason it
 would not restore. Observers, outputs, reactive expressions, closure state
-(\verb{<<-}) and in-flight async work are never saved; see the rules of
-reactives in the \verb{shiny-for-r} skill's \code{references/resume.md} for where to
-keep them instead.
+(\verb{<<-}) and in-flight async work are never saved.
+
+Values that commonly block resume because they carry an environment or a
+function: model fits and formulas created inside a function (their
+environment), ggplot objects, S7 objects (their class is a function), and
+anything holding a connection, an external pointer or an R6 object. Keep
+them in a \code{\link[=reactive]{reactive()}}, which recomputes after a resume, or mark the
+source with \code{disableResume()}.
+}
+
+\section{The rules of reactives}{
+
+Four habits keep saved state complete and correct. In development mode
+(\code{\link[=devmode]{devmode()}}) Shiny names the rule a session breaks.
+\enumerate{
+\item \strong{Label sources created in loops or in packaged code.} An installed
+package keeps no source references, so an unlabelled source there has
+no identity and blocks resume until it is labelled
+(\code{reactiveVal(0, label = "count")}) or marked with \code{disableResume()}.
+\item \strong{Hold reference objects in a \code{reactive()}, not a \code{reactiveVal()}.} A
+connection, pool or R6 client cannot be saved; in a \code{reactive()} it is
+rebuilt on first read. If one must live in a source, mark both the
+source and the observer that builds it with \code{disableResume()}.
+\item \strong{Derive page content with \code{\link[=renderUI]{renderUI()}}.} Content an \code{observeEvent()}
+put on the page imperatively (\code{\link[=insertUI]{insertUI()}}, new \code{update*Input()}
+choices, \code{\link[=showModal]{showModal()}}) does not come back on a reloaded page, because
+that handler does not run again.
+\item \strong{Accumulate into a reactive value from \code{observeEvent()}, not a plain
+\code{observe()}.} A plain observer has no event to hold back, so it runs
+on resume and applies its change a second time:
+\code{observe({ input$plus; isolate(count(count() + 1)) })} shows 4 after
+three clicks and a resume; \code{observeEvent(input$plus, count(count() + 1))}
+shows 3.
+}
 }
 
 \section{Reloading the page}{

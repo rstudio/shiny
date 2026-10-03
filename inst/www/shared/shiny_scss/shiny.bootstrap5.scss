@@ -12,6 +12,9 @@ $shiny-input-panel-bg:              RGBA($shiny-emphasis-color-rgb, 0.04) !defau
 $shiny-input-panel-border:          $border-width solid var(--#{$prefix}border-color, #{$border-color}) !default;
 $shiny-input-panel-border-radius:   $border-radius !default;
 $shiny-text-output-border-radius:   $border-radius !default;
+$shiny-dialog-bg:                   var(--#{$prefix}body-bg, #{$body-bg}) !default;
+$shiny-dialog-color:                var(--#{$prefix}body-color, #{$body-color}) !default;
+$shiny-dialog-border-radius:        var(--#{$prefix}border-radius-lg, #{$border-radius-lg}) !default;
 
 $notification-color:                var(--#{$prefix}emphasis-color, #{$body-emphasis-color}) !default;
 $notification-bg-color:             var(--#{$prefix}body-bg, #{$body-bg}) !default;

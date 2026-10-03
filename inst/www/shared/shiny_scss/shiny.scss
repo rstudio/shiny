@@ -110,7 +110,8 @@ html.autoreload-enabled #shiny-disconnected-overlay.reloading {
   }
 }
 
-// Above the overlay (99998) and the notification panel (99999).
+// Above the overlay (99998) and the notification panel (99999). Sizes are in
+// em, not rem: Bootstrap 3 sets the root font size to 10px.
 .shiny-blocking-dialog-backdrop {
   position: fixed;
   inset: 0;
@@ -118,7 +119,7 @@ html.autoreload-enabled #shiny-disconnected-overlay.reloading {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  padding: 1em;
   background-color: rgba(black, 0.3);
 }
 
@@ -126,24 +127,24 @@ html.autoreload-enabled #shiny-disconnected-overlay.reloading {
   background-color: $shiny-dialog-bg;
   color: $shiny-dialog-color;
   @include border-radius-shim($shiny-dialog-border-radius);
-  box-shadow: 0 0.5rem 1.5rem rgba(black, 0.3);
+  box-shadow: 0 0.5em 1.5em rgba(black, 0.3);
   width: 100%;
-  max-width: 32rem;
-  padding: 1.5rem;
-  h2 { font-size: 1.25rem; margin: 0 0 0.75rem; }
+  max-width: 32em;
+  padding: 1.5em;
+  h2 { font-size: 1.25em; margin: 0 0 0.6em; }
   .shiny-blocking-dialog-detail {
     display: block;
     white-space: pre-wrap;
     word-break: break-word;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.75em;
     font-size: 0.875em;
   }
   .shiny-blocking-dialog-actions {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.5rem;
-    margin-top: 1rem;
+    gap: 0.5em;
+    margin-top: 1em;
   }
 }
 

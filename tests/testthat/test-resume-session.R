@@ -146,17 +146,34 @@ test_that("an incomplete record resumes from inputs only with its first blocked 
   expect_null(snapshot_store()$read(key))
 })
 
-test_that("a changed UI fingerprint on an intact page asks for a reload, keeps the record, resumes from inputs; a fresh page skips the check", {
+test_that("a changed UI fingerprint on an intact page asks for a reload without running the server function; a fresh page skips the check", {
   local_snapshot_store_dir()
   token <- closed_counter_session()
   key <- snapshot_record_key(token)
   rec <- snapshot_store()$read(key); rec$identity$uiHash <- "stale"; snapshot_store()$write(key, rec)
   local_mocked_bindings(snapshot_ui_hash = function() "current")
-  expect_message(res <- resume_real(counter_app(new_spy("obs", "txt")), intact(token, list())), "from inputs only: ui changed; reload requested")
+  spy <- new_spy("obs", "txt")
+  expect_message(res <- resume_real(counter_app(spy), intact(token, list(`plus:shiny.action` = 3, txt = "typed"))),
+                 "^Resumed \\(reconnect\\): ui changed; reload requested")
   expect_identical(sent_of(res$ws, "reload")[[1]]$reload, TRUE)
+  expect_length(sent_of(res$ws, "resumed"), 0)
+  expect_identical(c(spy$obs, spy$txt), c(0, 0))
   expect_false(is.null(snapshot_store()$read(key)))
   expect_message(res2 <- resume_real(counter_app(new_spy("obs", "txt")), list(token = token, dom = "fresh", inputs = page_defaults)), "restored 1 values")
   expect_length(sent_of(res2$ws, "reload"), 0)
+})
+
+test_that("with bookmarking on, the session waiting for the reload still has a restore context", {
+  local_snapshot_store_dir()
+  shinyOptions(bookmarkStore = "url"); withr::defer(shinyOptions(bookmarkStore = NULL))
+  token <- closed_counter_session()
+  key <- snapshot_record_key(token)
+  rec <- snapshot_store()$read(key); rec$identity$uiHash <- "stale"; snapshot_store()$write(key, rec)
+  local_mocked_bindings(snapshot_ui_hash = function() "current")
+  expect_message(res <- resume_real(counter_app(new_spy("obs", "txt")), intact(token, list()),
+                                    before = function(s) s$createBookmarkObservers()),
+                 "ui changed")
+  expect_length(sent_of(res$ws, "fatalError"), 0)
 })
 
 test_that("inputs-only resume seeds an inactive RestoreContext; a fresh page without a record restores the URL's bookmark", {

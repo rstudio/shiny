@@ -1515,8 +1515,9 @@ ShinySession <- R6Class(
     # The `resume` branch of the WebSocket handler with resume on (spec 4.1
     # step 1 here, steps 2-6 in the registry). `data` is the decoded message;
     # `runServer` runs the app's server function. Every failure before the
-    # server function runs falls through to inputs-only; the server function
-    # never runs twice.
+    # server function runs falls through to inputs-only, except a changed UI,
+    # which asks the client to reload and does not run it; the server
+    # function never runs twice.
     .resumeSession = function(data, runServer) {
       reg <- self$.snapshotRegistry
       fresh <- identical(data$dom, "fresh")
@@ -1585,10 +1586,15 @@ ShinySession <- R6Class(
         # The page is intact but the app's UI changed: ask the client to
         # reload; the reloaded page resumes with dom = "fresh". The record is
         # left for that path. A fresh page was just rendered by the current UI.
+        # The server function does not run: with the replayed inputs its
+        # event handlers would fire before the page goes away.
         uiNow <- tryCatch(snapshot_ui_hash(), error = function(e) NULL)
         if (!is.null(uiNow) && !is.null(record$identity$uiHash) && !identical(uiNow, record$identity$uiHash)) {
+          # Bookmark observers, if any, read a restore context at the first flush.
+          self$restoreContext <- RestoreContext$new()
           private$sendMessage(reload = TRUE)
-          return(fallThrough("ui changed; reload requested"))
+          message(sprintf("Resumed (%s): ui changed; reload requested", from))
+          return(invisible(NULL))
         }
       }
       if (!isTRUE(record$complete)) {

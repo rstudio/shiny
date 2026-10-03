@@ -51,7 +51,9 @@ test_that("a restart with a changed UI reloads the page and resumes without aski
   b <- e$browser
   since <- Sys.time()
   for (i in 1:2) click_until(b, "#plus", "#count", paste("Count:", i))
+  click_until(b, "#send", "#emails", "Emails sent: 1")
   e2e_wait_for_record(e$store_dir, since = since)
+  before <- length(e$logs())
   e2e_mark_page(b)
   e$process <- restart_process(e, env = c(E2E_EXTRA = "1"))
   e2e_wait_new_page(b)
@@ -59,6 +61,7 @@ test_that("a restart with a changed UI reloads the page and resumes without aski
   e2e_wait_until(function() identical(resumed_attr(b), "snapshot"), timeout = 40, what = "shiny:resumed")
   expect_false(e2e_present(b, "#shiny-resume-ask"))
   e2e_wait_until(function() grepl("Count: 2", e2e_text(b, "#count"), fixed = TRUE), what = "kept count")
+  expect_false(any(grepl("EMAIL SENT", e$logs()[-seq_len(before)], fixed = TRUE)))
 })
 
 test_that("a session the server ends is neither retried nor resumable", {

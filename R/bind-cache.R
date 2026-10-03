@@ -579,7 +579,7 @@ bindCache.shiny.renderPlot <- function(x, ...,
   # the same output for a slightly different img element size), it would result
   # in getting the (same) image from the cache and sending it to the client
   # again. This resize observer prevents that.
-  fitDims <- snapshot_mark_internal(reactiveVal(NULL))
+  fitDims <- snapshot_internal(reactiveVal(NULL))
   resizeObserverCreated <- FALSE
   outputName <- NULL
   ensureResizeObserver <- function() {

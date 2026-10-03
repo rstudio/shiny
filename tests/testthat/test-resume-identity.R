@@ -63,6 +63,17 @@ test_that("two sources with one label both lose their identity", {
   expect_identical(vapply(rec$blocked, `[[`, "", "reason"), c("duplicate label", "duplicate label"))
 })
 
+test_that("three sources with one label all lose their identity", {
+  s <- snapshot_session(function(input, output, session) {
+    for (i in 1:3) {
+      rv <- reactiveVal(i)
+    }
+  })
+  rec <- s$.snapshotRegistry$snapshot()
+  expect_length(rec$sources, 0)
+  expect_identical(vapply(rec$blocked, `[[`, "", "reason"), rep("duplicate label", 3))
+})
+
 test_that("a source created inside a reactive() is exempt: not saved, not blocking", {
   s <- snapshot_session(function(input, output, session) {
     r <- reactive({ inner <- reactiveVal(1); inner() })

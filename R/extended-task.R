@@ -154,7 +154,7 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
         # none, so it falls back to a positional id (rule 4 of the rules of
         # reactives).
         private$rv_state <- if (identical(label, "<anonymous>")) {
-          snapshot_mark_internal(reactiveVal(initial, label = "ExtendedTask <anonymous>"))
+          snapshot_internal(reactiveVal(initial, label = "ExtendedTask <anonymous>"))
         } else {
           reactiveVal(initial, label = paste0("ExtendedTask ", label))
         }

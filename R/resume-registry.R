@@ -14,6 +14,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       private$session <- session
       private$entries <- list()
       private$orphans <- list()
+      private$retired <- character(0)
       private$informed <- character(0)
       snapshot_track_values(.subset2(session$input, "impl"), self, internal = TRUE)
       if (is.reactivevalues(session$clientData)) {
@@ -26,6 +27,10 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     # revert restores. Returns the id, or NULL when the source has none.
     registerSource = function(node, kind, identity, domain = NULL, initial = NULL,
                               apply = function(record) NULL) {
+      if (identical(identity$source, "internal")) {
+        snapshot_mark_skipped(node, "internal")
+        return(invisible(NULL))
+      }
       entry <- list(node = node, kind = kind, label = identity$label,
                     ns = private$namespaceOf(domain), apply = apply)
       if (private$insideConductor()) {
@@ -38,10 +43,12 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
         return(private$orphan(entry, "no label", counted = TRUE))
       }
       id <- paste(entry$ns, kind, identity$label, sep = "|")
+      if (id %in% private$retired) return(private$orphan(entry, "duplicate label", counted = TRUE))
       first <- private$entries[[id]]
       if (!is.null(first)) {
-        # Two sources with one id: both lose their identity (spec 3.2).
+        # Sources sharing an id all lose their identity (spec 3.2).
         private$entries[[id]] <- NULL
+        private$retired <- c(private$retired, id)
         first$node$.snapshot$id <- NULL
         if (id %in% private$applied) private$revertOne(first, id)
         private$orphan(first, "duplicate label", counted = TRUE)
@@ -57,7 +64,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
         } else if (identical(private$phase, "constructing")) {
           # Before verify, a source the record lacks trips the gate; one
           # created at the first flush keeps its initial value (spec 3.2).
-          private$trip(id, "no saved value")
+          private$trip(id, node, "no saved value")
         }
       }
       invisible(id)
@@ -319,7 +326,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       }
       for (entry in private$orphans) {
         if (isTRUE(entry$counted) && !isTRUE(entry$node$.snapshot$skip)) {
-          private$trip(paste(entry$ns, entry$kind, entry$label %||% "<unnamed>", sep = "|"), entry$reason)
+          private$trip(paste(entry$ns, entry$kind, entry$label %||% "<unnamed>", sep = "|"), entry$node, entry$reason)
         }
       }
       cause <- private$gateCause()
@@ -388,6 +395,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     session = NULL,
     entries = NULL,      # id -> list(node, kind, label, ns, apply)
     orphans = NULL,      # entries without an identity: list(..., reason, counted)
+    retired = NULL,      # ids two or more sources shared; none of them gets it
     informed = NULL,
 
     # writer
@@ -502,10 +510,10 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     # ---- resume internals ----
 
     # A source without a usable record trips the gate. Trips are collected
-    # and judged at verify: a Shiny-internal source is marked only after its
-    # constructor returned, so it cannot be told apart here.
-    trip = function(id, reason) {
-      private$trips[[length(private$trips) + 1L]] <- list(id = id, reason = reason)
+    # and judged at verify: the server function may mark the source with
+    # disableResume() after its constructor returned.
+    trip = function(id, node, reason) {
+      private$trips[[length(private$trips) + 1L]] <- list(id = id, node = node, reason = reason)
       invisible()
     },
 
@@ -513,8 +521,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     # cause text, or NULL.
     gateCause = function() {
       for (t in private$trips) {
-        entry <- private$entries[[t$id]]
-        if (!is.null(entry) && isTRUE(entry$node$.snapshot$skip)) next
+        if (isTRUE(t$node$.snapshot$skip)) next
         return(sprintf("%s (%s)", t$id, t$reason))
       }
       NULL
@@ -524,7 +531,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     # is gone) must not raise into the user's constructor call.
     applyRecord = function(id, entry, record) {
       ok <- tryCatch({ entry$apply(record); TRUE },
-        error = function(e) { private$trip(id, paste0("saved value could not be applied: ", conditionMessage(e))); FALSE })
+        error = function(e) { private$trip(id, entry$node, paste0("saved value could not be applied: ", conditionMessage(e))); FALSE })
       if (ok) private$applied <- c(private$applied, id)
       invisible(ok)
     },

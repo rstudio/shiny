@@ -212,10 +212,14 @@ snapshot_mark_skipped <- function(node, reason = "disableResume()") {
   invisible()
 }
 
-# Sources Shiny creates for itself: never recorded, never counted, never
-# reported (spec 3.1).
-snapshot_mark_internal <- function(x) {
-  impl <- if (is.reactivevalues(x)) .subset2(x, "impl") else attr(x, ".impl", exact = TRUE)
-  snapshot_mark_skipped(impl, "internal")
-  invisible(x)
+# Evaluates `expr`, whose reactiveVal() and reactiveValues() calls create
+# sources Shiny keeps for itself: never recorded, counted or reported. They
+# are marked as they are constructed, so they never trip the gate and never
+# collide with another source's label. Force arguments that run user code
+# before calling this.
+snapshot_internal <- function(expr) {
+  old <- .globals$snapshotInternal
+  .globals$snapshotInternal <- TRUE
+  on.exit(.globals$snapshotInternal <- old)
+  expr
 }

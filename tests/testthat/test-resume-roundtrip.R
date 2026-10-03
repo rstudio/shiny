@@ -167,3 +167,21 @@ test_that("Shiny's own internal sources do not trip the gate on resume", {
   expect_null(rt$outcome$cause)
   expect_equal(isolate(rt$second$env$count()), 2)
 })
+
+test_that("internal sources that share a label do not trip the gate or block the record", {
+  server <- function(input, output, session) {
+    count <- reactiveVal(0)
+    observeEvent(input$plus, count(count() + 1))
+    plus <- reactive(input$plus)
+    both <- lapply(1:2, function(i) debounce(plus, 50))
+    a <- debounce(plus, 50); a <- debounce(plus, 50)
+    ExtendedTask$new(function() 1)
+    ExtendedTask$new(function() 2)
+    output$txt <- renderText(paste(count(), both[[1]](), both[[2]](), a()))
+  }
+  rt <- snapshot_roundtrip(server, function(s) for (i in 1:2) s$setInputs(plus = i))
+  expect_true(rt$record$complete)
+  expect_identical(rt$outcome$resumed, "snapshot")
+  expect_null(rt$outcome$cause)
+  expect_equal(isolate(rt$second$env$count()), 2)
+})

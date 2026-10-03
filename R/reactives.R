@@ -2225,11 +2225,11 @@ reactive_poll_impl <- function(
   env <- environment()
 
   with_no_otel_collect({
-    cookie <- reactiveVal(
-      isolate(checkFunc()),
+    initialCookie <- isolate(checkFunc())
+    cookie <- snapshot_internal(reactiveVal(
+      initialCookie,
       label = sprintf("%s %s cookie", fnName, label)
-    )
-    snapshot_mark_internal(cookie)
+    ))
 
     o <- observe({
       # When no one holds a reference to the reactive returned from
@@ -2925,11 +2925,9 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
   }
 
   with_no_otel_collect({
-    trigger <- reactiveVal(NULL, label = sprintf("debounce %s trigger", label))
+    trigger <- snapshot_internal(reactiveVal(NULL, label = sprintf("debounce %s trigger", label)))
     # the deadline for the timer to fire; NULL if not scheduled
-    when <- reactiveVal(NULL, label = sprintf("debounce %s when", label))
-    snapshot_mark_internal(trigger)
-    snapshot_mark_internal(when)
+    when <- snapshot_internal(reactiveVal(NULL, label = sprintf("debounce %s when", label)))
 
     # Responsible for tracking when r() changes.
     firstRun <- TRUE
@@ -3031,14 +3029,11 @@ throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
   }
 
   with_no_otel_collect({
-    trigger <- reactiveVal(0, label = sprintf("throttle %s trigger", label))
+    trigger <- snapshot_internal(reactiveVal(0, label = sprintf("throttle %s trigger", label)))
     # Last time we fired; NULL if never
-    lastTriggeredAt <- reactiveVal(NULL, label = sprintf("throttle %s last triggered at", label))
+    lastTriggeredAt <- snapshot_internal(reactiveVal(NULL, label = sprintf("throttle %s last triggered at", label)))
     # If TRUE, trigger again when timer elapses
-    pending <- reactiveVal(FALSE, label = sprintf("throttle %s pending", label))
-    snapshot_mark_internal(trigger)
-    snapshot_mark_internal(lastTriggeredAt)
-    snapshot_mark_internal(pending)
+    pending <- snapshot_internal(reactiveVal(FALSE, label = sprintf("throttle %s pending", label)))
   })
 
   blackoutMillisLeft <- function() {

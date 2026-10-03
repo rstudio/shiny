@@ -18,6 +18,7 @@ snapshot_assigned_label <- function(call_srcref) {
 # Identity label for a source: the explicit label wins, then the assignment
 # name; otherwise the source has no identity (spec 3.2).
 snapshot_source_label <- function(call_srcref, explicit = NULL) {
+  if (isTRUE(.globals$snapshotInternal)) return(list(label = NULL, source = "internal"))
   if (!is.null(explicit)) {
     return(list(label = paste(as.character(explicit), collapse = ", "), source = "explicit"))
   }

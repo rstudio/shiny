@@ -38,8 +38,9 @@ test_that("Unscheduling works", {
   taskHandle()
 
   # Split into two sections to avoid `expect_equal(integer(0), character(0))` comparison on dev CRAN
-  if (length(origTimes) == 0) {
-    expect_equal(0, length(timerCallbacks$.times))
+  # (nrow(), not length(): `.times` is a data frame, whose length is its column count.)
+  if (nrow(origTimes) == 0) {
+    expect_equal(0, nrow(timerCallbacks$.times))
   } else {
     expect_equal(timerCallbacks$.times, origTimes)
   }

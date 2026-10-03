@@ -151,7 +151,7 @@ snapshot_app_path <- function() {
 
 snapshot_format_version <- 2L
 
-# App identity block: what must match for a record to be read (spec 3.1).
+# App identity block: what must match for a record to be read.
 snapshot_identity <- function(session) {
   list(
     appPath = snapshot_app_path(),

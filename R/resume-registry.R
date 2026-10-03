@@ -6,7 +6,7 @@ NULL
 
 # Per-session registry behind resume. Gives reactiveVal() / reactiveValues()
 # sources an identity, tracks what changed, writes the record, and on resume
-# applies a record under the all-or-nothing gate (spec 3-5). It knows nothing
+# applies a record under the all-or-nothing gate. It knows nothing
 # about observers, outputs or conductors: those always run again.
 SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
   public = list(
@@ -44,7 +44,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       if (id %in% private$retired) return(private$orphan(entry, "duplicate label", counted = TRUE))
       first <- private$entries[[id]]
       if (!is.null(first)) {
-        # Sources sharing an id all lose their identity (spec 3.2).
+        # Sources sharing an id all lose their identity.
         private$entries[[id]] <- NULL
         private$retired <- c(private$retired, id)
         first$node$.snapshot$id <- NULL
@@ -61,7 +61,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
           private$applyRecord(id, entry, record)
         } else if (identical(private$phase, "constructing")) {
           # Before verify, a source the record lacks trips the gate; one
-          # created at the first flush keeps its initial value (spec 3.2).
+          # created at the first flush keeps its initial value.
           private$trip(id, node, "no saved value")
         }
       }
@@ -155,7 +155,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     },
 
     # From a fatal error until the socket closes nothing is written, the
-    # closing write included (spec 5.1, 8).
+    # closing write included.
     pause = function() {
       private$pausedFlag <- TRUE
       private$cancelPendingWrite()
@@ -175,7 +175,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
 
     # After a close the client announced with `unload`: the record outlives
     # the session only briefly. In-process; a restart inside the window
-    # leaves the record to the TTL (accepted, spec 5.1).
+    # leaves the record to the TTL (accepted).
     scheduleDelete = function(seconds) {
       store <- self$writerStore()
       key <- private$key
@@ -236,7 +236,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
         if (identical(entry$reason, "no label")) private$informNoLabel(entry)
       }
 
-      # Total cap: the largest sources are blocked until the rest fit (spec 3.4).
+      # Total cap: the largest sources are blocked until the rest fit.
       while (length(sizes) && sum(sizes) > maxTotal) {
         victim <- names(sizes)[which.max(sizes)]
         sizes <- sizes[names(sizes) != victim]
@@ -286,9 +286,16 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       invisible()
     },
 
-    # ---- resuming (spec 4.1 steps 2-6) ---------------------------------
+    # ---- resuming ------------------------------------------------------
+    #
+    # A resume runs in six steps: (1) the session reads and checks the
+    # record (ShinySession$.resumeSession()); (2) the record's inputs are
+    # seeded; (3) the server function runs, and constructors apply their
+    # records; (4) the gate verifies and commits, or reverts everything;
+    # (5) the first flush, with observeEvent() first runs held back; (6) the
+    # client's live inputs are applied (finishResume()).
 
-    # Steps 2-4 of spec 4.1. `record` is a complete record whose identity
+    # Steps 2-4. `record` is a complete record whose identity
     # checks passed; `live` the client's handler-applied inputs; `run` runs
     # the server function once. The caller seeds the RestoreContext before
     # and sends `resumed` after. Returns the outcome; step 6 runs after the
@@ -530,7 +537,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       invisible(ok)
     },
 
-    # Step 4 of spec 4.1: the gate's cause, or NULL once the record's
+    # Step 4: the gate's cause, or NULL once the record's
     # userData is in place. A marked source that got a record (it was
     # unmarked when the record was written) goes back to its initial value;
     # an unmarked source without an identity blocks.

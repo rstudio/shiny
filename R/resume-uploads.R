@@ -52,8 +52,8 @@ snapshot_write_uploads <- function(snap, dir) {
 # Restores every file input in `snapshot` through the `shiny.file` handler,
 # which copies each file out of the session's restore context `dir` into a
 # fresh temp directory and marks the input as a file input again. A
-# value that cannot be restored becomes NULL; adopt() then drops it and its
-# dependents re-run.
+# value that cannot be restored becomes NULL, so the input starts empty and
+# its dependents re-run.
 snapshot_restore_uploads <- function(snapshot, session) {
   handler <- inputHandlers$get("shiny.file")
   for (name in snapshot$fileInputs) {

@@ -54,7 +54,7 @@ snapshot_bookmark_restore_context <- function(urlSearch) {
   tryCatch(RestoreContext$new(urlSearch), error = function(e) NULL)
 }
 
-# The always-on stderr lines (spec 2.6). `outcome` is the registry's outcome
+# The always-on stderr lines. `outcome` is the registry's outcome
 # list, or a list with `resumed = "inputs"` and a `cause`.
 snapshot_resume_log <- function(from, outcome, cause = NULL) {
   if (identical(outcome$resumed, "inputs")) {

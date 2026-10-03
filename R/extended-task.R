@@ -150,9 +150,8 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
       # Do not show these private reactive values in otel spans
       with_no_otel_collect({
         initial <- list(status = "initial", value = NULL, error = NULL)
-        # The label is the state's snapshot identity. An unassigned task has
-        # none, so it falls back to a positional id (rule 4 of the rules of
-        # reactives).
+        # The label is the state's resume identity. An unassigned task has
+        # none, so its state is internal: it starts over as not run.
         private$rv_state <- if (identical(label, "<anonymous>")) {
           snapshot_internal(reactiveVal(initial, label = "ExtendedTask <anonymous>"))
         } else {

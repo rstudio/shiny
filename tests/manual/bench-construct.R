@@ -2,7 +2,7 @@
 # session, with resume off and on. Run from the repo root:
 #   Rscript tests/manual/bench-construct.R
 #   SHINY_RESUME=TRUE Rscript tests/manual/bench-construct.R
-# Expect near parity (spec 13): the registry records identities only.
+# Expect near parity: the registry records identities only.
 pkgload::load_all(".", quiet = TRUE)
 
 n <- 2000L

@@ -988,9 +988,9 @@ ShinySession <- R6Class(
     cache = NULL,         # A cache object used in the session
     user = NULL,
     groups = NULL,
-    options = NULL,
+    options = NULL,       # For session-specific shinyOptions()
     .snapshotRegistry = NULL, # Resume registry; internal
-    .resumeSettings = NULL,   # resume_settings() at session start; internal       # For session-specific shinyOptions()
+    .resumeSettings = NULL,   # resume_settings() at session start; internal
 
     initialize = function(websocket) {
       private$websocket <- websocket
@@ -1491,7 +1491,7 @@ ShinySession <- R6Class(
       if (!(identical(value, TRUE) || identical(value, FALSE) || identical(value, "force"))) {
         stop('value must be TRUE, FALSE, or "force"')
       }
-      # With resume on, FALSE is the per-session opt-out (spec 1.4): no retry,
+      # With resume on, FALSE is the per-session opt-out: no retry,
       # no closing write, and the record goes when the session does.
       private$reconnectOptOut <- identical(value, FALSE)
       private$write(toJSON(list(allowReconnect = value)))
@@ -1512,8 +1512,8 @@ ShinySession <- R6Class(
       invisible()
     },
 
-    # The `resume` branch of the WebSocket handler with resume on (spec 4.1
-    # step 1 here, steps 2-6 in the registry). `data` is the decoded message;
+    # The `resume` branch of the WebSocket handler with resume on (step 1
+    # here, steps 2-6 in SnapshotRegistry$resume()). `data` is the decoded message;
     # `runServer` runs the app's server function. Every failure before the
     # server function runs falls through to inputs-only, except a changed UI,
     # which asks the client to reload and does not run it; the server
@@ -2400,7 +2400,7 @@ ShinySession <- R6Class(
     },
     reload = function() {
       if (is.null(self$.snapshotRegistry)) return(private$sendMessage(reload = TRUE))
-      # Every known use of session$reload() is as a reset (spec 2.3).
+      # Every known use of session$reload() is as a reset.
       private$snapshotDiscarded <- TRUE
       self$.snapshotRegistry$deleteSnapshot()
       private$sendMessage(reload = "fresh")
@@ -2485,7 +2485,7 @@ ShinySession <- R6Class(
                                   sep='/')))
     },
     # The client's pagehide hint: the record gets a short lifetime after the
-    # closing write (spec 5.1).
+    # closing write.
     `@unload` = function() {
       private$unloadHinted <- TRUE
       TRUE

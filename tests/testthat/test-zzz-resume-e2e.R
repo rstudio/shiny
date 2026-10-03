@@ -32,7 +32,7 @@ test_that("the page continues after a process restart: count kept, email not re-
   e2e_wait_until(function() grepl("Expensive: 20000", e2e_text(b, "#expensive"), fixed = TRUE), what = "recompute")
 })
 
-test_that("with SHINY_RESUME=FALSE, allowReconnect(TRUE) keeps PR A's behaviour: inputs replayed, nothing resumed", {
+test_that("with SHINY_RESUME=FALSE, allowReconnect(TRUE) reconnects as before: inputs replayed, nothing resumed", {
   skip_on_cran()
   e <- e2e_session(env = c(SHINY_RESUME = "FALSE", E2E_ALLOW = "1"), app = "resume-e2e")
   b <- e$browser

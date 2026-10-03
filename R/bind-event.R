@@ -325,7 +325,7 @@ bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
             if (ignoreInit) return()
             # A resumed session: this event already happened in the session
             # this one continues, so the first run is held back unless the
-            # handler is marked or assigns closure variables (spec 4.2). The
+            # handler is marked or assigns closure variables. The
             # event expression was evaluated above, so the dependency stands.
             if (!is.null(registry) && registry$skippingInits()) {
               if (isTRUE(x$.resumeSkip)) {

@@ -16,7 +16,7 @@ snapshot_assigned_label <- function(call_srcref) {
 }
 
 # Identity label for a source: the explicit label wins, then the assignment
-# name; otherwise the source has no identity (spec 3.2).
+# name; otherwise the source has no identity.
 snapshot_source_label <- function(call_srcref, explicit = NULL) {
   if (isTRUE(.globals$snapshotInternal)) return(list(label = NULL, source = "internal"))
   if (!is.null(explicit)) {
@@ -79,8 +79,8 @@ snapshot_too_large <- "too large to check"
 
 # NULL when `x` survives serialize()/unserialize() without reference
 # semantics; else the path of the first offending part, or "too large to
-# check" when the walk hit its depth or element limit (spec 3.3: fail
-# closed). Atomic vectors recurse only into their attributes, so a data
+# check" when the walk hit its depth or element limit: it fails
+# closed. Atomic vectors recurse only into their attributes, so a data
 # frame of atomic columns costs one step per column.
 snapshot_unserializable_path <- function(x, path = "value") {
   budget <- new.env(parent = emptyenv())

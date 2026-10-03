@@ -64,3 +64,39 @@ resume_check_version <- function(value) {
   }
   rlang::abort("`appVersion` must be NULL or a single string or number.")
 }
+
+#' @export
+disableResume.reactiveVal <- function(x) {
+  snapshot_mark_skipped(attr(x, ".impl", exact = TRUE))
+  invisible(x)
+}
+
+#' @export
+disableResume.reactivevalues <- function(x) {
+  snapshot_mark_skipped(.subset2(x, "impl"))
+  invisible(x)
+}
+
+#' @export
+disableResume.Observer <- function(x) {
+  x$.resumeSkip <- TRUE
+  invisible(x)
+}
+
+# A node no registry tracks is never recorded, so there is nothing to mark.
+snapshot_mark_skipped <- function(node, reason = "disableResume()") {
+  state <- node$.snapshot
+  if (!is.null(state)) {
+    state$skip <- TRUE
+    state$skipReason <- reason
+  }
+  invisible()
+}
+
+# Sources Shiny creates for itself: never recorded, never counted, never
+# reported (spec 3.1).
+snapshot_mark_internal <- function(x) {
+  impl <- if (is.reactivevalues(x)) .subset2(x, "impl") else attr(x, ".impl", exact = TRUE)
+  snapshot_mark_skipped(impl, "internal")
+  invisible(x)
+}

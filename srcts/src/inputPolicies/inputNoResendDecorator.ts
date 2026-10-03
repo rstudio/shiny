@@ -55,6 +55,14 @@ class InputNoResendDecorator implements InputPolicy {
   forget(name: string): void {
     delete this.lastSentValues[name];
   }
+  // Records `value` as the last one sent for one input, leaving the others
+  // alone (reset() replaces them all). Used after a page reload so that
+  // re-sending an input whose widget took the server's value is a no-op.
+  remember(nameType: string, value: unknown): void {
+    const { name, inputType } = splitInputNameType(nameType);
+
+    this.lastSentValues[name] = { jsonValue: JSON.stringify(value), inputType };
+  }
 }
 
 export { InputNoResendDecorator };

@@ -2,6 +2,7 @@ import type { OutputBindingAdapter } from "../bindings/outputAdapter";
 import type { UploadEndValue, UploadInitValue } from "../file/fileProcessor";
 import { AsyncQueue } from "../utils/asyncQueue";
 import { ReconnectDelay } from "./reconnectDelay";
+import type { PushedInputs } from "./resumePush";
 import type { ReloadMode } from "./resumeStash";
 import { OutputProgressReporter } from "./outputProgress";
 type ResponseValue = UploadEndValue | UploadInitValue;
@@ -60,6 +61,9 @@ declare class ShinyApp {
     $allowReconnect: boolean | "force";
     private $reconnecting;
     private $resumedFresh;
+    $applyResumedInputs: ((values: PushedInputs) => Promise<void>) | null;
+    private $crashLoop;
+    private $pendingPushedInputs;
     private $fatalErrorSeen;
     constructor();
     connect(initialInput: InputValues): void;

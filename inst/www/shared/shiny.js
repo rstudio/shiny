@@ -130,7 +130,7 @@
   }
 
   // srcts/src/shiny/index.ts
-  var import_jquery40 = __toESM(require_jquery());
+  var import_jquery41 = __toESM(require_jquery());
 
   // srcts/src/utils/index.ts
   var import_jquery6 = __toESM(require_jquery());
@@ -5511,6 +5511,13 @@
     forget(name) {
       delete this.lastSentValues[name];
     }
+    // Records `value` as the last one sent for one input, leaving the others
+    // alone (reset() replaces them all). Used after a page reload so that
+    // re-sending an input whose widget took the server's value is a no-op.
+    remember(nameType, value) {
+      const { name, inputType } = splitInputNameType(nameType);
+      this.lastSentValues[name] = { jsonValue: JSON.stringify(value), inputType };
+    }
   };
 
   // srcts/src/inputPolicies/inputRateDecorator.ts
@@ -6175,7 +6182,49 @@ ${duplicateIdMsg}`;
     });
   }
 
+  // srcts/src/shiny/resumePush.ts
+  async function applyPushedInputs(values, deps) {
+    for (const id of Object.keys(values)) {
+      try {
+        const bound = deps.lookup(id);
+        if (bound === null) continue;
+        const binding = bound.binding;
+        const type = binding.getType(bound.el);
+        deps.remember(type ? id + ":" + type : id, values[id]);
+        if (typeof binding.setValue === "function") {
+          binding.setValue(
+            bound.el,
+            adaptPushedValue(binding.name, bound.dataType, values[id])
+          );
+        } else {
+          await binding.receiveMessage(bound.el, { value: values[id] });
+        }
+      } catch (error) {
+        deps.log(
+          "Could not apply the restored value of input '" + id + "'",
+          error
+        );
+      }
+    }
+    try {
+      deps.resendAll();
+    } catch (error) {
+      deps.log("Could not re-send the inputs after restoring them", error);
+    }
+  }
+  function adaptPushedValue(bindingName, dataType, value) {
+    if (bindingName === "shiny.dateRangeInput" && Array.isArray(value)) {
+      return { start: value[0], end: value[1] };
+    }
+    if (bindingName === "shiny.sliderInput" && (dataType === "date" || dataType === "datetime")) {
+      const toMs = (v2) => typeof v2 === "string" ? Date.parse(v2) : v2;
+      return Array.isArray(value) ? value.map(toMs) : toMs(value);
+    }
+    return value;
+  }
+
   // srcts/src/shiny/resumeStash.ts
+  var crashLoopWindowMs = 1e4;
   var crashLoopLimit = 2;
   var reloadModes = ["ask", "resume", "fresh"];
   function decideOnLoad(stash, href) {
@@ -6248,6 +6297,24 @@ ${duplicateIdMsg}`;
       finish();
     }
   }
+  var CrashLoopTracker = class {
+    constructor(now) {
+      this.resumedAt = null;
+      this.now = now;
+    }
+    resumed() {
+      this.resumedAt = this.now();
+    }
+    // True when this close (or fatalError) is a failed resume.
+    closed() {
+      const at = this.resumedAt;
+      this.resumedAt = null;
+      return at !== null && this.now() - at < crashLoopWindowMs;
+    }
+    survived() {
+      return this.resumedAt !== null && this.now() - this.resumedAt >= crashLoopWindowMs;
+    }
+  };
   var pageDecision = null;
   var resumeNotice = null;
   function initResumeOnLoad() {
@@ -6309,6 +6376,9 @@ ${duplicateIdMsg}`;
   function refreshResumeStashUrl() {
     updateStash((s4) => ({ ...s4, url: window.location.href }));
   }
+  function updateResumeFailures(update) {
+    updateStash((s4) => ({ ...s4, failures: update(s4.failures) }));
+  }
   function discardResumeStash() {
     const storage = browserStorage();
     if (storage) removeStash(storage, window.location.pathname);
@@ -6322,7 +6392,7 @@ ${duplicateIdMsg}`;
   }
 
   // srcts/src/shiny/shinyapp.ts
-  var import_jquery39 = __toESM(require_jquery());
+  var import_jquery40 = __toESM(require_jquery());
 
   // srcts/src/utils/asyncQueue.ts
   var AsyncQueue = class {
@@ -6386,6 +6456,27 @@ ${duplicateIdMsg}`;
   }) {
     if (!(allow === true || allow === "force")) return "never";
     return exhausted ? "stop" : "retry";
+  }
+
+  // srcts/src/shiny/resumeToast.ts
+  var import_jquery39 = __toESM(require_jquery());
+  async function showResumedToast(onStartFresh) {
+    await show2({
+      id: "resumed",
+      html: "<span>Restored your session.</span>",
+      action: '<a href="#" id="shiny-resume-start-fresh">Start fresh instead</a>',
+      duration: 1e4,
+      closeButton: true
+    });
+    (0, import_jquery39.default)("#shiny-resume-start-fresh").one("click", (e4) => {
+      e4.preventDefault();
+      try {
+        onStartFresh();
+      } catch (error) {
+        if (isShinyInDevMode())
+          console.warn("[shiny] Could not start fresh", error);
+      }
+    });
   }
 
   // srcts/src/shiny/outputProgress.ts
@@ -6642,8 +6733,14 @@ ${duplicateIdMsg}`;
       // belongs to a reconnect and opens with `resume` instead of `init`.
       this.$reconnecting = false;
       // True for the first socket of a reloaded page that resumes its tab's
-      // session (read by the `resumed` handler in Task 10).
+      // session (read by the `resumed` handler).
       this.$resumedFresh = false;
+      // Set by ShinyClass.initialize(): applies `resumed.inputs` through the
+      // input bindings and re-sends the bound inputs.
+      this.$applyResumedInputs = null;
+      this.$crashLoop = new CrashLoopTracker(() => Date.now());
+      // `inputs` arrives as a sibling key of `resumed`; handlers see one key each.
+      this.$pendingPushedInputs = null;
       // Set when a `fatalError` arrives: the dialog, not the retry loop, decides
       // what happens next (Task 11).
       this.$fatalErrorSeen = false;
@@ -6658,7 +6755,7 @@ ${duplicateIdMsg}`;
           const key = message.id;
           const binding = this.$bindings[key];
           if (binding) {
-            (0, import_jquery39.default)(binding.el).trigger({
+            (0, import_jquery40.default)(binding.el).trigger({
               type: "shiny:outputinvalidated",
               // @ts-expect-error; Can not remove info on a established, malformed Event object
               binding,
@@ -6676,13 +6773,13 @@ ${duplicateIdMsg}`;
               duration: null
             });
           } else if (message.style === "old") {
-            let $container = (0, import_jquery39.default)(".shiny-progress-container");
+            let $container = (0, import_jquery40.default)(".shiny-progress-container");
             if ($container.length === 0) {
-              $container = (0, import_jquery39.default)('<div class="shiny-progress-container"></div>');
-              (0, import_jquery39.default)(document.body).append($container);
+              $container = (0, import_jquery40.default)('<div class="shiny-progress-container"></div>');
+              (0, import_jquery40.default)(document.body).append($container);
             }
-            const depth = (0, import_jquery39.default)(".shiny-progress.open").length;
-            const $progress = (0, import_jquery39.default)(
+            const depth = (0, import_jquery40.default)(".shiny-progress.open").length;
+            const $progress = (0, import_jquery40.default)(
               '<div class="shiny-progress open"><div class="progress active"><div class="progress-bar bar"></div></div><div class="progress-text"><span class="progress-message">message</span><span class="progress-detail"></span></div></div>'
             );
             $progress.attr("id", message.id);
@@ -6705,7 +6802,7 @@ ${duplicateIdMsg}`;
         // Update page-level progress bar
         update: function(message) {
           if (message.style === "notification") {
-            const $progress = (0, import_jquery39.default)("#shiny-progress-" + message.id);
+            const $progress = (0, import_jquery40.default)("#shiny-progress-" + message.id);
             if ($progress.length === 0) return;
             if (typeof message.message !== "undefined") {
               $progress.find(".progress-message").text(message.message);
@@ -6718,7 +6815,7 @@ ${duplicateIdMsg}`;
               $progress.find(".progress-bar").width(message.value * 100 + "%");
             }
           } else if (message.style === "old") {
-            const $progress = (0, import_jquery39.default)("#" + message.id + ".shiny-progress");
+            const $progress = (0, import_jquery40.default)("#" + message.id + ".shiny-progress");
             if (typeof message.message !== "undefined") {
               $progress.find(".progress-message").text(message.message);
             }
@@ -6737,13 +6834,13 @@ ${duplicateIdMsg}`;
           if (message.style === "notification") {
             remove2(message.id);
           } else if (message.style === "old") {
-            const $progress = (0, import_jquery39.default)("#" + message.id + ".shiny-progress");
+            const $progress = (0, import_jquery40.default)("#" + message.id + ".shiny-progress");
             $progress.removeClass("open");
             $progress.fadeOut({
               complete: function() {
                 $progress.remove();
-                if ((0, import_jquery39.default)(".shiny-progress").length === 0)
-                  (0, import_jquery39.default)(".shiny-progress-container").remove();
+                if ((0, import_jquery40.default)(".shiny-progress").length === 0)
+                  (0, import_jquery40.default)(".shiny-progress-container").remove();
               }
             });
           }
@@ -6756,7 +6853,7 @@ ${duplicateIdMsg}`;
         throw "Connect was already called on this application object";
       this.$socket = this.createSocket();
       this.$initialInput = initialInput;
-      import_jquery39.default.extend(this.$inputValues, initialInput);
+      import_jquery40.default.extend(this.$inputValues, initialInput);
       window.addEventListener("pagehide", () => {
         if (this.$resumeToken === null || !this.$socket) return;
         try {
@@ -6782,7 +6879,7 @@ ${duplicateIdMsg}`;
       this.$outputProgress.reset();
       this.$reconnecting = true;
       this.$socket = this.createSocket();
-      this.$initialInput = import_jquery39.default.extend({}, this.$inputValues);
+      this.$initialInput = import_jquery40.default.extend({}, this.$inputValues);
       this.$updateConditionals();
     }
     // A reloaded page resumes the session its tab had; called before connect().
@@ -6825,7 +6922,7 @@ ${duplicateIdMsg}`;
       let hasOpened = false;
       socket.onopen = () => {
         hasOpened = true;
-        (0, import_jquery39.default)(document).trigger({
+        (0, import_jquery40.default)(document).trigger({
           type: "shiny:connected",
           // @ts-expect-error; Can not remove info on a established, malformed Event object
           socket
@@ -6855,9 +6952,18 @@ ${duplicateIdMsg}`;
         this.taskQueue.enqueue(async () => await this.dispatchMessage(e4.data));
       };
       socket.onclose = (e4) => {
+        try {
+          if (e4.code !== 1e3 && e4.code !== 1001 && this.$crashLoop.closed()) {
+            updateResumeFailures((n4) => n4 + 1);
+          }
+        } catch (error) {
+          if (isShinyInDevMode()) {
+            console.warn("[shiny] Could not count the failed resume", error);
+          }
+        }
         const restarting = e4.code === 1012;
         if (hasOpened) {
-          (0, import_jquery39.default)(document).trigger({
+          (0, import_jquery40.default)(document).trigger({
             type: "shiny:disconnected",
             // @ts-expect-error; Can not remove info on a established, malformed Event object
             socket
@@ -6886,7 +6992,7 @@ ${duplicateIdMsg}`;
         data: values
       });
       this.$sendMsg(msg);
-      import_jquery39.default.extend(this.$inputValues, values);
+      import_jquery40.default.extend(this.$inputValues, values);
       this.$updateConditionals();
     }
     $notifyDisconnected() {
@@ -6903,10 +7009,10 @@ ${duplicateIdMsg}`;
       }, delay);
     }
     onDisconnected(reloading = false) {
-      if ((0, import_jquery39.default)("#shiny-disconnected-overlay").length === 0) {
-        (0, import_jquery39.default)(document.body).append('<div id="shiny-disconnected-overlay"></div>');
+      if ((0, import_jquery40.default)("#shiny-disconnected-overlay").length === 0) {
+        (0, import_jquery40.default)(document.body).append('<div id="shiny-disconnected-overlay"></div>');
       }
-      (0, import_jquery39.default)("#shiny-disconnected-overlay").toggleClass("reloading", reloading);
+      (0, import_jquery40.default)("#shiny-disconnected-overlay").toggleClass("reloading", reloading);
       const decision = retryDecision({
         allow: this.$allowReconnect,
         exhausted: this.reconnectDelay.exhausted()
@@ -6920,7 +7026,7 @@ ${duplicateIdMsg}`;
       }
     }
     onConnected() {
-      (0, import_jquery39.default)("#shiny-disconnected-overlay").remove();
+      (0, import_jquery40.default)("#shiny-disconnected-overlay").remove();
       hideReconnectDialog();
     }
     // NB: Including blobs will cause IE to break!
@@ -6999,28 +7105,28 @@ ${duplicateIdMsg}`;
       this.$errors[name] = error;
       delete this.$values[name];
       const binding = this.$bindings[name];
-      const evt = import_jquery39.default.Event("shiny:error");
+      const evt = import_jquery40.default.Event("shiny:error");
       evt.name = name;
       evt.error = error;
       evt.binding = binding;
-      (0, import_jquery39.default)(binding ? binding.el : document).trigger(evt);
+      (0, import_jquery40.default)(binding ? binding.el : document).trigger(evt);
       if (!evt.isDefaultPrevented() && binding && binding.onValueError) {
         binding.onValueError(evt.error);
       }
     }
     async receiveOutput(name, value) {
       const binding = this.$bindings[name];
-      const evt = import_jquery39.default.Event("shiny:value");
+      const evt = import_jquery40.default.Event("shiny:value");
       evt.name = name;
       evt.value = value;
       evt.binding = binding;
       if (this.$values[name] === value) {
-        (0, import_jquery39.default)(binding ? binding.el : document).trigger(evt);
+        (0, import_jquery40.default)(binding ? binding.el : document).trigger(evt);
         return void 0;
       }
       this.$values[name] = value;
       delete this.$errors[name];
-      (0, import_jquery39.default)(binding ? binding.el : document).trigger(evt);
+      (0, import_jquery40.default)(binding ? binding.el : document).trigger(evt);
       if (!evt.isDefaultPrevented() && binding) {
         await binding.onValueChange(evt.value);
       }
@@ -7047,7 +7153,7 @@ ${duplicateIdMsg}`;
     // by nsPrefix. Returns a new object with keys removed and renamed as
     // necessary.
     _narrowScopeComponent(scopeComponent, nsPrefix) {
-      return Object.keys(scopeComponent).filter((k2) => k2.indexOf(nsPrefix) === 0).map((k2) => ({ [k2.substring(nsPrefix.length)]: scopeComponent[k2] })).reduce((obj, pair) => import_jquery39.default.extend(obj, pair), {});
+      return Object.keys(scopeComponent).filter((k2) => k2.indexOf(nsPrefix) === 0).map((k2) => ({ [k2.substring(nsPrefix.length)]: scopeComponent[k2] })).reduce((obj, pair) => import_jquery40.default.extend(obj, pair), {});
     }
     // Narrows a scope -- an object with input and output "subComponents" -- to
     // one constrained by the nsPrefix string.
@@ -7066,7 +7172,7 @@ ${duplicateIdMsg}`;
       return scope;
     }
     $updateConditionals() {
-      (0, import_jquery39.default)(document).trigger({
+      (0, import_jquery40.default)(document).trigger({
         type: "shiny:conditional"
       });
       const inputs = {};
@@ -7077,9 +7183,9 @@ ${duplicateIdMsg}`;
         }
       }
       const scope = { input: inputs, output: this.$values };
-      const conditionals = (0, import_jquery39.default)(document).find("[data-display-if]");
+      const conditionals = (0, import_jquery40.default)(document).find("[data-display-if]");
       for (let i5 = 0; i5 < conditionals.length; i5++) {
-        const el = (0, import_jquery39.default)(conditionals[i5]);
+        const el = (0, import_jquery40.default)(conditionals[i5]);
         let condFunc = el.data("data-display-if-func");
         if (!condFunc) {
           const condExpr = el.attr("data-display-if");
@@ -7122,9 +7228,9 @@ ${duplicateIdMsg}`;
         msgObj.custom = {};
         msgObj.custom[type] = data;
       }
-      const evt = import_jquery39.default.Event("shiny:message");
+      const evt = import_jquery40.default.Event("shiny:message");
       evt.message = msgObj;
-      (0, import_jquery39.default)(document).trigger(evt);
+      (0, import_jquery40.default)(document).trigger(evt);
       if (evt.isDefaultPrevented()) return;
       this.$outputProgress.updateStateFromMessage(evt.message);
       await this._sendMessagesToHandlers(
@@ -7183,15 +7289,15 @@ ${duplicateIdMsg}`;
         "inputMessages",
         async (message) => {
           for (let i5 = 0; i5 < message.length; i5++) {
-            const $obj = (0, import_jquery39.default)(".shiny-bound-input#" + $escape(message[i5].id));
+            const $obj = (0, import_jquery40.default)(".shiny-bound-input#" + $escape(message[i5].id));
             const inputBinding = $obj.data("shiny-input-binding");
             if ($obj.length > 0) {
               if (!$obj.attr("aria-live")) $obj.attr("aria-live", "polite");
               const el = $obj[0];
-              const evt = import_jquery39.default.Event("shiny:updateinput");
+              const evt = import_jquery40.default.Event("shiny:updateinput");
               evt.message = message[i5].message;
               evt.binding = inputBinding;
-              (0, import_jquery39.default)(el).trigger(evt);
+              (0, import_jquery40.default)(el).trigger(evt);
               if (!evt.isDefaultPrevented()) {
                 try {
                   await inputBinding.receiveMessage(el, evt.message);
@@ -7288,16 +7394,62 @@ ${duplicateIdMsg}`;
           syncResumeStash(this.$resumeToken, this.$resumeReload);
           if (message.user) setShinyUser(message.user);
           this.reconnectDelay.reset();
-          (0, import_jquery39.default)(document).trigger("shiny:sessioninitialized");
+          (0, import_jquery40.default)(document).trigger("shiny:sessioninitialized");
         }
       );
+      addMessageHandler("inputs", (message) => {
+        this.$pendingPushedInputs = message;
+      });
+      addMessageHandler("resumed", async (message) => {
+        this.reconnectDelay.reset();
+        const pushed = this.$pendingPushedInputs;
+        const fresh = this.$resumedFresh;
+        this.$pendingPushedInputs = null;
+        this.$resumedFresh = false;
+        if (pushed && this.$applyResumedInputs) {
+          try {
+            await this.$applyResumedInputs(pushed);
+          } catch (error) {
+            if (isShinyInDevMode()) {
+              console.warn("[shiny] Could not restore the inputs", error);
+            }
+          }
+        }
+        if (fresh && message === "snapshot") {
+          this.$crashLoop.resumed();
+          window.setTimeout(() => {
+            try {
+              if (this.$crashLoop.survived()) updateResumeFailures(() => 0);
+            } catch (error) {
+              if (isShinyInDevMode()) {
+                console.warn(
+                  "[shiny] Could not clear the resume failures",
+                  error
+                );
+              }
+            }
+          }, crashLoopWindowMs);
+          if (this.$resumeReload === "resume") {
+            showResumedToast(() => this.$startFresh()).catch((error) => {
+              if (isShinyInDevMode()) {
+                console.warn("[shiny] Could not show the resumed toast", error);
+              }
+            });
+          }
+        }
+        (0, import_jquery40.default)(document).trigger({
+          type: "shiny:resumed",
+          // @ts-expect-error; Can not remove info on a established, malformed Event object
+          resumed: message
+        });
+      });
       addMessageHandler("busy", (message) => {
         if (message === "busy") {
-          (0, import_jquery39.default)(document.documentElement).addClass("shiny-busy");
-          (0, import_jquery39.default)(document).trigger("shiny:busy");
+          (0, import_jquery40.default)(document.documentElement).addClass("shiny-busy");
+          (0, import_jquery40.default)(document).trigger("shiny:busy");
         } else if (message === "idle") {
-          (0, import_jquery39.default)(document.documentElement).removeClass("shiny-busy");
-          (0, import_jquery39.default)(document).trigger("shiny:idle");
+          (0, import_jquery40.default)(document.documentElement).removeClass("shiny-busy");
+          (0, import_jquery40.default)(document).trigger("shiny:idle");
         }
       });
       addMessageHandler(
@@ -7306,9 +7458,9 @@ ${duplicateIdMsg}`;
           if (hasOwnProperty(message, "name") && hasOwnProperty(message, "status")) {
             const binding = this.$bindings[message.name];
             if (binding) {
-              (0, import_jquery39.default)(binding.el).trigger("shiny:" + message.status);
+              (0, import_jquery40.default)(binding.el).trigger("shiny:" + message.status);
             } else {
-              (0, import_jquery39.default)().trigger("shiny:" + message.status);
+              (0, import_jquery40.default)().trigger("shiny:" + message.status);
             }
           }
         }
@@ -7321,14 +7473,14 @@ ${duplicateIdMsg}`;
       addMessageHandler(
         "shiny-insert-ui",
         async (message) => {
-          const targets = (0, import_jquery39.default)(message.selector);
+          const targets = (0, import_jquery40.default)(message.selector);
           if (targets.length === 0) {
             console.warn(
               'The selector you chose ("' + message.selector + '") could not be found in the DOM.'
             );
             await renderHtmlAsync(
               message.content.html,
-              (0, import_jquery39.default)([]),
+              (0, import_jquery40.default)([]),
               message.content.deps
             );
           } else {
@@ -7342,10 +7494,10 @@ ${duplicateIdMsg}`;
       addMessageHandler(
         "shiny-remove-ui",
         (message) => {
-          const els = (0, import_jquery39.default)(message.selector);
+          const els = (0, import_jquery40.default)(message.selector);
           els.each(function(i5, el) {
             shinyUnbindAll(el, true);
-            (0, import_jquery39.default)(el).remove();
+            (0, import_jquery40.default)(el).remove();
             return message.multiple === false ? false : void 0;
           });
         }
@@ -7356,14 +7508,14 @@ ${duplicateIdMsg}`;
         }
       });
       function getTabset(id) {
-        const $tabset = (0, import_jquery39.default)("#" + $escape(id));
+        const $tabset = (0, import_jquery40.default)("#" + $escape(id));
         if ($tabset.length === 0)
           throw "There is no tabsetPanel (or navbarPage or navlistPanel) with id equal to '" + id + "'";
         return $tabset;
       }
       function getTabContent($tabset) {
         const tabsetId = $tabset.attr("data-tabsetid");
-        const $tabContent = (0, import_jquery39.default)(
+        const $tabContent = (0, import_jquery40.default)(
           "div.tab-content[data-tabsetid='" + $escape(tabsetId) + "']"
         );
         return $tabContent;
@@ -7382,12 +7534,12 @@ ${duplicateIdMsg}`;
           const dropdownId = $dropdownTabset.attr("data-tabsetid");
           const $dropdownLiTags = $dropdownTabset.find("a[data-toggle='tab']").parent("li");
           $dropdownLiTags.each(function(i5, el) {
-            $liTags.push((0, import_jquery39.default)(el));
+            $liTags.push((0, import_jquery40.default)(el));
           });
           const selector = "div.tab-pane[id^='tab-" + $escape(dropdownId) + "']";
           const $dropdownDivs = $tabContent.find(selector);
           $dropdownDivs.each(function(i5, el) {
-            $divTags.push((0, import_jquery39.default)(el));
+            $divTags.push((0, import_jquery40.default)(el));
           });
         } else {
           $divTags.push($tabContent.find("div" + dataValue));
@@ -7401,9 +7553,9 @@ ${duplicateIdMsg}`;
           let $tabset = $parentTabset;
           const $tabContent = getTabContent($tabset);
           let tabsetId = $parentTabset.attr("data-tabsetid");
-          const $fragLi = (0, import_jquery39.default)("<div>");
+          const $fragLi = (0, import_jquery40.default)("<div>");
           await renderContentAsync($fragLi, message.liTag, "afterBegin");
-          const $liTag = (0, import_jquery39.default)($fragLi).find("> li");
+          const $liTag = (0, import_jquery40.default)($fragLi).find("> li");
           const $aTag = $liTag.find("> a");
           let $targetLiTag = null;
           if (message.target !== null) {
@@ -7453,7 +7605,7 @@ ${duplicateIdMsg}`;
           function getTabIndex($tabset2, tabsetId2) {
             const existingTabIds = [0];
             $tabset2.find("> li").each(function() {
-              const $tab = (0, import_jquery39.default)(this).find("> a[data-toggle='tab']");
+              const $tab = (0, import_jquery40.default)(this).find("> a[data-toggle='tab']");
               if ($tab.length > 0) {
                 const href = $tab.attr("href").replace(/.*(?=#[^\s]+$)/, "");
                 const index = href.replace("#tab-" + tabsetId2 + "-", "");
@@ -7464,7 +7616,7 @@ ${duplicateIdMsg}`;
           }
           function getDropdown() {
             if (message.menuName !== null) {
-              const $dropdownATag = (0, import_jquery39.default)(
+              const $dropdownATag = (0, import_jquery40.default)(
                 "a.dropdown-toggle[data-value='" + $escape(message.menuName) + "']"
               );
               if ($dropdownATag.length === 0) {
@@ -7488,7 +7640,7 @@ ${duplicateIdMsg}`;
         const inputBinding = $tabset.data("shiny-input-binding");
         if (!inputBinding.getValue($tabset)) {
           const destTabValue = getFirstTab($tabset);
-          const evt = import_jquery39.default.Event("shiny:updateinput");
+          const evt = import_jquery40.default.Event("shiny:updateinput");
           evt.binding = inputBinding;
           $tabset.trigger(evt);
           inputBinding.setValue($tabset[0], destTabValue);
@@ -7498,18 +7650,18 @@ ${duplicateIdMsg}`;
         return $ul.find("li:visible a[data-toggle='tab']").first().attr("data-value") || null;
       }
       function tabApplyFunction(target, func, liTags = false) {
-        import_jquery39.default.each(target, function(key, el) {
+        import_jquery40.default.each(target, function(key, el) {
           if (key === "$liTag") {
             func(el);
           } else if (key === "$divTags") {
-            import_jquery39.default.each(
+            import_jquery40.default.each(
               el,
               function(i5, div) {
                 func(div);
               }
             );
           } else if (liTags && key === "$liTags") {
-            import_jquery39.default.each(
+            import_jquery40.default.each(
               el,
               function(i5, div) {
                 func(div);
@@ -7572,7 +7724,7 @@ ${duplicateIdMsg}`;
           refreshResumeStashUrl();
           if (message.queryString.indexOf("#") !== -1) what = "hash";
           if (window.location.hash !== oldHash) what = "hash";
-          if (what === "hash") (0, import_jquery39.default)(document).trigger("hashchange");
+          if (what === "hash") (0, import_jquery40.default)(document).trigger("hashchange");
         }
       );
       addMessageHandler(
@@ -7627,7 +7779,7 @@ ${duplicateIdMsg}`;
       this.renderHtmlAsync = renderHtmlAsync;
       this.renderHtml = renderHtml2;
       this.initializedPromise = createInitStatus();
-      (0, import_jquery40.default)(() => {
+      (0, import_jquery41.default)(() => {
         setTimeout(async () => {
           try {
             await this.initialize();
@@ -7677,6 +7829,42 @@ ${duplicateIdMsg}`;
       this.forgetLastInputValue = function(name) {
         inputsNoResend.forget(name);
       };
+      const warnInDevMode = (message, error) => {
+        if (isShinyInDevMode()) console.warn("[shiny] " + message, error);
+      };
+      const resendBoundInputs = () => {
+        (0, import_jquery41.default)(".shiny-bound-input").each(function() {
+          try {
+            const binding = (0, import_jquery41.default)(this).data("shiny-input-binding");
+            const id = binding.getId(this);
+            const type = binding.getType(this);
+            if (!id || type === "shiny.file") return;
+            inputs.setInput(type ? id + ":" + type : id, binding.getValue(this), {
+              priority: "immediate",
+              binding,
+              el: this
+            });
+          } catch (error) {
+            warnInDevMode("Could not re-send input '" + this.id + "'", error);
+          }
+        });
+      };
+      shinyapp.$applyResumedInputs = async (values) => {
+        await applyPushedInputs(values, {
+          lookup: (id) => {
+            const $el = (0, import_jquery41.default)(".shiny-bound-input#" + $escape(id));
+            if ($el.length === 0) return null;
+            return {
+              binding: $el.data("shiny-input-binding"),
+              el: $el[0],
+              dataType: $el.data("data-type")
+            };
+          },
+          remember: (nameType, value) => inputsNoResend.remember(nameType, value),
+          resendAll: resendBoundInputs,
+          log: warnInDevMode
+        });
+      };
       const inputBindings = this.inputBindings;
       const outputBindings = this.outputBindings;
       const shinyBindCtx = () => {
@@ -7702,7 +7890,7 @@ ${duplicateIdMsg}`;
           const inputObjects = binding.find(scope);
           if (inputObjects) {
             for (let j2 = 0; j2 < inputObjects.length; j2++) {
-              const $inputObjectJ = (0, import_jquery40.default)(inputObjects[j2]);
+              const $inputObjectJ = (0, import_jquery41.default)(inputObjects[j2]);
               if (!$inputObjectJ.data("_shiny_initialized")) {
                 $inputObjectJ.data("_shiny_initialized", true);
                 binding.initialize(inputObjects[j2]);
@@ -7713,7 +7901,7 @@ ${duplicateIdMsg}`;
       }
       this.initializeInputs = initializeInputs;
       function getIdFromEl(el) {
-        const $el = (0, import_jquery40.default)(el);
+        const $el = (0, import_jquery41.default)(el);
         const bindingAdapter = $el.data("shiny-output-binding");
         return bindingAdapter ? bindingAdapter.getId() : null;
       }
@@ -7739,7 +7927,7 @@ ${duplicateIdMsg}`;
         }
       }
       function doTriggerResize(el) {
-        const $el = (0, import_jquery40.default)(el), binding = $el.data("shiny-output-binding");
+        const $el = (0, import_jquery41.default)(el), binding = $el.data("shiny-output-binding");
         if (!binding) return;
         $el.trigger({
           type: "shiny:visualchange",
@@ -7828,7 +8016,7 @@ ${duplicateIdMsg}`;
         if (reportsTheme(el)) doSendTheme(el, initial);
       }
       function refreshThemeOutputs(initial = false) {
-        (0, import_jquery40.default)(".shiny-bound-output").each(function() {
+        (0, import_jquery41.default)(".shiny-bound-output").each(function() {
           const el = this;
           if (reportsTheme(el)) doSendTheme(el, initial);
         });
@@ -7838,10 +8026,10 @@ ${duplicateIdMsg}`;
           100,
           () => refreshThemeOutputs()
         );
-        (0, import_jquery40.default)(window).resize(function() {
+        (0, import_jquery41.default)(window).resize(function() {
           scheduleThemeInfoRefresh();
         });
-        (0, import_jquery40.default)(document).on("shiny:themechange", function() {
+        (0, import_jquery41.default)(document).on("shiny:themechange", function() {
           scheduleThemeInfoRefresh();
         });
       }
@@ -7862,7 +8050,7 @@ ${duplicateIdMsg}`;
         return el;
       }
       function ensureObservers(el) {
-        const $el = (0, import_jquery40.default)(el);
+        const $el = (0, import_jquery41.default)(el);
         if (!$el.data("shiny-resize-observer")) {
           const onResize = sendOutputInfoFns.createObserverCallback(
             100,
@@ -7898,7 +8086,7 @@ ${duplicateIdMsg}`;
       }
       function doSendOutputInfo(initial = false) {
         const outputIds = /* @__PURE__ */ new Set();
-        (0, import_jquery40.default)(".shiny-bound-output").each(function() {
+        (0, import_jquery41.default)(".shiny-bound-output").each(function() {
           const el = this;
           const id = getIdFromEl(el);
           if (id) outputIds.add(id);
@@ -7916,7 +8104,7 @@ ${duplicateIdMsg}`;
       sendOutputInfoFns.setSendMethod(inputBatchSender, doSendOutputInfo);
       registerThemeRefreshSignals();
       initialValues[".clientdata_pixelratio"] = pixelRatio();
-      (0, import_jquery40.default)(window).resize(function() {
+      (0, import_jquery41.default)(window).resize(function() {
         inputs.setInput(".clientdata_pixelratio", pixelRatio());
       });
       initialValues[".clientdata_url_protocol"] = window.location.protocol;
@@ -7924,31 +8112,31 @@ ${duplicateIdMsg}`;
       initialValues[".clientdata_url_port"] = window.location.port;
       initialValues[".clientdata_url_pathname"] = window.location.pathname;
       initialValues[".clientdata_url_search"] = window.location.search;
-      (0, import_jquery40.default)(window).on("pushstate", function(e4) {
+      (0, import_jquery41.default)(window).on("pushstate", function(e4) {
         inputs.setInput(".clientdata_url_search", window.location.search);
         return;
         e4;
       });
-      (0, import_jquery40.default)(window).on("popstate", function(e4) {
+      (0, import_jquery41.default)(window).on("popstate", function(e4) {
         inputs.setInput(".clientdata_url_search", window.location.search);
         return;
         e4;
       });
       initialValues[".clientdata_url_hash_initial"] = window.location.hash;
       initialValues[".clientdata_url_hash"] = window.location.hash;
-      (0, import_jquery40.default)(window).on("hashchange", function(e4) {
+      (0, import_jquery41.default)(window).on("hashchange", function(e4) {
         inputs.setInput(".clientdata_url_hash", window.location.hash);
         return;
         e4;
       });
-      const singletonText = initialValues[".clientdata_singletons"] = (0, import_jquery40.default)(
+      const singletonText = initialValues[".clientdata_singletons"] = (0, import_jquery41.default)(
         'script[type="application/shiny-singletons"]'
       ).text();
       registerNames(singletonText.split(/,/));
-      const dependencyText = (0, import_jquery40.default)(
+      const dependencyText = (0, import_jquery41.default)(
         'script[type="application/html-dependencies"]'
       ).text();
-      import_jquery40.default.each(dependencyText.split(/;/), function(i5, depStr) {
+      import_jquery41.default.each(dependencyText.split(/;/), function(i5, depStr) {
         const match = /\s*^(.+)\[(.+)\]\s*$/.exec(depStr);
         if (match) {
           registerDependency(match[1], match[2]);
@@ -7978,10 +8166,10 @@ ${duplicateIdMsg}`;
         if (decision?.kind === "resume") shinyapp.$resumeFromPage(decision.token);
         connect();
       }
-      (0, import_jquery40.default)(document).one("shiny:connected", () => {
+      (0, import_jquery41.default)(document).one("shiny:connected", () => {
         initDeferredIframes();
       });
-      (0, import_jquery40.default)(document).one("shiny:sessioninitialized", () => {
+      (0, import_jquery41.default)(document).one("shiny:sessioninitialized", () => {
         this.initializedPromise.resolve();
       });
     }
@@ -8001,8 +8189,8 @@ ${duplicateIdMsg}`;
     ) {
       return;
     }
-    (0, import_jquery40.default)(".shiny-frame-deferred").each(function(i5, el) {
-      const $el = (0, import_jquery40.default)(el);
+    (0, import_jquery41.default)(".shiny-frame-deferred").each(function(i5, el) {
+      const $el = (0, import_jquery41.default)(el);
       $el.removeClass("shiny-frame-deferred");
       $el.attr("src", $el.attr("data-deferred-src"));
       $el.attr("data-deferred-src", null);
@@ -8015,19 +8203,19 @@ ${duplicateIdMsg}`;
   }
 
   // srcts/src/shiny/reactlog.ts
-  var import_jquery41 = __toESM(require_jquery());
+  var import_jquery42 = __toESM(require_jquery());
   function shinyAppConfig() {
     return shinyShinyApp().config;
   }
   function initReactlog() {
-    (0, import_jquery41.default)(document).on("keydown", function(e4) {
+    (0, import_jquery42.default)(document).on("keydown", function(e4) {
       if (e4.which !== 114 || !e4.ctrlKey && !e4.metaKey || e4.shiftKey || e4.altKey)
         return;
       const url = "reactlog?w=" + window.escape(shinyAppConfig().workerId) + "&s=" + window.escape(shinyAppConfig().sessionId);
       window.open(url);
       e4.preventDefault();
     });
-    (0, import_jquery41.default)(document).on("keydown", function(e4) {
+    (0, import_jquery42.default)(document).on("keydown", function(e4) {
       if (
         // if not one of the key combos below
         !// cmd/ctrl + fn + f4
@@ -8037,7 +8225,7 @@ ${duplicateIdMsg}`;
         return;
       }
       const url = "reactlog/mark?w=" + window.escape(shinyAppConfig().workerId) + "&s=" + window.escape(shinyAppConfig().sessionId);
-      import_jquery41.default.get(url, function(result) {
+      import_jquery42.default.get(url, function(result) {
         if (result !== "marked") return;
         const html = '<span id="shiny-reactlog-mark-text">Marked time point in reactlog</span>';
         show2({

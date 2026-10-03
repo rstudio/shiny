@@ -52,6 +52,7 @@ import {
   renderHtmlAsync,
 } from "./render";
 import { showResumeAskDialog } from "./resumeAskDialog";
+import { applyPushedInputs } from "./resumePush";
 import {
   discardResumeStash,
   takeLoadDecision,
@@ -215,6 +216,50 @@ class ShinyClass {
     // is a dupe of the existing value.
     this.forgetLastInputValue = function (name) {
       inputsNoResend.forget(name);
+    };
+
+    const warnInDevMode = (message: string, error: unknown): void => {
+      if (isShinyInDevMode()) console.warn("[shiny] " + message, error);
+    };
+
+    // Re-read every bound input after a push and send it through the normal
+    // pipeline. File inputs are skipped: the browser cannot re-send a file
+    // and the server's value stands. A binding that throws skips only itself.
+    const resendBoundInputs = (): void => {
+      $(".shiny-bound-input").each(function () {
+        try {
+          const binding: InputBinding = $(this).data("shiny-input-binding");
+          const id = binding.getId(this);
+          const type = binding.getType(this);
+
+          if (!id || type === "shiny.file") return;
+          inputs.setInput(type ? id + ":" + type : id, binding.getValue(this), {
+            priority: "immediate",
+            binding,
+            el: this,
+          });
+        } catch (error) {
+          warnInDevMode("Could not re-send input '" + this.id + "'", error);
+        }
+      });
+    };
+
+    shinyapp.$applyResumedInputs = async (values) => {
+      await applyPushedInputs(values, {
+        lookup: (id) => {
+          const $el = $(".shiny-bound-input#" + $escape(id));
+
+          if ($el.length === 0) return null;
+          return {
+            binding: $el.data("shiny-input-binding"),
+            el: $el[0],
+            dataType: $el.data("data-type"),
+          };
+        },
+        remember: (nameType, value) => inputsNoResend.remember(nameType, value),
+        resendAll: resendBoundInputs,
+        log: warnInDevMode,
+      });
     };
 
     // MUST be called after `setShiny()`

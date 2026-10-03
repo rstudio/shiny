@@ -10,7 +10,13 @@ import type {
 } from "../events/shinyEvents";
 import type { UploadEndValue, UploadInitValue } from "../file/fileProcessor";
 import { resetBrush } from "../imageutils/resetBrush";
-import { $escape, hasOwnProperty, randomId, scopeExprToFunc } from "../utils";
+import {
+  $escape,
+  hasOwnProperty,
+  isShinyInDevMode,
+  randomId,
+  scopeExprToFunc,
+} from "../utils";
 import { AsyncQueue } from "../utils/asyncQueue";
 import { isQt } from "../utils/browser";
 import { indirectEval } from "../utils/eval";
@@ -29,14 +35,19 @@ import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
 import { retryDecision } from "./reconnectGate";
 import type { HtmlDep } from "./render";
 import { renderContentAsync, renderHtmlAsync } from "./render";
+import type { PushedInputs } from "./resumePush";
 import type { ReloadMode } from "./resumeStash";
 import {
+  CrashLoopTracker,
+  crashLoopWindowMs,
   discardResumeStash,
   markResumeStashServerInitiated,
   refreshResumeStashUrl,
   startFresh,
   syncResumeStash,
+  updateResumeFailures,
 } from "./resumeStash";
+import { showResumedToast } from "./resumeToast";
 import type { WherePosition } from "./singletons";
 
 import { OutputProgressReporter } from "./outputProgress";
@@ -187,8 +198,17 @@ class ShinyApp {
   private $reconnecting = false;
 
   // True for the first socket of a reloaded page that resumes its tab's
-  // session (read by the `resumed` handler in Task 10).
+  // session (read by the `resumed` handler).
   private $resumedFresh = false;
+
+  // Set by ShinyClass.initialize(): applies `resumed.inputs` through the
+  // input bindings and re-sends the bound inputs.
+  $applyResumedInputs: ((values: PushedInputs) => Promise<void>) | null = null;
+
+  private $crashLoop = new CrashLoopTracker(() => Date.now());
+
+  // `inputs` arrives as a sibling key of `resumed`; handlers see one key each.
+  private $pendingPushedInputs: PushedInputs | null = null;
 
   // Set when a `fatalError` arrives: the dialog, not the retry loop, decides
   // what happens next (Task 11).
@@ -356,6 +376,18 @@ class ShinyApp {
     // Called when a successfully-opened websocket is closed, or when an
     // attempt to open a connection fails.
     socket.onclose = (e) => {
+      // A resumed page that dies within ten seconds counts toward the
+      // crash-loop guard; a clean close (1000) or a navigation (1001) does not.
+      try {
+        if (e.code !== 1000 && e.code !== 1001 && this.$crashLoop.closed()) {
+          updateResumeFailures((n) => n + 1);
+        }
+      } catch (error) {
+        if (isShinyInDevMode()) {
+          console.warn("[shiny] Could not count the failed resume", error);
+        }
+      }
+
       const restarting = e.code === 1012; // Uvicorn sets this code when autoreloading
       // These things are needed only if we've successfully opened the
       // websocket.
@@ -967,6 +999,58 @@ class ShinyApp {
         $(document).trigger("shiny:sessioninitialized");
       },
     );
+
+    // Registered before `resumed`: handlers run in registration order, not key
+    // order, and `inputs` must be stashed before `resumed` applies it.
+    addMessageHandler("inputs", (message: PushedInputs) => {
+      this.$pendingPushedInputs = message;
+    });
+
+    addMessageHandler("resumed", async (message: "snapshot" | "inputs") => {
+      this.reconnectDelay.reset();
+      const pushed = this.$pendingPushedInputs;
+      const fresh = this.$resumedFresh;
+
+      this.$pendingPushedInputs = null;
+      this.$resumedFresh = false;
+      if (pushed && this.$applyResumedInputs) {
+        // A failed push degrades to an unrestored widget; shiny:resumed still fires.
+        try {
+          await this.$applyResumedInputs(pushed);
+        } catch (error) {
+          if (isShinyInDevMode()) {
+            console.warn("[shiny] Could not restore the inputs", error);
+          }
+        }
+      }
+      if (fresh && message === "snapshot") {
+        this.$crashLoop.resumed();
+        window.setTimeout(() => {
+          try {
+            if (this.$crashLoop.survived()) updateResumeFailures(() => 0);
+          } catch (error) {
+            if (isShinyInDevMode()) {
+              console.warn(
+                "[shiny] Could not clear the resume failures",
+                error,
+              );
+            }
+          }
+        }, crashLoopWindowMs);
+        if (this.$resumeReload === "resume") {
+          showResumedToast(() => this.$startFresh()).catch((error: unknown) => {
+            if (isShinyInDevMode()) {
+              console.warn("[shiny] Could not show the resumed toast", error);
+            }
+          });
+        }
+      }
+      $(document).trigger({
+        type: "shiny:resumed",
+        // @ts-expect-error; Can not remove info on a established, malformed Event object
+        resumed: message,
+      });
+    });
 
     addMessageHandler("busy", (message: "busy" | "idle") => {
       if (message === "busy") {

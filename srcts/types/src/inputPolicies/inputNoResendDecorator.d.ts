@@ -11,5 +11,6 @@ declare class InputNoResendDecorator implements InputPolicy {
     setInput(nameType: string, value: unknown, opts: InputPolicyOpts): void;
     reset(values?: LastSentValues): void;
     forget(name: string): void;
+    remember(nameType: string, value: unknown): void;
 }
 export { InputNoResendDecorator };

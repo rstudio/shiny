@@ -8,7 +8,6 @@ test_that("the store writes owner-only files, reads them back, and reports missi
   key <- snapshot_record_key(snapshot_token_new())
   store$write(key, list(a = 1))
   expect_identical(store$read(key), list(a = 1))
-  expect_true(store$exists(key))
   expect_null(store$read(snapshot_record_key(snapshot_token_new())))
 })
 

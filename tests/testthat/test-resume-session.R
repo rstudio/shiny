@@ -251,7 +251,7 @@ test_that("session$reload() discards the saved state, stops writing and sends re
   live <- live_session(counter_app(new_spy("obs", "txt")), outputs = "n")
   s <- live$session
   s$.snapshotRegistry$writeNow()
-  key <- s$.snapshotRegistry$storeKey()
+  key <- live_key(live)
   expect_false(is.null(snapshot_store()$read(key)))
   s$reload()
   expect_identical(sent_of(live$ws, "reload")[[1]]$reload, "fresh")
@@ -269,7 +269,7 @@ test_that("@discardSnapshot deletes the record and stops further writes; @unload
   local_snapshot_store_dir()
   live <- live_session(counter_app(new_spy("obs", "txt")), outputs = "n")
   s <- live$session
-  s$.snapshotRegistry$writeNow(); key <- s$.snapshotRegistry$storeKey()
+  s$.snapshotRegistry$writeNow(); key <- live_key(live)
   expect_true(s$`@discardSnapshot`())
   expect_null(snapshot_store()$read(key))
   s$wsClosed()
@@ -290,7 +290,7 @@ test_that("allowReconnect(FALSE) is the per-session opt-out: still sent, no clos
   live <- live_session(function(input, output, session) { v <- reactiveVal(1) })
   s <- live$session
   s$.snapshotRegistry$writeNow()                      # written before the opt-out
-  key <- s$.snapshotRegistry$storeKey()
+  key <- live_key(live)
   expect_false(is.null(snapshot_store()$read(key)))
   s$allowReconnect(FALSE)
   expect_identical(sent_of(live$ws, "allowReconnect")[[1]]$allowReconnect, FALSE)
@@ -305,7 +305,7 @@ test_that(".endForGood() deletes the record, tells the client once, and an error
   local_snapshot_store_dir()
   live <- live_session(counter_app(new_spy("obs", "txt")), outputs = "n")
   s <- live$session
-  s$.snapshotRegistry$writeNow(); key <- s$.snapshotRegistry$storeKey()
+  s$.snapshotRegistry$writeNow(); key <- live_key(live)
   s$.endForGood(); s$.endForGood()
   expect_null(snapshot_store()$read(key))
   expect_length(sent_of(live$ws, "allowReconnect"), 1)

@@ -18,7 +18,7 @@ test_that("a fatal error pauses the writer, sends fatalError with the message an
   live <- live_session(error_app, outputs = "n", inputs = list(`plus:shiny.action` = 0))
   live_set(live$session, `plus:shiny.action` = 1)
   live$session$.snapshotRegistry$writeNow()
-  key <- live$session$.snapshotRegistry$storeKey()
+  key <- live_key(live)
   crash(live)
   fatal <- sent_of(live$ws, "fatalError")
   expect_length(fatal, 1)

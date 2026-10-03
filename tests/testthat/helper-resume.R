@@ -193,6 +193,9 @@ live_set <- function(s, ...) {
   live_flush(s)
 }
 
+# The store key of the live session's record.
+live_key <- function(live) snapshot_record_key(live$ws$sent()[[1]]$config$resumeToken)
+
 # Closes the live session (its closing write runs) and returns its token.
 live_close <- function(live) {
   live$session$wsClosed()

@@ -185,7 +185,6 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     },
 
     wroteSnapshot = function() private$wrote,
-    storeKey = function() private$key,
 
     # ---- the record ----------------------------------------------------
 

@@ -36,9 +36,6 @@ SnapshotStore <- R6Class("SnapshotStore", cloneable = FALSE,
       value <- private$cache$get(key)
       if (cachem::is.key_missing(value)) NULL else value
     },
-    exists = function(key) {
-      private$cache$exists(key)
-    },
     delete = function(key) {
       private$cache$remove(key)
       unlink(self$filesDir(key), recursive = TRUE)

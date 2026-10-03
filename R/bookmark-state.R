@@ -388,6 +388,18 @@ RestoreContext <- R6Class("RestoreContext",
   )
 )
 
+# The RestoreContext a reconnecting session starts with (the `resume`
+# message, see srcts/PROTOCOL.md): the client's own inputs, so
+# restoreInput()-aware UI keeps its values, and inactive, so onRestore() /
+# onRestored() do not fire and the URL's bookmark is not restored over
+# inputs the user has changed since.
+reconnectRestoreContext <- function(inputs) {
+  ctx <- RestoreContext$new()
+  nms <- names(inputs) %||% character(0)
+  ctx$set(active = FALSE, input = inputs[!grepl("^\\.clientdata_", nms)])
+  ctx
+}
+
 
 # Restore input set. This is basically a key-value store, except for one
 # important difference: When the user `get()`s a value, the value is marked as

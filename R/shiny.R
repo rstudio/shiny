@@ -97,16 +97,18 @@ workerId <- local({
 #'
 #' @return
 #' \item{allowReconnect(value)}{
-#'   If `value` is `TRUE` and run in a hosting environment (Shiny
-#'   Server or Connect) with reconnections enabled,  then when the session ends
-#'   due to the network connection closing, the client will attempt to
-#'   reconnect to the server. If a reconnection is successful, the browser will
-#'   send all the current input values to the new session on the server, and
-#'   the server will recalculate any outputs and send them back to the client.
-#'   If `value` is `FALSE`, reconnections will be disabled (this is
-#'   the default state). If `"force"`, then the client browser will always
-#'   attempt to reconnect. The only reason to use `"force"` is for testing
-#'   on a local connection (without Shiny Server or Connect).
+#'   Whether the browser should try to reconnect when its connection to the
+#'   server is lost. If `value` is `TRUE`, the client retries for about a
+#'   minute (ten attempts with growing delays), on any server. If a retry
+#'   gets through, a new session starts on the server with the client's
+#'   current input values filled back in: `renderUI()` content that uses
+#'   [restoreInput()] keeps its values, every output recomputes, and
+#'   observers run as they do when a session starts (an `observeEvent()` on
+#'   an action button fires once with the button's replayed count). Nothing
+#'   else carries over: `reactiveVal()` and `reactiveValues()` start from
+#'   their initial values. If `value` is `FALSE` (the default), the client
+#'   does not retry. `"force"` behaves exactly like `TRUE`; earlier versions
+#'   needed it to retry outside Shiny Server and Posit Connect.
 #' }
 #' \item{clientData}{
 #'   A [reactiveValues()] object that contains information about the client.

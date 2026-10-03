@@ -6124,6 +6124,37 @@ ${duplicateIdMsg}`;
     }
   };
 
+  // srcts/src/shiny/reconnectDelay.ts
+  var delays = [1500, 1500, 2500, 2500, 5500, 5500, 10500];
+  var maxAttempts = 10;
+  var ReconnectDelay = class {
+    constructor() {
+      this.attempts = 0;
+    }
+    // The delay for the next attempt; counts the attempt.
+    next() {
+      const i5 = Math.min(this.attempts, delays.length - 1);
+      this.attempts++;
+      return delays[i5];
+    }
+    exhausted() {
+      return this.attempts >= maxAttempts;
+    }
+    // Called when the server answers (`config` or `values`), never on socket open.
+    reset() {
+      this.attempts = 0;
+    }
+  };
+
+  // srcts/src/shiny/reconnectGate.ts
+  function retryDecision({
+    allow,
+    exhausted
+  }) {
+    if (!(allow === true || allow === "force")) return "never";
+    return exhausted ? "stop" : "retry";
+  }
+
   // srcts/src/shiny/outputProgress.ts
   var _OutputProgressReporter_instances, updateStateFromRecalculating_fn, updateStateFromFlush_fn, updateStateFromProgress_fn, updateStateFromValueOrError_fn, getState_fn, setState_fn;
   var OutputProgressReporter = class {
@@ -6365,28 +6396,13 @@ ${duplicateIdMsg}`;
       this.$activeRequests = {};
       this.$nextRequestId = 0;
       this.$allowReconnect = false;
+      // True once reconnect() has been called: every socket after the first
+      // belongs to a reconnect and opens with `resume` instead of `init`.
+      this.$reconnecting = false;
       this.scheduledReconnect = void 0;
-      // How long should we wait before trying the next reconnection?
-      // The delay will increase with subsequent attempts.
-      // .next: Return the time to wait for next connection, and increment counter.
-      // .reset: Reset the attempt counter.
-      this.reconnectDelay = /* @__PURE__ */ function() {
-        let attempts = 0;
-        const delays = [1500, 1500, 2500, 2500, 5500, 5500, 10500];
-        return {
-          next: function() {
-            let i5 = attempts;
-            if (i5 >= delays.length) {
-              i5 = delays.length - 1;
-            }
-            attempts++;
-            return delays[i5];
-          },
-          reset: function() {
-            attempts = 0;
-          }
-        };
-      }();
+      // How long to wait before the next reconnection attempt, and whether the
+      // attempts have run out. Reset when the server answers, not on socket open.
+      this.reconnectDelay = new ReconnectDelay();
       // Progress reporting ====================================================
       this.progressHandlers = {
         // Progress for a particular object
@@ -6503,6 +6519,7 @@ ${duplicateIdMsg}`;
       if (this.isConnected())
         throw "Attempted to reconnect, but already connected.";
       this.$outputProgress.reset();
+      this.$reconnecting = true;
       this.$socket = this.createSocket();
       this.$initialInput = import_jquery39.default.extend({}, this.$inputValues);
       this.$updateConditionals();
@@ -6537,10 +6554,9 @@ ${duplicateIdMsg}`;
         });
         this.onConnected();
         socket.send(
-          JSON.stringify({
-            method: "init",
-            data: this.$initialInput
-          })
+          JSON.stringify(
+            this.$reconnecting ? { method: "resume", data: { inputs: this.$initialInput } } : { method: "init", data: this.$initialInput }
+          )
         );
         while (this.$pendingMessages.length) {
           const msg = this.$pendingMessages.shift();
@@ -6604,16 +6620,21 @@ ${duplicateIdMsg}`;
         (0, import_jquery39.default)(document.body).append('<div id="shiny-disconnected-overlay"></div>');
       }
       (0, import_jquery39.default)("#shiny-disconnected-overlay").toggleClass("reloading", reloading);
-      if (this.$allowReconnect === true && this.$socket.allowReconnect === true || this.$allowReconnect === "force") {
+      const decision = retryDecision({
+        allow: this.$allowReconnect,
+        exhausted: this.reconnectDelay.exhausted()
+      });
+      if (decision === "retry") {
         const delay = this.reconnectDelay.next();
         showReconnectDialog(delay);
         this.$scheduleReconnect(delay);
+      } else if (decision === "stop") {
+        hideReconnectDialog();
       }
     }
     onConnected() {
       (0, import_jquery39.default)("#shiny-disconnected-overlay").remove();
       hideReconnectDialog();
-      this.reconnectDelay.reset();
     }
     // NB: Including blobs will cause IE to break!
     // TODO: Make blobs work with Internet Explorer
@@ -6853,6 +6874,7 @@ ${duplicateIdMsg}`;
     }
     _init() {
       addMessageHandler("values", async (message) => {
+        this.reconnectDelay.reset();
         this._updateProgress();
         for (const key in message) {
           if (hasOwnProperty(message, key)) {
@@ -6971,6 +6993,7 @@ ${duplicateIdMsg}`;
             sessionId: message.sessionId
           };
           if (message.user) setShinyUser(message.user);
+          this.reconnectDelay.reset();
           (0, import_jquery39.default)(document).trigger("shiny:sessioninitialized");
         }
       );

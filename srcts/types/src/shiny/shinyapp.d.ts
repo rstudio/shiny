@@ -1,6 +1,7 @@
 import type { OutputBindingAdapter } from "../bindings/outputAdapter";
 import type { UploadEndValue, UploadInitValue } from "../file/fileProcessor";
 import { AsyncQueue } from "../utils/asyncQueue";
+import { ReconnectDelay } from "./reconnectDelay";
 import { OutputProgressReporter } from "./outputProgress";
 type ResponseValue = UploadEndValue | UploadInitValue;
 type Handler = (message: any) => Promise<void> | void;
@@ -51,6 +52,7 @@ declare class ShinyApp {
     };
     $nextRequestId: number;
     $allowReconnect: boolean | "force";
+    private $reconnecting;
     constructor();
     connect(initialInput: InputValues): void;
     isConnected(): boolean;
@@ -62,10 +64,7 @@ declare class ShinyApp {
     $notifyDisconnected(): void;
     $removeSocket(): void;
     $scheduleReconnect(delay: Parameters<typeof setTimeout>[1]): void;
-    reconnectDelay: {
-        next: () => number;
-        reset: () => void;
-    };
+    reconnectDelay: ReconnectDelay;
     onDisconnected(reloading?: boolean): void;
     onConnected(): void;
     makeRequest(method: string, args: unknown[], onSuccess: OnSuccessRequest, onError: OnErrorRequest, blobs: Array<ArrayBuffer | Blob | string> | undefined): void;

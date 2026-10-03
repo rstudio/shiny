@@ -1,5 +1,17 @@
 # shiny (development version)
 
+* `session$allowReconnect(TRUE)` now works on any server, not only behind
+  Shiny Server's or Posit Connect's connection layer. When the connection
+  drops, the browser retries for about a minute (ten attempts) and the new
+  session starts with the client's inputs filled back in. `renderUI()`
+  content that calls `restoreInput()` keeps its values across the
+  reconnect, and a bookmark in the page's URL is no longer restored over
+  inputs the user changed since. A reconnecting client's first message is
+  now `resume` rather than `init`; the wire protocol is documented in
+  `srcts/PROTOCOL.md`. Apps that already call `allowReconnect(TRUE)` outside
+  those platforms start retrying, `"force"` behaves exactly like `TRUE`, and
+  retries are bounded everywhere. (#<PR number>)
+
 * Added an agent skill (`inst/skills/shiny-for-r/`) following the
   [Agent Skills](https://agentskills.io) convention. Coding agents using
   [btw](https://posit-dev.github.io/btw/) discover it automatically when

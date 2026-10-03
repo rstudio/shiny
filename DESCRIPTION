@@ -102,6 +102,8 @@ Imports:
     xtable
 Suggests:
     Cairo (>= 1.5-5),
+    callr,
+    chromote,
     coro (>= 1.1.0),
     datasets,
     DT,
@@ -113,6 +115,7 @@ Suggests:
     markdown,
     mirai,
     otelsdk (>= 0.2.0),
+    pkgload,
     ragg,
     reactlog (>= 1.0.0),
     rmarkdown,

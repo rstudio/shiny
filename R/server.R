@@ -203,28 +203,46 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
 
           msg <- decodeMessage(msg)
 
+          # A reconnecting client sends `resume` with everything `init`
+          # carries under `inputs` (srcts/PROTOCOL.md). Bookmark-restore
+          # values the GET path rendered into fileInput()s (`:shiny.file`)
+          # point into a bookmark directory this session does not have, and
+          # a reconnect loses uploads as it always has, so they are dropped.
+          isResume <- identical(msg$method, "resume")
+          if (isResume) {
+            inputs <- msg$data$inputs
+            if (!is.list(inputs)) inputs <- list()
+            inputs <- inputs[!grepl(":shiny\\.file$", names(inputs) %||% character(0))]
+            msg$data <- inputs
+          }
+
           # Set up a restore context from .clientdata_url_search before
           # handling all the input values, because the restore context may be
           # used by an input handler (like the one for "shiny.file"). This
-          # should only happen once, when the app starts.
+          # should only happen once, when the app starts. A resume gets an
+          # empty context here and its seeded one below, after the input
+          # handlers have run.
           if (is.null(shinysession$restoreContext)) {
             bookmarkStore <- getShinyOption("bookmarkStore", default = "disable")
-            if (bookmarkStore == "disable") {
-              # If bookmarking is disabled, use empty context
+            if (bookmarkStore == "disable" || isResume) {
               shinysession$restoreContext <- RestoreContext$new()
             } else {
               # If there's bookmarked state, save it on the session object
               shinysession$restoreContext <- RestoreContext$new(msg$data$.clientdata_url_search)
+            }
+            if (bookmarkStore != "disable") {
+              # Its observers read the restore context when they run, at the
+              # first flush, by which time a resume has seeded its own.
               shinysession$createBookmarkObservers()
             }
           }
-
 
           msg$data <- applyInputHandlers(msg$data)
 
           switch(
             msg$method,
-            init = {
+            init = ,
+            resume = {
 
               serverFunc <- withReactiveDomain(NULL, serverFuncSource())
               if (!identicalFunctionBodies(serverFunc, appvars$server)) {
@@ -246,6 +264,10 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
                 mode <- showcaseModeOfQuerystring(msg$data$.clientdata_url_search)
                 if (!is.null(mode))
                   shinysession$setShowcase(mode)
+              }
+
+              if (isResume) {
+                shinysession$restoreContext <- reconnectRestoreContext(msg$data)
               }
 
               # In shinysession$createBookmarkObservers() above, observers may be

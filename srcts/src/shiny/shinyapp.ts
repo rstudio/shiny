@@ -24,7 +24,9 @@ import {
 } from "./initedMethods";
 import { removeModal, showModal } from "./modal";
 import { removeNotification, showNotification } from "./notifications";
+import { ReconnectDelay } from "./reconnectDelay";
 import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
+import { retryDecision } from "./reconnectGate";
 import type { HtmlDep } from "./render";
 import { renderContentAsync, renderHtmlAsync } from "./render";
 import type { WherePosition } from "./singletons";
@@ -35,6 +37,7 @@ type ResponseValue = UploadEndValue | UploadInitValue;
 type Handler = (message: any) => Promise<void> | void;
 
 type ShinyWebSocket = WebSocket & {
+  // Set by shiny-server-client; no longer consulted (see reconnectGate.ts).
   allowReconnect?: boolean;
 };
 
@@ -157,6 +160,10 @@ class ShinyApp {
 
   $allowReconnect: boolean | "force" = false;
 
+  // True once reconnect() has been called: every socket after the first
+  // belongs to a reconnect and opens with `resume` instead of `init`.
+  private $reconnecting = false;
+
   constructor() {
     this._init();
   }
@@ -186,11 +193,12 @@ class ShinyApp {
     if (this.isConnected())
       throw "Attempted to reconnect, but already connected.";
 
-    // We're about to `init` a new session on the server, which restarts every
+    // We're about to `resume` a new session on the server, which restarts every
     // output's progress lifecycle. Drop the state we accumulated for the
     // previous session so those messages aren't seen as illegal transitions.
     this.$outputProgress.reset();
 
+    this.$reconnecting = true;
     this.$socket = this.createSocket();
     this.$initialInput = $.extend({}, this.$inputValues);
     this.$updateConditionals();
@@ -241,11 +249,14 @@ class ShinyApp {
 
       this.onConnected();
 
+      // A reconnecting client says so, so the server seeds restoreInput()
+      // from these inputs instead of the URL's bookmark. See srcts/PROTOCOL.md.
       socket.send(
-        JSON.stringify({
-          method: "init",
-          data: this.$initialInput,
-        }),
+        JSON.stringify(
+          this.$reconnecting
+            ? { method: "resume", data: { inputs: this.$initialInput } }
+            : { method: "init", data: this.$initialInput },
+        ),
       );
 
       while (this.$pendingMessages.length) {
@@ -325,34 +336,9 @@ class ShinyApp {
     }, delay);
   }
 
-  // How long should we wait before trying the next reconnection?
-  // The delay will increase with subsequent attempts.
-  // .next: Return the time to wait for next connection, and increment counter.
-  // .reset: Reset the attempt counter.
-  reconnectDelay = (function () {
-    let attempts = 0;
-    // Time to wait before each reconnection attempt. If we go through all of
-    // these values, repeated use the last one. Add 500ms to each one so that
-    // in the last 0.5s, it shows "..."
-    const delays = [1500, 1500, 2500, 2500, 5500, 5500, 10500];
-
-    return {
-      next: function () {
-        let i = attempts;
-        // Instead of going off the end, use the last one
-
-        if (i >= delays.length) {
-          i = delays.length - 1;
-        }
-
-        attempts++;
-        return delays[i];
-      },
-      reset: function () {
-        attempts = 0;
-      },
-    };
-  })();
+  // How long to wait before the next reconnection attempt, and whether the
+  // attempts have run out. Reset when the server answers, not on socket open.
+  reconnectDelay = new ReconnectDelay();
 
   onDisconnected(reloading = false): void {
     // Add gray-out overlay, if not already present
@@ -361,27 +347,27 @@ class ShinyApp {
     }
     $("#shiny-disconnected-overlay").toggleClass("reloading", reloading);
 
-    // To try a reconnect, both the app (this.$allowReconnect) and the
-    // server (this.$socket.allowReconnect) must allow reconnections, or
-    // session$allowReconnect("force") was called. The "force" option should
-    // only be used for testing.
-    if (
-      (this.$allowReconnect === true &&
-        this.$socket!.allowReconnect === true) ||
-      this.$allowReconnect === "force"
-    ) {
+    // srcts/PROTOCOL.md, "Client retry rule". After the last attempt the
+    // overlay stays and the notification goes.
+    const decision = retryDecision({
+      allow: this.$allowReconnect,
+      exhausted: this.reconnectDelay.exhausted(),
+    });
+
+    if (decision === "retry") {
       const delay = this.reconnectDelay.next();
 
       /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
       showReconnectDialog(delay);
       this.$scheduleReconnect(delay);
+    } else if (decision === "stop") {
+      hideReconnectDialog();
     }
   }
 
   onConnected(): void {
     $("#shiny-disconnected-overlay").remove();
     hideReconnectDialog();
-    this.reconnectDelay.reset();
   }
 
   // NB: Including blobs will cause IE to break!
@@ -725,6 +711,7 @@ class ShinyApp {
     // * However, `_sendMessagesToHandlers()` will adjust the `this` context to the same _`this`_.
 
     addMessageHandler("values", async (message: { [key: string]: any }) => {
+      this.reconnectDelay.reset();
       this._updateProgress();
 
       for (const key in message) {
@@ -879,6 +866,7 @@ class ShinyApp {
           sessionId: message.sessionId,
         };
         if (message.user) setShinyUser(message.user);
+        this.reconnectDelay.reset();
         $(document).trigger("shiny:sessioninitialized");
       },
     );

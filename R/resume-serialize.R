@@ -95,7 +95,7 @@ snapshot_walk <- function(x, path, depth, budget) {
   if (inherits(x, snapshot_serializable_classes)) return(NULL)
   if (is.function(x) || typeof(x) %in% c("externalptr", "weakref", "bytecode")) return(path)
   if (inherits(x, "connection")) return(path)
-  if (inherits(x, "promise")) return(path)
+  if (inherits(x, c("promise", "reactivevalues"))) return(path)
   if (is.environment(x)) return(if (snapshot_special_env(x)) NULL else path)
 
   attrs <- attributes(x)
@@ -115,10 +115,13 @@ snapshot_walk <- function(x, path, depth, budget) {
   }
   if (is.atomic(x)) return(NULL)
   if (is.list(x) || is.pairlist(x)) {
+    # Classed lists (POSIXlt, numeric_version, reactivevalues) define names(),
+    # length() and [[ methods that recurse, throw, or need a reactive context.
+    x <- unclass(x)
     nms <- names(x)
     for (i in seq_along(x)) {
       sub <- if (!is.null(nms) && nzchar(nms[[i]])) paste0(path, "$", nms[[i]]) else paste0(path, "[[", i, "]]")
-      hit <- snapshot_walk(x[[i]], sub, depth + 1L, budget)
+      hit <- snapshot_walk(.subset2(x, i), sub, depth + 1L, budget)
       if (!is.null(hit)) return(hit)
     }
   }

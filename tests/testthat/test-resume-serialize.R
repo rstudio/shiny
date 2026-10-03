@@ -55,6 +55,15 @@ test_that("the walk fails closed past the element budget, and atomic vectors are
   expect_null(snapshot_unserializable_path(big_df))
 })
 
+test_that("the walk does not dispatch on the value's class", {
+  expect_null(snapshot_unserializable_path(as.POSIXlt("2026-01-01 12:00:00", tz = "UTC")))
+  expect_null(snapshot_unserializable_path(utils::packageVersion("base")))
+  registerS3method("[[", "resume_test_throws", function(x, i) stop("no [[ here"))
+  registerS3method("names", "resume_test_throws", function(x) stop("no names here"))
+  expect_null(snapshot_unserializable_path(structure(list(a = 1), class = "resume_test_throws")))
+  expect_identical(snapshot_unserializable_path(list(rv = reactiveValues(a = 1))), "value$rv")
+})
+
 test_that("serialized size is measured as bytes", {
   expect_identical(snapshot_serialized_size(raw(100)), length(serialize(raw(100), NULL, xdr = FALSE)))
 })

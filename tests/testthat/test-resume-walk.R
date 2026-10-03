@@ -85,3 +85,34 @@ test_that("resumeReport() groups by reason when printed and is empty with resume
     expect_identical(nrow(off$resumeReport()), 0L)
   })
 })
+
+test_that("a reactiveValues() in userData is reported, not fatal to the record", {
+  s <- snapshot_session(function(input, output, session) {
+    session$userData$events <- reactiveValues(click = NULL)
+    v <- reactiveVal(1)
+  })
+  rec <- s$.snapshotRegistry$snapshot()
+  expect_true(rec$complete)
+  expect_null(rec$userData$events)
+  expect_identical(rec$report$reason[rec$report$label == "events"], "value is not serializable: value")
+})
+
+test_that("an error while recording one value blocks that value, not the record", {
+  s <- snapshot_session(function(input, output, session) {
+    bad <- reactiveVal("explodes")
+    good <- reactiveVal(1)
+    session$userData$bad <- "explodes"
+    session$userData$good <- 2
+  })
+  walk <- snapshot_unserializable_path
+  local_mocked_bindings(snapshot_unserializable_path = function(x, ...) {
+    if (identical(x, "explodes")) stop("boom")
+    walk(x, ...)
+  })
+  rec <- s$.snapshotRegistry$snapshot()
+  expect_false(rec$complete)
+  expect_identical(rec$blocked, list(list(id = "|reactiveVal|bad", reason = "could not be checked: boom")))
+  expect_identical(names(rec$sources), "|reactiveVal|good")
+  expect_identical(rec$userData, list(good = 2))
+  expect_identical(rec$report$reason[rec$report$kind == "userData" & rec$report$label == "bad"], "could not be checked: boom")
+})

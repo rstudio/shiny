@@ -110,7 +110,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     # (re)schedules the write; the wait is capped at ten quiet intervals from
     # the first unsaved change so a session that never goes quiet still writes.
     scheduleWrite = function() {
-      if (!private$changedSinceSchedule || private$writeFailed || !self$writerEnabled()) return(invisible())
+      if (!private$changedSinceSchedule || !self$writerEnabled()) return(invisible())
       private$changedSinceSchedule <- FALSE
       private$cancelPendingWrite()
       waited <- private$session$.now() - private$firstDirtyAt
@@ -123,7 +123,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     },
 
     # Serializes and writes now if the gate allows; never throws. A failure
-    # is logged once per session.
+    # is logged once per session, and later writes are still attempted.
     writeNow = function() {
       private$cancelPendingWrite()
       ok <- tryCatch({
@@ -135,8 +135,8 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
         private$store$write(private$key, rec)
         TRUE
       }, error = function(e) {
-        if (!private$writeFailed) {
-          private$writeFailed <- TRUE
+        if (!private$writeFailureLogged) {
+          private$writeFailureLogged <- TRUE
           message("Saved state could not be written: ", conditionMessage(e))
         }
         FALSE
@@ -204,7 +204,8 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
           if (!identical(st$skipReason, "internal")) addRow(entry$kind, entry$label, entry$ns, FALSE, st$skipReason)
           next
         }
-        res <- private$sourceRecord(entry, maxNode)
+        res <- tryCatch(private$sourceRecord(entry, maxNode),
+          error = function(e) list(reason = snapshot_check_failed(e)))
         if (is.null(res$reason)) {
           sources[[id]] <- res$record
           sizes[[id]] <- res$size
@@ -392,7 +393,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     # writer
     store = NULL, key = NULL, gate = NULL, debounceMs = 1000,
     dirty = FALSE, firstDirtyAt = NULL, changedSinceSchedule = FALSE,
-    cancelWrite = NULL, writeFailed = FALSE, wrote = FALSE, pausedFlag = FALSE,
+    cancelWrite = NULL, writeFailureLogged = FALSE, wrote = FALSE, pausedFlag = FALSE,
 
     # resuming
     phase = "idle",      # "idle" | "constructing" (server function running) | "restoring" (verified; first flush)
@@ -483,13 +484,19 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       out <- list()
       for (name in ls(ud, all.names = TRUE)) {
         value <- get(name, envir = ud, inherits = FALSE)
-        hit <- snapshot_unserializable_path(value)
-        if (!is.null(hit)) { addRow("userData", name, "", FALSE, private$walkReason(hit)); next }
-        if (snapshot_serialized_size(value) > maxNode) { addRow("userData", name, "", FALSE, "over maxNodeSize"); next }
-        addRow("userData", name, "", TRUE)
-        out[name] <- list(value)
+        reason <- tryCatch(private$userDataReason(value, maxNode),
+          error = function(e) snapshot_check_failed(e))
+        addRow("userData", name, "", is.null(reason), reason)
+        if (is.null(reason)) out[name] <- list(value)
       }
       out
+    },
+
+    userDataReason = function(value, maxNode) {
+      hit <- snapshot_unserializable_path(value)
+      if (!is.null(hit)) return(private$walkReason(hit))
+      if (snapshot_serialized_size(value) > maxNode) return("over maxNodeSize")
+      NULL
     },
 
     # ---- resume internals ----
@@ -648,6 +655,8 @@ snapshot_values_revert <- function(impl, initial) {
   impl$.allValuesDeps$invalidate()
   invisible()
 }
+
+snapshot_check_failed <- function(e) paste0("could not be checked: ", conditionMessage(e))
 
 snapshot_session_report <- function(session) {
   reg <- session$.snapshotRegistry

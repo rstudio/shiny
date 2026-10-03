@@ -58,6 +58,21 @@ test_that("a write failure is logged once and the session continues", {
   expect_silent(s$.snapshotRegistry$writeNow())
 })
 
+test_that("a failed write does not stop later debounced writes", {
+  s <- snapshot_session(function(input, output, session) { v <- reactiveVal(1) })
+  store <- SnapshotStore$new(file.path(withr::local_tempdir(), "s"))
+  key <- configure_mock_writer(s, store)
+  fail <- TRUE
+  identity <- snapshot_identity
+  local_mocked_bindings(snapshot_identity = function(session) if (fail) stop("disk full") else identity(session))
+  isolate(s$env$v(2)); s$flushReact()
+  expect_message(s$elapse(1000), "disk full")
+  fail <- FALSE
+  isolate(s$env$v(3)); s$flushReact()
+  s$elapse(1000)
+  expect_identical(node_value(store$read(key)$sources[["|reactiveVal|v"]]), 3)
+})
+
 test_that("deleteSnapshot() removes the record and scheduleDelete() removes it later", {
   s <- snapshot_session(function(input, output, session) { v <- reactiveVal(1) })
   store <- SnapshotStore$new(file.path(withr::local_tempdir(), "s"))

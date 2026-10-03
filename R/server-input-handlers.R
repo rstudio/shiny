@@ -200,7 +200,7 @@ on_load({
     val <- as.data.frame(lapply(val, unlist), stringsAsFactors = FALSE)
 
     # `val$datapath` should be a filename without a path, for security reasons.
-    if (basename(val$datapath) != val$datapath) {
+    if (any(basename(val$datapath) != val$datapath)) {
       stop("Invalid '/' found in file input path.")
     }
 
@@ -211,6 +211,10 @@ on_load({
     # modify the original.
     newdir <- file.path(tempdir(), createUniqueId(12))
     dir.create(newdir)
+    # As fileUploadContext does for an upload, the copy goes with the session.
+    if (!is.null(shinysession)) {
+      shinysession$onSessionEnded(function() unlink(newdir, recursive = TRUE))
+    }
     val$datapath <- file.path(newdir, val$datapath)
     file.copy(oldfile, val$datapath)
 

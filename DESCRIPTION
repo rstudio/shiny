@@ -209,6 +209,7 @@ Collate:
     'resume-options.R'
     'resume-serialize.R'
     'resume-store.R'
+    'resume-uploads.R'
     'resume.R'
     'run-url.R'
     'runapp.R'

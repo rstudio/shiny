@@ -1407,10 +1407,15 @@ ShinySession <- R6Class(
     },
     unhandledError = function(e, close = TRUE) {
       "Call the global and session unhandled error handlers and then close the
-       session if the error is fatal."
+       session if the error is fatal. With resume on, the writer stops first so
+       the last record is from before the failing flush, and the client is
+       told so its dialog can offer Resume (see enableResume())."
       if (close) {
         class(e) <- c("shiny.error.fatal", class(e))
       }
+      reg <- self$.snapshotRegistry
+      offerResume <- close && !is.null(reg) && !self$closed && !private$endedForGood && !reg$paused()
+      if (offerResume) reg$pause()
 
       # For fatal errors, always log.
       # For non-fatal errors, only log if we haven't seen this error before.
@@ -1428,6 +1433,12 @@ ShinySession <- R6Class(
       private$unhandledErrorCallbacks$invoke(e, onError = printError)
       .globals$onUnhandledErrorCallbacks$invoke(e, onError = printError)
 
+      # A callback may have closed the session already.
+      if (offerResume && !self$closed && !private$endedForGood) {
+        msg <- list(saved = reg$wroteSnapshot())
+        msg$message <- after_error_message(e)
+        private$sendMessage(fatalError = msg)
+      }
       if (close) self$close()
     },
     close = function() {

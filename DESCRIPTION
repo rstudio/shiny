@@ -210,6 +210,7 @@ Collate:
     'render-cached-plot.R'
     'render-plot.R'
     'render-table.R'
+    'resume-after-error.R'
     'resume-session.R'
     'resume-store.R'
     'resume.R'

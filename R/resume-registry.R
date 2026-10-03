@@ -317,28 +317,15 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       # Step 3: constructors apply their records as the server function runs.
       run()
 
-      # Step 4: verify. A marked source that got a record (it was unmarked
-      # when the record was written) goes back to its initial value; an
-      # unmarked source without an identity blocks.
-      for (id in private$applied) {
-        entry <- private$entries[[id]]
-        if (!is.null(entry) && isTRUE(entry$node$.snapshot$skip)) private$revertOne(entry, id)
-      }
-      for (entry in private$orphans) {
-        if (isTRUE(entry$counted) && !isTRUE(entry$node$.snapshot$skip)) {
-          if (identical(entry$reason, "no label")) private$informNoLabel(entry)
-          private$trip(paste(entry$ns, entry$kind, entry$label %||% "<unnamed>", sep = "|"), entry$node, entry$reason)
-        }
-      }
-      cause <- private$gateCause()
+      # Step 4. An error here is the registry's, not the app's: it trips the gate.
+      cause <- tryCatch(private$verifyAndCommit(record),
+        error = function(e) paste0("saved state could not be applied: ", conditionMessage(e)))
       if (!is.null(cause)) {
         private$revertAll()
         private$phase <- "idle"           # every handler runs at the first flush
         private$outcomeValue <- list(resumed = "inputs", cause = cause,
                                      values = 0L, inputs = length(record$inputs))
       } else {
-        ud <- private$session$userData
-        for (name in names(record$userData)) assign(name, record$userData[[name]], envir = ud)
         private$phase <- "restoring"
         private$outcomeValue <- list(resumed = "snapshot", cause = NULL,
                                      values = length(private$applied), inputs = length(record$inputs))
@@ -541,6 +528,28 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
         error = function(e) { private$trip(id, entry$node, paste0("saved value could not be applied: ", conditionMessage(e))); FALSE })
       if (ok) private$applied <- c(private$applied, id)
       invisible(ok)
+    },
+
+    # Step 4 of spec 4.1: the gate's cause, or NULL once the record's
+    # userData is in place. A marked source that got a record (it was
+    # unmarked when the record was written) goes back to its initial value;
+    # an unmarked source without an identity blocks.
+    verifyAndCommit = function(record) {
+      for (id in private$applied) {
+        entry <- private$entries[[id]]
+        if (!is.null(entry) && isTRUE(entry$node$.snapshot$skip)) private$revertOne(entry, id)
+      }
+      for (entry in private$orphans) {
+        if (isTRUE(entry$counted) && !isTRUE(entry$node$.snapshot$skip)) {
+          if (identical(entry$reason, "no label")) private$informNoLabel(entry)
+          private$trip(paste(entry$ns, entry$kind, entry$label %||% "<unnamed>", sep = "|"), entry$node, entry$reason)
+        }
+      }
+      cause <- private$gateCause()
+      if (!is.null(cause)) return(cause)
+      ud <- private$session$userData
+      for (name in names(record$userData)) assign(name, record$userData[[name]], envir = ud)
+      NULL
     },
 
     revertOne = function(entry, id) {

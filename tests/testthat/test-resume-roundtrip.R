@@ -201,3 +201,16 @@ test_that("rule 4 is not raised for writes to sources that were not restored", {
   expect_identical(rt$outcome$resumed, "snapshot")
   expect_false(any(grepl("first flush", seen)))
 })
+
+test_that("an error while committing the saved state falls back to inputs only", {
+  server <- function(input, output, session) {
+    count <- reactiveVal(0)
+    observeEvent(input$plus, count(count() + 1))
+    session$userData$note <- "kept"
+    lockBinding("note", session$userData)
+  }
+  rt <- snapshot_roundtrip(server, function(s) s$setInputs(plus = 1))
+  expect_identical(rt$outcome$resumed, "inputs")
+  expect_match(rt$outcome$cause, "locked binding")
+  expect_equal(isolate(rt$second$env$count()), 1)
+})

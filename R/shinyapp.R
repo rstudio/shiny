@@ -221,6 +221,9 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
       # server.R.
       .globals$server <- NULL
       on.exit(.globals$server <- NULL, add = TRUE)
+      # enableResume() and disableResume() refuse to run here.
+      .globals$sourcingServerR <- TRUE
+      on.exit(.globals$sourcingServerR <- FALSE, add = TRUE)
       result <- sourceUTF8(serverR, envir = new.env(parent = sharedEnv))
       if (!is.null(.globals$server)) {
         result <- .globals$server[[1]]

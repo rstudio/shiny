@@ -292,13 +292,15 @@ shinyOptions <- function(...) {
 #
 # If another app had been created after s was created, but before s was run,
 # then it would capture the value of "bookmarkStore" at the time of creation.
+# The same holds for "resume".
 captureAppOptions <- function() {
   options <- list(
     appDir = getwd(),
-    bookmarkStore = getShinyOption("bookmarkStore")
+    bookmarkStore = getShinyOption("bookmarkStore"),
+    resume = getShinyOption("resume")
   )
 
-  shinyOptions(appDir = NULL, bookmarkStore = NULL)
+  shinyOptions(appDir = NULL, bookmarkStore = NULL, resume = NULL)
 
   options
 }

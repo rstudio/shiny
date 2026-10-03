@@ -106,6 +106,7 @@ Suggests:
     chromote,
     coro (>= 1.1.0),
     datasets,
+    data.table,
     DT,
     dygraphs,
     future,
@@ -114,6 +115,7 @@ Suggests:
     magrittr,
     markdown,
     mirai,
+    openssl,
     otelsdk (>= 0.2.0),
     pkgload,
     ragg,
@@ -204,6 +206,8 @@ Collate:
     'render-cached-plot.R'
     'render-plot.R'
     'render-table.R'
+    'resume-options.R'
+    'resume.R'
     'run-url.R'
     'runapp.R'
     'serializers.R'

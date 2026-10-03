@@ -65,6 +65,8 @@ declare class ShinyApp {
     private $crashLoop;
     private $pendingPushedInputs;
     private $fatalErrorSeen;
+    private $stashSyncPending;
+    private $reloadRequested;
     private $errorRecovery;
     constructor();
     connect(initialInput: InputValues): void;

@@ -6775,6 +6775,12 @@ ${duplicateIdMsg}`;
       // Set when a `fatalError` arrives: the dialog, not the retry loop, decides
       // what happens next.
       this.$fatalErrorSeen = false;
+      // After a `resume`, the stash keeps the token being resumed until the server
+      // says `resumed`: a `reload` that arrives first (the UI changed) is answered
+      // by a session with a token of its own and no saved state, and the reloaded
+      // page must resume the old record, not that session.
+      this.$stashSyncPending = false;
+      this.$reloadRequested = false;
       this.$errorRecovery = new ErrorRecovery({
         greyOut: () => this.$addDisconnectedOverlay(),
         show: (view, choose) => {
@@ -7008,6 +7014,7 @@ ${duplicateIdMsg}`;
         );
         this.$resumedFresh = this.$resumeDom === "fresh";
         this.$resumeDom = "intact";
+        this.$stashSyncPending = resuming && this.$resumeToken !== null;
         while (this.$pendingMessages.length) {
           const msg = this.$pendingMessages.shift();
           socket.send(msg);
@@ -7461,7 +7468,9 @@ ${duplicateIdMsg}`;
           this.$resumeToken = message.resumeToken ?? null;
           if (message.resumeReload) this.$resumeReload = message.resumeReload;
           if (this.$resumeToken !== null) this.$allowReconnect = true;
-          syncResumeStash(this.$resumeToken, this.$resumeReload);
+          if (this.$resumeToken === null || !this.$stashSyncPending) {
+            syncResumeStash(this.$resumeToken, this.$resumeReload);
+          }
           if (message.user) setShinyUser(message.user);
           this.reconnectDelay.reset();
           (0, import_jquery40.default)(document).trigger("shiny:sessioninitialized");
@@ -7472,6 +7481,12 @@ ${duplicateIdMsg}`;
       });
       addMessageHandler("resumed", async (message) => {
         this.reconnectDelay.reset();
+        if (this.$stashSyncPending) {
+          this.$stashSyncPending = false;
+          if (!this.$reloadRequested) {
+            syncResumeStash(this.$resumeToken, this.$resumeReload);
+          }
+        }
         const pushed = this.$pendingPushedInputs;
         const fresh = this.$resumedFresh;
         this.$pendingPushedInputs = null;
@@ -7547,6 +7562,7 @@ ${duplicateIdMsg}`;
         }
       );
       addMessageHandler("reload", (message) => {
+        this.$reloadRequested = true;
         if (message === "fresh") discardResumeStash();
         else markResumeStashServerInitiated();
         window.location.reload();

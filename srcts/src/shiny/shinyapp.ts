@@ -217,6 +217,13 @@ class ShinyApp {
   // what happens next.
   private $fatalErrorSeen = false;
 
+  // After a `resume`, the stash keeps the token being resumed until the server
+  // says `resumed`: a `reload` that arrives first (the UI changed) is answered
+  // by a session with a token of its own and no saved state, and the reloaded
+  // page must resume the old record, not that session.
+  private $stashSyncPending = false;
+  private $reloadRequested = false;
+
   private $errorRecovery = new ErrorRecovery({
     greyOut: () => this.$addDisconnectedOverlay(),
     show: (view, choose) => {
@@ -398,6 +405,7 @@ class ShinyApp {
       // Only the first socket of a reloaded page has a fresh DOM.
       this.$resumedFresh = this.$resumeDom === "fresh";
       this.$resumeDom = "intact";
+      this.$stashSyncPending = resuming && this.$resumeToken !== null;
 
       while (this.$pendingMessages.length) {
         const msg = this.$pendingMessages.shift();
@@ -1040,7 +1048,11 @@ class ShinyApp {
         if (message.resumeReload) this.$resumeReload = message.resumeReload;
         // enableResume() implies allowReconnect(TRUE) (spec 1.4).
         if (this.$resumeToken !== null) this.$allowReconnect = true;
-        syncResumeStash(this.$resumeToken, this.$resumeReload);
+        // No token (resume off on the server): the stash goes at once. With a
+        // token after a `resume`, it moves on to the new token at `resumed`.
+        if (this.$resumeToken === null || !this.$stashSyncPending) {
+          syncResumeStash(this.$resumeToken, this.$resumeReload);
+        }
         if (message.user) setShinyUser(message.user);
         this.reconnectDelay.reset();
         $(document).trigger("shiny:sessioninitialized");
@@ -1055,6 +1067,12 @@ class ShinyApp {
 
     addMessageHandler("resumed", async (message: "snapshot" | "inputs") => {
       this.reconnectDelay.reset();
+      if (this.$stashSyncPending) {
+        this.$stashSyncPending = false;
+        if (!this.$reloadRequested) {
+          syncResumeStash(this.$resumeToken, this.$resumeReload);
+        }
+      }
       const pushed = this.$pendingPushedInputs;
       const fresh = this.$resumedFresh;
 
@@ -1146,6 +1164,7 @@ class ShinyApp {
     addMessageHandler("reload", (message: true | "fresh") => {
       // `true`: a reload Shiny makes (the UI changed); the next page resumes
       // without asking. `"fresh"`: session$reload(), a reset.
+      this.$reloadRequested = true;
       if (message === "fresh") discardResumeStash();
       else markResumeStashServerInitiated();
       window.location.reload();

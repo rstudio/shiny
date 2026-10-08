@@ -170,3 +170,36 @@ test_that("an uploaded file survives a restart", {
   e2e_wait_until(function() identical(resumed_attr(b), "snapshot"), timeout = 40, what = "shiny:resumed")
   click_until(b, "#read", "#contents", "Contents: survives")
 })
+
+test_that("panels added by clicks come back live after a restart, rebuilt by onResume()", {
+  skip_on_cran()
+  e <- e2e_session(env = c(SHINY_RESUME = "TRUE"), app = "resume-e2e")
+  b <- e$browser
+  e2e_click(b, "#add")
+  e2e_wait_until(function() e2e_present(b, "#p1-count"), what = "panel p1")
+  e2e_click(b, "#add")
+  e2e_wait_until(function() e2e_present(b, "#p2-count"), what = "panel p2")
+  since <- Sys.time()
+  click_until(b, "#p1-plus", "#p1-count", "Panel count: 1")
+  pid1 <- e2e_text(b, "#process")
+  e2e_wait_for_record(e$store_dir, since = since)
+
+  restart_process(e)
+  e2e_wait_until(function() identical(resumed_attr(b), "snapshot"), timeout = 40, what = "shiny:resumed")
+  e2e_wait_until(function() !identical(e2e_text(b, "#process"), pid1), what = "the new process id")
+  expect_equal(e2e_js(b, "document.querySelectorAll('#panels .panel').length"), 2)
+  click_until(b, "#p1-plus", "#p1-count", "Panel count: 2")
+  click_until(b, "#p2-plus", "#p2-count", "Panel count: 1")
+})
+
+test_that("with resume off, onResume() redefines an output a handler built, and it updates after a reconnect", {
+  skip_on_cran()
+  e <- e2e_session(env = c(SHINY_RESUME = "FALSE", E2E_ALLOW = "1"), app = "resume-e2e")
+  b <- e$browser
+  click_until(b, "#build", "#built", "Built: first")
+  pid1 <- e2e_text(b, "#process")
+  restart_process(e)
+  e2e_wait_until(function() !identical(e2e_text(b, "#process"), pid1), timeout = 40, what = "the new process id")
+  e2e_set_text(b, "word", "second")
+  e2e_wait_until(function() grepl("Built: second", e2e_text(b, "#built"), fixed = TRUE), what = "the rebuilt output")
+})

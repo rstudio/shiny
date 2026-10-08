@@ -148,7 +148,7 @@ test_that("a valid token restores, sends `resumed` before any values, logs, dele
   spy <- new_spy("obs", "txt")
   expect_message(
     res <- resume_real(counter_app(spy), resume_data(token, list(`plus:shiny.action` = 3, txt = "typed")), spy = spy),
-    "^Resumed: restored 1 values and 2 inputs; 1 event handlers skipped, 0 re-ran"
+    "^Resumed: restored 1 values and 2 inputs; 1 event handlers held back"
   )
   expect_identical(res$outcome, "snapshot")
   expect_setequal(spy$received, c("plus", "txt"))     # onInputReceived fires on resume
@@ -286,7 +286,11 @@ test_that("a resume records its counts as an OTel log event carrying the session
       logged[[length(logged) + 1L]] <<- list(msg = msg, attributes = attributes)
     }
   )
-  res <- resume_real(counter_app(new_spy("obs", "txt")), resume_data(token, list(`plus:shiny.action` = 3, txt = "typed")))
+  app <- function(input, output, session) {
+    counter_app(new_spy("obs", "txt"))(input, output, session)
+    session$onResume(function(info) NULL)
+  }
+  res <- resume_real(app, resume_data(token, list(`plus:shiny.action` = 3, txt = "typed")))
   event <- Filter(function(l) identical(l$msg, "Resume"), logged)
   expect_length(event, 1)
   attrs <- event[[1]]$attributes
@@ -294,9 +298,11 @@ test_that("a resume records its counts as an OTel log event carrying the session
   expect_identical(attrs$shiny.resume.resumed, "snapshot")
   expect_identical(attrs$shiny.resume.values, 1L)
   expect_identical(attrs$shiny.resume.skipped, 1L)
+  expect_null(attrs$shiny.resume.reran)
+  expect_identical(attrs$shiny.resume.callbacks, 1L)
 })
 
-test_that("the log line counts values, inputs, skipped and re-run handlers", {
+test_that("the log line counts restored values and inputs and held-back handlers", {
   make <- function(spy) { force(spy); function(input, output, session) {
     count <- reactiveVal(0)
     observeEvent(input$plus, count(count() + 1))
@@ -304,9 +310,8 @@ test_that("the log line counts values, inputs, skipped and re-run handlers", {
   }}
   token <- NULL
   rt <- snapshot_roundtrip(make(new_spy()), function(s) s$setInputs(plus = 1, login = 1))
-  lines <- snapshot_resume_log(rt$outcome)
-  expect_identical(lines[[1]], "Resumed: restored 1 values and 2 inputs; 1 event handlers skipped, 1 re-ran")
-  expect_match(lines[[2]], "assigns closure variables")
+  expect_identical(snapshot_resume_log(rt$outcome),
+                   "Resumed: restored 1 values and 2 inputs; 2 event handlers held back")
   expect_identical(snapshot_resume_log(list(resumed = "inputs", cause = "no saved state")),
                    "Resumed from inputs only: no saved state")
 })
@@ -377,7 +382,7 @@ test_that("with resume off, a `resume` with a token is answered as init without 
   withr::local_envvar(SHINY_RESUME = "FALSE")
   local_mocked_bindings(snapshot_store = function() stop("the store must not be read"))
   runs <- 0; seen <- NULL
-  runs2 <- list2env(list(n = 0))   # an environment: `<<-` would be a hazard
+  runs2 <- list2env(list(n = 0))
   server <- function(input, output, session) {
     runs <<- runs + 1
     observe(seen <<- input$plus)
@@ -415,6 +420,7 @@ test_that("a resumed session logs outputs a held-back handler would have defined
   expect_message(resume_real(app, resume_data(token, page)),
                  "Outputs on the page with no definition after resume: plot")
   expect_match(seen, "rule 3", all = FALSE)
+  expect_match(seen, "session$onResume()", fixed = TRUE, all = FALSE)
   expect_message(resume_real(app, resume_data(snapshot_token_new(), page)),
                  "from inputs only: no saved state\nOutputs on the page with no definition after resume: plot")
   msgs <- character(0)
@@ -429,4 +435,67 @@ test_that("the log adds the undefined-outputs line only when there are some", {
   expect_identical(snapshot_resume_log(list(resumed = "inputs", cause = "x"), "p"),
                    c("Resumed from inputs only: x", "Outputs on the page with no definition after resume: p"))
   expect_identical(snapshot_resume_log(list(resumed = "inputs", cause = "x")), "Resumed from inputs only: x")
+})
+
+test_that("onResume() callbacks run before `resumed` is sent and before any observer, with restored = TRUE", {
+  local_snapshot_store_dir()
+  token <- closed_counter_session()
+  spy <- new_spy("obs", "txt")
+  ws <- fake_ws()
+  seen <- NULL
+  app <- function(input, output, session) {
+    counter_app(spy)(input, output, session)
+    session$onResume(function(info) {
+      seen <<- list(info = info, resumedSent = length(sent_of(ws, "resumed")), txtRuns = spy$txt)
+    })
+  }
+  expect_message(resume_real(app, resume_data(token, list(`plus:shiny.action` = 3, txt = "typed")), ws = ws),
+                 "^Resumed: restored 1 values")
+  expect_identical(seen, list(info = list(restored = TRUE), resumedSent = 0L, txtRuns = 0))
+  expect_length(sent_of(ws, "resumed"), 1)
+})
+
+test_that("an inputs-only resume runs onResume() callbacks with restored = FALSE", {
+  local_snapshot_store_dir()
+  seen <- NULL
+  app <- function(input, output, session) session$onResume(function(info) seen <<- info)
+  expect_message(resume_real(app, resume_data(snapshot_token_new(), list())), "from inputs only: no saved state")
+  expect_identical(seen, list(restored = FALSE))
+})
+
+test_that("an error in an onResume() callback ends the session for good and `resumed` is not sent", {
+  local_snapshot_store_dir()
+  token <- closed_counter_session()
+  app <- function(input, output, session) {
+    counter_app(new_spy("obs", "txt"))(input, output, session)
+    session$onResume(function(info) stop("rebuild failed"))
+  }
+  handlers <- createAppHandlers(NULL, function() app)
+  ws <- fake_httpuv_ws(); handlers$ws(ws)
+  suppressWarnings(expect_error(
+    ws$callbacks$message(FALSE, sprintf('{"method":"resume","data":{"token":"%s","inputs":{}}}', token)),
+    "rebuild failed"
+  ))
+  expect_length(sent_of(ws, "resumed"), 0)
+  expect_identical(sent_of(ws, "allowReconnect")[[1]]$allowReconnect, FALSE)
+  expect_null(snapshot_store()$read(snapshot_record_key(token)))
+  expect_null(snapshot_store()$read(snapshot_record_key(ws$sent()[[1]]$config$resumeToken)))
+})
+
+test_that("a server function that errors on resume runs no onResume() callbacks and sends no `resumed`", {
+  local_snapshot_store_dir()
+  token <- closed_counter_session()
+  ran <- FALSE
+  app <- function(input, output, session) {
+    session$onResume(function(info) ran <<- TRUE)
+    stop("server boom")
+  }
+  handlers <- createAppHandlers(NULL, function() app)
+  ws <- fake_httpuv_ws(); handlers$ws(ws)
+  suppressWarnings(expect_error(
+    ws$callbacks$message(FALSE, sprintf('{"method":"resume","data":{"token":"%s","inputs":{}}}', token)),
+    "server boom"
+  ))
+  expect_false(ran)
+  expect_length(sent_of(ws, "resumed"), 0)
 })

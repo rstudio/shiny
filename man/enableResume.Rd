@@ -2,19 +2,21 @@
 % Please edit documentation in R/resume.R
 \name{enableResume}
 \alias{enableResume}
-\alias{disableResume}
 \title{Resume sessions after a dropped connection}
 \usage{
 enableResume(
+  enabled = TRUE,
   appVersion = NULL,
   maxSize = 5e+07,
   maxNodeSize = 5e+06,
   debounce = 1000
 )
-
-disableResume(x)
 }
 \arguments{
+\item{enabled}{\code{TRUE} to turn resume on for the app, \code{FALSE} to turn it
+off, overriding the \code{SHINY_RESUME} environment variable. With \code{FALSE}
+the other arguments are ignored.}
+
 \item{appVersion}{\code{NULL}, or a string or number recorded with the saved
 state. Change it in a deploy that changes what the app's state means, so
 sessions saved by the previous version resume from inputs only.}
@@ -28,14 +30,9 @@ blocks resume.}
 \item{debounce}{Milliseconds of quiet after a change before the state is
 saved. While changes keep arriving it is saved at least every ten such
 intervals.}
-
-\item{x}{Optional. A reactive value, \code{reactiveValues()} object, observer
-or \code{ExtendedTask} to leave out of resume. Without it, \code{disableResume()}
-turns resume off for the app.}
 }
 \value{
-\code{enableResume()} and \code{disableResume()} return \code{NULL} invisibly;
-\code{disableResume(x)} returns \code{x} invisibly.
+\code{NULL}, invisibly.
 }
 \description{
 With resume on, Shiny saves each session's state as it goes, and a page
@@ -47,27 +44,17 @@ values, \code{input}, uploaded files and \code{session$userData} come back;
 the page was disconnected are applied on top.
 
 \code{enableResume()} turns resume on for an app and configures it;
-\code{disableResume()} turns it off. Call either at the top level of \code{app.R}
+\code{enableResume(FALSE)} turns it off. Call it at the top level of \code{app.R}
 (before \code{\link[=shinyApp]{shinyApp()}}) or in \code{global.R}, not in \code{server.R} or inside the
 server function. Like \code{\link[=enableBookmarking]{enableBookmarking()}}, the call applies to the app
-created next; when an app calls both, the last call wins. Resume implies
-\code{session$allowReconnect(TRUE)} for the app's sessions; a session may still
-call \code{session$allowReconnect(FALSE)} to opt out, in which case it is
-neither retried nor resumed.
+created next; when an app calls it more than once, the last call wins.
+Resume implies \code{session$allowReconnect(TRUE)} for the app's sessions; a
+session may still call \code{session$allowReconnect(FALSE)} to opt out, in
+which case it is neither retried nor resumed.
 
-\code{disableResume(x)} leaves one reactive out:
-\itemize{
-\item On a \code{\link[=reactiveVal]{reactiveVal()}} or \code{\link[=reactiveValues]{reactiveValues()}} object: its value is not
-saved and does not count against the all-or-nothing rule below; after a
-resume it holds its initial value.
-\item On an \link{ExtendedTask}: its state is not saved; after a resume the task is
-as if never invoked.
-\item On an observer made with \code{\link[=observeEvent]{observeEvent()}} or \code{\link[=bindEvent]{bindEvent()}}: its first
-run is not held back; it runs on resume exactly as on a fresh start,
-\code{ignoreInit} included. Use it on a handler whose job is to build
-something. A plain \code{\link[=observe]{observe()}} always runs on resume, so marking one
-changes nothing.
-}
+Two tools work with it: \code{\link[=excludeFromResume]{excludeFromResume()}} leaves a value out of the
+saved state, and \code{session$onResume()} runs code when a page reconnects
+(see "Rebuilding on resume" below).
 }
 \section{What resume does not do}{
 
@@ -77,10 +64,13 @@ that is still open.
 \item \strong{An unhandled error in an observer ends the session}, and its saved
 state is deleted. So does \code{session$close()}. The page is not retried.
 \item Structure an \code{observeEvent()} handler created after startup (an output,
-a module server, an observer) does not come back, because that handler
-does not run again. See rule 3.
-\item Closure state (\verb{<<-}), reference objects and async work in flight are
-never saved.
+a module server, an observer) does not come back on its own, because
+that handler does not run again. Rebuild it in \code{session$onResume()};
+see rule 3.
+\item Closure variables (assigned with \verb{<<-}), reference objects and async
+work in flight are never saved. A handler that assigns closure
+variables is held back like any other, so they keep their initial
+values.
 }
 }
 
@@ -88,7 +78,7 @@ never saved.
 
 Resolved once per app, first match wins:
 \enumerate{
-\item The app's last \code{enableResume()} or \code{disableResume()} call.
+\item The app's last \code{enableResume()} call, with \code{TRUE} or \code{FALSE}.
 \item The \code{SHINY_RESUME} environment variable (\code{TRUE} or \code{FALSE}), for a
 hosting platform that has verified its storage.
 \item Off.
@@ -113,7 +103,43 @@ Values that commonly block resume because they carry an environment or a
 function: model fits and formulas created inside a function, ggplot
 objects, S7 objects, and anything holding a connection, an external
 pointer or an R6 object. Keep them in a \code{\link[=reactive]{reactive()}}, which recomputes
-after a resume, or mark the source with \code{disableResume()}.
+after a resume, or leave the source out with \code{\link[=excludeFromResume]{excludeFromResume()}} and
+rebuild the value in \code{session$onResume()}.
+}
+
+\section{Rebuilding on resume}{
+
+\code{session$onResume(fun)} registers a function that runs once when a page
+reconnects, after the server function and before any observer or output
+runs. By then saved values are restored, or, if they could not be, every
+source holds its initial value. \code{fun} takes one argument, \code{info}, a list
+whose \code{restored} element is \code{TRUE} when saved state was restored and
+\code{FALSE} when the session resumed from its inputs only. It also fires with
+resume off, when \code{session$allowReconnect(TRUE)} reconnects a page, with
+\code{restored} \code{FALSE}. It never fires on a fresh start.
+
+The function runs inside \code{\link[=isolate]{isolate()}}, so it can read reactive values
+directly. Registered in a module, it runs in that module's namespace.
+Module servers it starts may register their own, which run in the same
+pass. An error in it ends the session.
+
+Panels added by clicks come back live after a restart:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{ids <- reactiveVal(character())
+observeEvent(input$add, \{
+  id <- paste0("p", input$add)
+  ids(c(ids(), id))
+  insertUI("#panels", ui = panelUI(id))
+  panelServer(id)
+\})
+session$onResume(function(info) \{
+  for (id in ids()) panelServer(id)
+\})
+}\if{html}{\out{</div>}}
+
+\code{ids} comes back with the saved state; the handler is held back; the
+callback starts each panel's server, whose own values are restored as it
+creates them. The panels themselves are still on the page.
 }
 
 \section{The rules of reactives}{
@@ -123,20 +149,22 @@ mode Shiny names the rule a session breaks.
 \enumerate{
 \item \strong{Label sources created in loops or through helpers.} A source made
 in \code{lapply()} or by a wrapper function has no name to infer. Give it
-one (\code{reactiveVal(0, label = paste0("count", i))}) or mark it with
-\code{disableResume()}.
+one (\code{reactiveVal(0, label = paste0("count", i))}) or leave it out with
+\code{\link[=excludeFromResume]{excludeFromResume()}}.
 \item \strong{Hold reference objects in a \code{reactive()}, not a \code{reactiveVal()}.} A
 connection, pool or R6 client cannot be saved; in a \code{reactive()} it is
-rebuilt on first read. If one must live in a source, mark both the
-source and the observer that builds it with \code{disableResume()}.
-\item \strong{Build structure from state, not in handlers.} A handler that
-defines an output, starts a module server or creates an observer does
-not run again after a resume, so what it built is missing; the log
-names outputs on the page that have no definition. Keep the ids in a
-\code{reactiveVal()}, render the UI with \code{\link[=renderUI]{renderUI()}}, and start module
-servers from a plain \code{\link[=observe]{observe()}} over the ids; or mark the handler with
-\code{disableResume()} if it builds exactly one thing and has no other side
-effect.
+rebuilt on first read. If one must live in a source, leave the source
+out with \code{\link[=excludeFromResume]{excludeFromResume()}} and rebuild the object in
+\code{session$onResume()}.
+\item \strong{Build structure from state.} A handler that defines an output,
+starts a module server or creates an observer is held back on resume,
+so what it built is gone; the log names outputs on the page that have
+no definition. Either derive the structure from state (\code{\link[=renderUI]{renderUI()}},
+an \code{\link[=observe]{observe()}} over ids), or keep the ids in a \code{reactiveVal()} and
+rebuild in \code{session$onResume()}, as above. For a handler that builds
+one output from inputs, prefer \code{\link[=eventReactive]{eventReactive()}}:
+\code{n <- eventReactive(input$go, input$n)} with
+\code{output$plot <- renderPlot(make_plot(n()))} needs nothing on resume.
 \item \strong{Accumulate into a reactive value from \code{observeEvent()}, not a plain
 \code{observe()}.} A plain observer has no event to hold back, so it runs
 on resume and applies its change again:
@@ -151,12 +179,17 @@ current inputs; \code{observeEvent(once = TRUE)} may fire once more after a
 resume; process-scoped values (temp paths, process ids) serialize fine
 and are wrong after a restart; an unconditional top-level
 \code{session$userData$x <- 0} overwrites the saved value, so guard it with
-\verb{if (is.null(session$userData$x))} or use a \code{reactiveVal()}.
+\verb{if (is.null(session$userData$x))} or use a \code{reactiveVal()}. Closure
+variables are never saved and the handlers that assign them are held
+back; in development mode Shiny names them. \code{session$onResume()} also
+fires with resume off, which is how an app that only calls
+\code{session$allowReconnect(TRUE)} redoes what a held-back handler built:
+\code{session$onResume(function(info) if (input$go > 0) output$plot <- renderPlot(...))}.
 }
 
 \section{What the log says}{
 
-Each resume writes one line to standard error: \verb{Resumed: restored N values and M inputs; K event handlers skipped, J re-ran}, or \verb{Resumed from inputs only: <cause>}, plus \verb{Outputs on the page with no definition after resume: ...} when rule 3 is broken.
+Each resume writes one line to standard error: \verb{Resumed: restored N values and M inputs; K event handlers held back}, or \verb{Resumed from inputs only: <cause>}, plus \verb{Outputs on the page with no definition after resume: ...} when rule 3 is broken.
 }
 
 \section{Where saved state lives}{
@@ -194,6 +227,7 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-\link{session} for \code{session$resumeReport()} and
-\code{session$allowReconnect()}; \code{\link[=reactiveValues]{reactiveValues()}} for \code{.label}.
+\code{\link[=excludeFromResume]{excludeFromResume()}}; \link{session} for \code{session$onResume()},
+\code{session$resumeReport()} and \code{session$allowReconnect()};
+\code{\link[=reactiveValues]{reactiveValues()}} for \code{.label}.
 }

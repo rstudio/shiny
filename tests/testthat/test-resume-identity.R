@@ -41,14 +41,14 @@ test_that("a source with neither label nor assignment is not saved and does not 
 
 test_that("a marked source without identity does not block; a marked one with identity is not saved", {
   s <- snapshot_session(function(input, output, session) {
-    anon <- lapply(1, function(i) disableResume(reactiveVal(i)))
-    secret <- reactiveVal("s"); disableResume(secret)
+    anon <- lapply(1, function(i) excludeFromResume(reactiveVal(i)))
+    secret <- reactiveVal("s"); excludeFromResume(secret)
     keep <- reactiveVal(1)
   })
   rec <- s$.snapshotRegistry$snapshot()
   expect_true(rec$complete)
   expect_identical(names(rec$sources), "|reactiveVal|keep")
-  expect_identical(rec$report$reason[rec$report$label %in% "secret"], "disableResume()")
+  expect_identical(rec$report$reason[rec$report$label %in% "secret"], "excludeFromResume()")
 })
 
 test_that("two sources with one label both lose their identity", {
@@ -124,7 +124,7 @@ test_that("devmode names unlabelled sources once, by their calls, only if still 
   seen <- character(0)
   local_mocked_bindings(devmode_inform = function(message, ...) seen <<- c(seen, message))
   s <- snapshot_session(function(input, output, session) {
-    marked <- lapply(1, function(i) disableResume(reactiveVal(i)))
+    marked <- lapply(1, function(i) excludeFromResume(reactiveVal(i)))
     output$p <- renderPlot(plot(1)) |> bindCache(1)
   })
   s$.snapshotRegistry$snapshot()
@@ -197,4 +197,33 @@ test_that("reactiveValues() is labelled from the caller's body too", {
     server <- function(input, output, session) { state <- reactiveValues(n = 0) }
   ', new.env())
   expect_identical(short_ids(snapshot_session(env$server)), "reactiveValues|state")
+})
+
+test_that("excludeFromResume() marks each kind of source and returns it invisibly", {
+  s <- snapshot_session(function(input, output, session) {
+    v <- excludeFromResume(reactiveVal(1, label = "v"))
+    rv <- excludeFromResume(reactiveValues(a = 1, .label = "rv"))
+    keep <- reactiveVal(2)
+  })
+  expect_identical(withVisible(excludeFromResume(s$env$v))$visible, FALSE)
+  expect_identical(excludeFromResume(s$env$v), s$env$v)
+  expect_identical(withVisible(excludeFromResume(s$env$rv))$visible, FALSE)
+  rec <- s$.snapshotRegistry$snapshot()
+  expect_identical(names(rec$sources), "|reactiveVal|keep")
+  expect_identical(rec$report$reason[rec$report$label %in% c("v", "rv")], rep("excludeFromResume()", 2))
+})
+
+test_that("excludeFromResume() rejects observers and anything else it has no method for", {
+  expect_error(excludeFromResume(42),
+    "excludeFromResume() expects a reactiveVal, reactiveValues object or ExtendedTask, not an object of class numeric.", fixed = TRUE)
+  o <- observe(NULL)
+  withr::defer(o$destroy())
+  expect_error(excludeFromResume(o), "not an object of class Observer/R6.", fixed = TRUE)
+})
+
+test_that("with resume off excludeFromResume() returns the source unchanged", {
+  withr::local_envvar(SHINY_RESUME = "FALSE")
+  s <- snapshot_session(function(input, output, session) v <- excludeFromResume(reactiveVal(1)))
+  expect_null(s$.snapshotRegistry)
+  expect_equal(isolate(s$env$v()), 1)
 })

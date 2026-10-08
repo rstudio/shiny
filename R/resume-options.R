@@ -15,9 +15,8 @@ resume_defaults <- function() {
   list(appVersion = NULL, maxSize = 50e6, maxNodeSize = 5e6, debounce = 1000)
 }
 
-# The app's resume settings: its last enableResume() or disableResume() call
-# as captured by shinyApp(), else SHINY_RESUME, else off. Sessions resolve
-# it once, at start.
+# The app's resume settings: its last enableResume() call as captured by
+# shinyApp(), else SHINY_RESUME, else off. Sessions resolve it once, at start.
 resume_settings <- function() {
   captured <- getShinyOption("resume")
   if (!is.null(captured)) return(captured)

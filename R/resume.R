@@ -13,26 +13,17 @@ NULL
 #' the page was disconnected are applied on top.
 #'
 #' `enableResume()` turns resume on for an app and configures it;
-#' `disableResume()` turns it off. Call either at the top level of `app.R`
+#' `enableResume(FALSE)` turns it off. Call it at the top level of `app.R`
 #' (before [shinyApp()]) or in `global.R`, not in `server.R` or inside the
 #' server function. Like [enableBookmarking()], the call applies to the app
-#' created next; when an app calls both, the last call wins. Resume implies
-#' `session$allowReconnect(TRUE)` for the app's sessions; a session may still
-#' call `session$allowReconnect(FALSE)` to opt out, in which case it is
-#' neither retried nor resumed.
+#' created next; when an app calls it more than once, the last call wins.
+#' Resume implies `session$allowReconnect(TRUE)` for the app's sessions; a
+#' session may still call `session$allowReconnect(FALSE)` to opt out, in
+#' which case it is neither retried nor resumed.
 #'
-#' `disableResume(x)` leaves one reactive out:
-#'
-#' * On a [reactiveVal()] or [reactiveValues()] object: its value is not
-#'   saved and does not count against the all-or-nothing rule below; after a
-#'   resume it holds its initial value.
-#' * On an [ExtendedTask]: its state is not saved; after a resume the task is
-#'   as if never invoked.
-#' * On an observer made with [observeEvent()] or [bindEvent()]: its first
-#'   run is not held back; it runs on resume exactly as on a fresh start,
-#'   `ignoreInit` included. Use it on a handler whose job is to build
-#'   something. A plain [observe()] always runs on resume, so marking one
-#'   changes nothing.
+#' Two tools work with it: [excludeFromResume()] leaves a value out of the
+#' saved state, and `session$onResume()` runs code when a page reconnects
+#' (see "Rebuilding on resume" below).
 #'
 #' @section What resume does not do:
 #' * **A page reload starts fresh**, as without resume. Resume is for a page
@@ -40,15 +31,18 @@ NULL
 #' * **An unhandled error in an observer ends the session**, and its saved
 #'   state is deleted. So does `session$close()`. The page is not retried.
 #' * Structure an `observeEvent()` handler created after startup (an output,
-#'   a module server, an observer) does not come back, because that handler
-#'   does not run again. See rule 3.
-#' * Closure state (`<<-`), reference objects and async work in flight are
-#'   never saved.
+#'   a module server, an observer) does not come back on its own, because
+#'   that handler does not run again. Rebuild it in `session$onResume()`;
+#'   see rule 3.
+#' * Closure variables (assigned with `<<-`), reference objects and async
+#'   work in flight are never saved. A handler that assigns closure
+#'   variables is held back like any other, so they keep their initial
+#'   values.
 #'
 #' @section Who decides:
 #' Resolved once per app, first match wins:
 #'
-#' 1. The app's last `enableResume()` or `disableResume()` call.
+#' 1. The app's last `enableResume()` call, with `TRUE` or `FALSE`.
 #' 2. The `SHINY_RESUME` environment variable (`TRUE` or `FALSE`), for a
 #'    hosting platform that has verified its storage.
 #' 3. Off.
@@ -70,7 +64,42 @@ NULL
 #' function: model fits and formulas created inside a function, ggplot
 #' objects, S7 objects, and anything holding a connection, an external
 #' pointer or an R6 object. Keep them in a [reactive()], which recomputes
-#' after a resume, or mark the source with `disableResume()`.
+#' after a resume, or leave the source out with [excludeFromResume()] and
+#' rebuild the value in `session$onResume()`.
+#'
+#' @section Rebuilding on resume:
+#' `session$onResume(fun)` registers a function that runs once when a page
+#' reconnects, after the server function and before any observer or output
+#' runs. By then saved values are restored, or, if they could not be, every
+#' source holds its initial value. `fun` takes one argument, `info`, a list
+#' whose `restored` element is `TRUE` when saved state was restored and
+#' `FALSE` when the session resumed from its inputs only. It also fires with
+#' resume off, when `session$allowReconnect(TRUE)` reconnects a page, with
+#' `restored` `FALSE`. It never fires on a fresh start.
+#'
+#' The function runs inside [isolate()], so it can read reactive values
+#' directly. Registered in a module, it runs in that module's namespace.
+#' Module servers it starts may register their own, which run in the same
+#' pass. An error in it ends the session.
+#'
+#' Panels added by clicks come back live after a restart:
+#'
+#' ```r
+#' ids <- reactiveVal(character())
+#' observeEvent(input$add, {
+#'   id <- paste0("p", input$add)
+#'   ids(c(ids(), id))
+#'   insertUI("#panels", ui = panelUI(id))
+#'   panelServer(id)
+#' })
+#' session$onResume(function(info) {
+#'   for (id in ids()) panelServer(id)
+#' })
+#' ```
+#'
+#' `ids` comes back with the saved state; the handler is held back; the
+#' callback starts each panel's server, whose own values are restored as it
+#' creates them. The panels themselves are still on the page.
 #'
 #' @section The rules of reactives:
 #' Four habits keep resumed sessions complete and correct. In development
@@ -78,20 +107,22 @@ NULL
 #'
 #' 1. **Label sources created in loops or through helpers.** A source made
 #'    in `lapply()` or by a wrapper function has no name to infer. Give it
-#'    one (`reactiveVal(0, label = paste0("count", i))`) or mark it with
-#'    `disableResume()`.
+#'    one (`reactiveVal(0, label = paste0("count", i))`) or leave it out with
+#'    [excludeFromResume()].
 #' 2. **Hold reference objects in a `reactive()`, not a `reactiveVal()`.** A
 #'    connection, pool or R6 client cannot be saved; in a `reactive()` it is
-#'    rebuilt on first read. If one must live in a source, mark both the
-#'    source and the observer that builds it with `disableResume()`.
-#' 3. **Build structure from state, not in handlers.** A handler that
-#'    defines an output, starts a module server or creates an observer does
-#'    not run again after a resume, so what it built is missing; the log
-#'    names outputs on the page that have no definition. Keep the ids in a
-#'    `reactiveVal()`, render the UI with [renderUI()], and start module
-#'    servers from a plain [observe()] over the ids; or mark the handler with
-#'    `disableResume()` if it builds exactly one thing and has no other side
-#'    effect.
+#'    rebuilt on first read. If one must live in a source, leave the source
+#'    out with [excludeFromResume()] and rebuild the object in
+#'    `session$onResume()`.
+#' 3. **Build structure from state.** A handler that defines an output,
+#'    starts a module server or creates an observer is held back on resume,
+#'    so what it built is gone; the log names outputs on the page that have
+#'    no definition. Either derive the structure from state ([renderUI()],
+#'    an [observe()] over ids), or keep the ids in a `reactiveVal()` and
+#'    rebuild in `session$onResume()`, as above. For a handler that builds
+#'    one output from inputs, prefer [eventReactive()]:
+#'    `n <- eventReactive(input$go, input$n)` with
+#'    `output$plot <- renderPlot(make_plot(n()))` needs nothing on resume.
 #' 4. **Accumulate into a reactive value from `observeEvent()`, not a plain
 #'    `observe()`.** A plain observer has no event to hold back, so it runs
 #'    on resume and applies its change again:
@@ -105,11 +136,16 @@ NULL
 #' resume; process-scoped values (temp paths, process ids) serialize fine
 #' and are wrong after a restart; an unconditional top-level
 #' `session$userData$x <- 0` overwrites the saved value, so guard it with
-#' `if (is.null(session$userData$x))` or use a `reactiveVal()`.
+#' `if (is.null(session$userData$x))` or use a `reactiveVal()`. Closure
+#' variables are never saved and the handlers that assign them are held
+#' back; in development mode Shiny names them. `session$onResume()` also
+#' fires with resume off, which is how an app that only calls
+#' `session$allowReconnect(TRUE)` redoes what a held-back handler built:
+#' `session$onResume(function(info) if (input$go > 0) output$plot <- renderPlot(...))`.
 #'
 #' @section What the log says:
 #' Each resume writes one line to standard error: `Resumed: restored N
-#' values and M inputs; K event handlers skipped, J re-ran`, or `Resumed from
+#' values and M inputs; K event handlers held back`, or `Resumed from
 #' inputs only: <cause>`, plus `Outputs on the page with no definition after
 #' resume: ...` when rule 3 is broken.
 #'
@@ -126,6 +162,9 @@ NULL
 #' Posit's hosted products; a container without a persistent volume resumes
 #' from inputs only after it restarts.
 #'
+#' @param enabled `TRUE` to turn resume on for the app, `FALSE` to turn it
+#'   off, overriding the `SHINY_RESUME` environment variable. With `FALSE`
+#'   the other arguments are ignored.
 #' @param appVersion `NULL`, or a string or number recorded with the saved
 #'   state. Change it in a deploy that changes what the app's state means, so
 #'   sessions saved by the previous version resume from inputs only.
@@ -136,13 +175,10 @@ NULL
 #' @param debounce Milliseconds of quiet after a change before the state is
 #'   saved. While changes keep arriving it is saved at least every ten such
 #'   intervals.
-#' @param x Optional. A reactive value, `reactiveValues()` object, observer
-#'   or `ExtendedTask` to leave out of resume. Without it, `disableResume()`
-#'   turns resume off for the app.
-#' @return `enableResume()` and `disableResume()` return `NULL` invisibly;
-#'   `disableResume(x)` returns `x` invisibly.
-#' @seealso [session] for `session$resumeReport()` and
-#'   `session$allowReconnect()`; [reactiveValues()] for `.label`.
+#' @return `NULL`, invisibly.
+#' @seealso [excludeFromResume()]; [session] for `session$onResume()`,
+#'   `session$resumeReport()` and `session$allowReconnect()`;
+#'   [reactiveValues()] for `.label`.
 #' @examples
 #' \dontrun{
 #' # app.R
@@ -162,8 +198,15 @@ NULL
 #' shinyApp(ui, server)
 #' }
 #' @export
-enableResume <- function(appVersion = NULL, maxSize = 50e6, maxNodeSize = 5e6, debounce = 1000) {
-  resume_check_top_level("enableResume")
+enableResume <- function(enabled = TRUE, appVersion = NULL, maxSize = 50e6, maxNodeSize = 5e6, debounce = 1000) {
+  resume_check_top_level()
+  if (!is.logical(enabled) || length(enabled) != 1 || is.na(enabled)) {
+    rlang::abort("`enabled` must be TRUE or FALSE.")
+  }
+  if (!enabled) {
+    shinyOptions(resume = c(list(enabled = FALSE), resume_defaults()))
+    return(invisible())
+  }
   settings <- list(
     enabled = TRUE,
     appVersion = resume_check_version(appVersion),
@@ -175,36 +218,86 @@ enableResume <- function(appVersion = NULL, maxSize = 50e6, maxNodeSize = 5e6, d
   invisible()
 }
 
-#' @rdname enableResume
+#' Leave a value out of resume
+#'
+#' @description
+#' With [enableResume()] on, `excludeFromResume(x)` keeps one value out of a
+#' session's saved state: it is not saved, does not count against the
+#' all-or-nothing rule, and after a resume holds its initial value. On an
+#' [ExtendedTask], the task's state is left out, and after a resume the task
+#' is as if never invoked.
+#'
+#' Use it for a value that:
+#'
+#' * cannot be serialized (a connection, an R6 object, a closure) but must
+#'   live in a [reactiveVal()]; rebuild it in `session$onResume()` (see
+#'   [enableResume()]);
+#' * should not be written to disk, such as a credential;
+#' * is transient UI state that should start fresh after a reconnect;
+#' * is over `maxNodeSize` and cheap to recompute.
+#'
+#' Call it anywhere, including inside the server function and a module. It
+#' can wrap the constructor or mark an object already held. With resume off
+#' it does nothing.
+#'
+#' @param x A [reactiveVal()], a [reactiveValues()] object or an
+#'   [ExtendedTask].
+#' @return `x`, invisibly.
+#' @seealso [enableResume()]
+#' @examples
+#' \dontrun{
+#' server <- function(input, output, session) {
+#'   url <- reactiveVal(NULL)
+#'   # A connection cannot be saved: leave it out and rebuild it on resume.
+#'   conn <- excludeFromResume(reactiveVal(NULL))
+#'   observeEvent(input$connect, {
+#'     url(input$url)
+#'     conn(url(input$url))
+#'   })
+#'   session$onResume(function(info) {
+#'     if (!is.null(url())) conn(url(url()))
+#'   })
+#' }
+#' }
 #' @export
-disableResume <- function(x) {
-  if (missing(x)) {
-    resume_check_top_level("disableResume")
-    shinyOptions(resume = c(list(enabled = FALSE), resume_defaults()))
-    return(invisible())
-  }
-  UseMethod("disableResume")
+excludeFromResume <- function(x) {
+  UseMethod("excludeFromResume")
 }
 
 #' @export
-disableResume.default <- function(x) {
+excludeFromResume.default <- function(x) {
   rlang::abort(paste0(
-    "disableResume() expects a reactiveVal, reactiveValues object, observer, or ExtendedTask, not an object of class ",
+    "excludeFromResume() expects a reactiveVal, reactiveValues object or ExtendedTask, not an object of class ",
     paste(class(x), collapse = "/"), "."
   ))
 }
 
-resume_check_top_level <- function(fn) {
+#' @export
+excludeFromResume.reactiveVal <- function(x) {
+  snapshot_mark_skipped(attr(x, ".impl", exact = TRUE))
+  invisible(x)
+}
+
+#' @export
+excludeFromResume.reactivevalues <- function(x) {
+  snapshot_mark_skipped(.subset2(x, "impl"))
+  invisible(x)
+}
+
+#' @export
+excludeFromResume.ExtendedTask <- function(x) {
+  snapshot_mark_skipped(attr(extended_task_state(x), ".impl", exact = TRUE))
+  invisible(x)
+}
+
+resume_check_top_level <- function() {
   # server.R is sourced when the first session starts, after that session
   # resolved its settings; a call there would reach later sessions only.
   if (isTRUE(.globals$sourcingServerR)) {
-    rlang::abort(sprintf("Call %s() in global.R, not server.R: server.R runs only once the first session has started.", fn))
+    rlang::abort("Call enableResume() in global.R, not server.R: server.R runs only once the first session has started.")
   }
   if (is.null(getDefaultReactiveDomain())) return(invisible())
-  rlang::abort(switch(fn,
-    enableResume = "Call enableResume() at the top level of the app (in app.R before shinyApp(), or in global.R), not inside a session.",
-    disableResume = "Call disableResume() at the top level of the app to turn resume off, or pass it a reactive."
-  ))
+  rlang::abort("Call enableResume() at the top level of the app (in app.R before shinyApp(), or in global.R), not inside a session.")
 }
 
 resume_check_number <- function(value, arg, what, positive) {
@@ -222,32 +315,8 @@ resume_check_version <- function(value) {
   rlang::abort("`appVersion` must be NULL or a single string or number.")
 }
 
-#' @export
-disableResume.reactiveVal <- function(x) {
-  snapshot_mark_skipped(attr(x, ".impl", exact = TRUE))
-  invisible(x)
-}
-
-#' @export
-disableResume.reactivevalues <- function(x) {
-  snapshot_mark_skipped(.subset2(x, "impl"))
-  invisible(x)
-}
-
-#' @export
-disableResume.Observer <- function(x) {
-  x$.resumeSkip <- TRUE
-  invisible(x)
-}
-
-#' @export
-disableResume.ExtendedTask <- function(x) {
-  snapshot_mark_skipped(attr(extended_task_state(x), ".impl", exact = TRUE))
-  invisible(x)
-}
-
 # A node no registry tracks is never recorded, so there is nothing to mark.
-snapshot_mark_skipped <- function(node, reason = "disableResume()") {
+snapshot_mark_skipped <- function(node, reason = "excludeFromResume()") {
   state <- node$.snapshot
   if (!is.null(state)) {
     state$skip <- TRUE

@@ -104,8 +104,9 @@ workerId <- local({
 #'   current input values filled back in: `renderUI()` content that uses
 #'   [restoreInput()] keeps its values and every output recomputes.
 #'   `observeEvent()` handlers do not fire for the replayed values, which are
-#'   events that already happened; they fire on the next change. Nothing
-#'   else carries over unless the app calls [enableResume()]:
+#'   events that already happened; they fire on the next change. To redo
+#'   what such a handler built, use `onResume()`. Nothing else carries over
+#'   unless the app calls [enableResume()]:
 #'   `reactiveVal()` and `reactiveValues()` start from their initial values.
 #'   A session the server ends (`session$close()`, an unhandled error) is
 #'   not retried. If `value` is `FALSE` (the default), the client
@@ -312,6 +313,14 @@ workerId <- local({
 #' \item{onRestored(fun)}{
 #'   Registers a function that will be called when a session is restored, after
 #'   all other reactives, observers, and render functions are run.
+#' }
+#' \item{onResume(fun)}{
+#'   Registers a function that runs once when a page reconnects to this
+#'   session (see [enableResume()]), after the server function and before
+#'   any observer or output runs. `fun` takes one argument, a list whose
+#'   `restored` element is `TRUE` when saved state was restored and `FALSE`
+#'   otherwise, including with resume off. Returns a function that
+#'   unregisters the callback.
 #' }
 #' \item{doBookmark()}{
 #'   Do bookmarking and invoke the onBookmark and onBookmarked callback functions.
@@ -997,6 +1006,7 @@ ShinySession <- R6Class(
     .resumeHoldBack = FALSE,  # TRUE from a `resume` until its first flush ends (snapshot_begin_hold_back()); internal
     .snapshotRegistry = NULL, # Resume registry; internal
     .resumeSettings = NULL,   # resume_settings() at session start; internal
+    .resumeCallbacks = NULL,  # session$onResume() callbacks (ResumeCallbacks); internal
 
     initialize = function(websocket) {
       private$websocket <- websocket
@@ -1025,6 +1035,7 @@ ShinySession <- R6Class(
       self$input <- .createReactiveValues(private$.input, readonly=TRUE)
       self$clientData <- .createReactiveValues(private$.clientData, readonly=TRUE)
 
+      self$.resumeCallbacks <- ResumeCallbacks$new()
       self$.resumeSettings <- resume_settings()
       if (isTRUE(self$.resumeSettings$enabled)) {
         private$resumeToken <- snapshot_token_new()
@@ -1153,6 +1164,10 @@ ShinySession <- R6Class(
             stop("`fun` must be a function that takes one argument")
           }
           restoredCallbacks$register(fun)
+        },
+        # Registered on the root's list, so order is global, under this scope.
+        onResume = function(fun) {
+          self$.resumeCallbacks$register(fun, scope)
         },
         exportTestValues = function(..., quoted_ = FALSE, env_ = parent.frame()) {
           if (quoted_) {
@@ -1506,7 +1521,8 @@ ShinySession <- R6Class(
     },
 
     # The `resume` branch of the WebSocket handler with resume on (step 1
-    # here, steps 2-6 in SnapshotRegistry$resume()). `data` is the decoded
+    # here, steps 2-4 and 6 in SnapshotRegistry$resume(), 4a-4b in finish()).
+    # `data` is the decoded
     # message; `runServer` runs the app's server function. Every failure
     # before the server function runs falls through to inputs-only; the
     # server function never runs twice.
@@ -1527,14 +1543,19 @@ ShinySession <- R6Class(
       # `fromRegistry`: the registry's outcome gains its handler counts after
       # the first flush, so the log reads it then.
       finish <- function(outcome, fromRegistry = TRUE) {
+        # Step 4a: values are final (restored, or initial after a trip). An
+        # error here propagates, and server.R ends the session for good.
+        callbacks <- self$.resumeCallbacks$run(identical(outcome$resumed, "snapshot"))
+        # Step 4b.
         self$.sendResumed(outcome$resumed)
         self$onFlushed(function() {
           out <- if (fromRegistry) reg$outcome() %||% outcome else outcome
+          out$callbacks <- callbacks
           undefined <- snapshot_undefined_outputs(live$clientData, names(private$.outputs))
           message(paste(snapshot_resume_log(out, undefined), collapse = "\n"))
           if (length(undefined)) {
             reg$devmodeInform("undefined-outputs", sprintf(
-              "Outputs %s are on the page but were not defined after resuming, probably because an observeEvent() handler defines them and handlers whose events already happened do not run again. Build them from state instead (rule 3 of the rules of reactives in ?enableResume), or mark that handler with disableResume().",
+              "Outputs %s are on the page but were not defined after resuming, probably because an observeEvent() handler defines them and handlers whose events already happened do not run again. Build them from state instead, or rebuild them in session$onResume() (rule 3 of the rules of reactives in ?enableResume).",
               paste(undefined, collapse = ", ")))
           }
           snapshot_resume_otel(self, out)
@@ -2264,6 +2285,9 @@ ShinySession <- R6Class(
         stop("`fun` must be a function that takes one argument")
       }
       private$restoredCallbacks$register(fun)
+    },
+    onResume = function(fun) {
+      self$.resumeCallbacks$register(fun, self)
     },
     doBookmark = function() {
       # Get bookmarking store config

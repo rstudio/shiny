@@ -87,6 +87,9 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     # accumulated into twice. `state` is the source's `.snapshot`.
     noteWrite = function(state, label) {
       if (!identical(private$phase, "restoring") || !hasCurrentContext()) return(invisible())
+      # session$onResume() callbacks run in isolate() while restoring; their
+      # writes rebuild state rather than accumulate into it.
+      if (private$session$.resumeCallbacks$running()) return(invisible())
       if (isTRUE(state$skip) || !isTRUE(state$id %in% private$applied)) return(invisible())
       # isolate() opens its own context (type "isolate"), and that is how an
       # observer usually writes: observe({ input$x; isolate(count(count() + 1)) }).
@@ -206,7 +209,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
           block(id, res$reason)
           addRow(entry$kind, entry$label, entry$ns, FALSE, res$reason)
           self$devmodeInform(paste0("blocked:", id), sprintf(
-            "`%s` cannot be saved (%s), so the session resumes from inputs only until it is fixed or marked with disableResume().",
+            "`%s` cannot be saved (%s), so the session resumes from inputs only until it is fixed or left out with excludeFromResume().",
             entry$label, res$reason))
         }
       }
@@ -283,14 +286,16 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     # record (ShinySession$.resumeSession()); (2) the record's inputs and
     # userData are restored; (3) the server function runs, and constructors
     # apply their records; (4) the gate verifies and commits, or reverts
-    # everything; (5) the first flush, with observeEvent() first runs held
-    # back; (6) the client's live inputs are applied (finishResume()).
+    # everything; (4a) the session runs session$onResume() callbacks and
+    # (4b) sends `resumed`; (5) the first flush, with observeEvent() first
+    # runs held back; (6) the client's live inputs are applied
+    # (finishResume()).
 
     # Steps 2-4. `record` is a complete record whose identity
     # checks passed; `live` the client's handler-applied inputs; `run` runs
-    # the server function once. The caller seeds the RestoreContext before
-    # and sends `resumed` after. Returns the outcome; step 6 runs after the
-    # first flush.
+    # the server function once. The caller seeds the RestoreContext before,
+    # and runs the callbacks and sends `resumed` after. Returns the outcome;
+    # step 6 runs after the first flush.
     resume = function(record, live, run) {
       private$records <- record$sources
       private$initials <- list()
@@ -301,7 +306,6 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       private$recordClientData <- record$clientData
       private$updated <- character(0)
       private$skipped <- character(0)
-      private$reran <- list()
       private$outcomeValue <- NULL
       private$restoredUserData <- list()
       private$phase <- "constructing"
@@ -358,7 +362,6 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       }
       private$setClientData(changedCd, force = TRUE)
       private$outcomeValue$skipped <- private$skipped
-      private$outcomeValue$reran <- private$reran
       private$leave()
       invisible()
     },
@@ -369,10 +372,6 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     },
     noteInitSkipped = function(label) {
       private$skipped <- c(private$skipped, label)
-      invisible()
-    },
-    noteInitRan = function(label, why) {
-      private$reran[[length(private$reran) + 1L]] <- list(label = label, why = why)
       invisible()
     },
     outcome = function() private$outcomeValue
@@ -395,7 +394,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     phase = "idle",      # "idle" | "constructing" (server function running) | "restoring" (verified; first flush)
     records = NULL, initials = NULL, applied = character(0), trips = list(),
     liveSet = NULL, recordInputs = NULL, recordClientData = NULL,
-    updated = character(0), skipped = character(0), reran = list(), outcomeValue = NULL,
+    updated = character(0), skipped = character(0), outcomeValue = NULL,
     restoredUserData = NULL,
 
     orphan = function(entry, reason, counted) {
@@ -511,7 +510,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
 
     # A source without a usable record trips the gate. Trips are collected
     # and judged at verify: the server function may mark the source with
-    # disableResume() after its constructor returned.
+    # excludeFromResume() after its constructor returned.
     trip = function(id, node, reason) {
       private$trips[[length(private$trips) + 1L]] <- list(id = id, node = node, reason = reason)
       invisible()
@@ -644,6 +643,20 @@ snapshot_holding_back <- function(domain) {
   while (inherits(domain, "session_proxy")) domain <- .subset2(domain, "parent")
   if (!is.environment(domain)) return(FALSE)
   isTRUE(tryCatch(.subset2(domain, ".resumeHoldBack"), error = function(e) FALSE))
+}
+
+# Closure state is never saved, so the variables a held-back handler would
+# have assigned keep their initial values; devmode names them.
+snapshot_inform_closure_vars <- function(label, func) {
+  vars <- snapshot_hazards(snapshot_user_body(func))
+  if (!length(vars)) return(invisible())
+  one <- length(vars) == 1L
+  devmode_inform(sprintf(
+    "%s was held back on resume; it assigns %s, whose %s not saved. Keep %s in a reactiveVal() or session$userData, or rebuild %s in session$onResume().",
+    label, paste(vars, collapse = ", "), if (one) "value was" else "values were",
+    if (one) "it" else "them", if (one) "it" else "them"
+  ), .frequency = "always")
+  invisible()
 }
 
 # The `.snapshot` state of a tracked source: an environment the registry and

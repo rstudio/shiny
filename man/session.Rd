@@ -12,8 +12,9 @@ gets through, a new session starts on the server with the client's
 current input values filled back in: \code{renderUI()} content that uses
 \code{\link[=restoreInput]{restoreInput()}} keeps its values and every output recomputes.
 \code{observeEvent()} handlers do not fire for the replayed values, which are
-events that already happened; they fire on the next change. Nothing
-else carries over unless the app calls \code{\link[=enableResume]{enableResume()}}:
+events that already happened; they fire on the next change. To redo
+what such a handler built, use \code{onResume()}. Nothing else carries over
+unless the app calls \code{\link[=enableResume]{enableResume()}}:
 \code{reactiveVal()} and \code{reactiveValues()} start from their initial values.
 A session the server ends (\code{session$close()}, an unhandled error) is
 not retried. If \code{value} is \code{FALSE} (the default), the client
@@ -218,6 +219,14 @@ all other reactives, observers, and render functions are run.
 \item{onRestored(fun)}{
 Registers a function that will be called when a session is restored, after
 all other reactives, observers, and render functions are run.
+}
+\item{onResume(fun)}{
+Registers a function that runs once when a page reconnects to this
+session (see \code{\link[=enableResume]{enableResume()}}), after the server function and before
+any observer or output runs. \code{fun} takes one argument, a list whose
+\code{restored} element is \code{TRUE} when saved state was restored and \code{FALSE}
+otherwise, including with resume off. Returns a function that
+unregisters the callback.
 }
 \item{doBookmark()}{
 Do bookmarking and invoke the onBookmark and onBookmarked callback functions.

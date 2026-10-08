@@ -86,25 +86,21 @@ test_that("once=TRUE works", {
   expect_identical(n, 1)
 })
 
-test_that("bindEvent.Observer holds back the first run while the session answers a resume, unless marked or hazardous", {
-  # Counters live in environments: a `runs["x"] <<- ...` handler would itself
-  # assign a closure variable and so count as a hazard.
-  count <- function() list2env(list(plain = 0, marked = 0, hazard = 0, ignore = 0))
+test_that("bindEvent.Observer holds back every first run while the session answers a resume", {
+  count <- function() list2env(list(plain = 0, closure = 0, ignore = 0))
   handlers <- function(s, runs) withMockContext(s, {
     observeEvent(s$input$x, runs$plain <- runs$plain + 1)
-    m <- observeEvent(s$input$x, runs$marked <- runs$marked + 1)
-    disableResume(m)
-    observeEvent(s$input$x, { shared <<- 1; runs$hazard <- runs$hazard + 1 })
+    observeEvent(s$input$x, { shared <<- 1; runs$closure <- runs$closure + 1 })
     observeEvent(s$input$x, runs$ignore <- runs$ignore + 1, ignoreInit = TRUE)
   })
-  tally <- function(runs) c(runs$plain, runs$marked, runs$hazard, runs$ignore)
+  tally <- function(runs) c(runs$plain, runs$closure, runs$ignore)
   shared <- NULL
 
   runs <- count()
   s <- MockShinySession$new()
   handlers(s, runs)
   s$setInputs(x = 1)                                   # not resuming: all but ignoreInit ran
-  expect_identical(tally(runs), c(1, 1, 1, 0))
+  expect_identical(tally(runs), c(1, 1, 0))
 
   # No registry at all (resume off): the field alone holds back.
   withr::local_envvar(SHINY_RESUME = "FALSE")
@@ -113,11 +109,33 @@ test_that("bindEvent.Observer holds back the first run while the session answers
   expect_null(s2$.snapshotRegistry)
   handlers(s2, runs2)
   snapshot_begin_hold_back(s2)
-  s2$setInputs(x = 1)                                  # the first flush: first runs happen here
-  expect_identical(tally(runs2), c(0, 1, 1, 0))
+  s2$setInputs(x = 1)                                  # the first flush: every first run held back
+  expect_identical(tally(runs2), c(0, 0, 0))
   expect_false(s2$.resumeHoldBack)                     # cleared after the first flush
   s2$setInputs(x = 2)                                  # the dependency was registered
-  expect_identical(tally(runs2), c(1, 2, 2, 1))
+  expect_identical(tally(runs2), c(1, 1, 1))
+})
+
+test_that("a held-back handler that assigns closure variables is named in devmode", {
+  withr::local_envvar(SHINY_RESUME = "FALSE")
+  seen <- character(0)
+  local_mocked_bindings(devmode_inform = function(message, ...) seen <<- c(seen, message))
+  n <- 0
+  last <- NULL
+  s <- MockShinySession$new()
+  one <- withMockContext(s, observeEvent(s$input$send, n <<- n + 1))
+  two <- withMockContext(s, observeEvent(s$input$send, { n <<- n + 1; last <<- "x" }))
+  withMockContext(s, observeEvent(s$input$send, NULL))
+  snapshot_begin_hold_back(s)
+  s$setInputs(send = 1)
+  expect_identical(n, 0)
+  expect_setequal(seen, c(
+    sprintf("%s was held back on resume; it assigns n, whose value was not saved. Keep it in a reactiveVal() or session$userData, or rebuild it in session$onResume().", one$.label),
+    sprintf("%s was held back on resume; it assigns n, last, whose values were not saved. Keep them in a reactiveVal() or session$userData, or rebuild them in session$onResume().", two$.label)
+  ))
+  s$setInputs(send = 2)                                # a run that is not held back says nothing
+  expect_identical(n, 2)
+  expect_length(seen, 2)
 })
 
 test_that("an observer created after the first flush of a resume runs normally", {

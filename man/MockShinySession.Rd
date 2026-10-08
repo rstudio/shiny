@@ -73,6 +73,9 @@ resume off. For internal use.}
 
     \item{\code{.resumeHoldBack}}{\code{TRUE} while the session answers a resume, until
 its first flush ends. For internal use.}
+
+    \item{\code{.resumeCallbacks}}{The session's \code{onResume()} callbacks. For
+internal use.}
   }
   \if{html}{\out{</div>}}
 }
@@ -114,6 +117,7 @@ its first flush ends. For internal use.}
     \item \href{#method-MockShinySession-defineOutput}{\code{MockShinySession$defineOutput()}}
     \item \href{#method-MockShinySession-getOutput}{\code{MockShinySession$getOutput()}}
     \item \href{#method-MockShinySession-resumeReport}{\code{MockShinySession$resumeReport()}}
+    \item \href{#method-MockShinySession-onResume}{\code{MockShinySession$onResume()}}
     \item \href{#method-MockShinySession-ns}{\code{MockShinySession$ns()}}
     \item \href{#method-MockShinySession-flushReact}{\code{MockShinySession$flushReact()}}
     \item \href{#method-MockShinySession-makeScope}{\code{MockShinySession$makeScope()}}
@@ -502,6 +506,29 @@ and, if not, why. See \code{?session}.
     \if{html}{\out{<div class="r">}}
     \preformatted{MockShinySession$resumeReport()}
     \if{html}{\out{</div>}}
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MockShinySession-onResume"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-onResume}{}}}
+\subsection{\code{MockShinySession$onResume()}}{
+  Registers a function to run when the session resumes. In
+a \code{MockShinySession} it runs only when a test drives a resume.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{MockShinySession$onResume(fun)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{fun}}{A function of one argument, \code{info}.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A function that unregisters the callback.
   }
 }
 

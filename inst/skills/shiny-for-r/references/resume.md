@@ -33,8 +33,32 @@ shinyApp(ui, server)
 ```
 
 Resume is off unless the app calls `enableResume()` or the hosting platform
-sets `SHINY_RESUME=TRUE`; the app's own call wins. `disableResume()` with no
-argument turns it off.
+sets `SHINY_RESUME=TRUE`; the app's own call wins, and
+`enableResume(FALSE)` turns it off.
+
+## Rebuilding on resume
+
+`session$onResume()` runs a function once when a page reconnects, after the
+server function and before any observer or output, with saved values
+already restored. Use it to rebuild what event handlers built, since those
+handlers are held back:
+
+```r
+ids <- reactiveVal(character())
+observeEvent(input$add, {
+  id <- paste0("p", input$add)
+  ids(c(ids(), id))
+  insertUI("#panels", ui = panelUI(id))
+  panelServer(id)
+})
+session$onResume(function(info) {
+  for (id in ids()) panelServer(id)
+})
+```
+
+`info$restored` is `TRUE` when saved state came back and `FALSE` when the
+session resumed from its inputs only. It also fires with resume off, when
+`session$allowReconnect(TRUE)` reconnects a page.
 
 ## The rules of reactives
 
@@ -47,11 +71,13 @@ complete and correct.
    saved.
 2. **Hold reference objects in a `reactive()`, not a `reactiveVal()`.** A
    connection, pool or R6 client cannot be saved; in a `reactive()` it is
-   rebuilt on first read.
-3. **Build structure from state, not in handlers.** A handler that defines
-   an output, starts a module server or creates an observer does not run
-   again after a resume. Keep the ids in a `reactiveVal()`, render with
-   `renderUI()`, and start module servers from a plain `observe()`.
+   rebuilt on first read. If one must live in a source, leave it out with
+   `excludeFromResume()` and rebuild it in `session$onResume()`.
+3. **Build structure from state.** A handler that defines an output, starts
+   a module server or creates an observer is held back on resume. Derive
+   the structure from state (`renderUI()`, an `observe()` over ids), or
+   keep the ids in a `reactiveVal()` and rebuild in `session$onResume()`.
+   For one output built from inputs, prefer `eventReactive()`.
 4. **Accumulate into a reactive value from `observeEvent()`, not a plain
    `observe()`.** A plain observer has no event to hold back, so it runs on
    resume and applies its change again.
@@ -61,20 +87,15 @@ complete and correct.
 counts <- lapply(1:3, function(i) reactiveVal(0, label = paste0("count", i)))
 # Rule 2: hold reference objects in a reactive().
 conn <- reactive(DBI::dbConnect(RSQLite::SQLite(), ":memory:"))
-# Rule 3: build structure from state.
-ids <- reactiveVal(character(0))
-observeEvent(input$add, ids(c(ids(), paste0("panel", length(ids()) + 1))))
-output$panels <- renderUI(lapply(ids(), panelUI))
-observe(for (id in ids()) panelServer(id))
+# Rule 3: one output built from inputs.
+n <- eventReactive(input$go, input$n)
+output$plot <- renderPlot(plot(seq_len(n())))
 # Rule 4: accumulate from observeEvent().
 observeEvent(input$plus, count(count() + 1))
 ```
 
-(`panelServer()` must tolerate being started again for an id it already
-serves, for example by tracking started ids in a plain environment.)
-
-To leave one value, observer or `ExtendedTask` out, call `disableResume(x)`
-on it. A marked observer runs on resume exactly as on a fresh start.
+To leave one value or `ExtendedTask` out of the saved state, wrap it in
+`excludeFromResume()`; after a resume it holds its initial value.
 
 ## Reading the report
 
@@ -104,8 +125,8 @@ testServer(server, {
 
 | Function | Purpose |
 |---|---|
-| `enableResume(appVersion, maxSize, maxNodeSize, debounce)` | Turn resume on for the app and configure it |
-| `disableResume()` | Turn resume off for the app |
-| `disableResume(x)` | Leave a `reactiveVal()`, `reactiveValues()`, observer or `ExtendedTask` out |
+| `enableResume(enabled, appVersion, maxSize, maxNodeSize, debounce)` | Turn resume on (or off with `FALSE`) for the app and configure it |
+| `excludeFromResume(x)` | Leave a `reactiveVal()`, `reactiveValues()` or `ExtendedTask` out |
+| `session$onResume(fun)` | Run code when a page reconnects, to rebuild what handlers built |
 | `reactiveValues(..., .label)` | Name an object across sessions |
 | `session$resumeReport()` | Why each value would or would not restore |

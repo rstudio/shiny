@@ -39,15 +39,15 @@ test_that("a cached renderPlot's size value is internal", {
   expect_length(rec$sources, 0)
 })
 
-test_that("disableResume() on an ExtendedTask leaves its state out: it comes back as never invoked", {
+test_that("excludeFromResume() on an ExtendedTask leaves its state out: it comes back as never invoked", {
   server <- function(input, output, session) {
     task <- ExtendedTask$new(function() 1)
-    disableResume(task)
+    excludeFromResume(task)
   }
   s <- snapshot_session(server)
   rec <- s$.snapshotRegistry$snapshot()
   expect_length(rec$sources, 0)
   expect_true(rec$complete)
-  expect_identical(rec$report$reason[rec$report$label %in% "ExtendedTask task"], "disableResume()")
-  expect_identical(withVisible(disableResume(s$env$task))$visible, FALSE)
+  expect_identical(rec$report$reason[rec$report$label %in% "ExtendedTask task"], "excludeFromResume()")
+  expect_identical(withVisible(excludeFromResume(s$env$task))$visible, FALSE)
 })

@@ -11,6 +11,17 @@ log_line <- function(...) {
   if (nzchar(path)) cat(paste0(..., "\n"), file = path, append = TRUE)
 }
 
+panelUI <- function(id) {
+  ns <- NS(id)
+  div(class = "panel", actionButton(ns("plus"), paste("+1", id)), textOutput(ns("count")))
+}
+
+panelServer <- function(id) moduleServer(id, function(input, output, session) {
+  count <- reactiveVal(0)
+  observeEvent(input$plus, count(count() + 1))
+  output$count <- renderText(paste("Panel count:", count()))
+})
+
 ui <- fluidPage(
   # Tab ids are random on every render: a resume must not depend on the
   # page's markup matching the app's.
@@ -27,7 +38,12 @@ ui <- fluidPage(
       textOutput("emails"),
       textOutput("expensive"),
       textOutput("process"),
-      textOutput("contents")
+      textOutput("contents"),
+      actionButton("add", "Add panel"),
+      div(id = "panels"),
+      textInput("word", "Word", "first"),
+      actionButton("build", "Build"),
+      textOutput("built")
     ),
     tabPanel("Other", "Nothing here")
   ),
@@ -54,6 +70,22 @@ server <- function(input, output, session) {
   output$expensive <- renderText(paste("Expensive:", expensive()))
   output$process <- renderText(paste("PID:", Sys.getpid()))
   output$contents <- renderText(paste("Contents:", contents()))
+
+  ids <- reactiveVal(character())
+  observeEvent(input$add, {
+    id <- paste0("p", input$add)
+    ids(c(ids(), id))
+    insertUI("#panels", ui = panelUI(id))
+    panelServer(id)
+  })
+  # An output a handler defines; with resume off nothing is restored, so
+  # the callback defines it again if the button was clicked.
+  build <- function() output$built <- renderText(paste("Built:", input$word))
+  observeEvent(input$build, build())
+  session$onResume(function(info) {
+    for (id in ids()) panelServer(id)
+    if (isTRUE(input$build > 0)) build()
+  })
 }
 
 shinyApp(ui, server)

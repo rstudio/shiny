@@ -345,7 +345,7 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
   )
 )
 
-# The task's state source, for disableResume().
+# The task's state source, for excludeFromResume().
 extended_task_state <- function(task) {
   task$.__enclos_env__$private$rv_state
 }

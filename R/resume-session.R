@@ -41,20 +41,56 @@ snapshot_seed_restore_context <- function(session, inputs, dir = NULL) {
   invisible(ctx)
 }
 
+# session$onResume() callbacks. Each is kept with the domain it was
+# registered through (the session, or a module's scope) and runs under it.
+ResumeCallbacks <- R6Class("ResumeCallbacks", cloneable = FALSE,
+  public = list(
+    register = function(fun, domain) {
+      if (!is.function(fun) || length(formals(fun)) == 0L) {
+        stop("`fun` must be a function that takes one argument")
+      }
+      i <- length(private$entries) + 1L
+      private$entries[[i]] <- list(fun = fun, domain = domain)
+      # The slot stays so the pass's positions do not shift.
+      function() private$entries[i] <- list(NULL)
+    },
+
+    # Runs once per session, with `info = list(restored = restored)`, and
+    # returns how many ran. Callbacks registered while it runs (a module
+    # server started by a callback registers its own) run in the same pass;
+    # those registered afterwards never do. An error propagates: the caller
+    # ends the session.
+    run = function(restored) {
+      if (private$done) return(0L)
+      private$done <- TRUE
+      private$active <- TRUE
+      on.exit(private$active <- FALSE, add = TRUE)
+      info <- list(restored = restored)
+      n <- 0L
+      i <- 0L
+      while (i < length(private$entries)) {
+        i <- i + 1L
+        entry <- private$entries[[i]]
+        if (is.null(entry)) next
+        n <- n + 1L
+        withReactiveDomain(entry$domain, isolate(entry$fun(info)))
+      }
+      n
+    },
+
+    running = function() private$active
+  ),
+  private = list(entries = list(), done = FALSE, active = FALSE)
+)
+
 # The always-on stderr lines. `outcome` is the registry's outcome list, or a
 # list with `resumed = "inputs"` and a `cause`.
 snapshot_resume_log <- function(outcome, undefined = character(0)) {
-  if (identical(outcome$resumed, "inputs")) {
-    lines <- sprintf("Resumed from inputs only: %s", outcome$cause %||% "no saved state")
+  lines <- if (identical(outcome$resumed, "inputs")) {
+    sprintf("Resumed from inputs only: %s", outcome$cause %||% "no saved state")
   } else {
-    reran <- outcome$reran %||% list()
-    lines <- sprintf("Resumed: restored %d values and %d inputs; %d event handlers skipped, %d re-ran",
-                     outcome$values, outcome$inputs, length(outcome$skipped), length(reran))
-    if (length(reran)) {
-      shown <- utils::head(reran, 5)
-      lines <- c(lines, vapply(shown, function(r) sprintf("  %s: %s", r$label, r$why), character(1)))
-      if (length(reran) > 5) lines <- c(lines, sprintf("  and %d more", length(reran) - 5))
-    }
+    sprintf("Resumed: restored %d values and %d inputs; %d event handlers held back",
+            outcome$values, outcome$inputs, length(outcome$skipped))
   }
   if (length(undefined)) {
     lines <- c(lines, sprintf("Outputs on the page with no definition after resume: %s", paste(undefined, collapse = ", ")))
@@ -75,7 +111,7 @@ snapshot_resume_otel <- function(session, outcome) {
         shiny.resume.resumed = outcome$resumed,
         shiny.resume.values = as.integer(outcome$values %||% 0L),
         shiny.resume.skipped = length(outcome$skipped),
-        shiny.resume.reran = length(outcome$reran)
+        shiny.resume.callbacks = as.integer(outcome$callbacks %||% 0L)
       )
     ))
   )

@@ -69,7 +69,7 @@ package and its help pages.
 |---|---|---|
 | Feedback | Toasts/notifications, modal dialogs, progress bars, and input validation sent from the server, typically inside `observeEvent()` | `references/feedback.md` |
 | Bookmarking | Saving/restoring app state via a shareable URL instead of a hand-built query string or custom persistence layer | `references/bookmarking.md` |
-| Resuming sessions | Keeping a user's state when the connection drops, across a server restart; `enableResume()`, `disableResume()`, `reactiveValues(.label)`, `session$resumeReport()`; the four rules of reactives (labels, reference objects in `reactive()`, structure built from state, `observeEvent()` for accumulation) | `references/resume.md` |
+| Resuming sessions | Keeping a user's state when the connection drops, across a server restart; `enableResume()`, `excludeFromResume()`, `session$onResume()`, `reactiveValues(.label)`, `session$resumeReport()`; the four rules of reactives (labels, reference objects in `reactive()`, structure built from state, `observeEvent()` for accumulation) | `references/resume.md` |
 
 ## Theming, assets & extending
 

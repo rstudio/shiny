@@ -260,6 +260,9 @@ MockShinySession <- R6Class(
     #' @field .resumeHoldBack `TRUE` while the session answers a resume, until
     #'   its first flush ends. For internal use.
     .resumeHoldBack = FALSE,
+    #' @field .resumeCallbacks The session's `onResume()` callbacks. For
+    #'   internal use.
+    .resumeCallbacks = NULL,
 
     #' @description Create a new MockShinySession.
     initialize = function() {
@@ -284,6 +287,7 @@ MockShinySession <- R6Class(
       # Create a read-only copy of the inputs reactive.
       self$input <- .createReactiveValues(private$.input, readonly = TRUE)
 
+      self$.resumeCallbacks <- ResumeCallbacks$new()
       self$.resumeSettings <- resume_settings()
       if (isTRUE(self$.resumeSettings$enabled)) self$.snapshotRegistry <- SnapshotRegistry$new(self)
 
@@ -569,6 +573,14 @@ MockShinySession <- R6Class(
     #'   and, if not, why. See `?session`.
     resumeReport = function() snapshot_session_report(self),
 
+    #' @description Registers a function to run when the session resumes. In
+    #'   a `MockShinySession` it runs only when a test drives a resume.
+    #' @param fun A function of one argument, `info`.
+    #' @return A function that unregisters the callback.
+    onResume = function(fun) {
+      self$.resumeCallbacks$register(fun, self)
+    },
+
     #' @description Returns the given id prefixed by this namespace's id.
     #' @param id The id to prefix with a namespace id.
     #' @return The id with a namespace prefix.
@@ -605,6 +617,9 @@ MockShinySession <- R6Class(
         },
         getBookmarkExclude = function() {
           bookmarkExclude
+        },
+        onResume = function(fun) {
+          self$.resumeCallbacks$register(fun, scope)
         },
         onDestroy = function(callback) {
           private$getOrCreateDestroyCallbacks(namespace)$register(callback)

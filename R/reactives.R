@@ -1440,9 +1440,6 @@ Observer <- R6Class(
     .isRecordingOtel = FALSE, # Needs to be set by Shiny
     .otelLabel = NULL, # Needs to be set by Shiny
     .otelAttrs = NULL, # Needs to be set by Shiny
-    # Set by disableResume(): bindEvent.Observer does not hold back its first run.
-    .resumeSkip = FALSE,
-
     initialize = function(observerFunc, label, suspended = FALSE, priority = 0,
                           domain = getDefaultReactiveDomain(),
                           autoDestroy = TRUE, ..stacktraceon = TRUE) {

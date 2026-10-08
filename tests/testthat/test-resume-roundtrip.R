@@ -55,26 +55,24 @@ test_that("an input that changed while disconnected fires its handler after the 
   expect_equal(isolate(rt$second$env$count()), 4)
 })
 
-test_that("a hazard handler and a marked handler run; ignoreInit = TRUE handles the next event; once = TRUE may fire again", {
+test_that("a closure-assigning handler is held back; ignoreInit = TRUE handles the next event; once = TRUE may fire again", {
   make <- function(spy) { force(spy); function(input, output, session) {
     conn <- NULL
-    observeEvent(input$login, { conn <<- "open"; spy$hazard <- spy$hazard + 1 })
-    marked <- observeEvent(input$x, spy$marked <- spy$marked + 1)
-    disableResume(marked)
+    observeEvent(input$login, { conn <<- "open"; spy$closure <- spy$closure + 1 })
     observeEvent(input$y, spy$ignore <- spy$ignore + 1, ignoreInit = TRUE)
     observeEvent(input$z, spy$once <- spy$once + 1, once = TRUE)
   }}
-  spy <- new_spy("hazard", "marked", "ignore", "once")
-  rt <- snapshot_roundtrip(make(spy), function(s) { s$setInputs(login = 1, x = 1, y = 1, z = 1) })
-  expect_equal(spy$hazard, 1)
-  expect_equal(spy$marked, 1)
+  spy <- new_spy("closure", "ignore", "once")
+  rt <- snapshot_roundtrip(make(spy), function(s) { s$setInputs(login = 1, y = 1, z = 1) })
+  expect_equal(spy$closure, 0)
+  expect_null(rt$second$env$conn)                      # closure state is never saved
   expect_equal(spy$ignore, 0)
   expect_equal(spy$once, 0)
   rt$second$setInputs(y = 2, z = 2)
   expect_equal(spy$ignore, 1)
   expect_equal(spy$once, 1)
-  whys <- vapply(rt$outcome$reran, `[[`, "", "why")
-  expect_setequal(whys, c("assigns closure variables", "disableResume()"))
+  expect_length(rt$outcome$skipped, 2)                 # login and z; ignoreInit skips y before the hold-back
+  expect_null(rt$outcome$reran)
 })
 
 test_that("a source without a saved value trips the gate: sources revert, inputs stay seeded, handlers are still held back", {
@@ -181,7 +179,7 @@ test_that("internal sources that share a label do not trip the gate or block the
 
 test_that("rule 4 is not raised for writes to sources that were not restored", {
   server <- function(input, output, session) {
-    secret <- reactiveVal(0); disableResume(secret)
+    secret <- reactiveVal(0); excludeFromResume(secret)
     count <- reactiveVal(0)
     observeEvent(input$plus, count(count() + 1))
     slow <- debounce(reactive(input$plus), 50)
@@ -199,7 +197,7 @@ test_that("an error while committing the saved state falls back to inputs only",
   server <- function(input, output, session) {
     rv <- reactiveValues(a = 0)
     observeEvent(input$plus, rv$a <- rv$a + 1)
-    disableResume(rv)                                  # marked after its record applied: commit reverts it
+    excludeFromResume(rv)                                  # marked after its record applied: commit reverts it
   }
   first <- snapshot_session(function(input, output, session) {
     rv <- reactiveValues(a = 0)

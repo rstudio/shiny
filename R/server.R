@@ -328,6 +328,9 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
               shinysession$manageInputs(msg$data, now = TRUE)
 
               local({ runServerWith(serverFunc) })
+              # A reconnect with resume off restores nothing, but the app may
+              # rebuild what its held-back handlers built.
+              if (seedFromInputs) shinysession$.resumeCallbacks$run(FALSE)
             }),
             resume = endOnError({
               serverFunc <- prepareServer(if (is.list(msg$data$inputs)) msg$data$inputs else list())

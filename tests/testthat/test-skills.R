@@ -98,7 +98,7 @@ test_that("shiny APIs documented in references still exist", {
     files = c("fileInput", "downloadHandler", "downloadButton", "downloadLink", "outputOptions"),
     feedback = c("showNotification", "removeNotification", "modalDialog", "modalButton", "showModal", "removeModal", "withProgress", "incProgress", "validate", "need"),
     bookmarking = c("enableBookmarking", "bookmarkButton", "onBookmark", "onBookmarked", "onRestore", "onRestored", "setBookmarkExclude", "updateQueryString", "reactiveValuesToList"),
-    resume = c("enableResume", "disableResume", "reactiveVal", "reactiveValues", "observeEvent", "renderUI", "testServer"),
+    resume = c("enableResume", "excludeFromResume", "reactiveVal", "reactiveValues", "observeEvent", "renderUI", "testServer"),
     `custom-components` = c("registerInputHandler"),
     testing = c("testServer", "exportTestValues"),
     debugging = c("req", "validate", "need", "reactlogShow"),

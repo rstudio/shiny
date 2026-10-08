@@ -9,7 +9,9 @@
   longer restored over inputs the user changed since. `observeEvent()`
   handlers no longer fire for the replayed inputs: they are events that
   already happened, and before, two clicks and a reconnect re-ran the
-  handler. A reconnecting client's first message is now `resume` rather
+  handler. `session$onResume()` runs code on every reconnect, to redo what
+  such handlers built. A reconnecting client's first message is now `resume`
+  rather
   than `init`; the wire protocol is documented in `srcts/PROTOCOL.md`. Apps
   that already call `allowReconnect(TRUE)` outside those platforms start
   retrying, `"force"` behaves exactly like `TRUE`, and retries are bounded
@@ -25,7 +27,10 @@
   Saved state is restored all or nothing: when a value cannot be saved the
   session resumes from its inputs and the log says why, and
   `session$resumeReport()` lists every value with its reason.
-  `disableResume(x)` leaves a value, observer or `ExtendedTask` out, and
+  `excludeFromResume(x)` leaves a value or `ExtendedTask` out, and
+  `session$onResume()` runs code when a page reconnects, to rebuild what
+  event handlers built. `enableResume(FALSE)` turns resume off, overriding
+  the `SHINY_RESUME` environment variable a hosting platform may set, and
   `reactiveValues()` gains `.label`. A page reload still starts fresh.
   (#<PR number>)
 

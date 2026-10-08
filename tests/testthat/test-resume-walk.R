@@ -72,13 +72,13 @@ test_that("a destroyed source is not recorded", {
 
 test_that("resumeReport() groups by reason when printed and is empty with resume off", {
   s <- snapshot_session(function(input, output, session) {
-    secret <- reactiveVal(1); disableResume(secret)
+    secret <- reactiveVal(1); excludeFromResume(secret)
     ok <- reactiveVal(2)
   })
   rep <- s$resumeReport()
   expect_s3_class(rep, "shiny_resume_report")
   expect_identical(names(rep), c("kind", "label", "namespace", "adoptable", "reason"))
-  expect_output(print(rep), "disableResume\\(\\):\\n  reactiveVal secret")
+  expect_output(print(rep), "excludeFromResume\\(\\):\\n  reactiveVal secret")
   withr::with_envvar(c(SHINY_RESUME = "FALSE"), {
     off <- snapshot_session(function(input, output, session) { v <- reactiveVal(1) })
     expect_null(off$.snapshotRegistry)

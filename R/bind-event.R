@@ -310,7 +310,6 @@ bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
   }
 
   initialized <- FALSE
-  hazards <- NULL
 
   x$.func <- wrapFunctionLabel(
     name = x$.label,
@@ -323,21 +322,13 @@ bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
             initialized <<- TRUE
             if (ignoreInit) return()
             # A resume: this event already happened in the session this one
-            # continues, so the first run is held back unless the handler is
-            # marked or assigns closure variables. The event expression was
-            # evaluated above, so the dependency stands.
+            # continues, so the first run is held back. The event expression
+            # was evaluated above, so the dependency stands.
             if (snapshot_holding_back(x$.domain)) {
               registry <- snapshot_registry(x$.domain)
-              if (isTRUE(x$.resumeSkip)) {
-                if (!is.null(registry)) registry$noteInitRan(x$.label, "disableResume()")
-              } else {
-                if (is.null(hazards)) hazards <<- snapshot_hazards(snapshot_user_body(valueFunc))
-                if (length(hazards) == 0L) {
-                  if (!is.null(registry)) registry$noteInitSkipped(x$.label)
-                  return()
-                }
-                if (!is.null(registry)) registry$noteInitRan(x$.label, "assigns closure variables")
-              }
+              if (!is.null(registry)) registry$noteInitSkipped(x$.label)
+              snapshot_inform_closure_vars(x$.label, valueFunc)
+              return()
             }
           }
 

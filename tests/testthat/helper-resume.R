@@ -82,7 +82,8 @@ snapshot_eval_no_srcref <- function(text, env = parent.frame()) {
 # returns everything a test needs. `live` is what the returning client
 # reports (default: what the record has).
 snapshot_roundtrip <- function(server, drive = function(session) NULL, live = NULL,
-                               second = MockShinySession$new()) {
+                               second = MockShinySession$new(), resume_server = server) {
+  force(resume_server)
   first <- snapshot_session(server)
   drive(first)
   first$flushReact()
@@ -91,12 +92,14 @@ snapshot_roundtrip <- function(server, drive = function(session) NULL, live = NU
   record$identity <- snapshot_identity(first)
   record <- unserialize(serialize(record, NULL))
   reset_spies()
-  server <- capture_env(server)
+  resume_server <- capture_env(resume_server)
   outcome <- second$.snapshotRegistry$resume(
     record,
     live = list(inputs = live %||% record$inputs, clientData = list(), fileInputs = character(0)),
-    run = function() withMockContext(second, server(input = second$input, output = second$output, session = second))
+    run = function() withMockContext(second, resume_server(input = second$input, output = second$output, session = second))
   )
+  # Step 4a, as ShinySession$.resumeSession() runs it before sending `resumed`.
+  withMockContext(second, second$.resumeCallbacks$run(identical(outcome$resumed, "snapshot")))
   # Changed live inputs apply after the first flush, so their dependents run in the second.
   second$flushReact()
   second$flushReact()

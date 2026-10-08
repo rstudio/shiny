@@ -25,7 +25,7 @@
   labels, in installed packages too), `input`, uploaded files and
   `session$userData` come back; reactive expressions and outputs recompute.
   Saved state is restored all or nothing: when a value cannot be saved, or
-  the app's R files changed and no appVersion is set, the session resumes
+  the app's R files changed and no `appVersion` is set, the session resumes
   from its inputs and the log says why; saved state that turns out not to
   fit once the server function has run ends the session.
   `enableResume(userDataExclude =)` keeps named `session$userData` entries

@@ -31,11 +31,12 @@ NULL
 #' * **An unhandled error in an observer ends the session**, and its saved
 #'   state is deleted. So does `session$close()`. The page is not retried.
 #' * **Saved state that no longer fits ends the session.** If, once the
-#'   server function has run, a labelled source has no saved value or two
-#'   sources share a label, the session ends as on an unhandled error and
-#'   reloading the page starts fresh. Without `appVersion`, a change to the
-#'   app's R files makes sessions resume from their inputs only instead,
-#'   before anything runs.
+#'   server function has run, a labelled source has no saved value (and was
+#'   not left out with [excludeFromResume()]) or two sources share a label
+#'   they did not share when the state was saved, the session ends as on an
+#'   unhandled error and reloading the page starts fresh. Without
+#'   `appVersion`, a change to the app's R files makes sessions resume from
+#'   their inputs only instead, before anything runs.
 #' * Structure an `observeEvent()` handler created after startup (an output,
 #'   a module server, an observer) does not come back on its own, because
 #'   that handler does not run again. Rebuild it in `session$onResume()`;
@@ -65,10 +66,11 @@ NULL
 #' function) is not saved and after a resume holds its initial value; in
 #' development mode ([devmode()]) Shiny names it. A value that cannot be
 #' serialized (a connection, an R6 object, a closure), one over
-#' `maxNodeSize`, or two sources sharing a label block saved state for the
-#' whole session: it is restored all or nothing, so the session resumes
-#' from its inputs only and the log says why. `session$resumeReport()`
-#' lists every value and input with the reason it would not restore.
+#' `maxNodeSize`, or two sources sharing a label when the state is saved
+#' block saved state for the whole session: it is restored all or nothing,
+#' so the session resumes from its inputs only and the log says why.
+#' `session$resumeReport()` lists every value and input with the reason it
+#' would not restore.
 #'
 #' Values that commonly block resume because they carry an environment or a
 #' function: model fits and formulas created inside a function, ggplot
@@ -246,8 +248,8 @@ enableResume <- function(enabled = TRUE, appVersion = NULL, maxSize = 50e6, maxN
 #'
 #' @description
 #' With [enableResume()] on, `excludeFromResume(x)` keeps one value out of a
-#' session's saved state: it is not saved, does not count against the
-#' all-or-nothing rule, and after a resume holds its initial value. On an
+#' session's saved state: it is not saved, does not keep the rest from
+#' being restored, and after a resume holds its initial value. On an
 #' [ExtendedTask], the task's state is left out, and after a resume the task
 #' is as if never invoked.
 #'
@@ -378,9 +380,9 @@ snapshot_untracked <- function(expr) {
 
 # Evaluates `expr`, whose reactiveVal() and reactiveValues() calls create
 # sources Shiny keeps for itself: never recorded, counted or reported. They
-# are marked as they are constructed, so they never trip the gate and never
-# collide with another source's label. Force arguments that run user code
-# before calling this.
+# are marked as they are constructed, so a resume never looks for their
+# saved values and they never collide with another source's label. Force
+# arguments that run user code before calling this.
 snapshot_internal <- function(expr) {
   old <- .globals$snapshotInternal
   .globals$snapshotInternal <- TRUE

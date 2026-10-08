@@ -74,11 +74,12 @@ that is still open.
 \item \strong{An unhandled error in an observer ends the session}, and its saved
 state is deleted. So does \code{session$close()}. The page is not retried.
 \item \strong{Saved state that no longer fits ends the session.} If, once the
-server function has run, a labelled source has no saved value or two
-sources share a label, the session ends as on an unhandled error and
-reloading the page starts fresh. Without \code{appVersion}, a change to the
-app's R files makes sessions resume from their inputs only instead,
-before anything runs.
+server function has run, a labelled source has no saved value (and was
+not left out with \code{\link[=excludeFromResume]{excludeFromResume()}}) or two sources share a label
+they did not share when the state was saved, the session ends as on an
+unhandled error and reloading the page starts fresh. Without
+\code{appVersion}, a change to the app's R files makes sessions resume from
+their inputs only instead, before anything runs.
 \item Structure an \code{observeEvent()} handler created after startup (an output,
 a module server, an observer) does not come back on its own, because
 that handler does not run again. Rebuild it in \code{session$onResume()};
@@ -114,10 +115,11 @@ A source with no label (one created in \code{lapply()}, or by a helper
 function) is not saved and after a resume holds its initial value; in
 development mode (\code{\link[=devmode]{devmode()}}) Shiny names it. A value that cannot be
 serialized (a connection, an R6 object, a closure), one over
-\code{maxNodeSize}, or two sources sharing a label block saved state for the
-whole session: it is restored all or nothing, so the session resumes
-from its inputs only and the log says why. \code{session$resumeReport()}
-lists every value and input with the reason it would not restore.
+\code{maxNodeSize}, or two sources sharing a label when the state is saved
+block saved state for the whole session: it is restored all or nothing,
+so the session resumes from its inputs only and the log says why.
+\code{session$resumeReport()} lists every value and input with the reason it
+would not restore.
 
 Values that commonly block resume because they carry an environment or a
 function: model fits and formulas created inside a function, ggplot

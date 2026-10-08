@@ -1521,12 +1521,12 @@ ShinySession <- R6Class(
     },
 
     # The `resume` branch of the WebSocket handler with resume on (step 1
-    # here, steps 2-4 and 6 in SnapshotRegistry$resume(), 4a-4b in finish()).
-    # `data` is the decoded
-    # message; `runServer` runs the app's server function. Every failure
-    # before the server function runs falls through to inputs-only; saved
-    # state that does not fit once it has run ends the session; the server
-    # function never runs twice.
+    # here, steps 2-4 in SnapshotRegistry$resume(), 4a-4b in finish(), step 6
+    # in SnapshotRegistry$finishResume()). `data` is the decoded message;
+    # `runServer` runs the app's server function. Every failure before the
+    # server function runs falls through to inputs-only; saved state that
+    # does not fit once it has run ends the session; the server function
+    # never runs twice.
     .resumeSession = function(data, runServer) {
       reg <- self$.snapshotRegistry
       live <- snapshot_live_inputs(data$inputs)

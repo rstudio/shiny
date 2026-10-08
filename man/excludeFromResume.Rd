@@ -15,8 +15,8 @@ excludeFromResume(x)
 }
 \description{
 With \code{\link[=enableResume]{enableResume()}} on, \code{excludeFromResume(x)} keeps one value out of a
-session's saved state: it is not saved, does not count against the
-all-or-nothing rule, and after a resume holds its initial value. On an
+session's saved state: it is not saved, does not keep the rest from
+being restored, and after a resume holds its initial value. On an
 \link{ExtendedTask}, the task's state is left out, and after a resume the task
 is as if never invoked.
 

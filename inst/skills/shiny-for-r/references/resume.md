@@ -65,7 +65,8 @@ session resumed from its inputs only. It also fires with resume off, when
 State comes back all or nothing: if a labelled value cannot be saved, or the
 app's R files changed and no `appVersion` is set, the session resumes from its
 inputs only. Saved state that does not fit once the server function has run (a
-labelled source with no saved value) ends the session. Four habits keep resumed sessions
+labelled source with no saved value that was not left out with
+`excludeFromResume()`) ends the session. Four habits keep resumed sessions
 complete and correct.
 
 1. **Label sources created in loops or through helpers.** A source made in

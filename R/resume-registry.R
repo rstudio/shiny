@@ -43,7 +43,8 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
         return(private$orphan(entry, "created inside a reactive()", counted = FALSE))
       }
       if (is.null(identity$label)) {
-        # Not saved and not counted: the gate trips only on what the app author can fix.
+        # Not saved and not counted: only what the app author can fix blocks
+        # saved state or ends a resume.
         return(private$orphan(entry, "no label", counted = FALSE))
       }
       id <- paste(entry$ns, kind, identity$label, sep = "|")
@@ -566,8 +567,9 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     # ---- resume internals ----
 
     # A source without a usable record is a trip that ends the session if it
-    # still counts at verify. Trips are collected and judged there: the server function may mark the source with
-    # excludeFromResume() after its constructor returned.
+    # still counts at verify. Trips are collected and judged there: the
+    # server function may mark the source with excludeFromResume() after its
+    # constructor returned.
     trip = function(id, node, reason) {
       private$trips[[length(private$trips) + 1L]] <- list(id = id, node = node, reason = reason)
       invisible()
@@ -597,7 +599,8 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       invisible(ok)
     },
 
-    # Step 4: the gate's cause, or NULL. An unmarked source without an identity blocks.
+    # Step 4: why saved state does not fit, or NULL. An unmarked source that
+    # lost its identity to a shared label counts too.
     verify = function() {
       for (entry in private$orphans) {
         if (isTRUE(entry$counted) && !isTRUE(entry$node$.snapshot$skip)) {

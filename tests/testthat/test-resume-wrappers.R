@@ -12,10 +12,10 @@ test_that("ExtendedTask keeps one labelled state value; an anonymous task is int
 })
 
 test_that("a running ExtendedTask restores as an interrupted error; a finished one restores its result", {
-  rec_for <- function(state) list(
+  rec_for <- function(state) snapshot_decode_sources(list(
     format = 2L, complete = TRUE, blocked = list(), inputs = list(), clientData = list(), fileInputs = character(0),
     userData = list(), sources = list("|reactiveVal|ExtendedTask task" = list(kind = "reactiveVal", bytes = serialize(state, NULL, xdr = FALSE)))
-  )
+  ))
   run_with <- function(rec) {
     s <- MockShinySession$new()
     s$.snapshotRegistry$resume(rec, live = list(inputs = list(), clientData = list(), fileInputs = character(0)),

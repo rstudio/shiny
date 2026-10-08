@@ -1601,6 +1601,12 @@ ShinySession <- R6Class(
         try(store$delete(key), silent = TRUE)
         return(fallThrough(sprintf("saved state incomplete: %s (%s)", first$id, first$reason)))
       }
+      decoded <- tryCatch(snapshot_decode_sources(record), error = function(e) e)
+      if (inherits(decoded, "error")) {
+        try(store$delete(key), silent = TRUE)
+        return(fallThrough(paste("record unreadable:", conditionMessage(decoded))))
+      }
+      record <- decoded
 
       # Step 2. Seed before input handlers run: the shiny.file handler reads
       # the restore context's dir. File inputs stay out of what

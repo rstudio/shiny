@@ -99,7 +99,7 @@ test_that("without srcrefs a labelled source has an identity and an unlabelled o
 test_that("a reactiveValues record restores saved keys and keeps new initial keys", {
   s1 <- snapshot_session(function(input, output, session) { rv <- reactiveValues(a = 1, b = 2) })
   isolate(s1$env$rv$a <- 10)
-  rec <- s1$.snapshotRegistry$snapshot()
+  rec <- snapshot_decode_sources(s1$.snapshotRegistry$snapshot())
   s2 <- MockShinySession$new()
   reg <- s2$.snapshotRegistry
   reg$resume(rec, live = list(inputs = list(), clientData = list(), fileInputs = character(0)),

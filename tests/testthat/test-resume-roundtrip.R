@@ -88,7 +88,7 @@ test_that("a source without a saved value trips the gate: sources revert, inputs
   spy <- new_spy("obs")
   first <- snapshot_session(v1(spy))
   for (i in 1:3) first$setInputs(plus = i)
-  rec <- first$.snapshotRegistry$snapshot(); rec$identity <- snapshot_identity(first)
+  rec <- snapshot_decode_sources(first$.snapshotRegistry$snapshot()); rec$identity <- snapshot_identity(first)
   reset_spies()
   s2 <- MockShinySession$new()
   srv <- capture_env(v2(spy))
@@ -103,19 +103,6 @@ test_that("a source without a saved value trips the gate: sources revert, inputs
   expect_equal(as.numeric(isolate(s2$input$plus)), 3)  # inputs stay seeded
   s2$setInputs(plus = 4)
   expect_equal(spy$obs, 1)
-})
-
-test_that("a record that fails to apply trips the gate", {
-  spy <- new_spy("obs")
-  first <- snapshot_session(counter_server(spy))
-  rec <- first$.snapshotRegistry$snapshot(); rec$identity <- snapshot_identity(first)
-  rec$sources[["|reactiveVal|count"]]$bytes <- as.raw(c(1, 2, 3))
-  s2 <- MockShinySession$new()
-  srv <- capture_env(counter_server(spy))
-  out <- s2$.snapshotRegistry$resume(rec, list(inputs = list(), clientData = list(), fileInputs = character(0)),
-    function() withMockContext(s2, srv(s2$input, s2$output, s2)))
-  expect_identical(out$resumed, "inputs")
-  expect_match(out$cause, "saved value could not be applied")
 })
 
 test_that("userData and module state under two namespaces come back", {
@@ -204,7 +191,7 @@ test_that("an error while committing the saved state falls back to inputs only",
     observeEvent(input$plus, rv$a <- rv$a + 1)
   })
   first$setInputs(plus = 1)
-  rec <- first$.snapshotRegistry$snapshot(); rec$identity <- snapshot_identity(first)
+  rec <- snapshot_decode_sources(first$.snapshotRegistry$snapshot()); rec$identity <- snapshot_identity(first)
   calls <- 0
   revert <- snapshot_values_revert
   local_mocked_bindings(snapshot_values_revert = function(impl, initial) {
@@ -245,7 +232,7 @@ test_that("a gate trip removes restored userData still holding the restored obje
     session$userData$overwritten <- "from v2"
   }
   first <- snapshot_session(v1)
-  rec <- first$.snapshotRegistry$snapshot(); rec$identity <- snapshot_identity(first)
+  rec <- snapshot_decode_sources(first$.snapshotRegistry$snapshot()); rec$identity <- snapshot_identity(first)
   s2 <- MockShinySession$new()
   srv <- capture_env(v2)
   out <- s2$.snapshotRegistry$resume(rec, list(inputs = list(), clientData = list(), fileInputs = character(0)),

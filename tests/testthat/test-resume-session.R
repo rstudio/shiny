@@ -248,6 +248,35 @@ test_that("non-R file changes without appVersion still restore", {
                  "^Resumed: restored 1 values")
 })
 
+test_that("decoding keeps NULL values and names the source that fails", {
+  rec <- list(sources = list(a = list(bytes = serialize(NULL, NULL)), b = list(bytes = serialize(1, NULL))))
+  out <- snapshot_decode_sources(rec)
+  expect_true("value" %in% names(out$sources$a))
+  expect_null(out$sources$a$value)
+  expect_identical(out$sources$b$value, 1)
+  rec$sources$b$bytes <- as.raw(1:3)
+  expect_error(snapshot_decode_sources(rec), "source `b` could not be decoded")
+})
+
+test_that("a saved value that cannot be decoded resumes from inputs only before the server function runs", {
+  local_snapshot_store_dir()
+  token <- closed_counter_session()
+  store <- snapshot_store(); key <- snapshot_record_key(token)
+  rec <- store$read(key)
+  rec$sources[["|reactiveVal|count"]]$bytes <- as.raw(c(1, 2, 3))
+  store$write(key, rec)
+  runs <- 0
+  app <- function(input, output, session) {
+    runs <<- runs + 1
+    counter_app(new_spy("obs", "txt"))(input, output, session)
+  }
+  expect_message(res <- resume_real(app, resume_data(token, list())),
+                 "from inputs only: record unreadable: source `\\|reactiveVal\\|count` could not be decoded")
+  expect_identical(res$outcome, "inputs")
+  expect_identical(runs, 1)
+  expect_null(store$read(key))
+})
+
 test_that("an incomplete record resumes from inputs only with its first blocked reason, and is deleted", {
   local_snapshot_store_dir()
   blocked_app <- function(input, output, session) {

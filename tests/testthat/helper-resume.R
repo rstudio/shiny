@@ -100,7 +100,7 @@ snapshot_roundtrip <- function(server, drive = function(session) NULL, live = NU
   drain_later()
   record <- first$.snapshotRegistry$snapshot()
   record$identity <- snapshot_identity(first)
-  record <- unserialize(serialize(record, NULL))
+  record <- snapshot_decode_sources(unserialize(serialize(record, NULL)))
   reset_spies()
   resume_server <- capture_env(resume_server)
   outcome <- second$.snapshotRegistry$resume(

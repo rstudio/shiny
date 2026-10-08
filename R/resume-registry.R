@@ -687,7 +687,7 @@ snapshot_track_val <- function(impl, registry) {
   impl$.snapshot <- snapshot_node_state(registry,
     value = function() private$value,
     destroyed = function() isTRUE(private$.destroyed),
-    apply = function(record) private$value <- unserialize(record$bytes),
+    apply = function(record) private$value <- record$value,
     revert = function(initial) {
       private$value <- initial
       # Something may have read the restored value already; it must see the revert.
@@ -703,7 +703,7 @@ snapshot_track_val <- function(impl, registry) {
 snapshot_track_values <- function(impl, registry, internal = FALSE) {
   impl$.snapshot <- snapshot_node_state(registry,
     apply = function(record) {
-      vals <- unserialize(record$bytes)
+      vals <- record$value
       order <- record$order
       vals <- lapply(order, function(key) vals[[key]])   # read all before setting any
       for (i in seq_along(order)) impl$.values$set(order[[i]], vals[[i]])

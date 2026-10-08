@@ -114,8 +114,10 @@ differ from the record, after the server function has run and the state
 has been verified) and holds back the first run of each `observeEvent()`
 handler. The queued `update`s that follow `resume` are processed after that
 first `values` message, as ordinary input, so each outage-era change runs
-its handlers exactly once. An `update` that was in flight when the previous
-connection died is in `inputs` and is not replayed. A server implementation
+its handlers exactly once. An `update` the previous session never processed
+(sent after its last processed message but before the browser noticed the
+close, or on a reconnect attempt that opened but was not answered) is in
+`inputs` and is not replayed. A server implementation
 must treat every `update` as an event even when the value is unchanged, as
 R's `input` does.
 

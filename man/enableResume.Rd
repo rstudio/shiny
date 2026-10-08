@@ -200,10 +200,13 @@ shows 3.
 On resume, inputs the previous session already had are restored, never
 replayed: no handler fires for them. Changes made while the page was
 disconnected are delivered once each, in order, after the first render,
-and fire their handlers as usual. One edge: a change sent in the instant
-the connection dropped, which the old session never received, counts as
-already handled and is not replayed. Design side effects so that losing
-one such event is harmless, rather than relying on exactly-once delivery.
+and fire their handlers as usual. One edge: a change the old session never
+received counts as already handled and is not replayed. That covers
+changes made between the last message the server processed and the moment
+the browser noticed the connection was gone (after a silent network loss
+this can be a long time), and changes sent on a reconnect attempt that
+opened but was not answered. Design side effects so that losing one such
+event is harmless, rather than relying on exactly-once delivery.
 
 Also: \code{\link[=bindCache]{bindCache()}} with a persistent cache keeps expensive reactive
 expressions cheap after a restart; \code{\link[=eventReactive]{eventReactive()}} recomputes with the

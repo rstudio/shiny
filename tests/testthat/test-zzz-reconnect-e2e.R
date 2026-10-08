@@ -20,7 +20,7 @@ wait_for_new_process <- function(b, old_pid_text) {
 
 test_that("allowReconnect(TRUE) reconnects on a plain socket and keeps restoreInput()-aware UI values", {
   skip_on_cran()
-  e <- e2e_session(env = c(E2E_ALLOW = "1"))
+  e <- e2e_session(env = c(SHINY_RESUME = "FALSE", E2E_ALLOW = "1"))
   b <- e$browser
   for (i in 1:3) click_until(b, "#plus", "#count", paste("Count:", i))
   e2e_set_text(b, "txt", "typed")
@@ -36,15 +36,16 @@ test_that("allowReconnect(TRUE) reconnects on a plain socket and keeps restoreIn
   e2e_wait_until(function() grepl("n: 42", e2e_text(b, "#slider_val"), fixed = TRUE), what = "slider value after reconnect")
   expect_identical(e2e_js(b, "document.getElementById('n').value"), "42")
   expect_match(e2e_text(b, "#txtout"), "Text: typed", fixed = TRUE)
-  # Transport only: the counter observer re-ran once with the replayed button
-  # value, as a reload does today. Keeping the count is enableResume()'s job.
-  e2e_wait_until(function() grepl("Count: 1", e2e_text(b, "#count"), fixed = TRUE), what = "replayed count")
-  click_until(b, "#plus", "#count", "Count: 2")
+  # The replayed button count is an event that already happened, so the
+  # counter's handler is held back; the next click counts.
+  Sys.sleep(1)
+  expect_match(e2e_text(b, "#count"), "Count: 0", fixed = TRUE)
+  click_until(b, "#plus", "#count", "Count: 1")
 })
 
 test_that("without allowReconnect() the client does not retry", {
   skip_on_cran()
-  e <- e2e_session()
+  e <- e2e_session(env = c(SHINY_RESUME = "FALSE"))
   b <- e$browser
   e$process$kill()
   e2e_wait_until(function() !e2e_port_open(e$port), what = "port to close")
@@ -53,9 +54,9 @@ test_that("without allowReconnect() the client does not retry", {
   expect_false(e2e_present(b, "#shiny-reconnect-text"))
 })
 
-test_that("after ten failed attempts the notification goes and the overlay stays", {
+test_that("after ten failed attempts the notification offers Try again and the overlay stays", {
   skip_on_cran()
-  e <- e2e_session(env = c(E2E_ALLOW = "1"))
+  e <- e2e_session(env = c(SHINY_RESUME = "FALSE", E2E_ALLOW = "1"))
   b <- e$browser
   e$process$kill()
   e2e_wait_until(function() !e2e_port_open(e$port), what = "port to close")
@@ -63,11 +64,12 @@ test_that("after ten failed attempts the notification goes and the overlay stays
   # "Try now" runs an attempt at once; each failure counts. The first
   # attempt was counted when the socket closed, so at most nine clicks.
   for (i in 1:12) {
-    if (!e2e_present(b, "#shiny-reconnect-text")) break
+    if (e2e_present(b, "#shiny-reconnect-failed")) break
     try(e2e_click(b, "#shiny-reconnect-now"), silent = TRUE)
     Sys.sleep(0.5)
   }
-  expect_false(e2e_present(b, "#shiny-reconnect-text"))
+  expect_true(e2e_present(b, "#shiny-reconnect-failed"))
+  expect_true(e2e_present(b, "#shiny-reconnect-retry"))
   expect_true(e2e_present(b, "#shiny-disconnected-overlay"))
   Sys.sleep(3)
   expect_false(e2e_present(b, "#shiny-reconnect-text"))
@@ -75,7 +77,7 @@ test_that("after ten failed attempts the notification goes and the overlay stays
 
 test_that("a bookmark URL is not re-restored on reconnect", {
   skip_on_cran()
-  e <- e2e_session(env = c(E2E_ALLOW = "1", E2E_BOOKMARK = "1"),
+  e <- e2e_session(env = c(SHINY_RESUME = "FALSE", E2E_ALLOW = "1", E2E_BOOKMARK = "1"),
                    path = "/?_inputs_&txt=%22bm%22", ready = "#txtout", ready_text = "Text: bm")
   b <- e$browser
   expect_identical(e2e_js(b, "document.getElementById('txt').value"), "bm")

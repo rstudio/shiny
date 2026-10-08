@@ -26,7 +26,9 @@ snapshot_source_label <- function(call_srcref, explicit = NULL, site = NULL) {
   }
   assigned <- snapshot_assigned_label(call_srcref)
   if (!is.null(assigned)) return(list(label = assigned, source = "srcref"))
-  if (is.null(call_srcref) && !is.null(site)) {
+  # A srcref that yields no assignment (an inline `if (x) a <- ...`) falls
+  # through to the body walk, exactly like code without srcrefs.
+  if (!is.null(site)) {
     return(list(label = NULL, source = "body", site = site, call = call))
   }
   c(list(label = NULL, source = "none"), if (!is.null(call)) list(call = call))

@@ -1,16 +1,16 @@
 #' @include utils.R
 NULL
 
-#' Resume sessions after an interruption
+#' Resume sessions after a dropped connection
 #'
 #' @description
-#' With resume on, Shiny saves each session's state as it goes, and a
-#' page whose connection drops reconnects and continues from it: [reactiveVal()] and
-#' [reactiveValues()] values with a label, `input`, uploaded files and
-#' `session$userData` come back; [observeEvent()] handlers whose events
-#' already happened do not fire again; [reactive()] expressions and outputs
-#' recompute. Inputs that changed while the page was disconnected are applied
-#' on top.
+#' With resume on, Shiny saves each session's state as it goes, and a page
+#' whose connection drops reconnects and continues from it, whether the R
+#' process survived or was restarted: [reactiveVal()] and [reactiveValues()]
+#' values, `input`, uploaded files and `session$userData` come back;
+#' [observeEvent()] handlers whose events already happened do not fire again;
+#' [reactive()] expressions and outputs recompute. Inputs that changed while
+#' the page was disconnected are applied on top.
 #'
 #' `enableResume()` turns resume on for an app and configures it;
 #' `disableResume()` turns it off. Call either at the top level of `app.R`
@@ -30,9 +30,20 @@ NULL
 #'   as if never invoked.
 #' * On an observer made with [observeEvent()] or [bindEvent()]: its first
 #'   run is not held back; it runs on resume exactly as on a fresh start,
-#'   `ignoreInit` included. Use it on a handler whose job is to rebuild
-#'   something outside the reactive graph. A plain [observe()] always runs on
-#'   resume, so marking one changes nothing.
+#'   `ignoreInit` included. Use it on a handler whose job is to build
+#'   something. A plain [observe()] always runs on resume, so marking one
+#'   changes nothing.
+#'
+#' @section What resume does not do:
+#' * **A page reload starts fresh**, as without resume. Resume is for a page
+#'   that is still open.
+#' * **An unhandled error in an observer ends the session**, and its saved
+#'   state is deleted. So does `session$close()`. The page is not retried.
+#' * Structure an `observeEvent()` handler created after startup (an output,
+#'   a module server, an observer) does not come back, because that handler
+#'   does not run again. See rule 3.
+#' * Closure state (`<<-`), reference objects and async work in flight are
+#'   never saved.
 #'
 #' @section Who decides:
 #' Resolved once per app, first match wins:
@@ -43,64 +54,81 @@ NULL
 #' 3. Off.
 #'
 #' @section What is saved:
-#' Every `reactiveVal()` and `reactiveValues()` that has an identity: a
+#' Every `reactiveVal()` and `reactiveValues()` with a label: an explicit
 #' `label` (`.label` for `reactiveValues()`), or the name it is assigned to
-#' (`count <- reactiveVal(0)`). A source with neither (one created in a loop,
-#' or in an installed package, which keeps no source references) blocks
-#' resume for the whole session until it is labelled or marked with
-#' `disableResume()`, and so does a value that cannot be serialized (a
-#' connection, an R6 object, a closure) or one over `maxNodeSize`. Saved
-#' state is restored all or nothing: when any source that should restore
-#' cannot, the session resumes from its inputs only and the log says why.
-#' `session$resumeReport()` lists every value and input with the reason it
-#' would not restore. Observers, outputs, reactive expressions, closure state
-#' (`<<-`) and in-flight async work are never saved.
+#' (`count <- reactiveVal(0)`), in app code and in installed packages alike.
+#' A source with no label (one created in `lapply()`, or by a helper
+#' function) is not saved and after a resume holds its initial value; in
+#' development mode ([devmode()]) Shiny names it. A value that cannot be
+#' serialized (a connection, an R6 object, a closure), one over
+#' `maxNodeSize`, or two sources sharing a label block saved state for the
+#' whole session: it is restored all or nothing, so the session resumes
+#' from its inputs only and the log says why. `session$resumeReport()`
+#' lists every value and input with the reason it would not restore.
 #'
 #' Values that commonly block resume because they carry an environment or a
-#' function: model fits and formulas created inside a function (their
-#' environment), ggplot objects, S7 objects (their class is a function), and
-#' anything holding a connection, an external pointer or an R6 object. Keep
-#' them in a [reactive()], which recomputes after a resume, or mark the
-#' source with `disableResume()`.
+#' function: model fits and formulas created inside a function, ggplot
+#' objects, S7 objects, and anything holding a connection, an external
+#' pointer or an R6 object. Keep them in a [reactive()], which recomputes
+#' after a resume, or mark the source with `disableResume()`.
 #'
 #' @section The rules of reactives:
-#' Four habits keep saved state complete and correct. In development mode
-#' ([devmode()]) Shiny names the rule a session breaks.
+#' Four habits keep resumed sessions complete and correct. In development
+#' mode Shiny names the rule a session breaks.
 #'
-#' 1. **Label sources created in loops or in packaged code.** An installed
-#'    package keeps no source references, so an unlabelled source there has
-#'    no identity and blocks resume until it is labelled
-#'    (`reactiveVal(0, label = "count")`) or marked with `disableResume()`.
+#' 1. **Label sources created in loops or through helpers.** A source made
+#'    in `lapply()` or by a wrapper function has no name to infer. Give it
+#'    one (`reactiveVal(0, label = paste0("count", i))`) or mark it with
+#'    `disableResume()`.
 #' 2. **Hold reference objects in a `reactive()`, not a `reactiveVal()`.** A
 #'    connection, pool or R6 client cannot be saved; in a `reactive()` it is
 #'    rebuilt on first read. If one must live in a source, mark both the
 #'    source and the observer that builds it with `disableResume()`.
-#' 3. **Derive page content with [renderUI()].** Content an `observeEvent()`
-#'    put on the page imperatively ([insertUI()], new `update*Input()`
-#'    choices, [showModal()]) does not come back on a reloaded page, because
-#'    that handler does not run again.
+#' 3. **Build structure from state, not in handlers.** A handler that
+#'    defines an output, starts a module server or creates an observer does
+#'    not run again after a resume, so what it built is missing; the log
+#'    names outputs on the page that have no definition. Keep the ids in a
+#'    `reactiveVal()`, render the UI with [renderUI()], and start module
+#'    servers from a plain [observe()] over the ids; or mark the handler with
+#'    `disableResume()` if it builds exactly one thing and has no other side
+#'    effect.
 #' 4. **Accumulate into a reactive value from `observeEvent()`, not a plain
 #'    `observe()`.** A plain observer has no event to hold back, so it runs
-#'    on resume and applies its change a second time:
+#'    on resume and applies its change again:
 #'    `observe({ input$plus; isolate(count(count() + 1)) })` shows 4 after
 #'    three clicks and a resume; `observeEvent(input$plus, count(count() + 1))`
 #'    shows 3.
+#'
+#' Also: [bindCache()] with a persistent cache keeps expensive reactive
+#' expressions cheap after a restart; [eventReactive()] recomputes with the
+#' current inputs; `observeEvent(once = TRUE)` may fire once more after a
+#' resume; process-scoped values (temp paths, process ids) serialize fine
+#' and are wrong after a restart; an unconditional top-level
+#' `session$userData$x <- 0` overwrites the saved value, so guard it with
+#' `if (is.null(session$userData$x))` or use a `reactiveVal()`.
+#'
+#' @section What the log says:
+#' Each resume writes one line to standard error: `Resumed: restored N
+#' values and M inputs; K event handlers skipped, J re-ran`, or `Resumed from
+#' inputs only: <cause>`, plus `Outputs on the page with no definition after
+#' resume: ...` when rule 3 is broken.
 #'
 #' @section Where saved state lives:
 #' In the hosting platform's bookmark storage when it provides one, otherwise
 #' under `tools::R_user_dir("shiny", "cache")`; never in the app directory.
 #' Records are readable only by the owner, keyed by a 128-bit random token
-#' and the app's path, kept for 24 hours, and the directory as a whole is
-#' capped at
+#' and the app's path, kept for 24 hours, deleted when the page is closed or
+#' the session ends for good, and the directory as a whole is capped at
 #' 1 GiB and 1000 records. On Windows the token comes from the `openssl`
 #' package when it is installed and from R's random number generator
 #' otherwise. Whether a hosting platform's directory survives a restart of
-#' the R process is up to the platform; a container without a persistent
-#' volume resumes from inputs only after it restarts.
+#' the R process is up to the platform and has not yet been verified for
+#' Posit's hosted products; a container without a persistent volume resumes
+#' from inputs only after it restarts.
 #'
 #' @param appVersion `NULL`, or a string or number recorded with the saved
 #'   state. Change it in a deploy that changes what the app's state means, so
-#'   sessions saved by the previous version start fresh.
+#'   sessions saved by the previous version resume from inputs only.
 #' @param maxSize Bytes; the total size of a session's saved state. Over it,
 #'   the largest values block resume until the rest fit.
 #' @param maxNodeSize Bytes; a value whose serialized size exceeds this

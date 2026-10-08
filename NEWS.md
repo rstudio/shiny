@@ -2,15 +2,32 @@
 
 * `session$allowReconnect(TRUE)` now works on any server, not only behind
   Shiny Server's or Posit Connect's connection layer. When the connection
-  drops, the browser retries for about a minute (ten attempts) and the new
-  session starts with the client's inputs filled back in. `renderUI()`
-  content that calls `restoreInput()` keeps its values across the
-  reconnect, and a bookmark in the page's URL is no longer restored over
-  inputs the user changed since. A reconnecting client's first message is
-  now `resume` rather than `init`; the wire protocol is documented in
-  `srcts/PROTOCOL.md`. Apps that already call `allowReconnect(TRUE)` outside
-  those platforms start retrying, `"force"` behaves exactly like `TRUE`, and
-  retries are bounded everywhere. (#<PR number>)
+  drops, the browser retries for about a minute (ten attempts), then offers
+  a **Try again** link; the new session starts with the client's inputs
+  filled back in. `renderUI()` content that calls `restoreInput()` keeps
+  its values across the reconnect, and a bookmark in the page's URL is no
+  longer restored over inputs the user changed since. `observeEvent()`
+  handlers no longer fire for the replayed inputs: they are events that
+  already happened, and before, two clicks and a reconnect re-ran the
+  handler. A reconnecting client's first message is now `resume` rather
+  than `init`; the wire protocol is documented in `srcts/PROTOCOL.md`. Apps
+  that already call `allowReconnect(TRUE)` outside those platforms start
+  retrying, `"force"` behaves exactly like `TRUE`, and retries are bounded
+  everywhere. A session the server ends, with `session$close()` or after an
+  unhandled error in an observer, is now never retried; before, behind
+  Shiny Server, the page reconnected into a new session. (#<PR number>)
+
+* New `enableResume()`: with it on, a page whose connection drops
+  continues from saved state, even when the R process restarted. Labelled
+  `reactiveVal()` and `reactiveValues()` values (assigned names count as
+  labels, in installed packages too), `input`, uploaded files and
+  `session$userData` come back; reactive expressions and outputs recompute.
+  Saved state is restored all or nothing: when a value cannot be saved the
+  session resumes from its inputs and the log says why, and
+  `session$resumeReport()` lists every value with its reason.
+  `disableResume(x)` leaves a value, observer or `ExtendedTask` out, and
+  `reactiveValues()` gains `.label`. A page reload still starts fresh.
+  (#<PR number>)
 
 * Added an agent skill (`inst/skills/shiny-for-r/`) following the
   [Agent Skills](https://agentskills.io) convention. Coding agents using

@@ -20,6 +20,11 @@ not retried. If \code{value} is \code{FALSE} (the default), the client
 does not retry. \code{"force"} behaves exactly like \code{TRUE}; earlier versions
 needed it to retry outside Shiny Server and Posit Connect.
 }
+\item{close()}{
+Ends the session for good: the browser is told not to reconnect, the
+session's saved state (see \code{\link[=enableResume]{enableResume()}}) is deleted, and the
+connection closes. An unhandled error in an observer does the same.
+}
 \item{clientData}{
 A \code{\link[=reactiveValues]{reactiveValues()}} object that contains information about the client.
 \itemize{

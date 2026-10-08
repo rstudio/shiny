@@ -3,7 +3,7 @@
 \name{enableResume}
 \alias{enableResume}
 \alias{disableResume}
-\title{Resume sessions after an interruption}
+\title{Resume sessions after a dropped connection}
 \usage{
 enableResume(
   appVersion = NULL,
@@ -17,7 +17,7 @@ disableResume(x)
 \arguments{
 \item{appVersion}{\code{NULL}, or a string or number recorded with the saved
 state. Change it in a deploy that changes what the app's state means, so
-sessions saved by the previous version start fresh.}
+sessions saved by the previous version resume from inputs only.}
 
 \item{maxSize}{Bytes; the total size of a session's saved state. Over it,
 the largest values block resume until the rest fit.}
@@ -38,13 +38,13 @@ turns resume off for the app.}
 \code{disableResume(x)} returns \code{x} invisibly.
 }
 \description{
-With resume on, Shiny saves each session's state as it goes, and a
-page whose connection drops reconnects and continues from it: \code{\link[=reactiveVal]{reactiveVal()}} and
-\code{\link[=reactiveValues]{reactiveValues()}} values with a label, \code{input}, uploaded files and
-\code{session$userData} come back; \code{\link[=observeEvent]{observeEvent()}} handlers whose events
-already happened do not fire again; \code{\link[=reactive]{reactive()}} expressions and outputs
-recompute. Inputs that changed while the page was disconnected are applied
-on top.
+With resume on, Shiny saves each session's state as it goes, and a page
+whose connection drops reconnects and continues from it, whether the R
+process survived or was restarted: \code{\link[=reactiveVal]{reactiveVal()}} and \code{\link[=reactiveValues]{reactiveValues()}}
+values, \code{input}, uploaded files and \code{session$userData} come back;
+\code{\link[=observeEvent]{observeEvent()}} handlers whose events already happened do not fire again;
+\code{\link[=reactive]{reactive()}} expressions and outputs recompute. Inputs that changed while
+the page was disconnected are applied on top.
 
 \code{enableResume()} turns resume on for an app and configures it;
 \code{disableResume()} turns it off. Call either at the top level of \code{app.R}
@@ -64,11 +64,26 @@ resume it holds its initial value.
 as if never invoked.
 \item On an observer made with \code{\link[=observeEvent]{observeEvent()}} or \code{\link[=bindEvent]{bindEvent()}}: its first
 run is not held back; it runs on resume exactly as on a fresh start,
-\code{ignoreInit} included. Use it on a handler whose job is to rebuild
-something outside the reactive graph. A plain \code{\link[=observe]{observe()}} always runs on
-resume, so marking one changes nothing.
+\code{ignoreInit} included. Use it on a handler whose job is to build
+something. A plain \code{\link[=observe]{observe()}} always runs on resume, so marking one
+changes nothing.
 }
 }
+\section{What resume does not do}{
+
+\itemize{
+\item \strong{A page reload starts fresh}, as without resume. Resume is for a page
+that is still open.
+\item \strong{An unhandled error in an observer ends the session}, and its saved
+state is deleted. So does \code{session$close()}. The page is not retried.
+\item Structure an \code{observeEvent()} handler created after startup (an output,
+a module server, an observer) does not come back, because that handler
+does not run again. See rule 3.
+\item Closure state (\verb{<<-}), reference objects and async work in flight are
+never saved.
+}
+}
+
 \section{Who decides}{
 
 Resolved once per app, first match wins:
@@ -82,51 +97,66 @@ hosting platform that has verified its storage.
 
 \section{What is saved}{
 
-Every \code{reactiveVal()} and \code{reactiveValues()} that has an identity: a
+Every \code{reactiveVal()} and \code{reactiveValues()} with a label: an explicit
 \code{label} (\code{.label} for \code{reactiveValues()}), or the name it is assigned to
-(\code{count <- reactiveVal(0)}). A source with neither (one created in a loop,
-or in an installed package, which keeps no source references) blocks
-resume for the whole session until it is labelled or marked with
-\code{disableResume()}, and so does a value that cannot be serialized (a
-connection, an R6 object, a closure) or one over \code{maxNodeSize}. Saved
-state is restored all or nothing: when any source that should restore
-cannot, the session resumes from its inputs only and the log says why.
-\code{session$resumeReport()} lists every value and input with the reason it
-would not restore. Observers, outputs, reactive expressions, closure state
-(\verb{<<-}) and in-flight async work are never saved.
+(\code{count <- reactiveVal(0)}), in app code and in installed packages alike.
+A source with no label (one created in \code{lapply()}, or by a helper
+function) is not saved and after a resume holds its initial value; in
+development mode (\code{\link[=devmode]{devmode()}}) Shiny names it. A value that cannot be
+serialized (a connection, an R6 object, a closure), one over
+\code{maxNodeSize}, or two sources sharing a label block saved state for the
+whole session: it is restored all or nothing, so the session resumes
+from its inputs only and the log says why. \code{session$resumeReport()}
+lists every value and input with the reason it would not restore.
 
 Values that commonly block resume because they carry an environment or a
-function: model fits and formulas created inside a function (their
-environment), ggplot objects, S7 objects (their class is a function), and
-anything holding a connection, an external pointer or an R6 object. Keep
-them in a \code{\link[=reactive]{reactive()}}, which recomputes after a resume, or mark the
-source with \code{disableResume()}.
+function: model fits and formulas created inside a function, ggplot
+objects, S7 objects, and anything holding a connection, an external
+pointer or an R6 object. Keep them in a \code{\link[=reactive]{reactive()}}, which recomputes
+after a resume, or mark the source with \code{disableResume()}.
 }
 
 \section{The rules of reactives}{
 
-Four habits keep saved state complete and correct. In development mode
-(\code{\link[=devmode]{devmode()}}) Shiny names the rule a session breaks.
+Four habits keep resumed sessions complete and correct. In development
+mode Shiny names the rule a session breaks.
 \enumerate{
-\item \strong{Label sources created in loops or in packaged code.} An installed
-package keeps no source references, so an unlabelled source there has
-no identity and blocks resume until it is labelled
-(\code{reactiveVal(0, label = "count")}) or marked with \code{disableResume()}.
+\item \strong{Label sources created in loops or through helpers.} A source made
+in \code{lapply()} or by a wrapper function has no name to infer. Give it
+one (\code{reactiveVal(0, label = paste0("count", i))}) or mark it with
+\code{disableResume()}.
 \item \strong{Hold reference objects in a \code{reactive()}, not a \code{reactiveVal()}.} A
 connection, pool or R6 client cannot be saved; in a \code{reactive()} it is
 rebuilt on first read. If one must live in a source, mark both the
 source and the observer that builds it with \code{disableResume()}.
-\item \strong{Derive page content with \code{\link[=renderUI]{renderUI()}}.} Content an \code{observeEvent()}
-put on the page imperatively (\code{\link[=insertUI]{insertUI()}}, new \code{update*Input()}
-choices, \code{\link[=showModal]{showModal()}}) does not come back on a reloaded page, because
-that handler does not run again.
+\item \strong{Build structure from state, not in handlers.} A handler that
+defines an output, starts a module server or creates an observer does
+not run again after a resume, so what it built is missing; the log
+names outputs on the page that have no definition. Keep the ids in a
+\code{reactiveVal()}, render the UI with \code{\link[=renderUI]{renderUI()}}, and start module
+servers from a plain \code{\link[=observe]{observe()}} over the ids; or mark the handler with
+\code{disableResume()} if it builds exactly one thing and has no other side
+effect.
 \item \strong{Accumulate into a reactive value from \code{observeEvent()}, not a plain
 \code{observe()}.} A plain observer has no event to hold back, so it runs
-on resume and applies its change a second time:
+on resume and applies its change again:
 \code{observe({ input$plus; isolate(count(count() + 1)) })} shows 4 after
 three clicks and a resume; \code{observeEvent(input$plus, count(count() + 1))}
 shows 3.
 }
+
+Also: \code{\link[=bindCache]{bindCache()}} with a persistent cache keeps expensive reactive
+expressions cheap after a restart; \code{\link[=eventReactive]{eventReactive()}} recomputes with the
+current inputs; \code{observeEvent(once = TRUE)} may fire once more after a
+resume; process-scoped values (temp paths, process ids) serialize fine
+and are wrong after a restart; an unconditional top-level
+\code{session$userData$x <- 0} overwrites the saved value, so guard it with
+\verb{if (is.null(session$userData$x))} or use a \code{reactiveVal()}.
+}
+
+\section{What the log says}{
+
+Each resume writes one line to standard error: \verb{Resumed: restored N values and M inputs; K event handlers skipped, J re-ran}, or \verb{Resumed from inputs only: <cause>}, plus \verb{Outputs on the page with no definition after resume: ...} when rule 3 is broken.
 }
 
 \section{Where saved state lives}{
@@ -134,13 +164,14 @@ shows 3.
 In the hosting platform's bookmark storage when it provides one, otherwise
 under \code{tools::R_user_dir("shiny", "cache")}; never in the app directory.
 Records are readable only by the owner, keyed by a 128-bit random token
-and the app's path, kept for 24 hours, and the directory as a whole is
-capped at
+and the app's path, kept for 24 hours, deleted when the page is closed or
+the session ends for good, and the directory as a whole is capped at
 1 GiB and 1000 records. On Windows the token comes from the \code{openssl}
 package when it is installed and from R's random number generator
 otherwise. Whether a hosting platform's directory survives a restart of
-the R process is up to the platform; a container without a persistent
-volume resumes from inputs only after it restarts.
+the R process is up to the platform and has not yet been verified for
+Posit's hosted products; a container without a persistent volume resumes
+from inputs only after it restarts.
 }
 
 \examples{

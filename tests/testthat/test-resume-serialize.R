@@ -29,10 +29,17 @@ test_that("an lm fit made inside a function is rejected at its terms environment
   expect_identical(snapshot_unserializable_path(fit), "value$terms@.Environment")
 })
 
-test_that("S4 slots are walked and data.table is allowlisted", {
+test_that("S4 slots are walked", {
   setClass("ResumeTestS4", representation(f = "function"), where = environment())
   obj <- new("ResumeTestS4", f = function() 1)
   expect_identical(snapshot_unserializable_path(obj), "value@f")
+})
+
+test_that("a data.table's internal pointer is skipped but its columns are checked", {
+  dt <- function(...) structure(list(...), class = c("data.table", "data.frame"),
+                                row.names = c(NA, -2L), .internal.selfref = new("externalptr"))
+  expect_null(snapshot_unserializable_path(dt(a = 1:2, b = c("x", "y"))))
+  expect_identical(snapshot_unserializable_path(dt(a = 1:2, f = list(function() 1, 2))), "value$f[[1]]")
   skip_if_not_installed("data.table")
   expect_null(snapshot_unserializable_path(data.table::data.table(x = 1)))
 })

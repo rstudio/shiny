@@ -122,10 +122,6 @@ snapshot_hazards <- function(expr) {
   unique(out)
 }
 
-# Classes known to round-trip through serialize() despite tripping the walk
-# (data.table carries an externalptr in its .internal.selfref attribute).
-snapshot_serializable_classes <- c("data.table")
-
 snapshot_special_env <- function(e) {
   identical(e, globalenv()) || identical(e, baseenv()) || identical(e, emptyenv()) ||
     isNamespace(e) || startsWith(environmentName(e), "package:")
@@ -151,7 +147,6 @@ snapshot_walk <- function(x, path, depth, budget) {
   budget$left <- budget$left - 1L
   if (budget$left < 0L) return(snapshot_too_large)
   if (is.null(x)) return(NULL)
-  if (inherits(x, snapshot_serializable_classes)) return(NULL)
   if (is.function(x) || typeof(x) %in% c("externalptr", "weakref", "bytecode")) return(path)
   if (inherits(x, "connection")) return(path)
   if (inherits(x, c("promise", "reactivevalues"))) return(path)
@@ -161,6 +156,8 @@ snapshot_walk <- function(x, path, depth, budget) {
   attrs$names <- NULL
   attrs$class <- NULL
   attrs$row.names <- NULL
+  # data.table rebuilds this external pointer when the table is read back.
+  if (inherits(x, "data.table")) attrs$.internal.selfref <- NULL
   for (nm in names(attrs)) {
     hit <- snapshot_walk(attrs[[nm]], paste0(path, "@", nm), depth + 1L, budget)
     if (!is.null(hit)) return(hit)

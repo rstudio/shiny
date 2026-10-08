@@ -62,8 +62,10 @@ session resumed from its inputs only. It also fires with resume off, when
 
 ## The rules of reactives
 
-State comes back all or nothing: if a labelled value cannot be saved, the
-session resumes from its inputs only. Four habits keep resumed sessions
+State comes back all or nothing: if a labelled value cannot be saved, or the
+app's R files changed and no `appVersion` is set, the session resumes from its
+inputs only. Saved state that does not fit once the server function has run (a
+labelled source with no saved value) ends the session. Four habits keep resumed sessions
 complete and correct.
 
 1. **Label sources created in loops or through helpers.** A source made in
@@ -95,7 +97,9 @@ observeEvent(input$plus, count(count() + 1))
 ```
 
 To leave one value or `ExtendedTask` out of the saved state, wrap it in
-`excludeFromResume()`; after a resume it holds its initial value.
+`excludeFromResume()`, around the constructor or before the app first reads
+it; after a resume it holds its initial value. Leave credentials in
+`session$userData` out with `enableResume(userDataExclude = "token")`.
 
 ## Reading the report
 
@@ -120,12 +124,14 @@ testServer(server, {
 - Whether a hosting platform's storage survives a process restart is up to
   the platform; without a persistent volume a restarted container resumes
   from inputs only.
+- A connection that drops while a page is resuming, before the resumed
+  session first saves, resumes from inputs only on the next attempt.
 
 ## Quick reference
 
 | Function | Purpose |
 |---|---|
-| `enableResume(enabled, appVersion, maxSize, maxNodeSize, debounce)` | Turn resume on (or off with `FALSE`) for the app and configure it |
+| `enableResume(enabled, appVersion, maxSize, maxNodeSize, debounce, userDataExclude)` | Turn resume on (or off with `FALSE`) for the app and configure it |
 | `excludeFromResume(x)` | Leave a `reactiveVal()`, `reactiveValues()` or `ExtendedTask` out |
 | `session$onResume(fun)` | Run code when a page reconnects, to rebuild what handlers built |
 | `reactiveValues(..., .label)` | Name an object across sessions |

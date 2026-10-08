@@ -93,9 +93,11 @@ keeps the token in memory only; a page reload starts without one.
 ```
 
 `token` is the one from the previous session's `config`. The server reads
-that session's record, restores it all or nothing, and answers with
-`resumed`. A record is used once: the server deletes it as it reads it, and
-writes the new session's own record straight after. Two `resume` messages
+that session's record, restores it, and answers with `resumed`. A record is
+used once: the server deletes it as it reads it, and writes the new
+session's own record after the first flush. If the saved state does not fit
+the app once the server function has run, the server ends the session
+instead: no `resumed`, `allowReconnect: false`, socket closed. Two `resume` messages
 with one token (a duplicated tab): the first gets the record, the second
 resumes from inputs only. A `dom` key is ignored.
 
@@ -110,9 +112,9 @@ inputs are events that already happened.
 ```
 
 `"snapshot"`: the saved state was restored. `"inputs"`: only the inputs
-were applied (no token, no record, a mismatch, an incomplete record, or a
-value that could not be restored; the server log names the cause). The
-client fires the DOM event `shiny:resumed` with `resumed` set to the value,
+were applied (no token, no record, a mismatch, an incomplete record, the
+app's code changed, or a value that could not be decoded; the server log
+names the cause). The client fires the DOM event `shiny:resumed` with `resumed` set to the value,
 and resets its retry count. With resume off the server sends no `resumed`.
 
 ### `unload` (client → server)

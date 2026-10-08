@@ -30,6 +30,12 @@ NULL
 #'   that is still open.
 #' * **An unhandled error in an observer ends the session**, and its saved
 #'   state is deleted. So does `session$close()`. The page is not retried.
+#' * **Saved state that no longer fits ends the session.** If, once the
+#'   server function has run, a labelled source has no saved value or two
+#'   sources share a label, the session ends as on an unhandled error and
+#'   reloading the page starts fresh. Without `appVersion`, a change to the
+#'   app's R files makes sessions resume from their inputs only instead,
+#'   before anything runs.
 #' * Structure an `observeEvent()` handler created after startup (an output,
 #'   a module server, an observer) does not come back on its own, because
 #'   that handler does not run again. Rebuild it in `session$onResume()`;
@@ -38,6 +44,10 @@ NULL
 #'   work in flight are never saved. A handler that assigns closure
 #'   variables is held back like any other, so they keep their initial
 #'   values.
+#' * **A drop during a resume loses the saved state.** A record is used
+#'   once, and the resumed session saves its own after its first flush; if
+#'   the connection drops or the process stops in between, the next attempt
+#'   resumes from inputs only.
 #'
 #' @section Who decides:
 #' Resolved once per app, first match wins:
@@ -70,8 +80,9 @@ NULL
 #' @section Rebuilding on resume:
 #' `session$onResume(fun)` registers a function that runs once when a page
 #' reconnects, after the server function and before any observer or output
-#' runs. By then saved values are restored, or, if they could not be, every
-#' source holds its initial value. `fun` takes one argument, `info`, a list
+#' runs. By then saved values are restored, or, if saved state could not be
+#' used, the session started from its inputs only and every source holds its
+#' initial value. `fun` takes one argument, `info`, a list
 #' whose `restored` element is `TRUE` when saved state was restored and
 #' `FALSE` when the session resumed from its inputs only. It also fires with
 #' resume off, when `session$allowReconnect(TRUE)` reconnects a page, with
@@ -147,7 +158,11 @@ NULL
 #' Each resume writes one line to standard error: `Resumed: restored N
 #' values and M inputs; K event handlers held back`, or `Resumed from
 #' inputs only: <cause>`, plus `Outputs on the page with no definition after
-#' resume: ...` when rule 3 is broken.
+#' resume: ...` when rule 3 is broken. A resumed session also logs `Saved
+#' values not restored because nothing recreated them: ...` when saved values
+#' had no source to go to by the end of the first flush (rule 3), and a
+#' session whose saved state does not fit logs `Resume failed after the
+#' server function ran: ...` before it ends.
 #'
 #' @section Where saved state lives:
 #' In the hosting platform's bookmark storage when it provides one, otherwise
@@ -166,8 +181,11 @@ NULL
 #'   off, overriding the `SHINY_RESUME` environment variable. With `FALSE`
 #'   the other arguments are ignored.
 #' @param appVersion `NULL`, or a string or number recorded with the saved
-#'   state. Change it in a deploy that changes what the app's state means, so
-#'   sessions saved by the previous version resume from inputs only.
+#'   state. With `NULL`, a hash of the app's R files (in the app directory
+#'   and its `R/` folder) stands in, so a deploy that changes them makes
+#'   sessions resume from their inputs only. Set it when the app's code lives
+#'   elsewhere (a package), or to keep saved state across a deploy whose code
+#'   changes do not change what the state means; change it when they do.
 #' @param maxSize Bytes; the total size of a session's saved state. Over it,
 #'   the largest values block resume until the rest fit.
 #' @param maxNodeSize Bytes; a value whose serialized size exceeds this
@@ -243,8 +261,12 @@ enableResume <- function(enabled = TRUE, appVersion = NULL, maxSize = 50e6, maxN
 #' * is over `maxNodeSize` and cheap to recompute.
 #'
 #' Call it anywhere, including inside the server function and a module. It
-#' can wrap the constructor or mark an object already held. With resume off
-#' it does nothing.
+#' can wrap the constructor or mark an object already held. While a page
+#' resumes, marking a source restores its initial value, provided the app has
+#' not yet read or written it; if it has, that is an error that ends the
+#' session, because what the app did with the restored value cannot be undone.
+#' Wrapping the constructor is always safe. Outside a resume, marking only
+#' keeps the value out of later saves. With resume off it does nothing.
 #'
 #' @param x A [reactiveVal()], a [reactiveValues()] object or an
 #'   [ExtendedTask].

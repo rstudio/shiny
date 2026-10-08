@@ -6,8 +6,9 @@ NULL
 
 # Per-session registry behind resume. Gives reactiveVal() / reactiveValues()
 # sources an identity, tracks what changed, writes the record, and on resume
-# applies a record under the all-or-nothing gate. It knows nothing
-# about observers, outputs or conductors: those always run again.
+# applies a record; saved state that does not fit, found at verify, ends
+# the session. It knows nothing about observers, outputs or conductors:
+# those always run again.
 SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
   public = list(
     initialize = function(session) {
@@ -300,7 +301,8 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     # their records; (4) verify: saved state that does not fit ends the
     # session; (4a) the session runs session$onResume() callbacks and (4b)
     # sends `resumed`; (5) the first flush, with observeEvent() first runs
-    # held back; (6) the client's live inputs are applied (finishResume()).
+    # held back; (6) the replacement record is written, then the client's live
+    # inputs are applied (finishResume()).
 
     # Steps 2-4. `record` is a decoded record whose identity checks passed;
     # `live` the client's handler-applied inputs; `run` runs the server
@@ -547,8 +549,8 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
 
     # ---- resume internals ----
 
-    # A source without a usable record trips the gate. Trips are collected
-    # and judged at verify: the server function may mark the source with
+    # A source without a usable record is a trip that ends the session if it
+    # still counts at verify. Trips are collected and judged there: the server function may mark the source with
     # excludeFromResume() after its constructor returned.
     trip = function(id, node, reason) {
       private$trips[[length(private$trips) + 1L]] <- list(id = id, node = node, reason = reason)

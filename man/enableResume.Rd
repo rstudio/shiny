@@ -19,8 +19,11 @@ off, overriding the \code{SHINY_RESUME} environment variable. With \code{FALSE}
 the other arguments are ignored.}
 
 \item{appVersion}{\code{NULL}, or a string or number recorded with the saved
-state. Change it in a deploy that changes what the app's state means, so
-sessions saved by the previous version resume from inputs only.}
+state. With \code{NULL}, a hash of the app's R files (in the app directory
+and its \verb{R/} folder) stands in, so a deploy that changes them makes
+sessions resume from their inputs only. Set it when the app's code lives
+elsewhere (a package), or to keep saved state across a deploy whose code
+changes do not change what the state means; change it when they do.}
 
 \item{maxSize}{Bytes; the total size of a session's saved state. Over it,
 the largest values block resume until the rest fit.}
@@ -70,6 +73,12 @@ saved state, and \code{session$onResume()} runs code when a page reconnects
 that is still open.
 \item \strong{An unhandled error in an observer ends the session}, and its saved
 state is deleted. So does \code{session$close()}. The page is not retried.
+\item \strong{Saved state that no longer fits ends the session.} If, once the
+server function has run, a labelled source has no saved value or two
+sources share a label, the session ends as on an unhandled error and
+reloading the page starts fresh. Without \code{appVersion}, a change to the
+app's R files makes sessions resume from their inputs only instead,
+before anything runs.
 \item Structure an \code{observeEvent()} handler created after startup (an output,
 a module server, an observer) does not come back on its own, because
 that handler does not run again. Rebuild it in \code{session$onResume()};
@@ -78,6 +87,10 @@ see rule 3.
 work in flight are never saved. A handler that assigns closure
 variables is held back like any other, so they keep their initial
 values.
+\item \strong{A drop during a resume loses the saved state.} A record is used
+once, and the resumed session saves its own after its first flush; if
+the connection drops or the process stops in between, the next attempt
+resumes from inputs only.
 }
 }
 
@@ -118,8 +131,9 @@ rebuild the value in \code{session$onResume()}.
 
 \code{session$onResume(fun)} registers a function that runs once when a page
 reconnects, after the server function and before any observer or output
-runs. By then saved values are restored, or, if they could not be, every
-source holds its initial value. \code{fun} takes one argument, \code{info}, a list
+runs. By then saved values are restored, or, if saved state could not be
+used, the session started from its inputs only and every source holds its
+initial value. \code{fun} takes one argument, \code{info}, a list
 whose \code{restored} element is \code{TRUE} when saved state was restored and
 \code{FALSE} when the session resumed from its inputs only. It also fires with
 resume off, when \code{session$allowReconnect(TRUE)} reconnects a page, with
@@ -196,7 +210,9 @@ fires with resume off, which is how an app that only calls
 
 \section{What the log says}{
 
-Each resume writes one line to standard error: \verb{Resumed: restored N values and M inputs; K event handlers held back}, or \verb{Resumed from inputs only: <cause>}, plus \verb{Outputs on the page with no definition after resume: ...} when rule 3 is broken.
+Each resume writes one line to standard error: \verb{Resumed: restored N values and M inputs; K event handlers held back}, or \verb{Resumed from inputs only: <cause>}, plus \verb{Outputs on the page with no definition after resume: ...} when rule 3 is broken. A resumed session also logs \verb{Saved values not restored because nothing recreated them: ...} when saved values
+had no source to go to by the end of the first flush (rule 3), and a
+session whose saved state does not fit logs \verb{Resume failed after the server function ran: ...} before it ends.
 }
 
 \section{Where saved state lives}{

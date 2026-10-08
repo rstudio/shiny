@@ -113,3 +113,20 @@ test_that("an immediate write clears changes awaiting a flush", {
   s$elapse(1000)
   expect_identical(writes, 1L)
 })
+
+test_that("a failed write keeps the previous record's upload copies", {
+  local_snapshot_store_dir()
+  up_app <- function(input, output, session) output$o <- renderText(input$f$name)
+  live <- live_session(up_app, outputs = "o")
+  live_upload(live$session, "f", "a.csv", "first")
+  reg <- live$session$.snapshotRegistry
+  expect_true(reg$writeNow())
+  key <- live_key(live); store <- snapshot_store()
+  old <- list.files(store$filesDir(key))
+  live_upload(live$session, "f", "b.csv", "second")
+  reg$configureWriter(list(write = function(key, value) stop("disk full"), filesDir = store$filesDir,
+                           delete = function(key) invisible()),
+                      key, function() TRUE, 1000)
+  expect_message(expect_false(reg$writeNow()), "could not be written: disk full")
+  expect_true(all(file.exists(file.path(store$filesDir(key), old))))
+})

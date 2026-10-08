@@ -27,7 +27,8 @@ snapshot_upload_plan <- function(inputs, fileInputs, budget) {
 
 # Copies the planned files into `dir` (a name already there is the same
 # upload, so it is copied once), rewrites each file input's `datapath` to
-# the bare record filenames, and removes files the record no longer uses.
+# the bare record filenames. The previous record's files stay until the new
+# record is written (snapshot_prune_uploads()).
 snapshot_write_uploads <- function(snap, dir) {
   if (!dir.exists(dir)) dir.create(dir, recursive = TRUE, mode = "0700")
   for (name in names(snap$uploads)) {
@@ -44,9 +45,14 @@ snapshot_write_uploads <- function(snap, dir) {
     value$datapath <- targets
     snap$inputs[[name]] <- value
   }
-  stale <- setdiff(list.files(dir), unlist(snap$uploads, use.names = FALSE))
-  unlink(file.path(dir, stale))
   snap
+}
+
+# Removes the files in `dir` the record just written does not reference.
+snapshot_prune_uploads <- function(dir, keep) {
+  stale <- setdiff(list.files(dir), keep)
+  unlink(file.path(dir, stale))
+  invisible()
 }
 
 # Restores every file input in `snapshot` through the `shiny.file` handler,

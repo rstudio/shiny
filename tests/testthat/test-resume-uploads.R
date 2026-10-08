@@ -32,6 +32,8 @@ test_that("uploads are copied once beside the record, datapaths rewritten, stale
   rec2 <- list(inputs = list(a = upload_value(dir, "second")))
   rec2$uploads <- snapshot_upload_plan(rec2$inputs, "a", Inf)$keep
   snapshot_write_uploads(rec2, files)
+  expect_length(list.files(files), 2)                   # nothing removed before the record is written
+  snapshot_prune_uploads(files, unlist(rec2$uploads, use.names = FALSE))
   expect_length(list.files(files), 1)
   expect_false(file.exists(file.path(files, out$inputs$a$datapath)))
 })

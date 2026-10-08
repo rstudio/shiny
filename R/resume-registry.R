@@ -143,9 +143,14 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
         if (!self$writerEnabled()) return(invisible(FALSE))
         rec <- self$snapshot(report = FALSE)
         rec$identity <- snapshot_identity(private$session)
-        if (length(rec$uploads)) rec <- snapshot_write_uploads(rec, private$store$filesDir(private$key))
+        uploads <- rec$uploads
+        if (length(uploads)) rec <- snapshot_write_uploads(rec, private$store$filesDir(private$key))
         rec$uploads <- NULL
-        !identical(private$store$write(private$key, rec), FALSE)
+        written <- !identical(private$store$write(private$key, rec), FALSE)
+        if (written && length(uploads)) {
+          snapshot_prune_uploads(private$store$filesDir(private$key), unlist(uploads, use.names = FALSE))
+        }
+        written
       }, error = function(e) {
         if (!private$writeFailureLogged) {
           private$writeFailureLogged <- TRUE

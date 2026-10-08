@@ -9,8 +9,9 @@ NULL
 #' process survived or was restarted: [reactiveVal()] and [reactiveValues()]
 #' values, `input`, uploaded files and `session$userData` come back;
 #' [observeEvent()] handlers whose events already happened do not fire again;
-#' [reactive()] expressions and outputs recompute. Inputs that changed while
-#' the page was disconnected are applied on top.
+#' [reactive()] expressions and outputs recompute. What the user did while
+#' the page was disconnected (clicks, typing, slider moves) arrives after the
+#' restored state as ordinary input and is handled once.
 #'
 #' `enableResume()` turns resume on for an app and configures it;
 #' `enableResume(FALSE)` turns it off. Call it at the top level of `app.R`
@@ -142,6 +143,14 @@ NULL
 #'    `observe({ input$plus; isolate(count(count() + 1)) })` shows 4 after
 #'    three clicks and a resume; `observeEvent(input$plus, count(count() + 1))`
 #'    shows 3.
+#'
+#' On resume, inputs the previous session already had are restored, never
+#' replayed: no handler fires for them. Changes made while the page was
+#' disconnected are delivered once each, in order, after the first render,
+#' and fire their handlers as usual. One edge: a change sent in the instant
+#' the connection dropped, which the old session never received, counts as
+#' already handled and is not replayed. Design side effects so that losing
+#' one such event is harmless, rather than relying on exactly-once delivery.
 #'
 #' Also: [bindCache()] with a persistent cache keeps expensive reactive
 #' expressions cheap after a restart; [eventReactive()] recomputes with the

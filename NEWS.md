@@ -9,7 +9,9 @@
   longer restored over inputs the user changed since. `observeEvent()`
   handlers no longer fire for the replayed inputs: they are events that
   already happened, and before, two clicks and a reconnect re-ran the
-  handler. `session$onResume()` runs code on every reconnect, to redo what
+  handler. What the user does while the page is disconnected is delivered
+  once, in order, after the restored state; before, each such change was
+  sent twice and could run a handler twice. `session$onResume()` runs code on every reconnect, to redo what
   such handlers built. A reconnecting client's first message is now `resume`
   rather
   than `init`; the wire protocol is documented in `srcts/PROTOCOL.md`. Apps

@@ -108,8 +108,16 @@ messages with one token (a duplicated tab): the first gets the record, the
 second resumes from inputs only. A `dom` key is ignored.
 
 On every `resume`, with or without a token, resume on or off, the server
-holds back the first run of each `observeEvent()` handler: the replayed
-inputs are events that already happened.
+treats `inputs` as state the previous session already handled: it applies
+them before the first `values` message (with a record, only the ones that
+differ from the record, after the server function has run and the state
+has been verified) and holds back the first run of each `observeEvent()`
+handler. The queued `update`s that follow `resume` are processed after that
+first `values` message, as ordinary input, so each outage-era change runs
+its handlers exactly once. An `update` that was in flight when the previous
+connection died is in `inputs` and is not replayed. A server implementation
+must treat every `update` as an event even when the value is unchanged, as
+R's `input` does.
 
 ### `resumed` (server → client, once, before the first `values`)
 

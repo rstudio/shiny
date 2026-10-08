@@ -167,7 +167,7 @@ test_that("a valid token restores, sends `resumed` before any values, logs, dele
   expect_false(is.null(snapshot_store()$read(snapshot_record_key(newToken))))
 })
 
-test_that("changed live inputs apply after the first flush and their outputs reach the client", {
+test_that("a payload value that differs from the record applies at the first flush without firing handlers", {
   local_snapshot_store_dir()
   token <- closed_counter_session()
   spy <- new_spy("obs", "txt")
@@ -175,10 +175,12 @@ test_that("changed live inputs apply after the first flush and their outputs rea
   expect_equal(spy$obs, 0)
   expect_false(res$session$.snapshotRegistry$restoring())
   expect_equal(as.numeric(isolate(res$session$input$plus)), 4)
-  live_flush(res$session)
-  expect_equal(spy$obs, 1)
   values <- sent_of(res$ws, "values")
-  expect_identical(values[[length(values)]]$values$n, "4")
+  expect_length(values, 1)                               # one render, already with the merged value
+  expect_identical(values[[1]]$values$n, "3")            # count is state the handler did not touch
+  live_flush(res$session)
+  expect_equal(spy$obs, 0)
+  expect_length(sent_of(res$ws, "values"), 1)
 })
 
 test_that("malformed, unknown and mismatched tokens fall through to inputs-only with the cause logged", {
@@ -598,7 +600,7 @@ test_that("a source with no saved value ends the session for good after the serv
   expect_null(snapshot_store()$read(snapshot_record_key(newToken)))
 })
 
-test_that("the first replacement record follows the first flush and keeps the checkpoint's inputs", {
+test_that("the first replacement record follows the first flush and holds the merged inputs", {
   local_snapshot_store_dir()
   app <- function(input, output, session) {
     count <- reactiveVal(0)
@@ -613,7 +615,7 @@ test_that("the first replacement record follows the first flush and keeps the ch
   newToken <- res$ws$sent()[[1]]$config$resumeToken
   rec <- snapshot_store()$read(snapshot_record_key(newToken))
   expect_true("|reactiveVal|late" %in% names(rec$sources))   # created in the first flush
-  expect_equal(as.numeric(rec$inputs$plus), 3)                # before the live click applies
+  expect_equal(as.numeric(rec$inputs$plus), 4)                # the merged inputs: the freshest baseline
 })
 
 test_that("an old session in this process cannot recreate a record a newer session claimed", {

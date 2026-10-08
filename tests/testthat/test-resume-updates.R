@@ -95,3 +95,86 @@ test_that("several queued updates to one input arrive in order after the restore
   ))
   expect_identical(seen, c("first", "a", "ab", "abc"))
 })
+
+# A session whose record says plus = 2 while the old session got to 3 and
+# died inside the debounce. Returns the token.
+record_lag_session <- function(spy) {
+  live <- live_session(counter_app(spy), outputs = "n", inputs = list(`plus:shiny.action` = 0, txt = ""),
+                       envir = parent.frame())
+  for (i in 1:2) live_set(live$session, `plus:shiny.action` = i)
+  live$session$.snapshotRegistry$writeNow()            # the record says 2 ...
+  live_set(live$session, `plus:shiny.action` = 3)      # ... the old session got to 3 and died inside the debounce
+  token <- live$ws$sent()[[1]]$config$resumeToken
+  # A closed gate keeps the closing write from refreshing the record, and a
+  # resolvable store lets the cleanup in local_cancel_writes() delete it.
+  live$session$.snapshotRegistry$configureWriter(function() snapshot_store(), snapshot_record_key(token), function() FALSE, 1000)
+  live$session$wsClosed()
+  token
+}
+
+test_that("record lag: a payload value newer than the record is restored as state and a queued update still fires once", {
+  local_snapshot_store_dir()
+  both_timings(function(before) {
+    token <- record_lag_session(new_spy("obs", "txt"))
+    spy <- new_spy("obs", "txt")
+    res <- suppressMessages(resume_with_updates(
+      counter_app(spy),
+      list(token = token, inputs = list(`plus:shiny.action` = 3L, txt = "", .clientdata_output_n_hidden = FALSE)),
+      updates = list(list(`plus:shiny.action` = 4L)),
+      updates_before_flush = before
+    ))
+    expect_identical(res$outcome, "snapshot")
+    expect_equal(spy$obs, 1, info = paste("before =", before))   # the queued click only
+    expect_equal(as.numeric(isolate(res$session$input$plus)), 4)
+    values <- sent_of(res$ws, "values")
+    expect_identical(values[[1]]$values$n, "2")                   # the record's count at the first flush
+    expect_identical(values[[length(values)]]$values$n, "3")      # then the queued click
+  })
+})
+
+test_that("at most once: a payload value with no queued update never fires its handler", {
+  local_snapshot_store_dir()
+  token <- record_lag_session(new_spy("obs", "txt"))
+  spy <- new_spy("obs", "txt")
+  res <- suppressMessages(resume_with_updates(
+    counter_app(spy), list(token = token, inputs = list(`plus:shiny.action` = 3L, txt = ""))
+  ))
+  expect_identical(res$outcome, "snapshot")
+  expect_equal(spy$obs, 0)
+  expect_equal(as.numeric(isolate(res$session$input$plus)), 3)
+})
+
+test_that("the record written after the first flush contains the merged inputs", {
+  local_snapshot_store_dir()
+  token <- record_lag_session(new_spy("obs", "txt"))
+  res <- suppressMessages(resume_with_updates(
+    counter_app(new_spy("obs", "txt")), list(token = token, inputs = list(`plus:shiny.action` = 3L, txt = ""))
+  ))
+  newToken <- res$ws$sent()[[1]]$config$resumeToken
+  rec <- snapshot_store()$read(snapshot_record_key(newToken))
+  expect_equal(as.numeric(rec$inputs$plus), 3)
+})
+
+test_that("a construction-time guard reads the record, not the payload; the payload converges afterwards", {
+  local_snapshot_store_dir()
+  app <- function(input, output, session) {
+    if (isTRUE(input$mode == "b")) extra <- reactiveVal("only in b")
+    observe({ input$mode; NULL })
+  }
+  live <- live_session(app, inputs = list(mode = "a"))
+  token <- live_close(live)
+  res <- suppressMessages(resume_with_updates(app, list(token = token, inputs = list(mode = "b"))))
+  expect_identical(res$outcome, "snapshot")                  # the gate passed: construction saw "a"
+  expect_identical(isolate(res$session$input$mode), "b")     # then the payload value won
+})
+
+test_that("payload clientData equal to the session's initial value but not the record's still invalidates", {
+  local_snapshot_store_dir()
+  seen <- character(0)
+  app <- function(input, output, session) observe(seen <<- c(seen, session$clientData$url_search))
+  live <- live_session(app, inputs = list(.clientdata_url_search = "?v=old"))
+  token <- live_close(live)
+  seen <- character(0)
+  res <- suppressMessages(resume_with_updates(app, list(token = token, inputs = list(.clientdata_url_search = ""))))
+  expect_identical(seen, "")                                 # one run, with the live value
+})

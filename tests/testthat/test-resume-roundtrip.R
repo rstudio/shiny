@@ -47,12 +47,14 @@ test_that("a plain observer runs again and double-applies; devmode names the sou
   expect_match(seen, "`count` was written during the first flush", all = FALSE)
 })
 
-test_that("an input that changed while disconnected fires its handler after the first flush, once", {
+test_that("a payload value the record lacks (record lag) converges at the first flush without firing its handler", {
   spy <- new_spy("obs", "out")
   rt <- snapshot_roundtrip(counter_server(spy), function(s) for (i in 1:3) s$setInputs(plus = i),
                            live = list(plus = 4))
-  expect_equal(spy$obs, 1)
-  expect_equal(isolate(rt$second$env$count()), 4)
+  expect_equal(spy$obs, 0)
+  expect_equal(isolate(rt$second$env$count()), 3)       # state, not an event: the handler did not run
+  expect_equal(as.numeric(isolate(rt$second$input$plus)), 4)
+  expect_equal(spy$out, 1)                              # one render, with the merged value
 })
 
 test_that("a closure-assigning handler is held back; ignoreInit = TRUE handles the next event; once = TRUE may fire again", {

@@ -323,7 +323,9 @@ bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
             if (ignoreInit) return()
             # A resume: this event already happened in the session this one
             # continues, so the first run is held back. The event expression
-            # was evaluated above, so the dependency stands.
+            # was evaluated above, so the dependency stands. The payload-vs-
+            # record merge (SnapshotRegistry$mergeLiveInputs()) relies on
+            # this too: its values are state, and land inside this window.
             if (snapshot_holding_back(x$.domain)) {
               registry <- snapshot_registry(x$.domain)
               if (!is.null(registry)) registry$noteInitSkipped(x$.label)

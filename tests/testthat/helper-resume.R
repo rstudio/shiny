@@ -110,7 +110,7 @@ snapshot_roundtrip <- function(server, drive = function(session) NULL, live = NU
   )
   # Step 4a, as ShinySession$.resumeSession() runs it before sending `resumed`.
   withMockContext(second, second$.resumeCallbacks$run(identical(outcome$resumed, "snapshot")))
-  # Changed live inputs apply after the first flush, so their dependents run in the second.
+  # Two flushes: the merged inputs render in the first; anything an onResume() callback invalidated, in the second.
   second$flushReact()
   second$flushReact()
   list(first = first, second = second, record = record, outcome = second$.snapshotRegistry$outcome(),

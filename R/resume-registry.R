@@ -309,17 +309,19 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
 
     # ---- resuming ------------------------------------------------------
     #
-    # A resume runs in six steps: (1) the session reads, checks and decodes
+    # A resume runs in these steps: (1) the session reads, checks and decodes
     # the record and claims it (ShinySession$.resumeSession()); a problem
     # there falls back to inputs only; (2) the record's inputs and userData
     # are restored; (3) the server function runs, and constructors apply
     # their records; (4) verify: saved state that does not fit ends the
-    # session; (4a) the session runs session$onResume() callbacks and (4b)
-    # sends `resumed`; (5) the first flush, with observeEvent() first runs
-    # held back; (6) the replacement record is written, then the client's live
-    # inputs are applied (finishResume()).
+    # session; (4.5) the client's inputs that differ from the record's are
+    # merged, as state (mergeLiveInputs()); (4a) the session runs
+    # session$onResume() callbacks and (4b) sends `resumed`; (5) the first
+    # flush, with observeEvent() first runs held back; (6) the replacement
+    # record is written (finishResume()). The client's `update`s queued while
+    # it was disconnected arrive after step 5 and are ordinary input.
 
-    # Steps 2-4. `record` is a decoded record whose identity checks passed;
+    # Steps 2-4.5. `record` is a decoded record whose identity checks passed;
     # `live` the client's handler-applied inputs; `run` runs the server
     # function once. Returns the outcome, or raises `shiny_resume_failed`.
     # Step 6 runs after the first flush.
@@ -364,20 +366,21 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       private$outcomeValue <- list(resumed = "snapshot", cause = NULL,
                                    values = length(private$applied), inputs = length(record$inputs))
       private$phase <- "restoring"
+      # Step 4.5, inside the hold-back: the delta is record lag (values the
+      # old session processed after its last write), so it is state. The
+      # outage-era changes are not here; the client sends them as `update`s.
+      private$mergeLiveInputs()
       private$session$onFlushed(function() self$finishResume(), once = TRUE)
       completed <- TRUE
       private$outcomeValue
     },
 
-    # Step 6. First the replacement record (the one read was deleted): after
-    # the first flush, so sources rebuilt by hooks and first-flush observers
-    # are in it; before live changes, so its inputs still match the sources
-    # computed from them and a change made while disconnected still looks
-    # like one to the next resume. Then the client's inputs that differ from
-    # the record's apply, skipping names an `update` changed since step 2.
+    # Step 6. The replacement record (the one read was deleted): after the
+    # first flush, so sources rebuilt by hooks and first-flush observers are
+    # in it, and with the merged inputs, the freshest baseline for the next
+    # resume's delta.
     finishResume = function() {
-      live <- private$liveSet
-      if (is.null(live)) return(invisible())
+      if (is.null(private$liveSet)) return(invisible())
       self$writeNow()
       private$outcomeValue$values <- length(private$applied)
       unclaimed <- setdiff(names(private$records), private$claimed)
@@ -387,17 +390,6 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
           "Saved values for %s were not restored because nothing recreated them, probably because an observeEvent() handler creates them and handlers whose events already happened do not run again. Create them from state instead, or in session$onResume() (rule 3 of the rules of reactives in ?enableResume).",
           paste(unclaimed, collapse = ", ")))
       }
-      changed <- list()
-      for (name in names(live$inputs)) {
-        if (name %in% live$fileInputs || name %in% private$updated) next
-        if (!identical(live$inputs[[name]], private$recordInputs[[name]])) changed[name] <- list(live$inputs[[name]])
-      }
-      private$setInputs(changed, force = TRUE)
-      changedCd <- list()
-      for (name in names(live$clientData)) {
-        if (!identical(live$clientData[[name]], private$recordClientData[[name]])) changedCd[name] <- list(live$clientData[[name]])
-      }
-      private$setClientData(changedCd, force = TRUE)
       private$outcomeValue$skipped <- private$skipped
       private$leave()
       invisible()
@@ -638,6 +630,26 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       impl <- .subset2(private$session$clientData, "impl")
       for (name in names(values)) impl$set(name, values[[name]], force = force)
       if (is.function(private$session$manageHiddenOutputs)) private$session$manageHiddenOutputs()
+      invisible()
+    },
+
+    # Step 4.5. A file input's live value is the browser's NULL and must not
+    # clobber the restored upload. `force = TRUE`: the dependents of a value
+    # that changed must recompute at the first flush even if a constructor
+    # already set it.
+    mergeLiveInputs = function() {
+      live <- private$liveSet
+      changed <- list()
+      for (name in names(live$inputs)) {
+        if (name %in% live$fileInputs || name %in% private$updated) next
+        if (!identical(live$inputs[[name]], private$recordInputs[[name]])) changed[name] <- list(live$inputs[[name]])
+      }
+      private$setInputs(changed, force = TRUE)
+      changedCd <- list()
+      for (name in names(live$clientData)) {
+        if (!identical(live$clientData[[name]], private$recordClientData[[name]])) changedCd[name] <- list(live$clientData[[name]])
+      }
+      private$setClientData(changedCd, force = TRUE)
       invisible()
     },
 

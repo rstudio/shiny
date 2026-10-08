@@ -27,7 +27,7 @@ test_that("onResume() never fires in a plain testServer()", {
   expect_false(ran)
 })
 
-test_that("a restored resume runs callbacks once, before any observer, seeing restored values", {
+test_that("a restored resume runs callbacks once, before any observer, seeing restored and merged values", {
   events <- character(0)
   seen <- NULL
   server <- function(input, output, session) {
@@ -36,14 +36,15 @@ test_that("a restored resume runs callbacks once, before any observer, seeing re
     observe(events <<- c(events, "observer"))
     session$onResume(function(info) {
       events <<- c(events, "callback")
-      seen <<- list(info = info, count = count())
+      seen <<- list(info = info, count = count(), plus = as.numeric(input$plus))
     })
   }
-  rt <- snapshot_roundtrip(server, function(s) for (i in 1:3) s$setInputs(plus = i))
+  rt <- snapshot_roundtrip(server, function(s) for (i in 1:3) s$setInputs(plus = i), live = list(plus = 4))
   expect_identical(rt$outcome$resumed, "snapshot")
   # The first session's observer; then, in the second, the callback before its observer.
   expect_identical(events, c("observer", "callback", "observer"))
-  expect_identical(seen, list(info = list(restored = TRUE), count = 3))
+  # count is restored state; plus is the payload's (record-lag) value, merged before the callback.
+  expect_identical(seen, list(info = list(restored = TRUE), count = 3, plus = 4))
 })
 
 test_that("callbacks run in global registration order, each under the namespace it was registered in", {

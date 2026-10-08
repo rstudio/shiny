@@ -330,7 +330,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       # Step 4. The server function has run with saved values, so resetting
       # them could not undo what it did with them: saved state that does not
       # fit this code ends the session (server.R's endOnError()).
-      cause <- tryCatch(private$verifyAndCommit(),
+      cause <- tryCatch(private$verify(),
         error = function(e) paste0("saved state could not be checked: ", conditionMessage(e)))
       if (!is.null(cause)) {
         message(sprintf(
@@ -378,6 +378,21 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       private$skipped <- c(private$skipped, label)
       invisible()
     },
+    # excludeFromResume() on a source whose saved value was applied during
+    # this resume. Before the app used that value, the source goes back to its
+    # constructor value; after, nothing can undo what the app did with it.
+    excludeRestored = function(state) {
+      # A source that lost its identity to a duplicate label has no entry.
+      entry <- if (is.null(state$id)) NULL else private$entries[[state$id]]
+      if (isTRUE(state$used)) {
+        rlang::abort(sprintf(
+          "excludeFromResume() was called on `%s` after the app used its restored value. Call it before the first read, for example around the constructor: `x <- excludeFromResume(reactiveVal(...))`.",
+          entry$label %||% state$id %||% "<unnamed>"), class = "shiny_resume_exclude_late")
+      }
+      if (!is.null(entry)) private$revertOne(entry, state$id)
+      state$watch <- FALSE
+      invisible()
+    },
     outcome = function() private$outcomeValue
   ),
 
@@ -400,6 +415,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     records = NULL, initials = NULL, applied = character(0), trips = list(),
     liveSet = NULL, recordInputs = NULL, recordClientData = NULL,
     updated = character(0), skipped = character(0), outcomeValue = NULL,
+    watched = list(),
 
     orphan = function(entry, reason, counted) {
       entry$reason <- reason
@@ -535,18 +551,16 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     applyRecord = function(id, entry, record) {
       ok <- tryCatch({ entry$apply(record); TRUE },
         error = function(e) { private$trip(id, entry$node, paste0("saved value could not be applied: ", conditionMessage(e))); FALSE })
-      if (ok) private$applied <- c(private$applied, id)
+      if (ok) {
+        private$applied <- c(private$applied, id)
+        entry$node$.snapshot$watch <- TRUE
+        private$watched <- c(private$watched, list(entry$node$.snapshot))
+      }
       invisible(ok)
     },
 
-    # Step 4: the gate's cause, or NULL. A marked source that got a record
-    # (it was unmarked when the record was written) goes back to its initial
-    # value; an unmarked source without an identity blocks.
-    verifyAndCommit = function() {
-      for (id in private$applied) {
-        entry <- private$entries[[id]]
-        if (!is.null(entry) && isTRUE(entry$node$.snapshot$skip)) private$revertOne(entry, id)
-      }
+    # Step 4: the gate's cause, or NULL. An unmarked source without an identity blocks.
+    verify = function() {
       for (entry in private$orphans) {
         if (isTRUE(entry$counted) && !isTRUE(entry$node$.snapshot$skip)) {
           private$trip(paste(entry$ns, entry$kind, entry$label %||% "<unnamed>", sep = "|"), entry$node, entry$reason)
@@ -586,6 +600,8 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     },
 
     leave = function() {
+      for (state in private$watched) { state$watch <- FALSE; state$used <- FALSE }
+      private$watched <- list()
       private$phase <- "idle"
       private$records <- NULL
       private$initials <- NULL
@@ -646,6 +662,10 @@ snapshot_node_state <- function(registry, ...) {
   state$id <- NULL
   state$skip <- FALSE
   state$skipReason <- NULL
+  # While a resume runs: `watch` once a saved value was applied, `used` once
+  # the app read or wrote it since (snapshot_note_use()).
+  state$watch <- FALSE
+  state$used <- FALSE
   state
 }
 

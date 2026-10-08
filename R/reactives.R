@@ -160,6 +160,7 @@ ReactiveVal <- R6Class(
     },
     get = function() {
       if (private$.destroyed) stop(destroyedReactiveError(private$label))
+      if (!is.null(.snapshot) && .snapshot$watch) snapshot_note_use(.snapshot)
       private$dependents$register()
 
       if (private$frozen)
@@ -184,6 +185,7 @@ ReactiveVal <- R6Class(
       rLog$valueChange(private$reactId, value, domain)
       private$value <- value
       if (!is.null(.snapshot)) {
+        if (.snapshot$watch) snapshot_note_use(.snapshot)
         .snapshot$registry$markDirty()
         .snapshot$registry$noteWrite(.snapshot, private$label)
       }
@@ -489,6 +491,7 @@ ReactiveValues <- R6Class(
 
     get = function(key) {
       if (.destroyed) stop(destroyedReactiveError(.label))
+      if (!is.null(.snapshot) && .snapshot$watch) snapshot_note_use(.snapshot)
       # get value right away to use for logging
       keyValue <- .values$get(key)
 
@@ -572,6 +575,7 @@ ReactiveValues <- R6Class(
       .values$set(key, value)
 
       if (!is.null(.snapshot)) {
+        if (.snapshot$watch) snapshot_note_use(.snapshot)
         .snapshot$registry$markDirty()
         .snapshot$registry$noteWrite(.snapshot, .label)
       }
@@ -614,6 +618,7 @@ ReactiveValues <- R6Class(
     },
 
     names = function() {
+      if (!is.null(.snapshot) && .snapshot$watch) snapshot_note_use(.snapshot)
       if (!isTRUE(.hasRetrieved$names)) {
         domain <- getDefaultReactiveDomain()
         rLog$defineNames(.reactId, .nameOrder, .label, domain)
@@ -668,6 +673,7 @@ ReactiveValues <- R6Class(
     },
 
     toList = function(all.names=FALSE) {
+      if (!is.null(.snapshot) && .snapshot$watch) snapshot_note_use(.snapshot)
       listValue <- .values$mget(.nameOrder)
       if (!all.names) {
         listValue <- listValue[!grepl("^\\.", base::names(listValue))]

@@ -318,11 +318,27 @@ resume_check_version <- function(value) {
 # A node no registry tracks is never recorded, so there is nothing to mark.
 snapshot_mark_skipped <- function(node, reason = "excludeFromResume()") {
   state <- node$.snapshot
-  if (!is.null(state)) {
-    state$skip <- TRUE
-    state$skipReason <- reason
-  }
+  if (is.null(state)) return(invisible())
+  if (isTRUE(state$watch)) state$registry$excludeRestored(state)
+  state$skip <- TRUE
+  state$skipReason <- reason
   invisible()
+}
+
+# Called from a tracked source's read and write paths while its restored
+# value is watched.
+snapshot_note_use <- function(state) {
+  if (!isTRUE(.globals$snapshotUntracked)) state$used <- TRUE
+  invisible()
+}
+
+# Evaluates `expr` without counting its reads and writes of restored sources
+# as the app's use: for Shiny's own bookkeeping inside a constructor.
+snapshot_untracked <- function(expr) {
+  old <- .globals$snapshotUntracked
+  .globals$snapshotUntracked <- TRUE
+  on.exit(.globals$snapshotUntracked <- old)
+  expr
 }
 
 # Evaluates `expr`, whose reactiveVal() and reactiveValues() calls create

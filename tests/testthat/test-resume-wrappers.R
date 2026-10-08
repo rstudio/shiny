@@ -51,3 +51,21 @@ test_that("excludeFromResume() on an ExtendedTask leaves its state out: it comes
   expect_identical(rec$report$reason[rec$report$label %in% "ExtendedTask task"], "excludeFromResume()")
   expect_identical(withVisible(excludeFromResume(s$env$task))$visible, FALSE)
 })
+
+test_that("an existing ExtendedTask marked during a resume starts as never invoked, even if saved running", {
+  for (status in c("success", "running")) {
+    state <- list(status = status, value = if (status == "success") list(value = 42, visible = TRUE), error = NULL)
+    rec <- snapshot_decode_sources(list(
+      format = 3L, complete = TRUE, blocked = list(), inputs = list(), clientData = list(), fileInputs = character(0),
+      userData = list(), sources = list("|reactiveVal|ExtendedTask task" = list(kind = "reactiveVal", bytes = serialize(state, NULL, xdr = FALSE)))
+    ))
+    s <- MockShinySession$new()
+    s$.snapshotRegistry$resume(rec, live = list(inputs = list(), clientData = list(), fileInputs = character(0)),
+      run = function() withMockContext(s, {
+        task <- ExtendedTask$new(function() 1)
+        excludeFromResume(task)
+        s$env$task <- task
+      }))
+    expect_identical(isolate(s$env$task$status()), "initial")
+  }
+})

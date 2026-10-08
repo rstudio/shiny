@@ -130,6 +130,93 @@ test_that("two sources sharing a label during the server function end the resume
   expect_equal(isolate(s2$env$count()), 1)              # the first keeps its restored value
 })
 
+# Resumes `v2` from a record `v1` wrote after `drive`, returning the second session.
+resume_from <- function(v1, v2, drive = function(s) NULL) {
+  first <- snapshot_session(v1)
+  drive(first)
+  rec <- snapshot_decode_sources(first$.snapshotRegistry$snapshot()); rec$identity <- snapshot_identity(first)
+  s2 <- MockShinySession$new()
+  srv <- capture_env(v2)
+  s2$.snapshotRegistry$resume(rec, list(inputs = rec$inputs, clientData = list(), fileInputs = character(0)),
+    function() withMockContext(s2, srv(s2$input, s2$output, s2)))
+  s2
+}
+
+saved_ten <- function(input, output, session) { count <- reactiveVal(10, label = "count") }
+
+test_that("excludeFromResume() around the constructor shows the constructor value during a resume", {
+  s2 <- resume_from(saved_ten, function(input, output, session) {
+    count <- excludeFromResume(reactiveVal(0, label = "count"))
+  })
+  expect_equal(isolate(s2$env$count()), 0)
+  s2$flushReact()
+  expect_false("|reactiveVal|count" %in% names(s2$.snapshotRegistry$snapshot()$sources))
+})
+
+test_that("marking an existing source before its first use reverts it to the constructor value", {
+  s2 <- resume_from(saved_ten, function(input, output, session) {
+    count <- reactiveVal(0, label = "count")
+    excludeFromResume(count)
+  })
+  expect_equal(isolate(s2$env$count()), 0)
+})
+
+test_that("marking a source after the app read its restored value ends the resume", {
+  expect_error(
+    resume_from(saved_ten, function(input, output, session) {
+      count <- reactiveVal(0, label = "count")
+      seen <- isolate(count())
+      excludeFromResume(count)
+    }),
+    "excludeFromResume() was called on `count` after the app used its restored value",
+    fixed = TRUE, class = "shiny_resume_exclude_late"
+  )
+})
+
+test_that("marking a reactiveValues after reading its names ends the resume", {
+  v1 <- function(input, output, session) { rv <- reactiveValues(a = 10, .label = "rv") }
+  expect_error(
+    resume_from(v1, function(input, output, session) {
+      rv <- reactiveValues(a = 0, .label = "rv")
+      isolate(names(rv))
+      excludeFromResume(rv)
+    }),
+    class = "shiny_resume_exclude_late"
+  )
+  s2 <- resume_from(v1, function(input, output, session) {
+    rv <- reactiveValues(a = 0, .label = "rv")
+    excludeFromResume(rv)
+  })
+  expect_equal(isolate(s2$env$rv$a), 0)
+})
+
+test_that("a source read by one first-flush observer and excluded by another ends the session", {
+  s2 <- resume_from(saved_ten, function(input, output, session) {
+    count <- reactiveVal(0, label = "count")
+    observe(count(), priority = 10)
+    observe(excludeFromResume(count), priority = 0)
+  })
+  # A mock session does not re-raise observer errors: it closes the session
+  # and calls onUnhandledError(), as a real session ends for good.
+  seen <- NULL
+  s2$onUnhandledError(function(e) seen <<- e)
+  suppressWarnings(suppressMessages(s2$flushReact()))  # printError()'s report
+  expect_s3_class(seen, "shiny_resume_exclude_late")
+  expect_true(s2$isClosed())
+})
+
+test_that("after the resume finished, marking keeps the current value and omits it from later records", {
+  s2 <- resume_from(saved_ten, function(input, output, session) {
+    count <- reactiveVal(0, label = "count")
+    observe(count())
+  })
+  s2$flushReact()
+  expect_false(s2$.snapshotRegistry$restoring())
+  excludeFromResume(s2$env$count)
+  expect_equal(isolate(s2$env$count()), 10)
+  expect_false("|reactiveVal|count" %in% names(s2$.snapshotRegistry$snapshot()$sources))
+})
+
 test_that("userData and module state under two namespaces come back", {
   mod <- function(id) moduleServer(id, function(input, output, session) {
     v <- reactiveVal(0)

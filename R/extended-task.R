@@ -159,13 +159,15 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
         }
       })
       # A snapshotted invocation cannot be resumed: its promise died with the
-      # process.
-      if (identical(isolate(private$rv_state())$status, "running")) {
-        private$rv_state(list(
-          status = "error", value = NULL,
-          error = simpleError("ExtendedTask was interrupted by a server restart; invoke it again")
-        ))
-      }
+      # process. Shiny's own read and write, not the app's use of the value.
+      snapshot_untracked({
+        if (identical(isolate(private$rv_state())$status, "running")) {
+          private$rv_state(list(
+            status = "error", value = NULL,
+            error = simpleError("ExtendedTask was interrupted by a server restart; invoke it again")
+          ))
+        }
+      })
 
       private$invocation_queue <- fastmap::fastqueue()
 

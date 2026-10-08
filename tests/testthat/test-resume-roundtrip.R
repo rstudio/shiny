@@ -147,7 +147,9 @@ saved_ten <- function(input, output, session) { count <- reactiveVal(10, label =
 test_that("excludeFromResume() around the constructor shows the constructor value during a resume", {
   s2 <- resume_from(saved_ten, function(input, output, session) {
     count <- excludeFromResume(reactiveVal(0, label = "count"))
+    seen <- isolate(count())
   })
+  expect_equal(s2$env$seen, 0)
   expect_equal(isolate(s2$env$count()), 0)
   s2$flushReact()
   expect_false("|reactiveVal|count" %in% names(s2$.snapshotRegistry$snapshot()$sources))
@@ -157,7 +159,9 @@ test_that("marking an existing source before its first use reverts it to the con
   s2 <- resume_from(saved_ten, function(input, output, session) {
     count <- reactiveVal(0, label = "count")
     excludeFromResume(count)
+    seen <- isolate(count())
   })
+  expect_equal(s2$env$seen, 0)
   expect_equal(isolate(s2$env$count()), 0)
 })
 
@@ -170,6 +174,26 @@ test_that("marking a source after the app read its restored value ends the resum
     }),
     "excludeFromResume() was called on `count` after the app used its restored value",
     fixed = TRUE, class = "shiny_resume_exclude_late"
+  )
+})
+
+test_that("marking a source after the app wrote its restored value back ends the resume", {
+  expect_error(
+    resume_from(saved_ten, function(input, output, session) {
+      count <- reactiveVal(0, label = "count")
+      count(10)
+      excludeFromResume(count)
+    }),
+    class = "shiny_resume_exclude_late"
+  )
+  v1 <- function(input, output, session) { rv <- reactiveValues(a = 10, .label = "rv") }
+  expect_error(
+    resume_from(v1, function(input, output, session) {
+      rv <- reactiveValues(a = 0, .label = "rv")
+      rv$a <- 10
+      excludeFromResume(rv)
+    }),
+    class = "shiny_resume_exclude_late"
   )
 })
 

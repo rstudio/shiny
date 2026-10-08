@@ -170,6 +170,7 @@ ReactiveVal <- R6Class(
     },
     set = function(value) {
       if (private$.destroyed) stop(destroyedReactiveError(private$label))
+      if (!is.null(.snapshot) && .snapshot$watch) snapshot_note_use(.snapshot)
       if (identical(private$value, value)) {
         return(invisible(FALSE))
       }
@@ -185,7 +186,6 @@ ReactiveVal <- R6Class(
       rLog$valueChange(private$reactId, value, domain)
       private$value <- value
       if (!is.null(.snapshot)) {
-        if (.snapshot$watch) snapshot_note_use(.snapshot)
         .snapshot$registry$markDirty()
         .snapshot$registry$noteWrite(.snapshot, private$label)
       }
@@ -516,6 +516,7 @@ ReactiveValues <- R6Class(
 
     set = function(key, value, force = FALSE) {
       if (.destroyed) stop(destroyedReactiveError(.label))
+      if (!is.null(.snapshot) && .snapshot$watch) snapshot_note_use(.snapshot)
       # if key exists
       #   if it is the same value, return
       #
@@ -575,7 +576,6 @@ ReactiveValues <- R6Class(
       .values$set(key, value)
 
       if (!is.null(.snapshot)) {
-        if (.snapshot$watch) snapshot_note_use(.snapshot)
         .snapshot$registry$markDirty()
         .snapshot$registry$noteWrite(.snapshot, .label)
       }

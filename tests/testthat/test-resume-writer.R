@@ -105,7 +105,8 @@ test_that("writer snapshots omit reports without changing saved state", {
 test_that("an immediate write clears changes awaiting a flush", {
   s <- snapshot_session(function(input, output, session) { v <- reactiveVal(1) })
   writes <- 0L
-  store <- list(write = function(key, value) writes <<- writes + 1L)
+  store <- list(write = function(key, value) writes <<- writes + 1L,
+                claimed = function(key) FALSE, filesDir = function(key) file.path(tempdir(), "none"))
   configure_mock_writer(s, store)
   isolate(s$env$v(2))
   expect_identical(s$.snapshotRegistry$writeNow(), TRUE)
@@ -125,8 +126,36 @@ test_that("a failed write keeps the previous record's upload copies", {
   old <- list.files(store$filesDir(key))
   live_upload(live$session, "f", "b.csv", "second")
   reg$configureWriter(list(write = function(key, value) stop("disk full"), filesDir = store$filesDir,
+                           claimed = function(key) FALSE,
                            delete = function(key) invisible()),
                       key, function() TRUE, 1000)
   expect_message(expect_false(reg$writeNow()), "could not be written: disk full")
   expect_true(all(file.exists(file.path(store$filesDir(key), old))))
+})
+
+test_that("a write to a claimed key copies no uploads", {
+  local_snapshot_store_dir()
+  up_app <- function(input, output, session) output$o <- renderText(input$f$name)
+  live <- live_session(up_app, outputs = "o")
+  live_upload(live$session, "f", "a.csv", "first")
+  reg <- live$session$.snapshotRegistry
+  expect_true(reg$writeNow())
+  key <- live_key(live); store <- snapshot_store()
+  store$claim(key)
+  expect_false(reg$writeNow())
+  expect_false(dir.exists(store$filesDir(key)))
+})
+
+test_that("a write after the last upload is gone removes its copy", {
+  local_snapshot_store_dir()
+  up_app <- function(input, output, session) output$o <- renderText(input$f$name)
+  live <- live_session(up_app, outputs = "o")
+  live_upload(live$session, "f", "a.csv", "first")
+  reg <- live$session$.snapshotRegistry
+  expect_true(reg$writeNow())
+  key <- live_key(live); store <- snapshot_store()
+  expect_length(list.files(store$filesDir(key)), 1)
+  live_set(live$session, f = NULL)
+  expect_true(reg$writeNow())
+  expect_identical(list.files(store$filesDir(key)), character(0))
 })

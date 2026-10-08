@@ -254,8 +254,16 @@ test_that("decoding keeps NULL values and names the source that fails", {
   expect_true("value" %in% names(out$sources$a))
   expect_null(out$sources$a$value)
   expect_identical(out$sources$b$value, 1)
+  expect_null(out$sources$b$bytes)                     # not held twice
   rec$sources$b$bytes <- as.raw(1:3)
   expect_error(snapshot_decode_sources(rec), "source `b` could not be decoded")
+})
+
+test_that("a record's `omitted` is optional but must be character", {
+  rec <- list(identity = list(), complete = TRUE)
+  expect_null(snapshot_shape_problem(rec))
+  rec$omitted <- list("x")
+  expect_identical(snapshot_shape_problem(rec), "`omitted` is not character")
 })
 
 test_that("a saved value that cannot be decoded resumes from inputs only before the server function runs", {

@@ -43,6 +43,7 @@ SnapshotStore <- R6Class("SnapshotStore", cloneable = FALSE,
       private$consumed$set(key, as.numeric(Sys.time()))
       self$delete(key)
     },
+    claimed = function(key) private$consumed$has(key),
     read = function(key) {
       value <- private$cache$get(key)
       if (cachem::is.key_missing(value)) NULL else value

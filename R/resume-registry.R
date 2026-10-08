@@ -64,9 +64,10 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
         record <- private$records[[id]]
         if (!is.null(record)) {
           private$applyRecord(id, entry, record)
-        } else if (identical(private$phase, "constructing")) {
-          # Before verify, a source the record lacks trips the gate; one
-          # created at the first flush keeps its initial value.
+        } else if (identical(private$phase, "constructing") && !id %in% private$omitted) {
+          # Before verify, a source the record lacks is a trip, unless the
+          # record says it left the source out on purpose. One created at
+          # the first flush keeps its initial value.
           private$trip(id, node, "no saved value")
         }
       }
@@ -142,14 +143,17 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       private$cancelPendingWrite()
       ok <- tryCatch({
         if (!self$writerEnabled()) return(invisible(FALSE))
+        # write() would refuse it too, but only after the uploads were
+        # copied back into the files directory claim() deleted.
+        if (private$store$claimed(private$key)) return(invisible(FALSE))
         rec <- self$snapshot(report = FALSE)
         rec$identity <- snapshot_identity(private$session)
         uploads <- rec$uploads
         if (length(uploads)) rec <- snapshot_write_uploads(rec, private$store$filesDir(private$key))
         rec$uploads <- NULL
         written <- !identical(private$store$write(private$key, rec), FALSE)
-        if (written && length(uploads)) {
-          snapshot_prune_uploads(private$store$filesDir(private$key), unlist(uploads, use.names = FALSE))
+        if (written) {
+          snapshot_prune_uploads(private$store$filesDir(private$key), as.character(unlist(uploads, use.names = FALSE)))
         }
         written
       }, error = function(e) {
@@ -201,13 +205,22 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       }
       block <- function(id, reason) blocked[[length(blocked) + 1L]] <<- list(id = id, reason = reason)
       unlabelled <- character(0)
+      # Left out on purpose, so the next resume does not take their missing
+      # saved values for sources the record never knew.
+      omitted <- character(0)
 
       for (id in names(private$entries)) {
         entry <- private$entries[[id]]
-        if (private$sourceDestroyed(entry)) next
+        if (private$sourceDestroyed(entry)) {
+          omitted <- c(omitted, id)
+          next
+        }
         st <- entry$node$.snapshot
         if (isTRUE(st$skip)) {
-          if (!identical(st$skipReason, "internal")) addRow(entry$kind, entry$label, entry$ns, FALSE, st$skipReason)
+          if (!identical(st$skipReason, "internal")) {
+            omitted <- c(omitted, id)
+            addRow(entry$kind, entry$label, entry$ns, FALSE, st$skipReason)
+          }
           next
         }
         res <- tryCatch(private$sourceRecord(entry, maxNode),
@@ -271,6 +284,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
         complete = length(blocked) == 0L,
         blocked = blocked,
         sources = sources,
+        omitted = omitted,
         userData = userData,
         inputs = inputs$inputs,
         clientData = inputs$clientData,
@@ -310,6 +324,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     # Step 6 runs after the first flush.
     resume = function(record, live, run) {
       private$records <- record$sources
+      private$omitted <- record$omitted %||% character(0)
       private$initials <- list()
       private$applied <- character(0)
       private$claimed <- character(0)
@@ -363,6 +378,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       live <- private$liveSet
       if (is.null(live)) return(invisible())
       self$writeNow()
+      private$outcomeValue$values <- length(private$applied)
       unclaimed <- setdiff(names(private$records), private$claimed)
       private$outcomeValue$unclaimed <- unclaimed
       if (length(unclaimed)) {
@@ -428,7 +444,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
 
     # resuming
     phase = "idle",      # "idle" | "constructing" (server function running) | "restoring" (verified; first flush)
-    records = NULL, initials = NULL, applied = character(0), claimed = character(0), trips = list(),
+    records = NULL, omitted = character(0), initials = NULL, applied = character(0), claimed = character(0), trips = list(),
     liveSet = NULL, recordInputs = NULL, recordClientData = NULL,
     updated = character(0), skipped = character(0), outcomeValue = NULL,
     watched = list(),
@@ -627,6 +643,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       private$watched <- list()
       private$phase <- "idle"
       private$records <- NULL
+      private$omitted <- character(0)
       private$initials <- NULL
       private$liveSet <- NULL
       private$recordInputs <- NULL

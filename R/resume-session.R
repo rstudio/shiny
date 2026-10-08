@@ -138,6 +138,7 @@ snapshot_shape_problem <- function(record) {
   }
   fileInputs <- record$fileInputs
   if (!is.null(fileInputs) && !is.character(fileInputs)) return("`fileInputs` is not character")
+  if (!is.null(record$omitted) && !is.character(record$omitted)) return("`omitted` is not character")
   for (name in fileInputs) {
     value <- record$inputs[[name]]
     if (!is.null(value) && !is.list(value)) return(sprintf("file input `%s` is not a list", name))
@@ -147,15 +148,16 @@ snapshot_shape_problem <- function(record) {
   NULL
 }
 
-# Decodes each source's bytes into `value`, so a value that cannot be read
-# back (corrupt bytes, a class whose package is gone) fails before the record
-# is claimed and before any app code sees saved state.
+# Replaces each source's bytes with the decoded `value`, so a value that
+# cannot be read back (corrupt bytes, a class whose package is gone) fails
+# before the record is claimed and before any app code sees saved state.
 snapshot_decode_sources <- function(record) {
   for (id in names(record$sources)) {
     value <- tryCatch(unserialize(record$sources[[id]]$bytes), error = function(e) {
       stop(sprintf("source `%s` could not be decoded: %s", id, conditionMessage(e)), call. = FALSE)
     })
     record$sources[[id]]["value"] <- list(value)
+    record$sources[[id]]$bytes <- NULL
   }
   record
 }

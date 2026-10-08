@@ -213,6 +213,8 @@ test_that("a claimed key is deleted and refuses later writes until the TTL passe
   store$write("k", list(a = 1))
   store$write("other", list(b = 2))
   store$claim("k")
+  expect_true(store$claimed("k"))
+  expect_false(store$claimed("other"))
   expect_null(store$read("k"))
   expect_false(store$write("k", list(a = 2)))
   expect_null(store$read("k"))

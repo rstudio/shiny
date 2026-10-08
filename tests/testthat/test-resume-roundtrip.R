@@ -89,6 +89,7 @@ test_that("a source without a saved value ends the resume: no rollback, an error
   first <- snapshot_session(v1)
   for (i in 1:3) first$setInputs(plus = i)
   rec <- snapshot_decode_sources(first$.snapshotRegistry$snapshot()); rec$identity <- snapshot_identity(first)
+  rec$omitted <- "|reactiveVal|other"                # only the ids it lists are spared
   s2 <- MockShinySession$new()
   srv <- capture_env(v2)
   expect_message(
@@ -241,6 +242,45 @@ test_that("after the resume finished, marking keeps the current value and omits 
   expect_false("|reactiveVal|count" %in% names(s2$.snapshotRegistry$snapshot()$sources))
 })
 
+test_that("a source an observer excluded is listed as omitted and keeps its initial value on resume", {
+  server <- function(input, output, session) {
+    big <- reactiveVal(0, label = "big")
+    count <- reactiveVal(0, label = "count")
+    observeEvent(input$plus, count(count() + 1))
+    observeEvent(input$drop, excludeFromResume(big))
+  }
+  rt <- snapshot_roundtrip(server, function(s) {
+    s$setInputs(plus = 1)
+    isolate(s$env$big(99))
+    s$setInputs(drop = 1)
+  })
+  expect_identical(rt$record$omitted, "|reactiveVal|big")
+  expect_identical(rt$outcome$resumed, "snapshot")
+  expect_equal(isolate(rt$second$env$big()), 0)
+  expect_equal(isolate(rt$second$env$count()), 1)
+})
+
+test_that("a source excluded in session$onResume() does not end the next resume", {
+  server <- function(input, output, session) {
+    x <- reactiveVal(0, label = "x")
+    count <- reactiveVal(0, label = "count")
+    observeEvent(input$plus, count(count() + 1))
+    session$onResume(function(info) excludeFromResume(x))
+  }
+  rt <- snapshot_roundtrip(server, function(s) { s$setInputs(plus = 1); isolate(s$env$x(5)) })
+  expect_identical(rt$outcome$resumed, "snapshot")
+  expect_equal(isolate(rt$second$env$x()), 0)
+  rec <- snapshot_decode_sources(rt$second$.snapshotRegistry$snapshot())
+  expect_identical(rec$omitted, "|reactiveVal|x")
+  s3 <- MockShinySession$new()
+  srv <- capture_env(server)
+  outcome <- s3$.snapshotRegistry$resume(rec, list(inputs = rec$inputs, clientData = list(), fileInputs = character(0)),
+    function() withMockContext(s3, srv(s3$input, s3$output, s3)))
+  expect_identical(outcome$resumed, "snapshot")
+  expect_equal(isolate(s3$env$x()), 0)
+  expect_equal(isolate(s3$env$count()), 1)
+})
+
 test_that("userData and module state under two namespaces come back", {
   mod <- function(id) moduleServer(id, function(input, output, session) {
     v <- reactiveVal(0)
@@ -265,6 +305,7 @@ test_that("a source created by an observer at the first flush applies its record
   rt <- snapshot_roundtrip(server, function(s) { s$flushReact(); isolate(s$env$late(7)) })
   expect_identical(rt$outcome$resumed, "snapshot")
   expect_equal(isolate(rt$second$env$late()), 7)
+  expect_identical(rt$outcome$values, 1L)              # counted after the first flush, not at verify
 })
 
 test_that("Shiny's own internal sources do not trip the gate on resume", {
@@ -350,7 +391,7 @@ test_that("a source excluded after claiming its record is not listed as unclaime
     function(input, output, session) { count <- reactiveVal(10, label = "count") },
     resume_server = function(input, output, session) { count <- excludeFromResume(reactiveVal(0, label = "count")) }
   )
-  expect_length(rt$outcome$unclaimed, 0)
+  expect_identical(rt$outcome$unclaimed, character(0))
 })
 
 test_that("an excluded userData name in an older record is not restored; others are", {

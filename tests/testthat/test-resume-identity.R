@@ -227,3 +227,61 @@ test_that("with resume off excludeFromResume() returns the source unchanged", {
   expect_null(s$.snapshotRegistry)
   expect_equal(isolate(s$env$v()), 1)
 })
+
+test_that("resume-off constructors do not inspect call sites", {
+  withr::local_envvar(SHINY_RESUME = "FALSE")
+  local_mocked_bindings(
+    snapshot_call_site = function(...) stop("call site inspected"),
+    snapshot_source_label = function(...) stop("identity inspected")
+  )
+  s <- snapshot_session(function(input, output, session) {
+    v <- reactiveVal(1)
+    rv <- reactiveValues(a = 2)
+  })
+  expect_identical(isolate(s$env$v()), 1)
+  expect_identical(isolate(s$env$rv$a), 2)
+})
+
+test_that("explicit source labels do not inspect call sites", {
+  local_mocked_bindings(snapshot_call_site = function(...) stop("call site inspected"))
+  s <- snapshot_session(function(input, output, session) {
+    v <- reactiveVal(1, label = "v")
+    rv <- reactiveValues(a = 2, .label = "rv")
+  })
+  expect_setequal(short_ids(s), c("reactiveVal|v", "reactiveValues|rv"))
+})
+
+test_that("tracking a source does not retain its caller's frame", {
+  s <- MockShinySession$new()
+  make <- function() {
+    payload <- new.env(parent = emptyenv())
+    ref <- rlang::new_weakref(payload)
+    source <- reactiveVal(0, label = "small")
+    list(source = source, ref = ref)
+  }
+  held <- withMockContext(s, make())
+  invisible(gc())
+  expect_null(rlang::wref_key(held$ref))
+  expect_identical(isolate(held$source()), 0)
+})
+
+test_that("restore callbacks do not retain replaced constructor values", {
+  s <- MockShinySession$new()
+  make <- function(kind) {
+    payload <- new.env(parent = emptyenv())
+    ref <- rlang::new_weakref(payload)
+    if (kind == "reactiveVal") {
+      source <- attr(reactiveVal(payload, label = "v"), ".impl", exact = TRUE)
+      source$set(NULL)
+    } else {
+      source <- reactiveValues(payload = payload, .label = "rv")
+      source$payload <- NULL
+    }
+    list(source = source, ref = ref)
+  }
+  for (kind in c("reactiveVal", "reactiveValues")) {
+    held <- withMockContext(s, make(kind))
+    invisible(gc())
+    expect_null(rlang::wref_key(held$ref))
+  }
+})

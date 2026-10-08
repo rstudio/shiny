@@ -20,7 +20,6 @@ snapshot_assigned_label <- function(call_srcref) {
 # resolves `source = "body"` from the call site (snapshot_body_label()).
 snapshot_source_label <- function(call_srcref, explicit = NULL, site = NULL) {
   if (isTRUE(.globals$snapshotInternal)) return(list(label = NULL, source = "internal"))
-  call <- if (!is.null(site)) snapshot_deparse(site$call)
   if (!is.null(explicit)) {
     return(list(label = paste(as.character(explicit), collapse = ", "), source = "explicit"))
   }
@@ -29,9 +28,9 @@ snapshot_source_label <- function(call_srcref, explicit = NULL, site = NULL) {
   # A srcref that yields no assignment (an inline `if (x) a <- ...`) falls
   # through to the body walk, exactly like code without srcrefs.
   if (!is.null(site)) {
-    return(list(label = NULL, source = "body", site = site, call = call))
+    return(list(label = NULL, source = "body", site = site, call = snapshot_deparse(site$call)))
   }
-  c(list(label = NULL, source = "none"), if (!is.null(call)) list(call = call))
+  list(label = NULL, source = "none")
 }
 
 # Where a constructor was called: its own call, and the function and frame

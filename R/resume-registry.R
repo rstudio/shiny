@@ -142,11 +142,10 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       private$cancelPendingWrite()
       ok <- tryCatch({
         if (!self$writerEnabled()) return(invisible(FALSE))
-        rec <- self$snapshot()
+        rec <- self$snapshot(report = FALSE)
         rec$identity <- snapshot_identity(private$session)
         if (length(rec$uploads)) rec <- snapshot_write_uploads(rec, private$store$filesDir(private$key))
         rec$uploads <- NULL
-        rec$report <- NULL
         private$store$write(private$key, rec)
         TRUE
       }, error = function(e) {
@@ -158,6 +157,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       })
       private$dirty <- FALSE
       private$firstDirtyAt <- NULL
+      private$changedSinceSchedule <- FALSE
       if (ok) private$wrote <- TRUE
       invisible(ok)
     },
@@ -176,7 +176,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
 
     # ---- the record ----------------------------------------------------
 
-    snapshot = function() {
+    snapshot = function(report = TRUE) {
       settings <- private$session$.resumeSettings
       maxNode <- settings$maxNodeSize
       maxTotal <- settings$maxSize
@@ -185,6 +185,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       rows <- list()
       blocked <- list()
       addRow <- function(kind, label, ns, adoptable, reason = NA_character_) {
+        if (!report) return(invisible())
         rows[[length(rows) + 1L]] <<- list(kind = kind, label = label %||% NA_character_, namespace = ns,
           adoptable = adoptable, reason = if (adoptable) NA_character_ else reason)
       }
@@ -255,7 +256,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       }
       userData <- private$userDataValues(maxNode, addRow)
 
-      list(
+      record <- list(
         format = snapshot_format_version,
         complete = length(blocked) == 0L,
         blocked = blocked,
@@ -264,9 +265,10 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
         inputs = inputs$inputs,
         clientData = inputs$clientData,
         fileInputs = inputs$fileInputs,
-        uploads = plan$keep,
-        report = snapshot_report_frame(rows)
+        uploads = plan$keep
       )
+      if (report) record$report <- snapshot_report_frame(rows)
+      record
     },
 
     report = function() self$snapshot()$report,
@@ -678,6 +680,7 @@ snapshot_track_val <- function(impl, registry) {
   impl$.snapshot <- snapshot_node_state(registry,
     value = function() private$value,
     destroyed = function() isTRUE(private$.destroyed),
+    apply = function(record) private$value <- unserialize(record$bytes),
     revert = function(initial) {
       private$value <- initial
       # Something may have read the restored value already; it must see the revert.
@@ -692,6 +695,13 @@ snapshot_track_val <- function(impl, registry) {
 # as sources).
 snapshot_track_values <- function(impl, registry, internal = FALSE) {
   impl$.snapshot <- snapshot_node_state(registry,
+    apply = function(record) {
+      vals <- unserialize(record$bytes)
+      order <- record$order
+      vals <- lapply(order, function(key) vals[[key]])   # read all before setting any
+      for (i in seq_along(order)) impl$.values$set(order[[i]], vals[[i]])
+      impl$.nameOrder <- unique(c(order, impl$.nameOrder))
+    },
     revert = function(initial) snapshot_values_revert(impl, initial)
   )
   if (internal) {
@@ -707,13 +717,7 @@ snapshot_track_values <- function(impl, registry, internal = FALSE) {
 snapshot_register_values <- function(impl, registry, identity, domain, initial) {
   snapshot_track_values(impl, registry)
   registry$registerSource(impl, "reactiveValues", identity, domain, initial = initial,
-    apply = function(record) {
-      vals <- unserialize(record$bytes)
-      order <- record$order
-      vals <- lapply(order, function(key) vals[[key]])   # read all before setting any
-      for (i in seq_along(order)) impl$.values$set(order[[i]], vals[[i]])
-      impl$.nameOrder <- unique(c(order, impl$.nameOrder))
-    }
+    apply = impl$.snapshot$apply
   )
   invisible()
 }

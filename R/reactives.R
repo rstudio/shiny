@@ -155,7 +155,7 @@ ReactiveVal <- R6Class(
       if (!is.null(reg)) {
         snapshot_track_val(self, reg)
         reg$registerSource(self, "reactiveVal", identity, domain, initial = value,
-          apply = function(record) private$value <- unserialize(record$bytes))
+          apply = self$.snapshot$apply)
       }
     },
     get = function() {
@@ -304,7 +304,9 @@ ReactiveVal <- R6Class(
 #'
 #' @export
 reactiveVal <- function(value = NULL, label = NULL) {
-  site <- snapshot_call_site(sys.call(), sys.parent())
+  # Retaining the caller's environment here would keep it alive with the source.
+  call <- sys.call()
+  frame <- sys.parent()
   call_srcref <- get_call_srcref()
   explicitLabel <- label
   if (missing(label)) {
@@ -315,7 +317,8 @@ reactiveVal <- function(value = NULL, label = NULL) {
   }
 
   rv <- ReactiveVal$new(value, label,
-    identity = snapshot_source_label(call_srcref, explicit = explicitLabel, site = site))
+    identity = snapshot_source_label(call_srcref, explicit = explicitLabel,
+      site = snapshot_call_site(call, frame)))
   if (!is.null(call_srcref)) {
     rv$.otelAttrs <- otel_srcref_attributes(call_srcref, fn_name = "reactiveVal")
   }
@@ -780,7 +783,6 @@ ReactiveValues <- R6Class(
 #' @seealso [isolate()] and [is.reactivevalues()].
 #' @export
 reactiveValues <- function(..., .label = NULL) {
-  site <- snapshot_call_site(sys.call(), sys.parent())
   args <- list2(...)
   if ((length(args) > 0) && (is.null(names(args)) || any(names(args) == "")))
     rlang::abort("All arguments passed to reactiveValues() must be named.")
@@ -806,7 +808,10 @@ reactiveValues <- function(..., .label = NULL) {
   # After mset(), so a saved value wins over the constructor's initial values.
   reg <- snapshot_registry(getDefaultReactiveDomain())
   if (!is.null(reg)) {
-    snapshot_register_values(impl, reg, snapshot_source_label(call_srcref, explicit = .label, site = site),
+    call <- sys.call()
+    frame <- sys.parent()
+    snapshot_register_values(impl, reg, snapshot_source_label(call_srcref, explicit = .label,
+      site = snapshot_call_site(call, frame)),
       getDefaultReactiveDomain(), initial = args)
   }
 

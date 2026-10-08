@@ -85,3 +85,31 @@ test_that("deleteSnapshot() removes the record and cancels a pending write", {
   expect_false("scheduleDelete" %in% names(SnapshotRegistry$public_methods))
   expect_false("pause" %in% names(SnapshotRegistry$public_methods))
 })
+
+test_that("writer snapshots omit reports without changing saved state", {
+  s <- snapshot_session(function(input, output, session) {
+    v <- reactiveVal(1)
+    rv <- reactiveValues(a = 2)
+  })
+  full <- s$.snapshotRegistry$snapshot()
+  full$report <- NULL
+  expect_identical(s$.snapshotRegistry$snapshot(report = FALSE), full)
+
+  store <- SnapshotStore$new(file.path(withr::local_tempdir(), "s"))
+  key <- configure_mock_writer(s, store)
+  local_mocked_bindings(snapshot_report_frame = function(...) stop("report constructed"))
+  expect_identical(s$.snapshotRegistry$writeNow(), TRUE)
+  expect_identical(node_value(store$read(key)$sources[["|reactiveVal|v"]]), 1)
+})
+
+test_that("an immediate write clears changes awaiting a flush", {
+  s <- snapshot_session(function(input, output, session) { v <- reactiveVal(1) })
+  writes <- 0L
+  store <- list(write = function(key, value) writes <<- writes + 1L)
+  configure_mock_writer(s, store)
+  isolate(s$env$v(2))
+  expect_identical(s$.snapshotRegistry$writeNow(), TRUE)
+  s$flushReact()
+  s$elapse(1000)
+  expect_identical(writes, 1L)
+})

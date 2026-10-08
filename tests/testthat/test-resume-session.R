@@ -589,3 +589,21 @@ test_that("a source with no saved value ends the session for good after the serv
   expect_null(snapshot_store()$read(snapshot_record_key(token)))
   expect_null(snapshot_store()$read(snapshot_record_key(newToken)))
 })
+
+test_that("the first replacement record follows the first flush and keeps the checkpoint's inputs", {
+  local_snapshot_store_dir()
+  app <- function(input, output, session) {
+    count <- reactiveVal(0)
+    observeEvent(input$plus, count(count() + 1))
+    late <- NULL
+    observe({ if (is.null(late)) late <<- reactiveVal(5, label = "late") })
+  }
+  live <- live_session(app, inputs = list(`plus:shiny.action` = 0))
+  for (i in 1:3) live_set(live$session, `plus:shiny.action` = i)
+  token <- live_close(live)
+  res <- resume_real(app, resume_data(token, list(`plus:shiny.action` = 4)))
+  newToken <- res$ws$sent()[[1]]$config$resumeToken
+  rec <- snapshot_store()$read(snapshot_record_key(newToken))
+  expect_true("|reactiveVal|late" %in% names(rec$sources))   # created in the first flush
+  expect_equal(as.numeric(rec$inputs$plus), 3)                # before the live click applies
+})

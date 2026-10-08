@@ -306,6 +306,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       private$records <- record$sources
       private$initials <- list()
       private$applied <- character(0)
+      private$claimed <- character(0)
       private$trips <- list()
       private$liveSet <- live
       private$recordInputs <- record$inputs
@@ -340,20 +341,29 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       }
       private$outcomeValue <- list(resumed = "snapshot", cause = NULL,
                                    values = length(private$applied), inputs = length(record$inputs))
-      # The record we read was deleted (single use); write our own now
-      # rather than after the debounce. A no-op without a writer (Mock).
-      self$writeNow()
       private$phase <- "restoring"
       private$session$onFlushed(function() self$finishResume(), once = TRUE)
       completed <- TRUE
       private$outcomeValue
     },
 
-    # Step 6: the client's inputs that differ from the record's are applied
-    # now, skipping names an `update` changed since step 2.
+    # Step 6. First the replacement record (the one read was deleted): after
+    # the first flush, so sources rebuilt by hooks and first-flush observers
+    # are in it; before live changes, so its inputs still match the sources
+    # computed from them and a change made while disconnected still looks
+    # like one to the next resume. Then the client's inputs that differ from
+    # the record's apply, skipping names an `update` changed since step 2.
     finishResume = function() {
       live <- private$liveSet
       if (is.null(live)) return(invisible())
+      self$writeNow()
+      unclaimed <- setdiff(names(private$records), private$claimed)
+      private$outcomeValue$unclaimed <- unclaimed
+      if (length(unclaimed)) {
+        self$devmodeInform("unclaimed", sprintf(
+          "Saved values for %s were not restored because nothing recreated them, probably because an observeEvent() handler creates them and handlers whose events already happened do not run again. Create them from state instead, or in session$onResume() (rule 3 of the rules of reactives in ?enableResume).",
+          paste(unclaimed, collapse = ", ")))
+      }
       changed <- list()
       for (name in names(live$inputs)) {
         if (name %in% live$fileInputs || name %in% private$updated) next
@@ -412,7 +422,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
 
     # resuming
     phase = "idle",      # "idle" | "constructing" (server function running) | "restoring" (verified; first flush)
-    records = NULL, initials = NULL, applied = character(0), trips = list(),
+    records = NULL, initials = NULL, applied = character(0), claimed = character(0), trips = list(),
     liveSet = NULL, recordInputs = NULL, recordClientData = NULL,
     updated = character(0), skipped = character(0), outcomeValue = NULL,
     watched = list(),
@@ -553,6 +563,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
         error = function(e) { private$trip(id, entry$node, paste0("saved value could not be applied: ", conditionMessage(e))); FALSE })
       if (ok) {
         private$applied <- c(private$applied, id)
+        private$claimed <- c(private$claimed, id)
         entry$node$.snapshot$watch <- TRUE
         private$watched <- c(private$watched, list(entry$node$.snapshot))
       }

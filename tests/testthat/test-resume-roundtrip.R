@@ -328,3 +328,27 @@ test_that("userData is restored before the server function runs, so a top-level 
   expect_identical(rt$second$userData$seenAtStart, 2)
   expect_identical(rt$second$userData$visits, 2)
 })
+
+test_that("saved values nothing recreates are listed and logged, and the resume still succeeds", {
+  seen <- character(0)
+  local_mocked_bindings(devmode_inform = function(message, ...) seen <<- c(seen, message))
+  panel <- function(id) moduleServer(id, function(input, output, session) {
+    n <- reactiveVal(0)
+    observeEvent(input$plus, n(n() + 1))
+  })
+  server <- function(input, output, session) observeEvent(input$add, panel("p1"))
+  rt <- snapshot_roundtrip(server, function(s) { s$setInputs(add = 1); s$setInputs(`p1-plus` = 1) })
+  expect_identical(rt$outcome$resumed, "snapshot")
+  expect_identical(rt$outcome$unclaimed, "p1-|reactiveVal|n")
+  expect_match(snapshot_resume_log(rt$outcome),
+               "^Saved values not restored because nothing recreated them: p1-\\|reactiveVal\\|n$", all = FALSE)
+  expect_match(seen, "rule 3", all = FALSE)
+})
+
+test_that("a source excluded after claiming its record is not listed as unclaimed", {
+  rt <- snapshot_roundtrip(
+    function(input, output, session) { count <- reactiveVal(10, label = "count") },
+    resume_server = function(input, output, session) { count <- excludeFromResume(reactiveVal(0, label = "count")) }
+  )
+  expect_length(rt$outcome$unclaimed, 0)
+})

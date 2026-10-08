@@ -92,6 +92,10 @@ snapshot_resume_log <- function(outcome, undefined = character(0)) {
     sprintf("Resumed: restored %d values and %d inputs; %d event handlers held back",
             outcome$values, outcome$inputs, length(outcome$skipped))
   }
+  if (length(outcome$unclaimed)) {
+    lines <- c(lines, sprintf("Saved values not restored because nothing recreated them: %s",
+                              paste(outcome$unclaimed, collapse = ", ")))
+  }
   if (length(undefined)) {
     lines <- c(lines, sprintf("Outputs on the page with no definition after resume: %s", paste(undefined, collapse = ", ")))
   }

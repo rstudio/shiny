@@ -30,6 +30,7 @@ declare class ShinyApp {
         workerId: string;
         sessionId: string;
     } | null;
+    $resumeToken: string | null;
     $inputValues: InputValues;
     $initialInput: InputValues | null;
     $bindings: {
@@ -57,6 +58,7 @@ declare class ShinyApp {
     connect(initialInput: InputValues): void;
     isConnected(): boolean;
     private scheduledReconnect;
+    retryReconnect(): void;
     reconnect(): void;
     createSocket(): ShinyWebSocket;
     startActionQueueLoop(): Promise<void>;

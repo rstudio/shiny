@@ -37,11 +37,14 @@ test_that("Unscheduling works", {
   # Unregister
   taskHandle()
 
-  # Split into two sections to avoid `expect_equal(integer(0), character(0))` comparison on dev CRAN
+  # Split into two sections to avoid `expect_equal(integer(0), character(0))` comparison on dev CRAN.
+  # Compare ids, not the whole data frame: another test file's schedule/cancel
+  # cycles on this process-wide queue can change how row.names is represented
+  # (character vs compact integer) without changing the contents.
   if (length(origTimes) == 0) {
     expect_equal(0, length(timerCallbacks$.times))
   } else {
-    expect_equal(timerCallbacks$.times, origTimes)
+    expect_equal(timerCallbacks$.times$id, origTimes$id)
   }
   expect_equal(timerCallbacks$.funcs$keys(), origFuncKeys)
 })

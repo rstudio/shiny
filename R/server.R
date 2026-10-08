@@ -203,71 +203,114 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
 
           msg <- decodeMessage(msg)
 
-          # A reconnecting client sends `resume` with everything `init`
-          # carries under `inputs` (srcts/PROTOCOL.md). Bookmark-restore
-          # values the GET path rendered into fileInput()s (`:shiny.file`)
-          # point into a bookmark directory this session does not have, and
-          # a reconnect loses uploads as it always has, so they are dropped.
           isResume <- identical(msg$method, "resume")
-          if (isResume) {
+          resumeOn <- isTRUE(shinysession$.resumeSettings$enabled)
+          # With resume off, a `resume` is a reconnect: everything init
+          # carries under `inputs`, bookmark-restore file values dropped
+          # (they point into a bookmark directory this session lacks), and
+          # restoreInput() seeded from these inputs rather than the URL.
+          # With resume on, .resumeSession() answers it.
+          seedFromInputs <- isResume && !resumeOn
+          if (seedFromInputs) {
             inputs <- msg$data$inputs
             if (!is.list(inputs)) inputs <- list()
-            inputs <- inputs[!grepl(":shiny\\.file$", names(inputs) %||% character(0))]
-            msg$data <- inputs
+            msg$data <- inputs[!grepl(":shiny\\.file$", names(inputs) %||% character(0))]
+            msg$method <- "init"
           }
 
           # Set up a restore context from .clientdata_url_search before
           # handling all the input values, because the restore context may be
           # used by an input handler (like the one for "shiny.file"). This
-          # should only happen once, when the app starts. A resume gets an
-          # empty context here and its seeded one below, after the input
-          # handlers have run.
+          # should only happen once, when the app starts. With resume on, the
+          # `resume` branch seeds its own context (.resumeSession()).
+          bookmarkStore <- getShinyOption("bookmarkStore", default = "disable")
           if (is.null(shinysession$restoreContext)) {
-            bookmarkStore <- getShinyOption("bookmarkStore", default = "disable")
-            if (bookmarkStore == "disable" || isResume) {
-              shinysession$restoreContext <- RestoreContext$new()
+            if (isResume && resumeOn) {
+              # Its observers read the restore context only when they run,
+              # at the first flush, by which time .resumeSession() has
+              # seeded one.
+              if (bookmarkStore != "disable") shinysession$createBookmarkObservers()
             } else {
-              # If there's bookmarked state, save it on the session object
-              shinysession$restoreContext <- RestoreContext$new(msg$data$.clientdata_url_search)
-            }
-            if (bookmarkStore != "disable") {
-              # Its observers read the restore context when they run, at the
-              # first flush, by which time a resume has seeded its own.
-              shinysession$createBookmarkObservers()
+              if (bookmarkStore == "disable" || seedFromInputs) {
+                shinysession$restoreContext <- RestoreContext$new()
+              } else {
+                # If there's bookmarked state, save it on the session object
+                shinysession$restoreContext <- RestoreContext$new(msg$data$.clientdata_url_search)
+              }
+              if (bookmarkStore != "disable") shinysession$createBookmarkObservers()
             }
           }
 
-          msg$data <- applyInputHandlers(msg$data)
+          if (!(isResume && resumeOn)) {
+            msg$data <- applyInputHandlers(msg$data)
+          }
+
+          # Everything the init branch does before running the server
+          # function, shared with the resume branch.
+          prepareServer <- function(inputs) {
+            serverFunc <- withReactiveDomain(NULL, serverFuncSource())
+            if (!identicalFunctionBodies(serverFunc, appvars$server)) {
+              appvars$server <- serverFunc
+              if (!is.null(appvars$server))
+              {
+                # Tag this function as the Shiny server function. A debugger may use this
+                # tag to give this function special treatment.
+                # It's very important that it's appvars$server itself and NOT a copy that
+                # is invoked, otherwise new breakpoints won't be picked up.
+                attr(appvars$server, "shinyServerFunction") <- TRUE
+                registerDebugHook("server", appvars, "Server Function")
+              }
+            }
+
+            # Check for switching into/out of showcase mode
+            if (.globals$showcaseOverride &&
+                exists(".clientdata_url_search", where = inputs)) {
+              mode <- showcaseModeOfQuerystring(inputs$.clientdata_url_search)
+              if (!is.null(mode))
+                shinysession$setShowcase(mode)
+            }
+
+            # The client tells us what singletons were rendered into
+            # the initial page
+            if (!is.null(inputs$.clientdata_singletons)) {
+              shinysession$singletons <- strsplit(
+                inputs$.clientdata_singletons, ',')[[1]]
+            }
+            serverFunc
+          }
+          runServerWith <- function(serverFunc) {
+            args <- argsForServerFunc(serverFunc, shinysession)
+
+            withReactiveDomain(shinysession, {
+              otel_span_session_start(domain = shinysession, {
+
+                do.call(
+                  # No corresponding ..stacktraceoff; the server func is pure
+                  # user code
+                  wrapFunctionLabel(appvars$server, "server",
+                    ..stacktraceon = TRUE
+                  ),
+                  args
+                )
+
+              })
+            })
+          }
+          # An error escaping init or resume makes httpuv close the socket;
+          # like session$close(), that ends the session for good.
+          endOnError <- function(expr) {
+            withCallingHandlers(expr, error = function(e) shinysession$.endForGood())
+          }
 
           switch(
             msg$method,
-            init = ,
-            resume = {
+            init = endOnError({
+              serverFunc <- prepareServer(msg$data)
 
-              serverFunc <- withReactiveDomain(NULL, serverFuncSource())
-              if (!identicalFunctionBodies(serverFunc, appvars$server)) {
-                appvars$server <- serverFunc
-                if (!is.null(appvars$server))
-                {
-                  # Tag this function as the Shiny server function. A debugger may use this
-                  # tag to give this function special treatment.
-                  # It's very important that it's appvars$server itself and NOT a copy that
-                  # is invoked, otherwise new breakpoints won't be picked up.
-                  attr(appvars$server, "shinyServerFunction") <- TRUE
-                  registerDebugHook("server", appvars, "Server Function")
-                }
-              }
-
-              # Check for switching into/out of showcase mode
-              if (.globals$showcaseOverride &&
-                  exists(".clientdata_url_search", where = msg$data)) {
-                mode <- showcaseModeOfQuerystring(msg$data$.clientdata_url_search)
-                if (!is.null(mode))
-                  shinysession$setShowcase(mode)
-              }
-
-              if (isResume) {
+              if (seedFromInputs) {
                 shinysession$restoreContext <- reconnectRestoreContext(msg$data)
+                # A reconnect's inputs are past events; see snapshot_begin_hold_back().
+                snapshot_begin_hold_back(shinysession)
               }
 
               # In shinysession$createBookmarkObservers() above, observers may be
@@ -284,33 +327,12 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
               # this manageInputs is called.
               shinysession$manageInputs(msg$data, now = TRUE)
 
-              # The client tells us what singletons were rendered into
-              # the initial page
-              if (!is.null(msg$data$.clientdata_singletons)) {
-                shinysession$singletons <- strsplit(
-                  msg$data$.clientdata_singletons, ',')[[1]]
-              }
-
-              local({
-                args <- argsForServerFunc(serverFunc, shinysession)
-
-                withReactiveDomain(shinysession, {
-                  otel_span_session_start(domain = shinysession, {
-
-                    do.call(
-                      # No corresponding ..stacktraceoff; the server func is pure
-                      # user code
-                      wrapFunctionLabel(appvars$server, "server",
-                        ..stacktraceon = TRUE
-                      ),
-                      args
-                    )
-
-                  })
-                })
-
-              })
-            },
+              local({ runServerWith(serverFunc) })
+            }),
+            resume = endOnError({
+              serverFunc <- prepareServer(if (is.list(msg$data$inputs)) msg$data$inputs else list())
+              shinysession$.resumeSession(msg$data, function() runServerWith(serverFunc))
+            }),
             update = {
               shinysession$manageInputs(msg$data)
             },
@@ -410,6 +432,16 @@ removeSubApp <- function(path) {
 
 startHttpuvApp <- function(appObj, port, host, quiet) {
   appHandlers <- createAppHandlers(appObj$httpHandler, appObj$serverFuncSource)
+
+  # Base R has no user-level SIGTERM handler; a hard kill loses at most the
+  # last quiet interval. On an orderly stop, write every live session's record.
+  onStop(function() {
+    for (session in appsByToken$values()) {
+      reg <- session$.snapshotRegistry
+      if (!is.null(reg)) try(reg$writeNow(), silent = TRUE)
+    }
+  }, session = NULL)
+
   handlerManager$addHandler(appHandlers$http, "/", tail = TRUE)
   handlerManager$addWSHandler(appHandlers$ws, "/", tail = TRUE)
 

@@ -25,10 +25,15 @@ import {
 import { removeModal, showModal } from "./modal";
 import { removeNotification, showNotification } from "./notifications";
 import { ReconnectDelay } from "./reconnectDelay";
-import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
+import {
+  hideReconnectDialog,
+  showReconnectDialog,
+  showReconnectFailedDialog,
+} from "./reconnectDialog";
 import { retryDecision } from "./reconnectGate";
 import type { HtmlDep } from "./render";
 import { renderContentAsync, renderHtmlAsync } from "./render";
+import { unloadOnPageHide } from "./resumeUnload";
 import type { WherePosition } from "./singletons";
 
 import { OutputProgressReporter } from "./outputProgress";
@@ -133,6 +138,10 @@ class ShinyApp {
     sessionId: string;
   } | null = null;
 
+  // Token of this session's saved state, from `config`; null when resume is
+  // off. Memory only: a reload starts fresh (srcts/PROTOCOL.md, "Saved state").
+  $resumeToken: string | null = null;
+
   // Cached input values
   $inputValues: InputValues = {};
 
@@ -176,6 +185,24 @@ class ShinyApp {
     this.$initialInput = initialInput;
     $.extend(this.$inputValues, initialInput);
 
+    // Best effort: the socket may already be gone, and then the record
+    // lives to its 24-hour limit.
+    window.addEventListener("pagehide", (event) => {
+      if (!unloadOnPageHide(event.persisted, this.$resumeToken)) return;
+      if (!this.$socket) return;
+      try {
+        this.$socket.send(
+          JSON.stringify({
+            method: "unload",
+            args: [],
+            tag: this.$nextRequestId++,
+          }),
+        );
+      } catch {
+        // Nothing to do; see above.
+      }
+    });
+
     this.$updateConditionals();
   }
 
@@ -184,6 +211,13 @@ class ShinyApp {
   }
 
   private scheduledReconnect: number | undefined = undefined;
+
+  // The "Try again" link once the attempts have run out: a fresh schedule,
+  // and the token this page still holds.
+  retryReconnect(): void {
+    this.reconnectDelay.reset();
+    this.reconnect();
+  }
 
   reconnect(): void {
     // This function can be invoked directly even if there's a scheduled
@@ -254,7 +288,15 @@ class ShinyApp {
       socket.send(
         JSON.stringify(
           this.$reconnecting
-            ? { method: "resume", data: { inputs: this.$initialInput } }
+            ? {
+                method: "resume",
+                data: {
+                  inputs: this.$initialInput,
+                  ...(this.$resumeToken !== null
+                    ? { token: this.$resumeToken }
+                    : {}),
+                },
+              }
             : { method: "init", data: this.$initialInput },
         ),
       );
@@ -348,7 +390,7 @@ class ShinyApp {
     $("#shiny-disconnected-overlay").toggleClass("reloading", reloading);
 
     // srcts/PROTOCOL.md, "Client retry rule". After the last attempt the
-    // overlay stays and the notification goes.
+    // overlay stays and the notification offers Try again.
     const decision = retryDecision({
       allow: this.$allowReconnect,
       exhausted: this.reconnectDelay.exhausted(),
@@ -361,7 +403,8 @@ class ShinyApp {
       showReconnectDialog(delay);
       this.$scheduleReconnect(delay);
     } else if (decision === "stop") {
-      hideReconnectDialog();
+      /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+      showReconnectFailedDialog();
     }
   }
 
@@ -860,16 +903,33 @@ class ShinyApp {
 
     addMessageHandler(
       "config",
-      (message: { workerId: string; sessionId: string; user?: string }) => {
+      (message: {
+        workerId: string;
+        sessionId: string;
+        user?: string;
+        resumeToken?: string | null;
+      }) => {
         this.config = {
           workerId: message.workerId,
           sessionId: message.sessionId,
         };
+        this.$resumeToken = message.resumeToken ?? null;
+        // enableResume() implies allowReconnect(TRUE).
+        if (this.$resumeToken !== null) this.$allowReconnect = true;
         if (message.user) setShinyUser(message.user);
         this.reconnectDelay.reset();
         $(document).trigger("shiny:sessioninitialized");
       },
     );
+
+    addMessageHandler("resumed", (message: "snapshot" | "inputs") => {
+      this.reconnectDelay.reset();
+      $(document).trigger({
+        type: "shiny:resumed",
+        // @ts-expect-error; Can not remove info on a established, malformed Event object
+        resumed: message,
+      });
+    });
 
     addMessageHandler("busy", (message: "busy" | "idle") => {
       if (message === "busy") {

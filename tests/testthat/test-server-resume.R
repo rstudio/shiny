@@ -76,3 +76,31 @@ test_that("init is unchanged: the URL's bookmark is restored and onRestore() fir
   expect_identical(restored, "bm")
   expect_identical(restores, 1)
 })
+
+test_that("with resume off, a reconnect does not replay past events, and the next event fires", {
+  withr::local_envvar(SHINY_RESUME = "FALSE")
+  # Environment counters: a `<<-` handler assigns a closure variable, which
+  # is a hazard whose first run is not held back.
+  sends <- list2env(list(n = 0))
+  count <- NULL
+  server <- function(input, output, session) {
+    n <- reactiveVal(0)
+    observeEvent(input$plus, n(n() + 1))
+    observeEvent(input$send, sends$n <- sends$n + 1)
+    observe(count <<- n())
+  }
+  ws <- start_with(server, '{"method":"resume","data":{"inputs":{"plus:shiny.action":2,"send:shiny.action":1}}}')
+  expect_identical(sends$n, 0)
+  expect_identical(count, 0)
+  ws$callbacks$message(FALSE, '{"method":"update","data":{"plus:shiny.action":3}}')
+  flushReact()
+  expect_identical(count, 1)
+})
+
+test_that("init is unchanged: a fresh page with a non-zero input runs its handler", {
+  withr::local_envvar(SHINY_RESUME = "FALSE")
+  runs <- 0
+  server <- function(input, output, session) observeEvent(input$x, runs <<- runs + 1)
+  start_with(server, '{"method":"init","data":{"x":"a"}}')
+  expect_identical(runs, 1)
+})

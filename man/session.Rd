@@ -10,11 +10,13 @@ server is lost. If \code{value} is \code{TRUE}, the client retries for about a
 minute (ten attempts with growing delays), on any server. If a retry
 gets through, a new session starts on the server with the client's
 current input values filled back in: \code{renderUI()} content that uses
-\code{\link[=restoreInput]{restoreInput()}} keeps its values, every output recomputes, and
-observers run as they do when a session starts (an \code{observeEvent()} on
-an action button fires once with the button's replayed count). Nothing
-else carries over: \code{reactiveVal()} and \code{reactiveValues()} start from
-their initial values. If \code{value} is \code{FALSE} (the default), the client
+\code{\link[=restoreInput]{restoreInput()}} keeps its values and every output recomputes.
+\code{observeEvent()} handlers do not fire for the replayed values, which are
+events that already happened; they fire on the next change. Nothing
+else carries over unless the app calls \code{\link[=enableResume]{enableResume()}}:
+\code{reactiveVal()} and \code{reactiveValues()} start from their initial values.
+A session the server ends (\code{session$close()}, an unhandled error) is
+not retried. If \code{value} is \code{FALSE} (the default), the client
 does not retry. \code{"force"} behaves exactly like \code{TRUE}; earlier versions
 needed it to retry outside Shiny Server and Posit Connect.
 }
@@ -133,6 +135,15 @@ response.
 \item{reload()}{
 The equivalent of hitting the browser's Reload button. Only works if the
 session is actually connected.
+}
+\item{resumeReport()}{
+Returns a data frame describing what resuming this session restores:
+one row per reactive value and input, with \code{kind} (\code{"reactiveVal"},
+\code{"reactiveValues"}, \code{"userData"}, \code{"input"}), \code{label}, \code{namespace},
+\code{adoptable} (whether it restores) and \code{reason} (why not, or \code{NA}).
+Printing groups the rows by reason. Intended for tests and audits, e.g.
+\code{testServer(server, { stopifnot(all(session$resumeReport()$adoptable)) })}.
+Empty in a session with resume off. See \code{\link[=enableResume]{enableResume()}}.
 }
 \item{request}{
 An environment that implements the \href{https://github.com/jeffreyhorner/Rook#the-environment}{Rook specification} for

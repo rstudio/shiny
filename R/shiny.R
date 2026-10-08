@@ -102,11 +102,13 @@ workerId <- local({
 #'   minute (ten attempts with growing delays), on any server. If a retry
 #'   gets through, a new session starts on the server with the client's
 #'   current input values filled back in: `renderUI()` content that uses
-#'   [restoreInput()] keeps its values, every output recomputes, and
-#'   observers run as they do when a session starts (an `observeEvent()` on
-#'   an action button fires once with the button's replayed count). Nothing
-#'   else carries over: `reactiveVal()` and `reactiveValues()` start from
-#'   their initial values. If `value` is `FALSE` (the default), the client
+#'   [restoreInput()] keeps its values and every output recomputes.
+#'   `observeEvent()` handlers do not fire for the replayed values, which are
+#'   events that already happened; they fire on the next change. Nothing
+#'   else carries over unless the app calls [enableResume()]:
+#'   `reactiveVal()` and `reactiveValues()` start from their initial values.
+#'   A session the server ends (`session$close()`, an unhandled error) is
+#'   not retried. If `value` is `FALSE` (the default), the client
 #'   does not retry. `"force"` behaves exactly like `TRUE`; earlier versions
 #'   needed it to retry outside Shiny Server and Posit Connect.
 #' }
@@ -226,6 +228,15 @@ workerId <- local({
 #' \item{reload()}{
 #'   The equivalent of hitting the browser's Reload button. Only works if the
 #'   session is actually connected.
+#' }
+#' \item{resumeReport()}{
+#'   Returns a data frame describing what resuming this session restores:
+#'   one row per reactive value and input, with `kind` (`"reactiveVal"`,
+#'   `"reactiveValues"`, `"userData"`, `"input"`), `label`, `namespace`,
+#'   `adoptable` (whether it restores) and `reason` (why not, or `NA`).
+#'   Printing groups the rows by reason. Intended for tests and audits, e.g.
+#'   `testServer(server, { stopifnot(all(session$resumeReport()$adoptable)) })`.
+#'   Empty in a session with resume off. See [enableResume()].
 #' }
 #' \item{request}{
 #'   An environment that implements the [Rook
@@ -498,6 +509,10 @@ ShinySession <- R6Class(
     .outputs = list(),          # Keeps track of all the output observer objects
     .outputOptions = list(),     # Options for each of the output observer objects
     progressKeys = 'character',
+    resumeToken = NULL,
+    endedForGood = FALSE,
+    reconnectOptOut = FALSE,     # session$allowReconnect(FALSE) with resume on
+    unloaded = FALSE,   # the page said it is going away; the record is gone
     showcase   = FALSE,
     fileUploadContext = 'FileUploadContext',
     .input      = 'ANY', # Internal ReactiveValues object for normal input sent from client
@@ -602,6 +617,27 @@ ShinySession <- R6Class(
 
       # Clear file upload directories, if present
       self$onSessionEnded(private$fileUploadContext$rmUploadDirs)
+
+      # cachem's pruning never removes a record's `<key>-files/`; sweep()
+      # does, whenever a session that wrote a record ends.
+      self$onSessionEnded(function() {
+        reg <- self$.snapshotRegistry
+        if (!is.null(reg) && reg$wroteSnapshot()) reg$writerStore()$sweep()
+      })
+    },
+
+    # Creates this session's registry and writer. Only a session with resume
+    # on has one, so other sessions pay nothing for the feature.
+    startSnapshots = function() {
+      reg <- SnapshotRegistry$new(self)
+      reg$configureWriter(
+        function() snapshot_store(),
+        snapshot_record_key(private$resumeToken),
+        function() !private$endedForGood && !private$unloaded && !private$reconnectOptOut,
+        self$.resumeSettings$debounce
+      )
+      self$.snapshotRegistry <- reg
+      reg
     },
 
     # Modules (scopes) call this to register a function that returns a vector
@@ -954,6 +990,8 @@ ShinySession <- R6Class(
     groups = NULL,
     options = NULL,       # For session-specific shinyOptions()
     .resumeHoldBack = FALSE,  # TRUE from a `resume` until its first flush ends (snapshot_begin_hold_back()); internal
+    .snapshotRegistry = NULL, # Resume registry; internal
+    .resumeSettings = NULL,   # resume_settings() at session start; internal
 
     initialize = function(websocket) {
       private$websocket <- websocket
@@ -982,6 +1020,12 @@ ShinySession <- R6Class(
       self$input <- .createReactiveValues(private$.input, readonly=TRUE)
       self$clientData <- .createReactiveValues(private$.clientData, readonly=TRUE)
 
+      self$.resumeSettings <- resume_settings()
+      if (isTRUE(self$.resumeSettings$enabled)) {
+        private$resumeToken <- snapshot_token_new()
+        private$startSnapshots()
+      }
+
       self$output <- .createOutputWriter(self)
 
       self$token <- createUniqueId(16)
@@ -1005,7 +1049,7 @@ ShinySession <- R6Class(
       # it knows to scope this reactiveVal to this session.
       # https://github.com/rstudio/shiny/pull/3182
       withReactiveDomain(self,
-        private$currentThemeDependency <- reactiveVal(0, label = "Theme Counter")
+        private$currentThemeDependency <- snapshot_internal(reactiveVal(0, label = "Theme Counter"))
       )
 
       private$registerSessionEndCallbacks()
@@ -1027,7 +1071,8 @@ ShinySession <- R6Class(
         config = list(
           workerId = workerId(),
           sessionId = self$token,
-          user = self$user
+          user = self$user,
+          resumeToken = private$resumeToken
         )
       )
     },
@@ -1397,11 +1442,18 @@ ShinySession <- R6Class(
     },
     close = function() {
       if (!self$closed) {
+        # A session the server ends (here, on a fatal error, or when the
+        # server function errors) ends for good: no retry, no resume.
+        try(self$.endForGood())
         private$websocket$close()
       }
     },
     wsClosed = function() {
       self$closed <- TRUE
+      reg <- self$.snapshotRegistry
+      if (!is.null(reg)) {
+        if (private$reconnectOptOut) reg$deleteSnapshot() else reg$writeNow()
+      }
       for (output in private$.outputs) {
         output$suspend()
       }
@@ -1427,7 +1479,143 @@ ShinySession <- R6Class(
       if (!(identical(value, TRUE) || identical(value, FALSE) || identical(value, "force"))) {
         stop('value must be TRUE, FALSE, or "force"')
       }
+      # With resume on, FALSE is the per-session opt-out: no retry,
+      # no closing write, and the record goes when the session does.
+      private$reconnectOptOut <- identical(value, FALSE)
       private$write(toJSON(list(allowReconnect = value)))
+    },
+
+    # Ends the session for good: the client must not retry and the record,
+    # if any, goes. Runs inside endOnError()'s calling handler, where an
+    # error would replace the app's own, so a failed delete is only reported.
+    .endForGood = function() {
+      if (private$endedForGood) return(invisible())
+      private$endedForGood <- TRUE
+      reg <- self$.snapshotRegistry
+      if (!is.null(reg)) {
+        tryCatch(reg$deleteSnapshot(),
+          error = function(e) message("Saved state could not be deleted: ", conditionMessage(e)))
+      }
+      private$write(toJSON(list(allowReconnect = FALSE)))
+      invisible()
+    },
+
+    # The `resume` branch of the WebSocket handler with resume on (step 1
+    # here, steps 2-6 in SnapshotRegistry$resume()). `data` is the decoded
+    # message; `runServer` runs the app's server function. Every failure
+    # before the server function runs falls through to inputs-only; the
+    # server function never runs twice.
+    .resumeSession = function(data, runServer) {
+      reg <- self$.snapshotRegistry
+      live <- snapshot_live_inputs(data$inputs)
+      ran <- FALSE
+      runOnce <- function() { ran <<- TRUE; runServer() }
+      snapshot_begin_hold_back(self)
+
+      # What manageInputs() does for init: onInputReceived() callbacks see
+      # the handler-applied live inputs, clientData keys prefixed as on the wire.
+      notifyInputs <- function(handled) {
+        cd <- handled$clientData
+        if (length(cd)) names(cd) <- paste0(".clientdata_", names(cd))
+        private$inputReceivedCallbacks$invoke(c(handled$inputs, cd))
+      }
+      # `fromRegistry`: the registry's outcome gains its handler counts after
+      # the first flush, so the log reads it then.
+      finish <- function(outcome, fromRegistry = TRUE) {
+        self$.sendResumed(outcome$resumed)
+        self$onFlushed(function() {
+          out <- if (fromRegistry) reg$outcome() %||% outcome else outcome
+          undefined <- snapshot_undefined_outputs(live$clientData, names(private$.outputs))
+          message(paste(snapshot_resume_log(out, undefined), collapse = "\n"))
+          if (length(undefined)) {
+            reg$devmodeInform("undefined-outputs", sprintf(
+              "Outputs %s are on the page but were not defined after resuming, probably because an observeEvent() handler defines them and handlers whose events already happened do not run again. Build them from state instead (rule 3 of the rules of reactives in ?enableResume), or mark that handler with disableResume().",
+              paste(undefined, collapse = ", ")))
+          }
+          snapshot_resume_otel(self, out)
+        }, once = TRUE)
+        invisible(outcome$resumed)
+      }
+
+      # `handled` is given when handlers already ran on the live set.
+      fallThrough <- function(cause, handled = NULL) {
+        if (is.null(handled)) {
+          # A `:shiny.file` value is a `data-restore` the GET path rendered
+          # from a bookmark; its files are in a directory this session lacks.
+          restores <- grepl(":shiny\\.file$", names(live$inputs) %||% character(0))
+          live$inputs[restores] <- list(NULL)
+          handled <- snapshot_apply_handlers(live, self)
+          # After the handlers, so restoreInput() sees bare names, not `n:shiny.number`.
+          snapshot_seed_restore_context(self, handled$inputs)
+          notifyInputs(handled)
+        }
+        for (name in names(handled$inputs)) private$.input$set(name, handled$inputs[[name]])
+        for (name in names(handled$clientData)) private$.clientData$set(name, handled$clientData[[name]])
+        self$manageHiddenOutputs()
+        runOnce()
+        finish(list(resumed = "inputs", cause = cause), fromRegistry = FALSE)
+      }
+
+      token <- data$token
+      if (is.null(token)) return(fallThrough("no token"))
+      if (!snapshot_token_valid(token)) return(fallThrough("malformed token"))
+      store <- snapshot_store()
+      if (is.null(store)) return(fallThrough("store unavailable"))
+      key <- snapshot_record_key(token)
+      record <- tryCatch(store$read(key), error = function(e) e)
+      if (inherits(record, "error")) return(fallThrough(paste("record unreadable:", conditionMessage(record))))
+      if (is.null(record)) return(fallThrough("no saved state"))
+      shape <- snapshot_shape_problem(record)
+      if (!is.null(shape)) return(fallThrough(paste("record unreadable:", shape)))
+      mismatch <- tryCatch(snapshot_identity_mismatch(record, self),
+        error = function(e) paste("identity check failed:", conditionMessage(e)))
+      if (!is.null(mismatch)) return(fallThrough(mismatch))
+      if (!isTRUE(record$complete)) {
+        first <- record$blocked[[1]]
+        try(store$delete(key), silent = TRUE)
+        return(fallThrough(sprintf("saved state incomplete: %s (%s)", first$id, first$reason)))
+      }
+
+      # Step 2. Seed before input handlers run: the shiny.file handler reads
+      # the restore context's dir. File inputs stay out of what
+      # restoreInput() sees: a re-rendered fileInput() would send a server
+      # path back through the handler.
+      snapshot_seed_restore_context(self, record$inputs[setdiff(names(record$inputs), record$fileInputs)],
+                                    dir = store$filesDir(key))
+      handled <- snapshot_apply_handlers(live, self)
+      notifyInputs(handled)
+      record <- snapshot_restore_uploads(record, self)
+      # Single use, which also settles a duplicated tab's race; the uploads
+      # were copied out above, so the record's files go with it.
+      deleted <- tryCatch(store$delete(key), error = function(e) e)
+      if (inherits(deleted, "error")) {
+        return(fallThrough(paste("saved state could not be claimed:", conditionMessage(deleted)), handled))
+      }
+
+      # Steps 3-4. An error before the server function runs falls through;
+      # one raised by it (user code) propagates as it does for init. A
+      # calling handler plus a restart, rather than tryCatch(), keeps the
+      # server function's errors unwound normally.
+      outcome <- NULL
+      failure <- withRestarts(
+        withCallingHandlers(
+          { outcome <- reg$resume(record, handled, runOnce); NULL },
+          error = function(e) if (!ran) invokeRestart("resumeFallback", e)
+        ),
+        resumeFallback = function(e) e
+      )
+      if (!is.null(failure)) {
+        return(fallThrough(paste("resume failed:", conditionMessage(failure)), handled))
+      }
+      finish(outcome)
+    },
+
+    .sendResumed = function(resumed) {
+      private$sendMessage(resumed = resumed)
+    },
+
+    resumeReport = function() {
+      snapshot_session_report(self)
     },
 
     defineOutput = function(name, func, label) {
@@ -2238,6 +2426,13 @@ ShinySession <- R6Class(
       )
     },
 
+    # The client's pagehide: the page can only come back fresh, so its saved
+    # state goes now and nothing more is written.
+    `@unload` = function() {
+      private$unloaded <- TRUE
+      if (!is.null(self$.snapshotRegistry)) self$.snapshotRegistry$deleteSnapshot()
+      TRUE
+    },
     `@uploadInit` = function(fileInfos) {
       maxSize <- getOption('shiny.maxRequestSize', 5 * 1024 * 1024)
       fileInfos <- lapply(fileInfos, function(fi) {
@@ -2471,6 +2666,11 @@ ShinySession <- R6Class(
     # not be used, but we're adding it to get around a show-stopping bug
     # for Shiny v1.1 (see the call site for more details).
     manageInputs = function(data, now = FALSE) {
+      reg <- self$.snapshotRegistry
+      if (!is.null(reg)) {
+        reg$markDirty()
+        reg$noteUpdated(names(data) %||% character(0))
+      }
       force(data)
       doManageInputs <- function() {
         private$inputReceivedCallbacks$invoke(data)

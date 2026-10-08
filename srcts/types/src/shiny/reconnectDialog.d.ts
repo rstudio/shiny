@@ -1,3 +1,4 @@
 declare function showReconnectDialog(delay: number): Promise<void>;
 declare function hideReconnectDialog(): void;
-export { hideReconnectDialog, showReconnectDialog };
+declare function showReconnectFailedDialog(): Promise<void>;
+export { hideReconnectDialog, showReconnectDialog, showReconnectFailedDialog };

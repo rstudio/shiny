@@ -6087,6 +6087,16 @@ ${duplicateIdMsg}`;
   function hideReconnectDialog() {
     remove2("reconnect");
   }
+  async function showReconnectFailedDialog() {
+    await show2({
+      id: "reconnect",
+      html: '<span id="shiny-reconnect-failed">Could not reconnect.</span>',
+      action: '<a id="shiny-reconnect-retry" href="#" onclick="Shiny.shinyapp.retryReconnect();">Try again</a>',
+      duration: null,
+      closeButton: false,
+      type: "warning"
+    });
+  }
 
   // srcts/src/shiny/shinyapp.ts
   var import_jquery39 = __toESM(require_jquery());
@@ -6153,6 +6163,11 @@ ${duplicateIdMsg}`;
   }) {
     if (!(allow === true || allow === "force")) return "never";
     return exhausted ? "stop" : "retry";
+  }
+
+  // srcts/src/shiny/resumeUnload.ts
+  function unloadOnPageHide(persisted, token) {
+    return !persisted && token !== null;
   }
 
   // srcts/src/shiny/outputProgress.ts
@@ -6379,6 +6394,9 @@ ${duplicateIdMsg}`;
       // other things tasks as well.
       this.taskQueue = new AsyncQueue();
       this.config = null;
+      // Token of this session's saved state, from `config`; null when resume is
+      // off. Memory only: a reload starts fresh (srcts/PROTOCOL.md, "Saved state").
+      this.$resumeToken = null;
       // Cached input values
       this.$inputValues = {};
       // Input values at initialization (and reconnect)
@@ -6509,10 +6527,30 @@ ${duplicateIdMsg}`;
       this.$socket = this.createSocket();
       this.$initialInput = initialInput;
       import_jquery39.default.extend(this.$inputValues, initialInput);
+      window.addEventListener("pagehide", (event) => {
+        if (!unloadOnPageHide(event.persisted, this.$resumeToken)) return;
+        if (!this.$socket) return;
+        try {
+          this.$socket.send(
+            JSON.stringify({
+              method: "unload",
+              args: [],
+              tag: this.$nextRequestId++
+            })
+          );
+        } catch {
+        }
+      });
       this.$updateConditionals();
     }
     isConnected() {
       return !!this.$socket;
+    }
+    // The "Try again" link once the attempts have run out: a fresh schedule,
+    // and the token this page still holds.
+    retryReconnect() {
+      this.reconnectDelay.reset();
+      this.reconnect();
     }
     reconnect() {
       clearTimeout(this.scheduledReconnect);
@@ -6555,7 +6593,13 @@ ${duplicateIdMsg}`;
         this.onConnected();
         socket.send(
           JSON.stringify(
-            this.$reconnecting ? { method: "resume", data: { inputs: this.$initialInput } } : { method: "init", data: this.$initialInput }
+            this.$reconnecting ? {
+              method: "resume",
+              data: {
+                inputs: this.$initialInput,
+                ...this.$resumeToken !== null ? { token: this.$resumeToken } : {}
+              }
+            } : { method: "init", data: this.$initialInput }
           )
         );
         while (this.$pendingMessages.length) {
@@ -6629,7 +6673,7 @@ ${duplicateIdMsg}`;
         showReconnectDialog(delay);
         this.$scheduleReconnect(delay);
       } else if (decision === "stop") {
-        hideReconnectDialog();
+        showReconnectFailedDialog();
       }
     }
     onConnected() {
@@ -6992,11 +7036,21 @@ ${duplicateIdMsg}`;
             workerId: message.workerId,
             sessionId: message.sessionId
           };
+          this.$resumeToken = message.resumeToken ?? null;
+          if (this.$resumeToken !== null) this.$allowReconnect = true;
           if (message.user) setShinyUser(message.user);
           this.reconnectDelay.reset();
           (0, import_jquery39.default)(document).trigger("shiny:sessioninitialized");
         }
       );
+      addMessageHandler("resumed", (message) => {
+        this.reconnectDelay.reset();
+        (0, import_jquery39.default)(document).trigger({
+          type: "shiny:resumed",
+          // @ts-expect-error; Can not remove info on a established, malformed Event object
+          resumed: message
+        });
+      });
       addMessageHandler("busy", (message) => {
         if (message === "busy") {
           (0, import_jquery39.default)(document.documentElement).addClass("shiny-busy");

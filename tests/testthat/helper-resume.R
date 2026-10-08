@@ -110,7 +110,12 @@ snapshot_roundtrip <- function(server, drive = function(session) NULL, live = NU
 # after), so cancel it when the calling test ends.
 local_cancel_writes <- function(session, envir = parent.frame()) {
   withr::defer(
-    if (!is.null(session$.snapshotRegistry)) session$.snapshotRegistry$deleteSnapshot(),
+    if (!is.null(session$.snapshotRegistry)) {
+      session$.snapshotRegistry$deleteSnapshot()
+      # The session may still flush during a later test's flushReact() and
+      # reschedule its debounced write; a NULL store disables the writer.
+      session$.snapshotRegistry$configureWriter(NULL, NULL, function() FALSE, 1000)
+    },
     envir = envir
   )
   invisible(session)
@@ -209,8 +214,10 @@ counter_app <- function(spy) { force(spy); function(input, output, session) {
 }}
 
 # A closed session that clicked `plus` three times and typed into `txt`.
-closed_counter_session <- function(spy = new_spy("obs", "txt")) {
-  live <- live_session(counter_app(spy), outputs = "n", inputs = list(`plus:shiny.action` = 0, txt = ""))
+# `envir` is where the write-cancelling defer is registered: the caller's
+# frame, so the record outlives this function.
+closed_counter_session <- function(spy = new_spy("obs", "txt"), envir = parent.frame()) {
+  live <- live_session(counter_app(spy), outputs = "n", inputs = list(`plus:shiny.action` = 0, txt = ""), envir = envir)
   for (i in 1:3) live_set(live$session, `plus:shiny.action` = i)
   live_set(live$session, txt = "typed")
   live_close(live)

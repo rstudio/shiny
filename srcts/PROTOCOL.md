@@ -17,8 +17,9 @@ message: `init`, or `resume` when it is reconnecting.
 | method | data | when |
 |---|---|---|
 | `init` | object of all input values; keys may carry a `:type` suffix (`btn:shiny.action`), plus `.clientdata_*` keys | first message of a new session |
-| `resume` | `{ "inputs": <the object init would carry> }` | first message when reconnecting |
+| `resume` | `{ "token"?: "<resumeToken>", "inputs": <the object init would carry> }` | first message when reconnecting |
 | `update` | object of changed input values, same key rules | whenever inputs change |
+| `unload` | `{ "method": "unload", "args": [], "tag": <n> }` | on `pagehide`, unless the page enters the back/forward cache |
 | `<other>` | `{ method, args, tag, blobs? }` | RPC (`@uploadInit`, `@uploadEnd`); the server answers with `response` carrying the same `tag` |
 
 ## Server → client
@@ -64,9 +65,66 @@ Carries the app's `session$allowReconnect()` calls. `"force"` behaves as
 After the socket closes, the client retries when the last `allowReconnect`
 value it saw is `true` or `"force"`, on any socket. Delays between attempts
 are 1.5 s, 1.5 s, 2.5 s, 2.5 s, 5.5 s, 5.5 s, then 10.5 s repeated; at most
-**ten** attempts, about a minute, after which the client stops, removes the
-"Attempting to reconnect" notification and leaves the disconnected overlay.
-Each retry opens a new socket and sends `resume` with the current inputs.
-The attempt count resets when the server answers (`config` or `values`),
-not when the socket opens, so a server that accepts the socket and drops it
-before answering still exhausts the attempts.
+**ten** attempts. Each retry opens a new socket and sends `resume`. The
+attempt count resets when the server answers (`config`, `values` or
+`resumed`), not when the socket opens. When the attempts run out the client
+replaces its "Attempting to reconnect" notification with "Could not
+reconnect." and a **Try again** link, which resets the count and starts the
+schedule over with the token the page holds in memory. The client never
+retries in the background after that.
+
+## Saved state
+
+These apply when the app turned resume on (`enableResume()`); a server with
+it off never sends a token and answers every `resume` as above.
+
+### `config` (server → client, at socket open)
+
+`"resumeToken": "<32 lowercase hex chars>" | null` joins `config`. It names
+this session's saved state. Its presence also means the app allows
+reconnecting, so the client sets its `allowReconnect` to `true`. The client
+keeps the token in memory only; a page reload starts without one.
+
+### `resume` with a token (client → server)
+
+```json
+{ "method": "resume",
+  "data": { "token": "<resumeToken>", "inputs": { "...": "as init carries them" } } }
+```
+
+`token` is the one from the previous session's `config`. The server reads
+that session's record, restores it all or nothing, and answers with
+`resumed`. A record is used once: the server deletes it as it reads it, and
+writes the new session's own record straight after. Two `resume` messages
+with one token (a duplicated tab): the first gets the record, the second
+resumes from inputs only. A `dom` key is ignored.
+
+On every `resume`, with or without a token, resume on or off, the server
+holds back the first run of each `observeEvent()` handler: the replayed
+inputs are events that already happened.
+
+### `resumed` (server → client, once, before the first `values`)
+
+```json
+{ "resumed": "snapshot" | "inputs" }
+```
+
+`"snapshot"`: the saved state was restored. `"inputs"`: only the inputs
+were applied (no token, no record, a mismatch, an incomplete record, or a
+value that could not be restored; the server log names the cause). The
+client fires the DOM event `shiny:resumed` with `resumed` set to the value,
+and resets its retry count. With resume off the server sends no `resumed`.
+
+### `unload` (client → server)
+
+Sent on `pagehide` when `event.persisted` is false and the page holds a
+token. The page can only come back fresh, so the server deletes the record
+and writes no more. Best effort: if the socket is already closed, the
+record lives to its 24-hour limit.
+
+### `allowReconnect` after a server-ended session
+
+When the server ends a session itself (`session$close()`, an error in the
+server function, an unhandled error in an observer), it sends
+`allowReconnect: false`, deletes the record and closes the socket. The
+client keeps its disconnected overlay and does not retry.

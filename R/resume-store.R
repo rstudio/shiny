@@ -149,14 +149,18 @@ snapshot_app_path <- function() {
   normalizePath(getShinyOption("appDir", default = getwd()), mustWork = FALSE)
 }
 
-snapshot_format_version <- 2L
+snapshot_format_version <- 3L
 
 # App identity block: what must match for a record to be read.
 snapshot_identity <- function(session) {
+  appVersion <- session$.resumeSettings$appVersion
   list(
     appPath = snapshot_app_path(),
     formatVersion = snapshot_format_version,
-    appVersion = session$.resumeSettings$appVersion,
+    appVersion = appVersion,
+    # Without a declared version the app's code stands in for one, so a
+    # deploy that changes it falls back before the server function runs.
+    codeHash = if (is.null(appVersion)) snapshot_session_code_hash(session),
     user = session$user,
     groups = session$groups
   )
@@ -169,6 +173,27 @@ snapshot_identity_mismatch <- function(snapshot, session, enforceUser = TRUE) {
   if (!identical(saved$formatVersion, now$formatVersion)) return("snapshot format version differs")
   if (!identical(saved$appPath, now$appPath)) return("app path differs")
   if (!identical(saved$appVersion, now$appVersion)) return("appVersion differs")
+  if (!identical(saved$codeHash, now$codeHash)) return("app code changed")
   if (enforceUser && (!identical(saved$user, now$user) || !identical(saved$groups, now$groups))) return("user differs")
   NULL
+}
+
+# A hash of the names and contents of every .R/.r file directly in the app
+# directory and in its R/ subdirectory, in C-locale order; NULL when there
+# are none. Packages, data and www/ are not covered: apps whose saved state
+# depends on them declare appVersion.
+snapshot_code_hash <- function(dir = snapshot_app_path()) {
+  rel <- c(
+    list.files(dir, pattern = "[.][rR]$"),
+    file.path("R", list.files(file.path(dir, "R"), pattern = "[.][rR]$"))
+  )
+  rel <- rel[!dir.exists(file.path(dir, rel))]
+  if (!length(rel)) return(NULL)
+  rel <- rel[order(rel, method = "radix")]
+  rlang::hash(list(rel, vapply(file.path(dir, rel), rlang::hash_file, character(1), USE.NAMES = FALSE)))
+}
+
+snapshot_session_code_hash <- function(session) {
+  reg <- session$.snapshotRegistry
+  if (is.null(reg)) snapshot_code_hash() else reg$codeHash()
 }

@@ -174,6 +174,12 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
 
     wroteSnapshot = function() private$wrote,
 
+    # snapshot_code_hash(), once per session: the files may change while it runs.
+    codeHash = function() {
+      if (is.null(private$codeHashValue)) private$codeHashValue <- list(snapshot_code_hash())
+      private$codeHashValue[[1]]
+    },
+
     # ---- the record ----------------------------------------------------
 
     snapshot = function(report = TRUE) {
@@ -386,6 +392,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     ordinals = NULL,     # per-caller construction order of identical calls: fastmap
     retired = NULL,      # ids two or more sources shared; none of them gets it
     informed = NULL,
+    codeHashValue = NULL,
 
     # writer
     store = NULL, key = NULL, gate = NULL, debounceMs = 1000,

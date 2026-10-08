@@ -103,8 +103,9 @@ test_that("identity block records path, format, declared version and user; misma
   local_enable_resume(appVersion = "v1")
   s <- MockShinySession$new()
   id <- snapshot_identity(s)
-  expect_identical(id$formatVersion, 2L)
+  expect_identical(id$formatVersion, 3L)
   expect_identical(id$appVersion, "v1")
+  expect_null(id$codeHash)                              # a declared version replaces the hash
   expect_identical(id$appPath, normalizePath(getwd()))
   snap <- list(identity = id)
   expect_null(snapshot_identity_mismatch(snap, s))
@@ -122,8 +123,57 @@ test_that("identity block records path, format, declared version and user; misma
 
 test_that("the identity block has no UI fingerprint, so a changed UI never blocks a resume", {
   s <- MockShinySession$new()
-  expect_named(snapshot_identity(s), c("appPath", "formatVersion", "appVersion", "user", "groups"))
+  expect_named(snapshot_identity(s), c("appPath", "formatVersion", "appVersion", "codeHash", "user", "groups"))
   expect_null(shinyApp(fluidPage(), function(input, output) NULL)$uiHash)
+})
+
+test_that("the code hash covers names and contents of R files in the app dir and R/, nothing else", {
+  dir <- local_app_dir()
+  expect_null(snapshot_code_hash())                     # an app built in the console
+  writeLines("x <- 1", file.path(dir, "app.R"))
+  dir.create(file.path(dir, "R"))
+  writeLines("f <- function() 1", file.path(dir, "R", "f.R"))
+  writeLines("a,b", file.path(dir, "data.csv"))
+  dir.create(file.path(dir, "www"))
+  writeLines("body {}", file.path(dir, "www", "app.css"))
+  h <- snapshot_code_hash()
+  expect_match(h, "^[0-9a-f]{32}$")
+  writeLines("a,b,c", file.path(dir, "data.csv"))
+  writeLines("body { color: red }", file.path(dir, "www", "app.css"))
+  expect_identical(snapshot_code_hash(), h)             # non-R files do not count
+  writeLines("f <- function() 2", file.path(dir, "R", "f.R"))
+  h2 <- snapshot_code_hash()
+  expect_false(identical(h2, h))
+  file.rename(file.path(dir, "R", "f.R"), file.path(dir, "R", "g.R"))
+  expect_false(identical(snapshot_code_hash(), h2))     # a rename counts
+})
+
+test_that("without appVersion the identity carries the code hash, computed once per session", {
+  dir <- local_app_dir()
+  writeLines("x <- 1", file.path(dir, "app.R"))
+  s <- MockShinySession$new()
+  id <- snapshot_identity(s)
+  expect_identical(id$codeHash, snapshot_code_hash())
+  writeLines("x <- 2", file.path(dir, "app.R"))
+  expect_identical(snapshot_identity(s)$codeHash, id$codeHash)
+  s2 <- MockShinySession$new()
+  expect_identical(snapshot_identity_mismatch(list(identity = id), s2), "app code changed")
+})
+
+test_that("an app with no R files keeps matching: codeHash is NULL on both sides", {
+  local_app_dir()
+  s <- MockShinySession$new()
+  id <- snapshot_identity(s)
+  expect_null(id$codeHash)
+  expect_null(snapshot_identity_mismatch(list(identity = id), MockShinySession$new()))
+})
+
+test_that("resume-off sessions never hash the app's code", {
+  withr::local_envvar(SHINY_RESUME = "FALSE")
+  local_mocked_bindings(snapshot_code_hash = function(...) stop("hashed"))
+  s <- snapshot_session(function(input, output, session) { v <- reactiveVal(1) })
+  s$flushReact()
+  expect_null(s$.snapshotRegistry)
 })
 
 test_that("the store applies a restrictive umask while writing", {

@@ -16,6 +16,16 @@ local_enable_resume <- function(..., .env = parent.frame()) {
   invisible()
 }
 
+# Points the app directory (getShinyOption("appDir")) at a fresh temp dir for
+# the calling test; the record key and the code hash both read it.
+local_app_dir <- function(envir = parent.frame()) {
+  dir <- withr::local_tempdir(.local_envir = envir)
+  old <- getShinyOption("appDir")
+  shinyOptions(appDir = dir)
+  withr::defer(shinyOptions(appDir = old), envir = envir)
+  dir
+}
+
 file_mode <- function(path) as.character(file.info(path)$mode)
 
 # Runs `server` in a fresh MockShinySession exactly as testServer() does and

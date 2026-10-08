@@ -214,6 +214,40 @@ test_that("a record of another format falls through to inputs-only", {
   expect_message(resume_real(counter_app(new_spy("obs", "txt")), resume_data(token, list())), "from inputs only: record unreadable: not a list")
 })
 
+test_that("changed R files without appVersion resume from inputs only before the server function runs", {
+  local_snapshot_store_dir()
+  dir <- local_app_dir()
+  writeLines("v <- 1", file.path(dir, "app.R"))
+  token <- closed_counter_session()
+  writeLines("v <- 2", file.path(dir, "app.R"))
+  expect_message(res <- resume_real(counter_app(new_spy("obs", "txt")), resume_data(token, list())),
+                 "from inputs only: app code changed")
+  expect_identical(res$outcome, "inputs")
+})
+
+test_that("with an unchanged explicit appVersion, changed R files still restore", {
+  local_snapshot_store_dir()
+  dir <- local_app_dir()
+  local_enable_resume(appVersion = "1")
+  writeLines("v <- 1", file.path(dir, "app.R"))
+  token <- closed_counter_session()
+  writeLines("v <- 2", file.path(dir, "app.R"))
+  expect_message(res <- resume_real(counter_app(new_spy("obs", "txt")), resume_data(token, list())),
+                 "^Resumed: restored 1 values")
+  expect_identical(res$outcome, "snapshot")
+})
+
+test_that("non-R file changes without appVersion still restore", {
+  local_snapshot_store_dir()
+  dir <- local_app_dir()
+  writeLines("v <- 1", file.path(dir, "app.R"))
+  writeLines("a", file.path(dir, "data.csv"))
+  token <- closed_counter_session()
+  writeLines("b", file.path(dir, "data.csv"))
+  expect_message(res <- resume_real(counter_app(new_spy("obs", "txt")), resume_data(token, list())),
+                 "^Resumed: restored 1 values")
+})
+
 test_that("an incomplete record resumes from inputs only with its first blocked reason, and is deleted", {
   local_snapshot_store_dir()
   blocked_app <- function(input, output, session) {

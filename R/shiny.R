@@ -2704,10 +2704,7 @@ ShinySession <- R6Class(
     # for Shiny v1.1 (see the call site for more details).
     manageInputs = function(data, now = FALSE) {
       reg <- self$.snapshotRegistry
-      if (!is.null(reg)) {
-        reg$markDirty()
-        reg$noteUpdated(names(data) %||% character(0))
-      }
+      if (!is.null(reg)) reg$markDirty()
       force(data)
       doManageInputs <- function() {
         private$inputReceivedCallbacks$invoke(data)

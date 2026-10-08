@@ -178,3 +178,27 @@ test_that("payload clientData equal to the session's initial value but not the r
   res <- suppressMessages(resume_with_updates(app, list(token = token, inputs = list(.clientdata_url_search = ""))))
   expect_identical(seen, "")                                 # one run, with the live value
 })
+
+test_that("an input the server updates during the restore keeps the client's echo, not the payload", {
+  local_snapshot_store_dir()
+  app <- function(input, output, session) {
+    observe({ input$txt; NULL })
+    updateTextInput(session, "txt", value = "from server")
+  }
+  live <- live_session(app, inputs = list(txt = "old"))
+  live$session$.snapshotRegistry$writeNow()
+  live_set(live$session, txt = "typed")                # record lag: the record says "old"
+  token <- live$ws$sent()[[1]]$config$resumeToken
+  live$session$.snapshotRegistry$configureWriter(function() snapshot_store(), snapshot_record_key(token), function() FALSE, 1000)
+  live$session$wsClosed()
+  both_timings(function(before) {
+    # The client echoes the update*Input() as an ordinary `update`.
+    res <- suppressMessages(resume_with_updates(
+      app, list(token = token, inputs = list(txt = "typed")),
+      updates = list(list(txt = "from server")), updates_before_flush = before
+    ))
+    expect_identical(isolate(res$session$input$txt), "from server", info = paste("before =", before))
+    msgs <- sent_of(res$ws, "inputMessages")
+    expect_identical(msgs[[1]]$inputMessages[[1]]$message$value, "from server")
+  })
+})

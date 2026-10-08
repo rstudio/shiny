@@ -335,7 +335,6 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       private$liveSet <- live
       private$recordInputs <- record$inputs
       private$recordClientData <- record$clientData
-      private$updated <- character(0)
       private$skipped <- character(0)
       private$outcomeValue <- NULL
       private$phase <- "constructing"
@@ -395,10 +394,6 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       invisible()
     },
     restoring = function() private$phase %in% c("constructing", "restoring"),
-    noteUpdated = function(names) {
-      if (self$restoring()) private$updated <- union(private$updated, names)
-      invisible()
-    },
     noteInitSkipped = function(label) {
       private$skipped <- c(private$skipped, label)
       invisible()
@@ -439,7 +434,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     phase = "idle",      # "idle" | "constructing" (server function running) | "restoring" (verified; first flush)
     records = NULL, omitted = character(0), initials = NULL, applied = character(0), claimed = character(0), trips = list(),
     liveSet = NULL, recordInputs = NULL, recordClientData = NULL,
-    updated = character(0), skipped = character(0), outcomeValue = NULL,
+    skipped = character(0), outcomeValue = NULL,
     watched = list(),
 
     orphan = function(entry, reason, counted) {
@@ -641,7 +636,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       live <- private$liveSet
       changed <- list()
       for (name in names(live$inputs)) {
-        if (name %in% live$fileInputs || name %in% private$updated) next
+        if (name %in% live$fileInputs) next
         if (!identical(live$inputs[[name]], private$recordInputs[[name]])) changed[name] <- list(live$inputs[[name]])
       }
       private$setInputs(changed, force = TRUE)
@@ -663,7 +658,6 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       private$liveSet <- NULL
       private$recordInputs <- NULL
       private$recordClientData <- NULL
-      private$updated <- character(0)
       invisible()
     }
   )

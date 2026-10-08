@@ -46,23 +46,6 @@ test_that("a restored resume runs callbacks once, before any observer, seeing re
   expect_identical(seen, list(info = list(restored = TRUE), count = 3))
 })
 
-test_that("after a gate trip callbacks run with restored = FALSE and see initial values", {
-  v1 <- function(input, output, session) {
-    count <- reactiveVal(0)
-    observeEvent(input$plus, count(count() + 1))
-  }
-  v2 <- function(input, output, session) {
-    count <- reactiveVal(0)
-    added <- reactiveVal("new in v2")
-    observeEvent(input$plus, count(count() + 1))
-    session$onResume(function(info) seen <<- list(info = info, count = count()))
-  }
-  seen <- NULL
-  rt <- snapshot_roundtrip(v1, function(s) for (i in 1:3) s$setInputs(plus = i), resume_server = v2)
-  expect_identical(rt$outcome$resumed, "inputs")
-  expect_identical(seen, list(info = list(restored = FALSE), count = 0))
-})
-
 test_that("callbacks run in global registration order, each under the namespace it was registered in", {
   order <- character(0)
   inner <- function(id) moduleServer(id, function(input, output, session) {

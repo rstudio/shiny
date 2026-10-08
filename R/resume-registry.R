@@ -53,7 +53,6 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
         private$entries[[id]] <- NULL
         private$retired <- c(private$retired, id)
         first$node$.snapshot$id <- NULL
-        if (id %in% private$applied) private$revertOne(first, id)
         private$orphan(first, "duplicate label", counted = TRUE)
         return(private$orphan(entry, "duplicate label", counted = TRUE))
       }
@@ -290,20 +289,19 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
 
     # ---- resuming ------------------------------------------------------
     #
-    # A resume runs in six steps: (1) the session reads and checks the
-    # record (ShinySession$.resumeSession()); (2) the record's inputs and
-    # userData are restored; (3) the server function runs, and constructors
-    # apply their records; (4) the gate verifies and commits, or reverts
-    # everything; (4a) the session runs session$onResume() callbacks and
-    # (4b) sends `resumed`; (5) the first flush, with observeEvent() first
-    # runs held back; (6) the client's live inputs are applied
-    # (finishResume()).
+    # A resume runs in six steps: (1) the session reads, checks and decodes
+    # the record and claims it (ShinySession$.resumeSession()); a problem
+    # there falls back to inputs only; (2) the record's inputs and userData
+    # are restored; (3) the server function runs, and constructors apply
+    # their records; (4) verify: saved state that does not fit ends the
+    # session; (4a) the session runs session$onResume() callbacks and (4b)
+    # sends `resumed`; (5) the first flush, with observeEvent() first runs
+    # held back; (6) the client's live inputs are applied (finishResume()).
 
-    # Steps 2-4. `record` is a complete record whose identity
-    # checks passed; `live` the client's handler-applied inputs; `run` runs
-    # the server function once. The caller seeds the RestoreContext before,
-    # and runs the callbacks and sends `resumed` after. Returns the outcome;
-    # step 6 runs after the first flush.
+    # Steps 2-4. `record` is a decoded record whose identity checks passed;
+    # `live` the client's handler-applied inputs; `run` runs the server
+    # function once. Returns the outcome, or raises `shiny_resume_failed`.
+    # Step 6 runs after the first flush.
     resume = function(record, live, run) {
       private$records <- record$sources
       private$initials <- list()
@@ -315,7 +313,6 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       private$updated <- character(0)
       private$skipped <- character(0)
       private$outcomeValue <- NULL
-      private$restoredUserData <- list()
       private$phase <- "constructing"
       snapshot_begin_hold_back(private$session)
       completed <- FALSE
@@ -330,23 +327,22 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       # Step 3: constructors apply their records as the server function runs.
       run()
 
-      # Step 4. An error here is the registry's, not the app's: it trips the gate.
+      # Step 4. The server function has run with saved values, so resetting
+      # them could not undo what it did with them: saved state that does not
+      # fit this code ends the session (server.R's endOnError()).
       cause <- tryCatch(private$verifyAndCommit(),
-        error = function(e) paste0("saved state could not be applied: ", conditionMessage(e)))
+        error = function(e) paste0("saved state could not be checked: ", conditionMessage(e)))
       if (!is.null(cause)) {
-        private$revertAll()
-        private$revertUserData()
-        # Sources created at the first flush keep their initial values.
-        private$records <- list()
-        private$outcomeValue <- list(resumed = "inputs", cause = cause,
-                                     values = 0L, inputs = length(record$inputs))
-      } else {
-        private$outcomeValue <- list(resumed = "snapshot", cause = NULL,
-                                     values = length(private$applied), inputs = length(record$inputs))
-        # The record we read was deleted (single use); write our own now
-        # rather than after the debounce. A no-op without a writer (Mock).
-        self$writeNow()
+        message(sprintf(
+          "Resume failed after the server function ran: %s. The session ended; reloading the page starts fresh. Set or bump appVersion in enableResume() when a deploy changes what the app saves.",
+          cause))
+        rlang::abort(paste0("Saved state does not fit the app: ", cause), class = "shiny_resume_failed")
       }
+      private$outcomeValue <- list(resumed = "snapshot", cause = NULL,
+                                   values = length(private$applied), inputs = length(record$inputs))
+      # The record we read was deleted (single use); write our own now
+      # rather than after the debounce. A no-op without a writer (Mock).
+      self$writeNow()
       private$phase <- "restoring"
       private$session$onFlushed(function() self$finishResume(), once = TRUE)
       completed <- TRUE
@@ -404,7 +400,6 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     records = NULL, initials = NULL, applied = character(0), trips = list(),
     liveSet = NULL, recordInputs = NULL, recordClientData = NULL,
     updated = character(0), skipped = character(0), outcomeValue = NULL,
-    restoredUserData = NULL,
 
     orphan = function(entry, reason, counted) {
       entry$reason <- reason
@@ -567,35 +562,11 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       invisible()
     },
 
-    revertAll = function() {
-      for (id in private$applied) {
-        entry <- private$entries[[id]]
-        if (!is.null(entry)) private$revertOne(entry, id)
-      }
-      private$applied <- character(0)
-      invisible()
-    },
-
     restoreUserData = function(values) {
       ud <- private$session$userData
       for (name in names(values)) {
         assign(name, values[[name]], envir = ud)
-        private$restoredUserData[name] <- list(values[[name]])
       }
-      invisible()
-    },
-
-    # On a gate trip, a restored name goes only if it still holds the object
-    # the record gave it; the server function's own writes stay.
-    revertUserData = function() {
-      ud <- private$session$userData
-      for (name in names(private$restoredUserData)) {
-        if (exists(name, envir = ud, inherits = FALSE) &&
-            identical(get(name, envir = ud, inherits = FALSE), private$restoredUserData[[name]])) {
-          rm(list = name, envir = ud)
-        }
-      }
-      private$restoredUserData <- list()
       invisible()
     },
 
@@ -621,7 +592,6 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       private$liveSet <- NULL
       private$recordInputs <- NULL
       private$recordClientData <- NULL
-      private$restoredUserData <- NULL
       private$updated <- character(0)
       invisible()
     }

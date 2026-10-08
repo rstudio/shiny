@@ -75,34 +75,59 @@ test_that("a closure-assigning handler is held back; ignoreInit = TRUE handles t
   expect_null(rt$outcome$reran)
 })
 
-test_that("a source without a saved value trips the gate: sources revert, inputs stay seeded, handlers are still held back", {
-  v1 <- function(spy) { force(spy); function(input, output, session) {
+test_that("a source without a saved value ends the resume: no rollback, an error naming it", {
+  v1 <- function(input, output, session) {
     count <- reactiveVal(0)
-    observeEvent(input$plus, { spy$obs <- spy$obs + 1; count(count() + 1) })
-  }}
-  v2 <- function(spy) { force(spy); function(input, output, session) {
+    observeEvent(input$plus, count(count() + 1))
+    session$userData$kept <- "from record"
+  }
+  v2 <- function(input, output, session) {
     count <- reactiveVal(0)
     added <- reactiveVal("new in v2")
-    observeEvent(input$plus, { spy$obs <- spy$obs + 1; count(count() + 1) })
-  }}
-  spy <- new_spy("obs")
-  first <- snapshot_session(v1(spy))
+    observeEvent(input$plus, count(count() + 1))
+  }
+  first <- snapshot_session(v1)
   for (i in 1:3) first$setInputs(plus = i)
   rec <- snapshot_decode_sources(first$.snapshotRegistry$snapshot()); rec$identity <- snapshot_identity(first)
-  reset_spies()
   s2 <- MockShinySession$new()
-  srv <- capture_env(v2(spy))
-  out <- s2$.snapshotRegistry$resume(rec, list(inputs = rec$inputs, clientData = list(), fileInputs = character(0)),
-    function() withMockContext(s2, srv(s2$input, s2$output, s2)))
-  expect_identical(out$resumed, "inputs")
-  expect_match(out$cause, "\\|reactiveVal\\|added \\(no saved value\\)")
-  expect_equal(isolate(s2$env$count()), 0)
-  s2$flushReact()
-  expect_equal(spy$obs, 0)                             # the replayed click is a past event
-  expect_equal(isolate(s2$env$count()), 0)
-  expect_equal(as.numeric(isolate(s2$input$plus)), 3)  # inputs stay seeded
-  s2$setInputs(plus = 4)
-  expect_equal(spy$obs, 1)
+  srv <- capture_env(v2)
+  expect_message(
+    expect_error(
+      s2$.snapshotRegistry$resume(rec, list(inputs = rec$inputs, clientData = list(), fileInputs = character(0)),
+        function() withMockContext(s2, srv(s2$input, s2$output, s2))),
+      "Saved state does not fit the app: \\|reactiveVal\\|added \\(no saved value\\)",
+      class = "shiny_resume_failed"
+    ),
+    "^Resume failed after the server function ran: \\|reactiveVal\\|added \\(no saved value\\)\\. The session ended"
+  )
+  expect_equal(isolate(s2$env$count()), 3)              # no rollback
+  expect_identical(s2$userData$kept, "from record")    # no userData rollback either
+  expect_false(s2$.snapshotRegistry$restoring())
+})
+
+test_that("two sources sharing a label during the server function end the resume", {
+  server <- function(input, output, session) {
+    count <- reactiveVal(0, label = "count")
+    observeEvent(input$plus, count(count() + 1))
+  }
+  twins <- function(input, output, session) {
+    count <- reactiveVal(0, label = "count")
+    other <- reactiveVal(0, label = "count")
+  }
+  first <- snapshot_session(server)
+  first$setInputs(plus = 1)
+  rec <- snapshot_decode_sources(first$.snapshotRegistry$snapshot()); rec$identity <- snapshot_identity(first)
+  s2 <- MockShinySession$new()
+  srv <- capture_env(twins)
+  expect_message(
+    expect_error(
+      s2$.snapshotRegistry$resume(rec, list(inputs = rec$inputs, clientData = list(), fileInputs = character(0)),
+        function() withMockContext(s2, srv(s2$input, s2$output, s2))),
+      "duplicate label", class = "shiny_resume_failed"
+    ),
+    "Resume failed after the server function ran"
+  )
+  expect_equal(isolate(s2$env$count()), 1)              # the first keeps its restored value
 })
 
 test_that("userData and module state under two namespaces come back", {
@@ -180,33 +205,6 @@ test_that("rule 4 is not raised for writes to sources that were not restored", {
   expect_false(any(grepl("first flush", seen)))
 })
 
-test_that("an error while committing the saved state falls back to inputs only", {
-  server <- function(input, output, session) {
-    rv <- reactiveValues(a = 0)
-    observeEvent(input$plus, rv$a <- rv$a + 1)
-    excludeFromResume(rv)                                  # marked after its record applied: commit reverts it
-  }
-  first <- snapshot_session(function(input, output, session) {
-    rv <- reactiveValues(a = 0)
-    observeEvent(input$plus, rv$a <- rv$a + 1)
-  })
-  first$setInputs(plus = 1)
-  rec <- snapshot_decode_sources(first$.snapshotRegistry$snapshot()); rec$identity <- snapshot_identity(first)
-  calls <- 0
-  revert <- snapshot_values_revert
-  local_mocked_bindings(snapshot_values_revert = function(impl, initial) {
-    calls <<- calls + 1
-    if (calls == 1) stop("boom") else revert(impl, initial)
-  })
-  s2 <- MockShinySession$new()
-  srv <- capture_env(server)
-  out <- s2$.snapshotRegistry$resume(rec, list(inputs = rec$inputs, clientData = list(), fileInputs = character(0)),
-    function() withMockContext(s2, srv(s2$input, s2$output, s2)))
-  expect_identical(out$resumed, "inputs")
-  expect_match(out$cause, "saved state could not be applied: boom")
-  expect_equal(isolate(s2$env$rv$a), 0)
-})
-
 test_that("userData is restored before the server function runs, so a top-level guard sees it", {
   server <- function(input, output, session) {
     count <- reactiveVal(0)
@@ -218,26 +216,4 @@ test_that("userData is restored before the server function runs, so a top-level 
   expect_identical(rt$outcome$resumed, "snapshot")
   expect_identical(rt$second$userData$seenAtStart, 2)
   expect_identical(rt$second$userData$visits, 2)
-})
-
-test_that("a gate trip removes restored userData still holding the restored object, and keeps the server function's writes", {
-  v1 <- function(input, output, session) {
-    count <- reactiveVal(0)
-    session$userData$kept <- "from record"
-    session$userData$overwritten <- "from record"
-  }
-  v2 <- function(input, output, session) {
-    count <- reactiveVal(0)
-    added <- reactiveVal(1)                            # no record: the gate trips
-    session$userData$overwritten <- "from v2"
-  }
-  first <- snapshot_session(v1)
-  rec <- snapshot_decode_sources(first$.snapshotRegistry$snapshot()); rec$identity <- snapshot_identity(first)
-  s2 <- MockShinySession$new()
-  srv <- capture_env(v2)
-  out <- s2$.snapshotRegistry$resume(rec, list(inputs = list(), clientData = list(), fileInputs = character(0)),
-    function() withMockContext(s2, srv(s2$input, s2$output, s2)))
-  expect_identical(out$resumed, "inputs")
-  expect_false(exists("kept", envir = s2$userData, inherits = FALSE))
-  expect_identical(s2$userData$overwritten, "from v2")
 })

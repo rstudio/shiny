@@ -562,3 +562,30 @@ test_that("a server function that errors on resume runs no onResume() callbacks 
   expect_false(ran)
   expect_length(sent_of(ws, "resumed"), 0)
 })
+
+test_that("a source with no saved value ends the session for good after the server function, with nothing saved", {
+  local_snapshot_store_dir()
+  token <- closed_counter_session()
+  ran <- FALSE
+  app <- function(input, output, session) {
+    counter_app(new_spy("obs", "txt"))(input, output, session)
+    added <- reactiveVal("new")
+    session$onResume(function(info) ran <<- TRUE)
+  }
+  handlers <- createAppHandlers(NULL, function() app)
+  ws <- fake_httpuv_ws(); handlers$ws(ws)
+  expect_message(
+    suppressWarnings(expect_error(
+      ws$callbacks$message(FALSE, sprintf('{"method":"resume","data":{"token":"%s","inputs":{}}}', token)),
+      class = "shiny_resume_failed"
+    )),
+    "Resume failed after the server function ran: \\|reactiveVal\\|added \\(no saved value\\)"
+  )
+  expect_false(ran)
+  expect_length(sent_of(ws, "resumed"), 0)
+  expect_identical(sent_of(ws, "allowReconnect")[[1]]$allowReconnect, FALSE)
+  newToken <- ws$sent()[[1]]$config$resumeToken
+  ws$callbacks$close()
+  expect_null(snapshot_store()$read(snapshot_record_key(token)))
+  expect_null(snapshot_store()$read(snapshot_record_key(newToken)))
+})

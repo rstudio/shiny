@@ -1524,8 +1524,9 @@ ShinySession <- R6Class(
     # here, steps 2-4 and 6 in SnapshotRegistry$resume(), 4a-4b in finish()).
     # `data` is the decoded
     # message; `runServer` runs the app's server function. Every failure
-    # before the server function runs falls through to inputs-only; the
-    # server function never runs twice.
+    # before the server function runs falls through to inputs-only; saved
+    # state that does not fit once it has run ends the session; the server
+    # function never runs twice.
     .resumeSession = function(data, runServer) {
       reg <- self$.snapshotRegistry
       live <- snapshot_live_inputs(data$inputs)
@@ -1543,7 +1544,7 @@ ShinySession <- R6Class(
       # `fromRegistry`: the registry's outcome gains its handler counts after
       # the first flush, so the log reads it then.
       finish <- function(outcome, fromRegistry = TRUE) {
-        # Step 4a: values are final (restored, or initial after a trip). An
+        # Step 4a: values are final (restored, or initial on inputs-only). An
         # error here propagates, and server.R ends the session for good.
         callbacks <- self$.resumeCallbacks$run(identical(outcome$resumed, "snapshot"))
         # Step 4b.

@@ -148,6 +148,11 @@ class ShinyApp {
   // Input values at initialization (and reconnect)
   $initialInput: InputValues | null = null;
 
+  // Input values when the last opened socket closed. A reconnect sends these
+  // as the `resume` payload, so what the user did while disconnected reaches
+  // the server only through the queued `update`s (srcts/PROTOCOL.md, "resume").
+  private $disconnectedInput: InputValues | null = null;
+
   // Output bindings
   $bindings: { [key: string]: OutputBindingAdapter } = {};
 
@@ -234,7 +239,8 @@ class ShinyApp {
 
     this.$reconnecting = true;
     this.$socket = this.createSocket();
-    this.$initialInput = $.extend({}, this.$inputValues);
+    this.$initialInput =
+      this.$disconnectedInput ?? $.extend({}, this.$inputValues);
     this.$updateConditionals();
   }
 
@@ -322,6 +328,7 @@ class ShinyApp {
       // These things are needed only if we've successfully opened the
       // websocket.
       if (hasOpened) {
+        this.$disconnectedInput = $.extend({}, this.$inputValues);
         $(document).trigger({
           type: "shiny:disconnected",
           // @ts-expect-error; Can not remove info on a established, malformed Event object

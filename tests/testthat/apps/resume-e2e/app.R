@@ -64,6 +64,7 @@ server <- function(input, output, session) {
   observeEvent(input$end, session$close())
   observeEvent(input$risky, if (identical(input$risky, "boom")) stop("risky boom"))
   observeEvent(input$read, contents(paste(readLines(input$file$datapath), collapse = "")))
+  observe(log_line("WORD ", input$word))
   expensive <- reactive({ log_line("COMPUTING expensive for n=", input$n); input$n * 1000 })
   output$count <- renderText(paste("Count:", count()))
   output$emails <- renderText(paste("Emails sent:", emails()))

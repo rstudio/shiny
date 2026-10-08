@@ -49,6 +49,41 @@ test_that("a dropped socket on a live process reconnects into saved state withou
   expect_false(any(grepl("EMAIL SENT", new_logs(e, before), fixed = TRUE)))
 })
 
+# Spec §1.0: the overlay does not block input, and the client used to send
+# every outage-era change twice (in the `resume` payload and as a queued
+# `update`), so the server saw `abc, a, ab, abc` and could fire a click twice.
+outage_changes_case <- function(env, emails_after) {
+  e <- e2e_session(env = env, app = "resume-e2e")
+  b <- e$browser
+  since <- Sys.time()
+  click_until(b, "#send", "#emails", "Emails sent: 1")
+  e2e_wait_for_record(e$store_dir, since = since)
+  e$process$kill()
+  e2e_wait_until(function() !e2e_port_open(e$port), what = "port to close")
+  e2e_wait_until(function() e2e_present(b, "#shiny-disconnected-overlay"), what = "overlay")
+  before <- length(e$logs())
+  for (w in c("a", "ab", "abc")) { e2e_set_text(b, "word", w); Sys.sleep(0.2) }
+  e2e_click(b, "#send")
+  restart_process(e)
+  e2e_wait_until(function() !is.null(resumed_attr(b)), timeout = 60, what = "shiny:resumed")
+  e2e_wait_until(function() grepl(emails_after, e2e_text(b, "#emails"), fixed = TRUE), what = emails_after)
+  Sys.sleep(1)                                   # a duplicate would show within one flush
+  after <- new_logs(e, before)
+  expect_identical(sum(grepl("EMAIL SENT", after, fixed = TRUE)), 1L)
+  words <- sub("^WORD ", "", grep("^WORD ", after, value = TRUE))
+  expect_identical(words, c("first", "a", "ab", "abc"))
+}
+
+test_that("changes made while disconnected arrive once, in order, after the restored state (snapshot)", {
+  skip_on_cran()
+  outage_changes_case(c(SHINY_RESUME = "TRUE"), "Emails sent: 2")
+})
+
+test_that("changes made while disconnected arrive once, in order, after the restored state (inputs only)", {
+  skip_on_cran()
+  outage_changes_case(c(SHINY_RESUME = "TRUE", E2E_BLOCK = "1"), "Emails sent: 1")
+})
+
 test_that("with SHINY_RESUME=FALSE a reconnect replays inputs but no events, and nothing is saved", {
   skip_on_cran()
   e <- e2e_session(env = c(SHINY_RESUME = "FALSE", E2E_ALLOW = "1"), app = "resume-e2e")

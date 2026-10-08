@@ -33,6 +33,7 @@ declare class ShinyApp {
     $resumeToken: string | null;
     $inputValues: InputValues;
     $initialInput: InputValues | null;
+    private $disconnectedInput;
     $bindings: {
         [key: string]: OutputBindingAdapter;
     };

@@ -6401,6 +6401,10 @@ ${duplicateIdMsg}`;
       this.$inputValues = {};
       // Input values at initialization (and reconnect)
       this.$initialInput = null;
+      // Input values when the last opened socket closed. A reconnect sends these
+      // as the `resume` payload, so what the user did while disconnected reaches
+      // the server only through the queued `update`s (srcts/PROTOCOL.md, "resume").
+      this.$disconnectedInput = null;
       // Output bindings
       this.$bindings = {};
       // Output progress states
@@ -6559,7 +6563,7 @@ ${duplicateIdMsg}`;
       this.$outputProgress.reset();
       this.$reconnecting = true;
       this.$socket = this.createSocket();
-      this.$initialInput = import_jquery39.default.extend({}, this.$inputValues);
+      this.$initialInput = this.$disconnectedInput ?? import_jquery39.default.extend({}, this.$inputValues);
       this.$updateConditionals();
     }
     createSocket() {
@@ -6614,6 +6618,7 @@ ${duplicateIdMsg}`;
       socket.onclose = (e4) => {
         const restarting = e4.code === 1012;
         if (hasOpened) {
+          this.$disconnectedInput = import_jquery39.default.extend({}, this.$inputValues);
           (0, import_jquery39.default)(document).trigger({
             type: "shiny:disconnected",
             // @ts-expect-error; Can not remove info on a established, malformed Event object

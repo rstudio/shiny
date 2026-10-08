@@ -17,7 +17,7 @@ message: `init`, or `resume` when it is reconnecting.
 | method | data | when |
 |---|---|---|
 | `init` | object of all input values; keys may carry a `:type` suffix (`btn:shiny.action`), plus `.clientdata_*` keys | first message of a new session |
-| `resume` | `{ "token"?: "<resumeToken>", "inputs": <the object init would carry> }` | first message when reconnecting |
+| `resume` | `{ "token"?: "<resumeToken>", "inputs": <the input set as of the moment the previous connection was lost> }` | first message when reconnecting; the `update`s queued while disconnected follow at once, in order |
 | `update` | object of changed input values, same key rules | whenever inputs change |
 | `unload` | `{ "method": "unload", "args": [], "tag": <n> }` | on `pagehide`, unless the page enters the back/forward cache |
 | `<other>` | `{ method, args, tag, blobs? }` | RPC (`@uploadInit`, `@uploadEnd`); the server answers with `response` carrying the same `tag` |
@@ -38,7 +38,7 @@ those keys.
 
 ```json
 { "method": "resume",
-  "data": { "inputs": { "...": "the complete current input set, as init carries it" } } }
+  "data": { "inputs": { "...": "the input set as of the moment the previous connection was lost" } } }
 ```
 
 The server treats it as `init` with one difference: the session's restore
@@ -50,6 +50,12 @@ inputs changed since the page loaded. `inputs` missing or not an object is
 treated as empty. Entries whose key ends in `:shiny.file` (bookmark-restore
 values the page rendered into file inputs) are dropped: their files live in
 a bookmark directory the new session does not have.
+
+`inputs` is the client's input set **as of the disconnect**, not its current
+one. Every change the user made while disconnected was queued as an
+ordinary `update` message, and the client sends those right after `resume`,
+in order. So the server sees each outage-era change exactly once, as live
+input, after the restored state; nothing in `inputs` is an event.
 
 ### `allowReconnect` (server → client)
 

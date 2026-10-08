@@ -189,6 +189,29 @@ resume_real <- function(server, data, ws = fake_ws(), spy = NULL, before = funct
   list(session = s, outcome = outcome, ws = ws)
 }
 
+# Drives a real ShinySession as server.R does for a `resume` followed by the
+# `update`s the client queued while disconnected: `.resumeSession()`, then
+# manageInputs() for each update (now = FALSE, as the `update` branch does).
+# `updates_before_flush` is whether those updates are processed before the
+# first flush (one httpuv drain handed both frames to R) or after it.
+resume_with_updates <- function(server, data, updates = list(), updates_before_flush = TRUE,
+                                ws = fake_ws(), envir = parent.frame()) {
+  s <- ShinySession$new(ws)
+  local_cancel_writes(s, envir)
+  run <- function() withReactiveDomain(s, isolate(server(input = s$input, output = s$output, session = s)))
+  outcome <- s$.resumeSession(data, run)
+  apply_updates <- function() {
+    for (u in updates) s$manageInputs(withReactiveDomain(s, applyInputHandlers(u, s)))
+  }
+  settle <- function() for (i in 1:4) { flushReact(); s$flushOutput(); drain_later() }
+  if (updates_before_flush) {
+    apply_updates(); settle()
+  } else {
+    settle(); apply_updates(); settle()
+  }
+  list(session = s, outcome = outcome, ws = ws)
+}
+
 # A ShinySession over fake_ws() that ran `server`, with `outputs` visible and
 # raw client `inputs` applied, after one flush.
 live_session <- function(server, outputs = character(0), inputs = list(), ws = fake_ws(),

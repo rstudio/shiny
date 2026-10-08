@@ -175,6 +175,11 @@ NULL
 #' @param debounce Milliseconds of quiet after a change before the state is
 #'   saved. While changes keep arriving it is saved at least every ten such
 #'   intervals.
+#' @param userDataExclude Names of `session$userData` entries never saved or
+#'   restored, such as credentials or connections. Exact top-level names. They
+#'   are left out even when an older record has them, so the server function's
+#'   own initialization runs, for example
+#'   `if (is.null(session$userData$token)) session$userData$token <- login()`.
 #' @return `NULL`, invisibly.
 #' @seealso [excludeFromResume()]; [session] for `session$onResume()`,
 #'   `session$resumeReport()` and `session$allowReconnect()`;
@@ -198,7 +203,7 @@ NULL
 #' shinyApp(ui, server)
 #' }
 #' @export
-enableResume <- function(enabled = TRUE, appVersion = NULL, maxSize = 50e6, maxNodeSize = 5e6, debounce = 1000) {
+enableResume <- function(enabled = TRUE, appVersion = NULL, maxSize = 50e6, maxNodeSize = 5e6, debounce = 1000, userDataExclude = character()) {
   resume_check_top_level()
   if (!is.logical(enabled) || length(enabled) != 1 || is.na(enabled)) {
     rlang::abort("`enabled` must be TRUE or FALSE.")
@@ -212,7 +217,8 @@ enableResume <- function(enabled = TRUE, appVersion = NULL, maxSize = 50e6, maxN
     appVersion = resume_check_version(appVersion),
     maxSize = resume_check_number(maxSize, "maxSize", "a single positive number of bytes", positive = TRUE),
     maxNodeSize = resume_check_number(maxNodeSize, "maxNodeSize", "a single positive number of bytes", positive = TRUE),
-    debounce = resume_check_number(debounce, "debounce", "a single non-negative number of milliseconds", positive = FALSE)
+    debounce = resume_check_number(debounce, "debounce", "a single non-negative number of milliseconds", positive = FALSE),
+    userDataExclude = resume_check_names(userDataExclude, "userDataExclude")
   )
   shinyOptions(resume = settings)
   invisible()
@@ -313,6 +319,13 @@ resume_check_version <- function(value) {
     return(as.character(value))
   }
   rlang::abort("`appVersion` must be NULL or a single string or number.")
+}
+
+resume_check_names <- function(value, arg) {
+  if (!is.character(value) || anyNA(value) || !all(nzchar(value))) {
+    rlang::abort(sprintf("`%s` must be a character vector of names.", arg))
+  }
+  unique(value)
 }
 
 # A node no registry tracks is never recorded, so there is nothing to mark.

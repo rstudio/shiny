@@ -18,11 +18,14 @@ test_that("enableResume() stores its settings and validates each argument by nam
   expect_error(enableResume(maxNodeSize = "big"), "`maxNodeSize` must be a single positive number")
   expect_error(enableResume(debounce = c(1, 2)), "`debounce` must be a single non-negative number")
   expect_error(enableResume(appVersion = list("v1")), "`appVersion` must be NULL or a single string or number.", fixed = TRUE)
+  expect_error(enableResume(userDataExclude = 1), "`userDataExclude` must be a character vector of names.", fixed = TRUE)
+  expect_error(enableResume(userDataExclude = c("a", NA)), "`userDataExclude` must be a character vector of names.", fixed = TRUE)
+  expect_error(enableResume(userDataExclude = ""), "`userDataExclude` must be a character vector of names.", fixed = TRUE)
   expect_null(getShinyOption("resume"))
   expect_invisible(enableResume(appVersion = 2, maxSize = 1e6, maxNodeSize = 1e3, debounce = 0))
   expect_identical(
     getShinyOption("resume"),
-    list(enabled = TRUE, appVersion = "2", maxSize = 1e6, maxNodeSize = 1e3, debounce = 0)
+    list(enabled = TRUE, appVersion = "2", maxSize = 1e6, maxNodeSize = 1e3, debounce = 0, userDataExclude = character(0))
   )
   expect_invisible(enableResume(FALSE))
   expect_identical(getShinyOption("resume"), c(list(enabled = FALSE), resume_defaults()))

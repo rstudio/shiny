@@ -519,7 +519,12 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     userDataValues = function(maxNode, addRow) {
       ud <- private$session$userData
       out <- list()
+      exclude <- private$session$.resumeSettings$userDataExclude
       for (name in ls(ud, all.names = TRUE)) {
+        if (name %in% exclude) {
+          addRow("userData", name, "", FALSE, "userDataExclude")
+          next
+        }
         value <- get(name, envir = ud, inherits = FALSE)
         reason <- tryCatch(private$userDataReason(value, maxNode),
           error = function(e) snapshot_check_failed(e))
@@ -588,6 +593,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     },
 
     restoreUserData = function(values) {
+      values <- values[setdiff(names(values), private$session$.resumeSettings$userDataExclude)]
       ud <- private$session$userData
       for (name in names(values)) {
         assign(name, values[[name]], envir = ud)

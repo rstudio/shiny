@@ -9,7 +9,8 @@ enableResume(
   appVersion = NULL,
   maxSize = 5e+07,
   maxNodeSize = 5e+06,
-  debounce = 1000
+  debounce = 1000,
+  userDataExclude = character()
 )
 }
 \arguments{
@@ -30,6 +31,12 @@ blocks resume.}
 \item{debounce}{Milliseconds of quiet after a change before the state is
 saved. While changes keep arriving it is saved at least every ten such
 intervals.}
+
+\item{userDataExclude}{Names of \code{session$userData} entries never saved or
+restored, such as credentials or connections. Exact top-level names. They
+are left out even when an older record has them, so the server function's
+own initialization runs, for example
+\code{if (is.null(session$userData$token)) session$userData$token <- login()}.}
 }
 \value{
 \code{NULL}, invisibly.

@@ -116,3 +116,16 @@ test_that("an error while recording one value blocks that value, not the record"
   expect_identical(rec$userData, list(good = 2))
   expect_identical(rec$report$reason[rec$report$kind == "userData" & rec$report$label == "bad"], "could not be checked: boom")
 })
+
+test_that("userDataExclude names are not saved, are reported, and stay out when recreated", {
+  local_enable_resume(userDataExclude = "token")
+  s <- snapshot_session(function(input, output, session) {
+    session$userData$token <- "secret"
+    session$userData$note <- "draft"
+  })
+  rec <- s$.snapshotRegistry$snapshot()
+  expect_identical(names(rec$userData), "note")
+  expect_identical(rec$report$reason[rec$report$label %in% "token"], "userDataExclude")
+  s$userData$token <- "new secret"                      # recreated later in the session
+  expect_identical(names(s$.snapshotRegistry$snapshot()$userData), "note")
+})

@@ -12,7 +12,7 @@ snapshot_store_max_n <- 1000L
 # What enableResume() defaults to; also what an app gets when it made no
 # call and a platform set SHINY_RESUME=TRUE.
 resume_defaults <- function() {
-  list(appVersion = NULL, maxSize = 50e6, maxNodeSize = 5e6, debounce = 1000)
+  list(appVersion = NULL, maxSize = 50e6, maxNodeSize = 5e6, debounce = 1000, userDataExclude = character(0))
 }
 
 # The app's resume settings: its last enableResume() call as captured by

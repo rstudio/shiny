@@ -352,3 +352,18 @@ test_that("a source excluded after claiming its record is not listed as unclaime
   )
   expect_length(rt$outcome$unclaimed, 0)
 })
+
+test_that("an excluded userData name in an older record is not restored; others are", {
+  first <- snapshot_session(function(input, output, session) {
+    session$userData$token <- "secret"
+    session$userData$note <- "draft"
+  })
+  rec <- snapshot_decode_sources(first$.snapshotRegistry$snapshot())
+  local_enable_resume(userDataExclude = "token")
+  s2 <- MockShinySession$new()
+  seen <- NULL
+  s2$.snapshotRegistry$resume(rec, list(inputs = list(), clientData = list(), fileInputs = character(0)),
+    function() seen <<- exists("token", envir = s2$userData, inherits = FALSE))
+  expect_false(seen)                                    # absent while the server function runs
+  expect_identical(s2$userData$note, "draft")
+})

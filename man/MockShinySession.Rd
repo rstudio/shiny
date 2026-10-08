@@ -64,6 +64,15 @@ user. Always \code{NULL} for a \code{MockShinySesion}.}
 \code{MockShinySession}.}
 
     \item{\code{options}}{A list containing session-level shinyOptions.}
+
+    \item{\code{.resumeSettings}}{The app's resume settings, resolved at session
+start. For internal use.}
+
+    \item{\code{.snapshotRegistry}}{The session's resume registry, or \code{NULL} with
+resume off. For internal use.}
+
+    \item{\code{.resumeHoldBack}}{\code{TRUE} while the session answers a resume, until
+its first flush ends. For internal use.}
   }
   \if{html}{\out{</div>}}
 }
@@ -104,6 +113,7 @@ user. Always \code{NULL} for a \code{MockShinySesion}.}
     \item \href{#method-MockShinySession-.now}{\code{MockShinySession$.now()}}
     \item \href{#method-MockShinySession-defineOutput}{\code{MockShinySession$defineOutput()}}
     \item \href{#method-MockShinySession-getOutput}{\code{MockShinySession$getOutput()}}
+    \item \href{#method-MockShinySession-resumeReport}{\code{MockShinySession$resumeReport()}}
     \item \href{#method-MockShinySession-ns}{\code{MockShinySession$ns()}}
     \item \href{#method-MockShinySession-flushReact}{\code{MockShinySession$flushReact()}}
     \item \href{#method-MockShinySession-makeScope}{\code{MockShinySession$makeScope()}}
@@ -478,6 +488,20 @@ evaluation of any reactive dependencies of the output function.
   \subsection{Returns}{
     The return value of the function responsible for rendering the
 output.
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MockShinySession-resumeReport"></a>}}
+\if{latex}{\out{\hypertarget{method-MockShinySession-resumeReport}{}}}
+\subsection{\code{MockShinySession$resumeReport()}}{
+  The resume report for this session: one row per reactive
+value and input saying whether it restores when the session resumes
+and, if not, why. See \code{?session}.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{MockShinySession$resumeReport()}
+    \if{html}{\out{</div>}}
   }
 }
 

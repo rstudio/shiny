@@ -4,11 +4,16 @@
 \alias{reactiveValues}
 \title{Create an object for storing reactive values}
 \usage{
-reactiveValues(...)
+reactiveValues(..., .label = NULL)
 }
 \arguments{
 \item{...}{Objects that will be added to the reactivevalues object. All of
 these objects must be named.}
+
+\item{.label}{An optional label that identifies this object across
+sessions when a session resumes (see \code{\link[=enableResume]{enableResume()}}). Dotted because
+every other named argument is a value. Defaults to the name it is
+assigned to when that can be determined.}
 }
 \description{
 This function returns an object for storing reactive values. It is similar to

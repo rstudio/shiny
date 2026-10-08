@@ -207,6 +207,7 @@ addGeneratedInstanceMethods <- function(instance, methods = makeExtraMethods()) 
 #'   of [testServer()].
 #'
 #' @include timer.R
+#' @include resume-registry.R
 #' @export
 MockShinySession <- R6Class(
   'MockShinySession',
@@ -246,6 +247,15 @@ MockShinySession <- R6Class(
     user = NULL,
     #' @field options A list containing session-level shinyOptions.
     options = NULL,
+    #' @field .resumeSettings The app's resume settings, resolved at session
+    #'   start. For internal use.
+    .resumeSettings = NULL,
+    #' @field .snapshotRegistry The session's resume registry, or `NULL` with
+    #'   resume off. For internal use.
+    .snapshotRegistry = NULL,
+    #' @field .resumeHoldBack `TRUE` while the session answers a resume, until
+    #'   its first flush ends. For internal use.
+    .resumeHoldBack = FALSE,
 
     #' @description Create a new MockShinySession.
     initialize = function() {
@@ -269,6 +279,9 @@ MockShinySession <- R6Class(
 
       # Create a read-only copy of the inputs reactive.
       self$input <- .createReactiveValues(private$.input, readonly = TRUE)
+
+      self$.resumeSettings <- resume_settings()
+      if (isTRUE(self$.resumeSettings$enabled)) self$.snapshotRegistry <- SnapshotRegistry$new(self)
 
       self$token <- createUniqueId(16)
 
@@ -546,6 +559,11 @@ MockShinySession <- R6Class(
         v$val
       }
     },
+
+    #' @description The resume report for this session: one row per reactive
+    #'   value and input saying whether it restores when the session resumes
+    #'   and, if not, why. See `?session`.
+    resumeReport = function() snapshot_session_report(self),
 
     #' @description Returns the given id prefixed by this namespace's id.
     #' @param id The id to prefix with a namespace id.

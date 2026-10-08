@@ -953,6 +953,7 @@ ShinySession <- R6Class(
     user = NULL,
     groups = NULL,
     options = NULL,       # For session-specific shinyOptions()
+    .resumeHoldBack = FALSE,  # TRUE from a `resume` until its first flush ends (snapshot_begin_hold_back()); internal
 
     initialize = function(websocket) {
       private$websocket <- websocket

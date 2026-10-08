@@ -85,3 +85,49 @@ test_that("once=TRUE works", {
   flushReact()
   expect_identical(n, 1)
 })
+
+test_that("bindEvent.Observer holds back the first run while the session answers a resume, unless marked or hazardous", {
+  # Counters live in environments: a `runs["x"] <<- ...` handler would itself
+  # assign a closure variable and so count as a hazard.
+  count <- function() list2env(list(plain = 0, marked = 0, hazard = 0, ignore = 0))
+  handlers <- function(s, runs) withMockContext(s, {
+    observeEvent(s$input$x, runs$plain <- runs$plain + 1)
+    m <- observeEvent(s$input$x, runs$marked <- runs$marked + 1)
+    disableResume(m)
+    observeEvent(s$input$x, { shared <<- 1; runs$hazard <- runs$hazard + 1 })
+    observeEvent(s$input$x, runs$ignore <- runs$ignore + 1, ignoreInit = TRUE)
+  })
+  tally <- function(runs) c(runs$plain, runs$marked, runs$hazard, runs$ignore)
+  shared <- NULL
+
+  runs <- count()
+  s <- MockShinySession$new()
+  handlers(s, runs)
+  s$setInputs(x = 1)                                   # not resuming: all but ignoreInit ran
+  expect_identical(tally(runs), c(1, 1, 1, 0))
+
+  # No registry at all (resume off): the field alone holds back.
+  withr::local_envvar(SHINY_RESUME = "FALSE")
+  runs2 <- count()
+  s2 <- MockShinySession$new()
+  expect_null(s2$.snapshotRegistry)
+  handlers(s2, runs2)
+  snapshot_begin_hold_back(s2)
+  s2$setInputs(x = 1)                                  # the first flush: first runs happen here
+  expect_identical(tally(runs2), c(0, 1, 1, 0))
+  expect_false(s2$.resumeHoldBack)                     # cleared after the first flush
+  s2$setInputs(x = 2)                                  # the dependency was registered
+  expect_identical(tally(runs2), c(1, 2, 2, 1))
+})
+
+test_that("an observer created after the first flush of a resume runs normally", {
+  withr::local_envvar(SHINY_RESUME = "FALSE")
+  runs <- 0
+  s <- MockShinySession$new()
+  s$setInputs(x = 1)
+  snapshot_begin_hold_back(s)
+  s$flushReact()
+  withMockContext(s, observeEvent(s$input$x, runs <<- runs + 1))
+  s$flushReact()
+  expect_identical(runs, 1)
+})

@@ -131,8 +131,11 @@ ReactiveVal <- R6Class(
     .isRecordingOtel = FALSE, # Needs to be set by Shiny
     .otelLabel = NULL, # Needs to be set by Shiny
     .otelAttrs = NULL, # Needs to be set by Shiny
+    .snapshot = NULL, # Resume tracking state; NULL unless the session resumes
 
-    initialize = function(value, label = NULL) {
+    # `identity` (see snapshot_source_label()) is a promise forced only when
+    # the domain has a registry; without one the node is not tracked.
+    initialize = function(value, label = NULL, identity = NULL) {
       reactId <- nextGlobalReactId()
       private$reactId <- reactId
       private$value <- value
@@ -146,6 +149,13 @@ ReactiveVal <- R6Class(
       if (!is.null(domain) && is.function(domain$onDestroy)) {
         wr <- rlang::new_weakref(key = self)
         private$.destroyHandle <- domain$onDestroy(make_weak_destroy_wrapper(wr, domain))
+      }
+
+      reg <- snapshot_registry(domain)
+      if (!is.null(reg)) {
+        snapshot_track_val(self, reg)
+        reg$registerSource(self, "reactiveVal", identity, domain, initial = value,
+          apply = function(record) private$value <- unserialize(record$bytes))
       }
     },
     get = function() {
@@ -173,6 +183,10 @@ ReactiveVal <- R6Class(
       }
       rLog$valueChange(private$reactId, value, domain)
       private$value <- value
+      if (!is.null(.snapshot)) {
+        .snapshot$registry$markDirty()
+        .snapshot$registry$noteWrite(.snapshot, private$label)
+      }
       private$dependents$invalidate()
       invisible(TRUE)
     },
@@ -290,7 +304,9 @@ ReactiveVal <- R6Class(
 #'
 #' @export
 reactiveVal <- function(value = NULL, label = NULL) {
+  site <- snapshot_call_site(sys.call(), sys.parent())
   call_srcref <- get_call_srcref()
+  explicitLabel <- label
   if (missing(label)) {
     label <- rassignSrcrefToLabel(
       call_srcref,
@@ -298,7 +314,8 @@ reactiveVal <- function(value = NULL, label = NULL) {
     )
   }
 
-  rv <- ReactiveVal$new(value, label)
+  rv <- ReactiveVal$new(value, label,
+    identity = snapshot_source_label(call_srcref, explicit = explicitLabel, site = site))
   if (!is.null(call_srcref)) {
     rv$.otelAttrs <- otel_srcref_attributes(call_srcref, fn_name = "reactiveVal")
   }
@@ -442,6 +459,7 @@ ReactiveValues <- R6Class(
     .otelAttrs = NULL, # Needs to be set by Shiny
     .destroyed = FALSE,
     .destroyHandle = NULL,
+    .snapshot = NULL, # Resume tracking state; NULL unless the session resumes
 
 
     initialize = function(
@@ -549,6 +567,11 @@ ReactiveValues <- R6Class(
 
       # set the value for better logging
       .values$set(key, value)
+
+      if (!is.null(.snapshot)) {
+        .snapshot$registry$markDirty()
+        .snapshot$registry$noteWrite(.snapshot, .label)
+      }
 
       # key has been depended upon
       if (.dependents$containsKey(key)) {
@@ -749,10 +772,15 @@ ReactiveValues <- R6Class(
 #'
 #' @param ... Objects that will be added to the reactivevalues object. All of
 #'   these objects must be named.
+#' @param .label An optional label that identifies this object across
+#'   sessions when a session resumes (see [enableResume()]). Dotted because
+#'   every other named argument is a value. Defaults to the name it is
+#'   assigned to when that can be determined.
 #'
 #' @seealso [isolate()] and [is.reactivevalues()].
 #' @export
-reactiveValues <- function(...) {
+reactiveValues <- function(..., .label = NULL) {
+  site <- snapshot_call_site(sys.call(), sys.parent())
   args <- list2(...)
   if ((length(args) > 0) && (is.null(names(args)) || any(names(args) == "")))
     rlang::abort("All arguments passed to reactiveValues() must be named.")
@@ -774,6 +802,13 @@ reactiveValues <- function(...) {
   }
 
   impl$mset(args)
+
+  # After mset(), so a saved value wins over the constructor's initial values.
+  reg <- snapshot_registry(getDefaultReactiveDomain())
+  if (!is.null(reg)) {
+    snapshot_register_values(impl, reg, snapshot_source_label(call_srcref, explicit = .label, site = site),
+      getDefaultReactiveDomain(), initial = args)
+  }
 
   # Add otel collection after `$mset()` so that we don't log the initial values
   # Add otel collection after `.label` so that any logging uses the correct label
@@ -1405,6 +1440,8 @@ Observer <- R6Class(
     .isRecordingOtel = FALSE, # Needs to be set by Shiny
     .otelLabel = NULL, # Needs to be set by Shiny
     .otelAttrs = NULL, # Needs to be set by Shiny
+    # Set by disableResume(): bindEvent.Observer does not hold back its first run.
+    .resumeSkip = FALSE,
 
     initialize = function(observerFunc, label, suspended = FALSE, priority = 0,
                           domain = getDefaultReactiveDomain(),
@@ -2190,10 +2227,11 @@ reactive_poll_impl <- function(
   env <- environment()
 
   with_no_otel_collect({
-    cookie <- reactiveVal(
-      isolate(checkFunc()),
+    initialCookie <- isolate(checkFunc())
+    cookie <- snapshot_internal(reactiveVal(
+      initialCookie,
       label = sprintf("%s %s cookie", fnName, label)
-    )
+    ))
 
     o <- observe({
       # When no one holds a reference to the reactive returned from
@@ -2889,9 +2927,9 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
   }
 
   with_no_otel_collect({
-    trigger <- reactiveVal(NULL, label = sprintf("debounce %s trigger", label))
+    trigger <- snapshot_internal(reactiveVal(NULL, label = sprintf("debounce %s trigger", label)))
     # the deadline for the timer to fire; NULL if not scheduled
-    when <- reactiveVal(NULL, label = sprintf("debounce %s when", label))
+    when <- snapshot_internal(reactiveVal(NULL, label = sprintf("debounce %s when", label)))
 
     # Responsible for tracking when r() changes.
     firstRun <- TRUE
@@ -2993,11 +3031,11 @@ throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
   }
 
   with_no_otel_collect({
-    trigger <- reactiveVal(0, label = sprintf("throttle %s trigger", label))
+    trigger <- snapshot_internal(reactiveVal(0, label = sprintf("throttle %s trigger", label)))
     # Last time we fired; NULL if never
-    lastTriggeredAt <- reactiveVal(NULL, label = sprintf("throttle %s last triggered at", label))
+    lastTriggeredAt <- snapshot_internal(reactiveVal(NULL, label = sprintf("throttle %s last triggered at", label)))
     # If TRUE, trigger again when timer elapses
-    pending <- reactiveVal(FALSE, label = sprintf("throttle %s pending", label))
+    pending <- snapshot_internal(reactiveVal(FALSE, label = sprintf("throttle %s pending", label)))
   })
 
   blackoutMillisLeft <- function() {

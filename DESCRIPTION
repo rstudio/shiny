@@ -105,6 +105,7 @@ Suggests:
     callr,
     chromote,
     coro (>= 1.1.0),
+    data.table,
     datasets,
     DT,
     dygraphs,
@@ -114,6 +115,7 @@ Suggests:
     magrittr,
     markdown,
     mirai,
+    openssl,
     otelsdk (>= 0.2.0),
     pkgload,
     ragg,
@@ -182,6 +184,10 @@ Collate:
     'knitr.R'
     'middleware-shiny.R'
     'middleware.R'
+    'resume-uploads.R'
+    'resume-options.R'
+    'resume-serialize.R'
+    'resume-registry.R'
     'timer.R'
     'shiny.R'
     'mock-session.R'
@@ -204,6 +210,8 @@ Collate:
     'render-cached-plot.R'
     'render-plot.R'
     'render-table.R'
+    'resume-store.R'
+    'resume.R'
     'run-url.R'
     'runapp.R'
     'serializers.R'

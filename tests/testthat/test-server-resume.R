@@ -1,33 +1,3 @@
-# A stand-in for httpuv's WebSocket: records what the server sends and hands
-# the message/close callbacks back to the test.
-fake_httpuv_ws <- function() {
-  sent <- list()
-  cb <- new.env()
-  list(
-    request = list(PATH_INFO = "/websocket/"),
-    send = function(msg) sent[[length(sent) + 1]] <<- msg,
-    close = function() NULL,
-    onMessage = function(f) cb$message <- f,
-    onClose = function(f) cb$close <- f,
-    callbacks = cb,
-    sent = function() lapply(sent, jsonlite::fromJSON, simplifyVector = FALSE)
-  )
-}
-
-# Starts one session for `server` and delivers `json` as its first message.
-start_with <- function(server, json) {
-  # Emulate runApp(): sessions copy shinyOptions() from the current app state
-  # (ShinySession$initialize), which is how bookmarkStore reaches them.
-  initCurrentAppState(NULL)
-  on.exit(clearCurrentAppState(), add = TRUE)
-  handlers <- createAppHandlers(NULL, function() server)
-  ws <- fake_httpuv_ws()
-  handlers$ws(ws)
-  ws$callbacks$message(FALSE, json)
-  flushReact()
-  ws
-}
-
 test_that("a resume starts the session once, with the message's inputs applied", {
   runs <- 0
   seen <- NULL

@@ -145,8 +145,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
         rec$identity <- snapshot_identity(private$session)
         if (length(rec$uploads)) rec <- snapshot_write_uploads(rec, private$store$filesDir(private$key))
         rec$uploads <- NULL
-        private$store$write(private$key, rec)
-        TRUE
+        !identical(private$store$write(private$key, rec), FALSE)
       }, error = function(e) {
         if (!private$writeFailureLogged) {
           private$writeFailureLogged <- TRUE

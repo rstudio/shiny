@@ -207,3 +207,17 @@ test_that("the store caps total size and record count with fifo eviction", {
   expect_null(small$read("a"))
   expect_identical(length(small$read("b")), 300L)
 })
+
+test_that("a claimed key is deleted and refuses later writes until the TTL passes", {
+  store <- SnapshotStore$new(file.path(withr::local_tempdir(), "s"))
+  store$write("k", list(a = 1))
+  store$write("other", list(b = 2))
+  store$claim("k")
+  expect_null(store$read("k"))
+  expect_false(store$write("k", list(a = 2)))
+  expect_null(store$read("k"))
+  expect_true(store$write("other", list(b = 3)))       # other keys unaffected
+  store$.__enclos_env__$private$consumed$set("k", 0)    # remembered long ago
+  store$sweep()
+  expect_true(store$write("k", list(a = 3)))
+})

@@ -19,18 +19,29 @@ SnapshotStore <- R6Class("SnapshotStore", cloneable = FALSE,
       }
       Sys.chmod(dir, "0700")
       private$dir <- dir
+      private$maxAge <- max_age
+      private$consumed <- fastmap::fastmap()
       private$cache <- cachem::cache_disk(
         dir = dir, max_size = max_size, max_n = max_n, max_age = max_age,
         evict = evict, warn_ref_objects = FALSE
       )
       self$sweep()
     },
+    # FALSE, without writing, for a key a resume already claimed: an old
+    # session whose socket close arrives late must not bring it back.
     write = function(key, value) {
+      if (private$consumed$has(key)) return(invisible(FALSE))
       old <- Sys.umask("077")
       on.exit(Sys.umask(old), add = TRUE)
       private$cache$set(key, value)
       Sys.chmod(private$path(key), "0600")
       invisible(TRUE)
+    },
+    # Single use: deletes the record and its files and refuses later writes
+    # to the key in this process.
+    claim = function(key) {
+      private$consumed$set(key, as.numeric(Sys.time()))
+      self$delete(key)
     },
     read = function(key) {
       value <- private$cache$get(key)
@@ -54,6 +65,10 @@ SnapshotStore <- R6Class("SnapshotStore", cloneable = FALSE,
         path <- file.path(private$dir, d)
         if (isTRUE(as.numeric(Sys.time()) - as.numeric(file.mtime(path)) > 60)) unlink(path, recursive = TRUE)
       }
+      now <- as.numeric(Sys.time())
+      for (key in private$consumed$keys()) {
+        if (now - private$consumed$get(key) > private$maxAge) private$consumed$remove(key)
+      }
       invisible(TRUE)
     },
     # Where the uploads a record references are copied.
@@ -63,6 +78,7 @@ SnapshotStore <- R6Class("SnapshotStore", cloneable = FALSE,
   private = list(
     dir = NULL,
     cache = NULL,
+    maxAge = NULL, consumed = NULL,
     path = function(key) file.path(private$dir, paste0(key, ".rds"))
   )
 )

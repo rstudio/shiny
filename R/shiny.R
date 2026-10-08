@@ -1620,7 +1620,7 @@ ShinySession <- R6Class(
       record <- snapshot_restore_uploads(record, self)
       # Single use, which also settles a duplicated tab's race; the uploads
       # were copied out above, so the record's files go with it.
-      deleted <- tryCatch(store$delete(key), error = function(e) e)
+      deleted <- tryCatch(store$claim(key), error = function(e) e)
       if (inherits(deleted, "error")) {
         return(fallThrough(paste("saved state could not be claimed:", conditionMessage(deleted)), handled))
       }

@@ -607,3 +607,16 @@ test_that("the first replacement record follows the first flush and keeps the ch
   expect_true("|reactiveVal|late" %in% names(rec$sources))   # created in the first flush
   expect_equal(as.numeric(rec$inputs$plus), 3)                # before the live click applies
 })
+
+test_that("an old session in this process cannot recreate a record a newer session claimed", {
+  local_snapshot_store_dir()
+  spy <- new_spy("obs", "txt")
+  live <- live_session(counter_app(spy), outputs = "n")
+  live$session$.snapshotRegistry$writeNow()
+  key <- live_key(live)
+  token <- live$ws$sent()[[1]]$config$resumeToken
+  resume_real(counter_app(spy), resume_data(token, list()))
+  expect_null(snapshot_store()$read(key))
+  live$session$wsClosed()                               # the old socket's close arrives late
+  expect_null(snapshot_store()$read(key))
+})

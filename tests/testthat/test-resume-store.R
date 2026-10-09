@@ -32,19 +32,30 @@ test_that("tokens are 128-bit hex, validated before hashing, and keys are hashes
   expect_match(snapshot_record_key(tok), "^[0-9a-f]{32}$")
 })
 
-test_that("the process store lives under R_USER_CACHE_DIR unless a platform save.interface exists", {
+test_that("the store directory resolves SHINY_RESUME_DIR, then CONNECT_CONTENT_DATA_DIR, then the user cache dir", {
   dir <- local_snapshot_store_dir()
   store <- snapshot_store()
   expect_identical(normalizePath(store$directory()), normalizePath(file.path(dir, "R", "shiny", "resume"), mustWork = FALSE))
   expect_identical(snapshot_store(), store)
 
-  platform_dir <- file.path(dir, "platform")
-  shinyOptions(save.interface = function(id, callback) {
-    d <- file.path(platform_dir, id); dir.create(d, recursive = TRUE, showWarnings = FALSE); callback(d)
-  })
-  withr::defer(shinyOptions(save.interface = NULL))
+  connect_dir <- file.path(dir, "connect-content")
+  withr::local_envvar(CONNECT_CONTENT_DATA_DIR = connect_dir)
   snapshot_store_reset()
-  expect_identical(normalizePath(snapshot_store()$directory()), normalizePath(file.path(platform_dir, "snapshots")))
+  expect_identical(normalizePath(snapshot_store()$directory()), normalizePath(file.path(connect_dir, "shiny-resume")))
+
+  explicit_dir <- file.path(dir, "explicit")
+  withr::local_envvar(SHINY_RESUME_DIR = explicit_dir)
+  snapshot_store_reset()
+  expect_identical(normalizePath(snapshot_store()$directory()), normalizePath(explicit_dir))
+})
+
+test_that("empty directory variables fall through to the user cache dir", {
+  dir <- local_snapshot_store_dir()
+  withr::local_envvar(SHINY_RESUME_DIR = "", CONNECT_CONTENT_DATA_DIR = "")
+  expect_identical(
+    normalizePath(snapshot_dir(), mustWork = FALSE),
+    normalizePath(file.path(dir, "R", "shiny", "resume"), mustWork = FALSE)
+  )
 })
 
 test_that("an unwritable store directory disables the feature for the process with one message", {
@@ -56,44 +67,20 @@ test_that("an unwritable store directory disables the feature for the process wi
   expect_silent(expect_null(snapshot_store()))
 })
 
-test_that("a platform save.interface is asked for the store directory once per process", {
-  dir <- local_snapshot_store_dir()
-  calls <- 0
-  shinyOptions(save.interface = function(id, callback) {
-    calls <<- calls + 1
-    d <- file.path(dir, "platform", id); dir.create(d, recursive = TRUE, showWarnings = FALSE); callback(d)
-  })
-  withr::defer(shinyOptions(save.interface = NULL))
-  store <- snapshot_store()
-  expect_identical(snapshot_store(), store)
-  expect_equal(calls, 1)
-})
-
-test_that("a save.interface that fails is asked once per process, until the store is reset", {
+test_that("an unusable directory disables the feature for the process with one message, until the store is reset", {
   local_snapshot_store_dir()
-  calls <- 0
-  shinyOptions(save.interface = function(id, callback) {
-    calls <<- calls + 1
-    stop("platform unavailable")
-  })
-  withr::defer(shinyOptions(save.interface = NULL))
-  expect_message(expect_null(snapshot_store()), "platform unavailable")
+  blocker <- withr::local_tempdir()
+  blocker <- file.path(blocker, "blocker")
+  writeLines("not a directory", blocker)
+  withr::local_envvar(SHINY_RESUME_DIR = file.path(blocker, "subdir"))
+  expect_message(expect_null(snapshot_store()), "Resume disabled for this process")
   expect_silent(expect_null(snapshot_store()))
-  expect_equal(calls, 1)
   snapshot_store_reset()
-  expect_message(expect_null(snapshot_store()), "platform unavailable")
-  expect_equal(calls, 2)
+  expect_message(expect_null(snapshot_store()), "Resume disabled for this process")
 })
 
-test_that("an empty directory from a save.interface or the resolver never raises", {
-  dir <- local_snapshot_store_dir()
-  shinyOptions(save.interface = function(id, callback) callback(""))
-  withr::defer(shinyOptions(save.interface = NULL))
-  expect_message(store <- expect_no_error(snapshot_store()), "save.interface gave no usable directory")
-  expect_identical(normalizePath(store$directory()), normalizePath(file.path(dir, "R", "shiny", "resume")))
-  expect_silent(snapshot_store())
-
-  snapshot_store_reset()
+test_that("an empty directory from the resolver never raises", {
+  local_snapshot_store_dir()
   local_mocked_bindings(snapshot_dir = function() "")
   expect_message(expect_null(snapshot_store()), "no usable snapshot directory")
   expect_silent(expect_null(snapshot_store()))

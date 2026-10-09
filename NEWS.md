@@ -70,7 +70,10 @@
   values are never written to disk; they come back from the browser. When
   saved state turns out not to fit the app after the server function ran,
   the browser shows "This session could not be resumed" with a Reload link
-  and the R log names the value.
+  and the R log names the value. Records live in `SHINY_RESUME_DIR` when
+  set, else in a `shiny-resume` folder inside the per-content persistent
+  data directory on Posit Connect (`CONNECT_CONTENT_DATA_DIR`), else under
+  `tools::R_user_dir("shiny", "cache")`.
   (#<PR number>)
 
 * Added an agent skill (`inst/skills/shiny-for-r/`) following the

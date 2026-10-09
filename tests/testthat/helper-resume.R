@@ -1,7 +1,13 @@
-# Points the process store at a fresh temp cache dir for the calling test.
+# Points the process store at a fresh temp cache dir for the calling test,
+# shielded from any platform directory variables the environment may set.
 local_snapshot_store_dir <- function(envir = parent.frame()) {
   dir <- withr::local_tempdir(.local_envir = envir)
-  withr::local_envvar(R_USER_CACHE_DIR = dir, .local_envir = envir)
+  withr::local_envvar(
+    R_USER_CACHE_DIR = dir,
+    SHINY_RESUME_DIR = NA,
+    CONNECT_CONTENT_DATA_DIR = NA,
+    .local_envir = envir
+  )
   snapshot_store_reset()
   withr::defer(snapshot_store_reset(), envir = envir)
   dir
@@ -26,12 +32,6 @@ local_app_dir <- function(envir = parent.frame()) {
   dir
 }
 
-file_mode <- function(path) as.character(file.info(path)$mode)
-
-# Runs `server` in a fresh MockShinySession exactly as testServer() does and
-# returns the session; the caller drives it and reads `session$.snapshotRegistry`.
-snapshot_session <- function(server, session = MockShinySession$new()) {
-  server <- capture_env(server)
 # Clears a leaked app directory (runApp() in an earlier test file leaves one in
 # the global options). A session made by createAppHandlers() reads the app's
 # options, not the global ones, so there the app path falls back to getwd();
@@ -43,6 +43,12 @@ local_no_app_dir <- function(envir = parent.frame()) {
   invisible()
 }
 
+file_mode <- function(path) as.character(file.info(path)$mode)
+
+# Runs `server` in a fresh MockShinySession exactly as testServer() does and
+# returns the session; the caller drives it and reads `session$.snapshotRegistry`.
+snapshot_session <- function(server, session = MockShinySession$new()) {
+  server <- capture_env(server)
   withMockContext(session, {
     server(input = session$input, output = session$output, session = session)
   })

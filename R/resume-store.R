@@ -84,28 +84,24 @@ SnapshotStore <- R6Class("SnapshotStore", cloneable = FALSE,
   )
 )
 
-# A platform's registered bookmark save.interface provides a
-# per-id directory; otherwise the user cache dir. Never the app directory.
+# Where resume records live, first hit wins: SHINY_RESUME_DIR (an
+# operator's or platform's explicit override); the per-content persistent
+# data directory on Posit Connect (CONNECT_CONTENT_DATA_DIR, set when
+# persistent data directories are enabled), in a shiny-resume subfolder so
+# records stay clear of the app's own files; the user cache dir otherwise.
+# Never the app directory. The cache-dir fallback is shared by every app the
+# user runs, TTL pruning included.
 snapshot_dir <- function() {
-  saveInterface <- getShinyOption("save.interface", default = NULL)
-  if (is.function(saveInterface)) {
-    dir <- NULL
-    saveInterface("snapshots", function(stateDir) dir <<- stateDir)
-    if (is.character(dir) && length(dir) == 1 && !is.na(dir) && nzchar(dir)) return(dir)
-  }
-  fallback <- file.path(tools::R_user_dir("shiny", "cache"), "resume")
-  # Other apps run by the same user share this directory, and with it TTL
-  # pruning, so say so rather than fall back silently.
-  if (is.function(saveInterface)) {
-    message("Resume: the registered save.interface gave no usable directory; using ", fallback)
-  }
-  fallback
+  dir <- Sys.getenv("SHINY_RESUME_DIR", unset = "")
+  if (nzchar(dir)) return(dir)
+  dataDir <- Sys.getenv("CONNECT_CONTENT_DATA_DIR", unset = "")
+  if (nzchar(dataDir)) return(file.path(dataDir, "shiny-resume"))
+  file.path(tools::R_user_dir("shiny", "cache"), "resume")
 }
 
 # One store per directory per process. A directory that cannot be created
 # disables the feature for that directory with a single message.
-# Never throws: the writer calls this from writeNow(). Resolving the
-# directory runs a platform's save.interface, so it is guarded too and
+# Never throws: the writer calls this from writeNow(). The directory is
 # resolved once per process; a failure there is recorded
 # under "<unresolved>" so it is neither retried nor reported again.
 snapshot_store <- function() {

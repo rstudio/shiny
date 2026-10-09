@@ -85,6 +85,43 @@ test_that("a deploy that moves the app directory keeps the key and identity when
   expect_null(snapshot_identity_mismatch(saved, MockShinySession$new()))
 })
 
+test_that("the first store in a process prunes expired records in other apps' subdirectories", {
+  dir <- file.path(local_snapshot_store_dir(), "resume")
+  withr::local_envvar(SHINY_RESUME_DIR = dir)
+  gone <- file.path(dir, rlang::hash("an app that never runs again"))
+  dir.create(gone, recursive = TRUE)
+  expired <- file.path(gone, rlang::hash("expired"))
+  fresh <- file.path(gone, rlang::hash("fresh"))
+  for (key in c(expired, fresh)) {
+    writeLines("x", paste0(key, ".rds"))
+    dir.create(paste0(key, "-files"))
+  }
+  Sys.setFileTime(c(paste0(expired, ".rds"), paste0(expired, "-files")), Sys.time() - snapshot_ttl - 60)
+
+  withr::local_envvar(SHINY_RESUME_APP_ID = "app-a")
+  expect_false(is.null(snapshot_store()))
+  expect_false(file.exists(paste0(expired, ".rds")))
+  expect_false(dir.exists(paste0(expired, "-files")))
+  expect_true(file.exists(paste0(fresh, ".rds")))
+  expect_true(dir.exists(paste0(fresh, "-files")))
+  expect_true(dir.exists(gone))
+})
+
+test_that("the first store in a process prunes expired loose records from earlier versions and keeps other files", {
+  dir <- file.path(local_snapshot_store_dir(), "resume")
+  withr::local_envvar(SHINY_RESUME_DIR = dir)
+  dir.create(dir, recursive = TRUE)
+  loose <- file.path(dir, paste0(rlang::hash("format 3"), ".rds"))
+  mine <- file.path(dir, "notes.txt")
+  writeLines("x", loose)
+  writeLines("kept by the operator", mine)
+  Sys.setFileTime(c(loose, mine), Sys.time() - snapshot_ttl - 60)
+
+  expect_false(is.null(snapshot_store()))
+  expect_false(file.exists(loose))
+  expect_true(file.exists(mine))
+})
+
 test_that("empty directory variables fall through to the user cache dir", {
   dir <- local_snapshot_store_dir()
   withr::local_envvar(SHINY_RESUME_DIR = "", CONNECT_CONTENT_DATA_DIR = "")

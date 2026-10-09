@@ -130,6 +130,9 @@ snapshot_store <- function(appId = snapshot_app_id()) {
     if (!is.character(resolved) || length(resolved) != 1 || is.na(resolved) || !nzchar(resolved)) {
       stop("no usable snapshot directory")
     }
+    if (is.null(.globals$snapshotDir)) {
+      tryCatch(snapshot_dir_sweep(resolved), error = function(e) NULL)
+    }
     .globals$snapshotDir <- resolved
     dir <- file.path(resolved, rlang::hash(appId))
     .globals$snapshotStores$get(dir) %||%
@@ -142,6 +145,28 @@ snapshot_store <- function(appId = snapshot_app_id()) {
   })
   .globals$snapshotStores$set(dir, store)
   if (identical(store, FALSE)) NULL else store
+}
+
+# A store prunes only its own app's subdirectory, so this prunes the whole
+# base directory once per process: the subdirectories of apps that no longer
+# run, and records earlier versions left at the top level. It touches only
+# names of the shape SnapshotStore writes (`<key>.rds`, `<key>-files`), since
+# SHINY_RESUME_DIR may hold other files.
+snapshot_dir_sweep <- function(base) {
+  apps <- list.files(base, pattern = "^[0-9a-f]{32}$", full.names = TRUE)
+  for (dir in c(base, apps[dir.exists(apps)])) snapshot_dir_sweep_one(dir)
+}
+
+# As SnapshotStore's sweep(): expired records go, then upload directories
+# whose record is gone, sparing those younger than a minute.
+snapshot_dir_sweep_one <- function(dir) {
+  now <- as.numeric(Sys.time())
+  age <- function(paths) now - as.numeric(file.mtime(paths))
+  records <- list.files(dir, pattern = "^[0-9a-f]{32}\\.rds$", full.names = TRUE)
+  unlink(records[which(age(records) > snapshot_ttl)])
+  uploads <- list.files(dir, pattern = "^[0-9a-f]{32}-files$", full.names = TRUE)
+  orphaned <- !file.exists(sub("-files$", ".rds", uploads)) & age(uploads) > 60
+  unlink(uploads[which(orphaned)], recursive = TRUE)
 }
 
 snapshot_store_reset <- function() {

@@ -213,9 +213,10 @@ NULL
 #' `CONNECT_CONTENT_GUID` on Posit Connect (unlike the bundle directory, it
 #' stays the same across deploys), else the app's directory. The directory
 #' and each record are made readable only by the owner. A record is keyed
-#' by a 128-bit random token and the app id, kept for 24 hours, and deleted
-#' when the page is closed, when the session ends for good, or when a resume
-#' reads it. Each app's records are capped at 1 GiB and 1000 in all; copies
+#' by a 128-bit random token and the app id, kept for 24 hours (a process
+#' prunes every app's expired records when it first opens the store), and
+#' deleted when the page is closed, when the session ends for good, or when
+#' a resume reads it. Each app's records are capped at 1 GiB and 1000 in all; copies
 #' of uploaded files are not counted towards the 1 GiB and are deleted with
 #' their record. Nothing is written unless the app called `enableResume()`
 #' or the platform set `SHINY_RESUME`. On Windows the token comes from the

@@ -229,7 +229,7 @@ test_that("with resume off, onResume() redefines an output a handler built, and 
   e2e_wait_until(function() grepl("Built: second", e2e_text(b, "#built"), fixed = TRUE), what = "the rebuilt output")
 })
 
-test_that("saved state that no longer fits ends the session with a notice and a Reload link", {
+test_that("saved state that no longer fits restarts the page from inputs only after one failed attempt", {
   skip_on_cran()
   e <- e2e_session(env = c(SHINY_RESUME = "TRUE", E2E_APP_VERSION = "1"), app = "resume-e2e")
   b <- e$browser
@@ -238,10 +238,10 @@ test_that("saved state that no longer fits ends the session with a notice and a 
   e2e_wait_for_record(e$store_dir, since = since)
   p2 <- restart_process(e, env = c(E2E_EXTRA_SOURCE = "1"))
   stderr <- e2e_stderr_reader(p2)
-  e2e_wait_until(function() e2e_present(b, "#shiny-resume-ended"), timeout = 40, what = "the resume-ended notice")
-  expect_true(e2e_present(b, "#shiny-reload-link"))
-  expect_true(e2e_present(b, "#shiny-disconnected-overlay"))
-  Sys.sleep(4)
-  expect_false(e2e_present(b, "#shiny-reconnect-text"))
-  e2e_wait_until(function() any(grepl("Resume failed after the server function ran", stderr())), what = "the resume failure in the server log")
+  e2e_wait_until(function() identical(resumed_attr(b), "inputs"), timeout = 40, what = "shiny:resumed")
+  expect_match(e2e_text(b, "#count"), "Count: 0", fixed = TRUE)
+  expect_false(e2e_present(b, "#shiny-resume-ended"))
+  e2e_wait_until(function() any(grepl("The session restarted from inputs only", stderr(), fixed = TRUE)), what = "the failure line")
+  e2e_wait_until(function() any(grepl("Resumed from inputs only: no saved state", stderr(), fixed = TRUE)), what = "the retry's line")
+  click_until(b, "#plus", "#count", "Count: 1")
 })

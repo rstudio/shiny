@@ -277,10 +277,16 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
               })
             })
           }
-          # An error escaping init or resume makes httpuv close the socket;
-          # like session$close(), that ends the session for good.
+          # An error escaping init or resume makes httpuv close the socket
+          # (1011). Like session$close(), that ends the session for good,
+          # except for saved state that did not fit after the server function
+          # ran: the client retries and resumes from inputs only. Raising
+          # rather than returning keeps the failed session from flushing.
           endOnError <- function(expr) {
-            withCallingHandlers(expr, error = function(e) shinysession$.endForGood())
+            withCallingHandlers(expr, error = function(e) {
+              if (inherits(e, "shiny_resume_failed")) shinysession$.abandonResume()
+              else shinysession$.endForGood()
+            })
           }
 
           switch(

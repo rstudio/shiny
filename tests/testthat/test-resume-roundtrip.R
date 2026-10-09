@@ -77,7 +77,7 @@ test_that("a closure-assigning handler is held back; ignoreInit = TRUE handles t
   expect_null(rt$outcome$reran)
 })
 
-test_that("a source without a saved value ends the resume: no rollback, an error naming it", {
+test_that("a source without a saved value fails the resume after the server function: no rollback, an error naming it", {
   v1 <- function(input, output, session) {
     count <- reactiveVal(0)
     observeEvent(input$plus, count(count() + 1))
@@ -101,7 +101,7 @@ test_that("a source without a saved value ends the resume: no rollback, an error
       "Saved state does not fit the app: \\|reactiveVal\\|added \\(no saved value\\)",
       class = "shiny_resume_failed"
     ),
-    "^Resume failed after the server function ran: \\|reactiveVal\\|added \\(no saved value\\)\\. The session ended"
+    "^Resume failed after the server function ran: \\|reactiveVal\\|added \\(no saved value\\)\\. The session restarted from inputs only\\.\n$"
   )
   expect_equal(isolate(s2$env$count()), 3)              # no rollback
   expect_identical(s2$userData$kept, "from record")    # no userData rollback either

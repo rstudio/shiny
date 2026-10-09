@@ -32,13 +32,14 @@ NULL
 #'   that is still open.
 #' * **An unhandled error in an observer ends the session**, and its saved
 #'   state is deleted. So does `session$close()`. The page is not retried.
-#' * **Saved state that no longer fits ends the session.** If, once the
-#'   server function has run, a labelled source has no saved value (and was
-#'   not left out with [excludeFromResume()]) or two sources share a label
-#'   they did not share when the state was saved, the session ends as on an
-#'   unhandled error and reloading the page starts fresh. Without
-#'   `appVersion`, a change to the app's R files makes sessions resume from
-#'   their inputs only instead, before anything runs.
+#' * **Saved state that no longer fits is dropped.** If, once the server
+#'   function has run, a labelled source has no saved value (and was not
+#'   left out with [excludeFromResume()]) or two sources share a label they
+#'   did not share when the state was saved, the session closes and the page
+#'   reconnects at once, resuming from its inputs only. The server function
+#'   runs again, as it would on a reload. Without `appVersion`, a change to
+#'   the app's R files makes sessions resume from their inputs only instead,
+#'   before anything runs.
 #' * Structure an `observeEvent()` handler created after startup (an output,
 #'   a module server, an observer) does not come back on its own, because
 #'   that handler does not run again. Rebuild it in `session$onResume()`;
@@ -177,7 +178,7 @@ NULL
 #' values not restored because nothing recreated them: ...` when saved values
 #' had no source to go to by the end of the first flush (rule 3), and a
 #' session whose saved state does not fit logs `Resume failed after the
-#' server function ran: ...` before it ends.
+#' server function ran: ... The session restarted from inputs only.`
 #'
 #' @section What is saved, and where:
 #' With resume on, a record of the session is written shortly after each

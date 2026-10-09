@@ -586,7 +586,7 @@ test_that("a server function that errors on resume runs no onResume() callbacks 
   expect_length(sent_of(ws, "resumed"), 0)
 })
 
-test_that("a source with no saved value ends the session for good after the server function, with nothing saved", {
+test_that("saved state that does not fit after the server function closes without a stop or a write, and the retry resumes from inputs only", {
   local_snapshot_store_dir()
   local_no_app_dir()
   token <- closed_counter_session()
@@ -597,21 +597,29 @@ test_that("a source with no saved value ends the session for good after the serv
     session$onResume(function(info) ran <<- TRUE)
   }
   handlers <- createAppHandlers(NULL, function() helper_defined(app))
+  resume_json <- sprintf('{"method":"resume","data":{"token":"%s","inputs":{}}}', token)
   ws <- fake_httpuv_ws(); handlers$ws(ws)
   expect_message(
-    suppressWarnings(expect_error(
-      ws$callbacks$message(FALSE, sprintf('{"method":"resume","data":{"token":"%s","inputs":{}}}', token)),
-      class = "shiny_resume_failed"
-    )),
-    "Resume failed after the server function ran: \\|reactiveVal\\|added \\(no saved value\\)"
+    suppressWarnings(expect_error(ws$callbacks$message(FALSE, resume_json), class = "shiny_resume_failed")),
+    "Resume failed after the server function ran: \\|reactiveVal\\|added \\(no saved value\\)\\. The session restarted from inputs only\\."
   )
   expect_false(ran)
   expect_length(sent_of(ws, "resumed"), 0)
-  expect_identical(sent_of(ws, "allowReconnect")[[1]]$allowReconnect, FALSE)
+  expect_length(sent_of(ws, "allowReconnect"), 0)       # the client retries
   newToken <- ws$sent()[[1]]$config$resumeToken
   ws$callbacks$close()
   expect_null(snapshot_store()$read(snapshot_record_key(token)))
-  expect_null(snapshot_store()$read(snapshot_record_key(newToken)))
+  expect_null(snapshot_store()$read(snapshot_record_key(newToken)))   # the failed session wrote nothing
+
+  # The client retries with the token it still holds.
+  ws2 <- fake_httpuv_ws(); handlers$ws(ws2)
+  expect_message(
+    { ws2$callbacks$message(FALSE, resume_json); flushReact(); flushPendingSessions() },
+    "Resumed from inputs only: no saved state"
+  )
+  expect_identical(sent_of(ws2, "resumed")[[1]]$resumed, "inputs")
+  expect_true(ran)
+  ws2$callbacks$close()
 })
 
 test_that("the first replacement record follows the first flush", {

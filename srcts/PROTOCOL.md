@@ -129,8 +129,10 @@ the first attempt wrote under its new token stays until its 24-hour limit.
 that session's record, restores it, and answers with `resumed`. A record is
 used once: the server deletes it as it reads it, and writes the new
 session's own record after the first flush. If the saved state does not fit
-the app once the server function has run, the server ends the session
-instead: no `resumed`, `allowReconnect: false`, socket closed. Two `resume`
+the app once the server function has run, the server closes the socket
+without `resumed` and without `allowReconnect: false`. The record is already
+consumed, so the client's retry with the same token is answered
+`resumed: "inputs"`. Two `resume`
 messages with one token (a duplicated tab): the first gets the record, the
 second resumes from inputs only. A `dom` key is ignored.
 
@@ -170,8 +172,7 @@ record lives to its 24-hour limit.
 ### `allowReconnect` after a server-ended session
 
 When the server ends a session itself (`session$close()`, an error in the
-server function, an unhandled error in an observer, saved state that does
-not fit on resume), it sends `allowReconnect: false`, deletes the record and
+server function, an unhandled error in an observer), it sends `allowReconnect: false`, deletes the record and
 closes the socket. The client keeps its disconnected overlay and does not
 retry. If the page was reconnecting and the socket closes before it received
 `resumed` or `values`, it shows "This session could not be resumed." with a Reload link;

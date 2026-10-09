@@ -80,13 +80,14 @@ saved state, and \code{session$onResume()} runs code when a page reconnects
 that is still open.
 \item \strong{An unhandled error in an observer ends the session}, and its saved
 state is deleted. So does \code{session$close()}. The page is not retried.
-\item \strong{Saved state that no longer fits ends the session.} If, once the
-server function has run, a labelled source has no saved value (and was
-not left out with \code{\link[=excludeFromResume]{excludeFromResume()}}) or two sources share a label
-they did not share when the state was saved, the session ends as on an
-unhandled error and reloading the page starts fresh. Without
-\code{appVersion}, a change to the app's R files makes sessions resume from
-their inputs only instead, before anything runs.
+\item \strong{Saved state that no longer fits is dropped.} If, once the server
+function has run, a labelled source has no saved value (and was not
+left out with \code{\link[=excludeFromResume]{excludeFromResume()}}) or two sources share a label they
+did not share when the state was saved, the session closes and the page
+reconnects at once, resuming from its inputs only. The server function
+runs again, as it would on a reload. Without \code{appVersion}, a change to
+the app's R files makes sessions resume from their inputs only instead,
+before anything runs.
 \item Structure an \code{observeEvent()} handler created after startup (an output,
 a module server, an observer) does not come back on its own, because
 that handler does not run again. Rebuild it in \code{session$onResume()};
@@ -232,7 +233,7 @@ fires with resume off, which is how an app that only calls
 
 Each resume writes one line to standard error: \verb{Resumed: restored N values; K event handlers held back}, or \verb{Resumed from inputs only: <cause>}, plus \verb{Outputs on the page with no definition after resume: ...} when rule 3 is broken. A resumed session also logs \verb{Saved values not restored because nothing recreated them: ...} when saved values
 had no source to go to by the end of the first flush (rule 3), and a
-session whose saved state does not fit logs \verb{Resume failed after the server function ran: ...} before it ends.
+session whose saved state does not fit logs \verb{Resume failed after the server function ran: ... The session restarted from inputs only.}
 }
 
 \section{What is saved, and where}{

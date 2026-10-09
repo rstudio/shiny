@@ -7,8 +7,8 @@ NULL
 
 # Per-session registry behind resume. Gives reactiveVal() / reactiveValues()
 # sources an identity, tracks what changed, writes the record, and on resume
-# applies a record; saved state that does not fit, found at verify, ends
-# the session. It knows nothing about observers, outputs or conductors:
+# applies a record; saved state that does not fit, found at verify, closes
+# the session for an inputs-only retry. It knows nothing about observers, outputs or conductors:
 # those always run again.
 SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
   public = list(
@@ -281,7 +281,8 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     # (ShinySession$.resumeSession()); a problem there falls back to inputs
     # only; (2) the client's inputs, the record's file inputs and userData are
     # set; (3) the server function runs, and constructors apply their records;
-    # (4) verify: saved state that does not fit ends the session; (4a) the
+    # (4) verify: saved state that does not fit closes the session, and the
+    # client's retry starts from inputs only; (4a) the
     # session runs session$onResume() callbacks and (4b) sends `resumed`;
     # (5) the first flush, with observeEvent() first runs held back; (6) the
     # replacement record is written (finishResume()). The client's `update`s
@@ -320,14 +321,17 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       run()
 
       # Step 4. The server function has run with saved values, so resetting
-      # them could not undo what it did with them: saved state that does not
-      # fit this code ends the session (server.R's endOnError()).
+      # them could not undo what it did with them. The session closes without
+      # a stop (server.R's endOnError()); the record is already claimed, so
+      # the client's retry starts from inputs only.
       cause <- tryCatch(private$verify(),
         error = function(e) paste0("saved state could not be checked: ", conditionMessage(e)))
       if (!is.null(cause)) {
         message(sprintf(
-          "Resume failed after the server function ran: %s. The session ended; reloading the page starts fresh. Set or bump appVersion in enableResume() when a deploy changes what the app saves.",
+          "Resume failed after the server function ran: %s. The session restarted from inputs only.",
           cause))
+        self$devmodeInform("misfit-appversion",
+          "Saved state did not fit the app once the server function ran. If a deploy changed what the app saves, set or bump appVersion in enableResume().")
         rlang::abort(paste0("Saved state does not fit the app: ", cause), class = "shiny_resume_failed")
       }
       private$outcomeValue <- list(resumed = "snapshot", cause = NULL, values = length(private$applied))

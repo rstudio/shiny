@@ -530,6 +530,7 @@ ShinySession <- R6Class(
     progressKeys = 'character',
     resumeToken = NULL,
     endedForGood = FALSE,
+    resumeAbandoned = FALSE, # saved state did not fit; this session writes nothing
     serverStarted = FALSE,   # nothing is saved before the server function runs
     reconnectOptOut = FALSE,     # session$allowReconnect(FALSE) with resume on
     unloaded = FALSE,   # the page said it is going away; the record is gone
@@ -656,7 +657,7 @@ ShinySession <- R6Class(
         snapshot_record_key(private$resumeToken, appId),
         function() {
           private$serverStarted && !private$endedForGood && !private$unloaded &&
-            !private$reconnectOptOut
+            !private$reconnectOptOut && !private$resumeAbandoned
         },
         self$.resumeSettings$debounce
       )
@@ -1530,12 +1531,22 @@ ShinySession <- R6Class(
       invisible()
     },
 
+    # Saved state did not fit once the server function ran. Unlike
+    # .endForGood(), no `allowReconnect: false`: the record is already
+    # claimed, so the client's retry with the same token resumes from inputs
+    # only. This session writes nothing, so nothing under its own token can
+    # be resumed either.
+    .abandonResume = function() {
+      private$resumeAbandoned <- TRUE
+      invisible()
+    },
+
     # The `resume` branch of the WebSocket handler, resume on or off (step 1
     # here, steps 2-4 in SnapshotRegistry$resume(), 4a-4b in finish(), step
     # 6 in SnapshotRegistry$finishResume()). `data` is the decoded message;
     # `runServer` runs the app's server function. Every failure before the
     # server function runs falls through to inputs-only; saved state that
-    # does not fit once it has run ends the session; the server function
+    # does not fit once it has run closes the session for an inputs-only retry; the server function
     # never runs twice. onResume() callbacks see the client's inputs on both
     # paths.
     .resumeSession = function(data, runServer) {

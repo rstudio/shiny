@@ -630,3 +630,15 @@ test_that("an old session in this process cannot recreate a record a newer sessi
   live$session$wsClosed()                               # the old socket's close arrives late
   expect_null(snapshot_store()$read(key))
 })
+
+test_that("a socket that opened and closed before any message leaves no record, so the retry resumes from inputs", {
+  local_snapshot_store_dir()
+  ws <- fake_ws()
+  s <- ShinySession$new(ws); local_cancel_writes(s)
+  tb <- ws$sent()[[1]]$config$resumeToken
+  s$wsClosed()
+  expect_null(snapshot_store()$read(snapshot_record_key(tb)))
+  app <- function(input, output, session) { count <- reactiveVal(0); output$n <- renderText(count()) }
+  expect_message(res <- resume_real(app, list(token = tb, inputs = list())), "from inputs only: no saved state")
+  expect_identical(res$outcome, "inputs")
+})

@@ -525,6 +525,7 @@ ShinySession <- R6Class(
     progressKeys = 'character',
     resumeToken = NULL,
     endedForGood = FALSE,
+    serverStarted = FALSE,   # the server function ran (init or resume processed); nothing is saved before
     reconnectOptOut = FALSE,     # session$allowReconnect(FALSE) with resume on
     unloaded = FALSE,   # the page said it is going away; the record is gone
     showcase   = FALSE,
@@ -647,7 +648,7 @@ ShinySession <- R6Class(
       reg$configureWriter(
         function() snapshot_store(),
         snapshot_record_key(private$resumeToken),
-        function() !private$endedForGood && !private$unloaded && !private$reconnectOptOut,
+        function() private$serverStarted && !private$endedForGood && !private$unloaded && !private$reconnectOptOut,
         self$.resumeSettings$debounce
       )
       self$.snapshotRegistry <- reg
@@ -1532,7 +1533,7 @@ ShinySession <- R6Class(
       reg <- self$.snapshotRegistry
       live <- snapshot_live_inputs(data$inputs)
       ran <- FALSE
-      runOnce <- function() { ran <<- TRUE; runServer() }
+      runOnce <- function() { ran <<- TRUE; private$serverStarted <- TRUE; runServer() }
       snapshot_begin_hold_back(self)
 
       # What manageInputs() does for init: onInputReceived() callbacks see
@@ -1642,6 +1643,14 @@ ShinySession <- R6Class(
         return(fallThrough(paste("resume failed:", conditionMessage(failure)), handled))
       }
       finish(outcome)
+    },
+
+    # server.R calls this as it runs the server function. A socket that
+    # opened and died before its first message must leave no record: a retry
+    # would find an empty one and fail verify.
+    .serverStarted = function() {
+      private$serverStarted <- TRUE
+      invisible()
     },
 
     .sendResumed = function(resumed) {

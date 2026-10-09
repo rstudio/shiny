@@ -281,6 +281,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
           runServerWith <- function(serverFunc) {
             args <- argsForServerFunc(serverFunc, shinysession)
 
+            shinysession$.serverStarted()
             withReactiveDomain(shinysession, {
               otel_span_session_start(domain = shinysession, {
 

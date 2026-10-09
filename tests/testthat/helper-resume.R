@@ -218,6 +218,7 @@ live_session <- function(server, outputs = character(0), inputs = list(), ws = f
                          envir = parent.frame()) {
   s <- ShinySession$new(ws)
   local_cancel_writes(s, envir)
+  s$.serverStarted()
   withReactiveDomain(s, isolate(server(input = s$input, output = s$output, session = s)))
   visible <- stats::setNames(rep(list(FALSE), length(outputs)), sprintf(".clientdata_output_%s_hidden", outputs))
   s$manageInputs(c(withReactiveDomain(s, applyInputHandlers(inputs, s)), visible), now = TRUE)

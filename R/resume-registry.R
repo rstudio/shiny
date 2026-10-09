@@ -146,13 +146,14 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       dir <- snapshot_app_path()
       files <- app_r_files(dir)
       covered <- normalizePath(file.path(dir, c(files$top, files$helpers)), mustWork = FALSE)
-      outside <- length(srcFile) == 1L && !normalizePath(srcFile, mustWork = FALSE) %in% covered
+      hasFile <- length(srcFile) == 1L && nzchar(srcFile)
+      outside <- hasFile && !normalizePath(srcFile, mustWork = FALSE) %in% covered
       nothing <- !length(covered) && is.null(package)
       if (outside || nothing) {
         self$devmodeInform("code-hash", sprintf(
-          "The resume code hash covers %s. The server function is defined in %s, which it does not see, so a deploy that changes it will not be detected before saved state is restored. Set enableResume(appVersion = ) and change it when a deploy changes what the app saves.",
+          "The resume code hash covers %s. The server function is defined in %s, which it does not see, so a deploy that changes it will not be detected before saved state is restored. Set `appVersion` in enableResume() and change it when a deploy changes what the app saves.",
           if (length(covered)) "the app's R files (the app directory and R/)" else "no files",
-          if (length(srcFile) == 1L) srcFile else "code the hash does not cover"))
+          if (hasFile) srcFile else "code the hash does not cover"))
       }
       invisible()
     },

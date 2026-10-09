@@ -101,12 +101,13 @@ test_that("an empty directory from a save.interface or the resolver never raises
 
 test_that("identity block records path, format, declared version and user; mismatches are named", {
   local_enable_resume(appVersion = "v1")
+  dir <- local_app_dir()
   s <- MockShinySession$new()
   id <- snapshot_identity(s)
   expect_identical(id$formatVersion, 3L)
   expect_identical(id$appVersion, "v1")
   expect_null(id$codeHash)                              # a declared version replaces the hash
-  expect_identical(id$appPath, normalizePath(getwd()))
+  expect_identical(id$appPath, normalizePath(dir))
   snap <- list(identity = id)
   expect_null(snapshot_identity_mismatch(snap, s))
   snapv <- snap; snapv$identity$appVersion <- "v2"
@@ -278,4 +279,19 @@ test_that("devmode names a server function whose file the hash does not cover", 
   s3 <- ShinySession$new(fake_ws()); local_cancel_writes(s3)
   s3$.noteServerFunction(noSrcref)
   expect_length(seen, 2)
+})
+
+test_that("a declared appVersion silences the devmode code-hash hint", {
+  seen <- character(0)
+  local_mocked_bindings(devmode_inform = function(message, ...) seen <<- c(seen, message))
+  local_snapshot_store_dir()
+  local_enable_resume(appVersion = "v1")
+  dir <- local_app_dir()
+  writeLines("x <- 1", file.path(dir, "app.R"))
+  outside <- withr::local_tempfile(fileext = ".R")
+  writeLines("server <- function(input, output, session) NULL", outside)
+  env <- new.env(parent = globalenv()); source(outside, local = env, keep.source = TRUE)
+  s <- ShinySession$new(fake_ws()); local_cancel_writes(s)
+  s$.noteServerFunction(env$server)
+  expect_length(seen, 0)
 })

@@ -1536,6 +1536,22 @@ ShinySession <- R6Class(
       reg <- self$.snapshotRegistry
       resumeOn <- !is.null(reg)
       live <- snapshot_live_inputs(data$inputs)
+      # What a widget rebuilt by renderUI() shows: the browser's values now,
+      # not as of the disconnect, or the rebuilt widget would echo the old
+      # value back over an edit made while disconnected.
+      current <- snapshot_live_inputs(data$current %||% data$inputs)
+      # A `:shiny.file` value is a `data-restore` the GET path rendered from a
+      # bookmark; its files are in a directory this session lacks.
+      dropBookmarkFiles <- function(set) {
+        restores <- grepl(":shiny\\.file$", names(set$inputs) %||% character(0))
+        set$inputs[restores] <- list(NULL)
+        set
+      }
+      # After the handlers, so restoreInput() sees bare names, not `n:shiny.number`.
+      seedRestore <- function(dir = NULL, fileInputs = character(0)) {
+        handled <- snapshot_apply_handlers(dropBookmarkFiles(current), self)$inputs
+        snapshot_seed_restore_context(self, handled[setdiff(names(handled), fileInputs)], dir = dir)
+      }
       ran <- FALSE
       runOnce <- function() { ran <<- TRUE; private$serverStarted <- TRUE; runServer() }
       snapshot_begin_hold_back(self)
@@ -1574,13 +1590,9 @@ ShinySession <- R6Class(
       # `handled` is given when handlers already ran on the live set.
       fallThrough <- function(cause, handled = NULL) {
         if (is.null(handled)) {
-          # A `:shiny.file` value is a `data-restore` the GET path rendered
-          # from a bookmark; its files are in a directory this session lacks.
-          restores <- grepl(":shiny\\.file$", names(live$inputs) %||% character(0))
-          live$inputs[restores] <- list(NULL)
+          live <- dropBookmarkFiles(live)
           handled <- snapshot_apply_handlers(live, self)
-          # After the handlers, so restoreInput() sees bare names, not `n:shiny.number`.
-          snapshot_seed_restore_context(self, handled$inputs)
+          seedRestore()
           notifyInputs(handled)
         }
         for (name in names(handled$inputs)) private$.input$set(name, handled$inputs[[name]])
@@ -1609,6 +1621,7 @@ ShinySession <- R6Class(
       handled <- snapshot_apply_handlers(live, self)
       notifyInputs(handled)
       record <- snapshot_restore_uploads(record, self)
+      seedRestore(dir = store$filesDir(key), fileInputs = record$fileInputs)
       # Single use, which also settles a duplicated tab's race; the uploads
       # were copied out above, so the record's files go with it.
       deleted <- tryCatch(store$claim(key), error = function(e) e)

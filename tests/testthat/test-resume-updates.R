@@ -202,3 +202,42 @@ test_that("an input the server updates during the restore keeps the client's ech
     expect_identical(msgs[[1]]$inputMessages[[1]]$message$value, "from server")
   })
 })
+
+rendered_value <- function(ws, output) {
+  html <- sent_of(ws, "values")[[1]]$values[[output]]$html
+  sub('.*value="([^"]*)".*', "\\1", html)
+}
+
+test_that("a renderUI() input edited while disconnected is rebuilt with the edit, on both paths and timings", {
+  local_snapshot_store_dir()
+  app <- function(input, output, session) {
+    output$form <- renderUI(textInput("name", "Name"))
+    output$echo <- renderText(input$name)
+  }
+  visible <- list(.clientdata_output_form_hidden = FALSE, .clientdata_output_echo_hidden = FALSE)
+  both_timings(function(before) {
+    res <- suppressMessages(resume_with_updates(app,
+      list(inputs = c(list(name = "hello"), visible), current = c(list(name = "hello world"), visible)),
+      updates = list(list(name = "hello world")), updates_before_flush = before))
+    expect_identical(rendered_value(res$ws, "form"), "hello world", info = paste("inputs-only, before =", before))
+    expect_identical(isolate(res$session$input$name), "hello world")
+  })
+  both_timings(function(before) {
+    live <- live_session(app, outputs = c("form", "echo"), inputs = list(name = "hello"))
+    token <- live_close(live)
+    res <- suppressMessages(resume_with_updates(app,
+      list(token = token, inputs = c(list(name = "hello"), visible), current = c(list(name = "hello world"), visible)),
+      updates = list(list(name = "hello world")), updates_before_flush = before))
+    expect_identical(res$outcome, "snapshot")
+    expect_identical(rendered_value(res$ws, "form"), "hello world", info = paste("snapshot, before =", before))
+    expect_identical(isolate(res$session$input$name), "hello world")
+  })
+})
+
+test_that("without `current` (an older client) the restore context comes from `inputs`", {
+  local_snapshot_store_dir()
+  app <- function(input, output, session) output$form <- renderUI(textInput("name", "Name"))
+  res <- suppressMessages(resume_with_updates(app,
+    list(inputs = list(name = "hello", .clientdata_output_form_hidden = FALSE))))
+  expect_identical(rendered_value(res$ws, "form"), "hello")
+})

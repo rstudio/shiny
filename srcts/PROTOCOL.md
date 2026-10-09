@@ -38,7 +38,8 @@ those keys.
 
 ```json
 { "method": "resume",
-  "data": { "inputs": { "...": "the input set as of the moment the previous connection was lost" } } }
+  "data": { "inputs": { "...": "the input set as of the moment the previous connection was lost" },
+            "current": { "...": "the input set now" } } }
 ```
 
 The server treats it as `init` with one difference: the session's restore
@@ -56,6 +57,12 @@ one. Every change the user made while disconnected was queued as an
 ordinary `update` message, and the client sends those right after `resume`,
 in order. So the server sees each outage-era change exactly once, as live
 input, after the restored state; nothing in `inputs` is an event.
+
+`current` is the client's input set now. It feeds only the restore context
+(what `restoreInput()` reads), so a widget rebuilt by `renderUI()` on the
+first flush shows what the user has, including edits made while
+disconnected, and the browser does not echo an old value back over them.
+`current` missing is treated as `inputs`.
 
 ### `allowReconnect` (server → client)
 
@@ -95,7 +102,8 @@ keeps the token in memory only; a page reload starts without one.
 
 ```json
 { "method": "resume",
-  "data": { "token": "<resumeToken>", "inputs": { "...": "as init carries them" } } }
+  "data": { "token": "<resumeToken>", "inputs": { "...": "as init carries them" },
+            "current": { "...": "the input set now" } } }
 ```
 
 `token` is the one from the previous session's `config`. The server reads

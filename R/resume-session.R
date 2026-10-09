@@ -89,8 +89,8 @@ snapshot_resume_log <- function(outcome, undefined = character(0)) {
   lines <- if (identical(outcome$resumed, "inputs")) {
     sprintf("Resumed from inputs only: %s", outcome$cause %||% "no saved state")
   } else {
-    sprintf("Resumed: restored %d values and %d inputs; %d event handlers held back",
-            outcome$values, outcome$inputs, length(outcome$skipped))
+    sprintf("Resumed: restored %d values; %d event handlers held back",
+            outcome$values, length(outcome$skipped))
   }
   if (length(outcome$unclaimed)) {
     lines <- c(lines, sprintf("Saved values not restored because nothing recreated them: %s",
@@ -129,19 +129,18 @@ snapshot_shape_problem <- function(record) {
   if (!is.list(record)) return("not a list")
   if (!is.list(record$identity)) return("no identity block")
   if (!is.logical(record$complete) || length(record$complete) != 1) return("`complete` is not a flag")
-  for (field in c("inputs", "clientData", "sources", "userData", "blocked")) {
+  for (field in c("sources", "userData", "blocked", "fileInputs")) {
     value <- record[[field]]
     if (!is.null(value) && !is.list(value)) return(sprintf("`%s` is not a list", field))
   }
   for (id in names(record$sources)) {
     if (!is.raw(record$sources[[id]]$bytes)) return(sprintf("source `%s` has no bytes", id))
   }
-  fileInputs <- record$fileInputs
-  if (!is.null(fileInputs) && !is.character(fileInputs)) return("`fileInputs` is not character")
   if (!is.null(record$omitted) && !is.character(record$omitted)) return("`omitted` is not character")
-  for (name in fileInputs) {
-    value <- record$inputs[[name]]
-    if (!is.null(value) && !is.list(value)) return(sprintf("file input `%s` is not a list", name))
+  fi <- names(record$fileInputs)
+  if (length(record$fileInputs) && (is.null(fi) || anyNA(fi) || !all(nzchar(fi)))) return("`fileInputs` has unnamed entries")
+  for (name in fi) {
+    if (!is.list(record$fileInputs[[name]])) return(sprintf("file input `%s` is not a list", name))
   }
   ud <- names(record$userData)
   if (length(record$userData) && (is.null(ud) || anyNA(ud) || !all(nzchar(ud)))) return("`userData` has unnamed entries")

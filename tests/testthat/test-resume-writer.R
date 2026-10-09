@@ -17,13 +17,15 @@ test_that("a source change marks the session dirty and a debounced write follows
   expect_null(store$read(key)$report)
 })
 
-test_that("an input change marks the session dirty on its own", {
+test_that("an input change still marks the session dirty (uploads arrive as inputs), and the record holds no input values", {
   s <- snapshot_session(function(input, output, session) NULL)
   store <- SnapshotStore$new(file.path(withr::local_tempdir(), "s"))
   key <- configure_mock_writer(s, store)
   s$setInputs(n = 1)        # no output flushed anything, only the input changed
   s$elapse(1000)
-  expect_identical(store$read(key)$inputs$n, 1)
+  rec <- store$read(key)
+  expect_false(is.null(rec))
+  expect_null(rec$inputs)
 })
 
 test_that("a session that never goes quiet is still written within ten debounce intervals", {
@@ -166,7 +168,7 @@ test_that("SnapshotWriter writes the record its callback builds, once the gate a
   open <- TRUE
   w <- SnapshotWriter$new(s, function() snapshot_store(), "k1", function() open, 1000)
   builds <- 0
-  record <- function() { builds <<- builds + 1; list(complete = TRUE, sources = list(), inputs = list(), userData = list(), identity = list()) }
+  record <- function() { builds <<- builds + 1; list(complete = TRUE, sources = list(), userData = list(), identity = list()) }
   expect_true(w$writeNow(record))
   expect_equal(builds, 1)
   expect_true(w$wrote())

@@ -136,11 +136,10 @@ second resumes from inputs only. A `dom` key is ignored.
 
 On every `resume`, with or without a token, resume on or off, the server
 treats `inputs` as state the previous session already handled: it applies
-them before the first `values` message (with a record, only the ones that
-differ from the record, after the server function has run and the state
-has been verified) and holds back the first run of each `observeEvent()`
-handler. The queued `update`s that follow `resume` are processed after that
-first `values` message, as ordinary input, so each outage-era change runs
+them before the server function runs, with or without a record, and holds
+back the first run of each `observeEvent()` handler. The queued `update`s
+that follow `resume` are processed after the first `values` message, as
+ordinary input, so each outage-era change runs
 its handlers exactly once. An `update` the previous session never processed
 (sent after its last processed message but before the browser noticed the
 close, or on a reconnect attempt that opened but was not answered) is in

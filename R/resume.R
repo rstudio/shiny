@@ -7,11 +7,12 @@ NULL
 #' With resume on, Shiny saves each session's state as it goes, and a page
 #' whose connection drops reconnects and continues from it, whether the R
 #' process survived or was restarted: [reactiveVal()] and [reactiveValues()]
-#' values, `input`, uploaded files and `session$userData` come back;
-#' [observeEvent()] handlers whose events already happened do not fire again;
-#' [reactive()] expressions and outputs recompute. What the user did while
-#' the page was disconnected (clicks, typing, slider moves) arrives after the
-#' restored state as ordinary input and is handled once.
+#' values, uploaded files and `session$userData` come back, and `input` holds
+#' the values the browser had; [observeEvent()] handlers whose events already
+#' happened do not fire again; [reactive()] expressions and outputs recompute.
+#' What the user did while the page was disconnected (clicks, typing, slider
+#' moves) arrives after the restored state as ordinary input and is handled
+#' once.
 #'
 #' `enableResume()` turns resume on for an app and configures it;
 #' `enableResume(FALSE)` turns it off. Call it at the top level of `app.R`
@@ -70,8 +71,8 @@ NULL
 #' `maxNodeSize`, or two sources sharing a label when the state is saved
 #' block saved state for the whole session: it is restored all or nothing,
 #' so the session resumes from its inputs only and the log says why.
-#' `session$resumeReport()` lists every value and input with the reason it
-#' would not restore.
+#' `session$resumeReport()` lists every value with the reason it would not
+#' restore.
 #'
 #' Values that commonly block resume because they carry an environment or a
 #' function: model fits and formulas created inside a function, ggplot
@@ -170,8 +171,8 @@ NULL
 #'
 #' @section What the log says:
 #' Each resume writes one line to standard error: `Resumed: restored N
-#' values and M inputs; K event handlers held back`, or `Resumed from
-#' inputs only: <cause>`, plus `Outputs on the page with no definition after
+#' values; K event handlers held back`, or `Resumed from inputs only:
+#' <cause>`, plus `Outputs on the page with no definition after
 #' resume: ...` when rule 3 is broken. A resumed session also logs `Saved
 #' values not restored because nothing recreated them: ...` when saved values
 #' had no source to go to by the end of the first flush (rule 3), and a
@@ -182,14 +183,9 @@ NULL
 #' With resume on, a record of the session is written shortly after each
 #' change and when the connection closes. It holds every labelled
 #' `reactiveVal()` and `reactiveValues()`, `session$userData` (minus
-#' `userDataExclude`), the client data, the current input values and copies
-#' of uploaded files. Three things are never written: `passwordInput()`
-#' values, inputs named in `session$setBookmarkExclude()`, and values marked
-#' with [excludeFromResume()]. Excluded inputs still come back after a
-#' reconnect, from the browser's own copy. A labelled reactive that holds a
-#' copy of an excluded input is still saved; exclude it with
-#' [excludeFromResume()]. Free-text inputs can hold personal data or pasted
-#' secrets; exclude them the same way.
+#' `userDataExclude`) and copies of uploaded files. Input values are not
+#' saved: after a reconnect they come from the browser, which kept them.
+#' Values marked with [excludeFromResume()] are never written.
 #'
 #' Records live in the first of these that is set: the `SHINY_RESUME_DIR`
 #' environment variable (an operator's or hosting platform's explicit

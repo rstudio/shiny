@@ -239,10 +239,10 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
         }
       }
 
-      inputs <- private$inputValues(addRow)
-      plan <- snapshot_upload_plan(inputs$inputs, inputs$fileInputs, maxTotal - sum(sizes))
+      fileInputs <- private$fileInputValues()
+      plan <- snapshot_upload_plan(fileInputs, maxTotal - sum(sizes))
       for (name in plan$omitted) {
-        inputs$inputs[name] <- list(NULL)
+        fileInputs[[name]] <- NULL
         self$devmodeInform(paste0("upload-omitted:", name), sprintf(
           "The files uploaded to input$%s do not fit under maxSize, so after a resume input$%s is empty and what depends on it re-runs.",
           name, name))
@@ -256,9 +256,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
         sources = sources,
         omitted = omitted,
         userData = userData,
-        inputs = inputs$inputs,
-        clientData = inputs$clientData,
-        fileInputs = inputs$fileInputs,
+        fileInputs = fileInputs,
         uploads = plan$keep
       )
       if (report) record$report <- snapshot_report_frame(rows)
@@ -279,21 +277,22 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     # ---- resuming ------------------------------------------------------
     #
     # A resume runs in these steps: (1) the session reads, checks and decodes
-    # the record and claims it (ShinySession$.resumeSession()); a problem
-    # there falls back to inputs only; (2) the record's inputs and userData
-    # are restored; (3) the server function runs, and constructors apply
-    # their records; (4) verify: saved state that does not fit ends the
-    # session; (4.5) the client's inputs that differ from the record's are
-    # merged, as state (mergeLiveInputs()); (4a) the session runs
-    # session$onResume() callbacks and (4b) sends `resumed`; (5) the first
-    # flush, with observeEvent() first runs held back; (6) the replacement
-    # record is written (finishResume()). The client's `update`s queued while
-    # it was disconnected arrive after step 5 and are ordinary input.
+    # the record, restores its uploads and claims it
+    # (ShinySession$.resumeSession()); a problem there falls back to inputs
+    # only; (2) the client's inputs, the record's file inputs and userData are
+    # set; (3) the server function runs, and constructors apply their records;
+    # (4) verify: saved state that does not fit ends the session; (4a) the
+    # session runs session$onResume() callbacks and (4b) sends `resumed`;
+    # (5) the first flush, with observeEvent() first runs held back; (6) the
+    # replacement record is written (finishResume()). The client's `update`s
+    # queued while it was disconnected arrive after step 5 and are ordinary
+    # input.
 
-    # Steps 2-4.5. `record` is a decoded record whose identity checks passed;
-    # `live` the client's handler-applied inputs; `run` runs the server
-    # function once. Returns the outcome, or raises `shiny_resume_failed`.
-    # Step 6 runs after the first flush.
+    # Steps 2-4. `record` is a decoded record whose identity checks passed and
+    # whose uploads were restored; `live` the client's handler-applied inputs
+    # as of the disconnect; `run` runs the server function once. Returns the
+    # outcome, or raises `shiny_resume_failed`. Step 6 runs after the first
+    # flush.
     resume = function(record, live, run) {
       private$records <- record$sources
       private$omitted <- record$omitted %||% character(0)
@@ -301,9 +300,6 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       private$applied <- character(0)
       private$claimed <- character(0)
       private$trips <- list()
-      private$liveSet <- live
-      private$recordInputs <- record$inputs
-      private$recordClientData <- record$clientData
       private$skipped <- character(0)
       private$outcomeValue <- NULL
       private$phase <- "constructing"
@@ -311,9 +307,12 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       completed <- FALSE
       on.exit(if (!completed) private$leave(), add = TRUE)
 
-      # Step 2: the record's inputs, the client's live clientData, then
-      # userData, so the server function's top-level guards see it.
-      private$setInputs(record$inputs, force = FALSE)
+      # Step 2: the client's inputs, as on an inputs-only resume; the record's
+      # file inputs over them, since the browser cannot send a file again;
+      # the live clientData; then userData, so the server function's
+      # top-level guards see it.
+      private$setInputs(live$inputs, force = FALSE)
+      private$setInputs(record$fileInputs, force = FALSE)
       private$setClientData(live$clientData, force = FALSE)
       private$restoreUserData(record$userData)
 
@@ -331,13 +330,8 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
           cause))
         rlang::abort(paste0("Saved state does not fit the app: ", cause), class = "shiny_resume_failed")
       }
-      private$outcomeValue <- list(resumed = "snapshot", cause = NULL,
-                                   values = length(private$applied), inputs = length(record$inputs))
+      private$outcomeValue <- list(resumed = "snapshot", cause = NULL, values = length(private$applied))
       private$phase <- "restoring"
-      # Step 4.5, inside the hold-back: the delta is record lag (values the
-      # old session processed after its last write), so it is state. The
-      # outage-era changes are not here; the client sends them as `update`s.
-      private$mergeLiveInputs()
       private$session$onFlushed(function() self$finishResume(), once = TRUE)
       completed <- TRUE
       private$outcomeValue
@@ -345,10 +339,9 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
 
     # Step 6. The replacement record (the one read was deleted): after the
     # first flush, so sources rebuilt by hooks and first-flush observers are
-    # in it, and with the merged inputs, the freshest baseline for the next
-    # resume's delta.
+    # in it.
     finishResume = function() {
-      if (is.null(private$liveSet)) return(invisible())
+      if (!identical(private$phase, "restoring")) return(invisible())
       self$writeNow()
       private$outcomeValue$values <- length(private$applied)
       unclaimed <- setdiff(names(private$records), private$claimed)
@@ -400,7 +393,6 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     # resuming
     phase = "idle",      # "idle" | "constructing" (server function running) | "restoring" (verified; first flush)
     records = NULL, omitted = character(0), initials = NULL, applied = character(0), claimed = character(0), trips = list(),
-    liveSet = NULL, recordInputs = NULL, recordClientData = NULL,
     skipped = character(0), outcomeValue = NULL,
     watched = list(),
 
@@ -473,33 +465,17 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       list(record = list(kind = "reactiveValues", bytes = bytes, order = order), size = length(bytes))
     },
 
-    inputValues = function(addRow) {
+    # The browser keeps every input value except a file, so file inputs are
+    # the only inputs a record holds.
+    fileInputValues = function() {
       impl <- .subset2(private$session$input, "impl")
-      # setBookmarkExclude() means "never persist this input"; it is restored
-      # from the browser's own values, as a password is.
-      excluded <- private$session$getBookmarkExclude()
-      inputs <- list()
-      fileInputs <- character(0)
+      out <- list()
       for (name in impl$.nameOrder) {
-        serializer <- impl$getMeta(name, "shiny.serializer")
-        if (identical(serializer, serializerUnserializable)) {
-          addRow("input", name, "", FALSE, "password input; restored from the client")
-          next
-        }
-        if (name %in% excluded) {
-          addRow("input", name, "", FALSE, "setBookmarkExclude(); restored from the client")
-          next
-        }
-        inputs[name] <- list(impl$.values$get(name))
-        addRow("input", name, "", TRUE)
-        if (identical(serializer, serializerFileInput)) fileInputs <- c(fileInputs, name)
+        if (!identical(impl$getMeta(name, "shiny.serializer"), serializerFileInput)) next
+        value <- impl$.values$get(name)
+        if (!is.null(value)) out[[name]] <- value
       }
-      clientData <- list()
-      if (is.reactivevalues(private$session$clientData)) {
-        cd <- .subset2(private$session$clientData, "impl")
-        clientData <- cd$.values$mget(cd$.nameOrder)
-      }
-      list(inputs = inputs, clientData = clientData, fileInputs = fileInputs)
+      out
     },
 
     userDataValues = function(maxNode, addRow) {
@@ -604,26 +580,6 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       invisible()
     },
 
-    # Step 4.5. A file input's live value is the browser's NULL and must not
-    # clobber the restored upload. `force = TRUE`: the dependents of a value
-    # that changed must recompute at the first flush even if a constructor
-    # already set it.
-    mergeLiveInputs = function() {
-      live <- private$liveSet
-      changed <- list()
-      for (name in names(live$inputs)) {
-        if (name %in% live$fileInputs) next
-        if (!identical(live$inputs[[name]], private$recordInputs[[name]])) changed[name] <- list(live$inputs[[name]])
-      }
-      private$setInputs(changed, force = TRUE)
-      changedCd <- list()
-      for (name in names(live$clientData)) {
-        if (!identical(live$clientData[[name]], private$recordClientData[[name]])) changedCd[name] <- list(live$clientData[[name]])
-      }
-      private$setClientData(changedCd, force = TRUE)
-      invisible()
-    },
-
     leave = function() {
       for (state in private$watched) { state$watch <- FALSE; state$used <- FALSE }
       private$watched <- list()
@@ -631,9 +587,6 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       private$records <- NULL
       private$omitted <- character(0)
       private$initials <- NULL
-      private$liveSet <- NULL
-      private$recordInputs <- NULL
-      private$recordClientData <- NULL
       invisible()
     }
   )
@@ -781,7 +734,7 @@ snapshot_report_frame <- function(rows) {
 
 #' @export
 print.shiny_resume_report <- function(x, ...) {
-  cat(sprintf("<resumeReport> %d of %d values and inputs restore\n", sum(x$adoptable), nrow(x)))
+  cat(sprintf("<resumeReport> %d of %d values restore\n", sum(x$adoptable), nrow(x)))
   bad <- x[!x$adoptable, , drop = FALSE]
   for (reason in unique(bad$reason)) {
     cat("\n", reason, ":\n", sep = "")

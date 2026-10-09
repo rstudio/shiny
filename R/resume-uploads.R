@@ -6,21 +6,19 @@ NULL
 # serializerFileInput() copies them into a state directory, and come back
 # through the `shiny.file` input handler bookmarks use.
 
-# Which file inputs in `inputs` keep their files within `budget` bytes, in
-# input order, with the record filename for each file.
-snapshot_upload_plan <- function(inputs, fileInputs, budget) {
+# Which of `fileInputs` (file input values by input id) keep their files
+# within `budget` bytes, in input order, with the record filename for each file.
+snapshot_upload_plan <- function(fileInputs, budget) {
   keep <- list()
   omitted <- character(0)
-  for (name in fileInputs) {
-    value <- inputs[[name]]
-    if (is.null(value)) next
-    sizes <- file.info(value$datapath)$size
+  for (name in names(fileInputs)) {
+    sizes <- file.info(fileInputs[[name]]$datapath)$size
     if (anyNA(sizes) || sum(sizes) > budget) {
       omitted <- c(omitted, name)
       next
     }
     budget <- budget - sum(sizes)
-    keep[[name]] <- snapshot_upload_names(name, value$datapath)
+    keep[[name]] <- snapshot_upload_names(name, fileInputs[[name]]$datapath)
   }
   list(keep = keep, omitted = omitted)
 }
@@ -32,7 +30,7 @@ snapshot_upload_plan <- function(inputs, fileInputs, budget) {
 snapshot_write_uploads <- function(snap, dir) {
   if (!dir.exists(dir)) dir.create(dir, recursive = TRUE, mode = "0700")
   for (name in names(snap$uploads)) {
-    value <- snap$inputs[[name]]
+    value <- snap$fileInputs[[name]]
     targets <- snap$uploads[[name]]
     dest <- file.path(dir, targets)
     missing <- !file.exists(dest)
@@ -43,7 +41,7 @@ snapshot_write_uploads <- function(snap, dir) {
       Sys.chmod(dest[missing], "0600")
     }
     value$datapath <- targets
-    snap$inputs[[name]] <- value
+    snap$fileInputs[[name]] <- value
   }
   snap
 }
@@ -55,16 +53,15 @@ snapshot_prune_uploads <- function(dir, keep) {
   invisible()
 }
 
-# Restores every file input in `snapshot` through the `shiny.file` handler,
+# Restores every file input in `record` through the `shiny.file` handler,
 # which copies each file out of the session's restore context `dir` into a
-# fresh temp directory and marks the input as a file input again. A
-# value that cannot be restored becomes NULL, so the input starts empty and
-# its dependents re-run.
-snapshot_restore_uploads <- function(snapshot, session) {
+# fresh temp directory and marks the input as a file input again. A value
+# that cannot be restored becomes NULL, so the input starts empty and its
+# dependents re-run.
+snapshot_restore_uploads <- function(record, session) {
   handler <- inputHandlers$get("shiny.file")
-  for (name in snapshot$fileInputs) {
-    value <- snapshot$inputs[[name]]
-    if (is.null(value)) next
+  for (name in names(record$fileInputs)) {
+    value <- record$fileInputs[[name]]
     restored <- tryCatch(
       withReactiveDomain(session, {
         dir <- session$restoreContext$dir
@@ -73,9 +70,9 @@ snapshot_restore_uploads <- function(snapshot, session) {
       }),
       error = function(e) NULL
     )
-    snapshot$inputs[name] <- list(restored)
+    record$fileInputs[name] <- list(restored)
   }
-  snapshot
+  record
 }
 
 # `<id>-<row>-<digest><ext>`: the input id and row name the file, and

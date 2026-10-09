@@ -46,8 +46,8 @@ test_that("wsClosed() forces a write that copies uploads beside the record", {
   token <- live_close(live)
   key <- snapshot_record_key(token)
   rec <- snapshot_store()$read(key)
-  expect_match(rec$inputs$f$datapath, "^f-1-[0-9a-f]{8}\\.csv$")
-  expect_true(file.exists(file.path(snapshot_store()$filesDir(key), rec$inputs$f$datapath)))
+  expect_match(rec$fileInputs$f$datapath, "^f-1-[0-9a-f]{8}\\.csv$")
+  expect_true(file.exists(file.path(snapshot_store()$filesDir(key), rec$fileInputs$f$datapath)))
 })
 
 test_that("allowReconnect(FALSE) is the per-session opt-out: still sent, no closing write, record deleted", {
@@ -148,7 +148,7 @@ test_that("a valid token restores, sends `resumed` before any values, logs, dele
   spy <- new_spy("obs", "txt")
   expect_message(
     res <- resume_real(counter_app(spy), resume_data(token, list(`plus:shiny.action` = 3, txt = "typed")), spy = spy),
-    "^Resumed: restored 1 values and 2 inputs; 1 event handlers held back"
+    "^Resumed: restored 1 values; 1 event handlers held back"
   )
   expect_identical(res$outcome, "snapshot")
   expect_setequal(spy$received, c("plus", "txt"))     # onInputReceived fires on resume
@@ -167,7 +167,7 @@ test_that("a valid token restores, sends `resumed` before any values, logs, dele
   expect_false(is.null(snapshot_store()$read(snapshot_record_key(newToken))))
 })
 
-test_that("a payload value that differs from the record applies at the first flush without firing handlers", {
+test_that("the payload's inputs are set before the server function, and held-back handlers do not fire", {
   local_snapshot_store_dir()
   token <- closed_counter_session()
   spy <- new_spy("obs", "txt")
@@ -176,7 +176,7 @@ test_that("a payload value that differs from the record applies at the first flu
   expect_false(res$session$.snapshotRegistry$restoring())
   expect_equal(as.numeric(isolate(res$session$input$plus)), 4)
   values <- sent_of(res$ws, "values")
-  expect_length(values, 1)                               # one render, already with the merged value
+  expect_length(values, 1)                               # one render, already with the payload value
   expect_identical(values[[1]]$values$n, "3")            # count is state the handler did not touch
   live_flush(res$session)
   expect_equal(spy$obs, 0)
@@ -268,6 +268,28 @@ test_that("a record's `omitted` is optional but must be character", {
   expect_identical(snapshot_shape_problem(rec), "`omitted` is not character")
 })
 
+test_that("a record's `fileInputs` must be a named list of lists", {
+  rec <- list(identity = list(), complete = TRUE, fileInputs = list())
+  expect_null(snapshot_shape_problem(rec))
+  rec$fileInputs <- "f"
+  expect_identical(snapshot_shape_problem(rec), "`fileInputs` is not a list")
+  rec$fileInputs <- list(1)
+  expect_identical(snapshot_shape_problem(rec), "`fileInputs` has unnamed entries")
+  rec$fileInputs <- list(f = "x")
+  expect_identical(snapshot_shape_problem(rec), "file input `f` is not a list")
+})
+
+test_that("a bookmark file value in the payload is dropped on a resume with a record", {
+  local_snapshot_store_dir()
+  token <- closed_counter_session()
+  bookmarked <- list(name = "a.csv", size = 1L, type = "text/csv", datapath = "0.csv")
+  res <- suppressMessages(resume_real(counter_app(new_spy("obs", "txt")),
+    resume_data(token, list(`plus:shiny.action` = 3L, `f:shiny.file` = bookmarked))))
+  expect_identical(res$outcome, "snapshot")
+  expect_null(isolate(res$session$input$f))
+  expect_equal(as.numeric(isolate(res$session$input$plus)), 3)
+})
+
 test_that("a saved value that cannot be decoded resumes from inputs only before the server function runs", {
   local_snapshot_store_dir()
   token <- closed_counter_session()
@@ -300,19 +322,6 @@ test_that("an incomplete record resumes from inputs only with its first blocked 
   expect_message(res <- resume_real(blocked_app, resume_data(token, list())),
                  "from inputs only: saved state incomplete: \\|reactiveVal\\|conn \\(value is not serializable: value\\)")
   expect_null(snapshot_store()$read(key))
-})
-
-test_that("passwords are never saved and come back from the live client", {
-  local_snapshot_store_dir()
-  pw_app <- function(input, output, session) output$o <- renderText(paste(input$pw, input$user))
-  live <- live_session(pw_app, outputs = "o", inputs = list(user = "bob"))
-  withReactiveDomain(live$session, setSerializer("pw", serializerUnserializable))
-  live_set(live$session, pw = "hunter2")
-  token <- live_close(live)
-  rec <- snapshot_store()$read(snapshot_record_key(token))
-  expect_null(rec$inputs$pw)
-  res <- resume_real(pw_app, resume_data(token, list(user = "bob", pw = "hunter2")))
-  expect_identical(isolate(res$session$input$pw), "hunter2")
 })
 
 test_that("an update during the first flush is not overwritten", {
@@ -376,7 +385,7 @@ test_that("a resume records its counts as an OTel log event carrying the session
   expect_identical(attrs$shiny.resume.callbacks, 1L)
 })
 
-test_that("the log line counts restored values and inputs and held-back handlers", {
+test_that("the log line counts restored values and held-back handlers", {
   make <- function(spy) { force(spy); function(input, output, session) {
     count <- reactiveVal(0)
     observeEvent(input$plus, count(count() + 1))
@@ -385,7 +394,7 @@ test_that("the log line counts restored values and inputs and held-back handlers
   token <- NULL
   rt <- snapshot_roundtrip(make(new_spy()), function(s) s$setInputs(plus = 1, login = 1))
   expect_identical(snapshot_resume_log(rt$outcome),
-                   "Resumed: restored 1 values and 2 inputs; 2 event handlers held back")
+                   "Resumed: restored 1 values; 2 event handlers held back")
   expect_identical(snapshot_resume_log(list(resumed = "inputs", cause = "no saved state")),
                    "Resumed from inputs only: no saved state")
 })
@@ -605,7 +614,7 @@ test_that("a source with no saved value ends the session for good after the serv
   expect_null(snapshot_store()$read(snapshot_record_key(newToken)))
 })
 
-test_that("the first replacement record follows the first flush and holds the merged inputs", {
+test_that("the first replacement record follows the first flush", {
   local_snapshot_store_dir()
   app <- function(input, output, session) {
     count <- reactiveVal(0)
@@ -620,7 +629,7 @@ test_that("the first replacement record follows the first flush and holds the me
   newToken <- res$ws$sent()[[1]]$config$resumeToken
   rec <- snapshot_store()$read(snapshot_record_key(newToken))
   expect_true("|reactiveVal|late" %in% names(rec$sources))   # created in the first flush
-  expect_equal(as.numeric(rec$inputs$plus), 4)                # the merged inputs: the freshest baseline
+  expect_null(rec$inputs)
 })
 
 test_that("an old session in this process cannot recreate a record a newer session claimed", {
@@ -660,26 +669,6 @@ test_that("snapshot_preflight() names each cause, and on success returns the rec
   expect_named(pre, c("ok", "record", "store", "key"))
   expect_equal(pre$record$sources[["|reactiveVal|count"]]$value, 3)
   expect_false(is.null(pre$store$read(pre$key)))
-})
-
-test_that("an input on the bookmark-exclude list is not saved and comes back from the client, modules included", {
-  local_snapshot_store_dir()
-  app <- function(input, output, session) {
-    session$setBookmarkExclude("secret")
-    moduleServer("m", function(input, output, session) session$setBookmarkExclude("key"))
-    output$n <- renderText(paste(input$secret, input$`m-key`, input$keep))
-  }
-  live <- live_session(app, outputs = "n", inputs = list(secret = "s3cret", `m-key` = "k", keep = "yes"))
-  report <- live$session$resumeReport()
-  expect_match(report$reason[report$label == "secret"], "setBookmarkExclude")
-  token <- live_close(live)
-  rec <- snapshot_store()$read(snapshot_record_key(token))
-  expect_false(is.null(rec))
-  expect_setequal(names(rec$inputs), "keep")
-  res <- suppressMessages(resume_real(app, list(token = token, inputs = list(secret = "s3cret", `m-key` = "k", keep = "yes"))))
-  expect_identical(res$outcome, "snapshot")
-  expect_identical(isolate(res$session$input$secret), "s3cret")
-  expect_identical(isolate(res$session$input$`m-key`), "k")
 })
 
 test_that("with URL bookmarking and resume both on, a reconnect resumes from the record and the bookmark observers fire", {

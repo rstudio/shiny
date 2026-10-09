@@ -241,9 +241,10 @@ workerId <- local({
 #' }
 #' \item{resumeReport()}{
 #'   Returns a data frame describing what resuming this session restores:
-#'   one row per reactive value and input, with `kind` (`"reactiveVal"`,
-#'   `"reactiveValues"`, `"userData"`, `"input"`), `label`, `namespace`,
-#'   `adoptable` (whether it restores) and `reason` (why not, or `NA`).
+#'   one row per reactive value and `session$userData` entry, with `kind`
+#'   (`"reactiveVal"`, `"reactiveValues"`, `"userData"`), `label`,
+#'   `namespace`, `adoptable` (whether it restores) and `reason` (why not, or
+#'   `NA`).
 #'   Printing groups the rows by reason. Intended for tests and audits, e.g.
 #'   `testServer(server, { stopifnot(all(session$resumeReport()$adoptable)) })`.
 #'   Empty in a session with resume off. See [enableResume()].
@@ -1530,12 +1531,12 @@ ShinySession <- R6Class(
     },
 
     # The `resume` branch of the WebSocket handler, resume on or off (step 1
-    # here, steps 2-4.5 in SnapshotRegistry$resume(), 4a-4b in finish(), step
+    # here, steps 2-4 in SnapshotRegistry$resume(), 4a-4b in finish(), step
     # 6 in SnapshotRegistry$finishResume()). `data` is the decoded message;
     # `runServer` runs the app's server function. Every failure before the
     # server function runs falls through to inputs-only; saved state that
     # does not fit once it has run ends the session; the server function
-    # never runs twice. onResume() callbacks see the merged inputs on both
+    # never runs twice. onResume() callbacks see the client's inputs on both
     # paths.
     .resumeSession = function(data, runServer) {
       reg <- self$.snapshotRegistry
@@ -1617,16 +1618,14 @@ ShinySession <- R6Class(
       store <- pre$store
       key <- pre$key
 
-      # Step 2. Seed before input handlers run: the shiny.file handler reads
-      # the restore context's dir. File inputs stay out of what
-      # restoreInput() sees: a re-rendered fileInput() would send a server
-      # path back through the handler.
-      snapshot_seed_restore_context(self, record$inputs[setdiff(names(record$inputs), record$fileInputs)],
-                                    dir = store$filesDir(key))
-      handled <- snapshot_apply_handlers(live, self)
+      # The restore context's `dir` is where the `shiny.file` handler finds
+      # the record's uploads. File inputs stay out of what restoreInput()
+      # sees: a re-rendered fileInput() would send a server path back
+      # through the handler.
+      seedRestore(dir = store$filesDir(key), fileInputs = names(record$fileInputs))
+      handled <- snapshot_apply_handlers(dropBookmarkFiles(live), self)
       notifyInputs(handled)
       record <- snapshot_restore_uploads(record, self)
-      seedRestore(dir = store$filesDir(key), fileInputs = record$fileInputs)
       # Single use, which also settles a duplicated tab's race; the uploads
       # were copied out above, so the record's files go with it.
       deleted <- tryCatch(store$claim(key), error = function(e) e)

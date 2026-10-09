@@ -148,9 +148,10 @@ session is actually connected.
 }
 \item{resumeReport()}{
 Returns a data frame describing what resuming this session restores:
-one row per reactive value and input, with \code{kind} (\code{"reactiveVal"},
-\code{"reactiveValues"}, \code{"userData"}, \code{"input"}), \code{label}, \code{namespace},
-\code{adoptable} (whether it restores) and \code{reason} (why not, or \code{NA}).
+one row per reactive value and \code{session$userData} entry, with \code{kind}
+(\code{"reactiveVal"}, \code{"reactiveValues"}, \code{"userData"}), \code{label},
+\code{namespace}, \code{adoptable} (whether it restores) and \code{reason} (why not, or
+\code{NA}).
 Printing groups the rows by reason. Intended for tests and audits, e.g.
 \code{testServer(server, { stopifnot(all(session$resumeReport()$adoptable)) })}.
 Empty in a session with resume off. See \code{\link[=enableResume]{enableResume()}}.

@@ -1,6 +1,6 @@
 withr::local_envvar(SHINY_RESUME = "TRUE")
 
-test_that("the record carries sources, key order, inputs, userData and completeness", {
+test_that("the record carries sources, key order, userData and completeness, and no input values", {
   s <- snapshot_session(function(input, output, session) {
     count <- reactiveVal(3)
     rv <- reactiveValues(z = 1, a = 2)
@@ -13,11 +13,13 @@ test_that("the record carries sources, key order, inputs, userData and completen
   expect_true(rec$complete)
   expect_identical(node_value(rec$sources[["|reactiveVal|count"]]), 3)
   expect_identical(rec$sources[["|reactiveValues|rv"]]$order, c("z", "a"))
-  expect_identical(rec$inputs$n, 5)
+  expect_null(rec$inputs)
+  expect_null(rec$clientData)
+  expect_identical(rec$fileInputs, list())
   expect_identical(rec$userData, list(note = "kept"))
   rep <- rec$report
   expect_identical(rep$reason[rep$kind == "userData" & rep$label == "conn"], "value is not serializable: value")
-  expect_true(all(rep$adoptable[rep$kind == "input"]))
+  expect_false("input" %in% rep$kind)
 })
 
 test_that("non-serializable, over-cap and too-large sources block the record with reasons", {
@@ -50,15 +52,6 @@ test_that("the total cap blocks the largest sources first", {
   expect_setequal(names(rec$sources), c("|reactiveVal|small", "|reactiveVal|mid"))
   expect_false(rec$complete)
   expect_identical(rec$blocked[[1]], list(id = "|reactiveVal|large", reason = "over maxSize"))
-})
-
-test_that("password inputs are left out of the record and reported", {
-  s <- snapshot_session(function(input, output, session) NULL)
-  s$setInputs(pw = "hunter2", user = "bob")
-  withReactiveDomain(s, setSerializer("pw", serializerUnserializable))
-  rec <- s$.snapshotRegistry$snapshot()
-  expect_identical(names(rec$inputs), "user")
-  expect_identical(rec$report$reason[rec$report$label == "pw"], "password input; restored from the client")
 })
 
 test_that("a destroyed source is not recorded", {

@@ -188,14 +188,7 @@ class ShinyApp {
 
   setAllowReconnect(value: ReconnectPermission): void {
     this.reconnectControl.setAllow(value);
-    if (value !== false) return;
-    if (this.reconnectState.reconnecting && !this.reconnectState.answered) {
-      // The server ended the session this page asked to resume.
-      /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-      showResumeEndedDialog();
-    } else {
-      hideReconnectDialog();
-    }
+    if (value === false) hideReconnectDialog();
   }
 
   constructor() {
@@ -412,6 +405,19 @@ class ShinyApp {
       $(document.body).append('<div id="shiny-disconnected-overlay"></div>');
     }
     $("#shiny-disconnected-overlay").toggleClass("reloading", reloading);
+
+    // Decided here, not when the stop arrives: a stop sent during the server
+    // function of a reconnect that then succeeds must not leave this notice
+    // on a working session.
+    if (
+      !this.reconnectControl.permitsManualRetry() &&
+      this.reconnectState.reconnecting &&
+      !this.reconnectState.answered
+    ) {
+      // The server ended the session this page asked to resume.
+      /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+      showResumeEndedDialog();
+    }
 
     // srcts/PROTOCOL.md, "Client retry rule" and "Hosting shims": a shim's
     // explicit false is a veto; no shim means no opinion.

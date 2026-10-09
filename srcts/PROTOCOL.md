@@ -170,6 +170,6 @@ When the server ends a session itself (`session$close()`, an error in the
 server function, an unhandled error in an observer, saved state that does
 not fit on resume), it sends `allowReconnect: false`, deletes the record and
 closes the socket. The client keeps its disconnected overlay and does not
-retry. If the page was reconnecting and had not yet received `resumed` or
-`values`, it shows "This session could not be resumed." with a Reload link;
+retry. If the page was reconnecting and the socket closes before it received
+`resumed` or `values`, it shows "This session could not be resumed." with a Reload link;
 otherwise it shows nothing.

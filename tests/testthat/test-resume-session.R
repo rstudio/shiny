@@ -656,3 +656,23 @@ test_that("snapshot_preflight() names each cause without touching the session", 
   expect_equal(pre$record$sources[["|reactiveVal|count"]]$value, 3)
   expect_false(is.null(pre$store$read(pre$key)))
 })
+
+test_that("an input on the bookmark-exclude list is not saved and comes back from the client, modules included", {
+  local_snapshot_store_dir()
+  app <- function(input, output, session) {
+    session$setBookmarkExclude("secret")
+    moduleServer("m", function(input, output, session) session$setBookmarkExclude("key"))
+    output$n <- renderText(paste(input$secret, input$`m-key`, input$keep))
+  }
+  live <- live_session(app, outputs = "n", inputs = list(secret = "s3cret", `m-key` = "k", keep = "yes"))
+  report <- live$session$resumeReport()
+  expect_match(report$reason[report$label == "secret"], "setBookmarkExclude")
+  token <- live_close(live)
+  rec <- snapshot_store()$read(snapshot_record_key(token))
+  expect_false(is.null(rec))
+  expect_setequal(names(rec$inputs), "keep")
+  res <- suppressMessages(resume_real(app, list(token = token, inputs = list(secret = "s3cret", `m-key` = "k", keep = "yes"))))
+  expect_identical(res$outcome, "snapshot")
+  expect_identical(isolate(res$session$input$secret), "s3cret")
+  expect_identical(isolate(res$session$input$`m-key`), "k")
+})

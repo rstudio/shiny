@@ -178,18 +178,34 @@ NULL
 #' session whose saved state does not fit logs `Resume failed after the
 #' server function ran: ...` before it ends.
 #'
-#' @section Where saved state lives:
-#' In the hosting platform's bookmark storage when it provides one, otherwise
-#' under `tools::R_user_dir("shiny", "cache")`; never in the app directory.
-#' Records are readable only by the owner, keyed by a 128-bit random token
-#' and the app's path, kept for 24 hours, deleted when the page is closed or
-#' the session ends for good, and the directory as a whole is capped at
-#' 1 GiB and 1000 records. On Windows the token comes from the `openssl`
-#' package when it is installed and from R's random number generator
-#' otherwise. Whether a hosting platform's directory survives a restart of
-#' the R process is up to the platform and has not yet been verified for
-#' Posit's hosted products; a container without a persistent volume resumes
-#' from inputs only after it restarts.
+#' @section What is saved, and where:
+#' With resume on, a record of the session is written shortly after each
+#' change and when the connection closes. It holds every labelled
+#' `reactiveVal()` and `reactiveValues()`, `session$userData` (minus
+#' `userDataExclude`), the client data, the current input values and copies
+#' of uploaded files. Three things are never written: `passwordInput()`
+#' values, inputs named in `session$setBookmarkExclude()`, and values marked
+#' with [excludeFromResume()]. Excluded inputs still come back after a
+#' reconnect, from the browser's own copy. Free-text inputs can hold
+#' personal data or pasted secrets; exclude them the same way.
+#'
+#' Records go to the hosting platform's bookmark storage when it provides one,
+#' otherwise under `tools::R_user_dir("shiny", "cache")`; never in the app
+#' directory. On the fallback store the directory and each file are readable
+#' only by the owner; on a platform's directory, permissions are the
+#' platform's. A record is keyed by a 128-bit random token and the app's
+#' path, kept for 24 hours, and deleted when the page is closed, when the
+#' session ends for good, or when a resume reads it. The directory as a whole
+#' is capped at 1 GiB and 1000 records. Nothing is written unless the app
+#' called `enableResume()` or the platform set `SHINY_RESUME`. On Windows the
+#' token comes from the `openssl` package when it is installed and from R's
+#' random number generator otherwise.
+#'
+#' The fallback store is per machine. Behind a load balancer without sticky
+#' sessions a reconnect that lands on another machine resumes from inputs
+#' only, and a container without a persistent volume does the same after it
+#' restarts. Shiny already needs sticky sessions for its WebSocket, so this
+#' adds no new deployment requirement.
 #'
 #' @param enabled `TRUE` to turn resume on for the app, `FALSE` to turn it
 #'   off, overriding the `SHINY_RESUME` environment variable. With `FALSE`

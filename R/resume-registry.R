@@ -450,12 +450,19 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
 
     inputValues = function(addRow) {
       impl <- .subset2(private$session$input, "impl")
+      # setBookmarkExclude() means "never persist this input"; it is restored
+      # from the browser's own values, as a password is.
+      excluded <- private$session$getBookmarkExclude()
       inputs <- list()
       fileInputs <- character(0)
       for (name in impl$.nameOrder) {
         serializer <- impl$getMeta(name, "shiny.serializer")
         if (identical(serializer, serializerUnserializable)) {
           addRow("input", name, "", FALSE, "password input; restored from the client")
+          next
+        }
+        if (name %in% excluded) {
+          addRow("input", name, "", FALSE, "setBookmarkExclude(); restored from the client")
           next
         }
         inputs[name] <- list(impl$.values$get(name))

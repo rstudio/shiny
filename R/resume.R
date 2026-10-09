@@ -36,7 +36,7 @@ NULL
 #'   function has run, a labelled source has no saved value (and was not
 #'   left out with [excludeFromResume()]) or two sources share a label they
 #'   did not share when the state was saved, the session closes and the page
-#'   reconnects at once, resuming from its inputs only. The server function
+#'   reconnects, resuming from its inputs only. The server function
 #'   runs again, as it would on a reload. Without `appVersion`, a change to
 #'   the app's R files makes sessions resume from their inputs only instead,
 #'   before anything runs. The browser then shows "Reconnected, but your
@@ -198,8 +198,8 @@ NULL
 #' With resume on, a record of the session is written shortly after each
 #' change and when the connection closes. It holds every labelled
 #' `reactiveVal()` and `reactiveValues()`, `session$userData` (minus
-#' `userDataExclude`) and copies of uploaded files. Input values are not
-#' saved: after a reconnect they come from the browser, which kept them.
+#' `userDataExclude`) and copies of uploaded files. Other input values are
+#' not saved: after a reconnect they come from the browser, which kept them.
 #' Values marked with [excludeFromResume()] are never written.
 #'
 #' Records live in the first of these that is set: the `SHINY_RESUME_DIR`

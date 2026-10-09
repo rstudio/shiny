@@ -11,9 +11,9 @@ reactiveVal(value = NULL, label = NULL)
 
 \item{label}{An optional label, for debugging purposes (see
 \code{\link[=reactlog]{reactlog()}}). It is also the value's identity for \code{\link[=enableResume]{enableResume()}}:
-two sources sharing an explicit label in one module namespace block
-saved state for the session. If missing, a label will be automatically
-created.}
+two sources sharing an explicit label in one module namespace keep the
+session's state from being saved, so it resumes from its inputs only. If
+missing, a label will be automatically created.}
 }
 \value{
 A function. Call the function with no arguments to (reactively) read

@@ -63,9 +63,10 @@ session resumed from its inputs only. It also fires with resume off, when
 
 ## The rules of reactives
 
-State comes back all or nothing: if a labelled value cannot be saved, or the
-app's R files changed and no `appVersion` is set, the session resumes from its
-inputs only. So does saved state that does not fit once the server function
+Labelled values come back all or nothing (`session$userData` is best-effort:
+an entry that cannot be saved is left out): if a labelled value cannot be
+saved, or the app's R files changed and no `appVersion` is set, the session
+resumes from its inputs only. So does saved state that does not fit once the server function
 has run (a labelled source with no saved value that was not left out with
 `excludeFromResume()`): the page reconnects once more and starts from its
 inputs. Four habits keep resumed sessions
@@ -110,8 +111,9 @@ during a resume it goes back to its initial value. Leave credentials in
 
 ## Reading the report
 
-`session$resumeReport()` returns one row per value and input with whether
-it restores and, if not, why. Use it in a test:
+`session$resumeReport()` returns one row per reactive value and
+`session$userData` entry with whether it restores and, if not, why. Use it in
+a test:
 
 ```r
 testServer(server, {

@@ -57,11 +57,12 @@
   `reactiveVal()` and `reactiveValues()` values (assigned names count as
   labels, in installed packages too), uploaded files and
   `session$userData` come back; `input` holds what the browser had;
-  reactive expressions and outputs recompute. Input values are never
-  written to disk. Saved state is restored all or nothing: when a value
-  cannot be saved, the app's R files changed and no `appVersion` is set,
-  or saved state turns out not to fit once the server function has run,
-  the session resumes from its inputs and the log says why. The browser
+  reactive expressions and outputs recompute. Input values other than
+  uploaded files are never written to disk. Labelled values are restored
+  all or nothing: when a value cannot be saved, the app's R files changed
+  and no `appVersion` is set, or saved state turns out not to fit once the
+  server function has run, the session resumes from its inputs and the log
+  says why. The browser
   then shows "Reconnected, but your previous work could not be restored.";
   `event.preventDefault()` on `shiny:resumed` suppresses it.
   `enableResume(userDataExclude =)` keeps named `session$userData` entries
@@ -72,14 +73,16 @@
   the `SHINY_RESUME` environment variable a hosting platform may set, and
   `reactiveValues()` gains `.label`. `reactiveVal(label =)` and
   `reactiveValues(.label =)` now also identify a value across sessions:
-  two sources sharing an explicit label in one module block saved state. A
+  two sources sharing an explicit label in one module namespace keep the
+  session's state from being saved, so it resumes from its inputs only. A
   page reload still starts fresh. Records live in `SHINY_RESUME_DIR` when
   set, else in a `shiny-resume` folder inside the per-content persistent
   data directory on Posit Connect (`CONNECT_CONTENT_DATA_DIR`), else under
   `tools::R_user_dir("shiny", "cache")`, one subdirectory per app. An app
   is identified by `SHINY_RESUME_APP_ID` when set, else by Connect's
-  `CONNECT_CONTENT_GUID`, so saved state survives a redeploy with an
-  unchanged `appVersion`, else by its directory.
+  `CONNECT_CONTENT_GUID`, else by its directory, so on Connect saved state
+  survives a redeploy that changes no code, or one with an unchanged
+  `appVersion`.
   (#<PR number>)
 
 * Added an agent skill (`inst/skills/shiny-for-r/`) following the

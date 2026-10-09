@@ -6136,6 +6136,9 @@ ${duplicateIdMsg}`;
       type: "warning"
     });
   }
+  function hideResumeLostNotice() {
+    remove2("resume-lost");
+  }
 
   // srcts/src/shiny/shinyapp.ts
   var import_jquery39 = __toESM(require_jquery());
@@ -7229,6 +7232,7 @@ ${duplicateIdMsg}`;
       addMessageHandler("resumed", (message) => {
         this.reconnectDelay.reset();
         const lost = this.reconnectState.onResumed(message);
+        if (message === "snapshot") hideResumeLostNotice();
         const evt = import_jquery39.default.Event("shiny:resumed", { resumed: message });
         (0, import_jquery39.default)(document).trigger(evt);
         if (lost && !evt.isDefaultPrevented()) {

@@ -29,6 +29,7 @@ import { peekAllowReconnect, ReconnectControl } from "./reconnectControl";
 import { ReconnectDelay } from "./reconnectDelay";
 import {
   hideReconnectDialog,
+  hideResumeLostNotice,
   showReconnectDialog,
   showResumeEndedDialog,
   showResumeLostNotice,
@@ -947,6 +948,9 @@ class ShinyApp {
     addMessageHandler("resumed", (message: "snapshot" | "inputs") => {
       this.reconnectDelay.reset();
       const lost = this.reconnectState.onResumed(message);
+      // The notice has no timeout, so one from an earlier reconnect would
+      // otherwise outlast a later one that restored.
+      if (message === "snapshot") hideResumeLostNotice();
       const evt = $.Event("shiny:resumed", { resumed: message });
       $(document).trigger(evt);
       if (lost && !evt.isDefaultPrevented()) {

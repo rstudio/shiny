@@ -105,8 +105,13 @@ async function showResumeLostNotice(): Promise<void> {
   });
 }
 
+function hideResumeLostNotice(): void {
+  removeNotification("resume-lost");
+}
+
 export {
   hideReconnectDialog,
+  hideResumeLostNotice,
   showReconnectDialog,
   showResumeEndedDialog,
   showResumeLostNotice,

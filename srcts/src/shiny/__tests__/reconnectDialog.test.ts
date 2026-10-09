@@ -70,3 +70,10 @@ void test("the resume-lost notice says the work was not restored and can be dism
     ?.closest(".shiny-notification");
   assert.ok(notice?.querySelector(".shiny-notification-close"));
 });
+
+void test("hiding the resume-lost notice removes it", async () => {
+  await dialog.showResumeLostNotice();
+  dialog.hideResumeLostNotice();
+  await wait(400);
+  assert.equal(document.querySelectorAll("#shiny-resume-lost").length, 0);
+});

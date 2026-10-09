@@ -2,4 +2,5 @@ declare function showReconnectDialog(delay: number, stillWanted?: () => boolean)
 declare function hideReconnectDialog(): void;
 declare function showResumeEndedDialog(): Promise<void>;
 declare function showResumeLostNotice(): Promise<void>;
-export { hideReconnectDialog, showReconnectDialog, showResumeEndedDialog, showResumeLostNotice, };
+declare function hideResumeLostNotice(): void;
+export { hideReconnectDialog, hideResumeLostNotice, showReconnectDialog, showResumeEndedDialog, showResumeLostNotice, };

@@ -6082,7 +6082,7 @@ ${duplicateIdMsg}`;
       updateTime(reconnectTime);
     }, 1e3);
   }
-  async function showReconnectDialog(delay) {
+  async function showReconnectDialog(delay, stillWanted = () => true) {
     const reconnectTime = (/* @__PURE__ */ new Date()).getTime() + delay;
     if ((0, import_jquery38.default)("#shiny-reconnect-text").length > 0) return;
     const html = '<span id="shiny-reconnect-text">Attempting to reconnect</span><span id="shiny-reconnect-time"></span>';
@@ -6095,6 +6095,10 @@ ${duplicateIdMsg}`;
       closeButton: false,
       type: "warning"
     });
+    if (!stillWanted()) {
+      hideReconnectDialog();
+      return;
+    }
     updateTime(reconnectTime);
   }
   function hideReconnectDialog() {
@@ -6136,6 +6140,67 @@ ${duplicateIdMsg}`;
       return this.$promises.length - this.$resolvers.length;
     }
   };
+
+  // srcts/src/shiny/reconnectControl.ts
+  var ReconnectControl = class {
+    constructor(setTimer = (fn, delay) => setTimeout(fn, delay), clearTimer = (handle) => clearTimeout(handle)) {
+      this.setTimer = setTimer;
+      this.clearTimer = clearTimer;
+      this.permission = false;
+      this.timer = void 0;
+      // Set only by an explicit allowReconnect(FALSE), not by the default `false`,
+      // so a manual reconnect() on a page that never heard from the server works.
+      this.stopped = false;
+      // Bumped by cancel(); a timer callback from an older generation is stale.
+      this.generation = 0;
+    }
+    get allow() {
+      return this.permission;
+    }
+    setAllow(value) {
+      this.permission = value;
+      this.stopped = value === false;
+      if (value === false) this.cancel();
+    }
+    // `socketAllows` is the connection layer's own flag (Shiny Server and
+    // Posit Connect set it on their socket); "force" ignores it.
+    shouldRetry(socketAllows) {
+      return this.permission === true && socketAllows || this.permission === "force";
+    }
+    schedule(delay, reconnect) {
+      this.cancel();
+      const generation = this.generation;
+      this.timer = this.setTimer(() => {
+        this.timer = void 0;
+        if (generation !== this.generation || this.permission === false) return;
+        reconnect();
+      }, delay);
+    }
+    cancel() {
+      this.generation++;
+      if (this.timer !== void 0) this.clearTimer(this.timer);
+      this.timer = void 0;
+    }
+    permitsManualRetry() {
+      return !this.stopped;
+    }
+  };
+  function peekAllowReconnect(data) {
+    if (typeof data !== "string" || !data.includes('"allowReconnect"')) {
+      return void 0;
+    }
+    let msg;
+    try {
+      msg = JSON.parse(data);
+    } catch {
+      return void 0;
+    }
+    if (typeof msg !== "object" || msg === null || !Object.prototype.hasOwnProperty.call(msg, "allowReconnect")) {
+      return void 0;
+    }
+    const value = msg.allowReconnect;
+    return value === true || value === false || value === "force" ? value : void 0;
+  }
 
   // srcts/src/shiny/outputProgress.ts
   var _OutputProgressReporter_instances, updateStateFromRecalculating_fn, updateStateFromFlush_fn, updateStateFromProgress_fn, updateStateFromValueOrError_fn, getState_fn, setState_fn;
@@ -6377,8 +6442,7 @@ ${duplicateIdMsg}`;
       this.$pendingMessages = [];
       this.$activeRequests = {};
       this.$nextRequestId = 0;
-      this.$allowReconnect = false;
-      this.scheduledReconnect = void 0;
+      this.reconnectControl = new ReconnectControl();
       // How long should we wait before trying the next reconnection?
       // The delay will increase with subsequent attempts.
       // .next: Return the time to wait for next connection, and increment counter.
@@ -6500,6 +6564,17 @@ ${duplicateIdMsg}`;
       };
       this._init();
     }
+    // Kept for code outside this class that reads or sets it.
+    get $allowReconnect() {
+      return this.reconnectControl.allow;
+    }
+    set $allowReconnect(value) {
+      this.setAllowReconnect(value);
+    }
+    setAllowReconnect(value) {
+      this.reconnectControl.setAllow(value);
+      if (value === false) hideReconnectDialog();
+    }
     connect(initialInput) {
       if (this.$socket)
         throw "Connect was already called on this application object";
@@ -6512,7 +6587,11 @@ ${duplicateIdMsg}`;
       return !!this.$socket;
     }
     reconnect() {
-      clearTimeout(this.scheduledReconnect);
+      this.reconnectControl.cancel();
+      if (!this.reconnectControl.permitsManualRetry()) {
+        hideReconnectDialog();
+        return;
+      }
       if (this.isConnected())
         throw "Attempted to reconnect, but already connected.";
       this.$outputProgress.reset();
@@ -6562,6 +6641,8 @@ ${duplicateIdMsg}`;
         this.startActionQueueLoop();
       };
       socket.onmessage = (e4) => {
+        const allow = peekAllowReconnect(e4.data);
+        if (allow !== void 0) this.setAllowReconnect(allow);
         this.taskQueue.enqueue(async () => await this.dispatchMessage(e4.data));
       };
       socket.onclose = (e4) => {
@@ -6608,18 +6689,16 @@ ${duplicateIdMsg}`;
       this.$socket = null;
     }
     $scheduleReconnect(delay) {
-      this.scheduledReconnect = window.setTimeout(() => {
-        this.reconnect();
-      }, delay);
+      this.reconnectControl.schedule(delay, () => this.reconnect());
     }
     onDisconnected(reloading = false) {
       if ((0, import_jquery39.default)("#shiny-disconnected-overlay").length === 0) {
         (0, import_jquery39.default)(document.body).append('<div id="shiny-disconnected-overlay"></div>');
       }
       (0, import_jquery39.default)("#shiny-disconnected-overlay").toggleClass("reloading", reloading);
-      if (this.$allowReconnect === true && this.$socket.allowReconnect === true || this.$allowReconnect === "force") {
+      if (this.reconnectControl.shouldRetry(this.$socket.allowReconnect === true)) {
         const delay = this.reconnectDelay.next();
-        showReconnectDialog(delay);
+        showReconnectDialog(delay, () => this.reconnectControl.allow !== false);
         this.$scheduleReconnect(delay);
       }
     }
@@ -6957,14 +7036,8 @@ ${duplicateIdMsg}`;
         }
       );
       addMessageHandler("allowReconnect", (message) => {
-        switch (message) {
-          case true:
-          case false:
-          case "force":
-            this.$allowReconnect = message;
-            break;
-          default:
-            throw "Invalid value for allowReconnect: " + message;
+        if (message !== true && message !== false && message !== "force") {
+          throw "Invalid value for allowReconnect: " + message;
         }
       });
       addMessageHandler("custom", async (message) => {

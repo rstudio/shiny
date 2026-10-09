@@ -115,3 +115,10 @@ test_that("with resume off, a reconnect runs onResume() callbacks with the repla
   start_with(server, '{"method":"init","data":{"go:shiny.action":2}}')
   expect_length(seen, 1)
 })
+
+test_that("with resume off a resume sends no `resumed` and logs nothing", {
+  withr::local_envvar(SHINY_RESUME = "FALSE")
+  server <- function(input, output, session) observeEvent(input$plus, NULL)
+  expect_silent(ws <- start_with(server, '{"method":"resume","data":{"inputs":{"plus:shiny.action":3}}}'))
+  expect_length(sent_of(ws, "resumed"), 0)
+})

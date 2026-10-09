@@ -204,46 +204,25 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
           msg <- decodeMessage(msg)
 
           isResume <- identical(msg$method, "resume")
-          resumeOn <- isTRUE(shinysession$.resumeSettings$enabled)
-          # With resume off, a `resume` is a reconnect: everything init
-          # carries under `inputs`, bookmark-restore file values dropped
-          # (they point into a bookmark directory this session lacks), and
-          # restoreInput() seeded from these inputs rather than the URL.
-          # With resume on, .resumeSession() answers it.
-          seedFromInputs <- isResume && !resumeOn
-          if (seedFromInputs) {
-            inputs <- msg$data$inputs
-            if (!is.list(inputs)) inputs <- list()
-            msg$data <- inputs[!grepl(":shiny\\.file$", names(inputs) %||% character(0))]
-            msg$method <- "init"
-          }
 
           # Set up a restore context from .clientdata_url_search before
           # handling all the input values, because the restore context may be
           # used by an input handler (like the one for "shiny.file"). This
-          # should only happen once, when the app starts. With resume on, the
-          # `resume` branch seeds its own context (.resumeSession()).
+          # should only happen once, when the app starts.
           bookmarkStore <- getShinyOption("bookmarkStore", default = "disable")
           if (is.null(shinysession$restoreContext)) {
-            if (isResume && resumeOn) {
-              # Its observers read the restore context only when they run,
-              # at the first flush, by which time .resumeSession() has
-              # seeded one.
+            if (isResume) {
+              # .resumeSession() seeds the context; the bookmark observers
+              # read it only when they run, at the first flush.
               if (bookmarkStore != "disable") shinysession$createBookmarkObservers()
             } else {
-              if (bookmarkStore == "disable" || seedFromInputs) {
-                shinysession$restoreContext <- RestoreContext$new()
-              } else {
-                # If there's bookmarked state, save it on the session object
-                shinysession$restoreContext <- RestoreContext$new(msg$data$.clientdata_url_search)
-              }
+              shinysession$restoreContext <- if (bookmarkStore == "disable") RestoreContext$new()
+                else RestoreContext$new(msg$data$.clientdata_url_search)
               if (bookmarkStore != "disable") shinysession$createBookmarkObservers()
             }
           }
 
-          if (!(isResume && resumeOn)) {
-            msg$data <- applyInputHandlers(msg$data)
-          }
+          if (!isResume) msg$data <- applyInputHandlers(msg$data)
 
           # Everything the init branch does before running the server
           # function, shared with the resume branch.
@@ -308,12 +287,6 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
             init = endOnError({
               serverFunc <- prepareServer(msg$data)
 
-              if (seedFromInputs) {
-                shinysession$restoreContext <- reconnectRestoreContext(msg$data)
-                # A reconnect's inputs are past events; see snapshot_begin_hold_back().
-                snapshot_begin_hold_back(shinysession)
-              }
-
               # In shinysession$createBookmarkObservers() above, observers may be
               # created, which puts the shiny session in busyCount > 0 state. That
               # prevents the manageInputs here from taking immediate effect, by
@@ -329,9 +302,6 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
               shinysession$manageInputs(msg$data, now = TRUE)
 
               local({ runServerWith(serverFunc) })
-              # A reconnect with resume off restores nothing, but the app may
-              # rebuild what its held-back handlers built.
-              if (seedFromInputs) shinysession$.resumeCallbacks$run(FALSE)
             }),
             resume = endOnError({
               serverFunc <- prepareServer(if (is.list(msg$data$inputs)) msg$data$inputs else list())

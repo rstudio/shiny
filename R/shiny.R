@@ -1524,7 +1524,7 @@ ShinySession <- R6Class(
       invisible()
     },
 
-    # The `resume` branch of the WebSocket handler with resume on (step 1
+    # The `resume` branch of the WebSocket handler, resume on or off (step 1
     # here, steps 2-4.5 in SnapshotRegistry$resume(), 4a-4b in finish(), step
     # 6 in SnapshotRegistry$finishResume()). `data` is the decoded message;
     # `runServer` runs the app's server function. Every failure before the
@@ -1534,6 +1534,7 @@ ShinySession <- R6Class(
     # paths.
     .resumeSession = function(data, runServer) {
       reg <- self$.snapshotRegistry
+      resumeOn <- !is.null(reg)
       live <- snapshot_live_inputs(data$inputs)
       ran <- FALSE
       runOnce <- function() { ran <<- TRUE; private$serverStarted <- TRUE; runServer() }
@@ -1552,6 +1553,7 @@ ShinySession <- R6Class(
         # Step 4a: values are final (restored, or initial on inputs-only). An
         # error here propagates, and server.R ends the session for good.
         callbacks <- self$.resumeCallbacks$run(identical(outcome$resumed, "snapshot"))
+        if (!resumeOn) return(invisible("inputs"))
         # Step 4b.
         self$.sendResumed(outcome$resumed)
         self$onFlushed(function() {
@@ -1587,6 +1589,10 @@ ShinySession <- R6Class(
         runOnce()
         finish(list(resumed = "inputs", cause = cause), fromRegistry = FALSE)
       }
+
+      # With resume off a reconnect still seeds restoreInput() from the
+      # client's inputs and holds back handlers; nothing is read or written.
+      if (!resumeOn) return(fallThrough("resume off"))
 
       pre <- snapshot_preflight(data, self)
       if (!pre$ok) return(fallThrough(pre$cause))

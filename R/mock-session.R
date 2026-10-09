@@ -168,6 +168,7 @@ makeExtraMethods <- function() {
     .endForGood = "for internal use only",
     .resumeSession = "for internal use only",
     .sendResumed = "for internal use only",
+    .serverStarted = "for internal use only",
     createBookmarkObservers = "for internal use only",
     dispatch = "for internal use only",
     handleRequest = "for internal use only",

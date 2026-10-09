@@ -525,7 +525,7 @@ ShinySession <- R6Class(
     progressKeys = 'character',
     resumeToken = NULL,
     endedForGood = FALSE,
-    serverStarted = FALSE,   # the server function ran (init or resume processed); nothing is saved before
+    serverStarted = FALSE,   # nothing is saved before the server function runs
     reconnectOptOut = FALSE,     # session$allowReconnect(FALSE) with resume on
     unloaded = FALSE,   # the page said it is going away; the record is gone
     showcase   = FALSE,
@@ -648,7 +648,10 @@ ShinySession <- R6Class(
       reg$configureWriter(
         function() snapshot_store(),
         snapshot_record_key(private$resumeToken),
-        function() private$serverStarted && !private$endedForGood && !private$unloaded && !private$reconnectOptOut,
+        function() {
+          private$serverStarted && !private$endedForGood && !private$unloaded &&
+            !private$reconnectOptOut
+        },
         self$.resumeSettings$debounce
       )
       self$.snapshotRegistry <- reg

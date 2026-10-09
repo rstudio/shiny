@@ -8,7 +8,7 @@ const tokenB = "fedcba9876543210fedcba9876543210";
 
 void test("a fresh page sends init and adopts the config token at once", () => {
   const s = new ReconnectState();
-  assert.deepEqual(s.firstMessage({ a: 1 }), {
+  assert.deepEqual(s.firstMessage({ a: 1 }, { a: 1 }), {
     method: "init",
     data: { a: 1 },
   });
@@ -21,7 +21,7 @@ void test("a reconnect sends the inputs as of the disconnect plus the current on
   s.onConfig(tokenA);
   s.onSocketClosed(true, { a: 1 });
   s.beginReconnect();
-  assert.deepEqual(s.firstMessage({ a: 2 }), {
+  assert.deepEqual(s.firstMessage({ a: 2 }, { a: 2 }), {
     method: "resume",
     data: { token: tokenA, inputs: { a: 1 }, current: { a: 2 } },
   });
@@ -32,7 +32,7 @@ void test("retries that never opened keep the snapshot", () => {
   s.onSocketClosed(true, { a: 1 });
   s.beginReconnect();
   s.onSocketClosed(false, { a: 3 }); // a failed attempt never opened
-  assert.deepEqual(s.firstMessage({ a: 3 }).data, {
+  assert.deepEqual(s.firstMessage({ a: 3 }, { a: 3 }).data, {
     inputs: { a: 1 },
     current: { a: 3 },
   });
@@ -44,9 +44,23 @@ void test("an attempt that opened and died re-takes the snapshot", () => {
   s.beginReconnect();
   s.onSocketClosed(true, { x: 2 });
   s.beginReconnect();
-  assert.deepEqual(s.firstMessage({ x: 2 }).data, {
+  assert.deepEqual(s.firstMessage({ x: 2 }, { x: 2 }).data, {
     inputs: { x: 2 },
     current: { x: 2 },
+  });
+});
+
+void test("init sends the initial inputs; resume sends the live ones as current", () => {
+  const s = new ReconnectState();
+  assert.deepEqual(s.firstMessage({ a: 1 }, { a: 2 }), {
+    method: "init",
+    data: { a: 1 },
+  });
+  s.onSocketClosed(true, { a: 1 });
+  s.beginReconnect();
+  assert.deepEqual(s.firstMessage({ a: 1 }, { a: 2 }).data, {
+    inputs: { a: 1 },
+    current: { a: 2 },
   });
 });
 
@@ -59,7 +73,7 @@ void test("while reconnecting the config token waits for resumed; a drop in betw
   assert.equal(s.resumeToken, tokenA);
   s.onSocketClosed(true, {});
   assert.equal(s.resumeToken, tokenA);
-  assert.deepEqual(s.firstMessage({}).data, {
+  assert.deepEqual(s.firstMessage({}, {}).data, {
     token: tokenA,
     inputs: {},
     current: {},
@@ -74,7 +88,7 @@ void test("with resume off there is never a token", () => {
   s.onConfig(null);
   s.onSocketClosed(true, { a: 1 });
   s.beginReconnect();
-  assert.deepEqual(s.firstMessage({ a: 1 }).data, {
+  assert.deepEqual(s.firstMessage({ a: 1 }, { a: 1 }).data, {
     inputs: { a: 1 },
     current: { a: 1 },
   });
@@ -99,7 +113,7 @@ void test("after a successful reconnect the next drop takes a fresh snapshot", (
   s.beginReconnect();
   s.onAnswered();
   s.onSocketClosed(true, { a: 5 });
-  assert.deepEqual(s.firstMessage({ a: 6 }).data, {
+  assert.deepEqual(s.firstMessage({ a: 6 }, { a: 6 }).data, {
     inputs: { a: 5 },
     current: { a: 6 },
   });

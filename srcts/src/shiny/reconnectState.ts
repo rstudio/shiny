@@ -62,8 +62,10 @@ class ReconnectState {
     this.isAnswered = false;
   }
 
-  firstMessage(current: InputValues): FirstMessage {
-    if (!this.isReconnecting) return { method: "init", data: current };
+  // `initial` is the input set copied when the attempt began; `current` is the
+  // live set, which also carries edits made while the attempt was connecting.
+  firstMessage(initial: InputValues, current: InputValues): FirstMessage {
+    if (!this.isReconnecting) return { method: "init", data: initial };
     const inputs = this.snapshot ?? { ...current };
     return {
       method: "resume",

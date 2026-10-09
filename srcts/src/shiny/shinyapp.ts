@@ -308,7 +308,10 @@ class ShinyApp {
       // from the current inputs instead of the URL's bookmark. See srcts/PROTOCOL.md.
       socket.send(
         JSON.stringify(
-          this.reconnectState.firstMessage(this.$initialInput ?? {}),
+          this.reconnectState.firstMessage(
+            this.$initialInput ?? {},
+            this.$inputValues,
+          ),
         ),
       );
 

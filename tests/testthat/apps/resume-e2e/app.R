@@ -60,6 +60,9 @@ server <- function(input, output, session) {
   emails <- reactiveVal(0)
   contents <- reactiveVal("")
   if (nzchar(Sys.getenv("E2E_BLOCK", ""))) conn <- reactiveVal(function() "a connection")
+  # Not textually `reactiveVal(0)`: identical non-toplevel calls get no label
+  # (snapshot_body_label()), so the source would be ignored and the resume
+  # would never reach the failure path.
   if (nzchar(Sys.getenv("E2E_EXTRA_SOURCE", ""))) extra <- reactiveVal(1)
   observeEvent(input$plus, count(count() + 1))
   observeEvent(input$send, { log_line("EMAIL SENT"); emails(emails() + 1) })

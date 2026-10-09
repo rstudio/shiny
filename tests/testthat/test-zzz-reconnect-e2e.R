@@ -87,3 +87,15 @@ test_that("a bookmark URL is not re-restored on reconnect", {
   expect_match(e2e_text(b, "#txtout"), "Text: live", fixed = TRUE)
   expect_identical(e2e_js(b, "document.getElementById('txt').value"), "live")
 })
+
+test_that("a connection layer that vetoes reconnecting (a clean server close) is honoured", {
+  skip_on_cran()
+  e <- e2e_session(env = c(SHINY_RESUME = "FALSE", E2E_ALLOW = "1"))
+  b <- e$browser
+  # What shiny-server-client does after a clean close such as an idle timeout.
+  e2e_js(b, "Shiny.shinyapp.$socket.allowReconnect = false; true")
+  e$process$kill()
+  e2e_wait_until(function() e2e_present(b, "#shiny-disconnected-overlay"), what = "the overlay")
+  Sys.sleep(4)
+  expect_false(e2e_present(b, "#shiny-reconnect-text"))
+})

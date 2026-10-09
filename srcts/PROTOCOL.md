@@ -84,6 +84,17 @@ for as long as the page is open. Each retry opens a new socket and sends
 or `resumed`), not when the socket opens. The "Attempting to reconnect"
 notification shows a countdown and a **Try now** link that attempts at once.
 
+### Hosting shims
+
+Shiny Server and Posit Connect wrap the socket with shiny-server-client. It
+retries the same session itself for a short window, then closes. It also
+sets `allowReconnect` on the socket object: `true` by default and `false`
+after a clean close the server meant to be final (a session idle timeout),
+unless the close code is in the 4700 range. The client treats that `false`
+as a veto and a missing flag as permission, so `allowReconnect(TRUE)` works
+on plain sockets while a platform can still end a session for good.
+`"force"` ignores the flag.
+
 ## Saved state
 
 These apply when the app turned resume on (`enableResume()`); a server with

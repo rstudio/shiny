@@ -6785,8 +6785,8 @@ ${duplicateIdMsg}`;
         (0, import_jquery39.default)(document.body).append('<div id="shiny-disconnected-overlay"></div>');
       }
       (0, import_jquery39.default)("#shiny-disconnected-overlay").toggleClass("reloading", reloading);
-      const permitted = this.reconnectControl.shouldRetry(true);
-      if (!permitted) return;
+      const socketAllows = this.$socket.allowReconnect !== false;
+      if (!this.reconnectControl.shouldRetry(socketAllows)) return;
       const delay = this.reconnectDelay.next();
       showReconnectDialog(delay, () => this.reconnectControl.allow !== false);
       this.$scheduleReconnect(delay);

@@ -40,8 +40,9 @@ type ResponseValue = UploadEndValue | UploadInitValue;
 type Handler = (message: any) => Promise<void> | void;
 
 type ShinyWebSocket = WebSocket & {
-  // Set by shiny-server-client; no longer consulted (srcts/PROTOCOL.md,
-  // "Client retry rule").
+  // Set by shiny-server-client (Shiny Server, Posit Connect): true by
+  // default, false after a clean server close the server wants to stay
+  // closed (an idle timeout). Absent on a plain socket.
   allowReconnect?: boolean;
 };
 
@@ -390,9 +391,10 @@ class ShinyApp {
     }
     $("#shiny-disconnected-overlay").toggleClass("reloading", reloading);
 
-    // srcts/PROTOCOL.md, "Client retry rule".
-    const permitted = this.reconnectControl.shouldRetry(true);
-    if (!permitted) return;
+    // srcts/PROTOCOL.md, "Client retry rule" and "Hosting shims": a shim's
+    // explicit false is a veto; no shim means no opinion.
+    const socketAllows = this.$socket!.allowReconnect !== false;
+    if (!this.reconnectControl.shouldRetry(socketAllows)) return;
     const delay = this.reconnectDelay.next();
     /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     showReconnectDialog(delay, () => this.reconnectControl.allow !== false);

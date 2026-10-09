@@ -75,6 +75,10 @@ NULL
 #' `maxNodeSize`, or two sources sharing a label when the state is saved
 #' block saved state for the whole session: it is restored all or nothing,
 #' so the session resumes from its inputs only and the log says why.
+#' `session$userData` is saved best-effort instead: an entry that cannot be
+#' saved is left out and reported, and the rest comes back. Sources are all or
+#' nothing because restoring some and not others can leave the app in a state
+#' it was never designed for.
 #' `session$resumeReport()` lists every value with the reason it would not
 #' restore.
 #'
@@ -141,13 +145,21 @@ NULL
 #'    rebuild in `session$onResume()`, as above. For a handler that builds
 #'    one output from inputs, prefer [eventReactive()]:
 #'    `n <- eventReactive(input$go, input$n)` with
-#'    `output$plot <- renderPlot(make_plot(n()))` needs nothing on resume.
+#'    `output$plot <- renderPlot(make_plot(n()))` needs nothing on resume. It
+#'    recomputes from the current inputs; when the committed value matters
+#'    (the `n` the user clicked Go with, not where the slider is now), store
+#'    it in a `reactiveVal()` from `observeEvent()`.
 #' 4. **Accumulate into a reactive value from `observeEvent()`, not a plain
 #'    `observe()`.** A plain observer has no event to hold back, so it runs
 #'    on resume and applies its change again:
 #'    `observe({ input$plus; isolate(count(count() + 1)) })` shows 4 after
 #'    three clicks and a resume; `observeEvent(input$plus, count(count() + 1))`
 #'    shows 3.
+#'    The same goes for an observer used as a handler:
+#'    `observe({ req(input$go); send() })` runs on resume and sends again,
+#'    because a button's count comes back non-zero; write
+#'    `observeEvent(input$go, send())`. In development mode Shiny names such
+#'    observers.
 #'
 #' On resume, inputs the previous session already had are restored, never
 #' replayed: no handler fires for them. Changes made while the page was
@@ -161,8 +173,7 @@ NULL
 #' event is harmless, rather than relying on exactly-once delivery.
 #'
 #' Also: [bindCache()] with a persistent cache keeps expensive reactive
-#' expressions cheap after a restart; [eventReactive()] recomputes with the
-#' current inputs; `observeEvent(once = TRUE)` may fire once more after a
+#' expressions cheap after a restart; `observeEvent(once = TRUE)` may fire once more after a
 #' resume; process-scoped values (temp paths, process ids) serialize fine
 #' and are wrong after a restart; an unconditional top-level
 #' `session$userData$x <- 0` overwrites the saved value, so guard it with
@@ -223,10 +234,10 @@ NULL
 #'   off, overriding the `SHINY_RESUME` environment variable. With `FALSE`
 #'   the other arguments are ignored.
 #' @param appVersion `NULL`, or a string or number recorded with the saved
-#'   state. With `NULL`, a hash stands in: the app's R files (the ones Shiny
-#'   loads: `app.R`, `ui.R`, `server.R`, `global.R` and the `R/` folder) and,
-#'   when the server function comes from an installed package, that package's
-#'   version. A deploy that changes any of them makes sessions resume from
+#'   state. With `NULL`, a hash stands in: every `.R` file at the top
+#'   level of the app directory and in its `R/` folder (so `app.R`, `ui.R`,
+#'   `server.R` and `global.R` among them) and, when the server function
+#'   comes from an installed package, that package's version. A deploy that changes any of them makes sessions resume from
 #'   their inputs only. Set `appVersion` when the code lives elsewhere (a
 #'   package whose version does not change with every deploy, a framework
 #'   that keeps code in another folder), or to keep saved state across a

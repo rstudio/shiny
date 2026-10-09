@@ -11,7 +11,9 @@
 * Fixed #4281, #3251: `dateInput()`'s `datesdisabled` now works when `format` is not the default `yyyy-mm-dd`. The dates are now converted to real dates on the client, the same way `min`/`max` already are, instead of being parsed by bootstrap-datepicker with the display format. (#4434)
 
 * `session$allowReconnect(TRUE)` now behaves the way it always should have:
-  the browser reconnects on any server and never replays past events.
+  the browser reconnects on any server, and `observeEvent()` and
+  `bindEvent()` handlers no longer re-run on reconnect; plain observers run
+  as they do on a fresh start.
   Before, it only worked behind Shiny Server and Posit Connect, and the
   reconnected session re-ran `observeEvent()` handlers for inputs that had
   already happened (two clicks and a reconnect re-sent the email). What
@@ -53,27 +55,31 @@
 * New `enableResume()`: with it on, a page whose connection drops
   continues from saved state, even when the R process restarted. Labelled
   `reactiveVal()` and `reactiveValues()` values (assigned names count as
-  labels, in installed packages too), `input`, uploaded files and
-  `session$userData` come back; reactive expressions and outputs recompute.
-  Saved state is restored all or nothing: when a value cannot be saved, or
-  the app's R files changed and no `appVersion` is set, the session resumes
-  from its inputs and the log says why; saved state that turns out not to
-  fit once the server function has run ends the session.
+  labels, in installed packages too), uploaded files and
+  `session$userData` come back; `input` holds what the browser had;
+  reactive expressions and outputs recompute. Input values are never
+  written to disk. Saved state is restored all or nothing: when a value
+  cannot be saved, the app's R files changed and no `appVersion` is set,
+  or saved state turns out not to fit once the server function has run,
+  the session resumes from its inputs and the log says why. The browser
+  then shows "Reconnected, but your previous work could not be restored.";
+  `event.preventDefault()` on `shiny:resumed` suppresses it.
   `enableResume(userDataExclude =)` keeps named `session$userData` entries
   out, and `session$resumeReport()` lists every value with its reason.
   `excludeFromResume(x)` leaves a value or `ExtendedTask` out, and
   `session$onResume()` runs code when a page reconnects, to rebuild what
   event handlers built. `enableResume(FALSE)` turns resume off, overriding
   the `SHINY_RESUME` environment variable a hosting platform may set, and
-  `reactiveValues()` gains `.label`. A page reload still starts fresh.
-  Inputs named in `session$setBookmarkExclude()` and `passwordInput()`
-  values are never written to disk; they come back from the browser. When
-  saved state turns out not to fit the app after the server function ran,
-  the browser shows "This session could not be resumed" with a Reload link
-  and the R log names the value. Records live in `SHINY_RESUME_DIR` when
+  `reactiveValues()` gains `.label`. `reactiveVal(label =)` and
+  `reactiveValues(.label =)` now also identify a value across sessions:
+  two sources sharing an explicit label in one module block saved state. A
+  page reload still starts fresh. Records live in `SHINY_RESUME_DIR` when
   set, else in a `shiny-resume` folder inside the per-content persistent
   data directory on Posit Connect (`CONNECT_CONTENT_DATA_DIR`), else under
-  `tools::R_user_dir("shiny", "cache")`.
+  `tools::R_user_dir("shiny", "cache")`, one subdirectory per app. An app
+  is identified by `SHINY_RESUME_APP_ID` when set, else by Connect's
+  `CONNECT_CONTENT_GUID`, so saved state survives a redeploy with an
+  unchanged `appVersion`, else by its directory.
   (#<PR number>)
 
 * Added an agent skill (`inst/skills/shiny-for-r/`) following the

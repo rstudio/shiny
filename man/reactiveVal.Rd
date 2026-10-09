@@ -10,7 +10,9 @@ reactiveVal(value = NULL, label = NULL)
 \item{value}{An optional initial value.}
 
 \item{label}{An optional label, for debugging purposes (see
-\code{\link[=reactlog]{reactlog()}}). If missing, a label will be automatically
+\code{\link[=reactlog]{reactlog()}}). It is also the value's identity for \code{\link[=enableResume]{enableResume()}}:
+two sources sharing an explicit label in one module namespace block
+saved state for the session. If missing, a label will be automatically
 created.}
 }
 \value{

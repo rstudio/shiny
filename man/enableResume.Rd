@@ -19,10 +19,10 @@ off, overriding the \code{SHINY_RESUME} environment variable. With \code{FALSE}
 the other arguments are ignored.}
 
 \item{appVersion}{\code{NULL}, or a string or number recorded with the saved
-state. With \code{NULL}, a hash stands in: the app's R files (the ones Shiny
-loads: \code{app.R}, \code{ui.R}, \code{server.R}, \code{global.R} and the \verb{R/} folder) and,
-when the server function comes from an installed package, that package's
-version. A deploy that changes any of them makes sessions resume from
+state. With \code{NULL}, a hash stands in: every \code{.R} file at the top
+level of the app directory and in its \verb{R/} folder (so \code{app.R}, \code{ui.R},
+\code{server.R} and \code{global.R} among them) and, when the server function
+comes from an installed package, that package's version. A deploy that changes any of them makes sessions resume from
 their inputs only. Set \code{appVersion} when the code lives elsewhere (a
 package whose version does not change with every deploy, a framework
 that keeps code in another folder), or to keep saved state across a
@@ -129,6 +129,10 @@ serialized (a connection, an R6 object, a closure), one over
 \code{maxNodeSize}, or two sources sharing a label when the state is saved
 block saved state for the whole session: it is restored all or nothing,
 so the session resumes from its inputs only and the log says why.
+\code{session$userData} is saved best-effort instead: an entry that cannot be
+saved is left out and reported, and the rest comes back. Sources are all or
+nothing because restoring some and not others can leave the app in a state
+it was never designed for.
 \code{session$resumeReport()} lists every value with the reason it would not
 restore.
 
@@ -198,13 +202,21 @@ an \code{\link[=observe]{observe()}} over ids), or keep the ids in a \code{react
 rebuild in \code{session$onResume()}, as above. For a handler that builds
 one output from inputs, prefer \code{\link[=eventReactive]{eventReactive()}}:
 \code{n <- eventReactive(input$go, input$n)} with
-\code{output$plot <- renderPlot(make_plot(n()))} needs nothing on resume.
+\code{output$plot <- renderPlot(make_plot(n()))} needs nothing on resume. It
+recomputes from the current inputs; when the committed value matters
+(the \code{n} the user clicked Go with, not where the slider is now), store
+it in a \code{reactiveVal()} from \code{observeEvent()}.
 \item \strong{Accumulate into a reactive value from \code{observeEvent()}, not a plain
 \code{observe()}.} A plain observer has no event to hold back, so it runs
 on resume and applies its change again:
 \code{observe({ input$plus; isolate(count(count() + 1)) })} shows 4 after
 three clicks and a resume; \code{observeEvent(input$plus, count(count() + 1))}
 shows 3.
+The same goes for an observer used as a handler:
+\code{observe({ req(input$go); send() })} runs on resume and sends again,
+because a button's count comes back non-zero; write
+\code{observeEvent(input$go, send())}. In development mode Shiny names such
+observers.
 }
 
 On resume, inputs the previous session already had are restored, never
@@ -219,8 +231,7 @@ opened but was not answered. Design side effects so that losing one such
 event is harmless, rather than relying on exactly-once delivery.
 
 Also: \code{\link[=bindCache]{bindCache()}} with a persistent cache keeps expensive reactive
-expressions cheap after a restart; \code{\link[=eventReactive]{eventReactive()}} recomputes with the
-current inputs; \code{observeEvent(once = TRUE)} may fire once more after a
+expressions cheap after a restart; \code{observeEvent(once = TRUE)} may fire once more after a
 resume; process-scoped values (temp paths, process ids) serialize fine
 and are wrong after a restart; an unconditional top-level
 \code{session$userData$x <- 0} overwrites the saved value, so guard it with

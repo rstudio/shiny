@@ -248,7 +248,9 @@ ReactiveVal <- R6Class(
 #'
 #' @param value An optional initial value.
 #' @param label An optional label, for debugging purposes (see
-#'   [reactlog()]). If missing, a label will be automatically
+#'   [reactlog()]). It is also the value's identity for [enableResume()]:
+#'   two sources sharing an explicit label in one module namespace block
+#'   saved state for the session. If missing, a label will be automatically
 #'   created.
 #'
 #' @return A function. Call the function with no arguments to (reactively) read

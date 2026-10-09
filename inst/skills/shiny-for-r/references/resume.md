@@ -8,7 +8,8 @@ process, continues from that state instead of from zero. A page reload
 still starts fresh.
 
 What comes back: `reactiveVal()` and `reactiveValues()` values with a label
-(an assigned name counts), `input`, uploaded files and `session$userData`.
+(an assigned name counts), uploaded files and `session$userData`; `input`
+holds what the browser had.
 What is recomputed: `reactive()` expressions and outputs. What does **not**
 run again: an `observeEvent()` whose event already happened (it would
 repeat a side effect such as sending an email). What is never saved:
@@ -64,9 +65,10 @@ session resumed from its inputs only. It also fires with resume off, when
 
 State comes back all or nothing: if a labelled value cannot be saved, or the
 app's R files changed and no `appVersion` is set, the session resumes from its
-inputs only. Saved state that does not fit once the server function has run (a
-labelled source with no saved value that was not left out with
-`excludeFromResume()`) ends the session. Four habits keep resumed sessions
+inputs only. So does saved state that does not fit once the server function
+has run (a labelled source with no saved value that was not left out with
+`excludeFromResume()`): the page reconnects once more and starts from its
+inputs. Four habits keep resumed sessions
 complete and correct.
 
 1. **Label sources created in loops or through helpers.** A source made in
@@ -80,10 +82,14 @@ complete and correct.
    a module server or creates an observer is held back on resume. Derive
    the structure from state (`renderUI()`, an `observe()` over ids), or
    keep the ids in a `reactiveVal()` and rebuild in `session$onResume()`.
-   For one output built from inputs, prefer `eventReactive()`.
+   For one output built from inputs, prefer `eventReactive()`. It recomputes
+   from the current inputs; when the committed value matters, store it in a
+   `reactiveVal()` from `observeEvent()`.
 4. **Accumulate into a reactive value from `observeEvent()`, not a plain
    `observe()`.** A plain observer has no event to hold back, so it runs on
-   resume and applies its change again.
+   resume and applies its change again. `observe({ req(input$go); send() })`
+   re-fires on resume because the button's count comes back non-zero; use
+   `observeEvent(input$go, send())`.
 
 ```r
 # Rule 1: label sources created in loops.
@@ -98,8 +104,8 @@ observeEvent(input$plus, count(count() + 1))
 ```
 
 To leave one value or `ExtendedTask` out of the saved state, wrap it in
-`excludeFromResume()`, around the constructor or before the app first reads
-it; after a resume it holds its initial value. Leave credentials in
+`excludeFromResume()`, around the constructor, or before the app reads it;
+during a resume it goes back to its initial value. Leave credentials in
 `session$userData` out with `enableResume(userDataExclude = "token")`.
 
 ## Reading the report
@@ -121,7 +127,9 @@ testServer(server, {
 - Process-scoped values (temp file paths, process ids) serialize fine and
   are wrong after a server restart.
 - `observeEvent(once = TRUE)` may fire once more after a resume.
-- `eventReactive()` recomputes with the current inputs.
+- A page that had saved state and resumes from inputs only shows
+  "Reconnected, but your previous work could not be restored.";
+  `event.preventDefault()` on `shiny:resumed` suppresses it.
 - Whether a hosting platform's storage survives a process restart is up to
   the platform; without a persistent volume a restarted container resumes
   from inputs only.

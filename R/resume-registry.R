@@ -360,19 +360,14 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       private$skipped <- c(private$skipped, label)
       invisible()
     },
-    # excludeFromResume() on a source whose saved value was applied during
-    # this resume. Before the app used that value, the source goes back to its
-    # constructor value; after, nothing can undo what the app did with it.
+    # excludeFromResume() during a resume: a source whose saved value was
+    # applied goes back to its constructor value, and its dependents
+    # recompute. A source that lost its identity to a duplicate label has no
+    # id and was never applied.
     excludeRestored = function(state) {
-      # A source that lost its identity to a duplicate label has no entry.
-      entry <- if (is.null(state$id)) NULL else private$entries[[state$id]]
-      if (isTRUE(state$used)) {
-        rlang::abort(sprintf(
-          "excludeFromResume() was called on `%s` after the app used its restored value. Call it before the first read, for example around the constructor: `x <- excludeFromResume(reactiveVal(...))`.",
-          entry$label %||% state$id %||% "<unnamed>"), class = "shiny_resume_exclude_late")
-      }
-      if (!is.null(entry)) private$revertOne(entry, state$id)
-      state$watch <- FALSE
+      id <- state$id
+      if (is.null(id) || !id %in% private$applied) return(invisible())
+      private$revertOne(private$entries[[id]], id)
       invisible()
     },
     outcome = function() private$outcomeValue
@@ -394,7 +389,6 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     phase = "idle",      # "idle" | "constructing" (server function running) | "restoring" (verified; first flush)
     records = NULL, omitted = character(0), initials = NULL, applied = character(0), claimed = character(0), trips = list(),
     skipped = character(0), outcomeValue = NULL,
-    watched = list(),
 
     orphan = function(entry, reason, counted) {
       entry$reason <- reason
@@ -532,8 +526,6 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       if (ok) {
         private$applied <- c(private$applied, id)
         private$claimed <- c(private$claimed, id)
-        entry$node$.snapshot$watch <- TRUE
-        private$watched <- c(private$watched, list(entry$node$.snapshot))
       }
       invisible(ok)
     },
@@ -581,8 +573,6 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     },
 
     leave = function() {
-      for (state in private$watched) { state$watch <- FALSE; state$used <- FALSE }
-      private$watched <- list()
       private$phase <- "idle"
       private$records <- NULL
       private$omitted <- character(0)
@@ -640,10 +630,6 @@ snapshot_node_state <- function(registry, ...) {
   state$id <- NULL
   state$skip <- FALSE
   state$skipReason <- NULL
-  # While a resume runs: `watch` once a saved value was applied, `used` once
-  # the app read or wrote it since (snapshot_note_use()).
-  state$watch <- FALSE
-  state$used <- FALSE
   state
 }
 

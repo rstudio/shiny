@@ -158,7 +158,7 @@ test_that("excludeFromResume() around the constructor shows the constructor valu
   expect_false("|reactiveVal|count" %in% names(s2$.snapshotRegistry$snapshot()$sources))
 })
 
-test_that("marking an existing source before its first use reverts it to the constructor value", {
+test_that("marking an existing source during a resume reverts it to the constructor value", {
   s2 <- resume_from(saved_ten, function(input, output, session) {
     count <- reactiveVal(0, label = "count")
     excludeFromResume(count)
@@ -168,68 +168,58 @@ test_that("marking an existing source before its first use reverts it to the con
   expect_equal(isolate(s2$env$count()), 0)
 })
 
-test_that("marking a source after the app read its restored value ends the resume", {
-  expect_error(
-    resume_from(saved_ten, function(input, output, session) {
-      count <- reactiveVal(0, label = "count")
-      seen <- isolate(count())
-      excludeFromResume(count)
-    }),
-    "excludeFromResume() was called on `count` after the app used its restored value",
-    fixed = TRUE, class = "shiny_resume_exclude_late"
-  )
+test_that("marking a source after the app read its restored value still reverts it", {
+  s2 <- resume_from(saved_ten, function(input, output, session) {
+    count <- reactiveVal(0, label = "count")
+    seen <- isolate(count())
+    excludeFromResume(count)
+  })
+  expect_equal(s2$env$seen, 10)
+  expect_equal(isolate(s2$env$count()), 0)
 })
 
-test_that("marking a source after the app wrote its restored value back ends the resume", {
-  expect_error(
-    resume_from(saved_ten, function(input, output, session) {
-      count <- reactiveVal(0, label = "count")
-      count(10)
-      excludeFromResume(count)
-    }),
-    class = "shiny_resume_exclude_late"
-  )
+test_that("marking a source after the app wrote its restored value back still reverts it", {
+  s2 <- resume_from(saved_ten, function(input, output, session) {
+    count <- reactiveVal(0, label = "count")
+    count(10)
+    excludeFromResume(count)
+  })
+  expect_equal(isolate(s2$env$count()), 0)
   v1 <- function(input, output, session) { rv <- reactiveValues(a = 10, .label = "rv") }
-  expect_error(
-    resume_from(v1, function(input, output, session) {
-      rv <- reactiveValues(a = 0, .label = "rv")
-      rv$a <- 10
-      excludeFromResume(rv)
-    }),
-    class = "shiny_resume_exclude_late"
-  )
+  s3 <- resume_from(v1, function(input, output, session) {
+    rv <- reactiveValues(a = 0, .label = "rv")
+    rv$a <- 10
+    excludeFromResume(rv)
+  })
+  expect_equal(isolate(s3$env$rv$a), 0)
 })
 
-test_that("marking a reactiveValues after reading its names ends the resume", {
+test_that("marking a reactiveValues during a resume reverts it, whether or not its names were read", {
   v1 <- function(input, output, session) { rv <- reactiveValues(a = 10, .label = "rv") }
-  expect_error(
-    resume_from(v1, function(input, output, session) {
-      rv <- reactiveValues(a = 0, .label = "rv")
-      isolate(names(rv))
-      excludeFromResume(rv)
-    }),
-    class = "shiny_resume_exclude_late"
-  )
   s2 <- resume_from(v1, function(input, output, session) {
     rv <- reactiveValues(a = 0, .label = "rv")
+    isolate(names(rv))
     excludeFromResume(rv)
   })
   expect_equal(isolate(s2$env$rv$a), 0)
+  s3 <- resume_from(v1, function(input, output, session) {
+    rv <- reactiveValues(a = 0, .label = "rv")
+    excludeFromResume(rv)
+  })
+  expect_equal(isolate(s3$env$rv$a), 0)
 })
 
-test_that("a source read by one first-flush observer and excluded by another ends the session", {
+test_that("a source excluded by a first-flush observer reverts, and its readers recompute", {
+  seen <- numeric(0)
   s2 <- resume_from(saved_ten, function(input, output, session) {
     count <- reactiveVal(0, label = "count")
-    observe(count(), priority = 10)
+    observe(seen <<- c(seen, count()), priority = 10)
     observe(excludeFromResume(count), priority = 0)
   })
-  # A mock session does not re-raise observer errors: it closes the session
-  # and calls onUnhandledError(), as a real session ends for good.
-  seen <- NULL
-  s2$onUnhandledError(function(e) seen <<- e)
-  suppressWarnings(suppressMessages(s2$flushReact()))  # printError()'s report
-  expect_s3_class(seen, "shiny_resume_exclude_late")
-  expect_true(s2$isClosed())
+  s2$flushReact()
+  expect_false(s2$isClosed())
+  expect_equal(isolate(s2$env$count()), 0)
+  expect_identical(seen, c(10, 0))
 })
 
 test_that("after the resume finished, marking keeps the current value and omits it from later records", {

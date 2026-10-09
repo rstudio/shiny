@@ -303,13 +303,12 @@ enableResume <- function(enabled = TRUE, appVersion = NULL, maxSize = 50e6, maxN
 #' * is transient UI state that should start fresh after a reconnect;
 #' * is over `maxNodeSize` and cheap to recompute.
 #'
-#' Call it anywhere, including inside the server function and a module. It
-#' can wrap the constructor or mark an object already held. While a page
-#' resumes, marking a source restores its initial value, provided the app has
-#' not yet read or written it; if it has, that is an error that ends the
-#' session, because what the app did with the restored value cannot be undone.
-#' Wrapping the constructor is always safe. Outside a resume, marking only
-#' keeps the value out of later saves. With resume off it does nothing.
+#' Call it anywhere, including inside the server function and a module.
+#' Wrap the constructor, or call it before the app reads the value; during a
+#' resume (the server function, `session$onResume()` callbacks and the first
+#' flush) the source goes back to its initial value and what depends on it
+#' recomputes. After a resume, marking only keeps the value out of later
+#' saves. With resume off it does nothing.
 #'
 #' @param x A [reactiveVal()], a [reactiveValues()] object or an
 #'   [ExtendedTask].
@@ -394,29 +393,15 @@ resume_check_names <- function(value, arg) {
 }
 
 # A node no registry tracks is never recorded, so there is nothing to mark.
+# During a resume a source whose saved value was applied goes back to its
+# constructor value.
 snapshot_mark_skipped <- function(node, reason = "excludeFromResume()") {
   state <- node$.snapshot
   if (is.null(state)) return(invisible())
-  if (isTRUE(state$watch)) state$registry$excludeRestored(state)
   state$skip <- TRUE
   state$skipReason <- reason
+  if (state$registry$restoring()) state$registry$excludeRestored(state)
   invisible()
-}
-
-# Called from a tracked source's read and write paths while its restored
-# value is watched.
-snapshot_note_use <- function(state) {
-  if (!isTRUE(.globals$snapshotUntracked)) state$used <- TRUE
-  invisible()
-}
-
-# Evaluates `expr` without counting its reads and writes of restored sources
-# as the app's use: for Shiny's own bookkeeping inside a constructor.
-snapshot_untracked <- function(expr) {
-  old <- .globals$snapshotUntracked
-  .globals$snapshotUntracked <- TRUE
-  on.exit(.globals$snapshotUntracked <- old)
-  expr
 }
 
 # Evaluates `expr`, whose reactiveVal() and reactiveValues() calls create

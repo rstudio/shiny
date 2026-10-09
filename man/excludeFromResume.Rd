@@ -30,13 +30,12 @@ live in a \code{\link[=reactiveVal]{reactiveVal()}}; rebuild it in \code{session
 \item is over \code{maxNodeSize} and cheap to recompute.
 }
 
-Call it anywhere, including inside the server function and a module. It
-can wrap the constructor or mark an object already held. While a page
-resumes, marking a source restores its initial value, provided the app has
-not yet read or written it; if it has, that is an error that ends the
-session, because what the app did with the restored value cannot be undone.
-Wrapping the constructor is always safe. Outside a resume, marking only
-keeps the value out of later saves. With resume off it does nothing.
+Call it anywhere, including inside the server function and a module.
+Wrap the constructor, or call it before the app reads the value; during a
+resume (the server function, \code{session$onResume()} callbacks and the first
+flush) the source goes back to its initial value and what depends on it
+recomputes. After a resume, marking only keeps the value out of later
+saves. With resume off it does nothing.
 }
 \examples{
 \dontrun{

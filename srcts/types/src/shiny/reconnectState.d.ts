@@ -30,4 +30,3 @@ declare class ReconnectState {
 }
 declare function peekAnswered(data: unknown): boolean;
 export { ReconnectState, peekAnswered };
-export type { FirstMessage, InputValues as ReconnectInputValues };

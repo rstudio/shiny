@@ -648,7 +648,7 @@ test_that("a socket that opened and closed before any message leaves no record, 
   expect_identical(res$outcome, "inputs")
 })
 
-test_that("snapshot_preflight() names each cause without touching the session", {
+test_that("snapshot_preflight() names each cause, and on success returns the record, store and key", {
   local_snapshot_store_dir()
   s <- ShinySession$new(fake_ws()); local_cancel_writes(s)
   expect_equal(snapshot_preflight(list(), s)$cause, "no token")

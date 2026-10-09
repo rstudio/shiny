@@ -20,8 +20,6 @@ SnapshotWriter <- R6Class("SnapshotWriter", cloneable = FALSE,
       private$storeField
     },
 
-    key = function() private$keyField,
-
     markDirty = function() {
       if (!private$dirty) private$firstDirtyAt <- private$session$.now()
       private$dirty <- TRUE

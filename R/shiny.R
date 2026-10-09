@@ -1588,31 +1588,11 @@ ShinySession <- R6Class(
         finish(list(resumed = "inputs", cause = cause), fromRegistry = FALSE)
       }
 
-      token <- data$token
-      if (is.null(token)) return(fallThrough("no token"))
-      if (!snapshot_token_valid(token)) return(fallThrough("malformed token"))
-      store <- snapshot_store()
-      if (is.null(store)) return(fallThrough("store unavailable"))
-      key <- snapshot_record_key(token)
-      record <- tryCatch(store$read(key), error = function(e) e)
-      if (inherits(record, "error")) return(fallThrough(paste("record unreadable:", conditionMessage(record))))
-      if (is.null(record)) return(fallThrough("no saved state"))
-      shape <- snapshot_shape_problem(record)
-      if (!is.null(shape)) return(fallThrough(paste("record unreadable:", shape)))
-      mismatch <- tryCatch(snapshot_identity_mismatch(record, self),
-        error = function(e) paste("identity check failed:", conditionMessage(e)))
-      if (!is.null(mismatch)) return(fallThrough(mismatch))
-      if (!isTRUE(record$complete)) {
-        first <- record$blocked[[1]]
-        try(store$delete(key), silent = TRUE)
-        return(fallThrough(sprintf("saved state incomplete: %s (%s)", first$id, first$reason)))
-      }
-      decoded <- tryCatch(snapshot_decode_sources(record), error = function(e) e)
-      if (inherits(decoded, "error")) {
-        try(store$delete(key), silent = TRUE)
-        return(fallThrough(paste("record unreadable:", conditionMessage(decoded))))
-      }
-      record <- decoded
+      pre <- snapshot_preflight(data, self)
+      if (!pre$ok) return(fallThrough(pre$cause))
+      record <- pre$record
+      store <- pre$store
+      key <- pre$key
 
       # Step 2. Seed before input handlers run: the shiny.file handler reads
       # the restore context's dir. File inputs stay out of what

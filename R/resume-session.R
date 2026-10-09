@@ -161,3 +161,35 @@ snapshot_decode_sources <- function(record) {
   }
   record
 }
+
+# Step 1 of a resume: everything checked before any app code sees saved state.
+# Returns the decoded record with its store and key, or the cause of an
+# inputs-only start. Deletes a record that is incomplete or cannot be decoded.
+snapshot_preflight <- function(data, session) {
+  fail <- function(cause) list(ok = FALSE, cause = cause)
+  token <- data$token
+  if (is.null(token)) return(fail("no token"))
+  if (!snapshot_token_valid(token)) return(fail("malformed token"))
+  store <- snapshot_store()
+  if (is.null(store)) return(fail("store unavailable"))
+  key <- snapshot_record_key(token)
+  record <- tryCatch(store$read(key), error = function(e) e)
+  if (inherits(record, "error")) return(fail(paste("record unreadable:", conditionMessage(record))))
+  if (is.null(record)) return(fail("no saved state"))
+  shape <- snapshot_shape_problem(record)
+  if (!is.null(shape)) return(fail(paste("record unreadable:", shape)))
+  mismatch <- tryCatch(snapshot_identity_mismatch(record, session),
+    error = function(e) paste("identity check failed:", conditionMessage(e)))
+  if (!is.null(mismatch)) return(fail(mismatch))
+  if (!isTRUE(record$complete)) {
+    first <- record$blocked[[1]]
+    try(store$delete(key), silent = TRUE)
+    return(fail(sprintf("saved state incomplete: %s (%s)", first$id, first$reason)))
+  }
+  decoded <- tryCatch(snapshot_decode_sources(record), error = function(e) e)
+  if (inherits(decoded, "error")) {
+    try(store$delete(key), silent = TRUE)
+    return(fail(paste("record unreadable:", conditionMessage(decoded))))
+  }
+  list(ok = TRUE, record = decoded, store = store, key = key)
+}

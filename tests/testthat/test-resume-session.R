@@ -642,3 +642,17 @@ test_that("a socket that opened and closed before any message leaves no record, 
   expect_message(res <- resume_real(app, list(token = tb, inputs = list())), "from inputs only: no saved state")
   expect_identical(res$outcome, "inputs")
 })
+
+test_that("snapshot_preflight() names each cause without touching the session", {
+  local_snapshot_store_dir()
+  s <- ShinySession$new(fake_ws()); local_cancel_writes(s)
+  expect_equal(snapshot_preflight(list(), s)$cause, "no token")
+  expect_equal(snapshot_preflight(list(token = "zz"), s)$cause, "malformed token")
+  expect_equal(snapshot_preflight(list(token = snapshot_token_new()), s)$cause, "no saved state")
+  token <- closed_counter_session()
+  pre <- snapshot_preflight(list(token = token), s)
+  expect_true(pre$ok)
+  expect_named(pre, c("ok", "record", "store", "key"))
+  expect_equal(pre$record$sources[["|reactiveVal|count"]]$value, 3)
+  expect_false(is.null(pre$store$read(pre$key)))
+})

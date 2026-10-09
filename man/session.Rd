@@ -27,6 +27,8 @@ needed it to retry outside Shiny Server and Posit Connect.
 Ends the session for good: the browser is told not to reconnect, the
 session's saved state (see \code{\link[=enableResume]{enableResume()}}) is deleted, and the
 connection closes. An unhandled error in an observer does the same.
+Apps that used \code{close()} behind Shiny Server as a way to restart the
+session should call \code{reload()} instead.
 }
 \item{clientData}{
 A \code{\link[=reactiveValues]{reactiveValues()}} object that contains information about the client.

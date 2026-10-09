@@ -10,26 +10,44 @@
 
 * Fixed #4281, #3251: `dateInput()`'s `datesdisabled` now works when `format` is not the default `yyyy-mm-dd`. The dates are now converted to real dates on the client, the same way `min`/`max` already are, instead of being parsed by bootstrap-datepicker with the display format. (#4434)
 
-* `session$allowReconnect(TRUE)` now works on any server, not only behind
-  Shiny Server's or Posit Connect's connection layer. When the connection
-  drops, the browser retries for about a minute (ten attempts), then offers
-  a **Try again** link; the new session starts with the client's inputs
-  filled back in. `renderUI()` content that calls `restoreInput()` keeps
-  its values across the reconnect, and a bookmark in the page's URL is no
-  longer restored over inputs the user changed since. `observeEvent()`
-  handlers no longer fire for the replayed inputs: they are events that
-  already happened, and before, two clicks and a reconnect re-ran the
-  handler. What the user does while the page is disconnected is delivered
-  once, in order, after the restored state; before, each such change was
-  sent twice and could run a handler twice. `session$onResume()` runs code on every reconnect, to redo what
-  such handlers built. A reconnecting client's first message is now `resume`
-  rather
-  than `init`; the wire protocol is documented in `srcts/PROTOCOL.md`. Apps
-  that already call `allowReconnect(TRUE)` outside those platforms start
-  retrying, `"force"` behaves exactly like `TRUE`, and retries are bounded
-  everywhere. A session the server ends, with `session$close()` or after an
-  unhandled error in an observer, is now never retried; before, behind
-  Shiny Server, the page reconnected into a new session. (#<PR number>)
+* `session$allowReconnect(TRUE)` now behaves the way it always should have:
+  the browser reconnects on any server and never replays past events.
+  Before, it only worked behind Shiny Server and Posit Connect, and the
+  reconnected session re-ran `observeEvent()` handlers for inputs that had
+  already happened (two clicks and a reconnect re-sent the email). What
+  changes for an app that calls it, resume on or off (#<PR number>):
+
+  * **Handlers no longer re-run on reconnect.** The replayed inputs are
+    restored as values; `observeEvent()` fires on the next change. A handler
+    that *built* something used to be re-run by accident:
+    ```r
+    observeEvent(input$go, output$plot <- renderPlot(hist(rnorm(input$n))))
+    ```
+    After a reconnect that plot is now stale. Either define the output at top
+    level with `eventReactive()`, or rebuild it in the new
+    `session$onResume()` hook, which runs once on every reconnect:
+    ```r
+    session$onResume(function(info) if (isTRUE(input$go > 0)) output$plot <- renderPlot(...))
+    ```
+  * **What the user did while disconnected is delivered once, in order**,
+    after the restored values. Before, each such change was sent twice and
+    could run a handler twice. A change sent in the instant the connection
+    died is restored as a value and not replayed.
+  * **Reconnecting works on any server.** Apps that already call
+    `allowReconnect(TRUE)` on plain `runApp()`, Docker or ShinyProxy start
+    retrying. The browser retries quickly for about a minute and then every
+    30 seconds for as long as the page is open, with a **Try now** link,
+    unless the hosting platform's connection layer says the session is over
+    (an idle timeout); `"force"` keeps retrying even then.
+  * **`session$close()` ends the session for good.** The browser is told not
+    to reconnect. Before, behind Shiny Server, a deliberate close was
+    followed by a reconnect into a new session; apps that used that as a
+    reset should call `session$reload()`.
+  * `renderUI()` content that calls `restoreInput()` keeps the user's
+    current values across a reconnect, and a bookmark in the page's URL is
+    no longer restored over inputs changed since the page loaded.
+  * A reconnecting browser's first message is `resume` rather than `init`;
+    the protocol is documented in `srcts/PROTOCOL.md`.
 
 * New `enableResume()`: with it on, a page whose connection drops
   continues from saved state, even when the R process restarted. Labelled
@@ -47,6 +65,11 @@
   event handlers built. `enableResume(FALSE)` turns resume off, overriding
   the `SHINY_RESUME` environment variable a hosting platform may set, and
   `reactiveValues()` gains `.label`. A page reload still starts fresh.
+  Inputs named in `session$setBookmarkExclude()` and `passwordInput()`
+  values are never written to disk; they come back from the browser. When
+  saved state turns out not to fit the app after the server function ran,
+  the browser shows "This session could not be resumed" with a Reload link
+  and the R log names the value.
   (#<PR number>)
 
 * Added an agent skill (`inst/skills/shiny-for-r/`) following the

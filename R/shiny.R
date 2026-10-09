@@ -119,6 +119,8 @@ workerId <- local({
 #'   Ends the session for good: the browser is told not to reconnect, the
 #'   session's saved state (see [enableResume()]) is deleted, and the
 #'   connection closes. An unhandled error in an observer does the same.
+#'   Apps that used `close()` behind Shiny Server as a way to restart the
+#'   session should call `reload()` instead.
 #' }
 #' \item{clientData}{
 #'   A [reactiveValues()] object that contains information about the client.

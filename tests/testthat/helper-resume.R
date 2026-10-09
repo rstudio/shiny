@@ -32,6 +32,17 @@ file_mode <- function(path) as.character(file.info(path)$mode)
 # returns the session; the caller drives it and reads `session$.snapshotRegistry`.
 snapshot_session <- function(server, session = MockShinySession$new()) {
   server <- capture_env(server)
+# Clears a leaked app directory (runApp() in an earlier test file leaves one in
+# the global options). A session made by createAppHandlers() reads the app's
+# options, not the global ones, so there the app path falls back to getwd();
+# the test must write its records under that same path.
+local_no_app_dir <- function(envir = parent.frame()) {
+  old <- getShinyOption("appDir")
+  shinyOptions(appDir = NULL)
+  withr::defer(shinyOptions(appDir = old), envir = envir)
+  invisible()
+}
+
   withMockContext(session, {
     server(input = session$input, output = session$output, session = session)
   })

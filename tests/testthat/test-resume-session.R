@@ -330,6 +330,7 @@ test_that("an update during the first flush is not overwritten", {
 
 test_that("the whole resume branch runs through createAppHandlers()", {
   local_snapshot_store_dir()
+  local_no_app_dir()
   token <- closed_counter_session()
   spy <- new_spy("obs", "txt")
   handlers <- createAppHandlers(NULL, function() counter_app(spy))
@@ -451,6 +452,7 @@ test_that("a `dom` key from an older client is ignored", {
 
 test_that("with resume off, a `resume` with a token is answered as init without reading saved state", {
   local_snapshot_store_dir()
+  local_no_app_dir()
   token <- closed_counter_session()
   withr::local_envvar(SHINY_RESUME = "FALSE")
   local_mocked_bindings(snapshot_store = function() stop("the store must not be read"))
@@ -538,6 +540,7 @@ test_that("an inputs-only resume runs onResume() callbacks with restored = FALSE
 
 test_that("an error in an onResume() callback ends the session for good and `resumed` is not sent", {
   local_snapshot_store_dir()
+  local_no_app_dir()
   token <- closed_counter_session()
   app <- function(input, output, session) {
     counter_app(new_spy("obs", "txt"))(input, output, session)
@@ -557,6 +560,7 @@ test_that("an error in an onResume() callback ends the session for good and `res
 
 test_that("a server function that errors on resume runs no onResume() callbacks and sends no `resumed`", {
   local_snapshot_store_dir()
+  local_no_app_dir()
   token <- closed_counter_session()
   ran <- FALSE
   app <- function(input, output, session) {
@@ -575,6 +579,7 @@ test_that("a server function that errors on resume runs no onResume() callbacks 
 
 test_that("a source with no saved value ends the session for good after the server function, with nothing saved", {
   local_snapshot_store_dir()
+  local_no_app_dir()
   token <- closed_counter_session()
   ran <- FALSE
   app <- function(input, output, session) {

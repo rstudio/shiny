@@ -6286,6 +6286,11 @@ ${duplicateIdMsg}`;
       this.pendingToken = null;
       if (hadOpened) this.snapshot = { ...inputs };
     }
+    // The server ended the session this page asked to resume: retries were
+    // stopped (`retriesStopped`) before it answered.
+    endedUnanswered(retriesStopped) {
+      return retriesStopped && this.isReconnecting && !this.isAnswered;
+    }
     beginReconnect() {
       this.isReconnecting = true;
       this.isAnswered = false;
@@ -6835,7 +6840,9 @@ ${duplicateIdMsg}`;
         (0, import_jquery39.default)(document.body).append('<div id="shiny-disconnected-overlay"></div>');
       }
       (0, import_jquery39.default)("#shiny-disconnected-overlay").toggleClass("reloading", reloading);
-      if (!this.reconnectControl.permitsManualRetry() && this.reconnectState.reconnecting && !this.reconnectState.answered) {
+      if (this.reconnectState.endedUnanswered(
+        !this.reconnectControl.permitsManualRetry()
+      )) {
         showResumeEndedDialog();
       }
       const socketAllows = this.$socket.allowReconnect !== false;

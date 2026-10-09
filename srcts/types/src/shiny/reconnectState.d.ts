@@ -25,6 +25,7 @@ declare class ReconnectState {
     onResumed(): void;
     onAnswered(): void;
     onSocketClosed(hadOpened: boolean, inputs: InputValues): void;
+    endedUnanswered(retriesStopped: boolean): boolean;
     beginReconnect(): void;
     firstMessage(initial: InputValues, current: InputValues): FirstMessage;
 }

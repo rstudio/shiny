@@ -57,6 +57,12 @@ class ReconnectState {
     if (hadOpened) this.snapshot = { ...inputs };
   }
 
+  // The server ended the session this page asked to resume: retries were
+  // stopped (`retriesStopped`) before it answered.
+  endedUnanswered(retriesStopped: boolean): boolean {
+    return retriesStopped && this.isReconnecting && !this.isAnswered;
+  }
+
   beginReconnect(): void {
     this.isReconnecting = true;
     this.isAnswered = false;

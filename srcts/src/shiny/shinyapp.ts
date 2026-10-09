@@ -417,11 +417,10 @@ class ShinyApp {
     // function of a reconnect that then succeeds must not leave this notice
     // on a working session.
     if (
-      !this.reconnectControl.permitsManualRetry() &&
-      this.reconnectState.reconnecting &&
-      !this.reconnectState.answered
+      this.reconnectState.endedUnanswered(
+        !this.reconnectControl.permitsManualRetry(),
+      )
     ) {
-      // The server ended the session this page asked to resume.
       /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
       showResumeEndedDialog();
     }

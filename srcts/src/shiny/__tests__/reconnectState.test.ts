@@ -135,3 +135,28 @@ void test("peekAnswered reads a top-level resumed or values from text messages",
   assert.equal(peekAnswered("not json, resumed values"), false);
   assert.equal(peekAnswered(new ArrayBuffer(4)), false);
 });
+
+void test("the resume-ended notice is for a reconnect the server ended without answering", () => {
+  const s = new ReconnectState();
+  assert.equal(s.endedUnanswered(true), false); // a fresh page
+  s.beginReconnect();
+  assert.equal(s.endedUnanswered(false), false); // retries still allowed
+  assert.equal(s.endedUnanswered(true), true); // stopped, never answered
+});
+
+void test("an answer that arrived before the socket closed means no resume-ended notice", () => {
+  const s = new ReconnectState();
+  s.beginReconnect();
+  // `resumed` arrives, then a stop, then the socket closes while the queued
+  // `resumed` handler has not run yet.
+  if (peekAnswered('{"resumed":"snapshot"}')) s.onAnswered();
+  assert.equal(s.endedUnanswered(true), false);
+});
+
+void test("beginning another attempt makes the page unanswered again", () => {
+  const s = new ReconnectState();
+  s.beginReconnect();
+  s.onAnswered();
+  s.beginReconnect();
+  assert.equal(s.endedUnanswered(true), true);
+});

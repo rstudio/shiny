@@ -126,6 +126,7 @@ class ShinyApp {
   // server and scheduling outgoing messages to the server, and can be used for
   // other things tasks as well.
   taskQueue = new AsyncQueue<() => Promise<void> | void>();
+  private actionQueueLoopStarted = false;
 
   config: {
     workerId: string;
@@ -271,9 +272,6 @@ class ShinyApp {
         socket.send(msg as string);
       }
 
-      // This launches the action queue loop, which just runs in the background,
-      // so we don't need to await it.
-      /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
       this.startActionQueueLoop();
     };
     socket.onmessage = (e) => {
@@ -305,7 +303,17 @@ class ShinyApp {
     return socket;
   }
 
-  async startActionQueueLoop(): Promise<void> {
+  // One loop drains the queue for the life of the page; it holds no
+  // per-socket state, so reconnects must not start another.
+  startActionQueueLoop(): void {
+    if (this.actionQueueLoopStarted) return;
+    this.actionQueueLoopStarted = true;
+    // It runs in the background, so we don't need to await it.
+    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+    this._runActionQueueLoop();
+  }
+
+  private async _runActionQueueLoop(): Promise<void> {
     while (true) {
       try {
         const action = await this.taskQueue.dequeue();

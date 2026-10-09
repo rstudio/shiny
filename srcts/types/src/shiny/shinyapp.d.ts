@@ -27,6 +27,7 @@ declare function addCustomMessageHandler(type: string, handler: Handler): void;
 declare class ShinyApp {
     $socket: ShinyWebSocket | null;
     taskQueue: AsyncQueue<() => Promise<void> | void>;
+    private actionQueueLoopStarted;
     config: {
         workerId: string;
         sessionId: string;
@@ -61,7 +62,8 @@ declare class ShinyApp {
     isConnected(): boolean;
     reconnect(): void;
     createSocket(): ShinyWebSocket;
-    startActionQueueLoop(): Promise<void>;
+    startActionQueueLoop(): void;
+    private _runActionQueueLoop;
     sendInput(values: InputValues): void;
     $notifyDisconnected(): void;
     $removeSocket(): void;

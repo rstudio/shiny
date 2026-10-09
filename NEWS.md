@@ -8,6 +8,11 @@
   also no longer reopen a session after the server sent
   `allowReconnect(FALSE)`. (#<PR number>)
 
+* After the browser reconnected, each reconnect started another loop for
+  processing messages from the server, so after N reconnects N loops ran and
+  server messages could be handled out of order. One loop now serves the page
+  for its lifetime. (#<PR number>)
+
 * Fixed #4281, #3251: `dateInput()`'s `datesdisabled` now works when `format` is not the default `yyyy-mm-dd`. The dates are now converted to real dates on the client, the same way `min`/`max` already are, instead of being parsed by bootstrap-datepicker with the display format. (#4434)
 
 * Added an agent skill (`inst/skills/shiny-for-r/`) following the

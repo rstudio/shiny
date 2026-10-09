@@ -6425,6 +6425,7 @@ ${duplicateIdMsg}`;
       // server and scheduling outgoing messages to the server, and can be used for
       // other things tasks as well.
       this.taskQueue = new AsyncQueue();
+      this.actionQueueLoopStarted = false;
       this.config = null;
       // Cached input values
       this.$inputValues = {};
@@ -6660,7 +6661,14 @@ ${duplicateIdMsg}`;
       };
       return socket;
     }
-    async startActionQueueLoop() {
+    // One loop drains the queue for the life of the page; it holds no
+    // per-socket state, so reconnects must not start another.
+    startActionQueueLoop() {
+      if (this.actionQueueLoopStarted) return;
+      this.actionQueueLoopStarted = true;
+      this._runActionQueueLoop();
+    }
+    async _runActionQueueLoop() {
       while (true) {
         try {
           const action = await this.taskQueue.dequeue();

@@ -26,8 +26,7 @@ declare class ReconnectState {
     onAnswered(): void;
     onSocketClosed(hadOpened: boolean, inputs: InputValues): void;
     beginReconnect(): void;
-    onReconnected(): void;
-    firstMessage(current: InputValues): FirstMessage;
+    firstMessage(initial: InputValues, current: InputValues): FirstMessage;
 }
 export { ReconnectState };
 export type { FirstMessage, InputValues as ReconnectInputValues };

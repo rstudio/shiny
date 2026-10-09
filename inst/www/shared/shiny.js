@@ -6069,6 +6069,15 @@ ${duplicateIdMsg}`;
 
   // srcts/src/shiny/reconnectDialog.ts
   var import_jquery38 = __toESM(require_jquery());
+  var countdownTimer;
+  function startCountdown(reconnectTime) {
+    stopCountdown();
+    updateTime(reconnectTime);
+  }
+  function stopCountdown() {
+    clearTimeout(countdownTimer);
+    countdownTimer = void 0;
+  }
   function updateTime(reconnectTime) {
     const $time = (0, import_jquery38.default)("#shiny-reconnect-time");
     if ($time.length === 0) return;
@@ -6078,13 +6087,16 @@ ${duplicateIdMsg}`;
     } else {
       $time.text("...");
     }
-    setTimeout(function() {
+    countdownTimer = setTimeout(function() {
       updateTime(reconnectTime);
     }, 1e3);
   }
   async function showReconnectDialog(delay, stillWanted = () => true) {
     const reconnectTime = (/* @__PURE__ */ new Date()).getTime() + delay;
-    if ((0, import_jquery38.default)("#shiny-reconnect-text").length > 0) return;
+    if ((0, import_jquery38.default)("#shiny-reconnect-text").length > 0) {
+      startCountdown(reconnectTime);
+      return;
+    }
     const html = '<span id="shiny-reconnect-text">Attempting to reconnect</span><span id="shiny-reconnect-time"></span>';
     const action = '<a id="shiny-reconnect-now" href="#" onclick="Shiny.shinyapp.reconnect();">Try now</a>';
     await show2({
@@ -6099,9 +6111,10 @@ ${duplicateIdMsg}`;
       hideReconnectDialog();
       return;
     }
-    updateTime(reconnectTime);
+    startCountdown(reconnectTime);
   }
   function hideReconnectDialog() {
+    stopCountdown();
     remove2("reconnect");
   }
   async function showResumeEndedDialog() {
@@ -6266,25 +6279,21 @@ ${duplicateIdMsg}`;
     onAnswered() {
       this.isAnswered = true;
     }
-    // `hadOpened`: the socket had opened, so `inputs` are what the server last
-    // had a chance to see. A failed attempt leaves the snapshot alone.
+    // `hadOpened`: the socket had opened, so it drained the queued `update`s
+    // right after `resume`, and any edits made since exist only in `inputs`:
+    // take the snapshot again. A failed attempt never opened and leaves it alone.
     onSocketClosed(hadOpened, inputs) {
       this.pendingToken = null;
-      if (hadOpened && (!this.isReconnecting || this.snapshot === null)) {
-        this.snapshot = { ...inputs };
-      }
+      if (hadOpened) this.snapshot = { ...inputs };
     }
     beginReconnect() {
       this.isReconnecting = true;
       this.isAnswered = false;
     }
-    // Called when a reconnect succeeded end to end, so the next drop takes a
-    // fresh snapshot.
-    onReconnected() {
-      this.snapshot = null;
-    }
-    firstMessage(current) {
-      if (!this.isReconnecting) return { method: "init", data: current };
+    // `initial` is the input set copied when the attempt began; `current` is the
+    // live set, which also carries edits made while the attempt was connecting.
+    firstMessage(initial, current) {
+      if (!this.isReconnecting) return { method: "init", data: initial };
       const inputs = this.snapshot ?? { ...current };
       return {
         method: "resume",
@@ -6525,6 +6534,7 @@ ${duplicateIdMsg}`;
       // server and scheduling outgoing messages to the server, and can be used for
       // other things tasks as well.
       this.taskQueue = new AsyncQueue();
+      this.actionQueueLoopStarted = false;
       this.config = null;
       this.reconnectState = new ReconnectState();
       // Cached input values
@@ -6661,12 +6671,7 @@ ${duplicateIdMsg}`;
     }
     setAllowReconnect(value) {
       this.reconnectControl.setAllow(value);
-      if (value !== false) return;
-      if (this.reconnectState.reconnecting && !this.reconnectState.answered) {
-        showResumeEndedDialog();
-      } else {
-        hideReconnectDialog();
-      }
+      if (value === false) hideReconnectDialog();
     }
     connect(initialInput) {
       if (this.$socket)
@@ -6739,7 +6744,10 @@ ${duplicateIdMsg}`;
         this.onConnected();
         socket.send(
           JSON.stringify(
-            this.reconnectState.firstMessage(this.$initialInput ?? {})
+            this.reconnectState.firstMessage(
+              this.$initialInput ?? {},
+              this.$inputValues
+            )
           )
         );
         while (this.$pendingMessages.length) {
@@ -6769,7 +6777,14 @@ ${duplicateIdMsg}`;
       };
       return socket;
     }
-    async startActionQueueLoop() {
+    // One loop drains the queue for the life of the page; it holds no
+    // per-socket state, so reconnects must not start another.
+    startActionQueueLoop() {
+      if (this.actionQueueLoopStarted) return;
+      this.actionQueueLoopStarted = true;
+      this._runActionQueueLoop();
+    }
+    async _runActionQueueLoop() {
       while (true) {
         try {
           const action = await this.taskQueue.dequeue();
@@ -6805,6 +6820,9 @@ ${duplicateIdMsg}`;
         (0, import_jquery39.default)(document.body).append('<div id="shiny-disconnected-overlay"></div>');
       }
       (0, import_jquery39.default)("#shiny-disconnected-overlay").toggleClass("reloading", reloading);
+      if (!this.reconnectControl.permitsManualRetry() && this.reconnectState.reconnecting && !this.reconnectState.answered) {
+        showResumeEndedDialog();
+      }
       const socketAllows = this.$socket.allowReconnect !== false;
       if (!this.reconnectControl.shouldRetry(socketAllows)) return;
       const delay = this.reconnectDelay.next();
@@ -7055,7 +7073,6 @@ ${duplicateIdMsg}`;
       addMessageHandler("values", async (message) => {
         if (this.reconnectState.reconnecting && !this.reconnectState.answered) {
           this.reconnectState.onAnswered();
-          this.reconnectState.onReconnected();
         }
         this.reconnectDelay.reset();
         this._updateProgress();
@@ -7179,7 +7196,6 @@ ${duplicateIdMsg}`;
       addMessageHandler("resumed", (message) => {
         this.reconnectDelay.reset();
         this.reconnectState.onResumed();
-        this.reconnectState.onReconnected();
         (0, import_jquery39.default)(document).trigger({
           type: "shiny:resumed",
           // @ts-expect-error; Can not remove info on a established, malformed Event object

@@ -270,7 +270,7 @@ test_that("with an async output in the first flush, the hold-back clears and a q
   expect_true(isTRUE(s$.resumeHoldBack))          # the slow output keeps the flush open
   expect_equal(spy$obs, 0)
   for (i in 1:30) {
-    later::run_now(0.05); flushReact(); s$flushOutput()
+    later::run_now(0.05); flushReact(); suppressMessages(s$flushOutput())
     if (!isTRUE(s$.resumeHoldBack)) break
   }
   expect_false(isTRUE(s$.resumeHoldBack))
@@ -282,6 +282,8 @@ test_that("with an async output in the first flush, the hold-back clears and a q
     later::run_now(0.05); flushReact(); s$flushOutput()
     if (spy$obs == 1) break
   }
+  expect_equal(spy$obs, 1)
+  for (i in 1:5) { later::run_now(0.05); flushReact(); s$flushOutput() }
   expect_equal(spy$obs, 1)
   expect_equal(as.numeric(isolate(s$input$plus)), 4)
 })

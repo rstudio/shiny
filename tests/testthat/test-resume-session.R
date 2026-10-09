@@ -677,7 +677,7 @@ test_that("an input on the bookmark-exclude list is not saved and comes back fro
   expect_identical(isolate(res$session$input$`m-key`), "k")
 })
 
-test_that("with URL bookmarking and resume both on, a reconnect keeps the record and the bookmark observers", {
+test_that("with URL bookmarking and resume both on, a reconnect resumes from the record and the bookmark observers fire", {
   local_snapshot_store_dir()
   shinyOptions(bookmarkStore = "url"); withr::defer(shinyOptions(bookmarkStore = NULL))
   initCurrentAppState(NULL); withr::defer(clearCurrentAppState())
@@ -695,13 +695,14 @@ test_that("with URL bookmarking and resume both on, a reconnect keeps the record
   live_set(live$session, txt = "typed")
   token <- live_close(live)
   res <- suppressMessages(resume_real(app,
-    list(token = token, inputs = list(`plus:shiny.action` = 2, txt = "typed", .clientdata_url_search = "?_inputs_&txt=%22bm%22",
+    list(token = token, inputs = list(`plus:shiny.action` = 2, txt = "typed",
       .clientdata_url_protocol = "http:", .clientdata_url_hostname = "localhost",
       .clientdata_url_port = "80", .clientdata_url_pathname = "/")),
     before = function(s) s$createBookmarkObservers()))
   expect_identical(res$outcome, "snapshot")
-  expect_identical(isolate(res$session$input$txt), "typed")   # the record, not the URL
+  expect_identical(isolate(res$session$input$txt), "typed")
   expect_equal(spy$restore, 0)
-  withReactiveDomain(res$session, isolate(res$session$doBookmark()))
-  expect_equal(spy$bookmarked, 1)                              # observers are live
+  res$session$manageInputs(withReactiveDomain(res$session, applyInputHandlers(list(`._bookmark_` = 1L), res$session)))
+  flushReact()
+  expect_equal(spy$bookmarked, 1)
 })

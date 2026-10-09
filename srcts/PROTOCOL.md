@@ -76,15 +76,13 @@ Carries the app's `session$allowReconnect()` calls. `"force"` behaves as
 ### Client retry rule
 
 After the socket closes, the client retries when the last `allowReconnect`
-value it saw is `true` or `"force"`, on any socket. Delays between attempts
-are 1.5 s, 1.5 s, 2.5 s, 2.5 s, 5.5 s, 5.5 s, then 10.5 s repeated; at most
-**ten** attempts. Each retry opens a new socket and sends `resume`. The
-attempt count resets when the server answers (`config`, `values` or
-`resumed`), not when the socket opens. When the attempts run out the client
-replaces its "Attempting to reconnect" notification with "Could not
-reconnect." and a **Try again** link, which resets the count and starts the
-schedule over with the token the page holds in memory. The client never
-retries in the background after that.
+value it saw is `true` or `"force"`, unless the connection layer vetoed it
+(see "Hosting shims" below). Delays between attempts are 1.5 s, 1.5 s,
+2.5 s, 2.5 s, 5.5 s, 5.5 s, 10.5 s, 10.5 s, 10.5 s, then 30.5 s repeated
+for as long as the page is open. Each retry opens a new socket and sends
+`resume`. The schedule restarts when the server answers (`config`, `values`
+or `resumed`), not when the socket opens. The "Attempting to reconnect"
+notification shows a countdown and a **Try now** link that attempts at once.
 
 ## Saved state
 

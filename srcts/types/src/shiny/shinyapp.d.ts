@@ -63,7 +63,6 @@ declare class ShinyApp {
     constructor();
     connect(initialInput: InputValues): void;
     isConnected(): boolean;
-    retryReconnect(): void;
     reconnect(): void;
     createSocket(): ShinyWebSocket;
     startActionQueueLoop(): Promise<void>;

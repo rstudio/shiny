@@ -102,7 +102,7 @@ test_that("with SHINY_RESUME=FALSE a reconnect replays inputs but no events, and
   click_until(b, "#plus", "#count", "Count: 1")
 })
 
-test_that("after the attempts run out, Try again resumes the restarted app with the token the page kept", {
+test_that("a page keeps retrying through a long outage and resumes with the token it kept", {
   skip_on_cran()
   e <- e2e_session(env = c(SHINY_RESUME = "TRUE"), app = "resume-e2e")
   b <- e$browser
@@ -112,20 +112,10 @@ test_that("after the attempts run out, Try again resumes the restarted app with 
   e$process$kill()
   e2e_wait_until(function() !e2e_port_open(e$port), what = "port to close")
   e2e_wait_until(function() e2e_present(b, "#shiny-reconnect-text"), what = "the reconnect notification")
-  # "Try now" runs an attempt at once; each failure counts.
-  for (i in 1:12) {
-    if (e2e_present(b, "#shiny-reconnect-failed")) break
-    try(e2e_click(b, "#shiny-reconnect-now"), silent = TRUE)
-    Sys.sleep(0.5)
-  }
-  expect_true(e2e_present(b, "#shiny-reconnect-failed"))
-  expect_true(e2e_present(b, "#shiny-disconnected-overlay"))
-  Sys.sleep(3)                                   # no background retries
-  expect_false(e2e_present(b, "#shiny-reconnect-text"))
-
+  Sys.sleep(8)
+  expect_true(e2e_present(b, "#shiny-reconnect-text"))
   restart_process(e)
-  e2e_click(b, "#shiny-reconnect-retry")
-  e2e_wait_until(function() identical(resumed_attr(b), "snapshot"), timeout = 40, what = "shiny:resumed")
+  e2e_wait_until(function() identical(resumed_attr(b), "snapshot"), timeout = 60, what = "shiny:resumed")
   expect_match(e2e_text(b, "#count"), "Count: 2", fixed = TRUE)
 })
 

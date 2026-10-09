@@ -54,25 +54,21 @@ test_that("without allowReconnect() the client does not retry", {
   expect_false(e2e_present(b, "#shiny-reconnect-text"))
 })
 
-test_that("after ten failed attempts the notification offers Try again and the overlay stays", {
+test_that("retries continue while the server is down and reconnect when it returns", {
   skip_on_cran()
   e <- e2e_session(env = c(SHINY_RESUME = "FALSE", E2E_ALLOW = "1"))
   b <- e$browser
+  pid1 <- e2e_text(b, "#process")
   e$process$kill()
   e2e_wait_until(function() !e2e_port_open(e$port), what = "port to close")
   e2e_wait_until(function() e2e_present(b, "#shiny-reconnect-text"), what = "the reconnect notification")
-  # "Try now" runs an attempt at once; each failure counts. The first
-  # attempt was counted when the socket closed, so at most nine clicks.
-  for (i in 1:12) {
-    if (e2e_present(b, "#shiny-reconnect-failed")) break
-    try(e2e_click(b, "#shiny-reconnect-now"), silent = TRUE)
-    Sys.sleep(0.5)
-  }
-  expect_true(e2e_present(b, "#shiny-reconnect-failed"))
-  expect_true(e2e_present(b, "#shiny-reconnect-retry"))
+  Sys.sleep(8)                                   # several failed attempts
+  expect_true(e2e_present(b, "#shiny-reconnect-text"))
+  expect_true(e2e_present(b, "#shiny-reconnect-now"))
   expect_true(e2e_present(b, "#shiny-disconnected-overlay"))
-  Sys.sleep(3)
-  expect_false(e2e_present(b, "#shiny-reconnect-text"))
+  restart_process(e)
+  wait_for_new_process(b, pid1)
+  expect_false(e2e_present(b, "#shiny-disconnected-overlay"))
 })
 
 test_that("a bookmark URL is not re-restored on reconnect", {

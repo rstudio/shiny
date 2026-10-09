@@ -1,11 +1,9 @@
 // Time to wait before each reconnection attempt. Past the end, the last
-// value repeats. Each has 500 ms added so the notification shows "..." for
-// its last half second.
-const delays = [1500, 1500, 2500, 2500, 5500, 5500, 10500];
-
-// About a minute of retrying; a server that is simply gone should not keep
-// the tab polling forever.
-const maxAttempts = 10;
+// value repeats: about a minute of quick attempts, then one every 30 s for
+// as long as the tab is open (srcts/PROTOCOL.md, "Client retry rule").
+// Each has 500 ms added so the notification shows "..." for its last half
+// second.
+const delays = [1500, 1500, 2500, 2500, 5500, 5500, 10500, 10500, 10500, 30500];
 
 class ReconnectDelay {
   private attempts = 0;
@@ -18,14 +16,11 @@ class ReconnectDelay {
     return delays[i];
   }
 
-  exhausted(): boolean {
-    return this.attempts >= maxAttempts;
-  }
-
-  // Called when the server answers (`config` or `values`), never on socket open.
+  // Called when the server answers (`config`, `values` or `resumed`), never
+  // on socket open.
   reset(): void {
     this.attempts = 0;
   }
 }
 
-export { ReconnectDelay, maxAttempts };
+export { ReconnectDelay };

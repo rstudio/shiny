@@ -98,8 +98,10 @@ workerId <- local({
 #' @return
 #' \item{allowReconnect(value)}{
 #'   Whether the browser should try to reconnect when its connection to the
-#'   server is lost. If `value` is `TRUE`, the client retries for about a
-#'   minute (ten attempts with growing delays), on any server. If a retry
+#'   server is lost. If `value` is `TRUE`, the client retries on any server:
+#'   quickly for about a minute, then every 30 seconds for as long as the page
+#'   is open, unless the hosting platform's connection layer says the session
+#'   is over (for example an idle timeout). If a retry
 #'   gets through, a new session starts on the server with the client's
 #'   current input values filled back in: `renderUI()` content that uses
 #'   [restoreInput()] keeps its values and every output recomputes.

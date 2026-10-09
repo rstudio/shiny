@@ -27,11 +27,7 @@ import { removeNotification, showNotification } from "./notifications";
 import type { ReconnectPermission } from "./reconnectControl";
 import { peekAllowReconnect, ReconnectControl } from "./reconnectControl";
 import { ReconnectDelay } from "./reconnectDelay";
-import {
-  hideReconnectDialog,
-  showReconnectDialog,
-  showReconnectFailedDialog,
-} from "./reconnectDialog";
+import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
 import { ReconnectState } from "./reconnectState";
 import type { HtmlDep } from "./render";
 import { renderContentAsync, renderHtmlAsync } from "./render";
@@ -227,13 +223,6 @@ class ShinyApp {
     return !!this.$socket;
   }
 
-  // The "Try again" link once the attempts have run out: a fresh schedule,
-  // and the token this page still holds.
-  retryReconnect(): void {
-    this.reconnectDelay.reset();
-    this.reconnect();
-  }
-
   reconnect(): void {
     // The "Try now" link calls this directly; it must not reopen a session
     // the server ended. Clear any scheduled reconnect either way.
@@ -404,11 +393,6 @@ class ShinyApp {
     // srcts/PROTOCOL.md, "Client retry rule".
     const permitted = this.reconnectControl.shouldRetry(true);
     if (!permitted) return;
-    if (this.reconnectDelay.exhausted()) {
-      /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-      showReconnectFailedDialog();
-      return;
-    }
     const delay = this.reconnectDelay.next();
     /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     showReconnectDialog(delay, () => this.reconnectControl.allow !== false);

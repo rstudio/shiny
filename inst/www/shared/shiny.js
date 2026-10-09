@@ -6104,16 +6104,6 @@ ${duplicateIdMsg}`;
   function hideReconnectDialog() {
     remove2("reconnect");
   }
-  async function showReconnectFailedDialog() {
-    await show2({
-      id: "reconnect",
-      html: '<span id="shiny-reconnect-failed">Could not reconnect.</span>',
-      action: '<a id="shiny-reconnect-retry" href="#" onclick="Shiny.shinyapp.retryReconnect();">Try again</a>',
-      duration: null,
-      closeButton: false,
-      type: "warning"
-    });
-  }
 
   // srcts/src/shiny/shinyapp.ts
   var import_jquery39 = __toESM(require_jquery());
@@ -6213,8 +6203,7 @@ ${duplicateIdMsg}`;
   }
 
   // srcts/src/shiny/reconnectDelay.ts
-  var delays = [1500, 1500, 2500, 2500, 5500, 5500, 10500];
-  var maxAttempts = 10;
+  var delays = [1500, 1500, 2500, 2500, 5500, 5500, 10500, 10500, 10500, 30500];
   var ReconnectDelay = class {
     constructor() {
       this.attempts = 0;
@@ -6225,10 +6214,8 @@ ${duplicateIdMsg}`;
       this.attempts++;
       return delays[i5];
     }
-    exhausted() {
-      return this.attempts >= maxAttempts;
-    }
-    // Called when the server answers (`config` or `values`), never on socket open.
+    // Called when the server answers (`config`, `values` or `resumed`), never
+    // on socket open.
     reset() {
       this.attempts = 0;
     }
@@ -6687,12 +6674,6 @@ ${duplicateIdMsg}`;
     isConnected() {
       return !!this.$socket;
     }
-    // The "Try again" link once the attempts have run out: a fresh schedule,
-    // and the token this page still holds.
-    retryReconnect() {
-      this.reconnectDelay.reset();
-      this.reconnect();
-    }
     reconnect() {
       this.reconnectControl.cancel();
       if (!this.reconnectControl.permitsManualRetry()) {
@@ -6806,10 +6787,6 @@ ${duplicateIdMsg}`;
       (0, import_jquery39.default)("#shiny-disconnected-overlay").toggleClass("reloading", reloading);
       const permitted = this.reconnectControl.shouldRetry(true);
       if (!permitted) return;
-      if (this.reconnectDelay.exhausted()) {
-        showReconnectFailedDialog();
-        return;
-      }
       const delay = this.reconnectDelay.next();
       showReconnectDialog(delay, () => this.reconnectControl.allow !== false);
       this.$scheduleReconnect(delay);

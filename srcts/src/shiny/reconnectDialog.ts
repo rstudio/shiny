@@ -60,18 +60,4 @@ function hideReconnectDialog(): void {
   removeNotification("reconnect");
 }
 
-// Shown in place of the "Attempting to reconnect" notification once the
-// attempts have run out; the link starts the schedule over.
-async function showReconnectFailedDialog(): Promise<void> {
-  await showNotification({
-    id: "reconnect",
-    html: '<span id="shiny-reconnect-failed">Could not reconnect.</span>',
-    action:
-      '<a id="shiny-reconnect-retry" href="#" onclick="Shiny.shinyapp.retryReconnect();">Try again</a>',
-    duration: null,
-    closeButton: false,
-    type: "warning",
-  });
-}
-
-export { hideReconnectDialog, showReconnectDialog, showReconnectFailedDialog };
+export { hideReconnectDialog, showReconnectDialog };

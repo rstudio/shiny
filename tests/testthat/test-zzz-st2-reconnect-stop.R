@@ -46,16 +46,17 @@ test_that("a stop arriving while the reconnect notice renders leaves no notice a
           queueMicrotask(function() { Shiny.shinyapp.$allowReconnect = false; });
         });
       ")),
-      actionButton("close", "Close")
+      "Connected"
     )
     server <- function(input, output, session) {
       session$allowReconnect("force")
-      observeEvent(input$close, session$close())
     }
     shinyApp(ui, server)
   })
   expect_equal(app$get_js("window.connects"), 1)
-  app$click("close", wait_ = FALSE)
+  # Dropped from the client, so no stop message arrives first (session$close()
+  # sends one) and the stop in the microtask above is the only one.
+  app$run_js("Shiny.shinyapp.$socket.close()")
   Sys.sleep(3)                                  # past the first retry delay (1.5 s)
   expect_equal(app$get_js("window.connects"), 1)
   expect_equal(app$get_js("document.querySelectorAll('#shiny-reconnect-text').length"), 0)

@@ -24,6 +24,8 @@ import {
 } from "./initedMethods";
 import { removeModal, showModal } from "./modal";
 import { removeNotification, showNotification } from "./notifications";
+import type { ReconnectPermission } from "./reconnectControl";
+import { peekAllowReconnect, ReconnectControl } from "./reconnectControl";
 import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
 import type { HtmlDep } from "./render";
 import { renderContentAsync, renderHtmlAsync } from "./render";
@@ -155,7 +157,20 @@ class ShinyApp {
   } = {};
   $nextRequestId = 0;
 
-  $allowReconnect: boolean | "force" = false;
+  reconnectControl = new ReconnectControl();
+
+  // Kept for code outside this class that reads or sets it.
+  get $allowReconnect(): ReconnectPermission {
+    return this.reconnectControl.allow;
+  }
+  set $allowReconnect(value: ReconnectPermission) {
+    this.setAllowReconnect(value);
+  }
+
+  setAllowReconnect(value: ReconnectPermission): void {
+    this.reconnectControl.setAllow(value);
+    if (value === false) hideReconnectDialog();
+  }
 
   constructor() {
     this._init();
@@ -176,12 +191,14 @@ class ShinyApp {
     return !!this.$socket;
   }
 
-  private scheduledReconnect: number | undefined = undefined;
-
   reconnect(): void {
-    // This function can be invoked directly even if there's a scheduled
-    // reconnect, so be sure to clear any such scheduled reconnects.
-    clearTimeout(this.scheduledReconnect);
+    // The "Try now" link calls this directly; it must not reopen a session
+    // the server ended. Clear any scheduled reconnect either way.
+    this.reconnectControl.cancel();
+    if (!this.reconnectControl.permitsManualRetry()) {
+      hideReconnectDialog();
+      return;
+    }
 
     if (this.isConnected())
       throw "Attempted to reconnect, but already connected.";
@@ -260,6 +277,10 @@ class ShinyApp {
       this.startActionQueueLoop();
     };
     socket.onmessage = (e) => {
+      // Applied on arrival, not in queue order: a stop must take effect even
+      // while a slow handler holds the queue and the socket closes behind it.
+      const allow = peekAllowReconnect(e.data);
+      if (allow !== undefined) this.setAllowReconnect(allow);
       this.taskQueue.enqueue(async () => await this.dispatchMessage(e.data));
     };
     // Called when a successfully-opened websocket is closed, or when an
@@ -319,10 +340,8 @@ class ShinyApp {
     this.$socket = null;
   }
 
-  $scheduleReconnect(delay: Parameters<typeof setTimeout>[1]): void {
-    this.scheduledReconnect = window.setTimeout(() => {
-      this.reconnect();
-    }, delay);
+  $scheduleReconnect(delay: number): void {
+    this.reconnectControl.schedule(delay, () => this.reconnect());
   }
 
   // How long should we wait before trying the next reconnection?
@@ -361,19 +380,16 @@ class ShinyApp {
     }
     $("#shiny-disconnected-overlay").toggleClass("reloading", reloading);
 
-    // To try a reconnect, both the app (this.$allowReconnect) and the
-    // server (this.$socket.allowReconnect) must allow reconnections, or
-    // session$allowReconnect("force") was called. The "force" option should
-    // only be used for testing.
+    // To try a reconnect, both the app and the connection layer
+    // (this.$socket.allowReconnect) must allow it, or
+    // session$allowReconnect("force") was called (for testing).
     if (
-      (this.$allowReconnect === true &&
-        this.$socket!.allowReconnect === true) ||
-      this.$allowReconnect === "force"
+      this.reconnectControl.shouldRetry(this.$socket!.allowReconnect === true)
     ) {
       const delay = this.reconnectDelay.next();
 
       /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-      showReconnectDialog(delay);
+      showReconnectDialog(delay, () => this.reconnectControl.allow !== false);
       this.$scheduleReconnect(delay);
     }
   }
@@ -845,14 +861,9 @@ class ShinyApp {
     );
 
     addMessageHandler("allowReconnect", (message: "force" | false | true) => {
-      switch (message) {
-        case true:
-        case false:
-        case "force":
-          this.$allowReconnect = message;
-          break;
-        default:
-          throw "Invalid value for allowReconnect: " + message;
+      // Applied as the message arrived (socket.onmessage); queue order is too late.
+      if (message !== true && message !== false && message !== "force") {
+        throw "Invalid value for allowReconnect: " + message;
       }
     });
 

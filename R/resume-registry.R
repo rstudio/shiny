@@ -2,6 +2,7 @@
 #' @include resume-serialize.R
 #' @include resume-options.R
 #' @include resume-uploads.R
+#' @include resume-writer.R
 NULL
 
 # Per-session registry behind resume. Gives reactiveVal() / reactiveValues()
@@ -78,9 +79,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     # ---- dirtiness and the writer ---------------------------------------
 
     markDirty = function() {
-      if (!private$dirty) private$firstDirtyAt <- private$session$.now()
-      private$dirty <- TRUE
-      private$changedSinceSchedule <- TRUE
+      if (!is.null(private$writer)) private$writer$markDirty()
       invisible()
     },
 
@@ -103,85 +102,31 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     },
 
     configureWriter = function(store, key, gate, debounceMs) {
-      private$store <- store
-      private$key <- key
-      private$gate <- gate
-      private$debounceMs <- debounceMs
+      private$writer <- SnapshotWriter$new(private$session, store, key, gate, debounceMs)
       private$session$onFlushed(function() self$scheduleWrite(), once = FALSE)
       invisible()
     },
 
-    writerEnabled = function() {
-      !is.null(private$store) && isTRUE(private$gate()) && !is.null(self$writerStore())
-    },
+    writerEnabled = function() !is.null(private$writer) && private$writer$enabled(),
 
-    # The writer's store, resolving it if needed; NULL when unconfigured or
-    # unavailable.
-    writerStore = function() {
-      if (is.function(private$store)) private$store <- private$store()
-      private$store
-    },
+    writerStore = function() if (!is.null(private$writer)) private$writer$store(),
 
-    # Called after every flush. Only a flush that followed a change
-    # (re)schedules the write; the wait is capped at ten quiet intervals from
-    # the first unsaved change so a session that never goes quiet still writes.
     scheduleWrite = function() {
-      if (!private$changedSinceSchedule || !self$writerEnabled()) return(invisible())
-      private$changedSinceSchedule <- FALSE
-      private$cancelPendingWrite()
-      waited <- private$session$.now() - private$firstDirtyAt
-      delay <- max(0, min(private$debounceMs, 10 * private$debounceMs - waited))
-      private$cancelWrite <- defineScheduler(private$session)(delay, function() {
-        private$cancelWrite <- NULL
-        self$writeNow()
-      })
+      if (!is.null(private$writer)) private$writer$schedule(function() private$record())
       invisible()
     },
 
-    # Serializes and writes now if the gate allows; never throws. A failure
-    # is logged once per session, and later writes are still attempted.
     writeNow = function() {
-      private$cancelPendingWrite()
-      ok <- tryCatch({
-        if (!self$writerEnabled()) return(invisible(FALSE))
-        # write() would refuse it too, but only after the uploads were
-        # copied back into the files directory claim() deleted.
-        if (private$store$claimed(private$key)) return(invisible(FALSE))
-        rec <- self$snapshot(report = FALSE)
-        rec$identity <- snapshot_identity(private$session)
-        uploads <- rec$uploads
-        if (length(uploads)) rec <- snapshot_write_uploads(rec, private$store$filesDir(private$key))
-        rec$uploads <- NULL
-        written <- !identical(private$store$write(private$key, rec), FALSE)
-        if (written) {
-          snapshot_prune_uploads(private$store$filesDir(private$key), as.character(unlist(uploads, use.names = FALSE)))
-        }
-        written
-      }, error = function(e) {
-        if (!private$writeFailureLogged) {
-          private$writeFailureLogged <- TRUE
-          message("Saved state could not be written: ", conditionMessage(e))
-        }
-        FALSE
-      })
-      private$dirty <- FALSE
-      private$firstDirtyAt <- NULL
-      private$changedSinceSchedule <- FALSE
-      if (ok) private$wrote <- TRUE
-      invisible(ok)
+      if (is.null(private$writer)) return(invisible(FALSE))
+      private$writer$writeNow(function() private$record())
     },
 
-    # Removes the record this session wrote, if any, and stops pending writes.
     deleteSnapshot = function() {
-      private$cancelPendingWrite()
-      if (private$wrote) {
-        self$writerStore()$delete(private$key)
-        private$wrote <- FALSE
-      }
+      if (!is.null(private$writer)) private$writer$delete()
       invisible()
     },
 
-    wroteSnapshot = function() private$wrote,
+    wroteSnapshot = function() !is.null(private$writer) && private$writer$wrote(),
 
     # snapshot_code_hash(), once per session: the files may change while it runs.
     codeHash = function() {
@@ -425,10 +370,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     informed = NULL,
     codeHashValue = NULL,
 
-    # writer
-    store = NULL, key = NULL, gate = NULL, debounceMs = 1000,
-    dirty = FALSE, firstDirtyAt = NULL, changedSinceSchedule = FALSE,
-    cancelWrite = NULL, writeFailureLogged = FALSE, wrote = FALSE, pausedFlag = FALSE,
+    writer = NULL,
 
     # resuming
     phase = "idle",      # "idle" | "constructing" (server function running) | "restoring" (verified; first flush)
@@ -474,9 +416,11 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       if (identical(entry$kind, "reactiveVal")) isTRUE(entry$node$.snapshot$destroyed()) else isTRUE(entry$node$.destroyed)
     },
 
-    cancelPendingWrite = function() {
-      if (is.function(private$cancelWrite)) private$cancelWrite()
-      private$cancelWrite <- NULL
+    # The record the writer stores: the snapshot plus the identity block.
+    record = function() {
+      rec <- self$snapshot(report = FALSE)
+      rec$identity <- snapshot_identity(private$session)
+      rec
     },
 
     walkReason = function(hit) {

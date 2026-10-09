@@ -159,3 +159,22 @@ test_that("a write after the last upload is gone removes its copy", {
   expect_true(reg$writeNow())
   expect_identical(list.files(store$filesDir(key)), character(0))
 })
+
+test_that("SnapshotWriter writes the record its callback builds, once the gate allows", {
+  dir <- local_snapshot_store_dir()
+  s <- ShinySession$new(fake_ws()); local_cancel_writes(s)
+  open <- TRUE
+  w <- SnapshotWriter$new(s, function() snapshot_store(), "k1", function() open, 1000)
+  builds <- 0
+  record <- function() { builds <<- builds + 1; list(complete = TRUE, sources = list(), inputs = list(), userData = list(), identity = list()) }
+  expect_true(w$writeNow(record))
+  expect_equal(builds, 1)
+  expect_true(w$wrote())
+  open <- FALSE
+  expect_false(w$writeNow(record))
+  expect_equal(builds, 1)                      # the gate is checked before building
+  open <- TRUE
+  w$delete()
+  expect_false(w$wrote())
+  expect_null(snapshot_store()$read("k1"))
+})

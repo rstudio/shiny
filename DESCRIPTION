@@ -184,6 +184,7 @@ Collate:
     'knitr.R'
     'middleware-shiny.R'
     'middleware.R'
+    'resume-writer.R'
     'resume-uploads.R'
     'resume-options.R'
     'resume-serialize.R'

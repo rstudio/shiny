@@ -3,18 +3,15 @@
 NULL
 
 # Splits a resume message's raw `inputs` (before input handlers) into the
-# live-input set. `fileInputs` remembers which inputs are fileInput()s: the
-# browser cannot re-send a file, so their NULL live value must not overwrite
-# a restored upload.
+# live-input set.
 snapshot_live_inputs <- function(rawInputs) {
   rawInputs <- if (is.list(rawInputs)) rawInputs else list()
   nms <- names(rawInputs) %||% character(0)
   isClientData <- grepl("^\\.clientdata_", nms)
-  fileInputs <- sub(":shiny\\.file$", "", nms[grepl(":shiny\\.file$", nms)])
   inputs <- rawInputs[!isClientData]
   clientData <- rawInputs[isClientData]
   names(clientData) <- sub("^\\.clientdata_", "", names(clientData))
-  list(inputs = inputs, clientData = clientData, fileInputs = fileInputs)
+  list(inputs = inputs, clientData = clientData)
 }
 
 # Applies the registered input handlers to the live inputs (strips the

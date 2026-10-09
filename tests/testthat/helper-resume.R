@@ -124,7 +124,7 @@ snapshot_roundtrip <- function(server, drive = function(session) NULL, live = NU
   resume_server <- capture_env(resume_server)
   outcome <- second$.snapshotRegistry$resume(
     record,
-    live = list(inputs = live %||% isolate(reactiveValuesToList(first$input)), clientData = list(), fileInputs = character(0)),
+    live = list(inputs = live %||% isolate(reactiveValuesToList(first$input)), clientData = list()),
     run = function() withMockContext(second, resume_server(input = second$input, output = second$output, session = second))
   )
   # Step 4a, as ShinySession$.resumeSession() runs it before sending `resumed`.

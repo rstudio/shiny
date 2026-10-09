@@ -102,7 +102,7 @@ test_that("a reactiveValues record restores saved keys and keeps new initial key
   rec <- snapshot_decode_sources(s1$.snapshotRegistry$snapshot())
   s2 <- MockShinySession$new()
   reg <- s2$.snapshotRegistry
-  reg$resume(rec, live = list(inputs = list(), clientData = list(), fileInputs = character(0)),
+  reg$resume(rec, live = list(inputs = list(), clientData = list()),
              run = function() withMockContext(s2, { rv <- reactiveValues(a = 1, c = 3); s2$env$rv <- rv }))
   expect_identical(isolate(reactiveValuesToList(s2$env$rv)), list(a = 10, b = 2, c = 3))
 })

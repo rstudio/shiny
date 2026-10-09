@@ -96,7 +96,7 @@ test_that("a source without a saved value ends the resume: no rollback, an error
   srv <- capture_env(v2)
   expect_message(
     expect_error(
-      s2$.snapshotRegistry$resume(rec, list(inputs = list(), clientData = list(), fileInputs = character(0)),
+      s2$.snapshotRegistry$resume(rec, list(inputs = list(), clientData = list()),
         function() withMockContext(s2, srv(s2$input, s2$output, s2))),
       "Saved state does not fit the app: \\|reactiveVal\\|added \\(no saved value\\)",
       class = "shiny_resume_failed"
@@ -124,7 +124,7 @@ test_that("two sources sharing a label during the server function end the resume
   srv <- capture_env(twins)
   expect_message(
     expect_error(
-      s2$.snapshotRegistry$resume(rec, list(inputs = list(), clientData = list(), fileInputs = character(0)),
+      s2$.snapshotRegistry$resume(rec, list(inputs = list(), clientData = list()),
         function() withMockContext(s2, srv(s2$input, s2$output, s2))),
       "duplicate label", class = "shiny_resume_failed"
     ),
@@ -140,7 +140,7 @@ resume_from <- function(v1, v2, drive = function(s) NULL) {
   rec <- snapshot_decode_sources(first$.snapshotRegistry$snapshot()); rec$identity <- snapshot_identity(first)
   s2 <- MockShinySession$new()
   srv <- capture_env(v2)
-  s2$.snapshotRegistry$resume(rec, list(inputs = list(), clientData = list(), fileInputs = character(0)),
+  s2$.snapshotRegistry$resume(rec, list(inputs = list(), clientData = list()),
     function() withMockContext(s2, srv(s2$input, s2$output, s2)))
   s2
 }
@@ -276,7 +276,7 @@ test_that("a source excluded in session$onResume() does not end the next resume"
   expect_identical(rec$omitted, "|reactiveVal|x")
   s3 <- MockShinySession$new()
   srv <- capture_env(server)
-  outcome <- s3$.snapshotRegistry$resume(rec, list(inputs = list(), clientData = list(), fileInputs = character(0)),
+  outcome <- s3$.snapshotRegistry$resume(rec, list(inputs = list(), clientData = list()),
     function() withMockContext(s3, srv(s3$input, s3$output, s3)))
   expect_identical(outcome$resumed, "snapshot")
   expect_equal(isolate(s3$env$x()), 0)
@@ -405,7 +405,7 @@ test_that("an excluded userData name in an older record is not restored; others 
   local_enable_resume(userDataExclude = "token")
   s2 <- MockShinySession$new()
   seen <- NULL
-  s2$.snapshotRegistry$resume(rec, list(inputs = list(), clientData = list(), fileInputs = character(0)),
+  s2$.snapshotRegistry$resume(rec, list(inputs = list(), clientData = list()),
     function() seen <<- exists("token", envir = s2$userData, inherits = FALSE))
   expect_false(seen)                                    # absent while the server function runs
   expect_identical(s2$userData$note, "draft")

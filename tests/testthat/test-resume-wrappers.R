@@ -18,7 +18,7 @@ test_that("a running ExtendedTask restores as an interrupted error; a finished o
   ))
   run_with <- function(rec) {
     s <- MockShinySession$new()
-    s$.snapshotRegistry$resume(rec, live = list(inputs = list(), clientData = list(), fileInputs = character(0)),
+    s$.snapshotRegistry$resume(rec, live = list(inputs = list(), clientData = list()),
       run = function() withMockContext(s, { task <- ExtendedTask$new(function() 1); s$env$task <- task }))
     s
   }
@@ -60,7 +60,7 @@ test_that("an existing ExtendedTask marked during a resume starts as never invok
       userData = list(), sources = list("|reactiveVal|ExtendedTask task" = list(kind = "reactiveVal", bytes = serialize(state, NULL, xdr = FALSE)))
     ))
     s <- MockShinySession$new()
-    s$.snapshotRegistry$resume(rec, live = list(inputs = list(), clientData = list(), fileInputs = character(0)),
+    s$.snapshotRegistry$resume(rec, live = list(inputs = list(), clientData = list()),
       run = function() withMockContext(s, {
         task <- ExtendedTask$new(function() 1)
         excludeFromResume(task)

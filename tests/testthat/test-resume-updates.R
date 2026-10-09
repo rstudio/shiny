@@ -112,7 +112,7 @@ record_lag_session <- function(spy) {
   token
 }
 
-test_that("record lag: a payload value newer than the record is restored as state and a queued update still fires once", {
+test_that("a record that lags the old session restores its own count, and a queued click still fires once", {
   local_snapshot_store_dir()
   both_timings(function(before) {
     token <- record_lag_session(new_spy("obs", "txt"))

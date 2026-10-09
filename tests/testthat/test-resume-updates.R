@@ -242,6 +242,34 @@ test_that("without `current` (an older client) the restore context comes from `i
   expect_identical(rendered_value(res$ws, "form"), "hello")
 })
 
+test_that("with resume off, restoreInput() sees `current` while the inputs hold the disconnect-time values", {
+  local_snapshot_store_dir()
+  withr::local_envvar(SHINY_RESUME = "FALSE")
+  restored <- NULL
+  server <- function(input, output, session) restored <<- restoreInput("t", "default")
+  res <- suppressMessages(resume_real(server, list(inputs = list(t = "disconnect"), current = list(t = "now"))))
+  expect_identical(restored, "now")
+  expect_identical(isolate(res$session$input$t), "disconnect")
+})
+
+test_that("`current` is read through the input handlers, so a typed key reaches restoreInput() under its bare name", {
+  local_snapshot_store_dir()
+  restored <- NULL
+  server <- function(input, output, session) restored <<- restoreInput("n", 10)
+  suppressMessages(resume_real(server,
+    list(inputs = list(`n:shiny.number` = 1), current = list(`n:shiny.number` = 42))))
+  expect_identical(restored, 42)
+})
+
+test_that("a `:shiny.file` entry in `current` is dropped, so restoreInput() never returns the bookmarked path", {
+  local_snapshot_store_dir()
+  restored <- NULL
+  server <- function(input, output, session) restored <<- restoreInput("f", "default")
+  suppressMessages(resume_real(server,
+    list(inputs = list(), current = list(`f:shiny.file` = "bookmarked/upload"))))
+  expect_null(restored)
+})
+
 test_that("with an async output in the first flush, the hold-back clears and a queued click fires once after it resolves", {
   local_snapshot_store_dir()
   spy <- new_spy("obs")

@@ -243,6 +243,12 @@ live_close <- function(live) {
   live$ws$sent()[[1]]$config$resumeToken
 }
 
+# The code hash includes the package of the server function's environment.
+# Under devtools::test a function defined in a test reports "shiny", while
+# counter_app() from this file reports none; routing a test's `app` through
+# here keeps the writer's and the resumer's hashes equal, as in a real app.
+helper_defined <- function(app) function(input, output, session) app(input, output, session)
+
 counter_app <- function(spy) { force(spy); function(input, output, session) {
   count <- reactiveVal(0)
   observeEvent(input$plus, { spy$obs <- spy$obs + 1; count(count() + 1) })

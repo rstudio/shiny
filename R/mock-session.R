@@ -166,6 +166,7 @@ makeExtraMethods <- function() {
     `@uploadInit` = "for internal use only",
     `@unload` = "for internal use only",
     .endForGood = "for internal use only",
+    .noteServerFunction = "for internal use only",
     .resumeSession = "for internal use only",
     .sendResumed = "for internal use only",
     .serverStarted = "for internal use only",

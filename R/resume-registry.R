@@ -130,8 +130,31 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
 
     # snapshot_code_hash(), once per session: the files may change while it runs.
     codeHash = function() {
-      if (is.null(private$codeHashValue)) private$codeHashValue <- list(snapshot_code_hash())
+      if (is.null(private$codeHashValue)) {
+        private$codeHashValue <- list(snapshot_code_hash(package = private$serverPackage))
+      }
       private$codeHashValue[[1]]
+    },
+
+    # server.R reports the server function before any write or resume. The
+    # package version joins the hash; in devmode, code the hash cannot see
+    # is named once.
+    noteServerFunction = function(package, srcFile) {
+      private$serverPackage <- package
+      private$codeHashValue <- NULL
+      if (!is.null(private$session$.resumeSettings$appVersion)) return(invisible())
+      dir <- snapshot_app_path()
+      files <- app_r_files(dir)
+      covered <- normalizePath(file.path(dir, c(files$top, files$helpers)), mustWork = FALSE)
+      outside <- length(srcFile) == 1L && !normalizePath(srcFile, mustWork = FALSE) %in% covered
+      nothing <- !length(covered) && is.null(package)
+      if (outside || nothing) {
+        self$devmodeInform("code-hash", sprintf(
+          "The resume code hash covers %s. The server function is defined in %s, which it does not see, so a deploy that changes it will not be detected before saved state is restored. Set enableResume(appVersion = ) and change it when a deploy changes what the app saves.",
+          if (length(covered)) "the app's R files (the app directory and R/)" else "no files",
+          if (length(srcFile) == 1L) srcFile else "code the hash does not cover"))
+      }
+      invisible()
     },
 
     # ---- the record ----------------------------------------------------
@@ -369,6 +392,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     retired = NULL,      # ids two or more sources shared; none of them gets it
     informed = NULL,
     codeHashValue = NULL,
+    serverPackage = NULL,
 
     writer = NULL,
 

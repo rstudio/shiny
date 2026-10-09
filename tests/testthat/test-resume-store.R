@@ -223,3 +223,59 @@ test_that("a claimed key is deleted and refuses later writes until the TTL passe
   store$sweep()
   expect_true(store$write("k", list(a = 3)))
 })
+
+test_that("app_r_files() lists what loadSupport() loads, in C-locale order", {
+  dir <- local_app_dir()
+  dir.create(file.path(dir, "R"))
+  writeLines("", file.path(dir, "R", "c.R")); writeLines("", file.path(dir, "R", "B.R")); writeLines("", file.path(dir, "R", "a.r"))
+  writeLines("", file.path(dir, "app.R")); writeLines("", file.path(dir, "global.R")); writeLines("", file.path(dir, "helpers.R"))
+  dir.create(file.path(dir, "R", "sub.R"))
+  f <- app_r_files(dir)
+  expect_identical(f$helpers, file.path("R", c("B.R", "a.r", "c.R")))
+  expect_identical(f$top, c("app.R", "global.R", "helpers.R"))
+})
+
+test_that("the code hash includes the server function's package version when given", {
+  dir <- local_app_dir()
+  writeLines("x <- 1", file.path(dir, "app.R"))
+  plain <- snapshot_code_hash(dir)
+  withPkg <- snapshot_code_hash(dir, package = "shiny")
+  expect_false(identical(plain, withPkg))
+  expect_identical(snapshot_code_hash(dir, package = "shiny"), withPkg)
+  local_app_dir()
+  expect_null(snapshot_code_hash(package = NULL))
+  expect_match(snapshot_code_hash(package = "shiny"), "^[0-9a-f]{32}$")
+})
+
+test_that("a session notes the server function's package and hashes with it", {
+  local_snapshot_store_dir()
+  dir <- local_app_dir()
+  writeLines("x <- 1", file.path(dir, "app.R"))
+  s <- ShinySession$new(fake_ws()); local_cancel_writes(s)
+  s$.noteServerFunction(shiny::runApp)
+  expect_identical(s$.snapshotRegistry$codeHash(), snapshot_code_hash(package = "shiny"))
+})
+
+test_that("devmode names a server function whose file the hash does not cover", {
+  # in_devmode() is FALSE under testthat; the resume tests mock the messenger.
+  seen <- character(0)
+  local_mocked_bindings(devmode_inform = function(message, ...) seen <<- c(seen, message))
+  local_snapshot_store_dir()
+  dir <- local_app_dir()
+  writeLines("x <- 1", file.path(dir, "app.R"))
+  outside <- withr::local_tempfile(fileext = ".R")
+  writeLines("server <- function(input, output, session) NULL", outside)
+  env <- new.env(parent = globalenv()); source(outside, local = env, keep.source = TRUE)
+  s <- ShinySession$new(fake_ws()); local_cancel_writes(s)
+  s$.noteServerFunction(env$server)
+  expect_length(seen, 1)
+  expect_match(seen, "appVersion")
+  noSrcref <- eval(parse(text = "function(input, output, session) NULL", keep.source = FALSE), envir = globalenv())
+  s2 <- ShinySession$new(fake_ws()); local_cancel_writes(s2)
+  s2$.noteServerFunction(noSrcref)                     # app.R is covered; no srcref, no package
+  expect_length(seen, 1)
+  local_app_dir()                                      # nothing to hash at all
+  s3 <- ShinySession$new(fake_ws()); local_cancel_writes(s3)
+  s3$.noteServerFunction(noSrcref)
+  expect_length(seen, 2)
+})

@@ -195,19 +195,20 @@ snapshot_identity_mismatch <- function(snapshot, session, enforceUser = TRUE) {
   NULL
 }
 
-# A hash of the names and contents of every .R/.r file directly in the app
-# directory and in its R/ subdirectory, in C-locale order; NULL when there
-# are none. Packages, data and www/ are not covered: apps whose saved state
-# depends on them declare appVersion.
-snapshot_code_hash <- function(dir = snapshot_app_path()) {
-  rel <- c(
-    list.files(dir, pattern = "[.][rR]$"),
-    file.path("R", list.files(file.path(dir, "R"), pattern = "[.][rR]$"))
-  )
-  rel <- rel[!dir.exists(file.path(dir, rel))]
-  if (!length(rel)) return(NULL)
-  rel <- rel[order(rel, method = "radix")]
-  rlang::hash(list(rel, vapply(file.path(dir, rel), rlang::hash_file, character(1), USE.NAMES = FALSE)))
+# A hash over the R files Shiny loads for the app (app_r_files(): the app
+# directory and its R/ folder) and, when the server function comes from an
+# installed package, that package's version. NULL when there is nothing to
+# hash. Data files, www/ and other packages are not covered: apps whose saved
+# state depends on them declare appVersion.
+snapshot_code_hash <- function(dir = snapshot_app_path(), package = NULL) {
+  files <- app_r_files(dir)
+  rel <- c(files$top, files$helpers)
+  version <- if (!is.null(package)) {
+    tryCatch(as.character(utils::packageVersion(package)), error = function(e) NULL)
+  }
+  if (!length(rel) && is.null(version)) return(NULL)
+  contents <- vapply(file.path(dir, rel), rlang::hash_file, character(1), USE.NAMES = FALSE)
+  rlang::hash(list(rel, contents, package, version))
 }
 
 snapshot_session_code_hash <- function(session) {

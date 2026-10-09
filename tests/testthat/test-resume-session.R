@@ -543,7 +543,7 @@ test_that("an error in an onResume() callback ends the session for good and `res
     counter_app(new_spy("obs", "txt"))(input, output, session)
     session$onResume(function(info) stop("rebuild failed"))
   }
-  handlers <- createAppHandlers(NULL, function() app)
+  handlers <- createAppHandlers(NULL, function() helper_defined(app))
   ws <- fake_httpuv_ws(); handlers$ws(ws)
   suppressWarnings(expect_error(
     ws$callbacks$message(FALSE, sprintf('{"method":"resume","data":{"token":"%s","inputs":{}}}', token)),
@@ -563,7 +563,7 @@ test_that("a server function that errors on resume runs no onResume() callbacks 
     session$onResume(function(info) ran <<- TRUE)
     stop("server boom")
   }
-  handlers <- createAppHandlers(NULL, function() app)
+  handlers <- createAppHandlers(NULL, function() helper_defined(app))
   ws <- fake_httpuv_ws(); handlers$ws(ws)
   suppressWarnings(expect_error(
     ws$callbacks$message(FALSE, sprintf('{"method":"resume","data":{"token":"%s","inputs":{}}}', token)),
@@ -582,7 +582,7 @@ test_that("a source with no saved value ends the session for good after the serv
     added <- reactiveVal("new")
     session$onResume(function(info) ran <<- TRUE)
   }
-  handlers <- createAppHandlers(NULL, function() app)
+  handlers <- createAppHandlers(NULL, function() helper_defined(app))
   ws <- fake_httpuv_ws(); handlers$ws(ws)
   expect_message(
     suppressWarnings(expect_error(

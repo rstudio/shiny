@@ -213,11 +213,16 @@ NULL
 #'   off, overriding the `SHINY_RESUME` environment variable. With `FALSE`
 #'   the other arguments are ignored.
 #' @param appVersion `NULL`, or a string or number recorded with the saved
-#'   state. With `NULL`, a hash of the app's R files (in the app directory
-#'   and its `R/` folder) stands in, so a deploy that changes them makes
-#'   sessions resume from their inputs only. Set it when the app's code lives
-#'   elsewhere (a package), or to keep saved state across a deploy whose code
-#'   changes do not change what the state means; change it when they do.
+#'   state. With `NULL`, a hash stands in: the app's R files (the ones Shiny
+#'   loads: `app.R`, `ui.R`, `server.R`, `global.R` and the `R/` folder) and,
+#'   when the server function comes from an installed package, that package's
+#'   version. A deploy that changes any of them makes sessions resume from
+#'   their inputs only. Set `appVersion` when the code lives elsewhere (a
+#'   package whose version does not change with every deploy, a framework
+#'   that keeps code in another folder), or to keep saved state across a
+#'   deploy whose changes do not change what the state means; change it when
+#'   they do. In devmode, Shiny says so when the server function is defined
+#'   in a file the hash does not cover.
 #' @param maxSize Bytes; the total size of a session's saved state. Over it,
 #'   the largest values block resume until the rest fit.
 #' @param maxNodeSize Bytes; a value whose serialized size exceeds this

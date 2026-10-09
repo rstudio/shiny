@@ -341,6 +341,24 @@ initAutoReloadMonitor <- function(dir) {
   invisible(watcher$stop)
 }
 
+# The R files Shiny loads for an app, relative to `appDir`: `top` are the .R
+# files directly in the directory (app.R, ui.R, server.R, global.R and
+# anything beside them), `helpers` those in R/. loadSupport() sources
+# `helpers`; the resume code hash covers both.
+#
+# Files are sorted according to the 'C' locale. This convention is based on
+# the default for packages. For details, see:
+# https://cran.r-project.org/doc/manuals/r-release/R-exts.html#The-DESCRIPTION-file
+app_r_files <- function(appDir) {
+  r_files <- function(dir, prefix = NULL) {
+    files <- list.files(dir, pattern = "\\.[rR]$")
+    files <- files[!dir.exists(file.path(dir, files))]
+    files <- sort_c(files)
+    if (is.null(prefix) || !length(files)) files else file.path(prefix, files)
+  }
+  list(top = r_files(appDir), helpers = r_files(file.path(appDir, "R"), "R"))
+}
+
 #' Load an app's supporting R files
 #'
 #' Loads all of the supporting R files of a Shiny application. Specifically,
@@ -393,12 +411,7 @@ loadSupport <- function(appDir=NULL, renv=new.env(parent=globalenv()), globalren
 
   warn_if_app_dir_is_package(appDir)
 
-  helpers <- list.files(helpersDir, pattern="\\.[rR]$", recursive=FALSE, full.names=TRUE)
-  # Ensure files in R/ are sorted according to the 'C' locale before sourcing.
-  # This convention is based on the default for packages. For details, see:
-  # https://cran.r-project.org/doc/manuals/r-release/R-exts.html#The-DESCRIPTION-file
-  helpers <- sort_c(helpers)
-  helpers <- normalizePath(helpers)
+  helpers <- normalizePath(file.path(appDir, app_r_files(appDir)$helpers))
 
   withr::with_dir(appDir, {
     lapply(helpers, sourceUTF8, envir=renv)

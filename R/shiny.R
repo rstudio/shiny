@@ -1657,6 +1657,17 @@ ShinySession <- R6Class(
       invisible()
     },
 
+    # The server function's namespace (when it comes from a package) and
+    # source file feed the resume code hash (S8).
+    .noteServerFunction = function(fn) {
+      reg <- self$.snapshotRegistry
+      if (is.null(reg) || !is.function(fn)) return(invisible())
+      env <- topenv(environment(fn) %||% globalenv())
+      package <- if (isNamespace(env)) unname(getNamespaceName(env)) else NULL
+      reg$noteServerFunction(package, utils::getSrcFilename(fn, full.names = TRUE))
+      invisible()
+    },
+
     .sendResumed = function(resumed) {
       private$sendMessage(resumed = resumed)
     },

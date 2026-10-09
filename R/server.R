@@ -228,6 +228,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
           # function, shared with the resume branch.
           prepareServer <- function(inputs) {
             serverFunc <- withReactiveDomain(NULL, serverFuncSource())
+            shinysession$.noteServerFunction(serverFunc)
             if (!identicalFunctionBodies(serverFunc, appvars$server)) {
               appvars$server <- serverFunc
               if (!is.null(appvars$server))

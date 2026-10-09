@@ -278,3 +278,14 @@ test_that("Setting options in various places works", {
 
 
 })
+
+test_that("loadSupport() sources exactly the helpers app_r_files() lists", {
+  dir <- withr::local_tempdir()
+  dir.create(file.path(dir, "R"))
+  writeLines("one <- 1", file.path(dir, "R", "one.R"))
+  writeLines("two <- 2", file.path(dir, "R", "two.r"))
+  dir.create(file.path(dir, "R", "nested"))
+  writeLines("three <- 3", file.path(dir, "R", "nested", "three.R"))
+  renv <- loadSupport(dir, globalrenv = NULL)
+  expect_setequal(ls(renv), c("one", "two"))
+})

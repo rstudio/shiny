@@ -24,13 +24,14 @@ import {
 } from "./initedMethods";
 import { removeModal, showModal } from "./modal";
 import { removeNotification, showNotification } from "./notifications";
+import type { ReconnectPermission } from "./reconnectControl";
+import { peekAllowReconnect, ReconnectControl } from "./reconnectControl";
 import { ReconnectDelay } from "./reconnectDelay";
 import {
   hideReconnectDialog,
   showReconnectDialog,
   showReconnectFailedDialog,
 } from "./reconnectDialog";
-import { retryDecision } from "./reconnectGate";
 import type { HtmlDep } from "./render";
 import { renderContentAsync, renderHtmlAsync } from "./render";
 import { unloadOnPageHide } from "./resumeUnload";
@@ -42,7 +43,8 @@ type ResponseValue = UploadEndValue | UploadInitValue;
 type Handler = (message: any) => Promise<void> | void;
 
 type ShinyWebSocket = WebSocket & {
-  // Set by shiny-server-client; no longer consulted (see reconnectGate.ts).
+  // Set by shiny-server-client; no longer consulted (srcts/PROTOCOL.md,
+  // "Client retry rule").
   allowReconnect?: boolean;
 };
 
@@ -172,7 +174,20 @@ class ShinyApp {
   } = {};
   $nextRequestId = 0;
 
-  $allowReconnect: boolean | "force" = false;
+  reconnectControl = new ReconnectControl();
+
+  // Kept for code outside this class that reads or sets it.
+  get $allowReconnect(): ReconnectPermission {
+    return this.reconnectControl.allow;
+  }
+  set $allowReconnect(value: ReconnectPermission) {
+    this.setAllowReconnect(value);
+  }
+
+  setAllowReconnect(value: ReconnectPermission): void {
+    this.reconnectControl.setAllow(value);
+    if (value === false) hideReconnectDialog();
+  }
 
   // True once reconnect() has been called: every socket after the first
   // belongs to a reconnect and opens with `resume` instead of `init`.
@@ -215,8 +230,6 @@ class ShinyApp {
     return !!this.$socket;
   }
 
-  private scheduledReconnect: number | undefined = undefined;
-
   // The "Try again" link once the attempts have run out: a fresh schedule,
   // and the token this page still holds.
   retryReconnect(): void {
@@ -225,9 +238,13 @@ class ShinyApp {
   }
 
   reconnect(): void {
-    // This function can be invoked directly even if there's a scheduled
-    // reconnect, so be sure to clear any such scheduled reconnects.
-    clearTimeout(this.scheduledReconnect);
+    // The "Try now" link calls this directly; it must not reopen a session
+    // the server ended. Clear any scheduled reconnect either way.
+    this.reconnectControl.cancel();
+    if (!this.reconnectControl.permitsManualRetry()) {
+      hideReconnectDialog();
+      return;
+    }
 
     if (this.isConnected())
       throw "Attempted to reconnect, but already connected.";
@@ -319,6 +336,10 @@ class ShinyApp {
       this.startActionQueueLoop();
     };
     socket.onmessage = (e) => {
+      // Applied on arrival, not in queue order: a stop must take effect even
+      // while a slow handler holds the queue and the socket closes behind it.
+      const allow = peekAllowReconnect(e.data);
+      if (allow !== undefined) this.setAllowReconnect(allow);
       this.taskQueue.enqueue(async () => await this.dispatchMessage(e.data));
     };
     // Called when a successfully-opened websocket is closed, or when an
@@ -379,10 +400,8 @@ class ShinyApp {
     this.$socket = null;
   }
 
-  $scheduleReconnect(delay: Parameters<typeof setTimeout>[1]): void {
-    this.scheduledReconnect = window.setTimeout(() => {
-      this.reconnect();
-    }, delay);
+  $scheduleReconnect(delay: number): void {
+    this.reconnectControl.schedule(delay, () => this.reconnect());
   }
 
   // How long to wait before the next reconnection attempt, and whether the
@@ -396,23 +415,18 @@ class ShinyApp {
     }
     $("#shiny-disconnected-overlay").toggleClass("reloading", reloading);
 
-    // srcts/PROTOCOL.md, "Client retry rule". After the last attempt the
-    // overlay stays and the notification offers Try again.
-    const decision = retryDecision({
-      allow: this.$allowReconnect,
-      exhausted: this.reconnectDelay.exhausted(),
-    });
-
-    if (decision === "retry") {
-      const delay = this.reconnectDelay.next();
-
-      /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-      showReconnectDialog(delay);
-      this.$scheduleReconnect(delay);
-    } else if (decision === "stop") {
+    // srcts/PROTOCOL.md, "Client retry rule".
+    const permitted = this.reconnectControl.shouldRetry(true);
+    if (!permitted) return;
+    if (this.reconnectDelay.exhausted()) {
       /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
       showReconnectFailedDialog();
+      return;
     }
+    const delay = this.reconnectDelay.next();
+    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+    showReconnectDialog(delay, () => this.reconnectControl.allow !== false);
+    this.$scheduleReconnect(delay);
   }
 
   onConnected(): void {
@@ -882,14 +896,9 @@ class ShinyApp {
     );
 
     addMessageHandler("allowReconnect", (message: "force" | false | true) => {
-      switch (message) {
-        case true:
-        case false:
-        case "force":
-          this.$allowReconnect = message;
-          break;
-        default:
-          throw "Invalid value for allowReconnect: " + message;
+      // The value was already applied in socket.onmessage; this only validates.
+      if (message !== true && message !== false && message !== "force") {
+        throw "Invalid value for allowReconnect: " + message;
       }
     });
 
@@ -922,7 +931,7 @@ class ShinyApp {
         };
         this.$resumeToken = message.resumeToken ?? null;
         // enableResume() implies allowReconnect(TRUE).
-        if (this.$resumeToken !== null) this.$allowReconnect = true;
+        if (this.$resumeToken !== null) this.setAllowReconnect(true);
         if (message.user) setShinyUser(message.user);
         this.reconnectDelay.reset();
         $(document).trigger("shiny:sessioninitialized");

@@ -22,7 +22,12 @@ function updateTime(reconnectTime: number): void {
   }, 1000);
 }
 
-async function showReconnectDialog(delay: number): Promise<void> {
+// `stillWanted` is checked after the notice renders, which is async: a stop
+// that arrived meanwhile must not leave a retry notice on screen.
+async function showReconnectDialog(
+  delay: number,
+  stillWanted: () => boolean = () => true,
+): Promise<void> {
   const reconnectTime = new Date().getTime() + delay;
 
   // If there's already a reconnect dialog, don't add another
@@ -42,6 +47,11 @@ async function showReconnectDialog(delay: number): Promise<void> {
     closeButton: false,
     type: "warning",
   });
+
+  if (!stillWanted()) {
+    hideReconnectDialog();
+    return;
+  }
 
   updateTime(reconnectTime);
 }

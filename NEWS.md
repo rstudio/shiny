@@ -1,5 +1,15 @@
 # shiny (development version)
 
+* `session$allowReconnect(FALSE)` now takes effect as soon as the browser
+  receives it. Before, if a slow message handler (for example an async
+  custom message handler) was still running when the server closed the
+  connection, the browser could reconnect anyway, and a reconnect already
+  scheduled was never cancelled. "Try now" and `Shiny.shinyapp.reconnect()`
+  also no longer reopen a session after the server sent
+  `allowReconnect(FALSE)`. (#<PR number>)
+
+* Fixed #4281, #3251: `dateInput()`'s `datesdisabled` now works when `format` is not the default `yyyy-mm-dd`. The dates are now converted to real dates on the client, the same way `min`/`max` already are, instead of being parsed by bootstrap-datepicker with the display format. (#4434)
+
 * `session$allowReconnect(TRUE)` now works on any server, not only behind
   Shiny Server's or Posit Connect's connection layer. When the connection
   drops, the browser retries for about a minute (ten attempts), then offers

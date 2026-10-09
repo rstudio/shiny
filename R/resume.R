@@ -196,15 +196,20 @@ NULL
 #' choice); on Posit Connect, a `shiny-resume` folder inside the content's
 #' persistent data directory (`CONNECT_CONTENT_DATA_DIR`, set when
 #' persistent data directories are enabled); otherwise under
-#' `tools::R_user_dir("shiny", "cache")`. Never in the app directory. The
-#' directory and each record are made readable only by the owner. A record is keyed by a 128-bit random token and the app's path,
-#' kept for 24 hours, and deleted when the page is closed, when the session
-#' ends for good, or when a resume reads it. Records are capped at 1 GiB and
-#' 1000 in all; copies of uploaded files are not counted towards the 1 GiB
-#' and are deleted with their record. Nothing is written unless the app
-#' called `enableResume()` or the platform set `SHINY_RESUME`. On Windows the
-#' token comes from the `openssl` package when it is installed and from R's
-#' random number generator otherwise.
+#' `tools::R_user_dir("shiny", "cache")`. Never in the app directory. Each
+#' app's records go in their own subdirectory, named by a hash of the app
+#' id: the `SHINY_RESUME_APP_ID` environment variable when set, else
+#' `CONNECT_CONTENT_GUID` on Posit Connect (unlike the bundle directory, it
+#' stays the same across deploys), else the app's directory. The directory
+#' and each record are made readable only by the owner. A record is keyed
+#' by a 128-bit random token and the app id, kept for 24 hours, and deleted
+#' when the page is closed, when the session ends for good, or when a resume
+#' reads it. Each app's records are capped at 1 GiB and 1000 in all; copies
+#' of uploaded files are not counted towards the 1 GiB and are deleted with
+#' their record. Nothing is written unless the app called `enableResume()`
+#' or the platform set `SHINY_RESUME`. On Windows the token comes from the
+#' `openssl` package when it is installed and from R's random number
+#' generator otherwise.
 #'
 #' A store is only as shared as its directory. On Connect, the persistent
 #' data directory survives worker restarts and, on shared storage, resumes

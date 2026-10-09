@@ -32,21 +32,57 @@ test_that("tokens are 128-bit hex, validated before hashing, and keys are hashes
   expect_match(snapshot_record_key(tok), "^[0-9a-f]{32}$")
 })
 
-test_that("the store directory resolves SHINY_RESUME_DIR, then CONNECT_CONTENT_DATA_DIR, then the user cache dir", {
+test_that("the store directory resolves SHINY_RESUME_DIR, then CONNECT_CONTENT_DATA_DIR, then the user cache dir, with a per-app subdirectory", {
   dir <- local_snapshot_store_dir()
+  app <- rlang::hash(snapshot_app_id())
   store <- snapshot_store()
-  expect_identical(normalizePath(store$directory()), normalizePath(file.path(dir, "R", "shiny", "resume"), mustWork = FALSE))
+  expect_identical(normalizePath(store$directory()), normalizePath(file.path(dir, "R", "shiny", "resume", app), mustWork = FALSE))
   expect_identical(snapshot_store(), store)
 
   connect_dir <- file.path(dir, "connect-content")
   withr::local_envvar(CONNECT_CONTENT_DATA_DIR = connect_dir)
   snapshot_store_reset()
-  expect_identical(normalizePath(snapshot_store()$directory()), normalizePath(file.path(connect_dir, "shiny-resume")))
+  expect_identical(normalizePath(snapshot_store()$directory()), normalizePath(file.path(connect_dir, "shiny-resume", app)))
 
   explicit_dir <- file.path(dir, "explicit")
   withr::local_envvar(SHINY_RESUME_DIR = explicit_dir)
   snapshot_store_reset()
-  expect_identical(normalizePath(snapshot_store()$directory()), normalizePath(explicit_dir))
+  expect_identical(normalizePath(snapshot_store()$directory()), normalizePath(file.path(explicit_dir, app)))
+})
+
+test_that("the app id resolves SHINY_RESUME_APP_ID, then CONNECT_CONTENT_GUID, then the app directory", {
+  local_snapshot_store_dir()
+  dir <- local_app_dir()
+  expect_identical(snapshot_app_id(), normalizePath(dir))
+  withr::local_envvar(CONNECT_CONTENT_GUID = "guid-1")
+  expect_identical(snapshot_app_id(), "guid-1")
+  withr::local_envvar(SHINY_RESUME_APP_ID = "explicit")
+  expect_identical(snapshot_app_id(), "explicit")
+  withr::local_envvar(SHINY_RESUME_APP_ID = "", CONNECT_CONTENT_GUID = "")
+  expect_identical(snapshot_app_id(), normalizePath(dir))
+})
+
+test_that("two apps in one process get separate stores under one directory", {
+  local_snapshot_store_dir()
+  withr::local_envvar(SHINY_RESUME_APP_ID = "app-a")
+  a <- snapshot_store()
+  withr::local_envvar(SHINY_RESUME_APP_ID = "app-b")
+  b <- snapshot_store()
+  expect_false(identical(a$directory(), b$directory()))
+  expect_identical(dirname(a$directory()), dirname(b$directory()))
+})
+
+test_that("a deploy that moves the app directory keeps the key and identity when the app id is stable", {
+  local_snapshot_store_dir()
+  local_enable_resume(appVersion = "v1")
+  withr::local_envvar(CONNECT_CONTENT_GUID = "guid-1")
+  local_app_dir()
+  tok <- snapshot_token_new()
+  saved <- list(identity = snapshot_identity(MockShinySession$new()))
+  key <- snapshot_record_key(tok)
+  local_app_dir()                                      # the next bundle's directory
+  expect_identical(snapshot_record_key(tok), key)
+  expect_null(snapshot_identity_mismatch(saved, MockShinySession$new()))
 })
 
 test_that("empty directory variables fall through to the user cache dir", {
@@ -86,21 +122,22 @@ test_that("an empty directory from the resolver never raises", {
   expect_silent(expect_null(snapshot_store()))
 })
 
-test_that("identity block records path, format, declared version and user; mismatches are named", {
+test_that("identity block records app id, format, declared version and user; mismatches are named", {
+  local_snapshot_store_dir()
   local_enable_resume(appVersion = "v1")
   dir <- local_app_dir()
   s <- MockShinySession$new()
   id <- snapshot_identity(s)
-  expect_identical(id$formatVersion, 3L)
+  expect_identical(id$formatVersion, 4L)
   expect_identical(id$appVersion, "v1")
   expect_null(id$codeHash)                              # a declared version replaces the hash
-  expect_identical(id$appPath, normalizePath(dir))
+  expect_identical(id$appId, normalizePath(dir))
   snap <- list(identity = id)
   expect_null(snapshot_identity_mismatch(snap, s))
   snapv <- snap; snapv$identity$appVersion <- "v2"
   expect_identical(snapshot_identity_mismatch(snapv, s), "appVersion differs")
-  snap2 <- snap; snap2$identity$appPath <- "/elsewhere"
-  expect_identical(snapshot_identity_mismatch(snap2, s), "app path differs")
+  snap2 <- snap; snap2$identity$appId <- "/elsewhere"
+  expect_identical(snapshot_identity_mismatch(snap2, s), "app id differs")
   snap3 <- snap; snap3$identity$formatVersion <- 99L
   expect_identical(snapshot_identity_mismatch(snap3, s), "snapshot format version differs")
   s$user <- "bob"
@@ -111,7 +148,7 @@ test_that("identity block records path, format, declared version and user; misma
 
 test_that("the identity block has no UI fingerprint, so a changed UI never blocks a resume", {
   s <- MockShinySession$new()
-  expect_named(snapshot_identity(s), c("appPath", "formatVersion", "appVersion", "codeHash", "user", "groups"))
+  expect_named(snapshot_identity(s), c("appId", "formatVersion", "appVersion", "codeHash", "user", "groups"))
   expect_null(shinyApp(fluidPage(), function(input, output) NULL)$uiHash)
 })
 
@@ -174,7 +211,7 @@ test_that("the store applies a restrictive umask while writing", {
 })
 
 
-test_that("the record key includes the app path, so another app's record is never read", {
+test_that("the record key includes the app id, so another app's record is never read", {
   tok <- snapshot_token_new()
   expect_false(identical(snapshot_record_key(tok, "/apps/a"), snapshot_record_key(tok, "/apps/b")))
   expect_identical(snapshot_record_key(tok, "/apps/a"), snapshot_record_key(tok, "/apps/a"))

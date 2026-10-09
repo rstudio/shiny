@@ -248,23 +248,33 @@ copy of an excluded input is still saved; exclude it with
 \code{\link[=excludeFromResume]{excludeFromResume()}}. Free-text inputs can hold personal data or pasted
 secrets; exclude them the same way.
 
-Records go to the hosting platform's bookmark storage when it provides one,
-otherwise under \code{tools::R_user_dir("shiny", "cache")}; never in the app
-directory. The directory and each record are made readable only by the
-owner. A record is keyed by a 128-bit random token and the app's path,
-kept for 24 hours, and deleted when the page is closed, when the session
-ends for good, or when a resume reads it. Records are capped at 1 GiB and
-1000 in all; copies of uploaded files are not counted towards the 1 GiB
-and are deleted with their record. Nothing is written unless the app
-called \code{enableResume()} or the platform set \code{SHINY_RESUME}. On Windows the
-token comes from the \code{openssl} package when it is installed and from R's
-random number generator otherwise.
+Records live in the first of these that is set: the \code{SHINY_RESUME_DIR}
+environment variable (an operator's or hosting platform's explicit
+choice); on Posit Connect, a \code{shiny-resume} folder inside the content's
+persistent data directory (\code{CONNECT_CONTENT_DATA_DIR}, set when
+persistent data directories are enabled); otherwise under
+\code{tools::R_user_dir("shiny", "cache")}. Never in the app directory. Each
+app's records go in their own subdirectory, named by a hash of the app
+id: the \code{SHINY_RESUME_APP_ID} environment variable when set, else
+\code{CONNECT_CONTENT_GUID} on Posit Connect (unlike the bundle directory, it
+stays the same across deploys), else the app's directory. The directory
+and each record are made readable only by the owner. A record is keyed
+by a 128-bit random token and the app id, kept for 24 hours, and deleted
+when the page is closed, when the session ends for good, or when a resume
+reads it. Each app's records are capped at 1 GiB and 1000 in all; copies
+of uploaded files are not counted towards the 1 GiB and are deleted with
+their record. Nothing is written unless the app called \code{enableResume()}
+or the platform set \code{SHINY_RESUME}. On Windows the token comes from the
+\code{openssl} package when it is installed and from R's random number
+generator otherwise.
 
-The fallback store is per machine. Behind a load balancer without sticky
-sessions a reconnect that lands on another machine resumes from inputs
-only, and a container without a persistent volume does the same after it
-restarts. Shiny already needs sticky sessions for its WebSocket, so this
-adds no new deployment requirement.
+A store is only as shared as its directory. On Connect, the persistent
+data directory survives worker restarts and, on shared storage, resumes
+across machines. Elsewhere the store is per machine: behind a load
+balancer without sticky sessions a reconnect that lands on another
+machine resumes from inputs only, and a container without a persistent
+volume does the same after it restarts. Shiny already needs sticky
+sessions for its WebSocket, so this adds no new deployment requirement.
 }
 
 \examples{

@@ -89,8 +89,8 @@ SnapshotStore <- R6Class("SnapshotStore", cloneable = FALSE,
 # data directory on Posit Connect (CONNECT_CONTENT_DATA_DIR, set when
 # persistent data directories are enabled), in a shiny-resume subfolder so
 # records stay clear of the app's own files; the user cache dir otherwise.
-# Never the app directory. The cache-dir fallback is shared by every app the
-# user runs, TTL pruning included.
+# Never the app directory. Each app's records go in their own subdirectory
+# (snapshot_store()).
 snapshot_dir <- function() {
   dir <- Sys.getenv("SHINY_RESUME_DIR", unset = "")
   if (nzchar(dir)) return(dir)
@@ -99,12 +99,29 @@ snapshot_dir <- function() {
   file.path(tools::R_user_dir("shiny", "cache"), "resume")
 }
 
-# One store per directory per process. A directory that cannot be created
-# disables the feature for that directory with a single message.
-# Never throws: the writer calls this from writeNow(). The directory is
-# resolved once per process; a failure there is recorded
-# under "<unresolved>" so it is neither retried nor reported again.
-snapshot_store <- function() {
+# The app's identity across processes and deploys, first hit wins:
+# SHINY_RESUME_APP_ID (an operator's or platform's explicit choice);
+# CONNECT_CONTENT_GUID, which Posit Connect sets for every content process
+# and keeps across deploys, while the bundle directory changes with each;
+# the app directory otherwise.
+snapshot_app_id <- function() {
+  id <- Sys.getenv("SHINY_RESUME_APP_ID", unset = "")
+  if (nzchar(id)) return(id)
+  guid <- Sys.getenv("CONNECT_CONTENT_GUID", unset = "")
+  if (nzchar(guid)) return(guid)
+  snapshot_app_path()
+}
+
+# One store per app per process, in a subdirectory of snapshot_dir() named
+# by the app id's hash, so the caps and sweep() are per app. A directory that
+# cannot be created disables the feature for it with a single message.
+# Never throws: the writer calls this from writeNow(). The base directory is
+# resolved once per process; a failure there is recorded under
+# "<unresolved>" so it is neither retried nor reported again. A session
+# passes the app id it took at creation: inside a session, getShinyOption()
+# reads the session's options, which can differ from the ones that were
+# current when the session started.
+snapshot_store <- function(appId = snapshot_app_id()) {
   if (is.null(.globals$snapshotStores)) .globals$snapshotStores <- Map$new()
   dir <- "<unresolved>"
   if (is.null(.globals$snapshotDir) && .globals$snapshotStores$containsKey(dir)) return(NULL)
@@ -113,7 +130,8 @@ snapshot_store <- function() {
     if (!is.character(resolved) || length(resolved) != 1 || is.na(resolved) || !nzchar(resolved)) {
       stop("no usable snapshot directory")
     }
-    .globals$snapshotDir <- dir <- resolved
+    .globals$snapshotDir <- resolved
+    dir <- file.path(resolved, rlang::hash(appId))
     .globals$snapshotStores$get(dir) %||%
       SnapshotStore$new(dir)
   }, error = function(e) {
@@ -152,23 +170,23 @@ snapshot_token_valid <- function(token) {
   is.character(token) && length(token) == 1 && !is.na(token) && grepl("^[0-9a-f]{32}$", token)
 }
 
-# The record key folds in the app path, so a record another app wrote into
-# the shared cache directory is never read, let alone unserialize()d.
-snapshot_record_key <- function(token, appPath = snapshot_app_path()) {
-  rlang::hash(c(token, appPath))
+# The record key folds in the app id, so a record another app wrote into a
+# shared directory is never read, let alone unserialize()d.
+snapshot_record_key <- function(token, appId = snapshot_app_id()) {
+  rlang::hash(c(token, appId))
 }
 
 snapshot_app_path <- function() {
   normalizePath(getShinyOption("appDir", default = getwd()), mustWork = FALSE)
 }
 
-snapshot_format_version <- 3L
+snapshot_format_version <- 4L
 
 # App identity block: what must match for a record to be read.
 snapshot_identity <- function(session) {
   appVersion <- session$.resumeSettings$appVersion
   list(
-    appPath = snapshot_app_path(),
+    appId = snapshot_app_id(),
     formatVersion = snapshot_format_version,
     appVersion = appVersion,
     # Without a declared version the app's code stands in for one, so a
@@ -184,7 +202,7 @@ snapshot_identity_mismatch <- function(snapshot, session, enforceUser = TRUE) {
   if (!is.list(saved)) return("unknown snapshot format")
   now <- snapshot_identity(session)
   if (!identical(saved$formatVersion, now$formatVersion)) return("snapshot format version differs")
-  if (!identical(saved$appPath, now$appPath)) return("app path differs")
+  if (!identical(saved$appId, now$appId)) return("app id differs")
   if (!identical(saved$appVersion, now$appVersion)) return("appVersion differs")
   if (!identical(saved$codeHash, now$codeHash)) return("app code changed")
   if (enforceUser && (!identical(saved$user, now$user) || !identical(saved$groups, now$groups))) return("user differs")

@@ -6,6 +6,8 @@ local_snapshot_store_dir <- function(envir = parent.frame()) {
     R_USER_CACHE_DIR = dir,
     SHINY_RESUME_DIR = NA,
     CONNECT_CONTENT_DATA_DIR = NA,
+    SHINY_RESUME_APP_ID = NA,
+    CONNECT_CONTENT_GUID = NA,
     .local_envir = envir
   )
   snapshot_store_reset()
@@ -23,7 +25,7 @@ local_enable_resume <- function(..., .env = parent.frame()) {
 }
 
 # Points the app directory (getShinyOption("appDir")) at a fresh temp dir for
-# the calling test; the record key and the code hash both read it.
+# the calling test; the app id (without SHINY_RESUME_APP_ID or CONNECT_CONTENT_GUID) and the code hash both read it.
 local_app_dir <- function(envir = parent.frame()) {
   dir <- withr::local_tempdir(.local_envir = envir)
   old <- getShinyOption("appDir")
@@ -34,7 +36,7 @@ local_app_dir <- function(envir = parent.frame()) {
 
 # Clears a leaked app directory (runApp() in an earlier test file leaves one in
 # the global options). A session made by createAppHandlers() reads the app's
-# options, not the global ones, so there the app path falls back to getwd();
+# options, not the global ones, so there the app id falls back to getwd();
 # the test must write its records under that same path.
 local_no_app_dir <- function(envir = parent.frame()) {
   old <- getShinyOption("appDir")

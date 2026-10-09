@@ -9,7 +9,7 @@ test_that("the record carries sources, key order, inputs, userData and completen
   })
   s$setInputs(n = 5)
   rec <- s$.snapshotRegistry$snapshot()
-  expect_identical(rec$format, 3L)
+  expect_identical(rec$format, 4L)
   expect_true(rec$complete)
   expect_identical(node_value(rec$sources[["|reactiveVal|count"]]), 3)
   expect_identical(rec$sources[["|reactiveValues|rv"]]$order, c("z", "a"))

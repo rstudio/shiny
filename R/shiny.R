@@ -649,9 +649,10 @@ ShinySession <- R6Class(
     # on has one, so other sessions pay nothing for the feature.
     startSnapshots = function() {
       reg <- SnapshotRegistry$new(self)
+      appId <- snapshot_app_id()
       reg$configureWriter(
-        function() snapshot_store(),
-        snapshot_record_key(private$resumeToken),
+        function() snapshot_store(appId),
+        snapshot_record_key(private$resumeToken, appId),
         function() {
           private$serverStarted && !private$endedForGood && !private$unloaded &&
             !private$reconnectOptOut

@@ -4,8 +4,8 @@ NULL
 # How long a record is kept. A store setting with no knob.
 snapshot_ttl <- 86400
 
-# Store-wide caps: total bytes and record count in the shared
-# cache directory, enforced by cachem with fifo eviction.
+# Per-app caps: total bytes and record count in one app's store
+# subdirectory, enforced by cachem with fifo eviction.
 snapshot_store_max_size <- 1024^3
 snapshot_store_max_n <- 1000L
 

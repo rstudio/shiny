@@ -104,8 +104,9 @@ it off never sends a token and answers every `resume` as above.
 
 `"resumeToken": "<32 lowercase hex chars>" | null` joins `config`. It names
 this session's saved state. Its presence also means the app allows
-reconnecting, so the client sets its `allowReconnect` to `true`. The client
-keeps the token in memory only; a page reload starts without one.
+reconnecting, so the client sets its `allowReconnect` to `true` as the
+frame arrives. The client keeps the token in memory only; a page reload
+starts without one.
 
 A fresh page adopts the token as `config` arrives. A reconnecting page keeps
 the token it sent in `resume` until `resumed` arrives, then adopts the new

@@ -6186,7 +6186,7 @@ ${duplicateIdMsg}`;
     }
   };
   function peekAllowReconnect(data) {
-    if (typeof data !== "string" || !data.includes('"allowReconnect"')) {
+    if (typeof data !== "string" || !(data.includes('"allowReconnect"') || data.includes('"resumeToken"'))) {
       return void 0;
     }
     let msg;
@@ -6195,11 +6195,16 @@ ${duplicateIdMsg}`;
     } catch {
       return void 0;
     }
-    if (typeof msg !== "object" || msg === null || !Object.prototype.hasOwnProperty.call(msg, "allowReconnect")) {
-      return void 0;
+    if (typeof msg !== "object" || msg === null) return void 0;
+    if (Object.prototype.hasOwnProperty.call(msg, "allowReconnect")) {
+      const value = msg.allowReconnect;
+      return value === true || value === false || value === "force" ? value : void 0;
     }
-    const value = msg.allowReconnect;
-    return value === true || value === false || value === "force" ? value : void 0;
+    const config = msg.config;
+    if (typeof config === "object" && config !== null && typeof config.resumeToken === "string") {
+      return true;
+    }
+    return void 0;
   }
 
   // srcts/src/shiny/reconnectDelay.ts
@@ -7151,7 +7156,6 @@ ${duplicateIdMsg}`;
           };
           const token = message.resumeToken ?? null;
           this.reconnectState.onConfig(token);
-          if (token !== null) this.setAllowReconnect(true);
           if (message.user) setShinyUser(message.user);
           this.reconnectDelay.reset();
           (0, import_jquery39.default)(document).trigger("shiny:sessioninitialized");

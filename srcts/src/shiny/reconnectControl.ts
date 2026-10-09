@@ -59,11 +59,16 @@ class ReconnectControl {
   }
 }
 
-// The top-level `allowReconnect` of a text message, read as it arrives rather
-// than in queue order: a stop must win over a socket close that happens while
-// an earlier message's handler is still running.
+// The top-level `allowReconnect` of a text message, or the `true` implied by
+// a `config` that carries a `resumeToken`, read as it arrives rather than in
+// queue order: a stop must win over a socket close that happens while an
+// earlier message's handler is still running, and the implied `true` is
+// applied here for the same reason, so wire order decides.
 function peekAllowReconnect(data: unknown): ReconnectPermission | undefined {
-  if (typeof data !== "string" || !data.includes('"allowReconnect"')) {
+  if (
+    typeof data !== "string" ||
+    !(data.includes('"allowReconnect"') || data.includes('"resumeToken"'))
+  ) {
     return undefined;
   }
   let msg: unknown;
@@ -72,17 +77,23 @@ function peekAllowReconnect(data: unknown): ReconnectPermission | undefined {
   } catch {
     return undefined;
   }
-  if (
-    typeof msg !== "object" ||
-    msg === null ||
-    !Object.prototype.hasOwnProperty.call(msg, "allowReconnect")
-  ) {
-    return undefined;
+  if (typeof msg !== "object" || msg === null) return undefined;
+
+  if (Object.prototype.hasOwnProperty.call(msg, "allowReconnect")) {
+    const value = (msg as { allowReconnect: unknown }).allowReconnect;
+    return value === true || value === false || value === "force"
+      ? value
+      : undefined;
   }
-  const value = (msg as { allowReconnect: unknown }).allowReconnect;
-  return value === true || value === false || value === "force"
-    ? value
-    : undefined;
+  const config = (msg as { config?: unknown }).config;
+  if (
+    typeof config === "object" &&
+    config !== null &&
+    typeof (config as { resumeToken?: unknown }).resumeToken === "string"
+  ) {
+    return true;
+  }
+  return undefined;
 }
 
 export { ReconnectControl, peekAllowReconnect };

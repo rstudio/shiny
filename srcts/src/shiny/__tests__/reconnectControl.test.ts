@@ -100,3 +100,22 @@ void test("peekAllowReconnect reads only a top-level allowReconnect from text me
   assert.equal(peekAllowReconnect("not json, allowReconnect"), undefined);
   assert.equal(peekAllowReconnect(new ArrayBuffer(4)), undefined);
 });
+
+void test("peekAllowReconnect reads a config's resumeToken as allowReconnect(TRUE)", () => {
+  const token = "0123456789abcdef0123456789abcdef";
+  const config = (extra: string) =>
+    `{"config":{"workerId":"","sessionId":"s"${extra}}}`;
+  assert.equal(peekAllowReconnect(config(`,"resumeToken":"${token}"`)), true);
+  assert.equal(peekAllowReconnect(config(',"resumeToken":null')), undefined);
+  assert.equal(peekAllowReconnect(config("")), undefined);
+  assert.equal(
+    peekAllowReconnect(`{"values":{"txt":"\\"resumeToken\\":\\"${token}\\""}}`),
+    undefined,
+  );
+  assert.equal(
+    peekAllowReconnect(
+      `{"allowReconnect":false,"config":{"resumeToken":"${token}"}}`,
+    ),
+    false,
+  );
+});

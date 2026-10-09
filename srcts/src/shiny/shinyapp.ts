@@ -908,8 +908,6 @@ class ShinyApp {
         };
         const token = message.resumeToken ?? null;
         this.reconnectState.onConfig(token);
-        // enableResume() implies allowReconnect(TRUE).
-        if (token !== null) this.setAllowReconnect(true);
         if (message.user) setShinyUser(message.user);
         this.reconnectDelay.reset();
         $(document).trigger("shiny:sessioninitialized");

@@ -5,6 +5,9 @@ type ReconnectPermission = boolean | "force";
 class ReconnectControl {
   private permission: ReconnectPermission = false;
   private timer: unknown = undefined;
+  // Set only by an explicit allowReconnect(FALSE), not by the default `false`,
+  // so a manual reconnect() on a page that never heard from the server works.
+  private stopped = false;
   // Bumped by cancel(); a timer callback from an older generation is stale.
   private generation = 0;
 
@@ -23,6 +26,7 @@ class ReconnectControl {
 
   setAllow(value: ReconnectPermission): void {
     this.permission = value;
+    this.stopped = value === false;
     if (value === false) this.cancel();
   }
 
@@ -51,7 +55,7 @@ class ReconnectControl {
   }
 
   permitsManualRetry(): boolean {
-    return this.permission !== false;
+    return !this.stopped;
   }
 }
 

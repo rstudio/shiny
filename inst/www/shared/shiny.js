@@ -6148,6 +6148,9 @@ ${duplicateIdMsg}`;
       this.clearTimer = clearTimer;
       this.permission = false;
       this.timer = void 0;
+      // Set only by an explicit allowReconnect(FALSE), not by the default `false`,
+      // so a manual reconnect() on a page that never heard from the server works.
+      this.stopped = false;
       // Bumped by cancel(); a timer callback from an older generation is stale.
       this.generation = 0;
     }
@@ -6156,6 +6159,7 @@ ${duplicateIdMsg}`;
     }
     setAllow(value) {
       this.permission = value;
+      this.stopped = value === false;
       if (value === false) this.cancel();
     }
     // `socketAllows` is the connection layer's own flag (Shiny Server and
@@ -6178,7 +6182,7 @@ ${duplicateIdMsg}`;
       this.timer = void 0;
     }
     permitsManualRetry() {
-      return this.permission !== false;
+      return !this.stopped;
     }
   };
   function peekAllowReconnect(data) {

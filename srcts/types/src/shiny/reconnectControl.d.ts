@@ -4,6 +4,7 @@ declare class ReconnectControl {
     private clearTimer;
     private permission;
     private timer;
+    private stopped;
     private generation;
     constructor(setTimer?: (fn: () => void, delay: number) => unknown, clearTimer?: (handle: unknown) => void);
     get allow(): ReconnectPermission;

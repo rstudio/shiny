@@ -74,6 +74,19 @@ void test("the retry rule needs the connection layer for true, not for force", (
   assert.equal(control.permitsManualRetry(), true);
 });
 
+void test("a manual retry is refused only after an explicit stop", () => {
+  const control = new ReconnectControl();
+  assert.equal(control.allow, false);
+  assert.equal(control.permitsManualRetry(), true);
+  control.setAllow(false);
+  assert.equal(control.permitsManualRetry(), false);
+  control.setAllow(true);
+  assert.equal(control.permitsManualRetry(), true);
+  control.setAllow(false);
+  control.setAllow("force");
+  assert.equal(control.permitsManualRetry(), true);
+});
+
 void test("peekAllowReconnect reads only a top-level allowReconnect from text messages", () => {
   assert.equal(peekAllowReconnect('{"allowReconnect":false}'), false);
   assert.equal(peekAllowReconnect('{"allowReconnect":true}'), true);

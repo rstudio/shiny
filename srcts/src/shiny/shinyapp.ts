@@ -861,7 +861,7 @@ class ShinyApp {
     );
 
     addMessageHandler("allowReconnect", (message: "force" | false | true) => {
-      // Applied as the message arrived (socket.onmessage); queue order is too late.
+      // The value was already applied in socket.onmessage; this only validates.
       if (message !== true && message !== false && message !== "force") {
         throw "Invalid value for allowReconnect: " + message;
       }

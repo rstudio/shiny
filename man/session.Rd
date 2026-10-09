@@ -150,10 +150,10 @@ session is actually connected.
 Returns a data frame describing what resuming this session restores:
 one row per reactive value and \code{session$userData} entry, with \code{kind}
 (\code{"reactiveVal"}, \code{"reactiveValues"}, \code{"userData"}), \code{label},
-\code{namespace}, \code{adoptable} (whether it restores) and \code{reason} (why not, or
+\code{namespace}, \code{restores} (whether it restores) and \code{reason} (why not, or
 \code{NA}).
 Printing groups the rows by reason. Intended for tests and audits, e.g.
-\code{testServer(server, { stopifnot(all(session$resumeReport()$adoptable)) })}.
+\code{testServer(server, { stopifnot(all(session$resumeReport()$restores)) })}.
 Empty in a session with resume off. See \code{\link[=enableResume]{enableResume()}}.
 }
 \item{request}{

@@ -243,10 +243,10 @@ workerId <- local({
 #'   Returns a data frame describing what resuming this session restores:
 #'   one row per reactive value and `session$userData` entry, with `kind`
 #'   (`"reactiveVal"`, `"reactiveValues"`, `"userData"`), `label`,
-#'   `namespace`, `adoptable` (whether it restores) and `reason` (why not, or
+#'   `namespace`, `restores` (whether it restores) and `reason` (why not, or
 #'   `NA`).
 #'   Printing groups the rows by reason. Intended for tests and audits, e.g.
-#'   `testServer(server, { stopifnot(all(session$resumeReport()$adoptable)) })`.
+#'   `testServer(server, { stopifnot(all(session$resumeReport()$restores)) })`.
 #'   Empty in a session with resume off. See [enableResume()].
 #' }
 #' \item{request}{

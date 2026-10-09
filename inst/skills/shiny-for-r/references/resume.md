@@ -110,7 +110,7 @@ it restores and, if not, why. Use it in a test:
 ```r
 testServer(server, {
   session$setInputs(plus = 1)
-  stopifnot(all(session$resumeReport()$adoptable))
+  stopifnot(all(session$resumeReport()$restores))
 })
 ```
 

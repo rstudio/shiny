@@ -168,10 +168,10 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       sizes <- numeric(0)
       rows <- list()
       blocked <- list()
-      addRow <- function(kind, label, ns, adoptable, reason = NA_character_) {
+      addRow <- function(kind, label, ns, restores, reason = NA_character_) {
         if (!report) return(invisible())
         rows[[length(rows) + 1L]] <<- list(kind = kind, label = label %||% NA_character_, namespace = ns,
-          adoptable = adoptable, reason = if (adoptable) NA_character_ else reason)
+          restores = restores, reason = if (restores) NA_character_ else reason)
       }
       block <- function(id, reason) blocked[[length(blocked) + 1L]] <<- list(id = id, reason = reason)
       unlabelled <- character(0)
@@ -233,7 +233,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
         entry <- private$entries[[victim]]
         for (i in seq_along(rows)) {
           if (identical(rows[[i]]$kind, entry$kind) && identical(rows[[i]]$label, entry$label) && identical(rows[[i]]$namespace, entry$ns)) {
-            rows[[i]]$adoptable <- FALSE
+            rows[[i]]$restores <- FALSE
             rows[[i]]$reason <- "over maxSize"
           }
         }
@@ -726,7 +726,7 @@ snapshot_report_frame <- function(rows) {
     kind = vapply(rows, `[[`, character(1), "kind"),
     label = vapply(rows, `[[`, character(1), "label"),
     namespace = vapply(rows, `[[`, character(1), "namespace"),
-    adoptable = vapply(rows, `[[`, logical(1), "adoptable"),
+    restores = vapply(rows, `[[`, logical(1), "restores"),
     reason = vapply(rows, `[[`, character(1), "reason"),
     stringsAsFactors = FALSE
   )
@@ -736,8 +736,8 @@ snapshot_report_frame <- function(rows) {
 
 #' @export
 print.shiny_resume_report <- function(x, ...) {
-  cat(sprintf("<resumeReport> %d of %d values restore\n", sum(x$adoptable), nrow(x)))
-  bad <- x[!x$adoptable, , drop = FALSE]
+  cat(sprintf("<resumeReport> %d of %d values restore\n", sum(x$restores), nrow(x)))
+  bad <- x[!x$restores, , drop = FALSE]
   for (reason in unique(bad$reason)) {
     cat("\n", reason, ":\n", sep = "")
     sel <- bad$reason == reason

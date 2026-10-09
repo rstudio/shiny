@@ -27,7 +27,7 @@ void test("a reconnect sends the inputs as of the disconnect plus the current on
   });
 });
 
-void test("every retry during one outage sends the same snapshot", () => {
+void test("retries that never opened keep the snapshot", () => {
   const s = new ReconnectState();
   s.onSocketClosed(true, { a: 1 });
   s.beginReconnect();
@@ -35,6 +35,18 @@ void test("every retry during one outage sends the same snapshot", () => {
   assert.deepEqual(s.firstMessage({ a: 3 }).data, {
     inputs: { a: 1 },
     current: { a: 3 },
+  });
+});
+
+void test("an attempt that opened and died re-takes the snapshot", () => {
+  const s = new ReconnectState();
+  s.onSocketClosed(true, { x: 1 });
+  s.beginReconnect();
+  s.onSocketClosed(true, { x: 2 });
+  s.beginReconnect();
+  assert.deepEqual(s.firstMessage({ x: 2 }).data, {
+    inputs: { x: 2 },
+    current: { x: 2 },
   });
 });
 
@@ -86,7 +98,6 @@ void test("after a successful reconnect the next drop takes a fresh snapshot", (
   s.onSocketClosed(true, { a: 1 });
   s.beginReconnect();
   s.onAnswered();
-  s.onReconnected();
   s.onSocketClosed(true, { a: 5 });
   assert.deepEqual(s.firstMessage({ a: 6 }).data, {
     inputs: { a: 5 },

@@ -49,26 +49,17 @@ class ReconnectState {
     this.isAnswered = true;
   }
 
-  // `hadOpened`: the socket had opened, so `inputs` are what the server last
-  // had a chance to see. A failed attempt leaves the snapshot alone.
+  // `hadOpened`: the socket had opened, so it drained the queued `update`s
+  // right after `resume`, and any edits made since exist only in `inputs`:
+  // take the snapshot again. A failed attempt never opened and leaves it alone.
   onSocketClosed(hadOpened: boolean, inputs: InputValues): void {
     this.pendingToken = null;
-    // The first close of an opened socket in an outage fixes the snapshot;
-    // retries that opened and died again keep it. onReconnected() clears it.
-    if (hadOpened && (!this.isReconnecting || this.snapshot === null)) {
-      this.snapshot = { ...inputs };
-    }
+    if (hadOpened) this.snapshot = { ...inputs };
   }
 
   beginReconnect(): void {
     this.isReconnecting = true;
     this.isAnswered = false;
-  }
-
-  // Called when a reconnect succeeded end to end, so the next drop takes a
-  // fresh snapshot.
-  onReconnected(): void {
-    this.snapshot = null;
   }
 
   firstMessage(current: InputValues): FirstMessage {

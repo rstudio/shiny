@@ -761,7 +761,6 @@ class ShinyApp {
       // A server with resume off sends no `resumed`; its first `values` is the answer.
       if (this.reconnectState.reconnecting && !this.reconnectState.answered) {
         this.reconnectState.onAnswered();
-        this.reconnectState.onReconnected();
       }
       this.reconnectDelay.reset();
       this._updateProgress();
@@ -928,7 +927,6 @@ class ShinyApp {
     addMessageHandler("resumed", (message: "snapshot" | "inputs") => {
       this.reconnectDelay.reset();
       this.reconnectState.onResumed();
-      this.reconnectState.onReconnected();
       $(document).trigger({
         type: "shiny:resumed",
         // @ts-expect-error; Can not remove info on a established, malformed Event object

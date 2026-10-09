@@ -2,6 +2,18 @@ import $ from "jquery";
 
 import { removeNotification, showNotification } from "./notifications";
 
+let countdownTimer: ReturnType<typeof setTimeout> | undefined;
+
+function startCountdown(reconnectTime: number): void {
+  stopCountdown();
+  updateTime(reconnectTime);
+}
+
+function stopCountdown(): void {
+  clearTimeout(countdownTimer);
+  countdownTimer = undefined;
+}
+
 function updateTime(reconnectTime: number): void {
   const $time = $("#shiny-reconnect-time");
   // If the time has been removed, exit and don't reschedule this function.
@@ -17,7 +29,7 @@ function updateTime(reconnectTime: number): void {
   }
 
   // Reschedule this function after 1 second
-  setTimeout(function () {
+  countdownTimer = setTimeout(function () {
     updateTime(reconnectTime);
   }, 1000);
 }
@@ -30,8 +42,11 @@ async function showReconnectDialog(
 ): Promise<void> {
   const reconnectTime = new Date().getTime() + delay;
 
-  // If there's already a reconnect dialog, don't add another
-  if ($("#shiny-reconnect-text").length > 0) return;
+  // Already showing: later attempts only restart the countdown.
+  if ($("#shiny-reconnect-text").length > 0) {
+    startCountdown(reconnectTime);
+    return;
+  }
 
   const html =
     '<span id="shiny-reconnect-text">Attempting to reconnect</span>' +
@@ -53,10 +68,11 @@ async function showReconnectDialog(
     return;
   }
 
-  updateTime(reconnectTime);
+  startCountdown(reconnectTime);
 }
 
 function hideReconnectDialog(): void {
+  stopCountdown();
   removeNotification("reconnect");
 }
 

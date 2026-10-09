@@ -32,6 +32,7 @@ import {
   showReconnectDialog,
   showReconnectFailedDialog,
 } from "./reconnectDialog";
+import { ReconnectState } from "./reconnectState";
 import type { HtmlDep } from "./render";
 import { renderContentAsync, renderHtmlAsync } from "./render";
 import { unloadOnPageHide } from "./resumeUnload";
@@ -140,20 +141,19 @@ class ShinyApp {
     sessionId: string;
   } | null = null;
 
+  reconnectState = new ReconnectState();
+
   // Token of this session's saved state, from `config`; null when resume is
   // off. Memory only: a reload starts fresh (srcts/PROTOCOL.md, "Saved state").
-  $resumeToken: string | null = null;
+  get $resumeToken(): string | null {
+    return this.reconnectState.resumeToken;
+  }
 
   // Cached input values
   $inputValues: InputValues = {};
 
   // Input values at initialization (and reconnect)
   $initialInput: InputValues | null = null;
-
-  // Input values when the last opened socket closed. A reconnect sends these
-  // as the `resume` payload, so what the user did while disconnected reaches
-  // the server only through the queued `update`s (srcts/PROTOCOL.md, "resume").
-  private $disconnectedInput: InputValues | null = null;
 
   // Output bindings
   $bindings: { [key: string]: OutputBindingAdapter } = {};
@@ -189,10 +189,6 @@ class ShinyApp {
     if (value === false) hideReconnectDialog();
   }
 
-  // True once reconnect() has been called: every socket after the first
-  // belongs to a reconnect and opens with `resume` instead of `init`.
-  private $reconnecting = false;
-
   constructor() {
     this._init();
   }
@@ -208,7 +204,8 @@ class ShinyApp {
     // Best effort: the socket may already be gone, and then the record
     // lives to its 24-hour limit.
     window.addEventListener("pagehide", (event) => {
-      if (!unloadOnPageHide(event.persisted, this.$resumeToken)) return;
+      if (!unloadOnPageHide(event.persisted, this.reconnectState.resumeToken))
+        return;
       if (!this.$socket) return;
       try {
         this.$socket.send(
@@ -254,10 +251,9 @@ class ShinyApp {
     // previous session so those messages aren't seen as illegal transitions.
     this.$outputProgress.reset();
 
-    this.$reconnecting = true;
+    this.reconnectState.beginReconnect();
     this.$socket = this.createSocket();
-    this.$initialInput =
-      this.$disconnectedInput ?? $.extend({}, this.$inputValues);
+    this.$initialInput = $.extend({}, this.$inputValues);
     this.$updateConditionals();
   }
 
@@ -307,20 +303,10 @@ class ShinyApp {
       this.onConnected();
 
       // A reconnecting client says so, so the server seeds restoreInput()
-      // from these inputs instead of the URL's bookmark. See srcts/PROTOCOL.md.
+      // from the current inputs instead of the URL's bookmark. See srcts/PROTOCOL.md.
       socket.send(
         JSON.stringify(
-          this.$reconnecting
-            ? {
-                method: "resume",
-                data: {
-                  inputs: this.$initialInput,
-                  ...(this.$resumeToken !== null
-                    ? { token: this.$resumeToken }
-                    : {}),
-                },
-              }
-            : { method: "init", data: this.$initialInput },
+          this.reconnectState.firstMessage(this.$initialInput ?? {}),
         ),
       );
 
@@ -349,7 +335,6 @@ class ShinyApp {
       // These things are needed only if we've successfully opened the
       // websocket.
       if (hasOpened) {
-        this.$disconnectedInput = $.extend({}, this.$inputValues);
         $(document).trigger({
           type: "shiny:disconnected",
           // @ts-expect-error; Can not remove info on a established, malformed Event object
@@ -359,6 +344,7 @@ class ShinyApp {
         this.$notifyDisconnected();
       }
 
+      this.reconnectState.onSocketClosed(hasOpened, this.$inputValues);
       this.onDisconnected(restarting); // Must be run before this.$removeSocket()
       this.$removeSocket();
     };
@@ -775,6 +761,11 @@ class ShinyApp {
     // * However, `_sendMessagesToHandlers()` will adjust the `this` context to the same _`this`_.
 
     addMessageHandler("values", async (message: { [key: string]: any }) => {
+      // A server with resume off sends no `resumed`; its first `values` is the answer.
+      if (this.reconnectState.reconnecting && !this.reconnectState.answered) {
+        this.reconnectState.onAnswered();
+        this.reconnectState.onReconnected();
+      }
       this.reconnectDelay.reset();
       this._updateProgress();
 
@@ -929,9 +920,10 @@ class ShinyApp {
           workerId: message.workerId,
           sessionId: message.sessionId,
         };
-        this.$resumeToken = message.resumeToken ?? null;
+        const token = message.resumeToken ?? null;
+        this.reconnectState.onConfig(token);
         // enableResume() implies allowReconnect(TRUE).
-        if (this.$resumeToken !== null) this.setAllowReconnect(true);
+        if (token !== null) this.setAllowReconnect(true);
         if (message.user) setShinyUser(message.user);
         this.reconnectDelay.reset();
         $(document).trigger("shiny:sessioninitialized");
@@ -940,6 +932,8 @@ class ShinyApp {
 
     addMessageHandler("resumed", (message: "snapshot" | "inputs") => {
       this.reconnectDelay.reset();
+      this.reconnectState.onResumed();
+      this.reconnectState.onReconnected();
       $(document).trigger({
         type: "shiny:resumed",
         // @ts-expect-error; Can not remove info on a established, malformed Event object

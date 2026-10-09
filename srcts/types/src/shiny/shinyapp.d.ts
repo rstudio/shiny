@@ -4,6 +4,7 @@ import { AsyncQueue } from "../utils/asyncQueue";
 import type { ReconnectPermission } from "./reconnectControl";
 import { ReconnectControl } from "./reconnectControl";
 import { ReconnectDelay } from "./reconnectDelay";
+import { ReconnectState } from "./reconnectState";
 import { OutputProgressReporter } from "./outputProgress";
 type ResponseValue = UploadEndValue | UploadInitValue;
 type Handler = (message: any) => Promise<void> | void;
@@ -32,10 +33,10 @@ declare class ShinyApp {
         workerId: string;
         sessionId: string;
     } | null;
-    $resumeToken: string | null;
+    reconnectState: ReconnectState;
+    get $resumeToken(): string | null;
     $inputValues: InputValues;
     $initialInput: InputValues | null;
-    private $disconnectedInput;
     $bindings: {
         [key: string]: OutputBindingAdapter;
     };
@@ -59,7 +60,6 @@ declare class ShinyApp {
     get $allowReconnect(): ReconnectPermission;
     set $allowReconnect(value: ReconnectPermission);
     setAllowReconnect(value: ReconnectPermission): void;
-    private $reconnecting;
     constructor();
     connect(initialInput: InputValues): void;
     isConnected(): boolean;

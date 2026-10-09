@@ -98,6 +98,11 @@ this session's saved state. Its presence also means the app allows
 reconnecting, so the client sets its `allowReconnect` to `true`. The client
 keeps the token in memory only; a page reload starts without one.
 
+A fresh page adopts the token as `config` arrives. A reconnecting page keeps
+the token it sent in `resume` until `resumed` arrives, then adopts the new
+one: a drop between `config` and the server processing `resume` leaves the
+old record in place, and the next attempt names it.
+
 ### `resume` with a token (client → server)
 
 ```json

@@ -6234,6 +6234,67 @@ ${duplicateIdMsg}`;
     }
   };
 
+  // srcts/src/shiny/reconnectState.ts
+  var ReconnectState = class {
+    constructor() {
+      this.token = null;
+      this.pendingToken = null;
+      this.snapshot = null;
+      this.isReconnecting = false;
+      this.isAnswered = false;
+    }
+    get resumeToken() {
+      return this.token;
+    }
+    get reconnecting() {
+      return this.isReconnecting;
+    }
+    get answered() {
+      return this.isAnswered;
+    }
+    onConfig(token) {
+      if (this.isReconnecting) this.pendingToken = token;
+      else this.token = token;
+    }
+    onResumed() {
+      this.token = this.pendingToken;
+      this.pendingToken = null;
+      this.isAnswered = true;
+    }
+    onAnswered() {
+      this.isAnswered = true;
+    }
+    // `hadOpened`: the socket had opened, so `inputs` are what the server last
+    // had a chance to see. A failed attempt leaves the snapshot alone.
+    onSocketClosed(hadOpened, inputs) {
+      this.pendingToken = null;
+      if (hadOpened && (!this.isReconnecting || this.snapshot === null)) {
+        this.snapshot = { ...inputs };
+      }
+    }
+    beginReconnect() {
+      this.isReconnecting = true;
+      this.isAnswered = false;
+    }
+    // Called when a reconnect succeeded end to end, so the next drop takes a
+    // fresh snapshot.
+    onReconnected() {
+      this.snapshot = null;
+    }
+    firstMessage(current) {
+      if (!this.isReconnecting) return { method: "init", data: current };
+      const inputs = this.snapshot ?? { ...current };
+      return {
+        method: "resume",
+        data: {
+          ...this.token !== null ? { token: this.token } : {},
+          inputs,
+          current: { ...current }
+        }
+      };
+    }
+  };
+
   // srcts/src/shiny/resumeUnload.ts
   function unloadOnPageHide(persisted, token) {
     return !persisted && token !== null;
@@ -6463,17 +6524,11 @@ ${duplicateIdMsg}`;
       // other things tasks as well.
       this.taskQueue = new AsyncQueue();
       this.config = null;
-      // Token of this session's saved state, from `config`; null when resume is
-      // off. Memory only: a reload starts fresh (srcts/PROTOCOL.md, "Saved state").
-      this.$resumeToken = null;
+      this.reconnectState = new ReconnectState();
       // Cached input values
       this.$inputValues = {};
       // Input values at initialization (and reconnect)
       this.$initialInput = null;
-      // Input values when the last opened socket closed. A reconnect sends these
-      // as the `resume` payload, so what the user did while disconnected reaches
-      // the server only through the queued `update`s (srcts/PROTOCOL.md, "resume").
-      this.$disconnectedInput = null;
       // Output bindings
       this.$bindings = {};
       // Output progress states
@@ -6487,9 +6542,6 @@ ${duplicateIdMsg}`;
       this.$activeRequests = {};
       this.$nextRequestId = 0;
       this.reconnectControl = new ReconnectControl();
-      // True once reconnect() has been called: every socket after the first
-      // belongs to a reconnect and opens with `resume` instead of `init`.
-      this.$reconnecting = false;
       // How long to wait before the next reconnection attempt, and whether the
       // attempts have run out. Reset when the server answers, not on socket open.
       this.reconnectDelay = new ReconnectDelay();
@@ -6593,6 +6645,11 @@ ${duplicateIdMsg}`;
       };
       this._init();
     }
+    // Token of this session's saved state, from `config`; null when resume is
+    // off. Memory only: a reload starts fresh (srcts/PROTOCOL.md, "Saved state").
+    get $resumeToken() {
+      return this.reconnectState.resumeToken;
+    }
     // Kept for code outside this class that reads or sets it.
     get $allowReconnect() {
       return this.reconnectControl.allow;
@@ -6611,7 +6668,8 @@ ${duplicateIdMsg}`;
       this.$initialInput = initialInput;
       import_jquery39.default.extend(this.$inputValues, initialInput);
       window.addEventListener("pagehide", (event) => {
-        if (!unloadOnPageHide(event.persisted, this.$resumeToken)) return;
+        if (!unloadOnPageHide(event.persisted, this.reconnectState.resumeToken))
+          return;
         if (!this.$socket) return;
         try {
           this.$socket.send(
@@ -6644,9 +6702,9 @@ ${duplicateIdMsg}`;
       if (this.isConnected())
         throw "Attempted to reconnect, but already connected.";
       this.$outputProgress.reset();
-      this.$reconnecting = true;
+      this.reconnectState.beginReconnect();
       this.$socket = this.createSocket();
-      this.$initialInput = this.$disconnectedInput ?? import_jquery39.default.extend({}, this.$inputValues);
+      this.$initialInput = import_jquery39.default.extend({}, this.$inputValues);
       this.$updateConditionals();
     }
     createSocket() {
@@ -6680,13 +6738,7 @@ ${duplicateIdMsg}`;
         this.onConnected();
         socket.send(
           JSON.stringify(
-            this.$reconnecting ? {
-              method: "resume",
-              data: {
-                inputs: this.$initialInput,
-                ...this.$resumeToken !== null ? { token: this.$resumeToken } : {}
-              }
-            } : { method: "init", data: this.$initialInput }
+            this.reconnectState.firstMessage(this.$initialInput ?? {})
           )
         );
         while (this.$pendingMessages.length) {
@@ -6703,7 +6755,6 @@ ${duplicateIdMsg}`;
       socket.onclose = (e4) => {
         const restarting = e4.code === 1012;
         if (hasOpened) {
-          this.$disconnectedInput = import_jquery39.default.extend({}, this.$inputValues);
           (0, import_jquery39.default)(document).trigger({
             type: "shiny:disconnected",
             // @ts-expect-error; Can not remove info on a established, malformed Event object
@@ -6711,6 +6762,7 @@ ${duplicateIdMsg}`;
           });
           this.$notifyDisconnected();
         }
+        this.reconnectState.onSocketClosed(hasOpened, this.$inputValues);
         this.onDisconnected(restarting);
         this.$removeSocket();
       };
@@ -7004,6 +7056,10 @@ ${duplicateIdMsg}`;
     }
     _init() {
       addMessageHandler("values", async (message) => {
+        if (this.reconnectState.reconnecting && !this.reconnectState.answered) {
+          this.reconnectState.onAnswered();
+          this.reconnectState.onReconnected();
+        }
         this.reconnectDelay.reset();
         this._updateProgress();
         for (const key in message) {
@@ -7116,8 +7172,9 @@ ${duplicateIdMsg}`;
             workerId: message.workerId,
             sessionId: message.sessionId
           };
-          this.$resumeToken = message.resumeToken ?? null;
-          if (this.$resumeToken !== null) this.setAllowReconnect(true);
+          const token = message.resumeToken ?? null;
+          this.reconnectState.onConfig(token);
+          if (token !== null) this.setAllowReconnect(true);
           if (message.user) setShinyUser(message.user);
           this.reconnectDelay.reset();
           (0, import_jquery39.default)(document).trigger("shiny:sessioninitialized");
@@ -7125,6 +7182,8 @@ ${duplicateIdMsg}`;
       );
       addMessageHandler("resumed", (message) => {
         this.reconnectDelay.reset();
+        this.reconnectState.onResumed();
+        this.reconnectState.onReconnected();
         (0, import_jquery39.default)(document).trigger({
           type: "shiny:resumed",
           // @ts-expect-error; Can not remove info on a established, malformed Event object

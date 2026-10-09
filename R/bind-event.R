@@ -320,12 +320,18 @@ bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
         function(value) {
           if (!initialized) {
             initialized <<- TRUE
+            holdingBack <- snapshot_holding_back(x$.domain)
+            registry <- if (holdingBack) snapshot_registry(x$.domain)
+            # Tells this observer apart from a plain observe() that reads a
+            # button (SnapshotRegistry$actionObservers()), ignoreInit or not.
+            if (!is.null(registry) && hasCurrentContext()) {
+              registry$noteEventObserver(getCurrentContext()$id)
+            }
             if (ignoreInit) return()
             # A resume: this event already happened in the session this one
             # continues, so the first run is held back. The event expression
             # was evaluated above, so the dependency stands.
-            if (snapshot_holding_back(x$.domain)) {
-              registry <- snapshot_registry(x$.domain)
+            if (holdingBack) {
               if (!is.null(registry)) registry$noteInitSkipped(x$.label)
               snapshot_inform_closure_vars(x$.label, valueFunc)
               return()

@@ -708,3 +708,24 @@ test_that("with URL bookmarking and resume both on, a reconnect resumes from the
   flushReact()
   expect_equal(spy$bookmarked, 1)
 })
+
+test_that("devmode names a plain observer that reads an action button on resume, not observeEvent() ones", {
+  seen <- character(0)
+  local_mocked_bindings(devmode_inform = function(message, ...) seen <<- c(seen, message))
+  local_snapshot_store_dir()
+  app <- function(input, output, session) {
+    observe({ req(input$go); NULL }, label = "send on go")
+    observeEvent(input$plus, NULL, label = "plus handler")
+    observeEvent(input$skip, NULL, ignoreInit = TRUE, label = "skip handler")
+    observe({ input$txt; NULL }, label = "text watcher")
+  }
+  suppressMessages(resume_real(app, resume_data(snapshot_token_new(),
+    list(`go:shiny.action` = 1L, `plus:shiny.action` = 2L, `skip:shiny.action` = 1L, txt = "a"))))
+  hits <- grep("read an action button", seen, value = TRUE, fixed = TRUE)
+  expect_length(hits, 1)
+  expect_match(hits, "`send on go`", fixed = TRUE)
+  expect_match(hits, "observeEvent(input$go, send())", fixed = TRUE)
+  for (other in c("plus handler", "skip handler", "text watcher")) {
+    expect_false(grepl(other, hits, fixed = TRUE), info = other)
+  }
+})

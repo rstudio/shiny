@@ -1599,6 +1599,12 @@ ShinySession <- R6Class(
               "Outputs %s are on the page but were not defined after resuming, probably because an observeEvent() handler defines them and handlers whose events already happened do not run again. Build them from state instead, or rebuild them in session$onResume() (rule 3 of the rules of reactives in ?enableResume).",
               paste(undefined, collapse = ", ")))
           }
+          plain <- reg$actionObservers()
+          if (length(plain)) {
+            reg$devmodeInform("action-observers", sprintf(
+              "%s read an action button on resume. A plain observer runs again when a page resumes, and a button's count comes back non-zero, so an observer used as a handler, such as observe({ req(input$go); send() }), acts as if clicked. Use observeEvent(input$go, send()), whose handler is held back on resume (rule 4 of the rules of reactives in ?enableResume).",
+              paste0("`", plain, "`", collapse = ", ")))
+          }
           snapshot_resume_otel(self, out)
         }, once = TRUE)
         invisible(outcome$resumed)

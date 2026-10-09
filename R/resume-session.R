@@ -28,6 +28,23 @@ snapshot_undefined_outputs <- function(clientData, defined) {
   setdiff(sub("^output_(.*)_hidden$", "\\1", nms), defined)
 }
 
+# Labels of the observers that depend on an action button in `input` (a
+# ReactiveValues impl), except the contexts in `exclude`.
+snapshot_action_observers <- function(input, exclude) {
+  labels <- character(0)
+  for (key in input$.nameOrder) {
+    if (!inherits(input$.values$get(key), "shinyActionButtonValue")) next
+    deps <- input$.dependents$get(key)
+    if (is.null(deps)) next
+    for (ctx in deps$.dependents$values()) {
+      if (rlang::is_weakref(ctx)) ctx <- rlang::wref_key(ctx)
+      if (is.null(ctx) || !identical(ctx$.reactType, "observer") || ctx$id %in% exclude) next
+      labels <- c(labels, ctx$.label)
+    }
+  }
+  unique(labels)
+}
+
 # A RestoreContext that answers restoreInput() but never wakes bookmarking:
 # active = FALSE keeps onRestore()/onRestored() silent. `dir` is where the
 # `shiny.file` handler finds a record's uploads.

@@ -241,3 +241,47 @@ test_that("without `current` (an older client) the restore context comes from `i
     list(inputs = list(name = "hello", .clientdata_output_form_hidden = FALSE))))
   expect_identical(rendered_value(res$ws, "form"), "hello")
 })
+
+test_that("with an async output in the first flush, the hold-back clears and a queued click fires once after it resolves", {
+  local_snapshot_store_dir()
+  spy <- new_spy("obs")
+  app <- function(input, output, session) {
+    count <- reactiveVal(0)
+    observeEvent(input$plus, { spy$obs <- spy$obs + 1; count(count() + 1) })
+    output$n <- renderText(count())
+    output$slow <- renderText({
+      count()
+      promises::promise(function(resolve, reject) later::later(function() resolve("done"), 0.3))
+    })
+  }
+  visible <- list(.clientdata_output_n_hidden = FALSE, .clientdata_output_slow_hidden = FALSE)
+  live <- live_session(app, outputs = c("n", "slow"), inputs = list(`plus:shiny.action` = 0))
+  for (i in 1:3) live_set(live$session, `plus:shiny.action` = i)
+  Sys.sleep(0.4); later::run_now(); live_flush(live$session)
+  token <- live_close(live)
+  reset_spies()
+
+  ws <- fake_ws()
+  s <- ShinySession$new(ws); local_cancel_writes(s)
+  run <- function() { s$.serverStarted(); withReactiveDomain(s, isolate(app(input = s$input, output = s$output, session = s))) }
+  suppressMessages(s$.resumeSession(list(token = token, inputs = c(list(`plus:shiny.action` = 3L), visible)), run))
+  s$manageInputs(withReactiveDomain(s, applyInputHandlers(list(`plus:shiny.action` = 4L), s)))
+  flushReact(); s$flushOutput()
+  expect_true(isTRUE(s$.resumeHoldBack))          # the slow output keeps the flush open
+  expect_equal(spy$obs, 0)
+  for (i in 1:30) {
+    later::run_now(0.05); flushReact(); s$flushOutput()
+    if (!isTRUE(s$.resumeHoldBack)) break
+  }
+  expect_false(isTRUE(s$.resumeHoldBack))
+  tb <- ws$sent()[[1]]$config$resumeToken
+  rec <- snapshot_store()$read(snapshot_record_key(tb))
+  expect_false(is.null(rec))
+  expect_equal(node_value(rec$sources[["|reactiveVal|count"]]), 3)   # the replacement, before the queued click
+  for (i in 1:30) {
+    later::run_now(0.05); flushReact(); s$flushOutput()
+    if (spy$obs == 1) break
+  }
+  expect_equal(spy$obs, 1)
+  expect_equal(as.numeric(isolate(s$input$plus)), 4)
+})

@@ -676,3 +676,32 @@ test_that("an input on the bookmark-exclude list is not saved and comes back fro
   expect_identical(isolate(res$session$input$secret), "s3cret")
   expect_identical(isolate(res$session$input$`m-key`), "k")
 })
+
+test_that("with URL bookmarking and resume both on, a reconnect keeps the record and the bookmark observers", {
+  local_snapshot_store_dir()
+  shinyOptions(bookmarkStore = "url"); withr::defer(shinyOptions(bookmarkStore = NULL))
+  initCurrentAppState(NULL); withr::defer(clearCurrentAppState())
+  spy <- new_spy("obs", "txt", "restore", "bookmarked")
+  app <- function(input, output, session) {
+    count <- reactiveVal(0)
+    observeEvent(input$plus, { spy$obs <- spy$obs + 1; count(count() + 1) })
+    observe({ input$txt; spy$txt <- spy$txt + 1 })
+    session$onRestore(function(state) spy$restore <- spy$restore + 1)
+    session$onBookmarked(function(url) spy$bookmarked <- spy$bookmarked + 1)
+    output$n <- renderText(count())
+  }
+  live <- live_session(app, outputs = "n", inputs = list(`plus:shiny.action` = 0, txt = ""))
+  for (i in 1:2) live_set(live$session, `plus:shiny.action` = i)
+  live_set(live$session, txt = "typed")
+  token <- live_close(live)
+  res <- suppressMessages(resume_real(app,
+    list(token = token, inputs = list(`plus:shiny.action` = 2, txt = "typed", .clientdata_url_search = "?_inputs_&txt=%22bm%22",
+      .clientdata_url_protocol = "http:", .clientdata_url_hostname = "localhost",
+      .clientdata_url_port = "80", .clientdata_url_pathname = "/")),
+    before = function(s) s$createBookmarkObservers()))
+  expect_identical(res$outcome, "snapshot")
+  expect_identical(isolate(res$session$input$txt), "typed")   # the record, not the URL
+  expect_equal(spy$restore, 0)
+  withReactiveDomain(res$session, isolate(res$session$doBookmark()))
+  expect_equal(spy$bookmarked, 1)                              # observers are live
+})

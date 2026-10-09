@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { ReconnectState } from "../reconnectState";
+import { peekAnswered, ReconnectState } from "../reconnectState";
 
 const tokenA = "0123456789abcdef0123456789abcdef";
 const tokenB = "fedcba9876543210fedcba9876543210";
@@ -117,4 +117,21 @@ void test("after a successful reconnect the next drop takes a fresh snapshot", (
     inputs: { a: 5 },
     current: { a: 6 },
   });
+});
+
+void test("peekAnswered reads a top-level resumed or values from text messages", () => {
+  assert.equal(peekAnswered('{"resumed":"snapshot"}'), true);
+  assert.equal(peekAnswered('{"resumed":"inputs"}'), true);
+  assert.equal(peekAnswered('{"values":{"x":1}}'), true);
+  assert.equal(
+    peekAnswered('{"config":{"workerId":"","sessionId":"s"}}'),
+    false,
+  );
+  assert.equal(peekAnswered('{"allowReconnect":false}'), false);
+  assert.equal(
+    peekAnswered('{"custom":{"txt":"\\"resumed\\":\\"inputs\\""}}'),
+    false,
+  );
+  assert.equal(peekAnswered("not json, resumed values"), false);
+  assert.equal(peekAnswered(new ArrayBuffer(4)), false);
 });

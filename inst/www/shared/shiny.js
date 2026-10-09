@@ -6305,6 +6305,18 @@ ${duplicateIdMsg}`;
       };
     }
   };
+  function peekAnswered(data) {
+    if (typeof data !== "string" || !(data.includes('"resumed"') || data.includes('"values"'))) {
+      return false;
+    }
+    let msg;
+    try {
+      msg = JSON.parse(data);
+    } catch {
+      return false;
+    }
+    return typeof msg === "object" && msg !== null && (Object.prototype.hasOwnProperty.call(msg, "resumed") || Object.prototype.hasOwnProperty.call(msg, "values"));
+  }
 
   // srcts/src/shiny/resumeUnload.ts
   function unloadOnPageHide(persisted, token) {
@@ -6759,6 +6771,9 @@ ${duplicateIdMsg}`;
       socket.onmessage = (e4) => {
         const allow = peekAllowReconnect(e4.data);
         if (allow !== void 0) this.setAllowReconnect(allow);
+        if (this.reconnectState.reconnecting && !this.reconnectState.answered && peekAnswered(e4.data)) {
+          this.reconnectState.onAnswered();
+        }
         this.taskQueue.enqueue(async () => await this.dispatchMessage(e4.data));
       };
       socket.onclose = (e4) => {
@@ -7071,9 +7086,6 @@ ${duplicateIdMsg}`;
     }
     _init() {
       addMessageHandler("values", async (message) => {
-        if (this.reconnectState.reconnecting && !this.reconnectState.answered) {
-          this.reconnectState.onAnswered();
-        }
         this.reconnectDelay.reset();
         this._updateProgress();
         for (const key in message) {

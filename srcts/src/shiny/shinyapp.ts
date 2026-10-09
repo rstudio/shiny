@@ -32,7 +32,7 @@ import {
   showReconnectDialog,
   showResumeEndedDialog,
 } from "./reconnectDialog";
-import { ReconnectState } from "./reconnectState";
+import { peekAnswered, ReconnectState } from "./reconnectState";
 import type { HtmlDep } from "./render";
 import { renderContentAsync, renderHtmlAsync } from "./render";
 import { unloadOnPageHide } from "./resumeUnload";
@@ -321,6 +321,13 @@ class ShinyApp {
       // while a slow handler holds the queue and the socket closes behind it.
       const allow = peekAllowReconnect(e.data);
       if (allow !== undefined) this.setAllowReconnect(allow);
+      if (
+        this.reconnectState.reconnecting &&
+        !this.reconnectState.answered &&
+        peekAnswered(e.data)
+      ) {
+        this.reconnectState.onAnswered();
+      }
       this.taskQueue.enqueue(async () => await this.dispatchMessage(e.data));
     };
     // Called when a successfully-opened websocket is closed, or when an
@@ -775,10 +782,6 @@ class ShinyApp {
     // * However, `_sendMessagesToHandlers()` will adjust the `this` context to the same _`this`_.
 
     addMessageHandler("values", async (message: { [key: string]: any }) => {
-      // A server with resume off sends no `resumed`; its first `values` is the answer.
-      if (this.reconnectState.reconnecting && !this.reconnectState.answered) {
-        this.reconnectState.onAnswered();
-      }
       this.reconnectDelay.reset();
       this._updateProgress();
 

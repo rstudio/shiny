@@ -78,5 +78,31 @@ class ReconnectState {
   }
 }
 
-export { ReconnectState };
+// Whether a text message is the server's answer to a `resume`: a `resumed`, or
+// (from a server with resume off, which sends none) the first `values`. Read
+// as the message arrives, like `peekAllowReconnect()`: a socket that closes
+// while an earlier handler still holds the queue must not be taken for an
+// unanswered one.
+function peekAnswered(data: unknown): boolean {
+  if (
+    typeof data !== "string" ||
+    !(data.includes('"resumed"') || data.includes('"values"'))
+  ) {
+    return false;
+  }
+  let msg: unknown;
+  try {
+    msg = JSON.parse(data);
+  } catch {
+    return false;
+  }
+  return (
+    typeof msg === "object" &&
+    msg !== null &&
+    (Object.prototype.hasOwnProperty.call(msg, "resumed") ||
+      Object.prototype.hasOwnProperty.call(msg, "values"))
+  );
+}
+
+export { ReconnectState, peekAnswered };
 export type { FirstMessage, InputValues as ReconnectInputValues };

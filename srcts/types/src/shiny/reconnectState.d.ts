@@ -22,7 +22,7 @@ declare class ReconnectState {
     get reconnecting(): boolean;
     get answered(): boolean;
     onConfig(token: string | null): void;
-    onResumed(): void;
+    onResumed(resumed: "snapshot" | "inputs"): boolean;
     onAnswered(): void;
     onSocketClosed(hadOpened: boolean, inputs: InputValues): void;
     endedUnanswered(retriesStopped: boolean): boolean;

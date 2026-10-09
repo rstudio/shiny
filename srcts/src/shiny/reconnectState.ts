@@ -39,10 +39,15 @@ class ReconnectState {
     else this.token = token;
   }
 
-  onResumed(): void {
+  // True when the page lost the saved state it asked for: the `resume` this
+  // answers named a token (held in `token` until now) and the server could
+  // restore only the inputs.
+  onResumed(resumed: "snapshot" | "inputs"): boolean {
+    const lost = resumed === "inputs" && this.token !== null;
     this.token = this.pendingToken;
     this.pendingToken = null;
     this.isAnswered = true;
+    return lost;
   }
 
   onAnswered(): void {

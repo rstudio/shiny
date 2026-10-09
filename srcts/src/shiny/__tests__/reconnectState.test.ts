@@ -79,7 +79,7 @@ void test("while reconnecting the config token waits for resumed; a drop in betw
     current: {},
   });
   s.onConfig(tokenB);
-  s.onResumed();
+  s.onResumed("snapshot");
   assert.equal(s.resumeToken, tokenB);
 });
 
@@ -159,4 +159,28 @@ void test("beginning another attempt makes the page unanswered again", () => {
   s.onAnswered();
   s.beginReconnect();
   assert.equal(s.endedUnanswered(true), true);
+});
+
+void test("onResumed reports lost state only when the resume named a token and got inputs", () => {
+  const lost = (token: string | null, resumed: "snapshot" | "inputs") => {
+    const s = new ReconnectState();
+    s.onConfig(token);
+    s.onSocketClosed(true, {});
+    s.beginReconnect();
+    s.onConfig(tokenB);
+    return s.onResumed(resumed);
+  };
+  assert.equal(lost(tokenA, "inputs"), true);
+  assert.equal(lost(tokenA, "snapshot"), false);
+  assert.equal(lost(null, "inputs"), false); // no token was sent
+});
+
+void test("after a lost-state answer the page holds the new token", () => {
+  const s = new ReconnectState();
+  s.onConfig(tokenA);
+  s.onSocketClosed(true, {});
+  s.beginReconnect();
+  s.onConfig(tokenB);
+  assert.equal(s.onResumed("inputs"), true);
+  assert.equal(s.resumeToken, tokenB);
 });

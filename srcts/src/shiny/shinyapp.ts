@@ -31,6 +31,7 @@ import {
   hideReconnectDialog,
   showReconnectDialog,
   showResumeEndedDialog,
+  showResumeLostNotice,
 } from "./reconnectDialog";
 import { peekAnswered, ReconnectState } from "./reconnectState";
 import type { HtmlDep } from "./render";
@@ -945,12 +946,13 @@ class ShinyApp {
 
     addMessageHandler("resumed", (message: "snapshot" | "inputs") => {
       this.reconnectDelay.reset();
-      this.reconnectState.onResumed();
-      $(document).trigger({
-        type: "shiny:resumed",
-        // @ts-expect-error; Can not remove info on a established, malformed Event object
-        resumed: message,
-      });
+      const lost = this.reconnectState.onResumed(message);
+      const evt = $.Event("shiny:resumed", { resumed: message });
+      $(document).trigger(evt);
+      if (lost && !evt.isDefaultPrevented()) {
+        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+        showResumeLostNotice();
+      }
     });
 
     addMessageHandler("busy", (message: "busy" | "idle") => {

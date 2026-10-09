@@ -39,7 +39,10 @@ NULL
 #'   reconnects at once, resuming from its inputs only. The server function
 #'   runs again, as it would on a reload. Without `appVersion`, a change to
 #'   the app's R files makes sessions resume from their inputs only instead,
-#'   before anything runs.
+#'   before anything runs. The browser then shows "Reconnected, but your
+#'   previous work could not be restored.", as it does whenever a page that
+#'   had saved state resumes from its inputs only; call `event.preventDefault()`
+#'   in a `shiny:resumed` handler to suppress it.
 #' * Structure an `observeEvent()` handler created after startup (an output,
 #'   a module server, an observer) does not come back on its own, because
 #'   that handler does not run again. Rebuild it in `session$onResume()`;

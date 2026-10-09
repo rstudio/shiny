@@ -6127,6 +6127,15 @@ ${duplicateIdMsg}`;
       type: "warning"
     });
   }
+  async function showResumeLostNotice() {
+    await show2({
+      id: "resume-lost",
+      html: '<span id="shiny-resume-lost">Reconnected, but your previous work could not be restored.</span>',
+      duration: null,
+      closeButton: true,
+      type: "warning"
+    });
+  }
 
   // srcts/src/shiny/shinyapp.ts
   var import_jquery39 = __toESM(require_jquery());
@@ -6271,10 +6280,15 @@ ${duplicateIdMsg}`;
       if (this.isReconnecting) this.pendingToken = token;
       else this.token = token;
     }
-    onResumed() {
+    // True when the page lost the saved state it asked for: the `resume` this
+    // answers named a token (held in `token` until now) and the server could
+    // restore only the inputs.
+    onResumed(resumed) {
+      const lost = resumed === "inputs" && this.token !== null;
       this.token = this.pendingToken;
       this.pendingToken = null;
       this.isAnswered = true;
+      return lost;
     }
     onAnswered() {
       this.isAnswered = true;
@@ -7214,12 +7228,12 @@ ${duplicateIdMsg}`;
       );
       addMessageHandler("resumed", (message) => {
         this.reconnectDelay.reset();
-        this.reconnectState.onResumed();
-        (0, import_jquery39.default)(document).trigger({
-          type: "shiny:resumed",
-          // @ts-expect-error; Can not remove info on a established, malformed Event object
-          resumed: message
-        });
+        const lost = this.reconnectState.onResumed(message);
+        const evt = import_jquery39.default.Event("shiny:resumed", { resumed: message });
+        (0, import_jquery39.default)(document).trigger(evt);
+        if (lost && !evt.isDefaultPrevented()) {
+          showResumeLostNotice();
+        }
       });
       addMessageHandler("busy", (message) => {
         if (message === "busy") {

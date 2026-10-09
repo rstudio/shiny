@@ -159,8 +159,11 @@ R's `input` does.
 were applied (no token, no record, a mismatch, an incomplete record, the
 app's code changed, or a value that could not be decoded; the server log
 names the cause). The client fires the DOM event `shiny:resumed` with
-`resumed` set to the value, and resets its retry count. With resume off the
-server sends no `resumed`.
+`resumed` set to the value, and resets its retry count. When the `resume` it
+answers carried a `token` and the value is `"inputs"`, the client then shows a
+dismissable warning, "Reconnected, but your previous work could not be
+restored." A `shiny:resumed` handler that calls `event.preventDefault()`
+suppresses it. With resume off the server sends no `resumed`.
 
 ### `unload` (client → server)
 

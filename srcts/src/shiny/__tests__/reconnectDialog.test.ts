@@ -58,3 +58,15 @@ void test("the resume-ended notice is not removed by the retry notice fading out
   assert.equal(document.querySelectorAll("#shiny-reconnect-text").length, 0);
   assert.ok(document.querySelector("#shiny-reload-link"));
 });
+
+void test("the resume-lost notice says the work was not restored and can be dismissed", async () => {
+  await dialog.showResumeLostNotice();
+  assert.equal(
+    text("#shiny-resume-lost"),
+    "Reconnected, but your previous work could not be restored.",
+  );
+  const notice = document
+    .querySelector("#shiny-resume-lost")
+    ?.closest(".shiny-notification");
+  assert.ok(notice?.querySelector(".shiny-notification-close"));
+});

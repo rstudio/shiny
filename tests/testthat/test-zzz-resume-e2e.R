@@ -26,6 +26,7 @@ test_that("the page continues after a process restart: count kept, email not re-
   e2e_wait_until(function() identical(resumed_attr(b), "snapshot"), timeout = 40, what = "shiny:resumed")
   e2e_wait_until(function() !identical(e2e_text(b, "#process"), pid1), what = "the new process id")
   expect_match(e2e_text(b, "#count"), "Count: 3", fixed = TRUE)
+  expect_false(e2e_present(b, "#shiny-resume-lost"))
   expect_match(e2e_text(b, "#emails"), "Emails sent: 1", fixed = TRUE)
   after <- new_logs(e, before)
   expect_false(any(grepl("EMAIL SENT", after, fixed = TRUE)))
@@ -100,6 +101,7 @@ test_that("with SHINY_RESUME=FALSE a reconnect replays inputs but no events, and
   expect_null(resumed_attr(b))
   expect_length(e2e_records(e$store_dir), 0)
   click_until(b, "#plus", "#count", "Count: 1")
+  expect_false(e2e_present(b, "#shiny-resume-lost"))
 })
 
 test_that("a page keeps retrying through a long outage and resumes with the token it kept", {
@@ -133,6 +135,7 @@ test_that("a record that cannot be complete resumes from inputs only: count 0, n
   e2e_wait_until(function() identical(resumed_attr(b), "inputs"), timeout = 40, what = "shiny:resumed")
   Sys.sleep(1)
   expect_match(e2e_text(b, "#count"), "Count: 0", fixed = TRUE)
+  e2e_wait_until(function() e2e_present(b, "#shiny-resume-lost"), what = "the resume-lost notice")
   expect_false(any(grepl("EMAIL SENT", new_logs(e, before), fixed = TRUE)))
   stderr2 <- e2e_stderr_reader(p2)
   e2e_wait_until(function() any(grepl("Resumed from inputs only: saved state incomplete: |reactiveVal|conn", stderr2(), fixed = TRUE)),
@@ -240,6 +243,7 @@ test_that("saved state that no longer fits restarts the page from inputs only af
   stderr <- e2e_stderr_reader(p2)
   e2e_wait_until(function() identical(resumed_attr(b), "inputs"), timeout = 40, what = "shiny:resumed")
   expect_match(e2e_text(b, "#count"), "Count: 0", fixed = TRUE)
+  e2e_wait_until(function() e2e_present(b, "#shiny-resume-lost"), what = "the resume-lost notice")
   expect_false(e2e_present(b, "#shiny-resume-ended"))
   e2e_wait_until(function() any(grepl("The session restarted from inputs only", stderr(), fixed = TRUE)), what = "the failure line")
   e2e_wait_until(function() any(grepl("Resumed from inputs only: no saved state", stderr(), fixed = TRUE)), what = "the retry's line")

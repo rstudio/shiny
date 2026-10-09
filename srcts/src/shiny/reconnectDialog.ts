@@ -92,4 +92,22 @@ async function showResumeEndedDialog(): Promise<void> {
   });
 }
 
-export { hideReconnectDialog, showReconnectDialog, showResumeEndedDialog };
+// Shown when a reconnect named saved state the server could not restore
+// (srcts/PROTOCOL.md, "resumed"): the page is live, but the server started
+// over from the inputs. Its own id, for the same reason as resume-ended.
+async function showResumeLostNotice(): Promise<void> {
+  await showNotification({
+    id: "resume-lost",
+    html: '<span id="shiny-resume-lost">Reconnected, but your previous work could not be restored.</span>',
+    duration: null,
+    closeButton: true,
+    type: "warning",
+  });
+}
+
+export {
+  hideReconnectDialog,
+  showReconnectDialog,
+  showResumeEndedDialog,
+  showResumeLostNotice,
+};

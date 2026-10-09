@@ -186,17 +186,19 @@ NULL
 #' of uploaded files. Three things are never written: `passwordInput()`
 #' values, inputs named in `session$setBookmarkExclude()`, and values marked
 #' with [excludeFromResume()]. Excluded inputs still come back after a
-#' reconnect, from the browser's own copy. Free-text inputs can hold
-#' personal data or pasted secrets; exclude them the same way.
+#' reconnect, from the browser's own copy. A labelled reactive that holds a
+#' copy of an excluded input is still saved; exclude it with
+#' [excludeFromResume()]. Free-text inputs can hold personal data or pasted
+#' secrets; exclude them the same way.
 #'
 #' Records go to the hosting platform's bookmark storage when it provides one,
 #' otherwise under `tools::R_user_dir("shiny", "cache")`; never in the app
-#' directory. On the fallback store the directory and each file are readable
-#' only by the owner; on a platform's directory, permissions are the
-#' platform's. A record is keyed by a 128-bit random token and the app's
-#' path, kept for 24 hours, and deleted when the page is closed, when the
-#' session ends for good, or when a resume reads it. The directory as a whole
-#' is capped at 1 GiB and 1000 records. Nothing is written unless the app
+#' directory. The directory and each record are made readable only by the
+#' owner. A record is keyed by a 128-bit random token and the app's path,
+#' kept for 24 hours, and deleted when the page is closed, when the session
+#' ends for good, or when a resume reads it. Records are capped at 1 GiB and
+#' 1000 in all; copies of uploaded files are not counted towards the 1 GiB
+#' and are deleted with their record. Nothing is written unless the app
 #' called `enableResume()` or the platform set `SHINY_RESUME`. On Windows the
 #' token comes from the `openssl` package when it is installed and from R's
 #' random number generator otherwise.

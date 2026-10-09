@@ -39,10 +39,11 @@
     30 seconds for as long as the page is open, with a **Try now** link,
     unless the hosting platform's connection layer says the session is over
     (an idle timeout); `"force"` keeps retrying even then.
-  * **`session$close()` ends the session for good.** The browser is told not
-    to reconnect. Before, behind Shiny Server, a deliberate close was
-    followed by a reconnect into a new session; apps that used that as a
-    reset should call `session$reload()`.
+  * **`session$close()` ends the session for good**, as does an unhandled
+    error in an observer. The browser is told not to reconnect. Before,
+    behind Shiny Server, a deliberate close was followed by a reconnect
+    into a new session; apps that used that as a reset should call
+    `session$reload()`.
   * `renderUI()` content that calls `restoreInput()` keeps the user's
     current values across a reconnect, and a bookmark in the page's URL is
     no longer restored over inputs changed since the page loaded.

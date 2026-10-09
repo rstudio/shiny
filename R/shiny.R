@@ -112,8 +112,8 @@ workerId <- local({
 #'   `reactiveVal()` and `reactiveValues()` start from their initial values.
 #'   A session the server ends (`session$close()`, an unhandled error) is
 #'   not retried. If `value` is `FALSE` (the default), the client
-#'   does not retry. `"force"` behaves exactly like `TRUE`; earlier versions
-#'   needed it to retry outside Shiny Server and Posit Connect.
+#'   does not retry. `"force"` behaves like `TRUE` but keeps retrying even
+#'   when the hosting platform's connection layer says the session is over.
 #' }
 #' \item{close()}{
 #'   Ends the session for good: the browser is told not to reconnect, the

@@ -20,8 +20,8 @@ unless the app calls \code{\link[=enableResume]{enableResume()}}:
 \code{reactiveVal()} and \code{reactiveValues()} start from their initial values.
 A session the server ends (\code{session$close()}, an unhandled error) is
 not retried. If \code{value} is \code{FALSE} (the default), the client
-does not retry. \code{"force"} behaves exactly like \code{TRUE}; earlier versions
-needed it to retry outside Shiny Server and Posit Connect.
+does not retry. \code{"force"} behaves like \code{TRUE} but keeps retrying even
+when the hosting platform's connection layer says the session is over.
 }
 \item{close()}{
 Ends the session for good: the browser is told not to reconnect, the

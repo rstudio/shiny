@@ -71,7 +71,7 @@ disconnected, and the browser does not echo an old value back over them.
 ```
 
 Carries the app's `session$allowReconnect()` calls. `"force"` behaves as
-`true`; it is kept for compatibility.
+`true`, except that it ignores a hosting shim's veto (see "Hosting shims").
 
 ### Client retry rule
 

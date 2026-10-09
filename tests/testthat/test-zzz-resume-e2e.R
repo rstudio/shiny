@@ -228,3 +228,19 @@ test_that("with resume off, onResume() redefines an output a handler built, and 
   e2e_set_text(b, "word", "second")
   e2e_wait_until(function() grepl("Built: second", e2e_text(b, "#built"), fixed = TRUE), what = "the rebuilt output")
 })
+
+test_that("saved state that no longer fits ends the session with a notice and a Reload link", {
+  skip_on_cran()
+  e <- e2e_session(env = c(SHINY_RESUME = "TRUE", E2E_APP_VERSION = "1"), app = "resume-e2e")
+  b <- e$browser
+  since <- Sys.time()
+  click_until(b, "#plus", "#count", "Count: 1")
+  e2e_wait_for_record(e$store_dir, since = since)
+  p2 <- restart_process(e, env = c(E2E_EXTRA_SOURCE = "1"))
+  e2e_wait_until(function() e2e_present(b, "#shiny-resume-ended"), timeout = 40, what = "the resume-ended notice")
+  expect_true(e2e_present(b, "#shiny-reload-link"))
+  expect_true(e2e_present(b, "#shiny-disconnected-overlay"))
+  Sys.sleep(4)
+  expect_false(e2e_present(b, "#shiny-reconnect-text"))
+  expect_true(any(grepl("Resume failed after the server function ran", p2$read_error_lines())))
+})

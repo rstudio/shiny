@@ -60,4 +60,20 @@ function hideReconnectDialog(): void {
   removeNotification("reconnect");
 }
 
-export { hideReconnectDialog, showReconnectDialog };
+// Shown when the server ended a session the page was trying to resume.
+// Nothing can be retried; the reason is in the server log. It has its own id:
+// the retry notice is still fading out when the server's answer arrives, and
+// reusing "reconnect" would let that fade remove this one.
+async function showResumeEndedDialog(): Promise<void> {
+  await showNotification({
+    id: "resume-ended",
+    html: '<span id="shiny-resume-ended">This session could not be resumed.</span>',
+    action:
+      '<a id="shiny-reload-link" href="#" onclick="window.location.reload(); return false;">Reload to start fresh</a>',
+    duration: null,
+    closeButton: false,
+    type: "warning",
+  });
+}
+
+export { hideReconnectDialog, showReconnectDialog, showResumeEndedDialog };

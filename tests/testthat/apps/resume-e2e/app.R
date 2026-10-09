@@ -2,6 +2,7 @@ library(shiny)
 
 # E2E_APP_VERSION: appVersion. E2E_ALLOW: allowReconnect(TRUE).
 # E2E_BLOCK: a source that cannot be saved, so every record is incomplete.
+# E2E_EXTRA_SOURCE: one more reactiveVal, so a saved record no longer fits.
 args <- list(debounce = 300)
 if (nzchar(Sys.getenv("E2E_APP_VERSION", ""))) args$appVersion <- Sys.getenv("E2E_APP_VERSION")
 if (!identical(Sys.getenv("SHINY_RESUME"), "FALSE")) do.call(enableResume, args)
@@ -59,6 +60,7 @@ server <- function(input, output, session) {
   emails <- reactiveVal(0)
   contents <- reactiveVal("")
   if (nzchar(Sys.getenv("E2E_BLOCK", ""))) conn <- reactiveVal(function() "a connection")
+  if (nzchar(Sys.getenv("E2E_EXTRA_SOURCE", ""))) extra <- reactiveVal(1)
   observeEvent(input$plus, count(count() + 1))
   observeEvent(input$send, { log_line("EMAIL SENT"); emails(emails() + 1) })
   observeEvent(input$end, session$close())

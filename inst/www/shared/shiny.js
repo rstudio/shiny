@@ -6104,6 +6104,16 @@ ${duplicateIdMsg}`;
   function hideReconnectDialog() {
     remove2("reconnect");
   }
+  async function showResumeEndedDialog() {
+    await show2({
+      id: "resume-ended",
+      html: '<span id="shiny-resume-ended">This session could not be resumed.</span>',
+      action: '<a id="shiny-reload-link" href="#" onclick="window.location.reload(); return false;">Reload to start fresh</a>',
+      duration: null,
+      closeButton: false,
+      type: "warning"
+    });
+  }
 
   // srcts/src/shiny/shinyapp.ts
   var import_jquery39 = __toESM(require_jquery());
@@ -6651,7 +6661,12 @@ ${duplicateIdMsg}`;
     }
     setAllowReconnect(value) {
       this.reconnectControl.setAllow(value);
-      if (value === false) hideReconnectDialog();
+      if (value !== false) return;
+      if (this.reconnectState.reconnecting && !this.reconnectState.answered) {
+        showResumeEndedDialog();
+      } else {
+        hideReconnectDialog();
+      }
     }
     connect(initialInput) {
       if (this.$socket)

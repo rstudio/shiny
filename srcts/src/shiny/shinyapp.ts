@@ -27,7 +27,11 @@ import { removeNotification, showNotification } from "./notifications";
 import type { ReconnectPermission } from "./reconnectControl";
 import { peekAllowReconnect, ReconnectControl } from "./reconnectControl";
 import { ReconnectDelay } from "./reconnectDelay";
-import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
+import {
+  hideReconnectDialog,
+  showReconnectDialog,
+  showResumeEndedDialog,
+} from "./reconnectDialog";
 import { ReconnectState } from "./reconnectState";
 import type { HtmlDep } from "./render";
 import { renderContentAsync, renderHtmlAsync } from "./render";
@@ -183,7 +187,14 @@ class ShinyApp {
 
   setAllowReconnect(value: ReconnectPermission): void {
     this.reconnectControl.setAllow(value);
-    if (value === false) hideReconnectDialog();
+    if (value !== false) return;
+    if (this.reconnectState.reconnecting && !this.reconnectState.answered) {
+      // The server ended the session this page asked to resume.
+      /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+      showResumeEndedDialog();
+    } else {
+      hideReconnectDialog();
+    }
   }
 
   constructor() {

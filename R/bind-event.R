@@ -324,9 +324,7 @@ bindEvent.Observer <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE,
             registry <- if (holdingBack) snapshot_registry(x$.domain)
             # Tells this observer apart from a plain observe() that reads a
             # button (SnapshotRegistry$actionObservers()), ignoreInit or not.
-            if (!is.null(registry) && hasCurrentContext()) {
-              registry$noteEventObserver(getCurrentContext()$id)
-            }
+            if (!is.null(registry)) registry$noteEventObserver(x$.reactId)
             if (ignoreInit) return()
             # A resume: this event already happened in the session this one
             # continues, so the first run is held back. The event expression

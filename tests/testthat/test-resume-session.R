@@ -711,7 +711,8 @@ test_that("with URL bookmarking and resume both on, a reconnect resumes from the
 
 test_that("devmode names a plain observer that reads an action button on resume, not observeEvent() ones", {
   seen <- character(0)
-  local_mocked_bindings(devmode_inform = function(message, ...) seen <<- c(seen, message))
+  local_mocked_bindings(devmode_inform = function(message, ...) seen <<- c(seen, message),
+                        in_devmode = function() TRUE)
   local_snapshot_store_dir()
   app <- function(input, output, session) {
     observe({ req(input$go); NULL }, label = "send on go")
@@ -728,4 +729,43 @@ test_that("devmode names a plain observer that reads an action button on resume,
   for (other in c("plus handler", "skip handler", "text watcher")) {
     expect_false(grepl(other, hits, fixed = TRUE), info = other)
   }
+})
+
+# The labels the action-button detector names after resuming `app` from
+# inputs only, or NULL when it says nothing.
+action_observer_hits <- function(app, inputs, devmode = TRUE) {
+  seen <- character(0)
+  local_mocked_bindings(devmode_inform = function(message, ...) seen <<- c(seen, message),
+                        in_devmode = function() devmode)
+  local_snapshot_store_dir()
+  suppressMessages(resume_real(app, resume_data(snapshot_token_new(), inputs)))
+  hits <- grep("read an action button", seen, value = TRUE, fixed = TRUE)
+  if (length(hits)) strsplit(sub(" read an action button.*", "", hits), ", ", fixed = TRUE)[[1]]
+}
+
+test_that("the action-button detector skips outputs, which re-render without side effects", {
+  app <- function(input, output, session) {
+    observe({ req(input$go); NULL }, label = "send on go")
+    output$a <- renderText({ input$go; "x" })
+    output$b <- renderText("y") |> bindEvent(input$go2)
+  }
+  hits <- action_observer_hits(app, list(`go:shiny.action` = 1L, `go2:shiny.action` = 1L,
+    .clientdata_output_a_hidden = FALSE, .clientdata_output_b_hidden = FALSE))
+  expect_identical(hits, "`send on go`")
+})
+
+test_that("the action-button detector skips an event observer that runs again within the first flush", {
+  app <- function(input, output, session) {
+    rv <- reactiveVal(0)
+    observe({ req(input$go); NULL }, label = "send on go")
+    observeEvent(list(input$go, rv()), NULL, label = "go or rv")
+    observe(rv(1))
+  }
+  hits <- action_observer_hits(app, list(`go:shiny.action` = 1L))
+  expect_identical(hits, "`send on go`")
+})
+
+test_that("the action-button detector stays quiet outside devmode", {
+  app <- function(input, output, session) observe({ req(input$go); NULL }, label = "send on go")
+  expect_null(action_observer_hits(app, list(`go:shiny.action` = 1L), devmode = FALSE))
 })

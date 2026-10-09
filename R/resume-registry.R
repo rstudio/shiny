@@ -364,14 +364,17 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
       private$skipped <- c(private$skipped, label)
       invisible()
     },
-    noteEventObserver = function(ctxId) {
-      private$eventContexts <- c(private$eventContexts, ctxId)
+    noteEventObserver = function(reactId) {
+      private$eventObservers <- c(private$eventObservers, reactId)
       invisible()
     },
-    # Plain observers that depend on an action button after the first flush
-    # of a resume, by label.
-    actionObservers = function() {
-      snapshot_action_observers(.subset2(private$session$input, "impl"), private$eventContexts)
+    # Matched by observer (reactId), not by context, since an observer gets a
+    # new context each run. `outputs` are the reactIds of the session's output
+    # observers: re-rendering on resume has no side effect, so observeEvent()
+    # is the wrong advice for them.
+    actionObservers = function(outputs = character(0)) {
+      snapshot_action_observers(.subset2(private$session$input, "impl"),
+                                c(private$eventObservers, outputs))
     },
     # excludeFromResume() during a resume: a source whose saved value was
     # applied goes back to its constructor value, and its dependents
@@ -401,7 +404,7 @@ SnapshotRegistry <- R6Class("SnapshotRegistry", cloneable = FALSE,
     # resuming
     phase = "idle",      # "idle" | "constructing" (server function running) | "restoring" (verified; first flush)
     records = NULL, omitted = character(0), initials = NULL, applied = character(0), claimed = character(0), trips = list(),
-    skipped = character(0), eventContexts = character(0), outcomeValue = NULL,
+    skipped = character(0), eventObservers = character(0), outcomeValue = NULL,
 
     orphan = function(entry, reason, counted) {
       entry$reason <- reason

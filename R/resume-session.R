@@ -29,7 +29,7 @@ snapshot_undefined_outputs <- function(clientData, defined) {
 }
 
 # Labels of the observers that depend on an action button in `input` (a
-# ReactiveValues impl), except the contexts in `exclude`.
+# ReactiveValues impl), except the observers (reactIds) in `exclude`.
 snapshot_action_observers <- function(input, exclude) {
   labels <- character(0)
   for (key in input$.nameOrder) {
@@ -38,7 +38,7 @@ snapshot_action_observers <- function(input, exclude) {
     if (is.null(deps)) next
     for (ctx in deps$.dependents$values()) {
       if (rlang::is_weakref(ctx)) ctx <- rlang::wref_key(ctx)
-      if (is.null(ctx) || !identical(ctx$.reactType, "observer") || ctx$id %in% exclude) next
+      if (is.null(ctx) || !identical(ctx$.reactType, "observer") || ctx$.reactId %in% exclude) next
       labels <- c(labels, ctx$.label)
     }
   }

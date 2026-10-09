@@ -111,7 +111,11 @@ starts without one.
 A fresh page adopts the token as `config` arrives. A reconnecting page keeps
 the token it sent in `resume` until `resumed` arrives, then adopts the new
 one: a drop between `config` and the server processing `resume` leaves the
-old record in place, and the next attempt names it.
+old record in place, and the next attempt names it. The other side of that
+window: if the socket drops after the server read (and so deleted) the record
+but before the client processed `resumed`, the client still holds the used
+token. The next attempt names it and resumes from inputs only, and the record
+the first attempt wrote under its new token stays until its 24-hour limit.
 
 ### `resume` with a token (client → server)
 

@@ -1,0 +1,7 @@
+engine: shiny
+options:
+    host: "127.0.0.1"
+    port: null
+    app_dir: null
+    quiet: false
+

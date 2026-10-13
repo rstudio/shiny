@@ -1,12 +1,11 @@
 #!/usr/bin/env Rscript
 
-# This script downloads strftime-min.js from its GitHub repository,
+# This script vendors strftime-min.js out of `node_modules`,
 # https://github.com/samsonjs/strftime
 
 # This script can be sourced from RStudio, or run with Rscript.
 
 version <- "0.9.2"
-ref <- paste0("v", version)
 destdir <- rprojroot::find_package_root_file(
   "inst",
   "www",
@@ -14,13 +13,22 @@ destdir <- rprojroot::find_package_root_file(
   "strftime"
 )
 
-download.file(
-  paste0(
-    "https://raw.githubusercontent.com/samsonjs/strftime/",
-    ref,
-    "/strftime-min.js"
-  ),
-  destfile = file.path(destdir, "strftime-min.js")
+# Install first, then vendor out of `node_modules` rather than off GitHub, so
+# that `package.json` is the single record of which version ships. That is what
+# lets the `license-note` step in the routine workflow report strftime's
+# license automatically -- see LICENSE.note.
+withr::with_dir(
+  rprojroot::find_package_root_file(),
+  {
+    exit_code <- system(paste0("npm install --save-dev --save-exact strftime@", version))
+    if (exit_code != 0) stop("npm could not install strftime")
+  }
+)
+
+file.copy(
+  rprojroot::find_package_root_file("node_modules", "strftime", "strftime-min.js"),
+  file.path(destdir, "strftime-min.js"),
+  overwrite = TRUE
 )
 
 writeLines(
@@ -30,4 +38,3 @@ writeLines(
   ),
   rprojroot::find_package_root_file("R", "version_strftime.R")
 )
-

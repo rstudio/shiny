@@ -7,6 +7,15 @@
   "name": "@posit/shiny",
   "version": "1.14.0-alpha.9000",
   "license": "MIT",
+  "licenseNote": {
+    "bundled": [
+      "@selectize/selectize",
+      "bootstrap-datepicker",
+      "jquery",
+      "lit",
+      "strftime"
+    ]
+  },
   "main": "",
   "browser": "",
   "types": "srcts/types/extras/globalShiny.d.ts",
@@ -52,6 +61,7 @@
     "prettier": "3.x",
     "prettier-plugin-organize-imports": "4.x",
     "readcontrol": "1.x",
+    "strftime": "0.9.2",
     "tsx": "4.x",
     "type-coverage": "2.29.x",
     "typescript": "5.8.x"

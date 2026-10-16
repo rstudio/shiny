@@ -24,3 +24,12 @@ madge.svg
 .claude/settings.local.json
 /docs/
 .context
+
+# Contributor agent skills. Tools like `btw` or `library-skills` may install
+# dependency skills into .agents/skills/ (and, via the .claude/skills symlink,
+# Claude-targeted installs land there too), so only the skills listed here are
+# tracked. Update this list when adding or removing a skill.
+/.agents/*
+!/.agents/skills/
+/.agents/skills/*
+!/.agents/skills/memory-bank/

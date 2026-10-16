@@ -34,11 +34,21 @@ Contributor skills live in `.agents/skills/`; `.claude/skills` is a symlink to
 it. Only allowlisted skills are tracked, so when adding or removing one, update
 the `!/.agents/skills/<name>/` lines in `.gitignore` to match.
 
+Start with:
+
+- `memory-bank/architecture.md` - reactivity, sessions, modules, bindings, async, and where each lives
+- `memory-bank/assets.md` - the TypeScript build and vendored JS/CSS libraries
+- `memory-bank/testing.md` - running and writing shiny's own tests, and CI
+- `memory-bank/documentationStyle.md` - roxygen, pkgdown reference index, `NEWS.md`
+- `memory-bank/commitConventions.md` - commit messages, PR titles, merging
+- `memory-bank/agentSkills.md` - the bundled `inst/skills/shiny-for-r/` skill
+
 ## Bundled Agent Skill
 
 The package ships an Agent Skill for app authors under
 `inst/skills/shiny-for-r/`. Treat it like user-facing documentation: when a
 change touches a public API it documents, update the skill in the same PR.
+Read `memory-bank/agentSkills.md` before editing it.
 
 ## Common Pitfalls
 

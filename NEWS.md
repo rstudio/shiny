@@ -1,5 +1,7 @@
 # shiny (development version)
 
+* Fixed #4026: bookmarking no longer errors with "Error bookmarking state" when a frozen input (via `freezeReactiveValue()`) is part of the state. Frozen inputs are now omitted from the saved state, since their value is pending an update and reading it during bookmarking raised a silent error that aborted `session$doBookmark()`. (#4435)
+
 * Fixed #4281, #3251: `dateInput()`'s `datesdisabled` now works when `format` is not the default `yyyy-mm-dd`. The dates are now converted to real dates on the client, the same way `min`/`max` already are, instead of being parsed by bootstrap-datepicker with the display format. (#4434)
 
 * Added an agent skill (`inst/skills/shiny-for-r/`) following the

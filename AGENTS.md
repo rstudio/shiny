@@ -13,7 +13,7 @@ shiny is the R package for building reactive web applications. The server side i
 Rscript -e 'devtools::load_all()'                  # Load for interactive work
 Rscript -e 'devtools::document()'                  # Regenerate man/, NAMESPACE, Collate
 Rscript -e 'devtools::test()'                      # All testthat tests
-Rscript -e 'devtools::test(filter = "reactivity")' # One file: tests/testthat/test-reactivity.R
+Rscript -e 'devtools::test(filter = "reactivity")' # One file: tests/testthat/test-reactivity.r
 Rscript -e 'devtools::check()'                     # Full R CMD check
 
 # TypeScript (run `npm ci` once first)

@@ -14,7 +14,7 @@ not an enforced check: no workflow lints titles.
 <type>[(<scope>)][!]: <description> (#<PR>)
 ```
 
-From the last ~80 commits on `main`:
+Conventions seen on `main`:
 
 - Types: `fix`, `feat`, `docs`, `chore`, `refactor`, `ci`, `build`, `test`.
   Use `!` for a breaking change (`feat!(submitButton): ...`).
@@ -35,14 +35,13 @@ Release and version commits follow fixed wording:
 
 ## Merging
 
-- PRs are **squash merged**. Of the last 80 commits on `main`, only two are
-  merge commits (one merged external PR). The repo allows squash, merge, and
+- PRs are **squash merged**; merge commits on `main` are rare. The repo allows squash, merge, and
   rebase merges, with `squash_merge_commit_title: COMMIT_OR_PR_TITLE`. So
   the PR title becomes the commit subject when the PR has more than one
   commit; a single-commit PR keeps its commit message. Make the PR title
   final before merging.
 - The squash body is GitHub's default bullet list of the branch's commit
-  subjects (see `81844600f`), including any `(GitHub Actions)` commits from
+  subjects, including any `(GitHub Actions)` commits from
   `routine`. Branch commit messages end up on `main`, so keep them
   meaningful.
 - CI runs `.github/workflows/R-CMD-check.yaml` on pushes to `main` and
@@ -54,9 +53,8 @@ Release and version commits follow fixed wording:
 User-facing changes need a bullet under `# shiny (development version)` in
 `NEWS.md`, ending with the PR number, e.g. `(#4427)`. See
 `memory-bank/documentationStyle.md` for bullet style. You won't know the PR
-number until the PR is open, so add it in a follow-up commit; #4427 did this
-with "docs: fill shiny-for-r skill NEWS entry with PR number (#4427)". No CI
-check enforces NEWS entries.
+number until the PR is open, so add it in a follow-up commit. No CI check
+enforces NEWS entries.
 
 ## The `routine` workflow
 
@@ -71,8 +69,6 @@ PR branch**. Commits it can create (each only if something changed):
 | README build (only if `README.Rmd` exists; shiny has none) | `` `devtools::build_readme()` (GitHub Actions) `` |
 | `oxipng` lossless PNG optimization (`man/figures/*.png`, `vignettes/*.png`) | `` `oxipng`; Optimize PNGs (GitHub Actions) `` |
 | `npm ci` + `npm run build` (stages `inst/`, `srcts/`, `package-lock.json`) | `` `npm run build` (GitHub Actions) `` |
-| `rc-v*` branches only: `urlchecker::url_update()` | `` `urlchecker::url_update()` (GitHub Actions) `` |
-| `rc-v*` branches only: set `DESCRIPTION`/`NEWS.md` version from branch name | `` `usethis::use_version()` (GitHub Actions) `` |
 
 It then runs this repo's `.github/shiny-workflows/routine.sh`:
 
@@ -84,9 +80,8 @@ It then runs this repo's `.github/shiny-workflows/routine.sh`:
 After pushing, it runs lint (if a `.lintr` exists), `npm test`, and a
 `{staticimports}` freshness warning.
 
-To refresh generated files without code changes, push an empty commit. #4428
-did exactly this ("chore: trigger routine workflow"), and `routine` added an
-oxipng commit.
+To refresh generated files without code changes, push an empty commit
+(e.g. "chore: trigger routine workflow").
 
 ## Trailers
 
@@ -105,6 +100,8 @@ oxipng commit.
 - **`checkDocsCurrent.sh` is not auto-fixed.** A stale pkgdown index or
   reexport list fails `routine` even on same-repo PRs. Fix it by hand (see
   `memory-bank/documentationStyle.md`).
-- **Version bumps on `rc-v*` branches are automatic.** Do not hand-edit
-  `Version:` to match the branch; `routine` derives it from the
-  `rc-vX.Y.Z` name.
+- **Version bumps on `rc-v*` branches are not automatic.** `routine` has
+  `urlchecker::url_update()` and `usethis::use_version()` steps for `rc-v*`
+  branches, but they only run on push events, where the "Verify no new
+  commits" step fails instead of pushing. Set `Version:` and the `NEWS.md`
+  heading by hand (and run `urlchecker::url_update()` yourself).

@@ -31,7 +31,6 @@ devtools::test(filter = "timer")                   # files matching test-timer*
 testthat::test_file(testthat::test_path("test-otel-error.R"))  # one file, after load_all()
 ```
 
-`devtools::test(filter = "timer")` was verified to run (`PASS 23`, about 2s).
 Tests call shiny internals directly (`flushReact()`, `timerCallbacks`,
 `execCount()`, `MockShinySession`), so run them under `devtools::load_all()`
 semantics. Plain `library(shiny)` won't expose those internals.
@@ -48,15 +47,14 @@ semantics. Plain `library(shiny)` won't expose those internals.
 
 `rewire()` is the old-style stubbing approach, used in `test-test-runTests.R`
 (`rewire(runTests, sourceUTF8 = ..., loadSupport = ...)`). Newer tests use
-`testthat::local_mocked_bindings()` (about 29 calls, e.g. `test-non-blocking.R`,
+`testthat::local_mocked_bindings()` (e.g. `test-non-blocking.R`,
 `test-otel-reactive-update.R`). Options and env vars are set with
 `withr::local_options()` / `withr::local_envvar()`.
 
 ## Snapshots
 
-`_snaps/` holds `actionButton.md`, `busy-indication.md`, `downloadButton.md`,
-`reactivity.md`, `stacks.md`, `stacks-deep.md`, `tabPanel.md`. There are no
-platform variants. Update them with `testthat::snapshot_accept("stacks")` after
+`_snaps/` holds one `.md` per test file that calls `expect_snapshot()`
+(`ls tests/testthat/_snaps/`). There are no platform variants. Update them with `testthat::snapshot_accept("stacks")` after
 reviewing `snapshot_review()`. CI uploads failed snapshots as an artifact
 (`upload-snapshots: true` in the shared check workflow).
 
@@ -108,12 +106,12 @@ client DOM. Examples: `test-zzz-st2-input-date.R` and
 
 ## Reactivity idioms (verified in tests)
 
-- `flushReact()` (internal, `R/react.R`) runs pending invalidations and returns TRUE if any work ran. It's used about 245 times across 13 files. It's the core of `test-reactivity.r`.
+- `flushReact()` (internal, `R/react.R`) runs pending invalidations and returns TRUE if any work ran. It's the core of `test-reactivity.r`.
 - `isolate({ ... })` reads reactives outside an observer.
 - `execCount(observer)` (internal, `R/reactives.R`) asserts how many times an observer ran.
 - `withReactiveDomain(domain, expr)` scopes a fake domain (an `env` or a `MockShinySession`).
 - `reactiveConsole(TRUE)` with `on.exit(reactiveConsole(FALSE))` allows top-level reactive reads (`test-reactives.R`).
-- `later::run_now()` and loops on `later::loop_empty()` drain promises and later callbacks (about 59 calls).
+- `later::run_now()` and loops on `later::loop_empty()` drain promises and later callbacks.
 - `timerCallbacks$schedule()` / `$executeElapsed()` test the timer queue directly (`test-timer.R`).
 
 ## Fixture app suites
@@ -127,8 +125,9 @@ client DOM. Examples: `test-zzz-st2-input-date.R` and
 `shinyAppTemplate(path, examples)` copies `inst/app_template` (`app.R`, `R/`,
 `tests/testthat/` with `setup-shinytest2.R`, `test-shinytest2.R`,
 `test-server.R`, `test-examplemodule.R`, `test-sort.R`). `runTests(appDir)`
-(`R/test.R`) sources each top-level file in `appDir/tests/` and returns a
-result whose `$pass` column you can assert on. The template round-trip test
+(`R/test.R`) sources each top-level file in `appDir/tests/`. By default
+(`assert = TRUE`) it calls `stop()` if any file fails; pass `assert = FALSE`
+to get back a result whose `$pass` column you can check yourself. The template round-trip test
 is `test-test-shinyAppTemplate.R`.
 
 ## TypeScript tests
@@ -137,9 +136,9 @@ is `test-test-shinyAppTemplate.R`.
 npm run test_types   # tsx --test $(find srcts/src -path '*/__tests__/*.test.ts')
 ```
 
-This uses Node's built-in `node:test` and `node:assert/strict`. Current files:
-`srcts/src/shiny/__tests__/{sendOutputInfo,outputProgress}.test.ts` and
-`srcts/src/time/__tests__/debounce.test.ts`. `__tests__` is excluded from
+This uses Node's built-in `node:test` and `node:assert/strict`. Tests live in
+`__tests__/*.test.ts` next to the code they test (e.g.
+`srcts/src/time/__tests__/debounce.test.ts`). `__tests__` is excluded from
 `tsconfig.json`, so `build_types` doesn't type-check the tests. `test_types`
 is part of `npm run checks`, which `npm run build` runs. There is no `npm test`
 script.
@@ -155,9 +154,9 @@ script.
 Triggers: pushes to `main` and `rc-**`, every PR, and a cron job on Mondays.
 It calls three reusable workflows from `rstudio/shiny-workflows@v1`:
 
-- **R-CMD-check**: `rcmdcheck` with `--no-manual --as-cran`, `error-on: "warning"`. Matrix: macOS release; Windows release; Ubuntu 24.04 devel, release, and oldrel-1 to oldrel-4; plus a `check-depends-only` job (`_R_CHECK_DEPENDS_ONLY_=true`, so Suggests are absent and `skip_if_not_installed()` must guard every Suggests dependency). Windows oldrels and devel run only for packages with a `src/` dir, which shiny doesn't have. A failing check prints `testthat.Rout`.
-- **routine**: runs on R release and **can auto-commit to non-fork PR branches**. In order, it runs `usethis::use_tidy_description()`, then `devtools::document()` (DESCRIPTION, NAMESPACE, `man/`), then the README build (skipped because shiny has no README.Rmd), then oxipng on `man/figures/*.png`, then `npm ci` and `npm run build`. The build runs `checks` (lint with `--fix`, `build_types`, `test_types`, coverage, circular) and commits `inst/` and `srcts/` changes. Last, it runs the local `.github/shiny-workflows/routine.sh`, which runs `tools/documentation/checkDocsCurrent.sh`. That script **fails** if the roxygen docs or the re-exported htmltools docs are stale. It then syncs the `package.json` version and rebuilds. R code formatting (air) is off by default. On `push` events, and on PRs from forks, any new commit fails the job, so you must commit those changes yourself. There's no `.lintr` or `codecov.yml`, so the lint and coverage steps are skipped. On `rc-v*` branches it also runs `urlchecker::url_update()` and syncs the version.
-- **website**: builds the pkgdown site. It only verifies on PRs and the cron job, and deploys to `gh-pages` on push.
+- **R-CMD-check**: `rcmdcheck` with `--no-manual --as-cran`, `error-on: "warning"`. Matrix: macOS release; Windows release; Ubuntu 24.04 devel, release, and oldrel-1 to oldrel-4; plus a `check-depends-only` job (`_R_CHECK_DEPENDS_ONLY_=true`, so Suggests are absent and `skip_if_not_installed()` must guard every Suggests dependency). Windows oldrels and devel run only for packages with a `src/` dir, which shiny doesn't have. Every check run prints `testthat.Rout`, pass or fail.
+- **routine**: runs on R release and **can auto-commit to non-fork PR branches**. In order, it runs `usethis::use_tidy_description()`, then `devtools::document()` (DESCRIPTION, NAMESPACE, `man/`), then the README build (skipped because shiny has no README.Rmd), then oxipng on `man/figures/*.png`, then `npm ci` and `npm run build`. The build runs `checks` (lint with `--fix`, `build_types`, `test_types`, coverage, circular) and commits `inst/` and `srcts/` changes. Last, it runs the local `.github/shiny-workflows/routine.sh`, which runs `tools/documentation/checkDocsCurrent.sh`. That script **fails** if the roxygen docs or the re-exported htmltools docs are stale. It then syncs the `package.json` version and rebuilds. R code formatting (air) is off by default. On `push` events, and on PRs from forks, any new commit fails the job, so you must commit those changes yourself. There's no `.lintr` or `codecov.yml`, so the lint and coverage steps are skipped. Its `rc-v*` version and URL steps never commit (see `memory-bank/commitConventions.md`).
+- **website**: builds the pkgdown site with pkgdown's default config (there is no root `_pkgdown.yml`; see `memory-bank/documentationStyle.md`). It only verifies on PRs and the cron job, and deploys to `gh-pages` on push.
 
 ## Pitfalls
 

@@ -34,19 +34,19 @@ skill documents the public API and the memory-bank doc documents internals.
 inst/skills/
   shiny-for-r/
     SKILL.md          # frontmatter + grouped index tables
-    references/       # one file per topic (21 today), e.g. reactivity.md
+    references/       # one file per topic, e.g. reactivity.md
 ```
 
 - One skill directory only. Adding a topic **does not** mean a new skill
   directory.
 - Index groups in `SKILL.md`: Foundations, Async, Dashboard building,
-  Navigation & dynamic UI, Outputs, Feedback & state, Theming/assets &
+  Navigation & dynamic UI, Outputs, Feedback & state, Theming, assets &
   extending, Testing & observability.
 - Each row is `| Topic | Use when | Reference |`, with the reference written
   as a backticked relative path (`` `references/<topic>.md` ``). Keep
   references one level deep; no files pointing at further files.
-- There are no `scripts/` or `assets/` directories. Reference files are
-  roughly 55-195 lines each.
+- There are no `scripts/` or `assets/` directories. Keep each reference
+  file focused on one topic.
 
 ## Frontmatter
 

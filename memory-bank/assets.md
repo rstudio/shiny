@@ -63,7 +63,10 @@ npm run watch          # bundle_shiny -- --watch  (esbuild context.watch(), no c
   - `test_types`: `tsx --test` on every `srcts/src/**/__tests__/*.test.ts`
   - `coverage`: `type-coverage -p tsconfig.json --at-least 90`
   - `circular`: `npx --yes dpdm --transform ./srcts/src/index.ts`
-- `coverage_detailed` is an ad-hoc helper (not part of `checks`).
+- `coverage_detailed` is not part of `checks`, and it is currently broken:
+  it runs `npx --yes type-check`, a different package from `type-coverage`.
+- The `_jquery.ts` check is not part of `checks` either; only `bundle_shiny`
+  runs it, so `npm run checks` can pass while the build fails it.
 
 ### jQuery import rule (`srcts/build/_jquery.ts`)
 
@@ -76,34 +79,36 @@ of relying on the global `@types/jquery` declaration.
 
 Tests live next to code in `__tests__/` dirs and use Node's built-in runner
 (`import test from "node:test"`, `node:assert/strict`), run by `tsx --test`.
-Current files: `srcts/src/shiny/__tests__/outputProgress.test.ts`,
-`srcts/src/shiny/__tests__/sendOutputInfo.test.ts`,
-`srcts/src/time/__tests__/debounce.test.ts`. `**/__tests__` is excluded in
+Example: `srcts/src/time/__tests__/debounce.test.ts`. `**/__tests__` is excluded in
 `tsconfig.json`, so tests produce no `.d.ts`. Run alone with `npm run test_types`.
 
 ## Vendored libraries
 
-All under `inst/www/shared/`. Pinned versions for R live in generated
-`R/version_*.R` files ("do not edit by hand"), written by the update scripts.
+All under `inst/www/shared/`. Current versions live in generated
+`R/version_*.R` files ("do not edit by hand"), written by the update scripts;
+patches live in `tools/<lib>-patches/`. Versions below are listed only for
+frozen libraries.
 
 | Library | Location | Update path | Patches |
 |---------|----------|-------------|---------|
-| jQuery 3.7.1 | `jquery.js`, `jquery.min.js`, `.min.js.map` | `tools/updatejQuery.R` (code.jquery.com CDN; rewrites source map; writes `R/version_jquery.R`; `npm install` `jquery` + `@types/jquery`) | — |
+| jQuery 3 | `jquery.js`, `jquery.min.js`, `.min.js.map` | `tools/updatejQuery.R` (code.jquery.com CDN; rewrites source map; writes `R/version_jquery.R`; `npm install` `jquery` + `@types/jquery`) | — |
 | jQuery 1.12.4 (legacy) | `legacy/` | frozen, no script | — |
-| jQuery UI 1.14.1 | `jqueryui/` | `tools/updatejQueryUI.R` (writes `R/version_jqueryui.R`, `@types/jqueryui`) | — |
-| selectize 0.15.2 + a11y plugin | `selectize/{js,css,scss,accessibility}` | `tools/updateSelectize.R`: copies from **npm** `node_modules/@selectize/selectize/dist` (git ref pinned in `package.json`), downloads `selectize-plugin-a11y` at a pinned commit, applies patches with `git apply --reject`, writes `R/version_selectize.R`, runs `npm run build` | `tools/selectize-patches/` (000–009) |
-| ion.rangeSlider 2.3.1 | `ionrangeslider/{js,scss,css}` | `tools/updateIonRangeSlider.R`: GitHub zip, `npx less2sass`, patches, compiles `css/ion.rangeSlider.css` via `bslib::bs_theme(version = 3)`, writes `R/version_ion_range_slider.R`, `@types/ion-rangeslider`, runs `npm run bundle_external_libs` | `tools/ion.rangeSlider-patches/` (0001–0006; adds the Shiny skin `scss/shiny.scss`) |
-| bootstrap-datepicker 1.10.0 | `datepicker/{js,js/locales,scss,css}` | `tools/updateBootstrapDatepicker.R`: GitHub zip, `less2sass`, patches, compiles CSS with bslib, writes `R/version_bs_date_picker.R`, npm installs `bootstrap-datepicker` + types | `tools/datepicker-patches/` (001–003) |
-| strftime 0.9.2 | `strftime/strftime-min.js` | `tools/updateStrftime.R` | — |
+| jQuery UI | `jqueryui/` | `tools/updatejQueryUI.R` (writes `R/version_jqueryui.R`, `@types/jqueryui`) | — |
+| selectize + a11y plugin | `selectize/{js,css,scss,accessibility}` | `tools/updateSelectize.R`: copies from **npm** `node_modules/@selectize/selectize/dist` (git ref pinned in `package.json`), downloads `selectize-plugin-a11y` at a pinned commit, applies patches with `git apply --reject`, writes `R/version_selectize.R`, runs `npm run build`. You bump the `package.json` version by hand first; the script reads it | `tools/selectize-patches/` |
+| ion.rangeSlider | `ionrangeslider/{js,scss,css}` | `tools/updateIonRangeSlider.R`: GitHub zip, `npx less2sass`, patches, compiles `css/ion.rangeSlider.css` via `bslib::bs_theme(version = 3)`, writes `R/version_ion_range_slider.R`, `@types/ion-rangeslider`, runs `npm run bundle_external_libs` | `tools/ion.rangeSlider-patches/` (adds the Shiny skin `scss/shiny.scss`) |
+| bootstrap-datepicker | `datepicker/{js,js/locales,scss,css}` | `tools/updateBootstrapDatepicker.R`: GitHub zip, `less2sass`, patches, compiles CSS with bslib, writes `R/version_bs_date_picker.R`, npm installs `bootstrap-datepicker` + types. Copies upstream's unpatched `.min.js`; run `npm run bundle_external_libs` afterwards | `tools/datepicker-patches/` |
+| strftime | `strftime/strftime-min.js` | `tools/updateStrftime.R` | — |
 | Bootstrap 3.4.1 | `bootstrap/{css,js,fonts}` | frozen (`bootstrapVersion` in `R/bootstrap.R`); newer BS comes from bslib | — |
 | bootstrap-accessibility-plugin | `bootstrap/accessibility/` | `tools/updateBootstrapAccessibilityPlugin.R` copies/compiles from **bslib**'s `lib/bs-a11y-p` | — |
-| DataTables 1.10.22 | `datatables/` | `tools/updateDataTables.R` (CDN); version hard-coded in `dataTableDependency` | — |
+| DataTables | `datatables/` | `tools/updateDataTables.R` (CDN); version hard-coded in `dataTableDependency` | — |
 | highlight.js "6.2" | `highlight/` | frozen | — |
 | SVG spinners | `busy-indicators/spinners/` | `tools/updateSpinnerTypes.R` (also regenerates `R/busy-indicators-spinners.R`) | — |
 
-npm-sourced at update time: selectize (via `node_modules`), plus `@types/*` and the
-`jquery`/`bootstrap-datepicker` devDependencies that the update scripts keep in
-sync. Everything else is downloaded directly by the R script. Patch workflow
+npm-sourced at update time: selectize (via `node_modules`). The jQuery, jQuery UI,
+ion.rangeSlider and datepicker scripts also `npm install` their `@types/*` (and
+the `jquery`/`bootstrap-datepicker` devDependencies). Everything else is
+downloaded directly by the R script. Run the update scripts from the package
+root; they use relative paths. Patch workflow
 (`tools/README.md`): edit vendored files, `git diff > tools/<lib>-patches/NNN-desc.patch`
 (applied in `list.files()` order), re-run the update script, commit patch + output.
 
@@ -117,11 +122,12 @@ Shiny's own Sass source is hand-edited in place at `inst/www/shared/shiny_scss/`
 `.github/workflows/R-CMD-check.yaml` calls `rstudio/shiny-workflows`'
 `routine.yaml`, which (when `package.json` has `build`) deletes `srcts/types`,
 runs `npm ci` + `npm run build`, `git add -A` on `./inst` and `./srcts` (plus
-`package-lock.json`), commits "`npm run build` (GitHub Actions)" and pushes to
-same-repo PRs. On `push` events or fork PRs it fails instead
-("verify-no-new-commits"). Then `.github/shiny-workflows/routine.sh` runs
-`tools/updatePackageJsonVersion.R` (DESCRIPTION `1.14.0.9000` →
-package.json `1.14.0-alpha.9000`) and rebuilds if it changed.
+`package-lock.json`), and commits "`npm run build` (GitHub Actions)". Next,
+`.github/shiny-workflows/routine.sh` runs `checkDocsCurrent.sh`, then
+`tools/updatePackageJsonVersion.R` (DESCRIPTION `X.Y.Z.9000` → package.json
+`X.Y.Z-alpha.9000`), rebuilding and committing "Sync package version (GitHub
+Actions)" if it changed. Only after that are commits pushed to same-repo PRs;
+on `push` events or fork PRs the job fails instead ("verify-no-new-commits").
 
 `tests/testthat/test-built-files.R` only asserts `shiny.js`/`shiny.min.js` contain
 no `{{ VERSION }}` placeholder.
@@ -131,8 +137,8 @@ no `{{ VERSION }}` placeholder.
 `package.json` publishes only `LICENSE` and `srcts/types/**/*.d.ts`;
 `"types": "srcts/types/extras/globalShiny.d.ts"` (augments `Window` with
 `Shiny: ShinyClass`). `prepack`/`postpack` swap `README-npm.md` in as `README.md`
-during `npm pack`. Install instructions for consumers are at the top of
-`srcts/README.md`. Runtime `@types/*` and `lit` are `dependencies` so consumers get them.
+during `npm pack`. `srcts/README.md` has consumer install instructions, but
+they install from a GitHub tag, not from the `@posit/shiny` npm name. Runtime `@types/*` and `lit` are `dependencies` so consumers get them.
 
 ## How R serves the assets
 
@@ -150,7 +156,7 @@ turned into URLs by `createWebDependency()` (`R/html-deps.R`, uses `addResourceP
 - `R/bootstrap.R`: `bootstrapLib()` / `bootstrapDependency()`, `dataTableDependency`.
 - `R/input-select.R`: `selectizeDependency()`, `selectizeStaticDependency()`, `selectizeScripts()`.
 - `R/input-slider.R`: `ionRangeSliderDependency()` (+ `strftime`), `ionRangeSliderDependencyCSS()`.
-- `R/input-date.R`: `datePickerDependency()`, `datePickerCSS()` (adds a `noConflict` head script → `$.fn.bsDatepicker`).
+- `R/input-date.R`: `datePickerDependency()` (adds a `noConflict` head script → `$.fn.bsDatepicker`), `datePickerCSS()`.
 - `R/jqueryui.R`: `jqueryuiDependency()`; `R/showcase.R`: `showcaseHead()` (highlight.js + `shiny-showcase.*`).
 - `R/middleware.R` injects `shared/shiny-autoreload.js` directly as a `<script>`.
 
@@ -164,7 +170,8 @@ Themable widgets use `bslib::bs_dependency_defer()`: static CSS without a
   `R/version_*.R`. Edit `srcts/`, `shiny_scss/`, or the unminified vendored file
   + a patch, then rebuild.
 - **Vendored edits without a patch are lost** the next time an `update*.R`
-  script runs (they `unlink()` the target dir). Always add a `tools/*-patches/` file.
+  script runs (most `unlink()` the target dir; the rest overwrite the files they
+  download). Always add a `tools/*-patches/` file.
 - Edits to unminified vendored JS (`selectize.js`, `ion.rangeSlider.js`,
   `bootstrap-datepicker.js`) do nothing in production until
   `npm run bundle_external_libs` regenerates the `.min.js` that R serves by default.
@@ -177,4 +184,4 @@ Themable widgets use `bslib::bs_dependency_defer()`: static CSS without a
 - Forgetting to rebuild is usually auto-fixed by CI on same-repo PRs, but fork
   PRs and pushes fail the routine job instead; commit built files yourself.
 - Bump a vendored version via its `tools/update*.R` script, not by editing
-  `R/version_*.R`; the scripts also keep `package.json` `@types/*` in sync.
+  `R/version_*.R`.

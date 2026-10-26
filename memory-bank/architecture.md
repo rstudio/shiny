@@ -112,7 +112,7 @@ Implementation: `R/modules.R`, `ShinySession$makeScope()` /
 (`make_weak_destroy_wrapper()`, `isClosedDomain()`, `destroyedReactiveError()`).
 Tests: `tests/testthat/test-destroy.R`.
 
-- `NS()` joins ids with `ns.sep` (`"-"`). `moduleServer()` calls
+- `NS()` (`R/shiny.R`) joins ids with `ns.sep` (`"-"`). `moduleServer()` calls
   `callModule()`, which runs the module inside
   `withReactiveDomain(session$makeScope(id), ...)`.
 - `makeScope()` returns a `session_proxy` built by `createSessionProxy()`.
@@ -130,7 +130,7 @@ Tests: `tests/testthat/test-destroy.R`.
   routes. The `ReactiveVal`, `ReactiveValues`, `Observable` and auto-destroy
   `Observer` objects register `onDestroy(make_weak_destroy_wrapper(...))`, so
   a destroyed reactive raises a `shiny.destroyed.error` when read.
-- **Soft teardown on close (#4421):** `wsClosed()` sets `closed <- TRUE`,
+- **Soft teardown on close ([rstudio/shiny#4421](https://github.com/rstudio/shiny/issues/4421)):** `wsClosed()` sets `closed <- TRUE`,
   suspends outputs, runs `onSessionEnded` callbacks (observers auto-destroy
   here), then calls `invokeDestroyCallbacks(allowRoot = TRUE)`.
   `make_weak_destroy_wrapper()` returns early when `isClosedDomain(domain)`,
@@ -152,8 +152,10 @@ Implementation: `R/shinyui.R` (`renderPage()`, `shinyDependencies()`,
   `processDep = createWebDependency`, which maps dependencies to URLs served by
   `resourcePathHandler`.
 - `shinyDependencies()` is `bslib::bs_dependency_defer(shinyDependencyCSS)`
-  plus the busy indicators plus `shiny.min.js`. Set the devmode option
-  `shiny.minified = FALSE` to get `shiny.js`.
+  plus the busy indicators plus `shiny.min.js`. With `devmode()` on,
+  `shiny.minified` defaults to `FALSE` and `shiny.js` is served; otherwise set
+  `options(shiny.minified = FALSE)`. The datepicker reads the plain option
+  (`getOption("shiny.minified", TRUE)`), so devmode does not affect it.
 - `bootstrapLib(theme)` is a `tagFunction`. While the app is running it calls
   `setCurrentTheme()` (`shinyOptions(bootstrapTheme=)`) and
   `registerThemeDependency()`, then returns either `bslib::bs_theme_dependencies()`
@@ -276,9 +278,10 @@ so the collect level is captured when the object is built.
   bookmark and restore callbacks plus a bookmark-exclude function on the root
   session. They are removed only by that scope's `onDestroy`. Avoid calling
   `makeScope()` speculatively; `destroy(ns)` itself calls `makeScope()` first.
-- **Namespaces must be length 1.** `validateNamespace()` (also called by
-  `makeScope()`) requires a length-1, non-empty string that is not `"..root"`,
-  even though `NS()` accepts vectors. Destroy matches by prefix: `destroy("a")`
+- **Namespaces must be length 1.** `validateNamespace()` requires a
+  length-1, non-empty string that is not `"..root"`, even though `NS()`
+  accepts vectors. `makeScope()` calls it with `allow_root = TRUE`, so there
+  `NULL` / `character(0)` (the root scope) are also accepted. Destroy matches by prefix: `destroy("a")`
   also tears down `a-b`.
 - **Inputs are deferred while busy.** `manageInputs()` waits whenever any
   observer in the session is busy, including pending async work. Code that

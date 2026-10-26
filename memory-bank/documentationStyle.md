@@ -13,15 +13,15 @@ description: "Roxygen2 conventions in R/, regenerating man/ and NAMESPACE, the t
 fails if any is not. Edit the `#'` comments in `R/`, never `man/` or
 `NAMESPACE`.
 
-Tags in use (rough counts across `R/`):
+Tags in use across `R/`:
 
-- `@export` (~340): every public function. `@noRd` (~35) is for internal
+- `@export`: every public function. `@noRd` is for internal
   helpers that carry roxygen comments but no Rd.
-- `@rdname` (~90): groups related functions on one page, e.g.
+- `@rdname`: groups related functions on one page, e.g.
   `@rdname stacktrace`, `@rdname shiny.appobj`, `@rdname updateSelectInput`.
-  `@describeIn` (~14) is used less often.
-- `@inheritParams` (~57): reuses parameter docs instead of copying them.
-- `@keywords internal` (19): exported but hidden from the reference index
+  `@describeIn` is used less often.
+- `@inheritParams`: reuses parameter docs instead of copying them.
+- `@keywords internal`: exported but hidden from the reference index
   (see checkPkgdown below). `@family` is used for `input elements` and
   `layout functions`.
 - `@seealso` and `@return` are common. `@section` is used for long-form
@@ -57,12 +57,12 @@ dominant pattern is:
 #' }
 ```
 
-About 75 example blocks use this `## Only run ... in interactive ... sessions`
+Most older example blocks use this `## Only run ... in interactive ... sessions`
 comment plus `if (interactive()) {`, with small wording differences. Newer
 code uses `@examplesIf` instead: `@examplesIf rlang::is_interactive()`
 (`R/busy-indicators.R`), with an extra `rlang::is_installed("mirai")`
 condition in `R/extended-task.R`, and `@examplesIf interactive()` in
-`R/shiny.R`. About 12 blocks use `\dontrun{`. For new code, prefer
+`R/shiny.R`. Some blocks use `\dontrun{`. For new code, prefer
 `@examplesIf`, and add an `is_installed()` guard for Suggests packages.
 
 ## Regenerating docs
@@ -85,8 +85,9 @@ loaded after `document()` adds it.
 
 ## pkgdown reference index
 
-`tools/documentation/pkgdown.yml` is **not** used to build a site from this
-repo (there is no root `_pkgdown.yml`). rstudio/shiny-dev-center uses it to
+There is no root `_pkgdown.yml`. The `website` CI job builds a pkgdown site
+with pkgdown's default config (see `memory-bank/testing.md`), and it does
+not read `tools/documentation/pkgdown.yml`. rstudio/shiny-dev-center uses it to
 generate the reference index for shiny.posit.co. Sections include UI Layout,
 UI Inputs, UI Outputs, Rendering functions, Reactive programming, Modules,
 Testing, OpenTelemetry, Superseded, and a final `internal` section that
@@ -135,15 +136,15 @@ Released sections use subheadings (`## New features`, `## Improvements`,
 `## Bug fixes` or `## Bug fixes and minor improvements`, sometimes
 `## Breaking changes`); those are sorted in at release time.
 
-Bullet style, from the current dev section:
+Bullet style:
 
 - Wrap function names in backticks with parens (`` `dateInput()` ``) and
   packages in braces (`` `{watcher}` ``).
-- Bug fixes lead with the issue: `* Fixed #4281, #3251: \`dateInput()\`'s
+- Bug fixes lead with the issue: `* Fixed #1234, #5678: \`dateInput()\`'s
   ...`. Explain the user-visible symptom, then (briefly) the cause or fix.
-- End with the PR number in parens: `(#4434)`. Use several when relevant
-  (`(#4421, #4423)`). Thank outside contributors inline:
-  `(thanks @nbenn, #4400)`.
+- End with the PR number in parens: `(#1234)`. Use several when relevant
+  (`(#1234, #1235)`). Thank outside contributors inline:
+  `(thanks @username, #1234)`.
 - Write in plain or present tense ("now works", "is now printed").
   Hard-wrapped and single-line bullets both appear.
 

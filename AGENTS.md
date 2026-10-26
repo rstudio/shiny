@@ -61,11 +61,13 @@ Python. Keep the two from drifting apart:
   Python server support (a new message type, input/output contract, etc.),
   open an issue in py-shiny describing it.
 - **Server behavior and bugs**: when a fix or feature here likely applies to
-  py-shiny too, open an issue there and cross-link it; don't change both repos
-  in one PR. `gh issue create -R posit-dev/py-shiny --label ai-generated-issue`
+  py-shiny too, don't make the change in both repos at once; open an issue in
+  py-shiny and cross-link it. `gh issue create -R posit-dev/py-shiny --label ai-generated-issue`
 - **Agent infrastructure** (`AGENTS.md` conventions, `.agents/skills/memory-bank/`,
-  `memory-bank/commitConventions.md`): mirror shared changes with a PR in
-  py-shiny.
+  and the PR title and squash-merge parts of `memory-bank/commitConventions.md`):
+  mirror shared changes with a PR in py-shiny. The rest of
+  `commitConventions.md` (`routine`, `rc-v*`, build commits) is specific to
+  this repo.
 
 ## Common Pitfalls
 

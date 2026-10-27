@@ -71,11 +71,36 @@
 <h2 id="memory-bank">Memory Bank<a class="anchor" aria-label="anchor" href="#memory-bank"></a></h2>
 <p>The <code>memory-bank/</code> directory holds contributor documentation with YAML frontmatter (<code>title</code>, <code>description</code>). <strong>Before exploring the codebase</strong>, invoke the <code>memory-bank</code> skill to find and read the relevant docs. Update or add docs when you learn something future contributors will need (see the skill for conventions).</p>
 <p>Contributor skills live in <code>.agents/skills/</code>; <code>.claude/skills</code> is a symlink to it. Only allowlisted skills are tracked, so when adding or removing one, update the <code>!/.agents/skills/&lt;name&gt;/</code> lines in <code>.gitignore</code> to match.</p>
-</div>
+<p>Start with:</p>
+<ul><li>
+<code>memory-bank/architecture.md</code> - reactivity, sessions, modules, bindings, async, and where each lives</li>
+<li>
+<code>memory-bank/assets.md</code> - the TypeScript build and vendored JS/CSS libraries</li>
+<li>
+<code>memory-bank/testing.md</code> - running and writing shiny’s own tests, and CI</li>
+<li>
+<code>memory-bank/documentationStyle.md</code> - roxygen, pkgdown reference index, <code>NEWS.md</code>
+</li>
+<li>
+<code>memory-bank/commitConventions.md</code> - commit messages, PR titles, merging</li>
+<li>
+<code>memory-bank/agentSkills.md</code> - the bundled <code>inst/skills/shiny-for-r/</code> skill</li>
+</ul></div>
 <div class="section level2">
 <h2 id="bundled-agent-skill">Bundled Agent Skill<a class="anchor" aria-label="anchor" href="#bundled-agent-skill"></a></h2>
-<p>The package ships an Agent Skill for app authors under <code>inst/skills/shiny-for-r/</code>. Treat it like user-facing documentation: when a change touches a public API it documents, update the skill in the same PR.</p>
+<p>The package ships an Agent Skill for app authors under <code>inst/skills/shiny-for-r/</code>. Treat it like user-facing documentation: when a change touches a public API it documents, update the skill in the same PR. Read <code>memory-bank/agentSkills.md</code> before editing it.</p>
 </div>
+<div class="section level2">
+<h2 id="sibling-repo-py-shiny">Sibling Repo: py-shiny<a class="anchor" aria-label="anchor" href="#sibling-repo-py-shiny"></a></h2>
+<p><a href="https://github.com/posit-dev/py-shiny" class="external-link">posit-dev/py-shiny</a> is Shiny for Python. Keep the two from drifting apart:</p>
+<ul><li>
+<strong>Client JS and wire protocol</strong>: py-shiny vendors this package’s <code>inst/www/shared/</code> (including <code>shiny.js</code>) via <code>make upgrade-html-deps</code>, so <code>srcts/</code> changes reach it on its next upgrade. If the change also needs Python server support (a new message type, input/output contract, etc.), open an issue in py-shiny describing it.</li>
+<li>
+<strong>Server behavior and bugs</strong>: when a fix or feature here likely applies to py-shiny too, don’t make the change in both repos at once; open an issue in py-shiny and cross-link it. <code>gh issue create -R posit-dev/py-shiny --label ai-generated-issue</code>
+</li>
+<li>
+<strong>Agent infrastructure</strong> (<code>AGENTS.md</code> conventions, <code>.agents/skills/memory-bank/</code>, and the PR title and squash-merge parts of <code>memory-bank/commitConventions.md</code>): mirror shared changes with a PR in py-shiny. The rest of <code>commitConventions.md</code> (<code>routine</code>, <code>rc-v*</code>, build commits) is specific to this repo.</li>
+</ul></div>
 <div class="section level2">
 <h2 id="common-pitfalls">Common Pitfalls<a class="anchor" aria-label="anchor" href="#common-pitfalls"></a></h2>
 <ul><li>

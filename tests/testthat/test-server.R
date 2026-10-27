@@ -55,3 +55,16 @@ test_that("startHttpuvApp() with quiet = TRUE binds without announcing (#4400)",
   expect_true(bound)
   expect_s3_class(server, "mock_server")
 })
+
+test_that("flushPendingSessions() closes a session whose flush errors (#4439)", {
+  closed <- FALSE
+  session <- list(
+    flushOutput = function() stop("boom"),
+    close = function() closed <<- TRUE
+  )
+  appsNeedingFlush$set("test-flush-error", session)
+  withr::defer(appsNeedingFlush$remove("test-flush-error"))
+
+  expect_no_error(flushPendingSessions())
+  expect_true(closed)
+})

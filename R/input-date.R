@@ -141,8 +141,7 @@ datePickerDependency <- function(theme) {
       version = version_bs_date_picker,
       src = "www/shared/datepicker",
       package = "shiny",
-      script = if (getOption("shiny.minified", TRUE)) "js/bootstrap-datepicker.min.js"
-               else                                   "js/bootstrap-datepicker.js",
+      script = datePickerScripts(),
       # Need to enable noConflict mode. See #1346.
       head = "<script>(function() {
         var datepicker = $.fn.datepicker.noConflict();
@@ -152,6 +151,15 @@ datePickerDependency <- function(theme) {
     ),
     bslib::bs_dependency_defer(datePickerCSS)
   )
+}
+
+datePickerScripts <- function() {
+  if (isTRUE(get_devmode_option("shiny.minified", TRUE))) {
+    # The minified file bundles every locale
+    return("js/bootstrap-datepicker.min.js")
+  }
+  locales <- dir(system_file("www/shared/datepicker/js/locales", package = "shiny"))
+  c("js/bootstrap-datepicker.js", file.path("js/locales", locales))
 }
 
 datePickerSass <- function() {

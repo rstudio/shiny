@@ -154,8 +154,8 @@ Implementation: `R/shinyui.R` (`renderPage()`, `shinyDependencies()`,
 - `shinyDependencies()` is `bslib::bs_dependency_defer(shinyDependencyCSS)`
   plus the busy indicators plus `shiny.min.js`. With `devmode()` on,
   `shiny.minified` defaults to `FALSE` and `shiny.js` is served; otherwise set
-  `options(shiny.minified = FALSE)`. The datepicker reads the plain option
-  (`getOption("shiny.minified", TRUE)`), so devmode does not affect it.
+  `options(shiny.minified = FALSE)`. selectize, ion.rangeSlider and the
+  datepicker read the same devmode option.
 - `bootstrapLib(theme)` is a `tagFunction`. While the app is running it calls
   `setCurrentTheme()` (`shinyOptions(bootstrapTheme=)`) and
   `registerThemeDependency()`, then returns either `bslib::bs_theme_dependencies()`

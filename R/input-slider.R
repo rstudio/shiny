@@ -209,7 +209,11 @@ ionRangeSliderDependency <- function() {
       version_ion_range_slider,
       src = "www/shared/ionrangeslider",
       package = "shiny",
-      script = "js/ion.rangeSlider.min.js"
+      script = if (isTRUE(get_devmode_option("shiny.minified", TRUE))) {
+        "js/ion.rangeSlider.min.js"
+      } else {
+        "js/ion.rangeSlider.js"
+      }
     ),
     htmlDependency(
       "strftime",

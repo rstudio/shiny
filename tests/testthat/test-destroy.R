@@ -1208,3 +1208,20 @@ test_that("module reactives survive a root session close", {
 
   isolate(expect_equal(rv(), 10))
 })
+
+test_that("MockShinySession destroy(ns) removes that module's outputs and downloads (#4439)", {
+  mod <- function(id) {
+    moduleServer(id, function(input, output, session) {
+      output$txt <- renderText("hi")
+      output$dl <- downloadHandler("x.txt", function(file) writeLines("x", file))
+    })
+  }
+  testServer(function(input, output, session) mod("m"), {
+    expect_equal(session$getOutput("m-txt"), "hi")
+    expect_true(file.exists(session$getOutput("m-dl")))
+
+    session$destroy("m")
+    expect_error(session$getOutput("m-txt"), "hasn't been defined")
+    expect_error(session$getOutput("m-dl"), "hasn't been defined")
+  })
+})

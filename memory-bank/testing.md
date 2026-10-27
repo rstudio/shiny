@@ -65,7 +65,7 @@ reviewing `snapshot_review()`. CI uploads failed snapshots as an artifact
 - `skip_on_os("windows")`: in `test-shinywrappers.R`, `test-busy-indication.R`, `test-utils.R` (UTF-8).
 - `skip_if(!isTRUE(as.logical(Sys.getenv("CI"))), ...)`: in `test-devmode.R` (only runs in CI).
 - `skip_if_shiny_otel_tracer_is_enabled()`: stack-trace tests, which differ when otel is active.
-- `skip_if_not_shinytest2()`: skip on CRAN, skip on Windows/Linux/Solaris/emscripten, skip if shinytest2 is missing. **Browser tests run only on macOS.**
+- `skip_if_not_shinytest2()`: skip on CRAN, skip on Windows/Solaris/emscripten, skip if shinytest2 is missing. Browser tests run on macOS and Linux. They take no screenshots, so results don't depend on the OS.
 
 ## In-process server tests vs browser tests
 

@@ -129,8 +129,9 @@ runs `npm ci` + `npm run build`, `git add -A` on `./inst` and `./srcts` (plus
 Actions)" if it changed. Only after that are commits pushed to same-repo PRs;
 on `push` events or fork PRs the job fails instead ("verify-no-new-commits").
 
-`tests/testthat/test-built-files.R` only asserts `shiny.js`/`shiny.min.js` contain
-no `{{ VERSION }}` placeholder.
+`tests/testthat/test-built-files.R` asserts `shiny.js`/`shiny.min.js` start
+with the `/*! shiny <version> |` banner for the `DESCRIPTION` version, so a
+version bump needs `npm run build` before the tests pass.
 
 ## Published types (`@posit/shiny`)
 

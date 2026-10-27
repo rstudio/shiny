@@ -50,6 +50,25 @@ The package ships an Agent Skill for app authors under
 change touches a public API it documents, update the skill in the same PR.
 Read `memory-bank/agentSkills.md` before editing it.
 
+## Sibling Repo: py-shiny
+
+[posit-dev/py-shiny](https://github.com/posit-dev/py-shiny) is Shiny for
+Python. Keep the two from drifting apart:
+
+- **Client JS and wire protocol**: py-shiny vendors this package's
+  `inst/www/shared/` (including `shiny.js`) via `make upgrade-html-deps`, so
+  `srcts/` changes reach it on its next upgrade. If the change also needs
+  Python server support (a new message type, input/output contract, etc.),
+  open an issue in py-shiny describing it.
+- **Server behavior and bugs**: when a fix or feature here likely applies to
+  py-shiny too, don't make the change in both repos at once; open an issue in
+  py-shiny and cross-link it. `gh issue create -R posit-dev/py-shiny --label ai-generated-issue`
+- **Agent infrastructure** (`AGENTS.md` conventions, `.agents/skills/memory-bank/`,
+  and the PR title and squash-merge parts of `memory-bank/commitConventions.md`):
+  mirror shared changes with a PR in py-shiny. The rest of
+  `commitConventions.md` (`routine`, `rc-v*`, build commits) is specific to
+  this repo.
+
 ## Common Pitfalls
 
 - **New R files**: `DESCRIPTION` has an explicit `Collate:` field. Run `devtools::document()` after adding a file so it gets collated.

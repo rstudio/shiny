@@ -122,7 +122,7 @@ decodeMessage <- function(data) {
   }
 
   mainMessage <- decodeMessage(parts[[1]])
-  mainMessage$blobs <- parts[2:length(parts)]
+  mainMessage$blobs <- parts[-1]
   return(mainMessage)
 }
 

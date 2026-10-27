@@ -91,3 +91,22 @@ test_that("ShinySession$dispatch() reports an unknown method once (#4439)", {
   dispatch(list(method = "known", args = list(3), tag = 2))
   expect_equal(responses, list(list(value = 6)))
 })
+
+test_that("decodeMessage() gives no blobs for a binary frame with only JSON (#4439)", {
+  frame <- function(...) {
+    parts <- lapply(list(...), charToRaw)
+    c(
+      writeBin(0x01020202L, raw(), endian = "little"),
+      unlist(lapply(parts, function(p) {
+        c(writeBin(length(p), raw(), endian = "little"), p)
+      }))
+    )
+  }
+
+  msg <- decodeMessage(frame('{"method":"m","args":[]}'))
+  expect_equal(msg$method, "m")
+  expect_length(msg$blobs, 0)
+
+  msg <- decodeMessage(frame('{"method":"m","args":[]}', "ab"))
+  expect_equal(msg$blobs, list(charToRaw("ab")))
+})

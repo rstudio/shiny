@@ -342,7 +342,7 @@ MockShinySession <- R6Class(
           call. = FALSE
         )
       }
-      validateNamespace(namespace)
+      namespace <- validateNamespace(namespace)
       self$makeScope(namespace)$destroy()
     },
 
@@ -561,7 +561,7 @@ MockShinySession <- R6Class(
     #' @param namespace Character vector indicating a namespace.
     #' @return A new session proxy.
     makeScope = function(namespace) {
-      validateNamespace(namespace, allow_root = TRUE)
+      namespace <- validateNamespace(namespace, allow_root = TRUE)
       ns <- NS(namespace)
       # The scope's own namespace, captured because the proxy `destroy()` below
       # has a `namespace` parameter that would otherwise shadow it.
@@ -593,7 +593,7 @@ MockShinySession <- R6Class(
             private$invokeDestroyCallbacks(selfNamespace)
           } else {
             # Tear down a named child scope.
-            validateNamespace(namespace)
+            namespace <- validateNamespace(namespace)
             self$makeScope(ns(namespace))$destroy()
           }
         }

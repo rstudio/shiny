@@ -455,14 +455,18 @@ ns.sep <- "-"
 # additionally guards against).
 destroyNsRoot <- "..root"
 
-# Validate a module `namespace`. A namespace must be a single, non-empty,
-# non-NA string and may not be the reserved sentinel. When `allow_root = TRUE`
+# Validate a module `namespace` and return it. A character vector (as accepted
+# by `NS()`) is first joined with `ns.sep`. A namespace must be a single,
+# non-empty, non-NA string and may not be the reserved sentinel. When `allow_root = TRUE`
 # (e.g. `makeScope()`), the root scope -- a length-0 `NULL` / `character(0)` --
 # is also accepted; the destroy entry points pass `allow_root = FALSE` because a
 # child scope must be named explicitly.
 validateNamespace <- function(namespace, allow_root = FALSE) {
   if (allow_root && length(namespace) == 0) {
     return(invisible(namespace))
+  }
+  if (is.character(namespace) && length(namespace) > 1L && !anyNA(namespace)) {
+    namespace <- paste(namespace, collapse = ns.sep)
   }
   if (!is.character(namespace) || length(namespace) != 1L || is.na(namespace) || !nzchar(namespace)) {
     stop(
@@ -1047,7 +1051,7 @@ ShinySession <- R6Class(
       self
     },
     makeScope = function(namespace) {
-      validateNamespace(namespace, allow_root = TRUE)
+      namespace <- validateNamespace(namespace, allow_root = TRUE)
       ns <- NS(namespace)
       # The scope's own namespace, captured because the proxy `destroy()` below
       # has a `namespace` parameter that would otherwise shadow it.
@@ -1129,7 +1133,7 @@ ShinySession <- R6Class(
             private$invokeDestroyCallbacks(selfNamespace)
           } else {
             # Tear down a named child scope.
-            validateNamespace(namespace)
+            namespace <- validateNamespace(namespace)
             self$makeScope(ns(namespace))$destroy()
           }
         }
@@ -1355,7 +1359,7 @@ ShinySession <- R6Class(
           call. = FALSE
         )
       }
-      validateNamespace(namespace)
+      namespace <- validateNamespace(namespace)
       self$makeScope(namespace)$destroy()
     },
     onInputReceived = function(callback) {

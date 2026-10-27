@@ -166,7 +166,7 @@ It calls three reusable workflows from `rstudio/shiny-workflows@v1`:
 - `test-test-shinyAppTemplate.R` starts with an unconditional `testthat::skip("Refactor test for next release")`, so the app template and `runTests()` round-trip are currently untested.
 - shinytest2 tests never run on Linux or Windows CI, only on the macOS job. A JS regression that only shows up on other platforms won't be caught.
 - Inside `launch_test_app()`, omitting `library(shiny)` makes the app run the *installed* shiny, not your working copy.
-- `test-otel-error.R` calls `skip_if(length(traces) > 3, ...)`. Spans leak between files when the whole suite runs, so these assertions may silently skip. To see them for real, run `testthat::test_file(test_path("test-otel-error.R"))`.
+- `with_shiny_otel_record()` captures spans from the whole process, so spans from earlier tests can show up. `test-otel-error.R` keeps only traces whose `session.id` matches its mock session's token; do the same when a test counts spans.
 - `test-otel-reactive-update.R` defines its own `create_mock_otel_span(name, attributes, ended)` that shadows the one in `helper-otel.R`, which has a different signature.
 - `with_shiny_otel_record()` errors with a `stopifnot` failure outside testthat, because it checks `Sys.getenv("TESTTHAT")`.
 - `test-built-files.R` checks that the installed `www/shared/shiny.js` has no `{{ VERSION }}` placeholder. After editing `srcts/`, run `npm run build`. Routine will otherwise commit the built JS for you on a PR, or fail on a push.

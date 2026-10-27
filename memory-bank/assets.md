@@ -62,7 +62,8 @@ npm run watch          # bundle_shiny -- --watch  (esbuild context.watch(), no c
   - `build_types`: `tsc -p tsconfig.json` (emit declarations only → `srcts/types/`)
   - `test_types`: `tsx --test` on every `srcts/src/**/__tests__/*.test.ts`
   - `coverage`: `type-coverage -p tsconfig.json --at-least 90`
-  - `circular`: `npx --yes dpdm --transform ./srcts/src/index.ts`
+  - `circular`: `dpdm --transform --exit-code circular:1 ./srcts/src/index.ts`
+    (pinned devDependency; fails on any import cycle)
 - `coverage_detailed` (`type-coverage --detail`) is not part of `checks`; it
   lists each untyped location.
 - The `_jquery.ts` check is not part of `checks` either; only `bundle_shiny`

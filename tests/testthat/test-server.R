@@ -86,3 +86,26 @@ test_that("flushPendingSessions() closes only the session whose flush errors (#4
   expect_setequal(flushed, c("bad", "good"))
   expect_equal(closed, "bad")
 })
+
+test_that("ShinySession$dispatch() reports an unknown method once (#4439)", {
+  responses <- list()
+  env <- new.env()
+  env$self <- list(`@known` = function(x) x * 2)
+  env$private <- list(
+    sendErrorResponse = function(msg, error) {
+      responses[[length(responses) + 1]] <<- list(error = error)
+    },
+    sendResponse = function(msg, value) {
+      responses[[length(responses) + 1]] <<- list(value = value)
+    }
+  )
+  dispatch <- ShinySession$public_methods$dispatch
+  environment(dispatch) <- env
+
+  dispatch(list(method = "nope", args = list(), tag = 1))
+  expect_equal(responses, list(list(error = "Unknown method nope")))
+
+  responses <- list()
+  dispatch(list(method = "known", args = list(3), tag = 2))
+  expect_equal(responses, list(list(value = 6)))
+})

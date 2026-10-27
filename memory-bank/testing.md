@@ -127,8 +127,10 @@ client DOM. Examples: `test-zzz-st2-input-date.R` and
 `test-server.R`, `test-examplemodule.R`, `test-sort.R`). `runTests(appDir)`
 (`R/test.R`) sources each top-level file in `appDir/tests/`. By default
 (`assert = TRUE`) it calls `stop()` if any file fails; pass `assert = FALSE`
-to get back a result whose `$pass` column you can check yourself. The template round-trip test
-is `test-test-shinyAppTemplate.R`.
+to get back a result whose `$pass` column you can check yourself.
+`test-test-shinyAppTemplate.R` snapshots the files each `examples` combo
+creates; it does not run the template's tests, since their shinytest2
+snapshots are new on every run and fail on CI.
 
 ## TypeScript tests
 

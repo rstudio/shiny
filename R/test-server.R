@@ -92,6 +92,12 @@ testServer <- function(app = NULL, expr, args = list(), session = MockShinySessi
     app <- shinyAppDir(path)
   } else if (isServer(app)) {
     app <- shinyApp(fluidPage(), app)
+  } else if (is.function(app)) {
+    stop(
+      "`app` must be a module server function (whose first argument is `id`) ",
+      "or a server function (with arguments `input`, `output` and `session`).",
+      call. = FALSE
+    )
   } else {
     app <- as.shiny.appobj(app)
   }
@@ -140,7 +146,7 @@ withMockContext <- function(session, expr) {
 # Helpers -----------------------------------------------------------------
 
 isModuleServer <- function(x) {
-  is.function(x) && names(formals(x))[[1]] == "id"
+  is.function(x) && identical(names(formals(x))[1], "id")
 }
 
 isServer <- function(x) {

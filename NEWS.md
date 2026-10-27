@@ -1,5 +1,19 @@
 # shiny (development version)
 
+* Module ids that are character vectors, such as `c("a", "b")`, work again in `callModule()`, `moduleServer()`, `testServer()` and `session$destroy()`. Since 1.14.0 they failed with ``Invalid `namespace` ``. They are joined the same way `NS()` joins them. (#4447)
+
+* If flushing a session's outputs throws an unhandled error, that session is now closed as intended, instead of the error escaping the server loop. (#4444)
+
+* A request to an unknown session method now gets an `Unknown method` error response instead of a `do.call()` error. (#4445)
+
+* A binary websocket message that has only a JSON part no longer passes two extra `NULL`/JSON arguments to the requested method. (#4446)
+
+* `ExtendedTask` OpenTelemetry fixes: the "add to queue" log now has its message, and invocations that were queued behind a running one now get their own span. (#4448, #4449)
+
+* `testServer()` fixes: a `downloadHandler()` whose `content` writes no file now gives a clear error instead of `could not find function "error"`; `session$destroy(id)` now also removes that module's outputs and downloads; and passing a function that is neither a server nor a module server now gives a clear error instead of `missing value where TRUE/FALSE needed`. (#4450, #4451, #4452)
+
+* With `options(shiny.minified = FALSE)`, `dateInput(language =)` now loads its locale instead of falling back to English. The datepicker and `sliderInput()` now follow `devmode()`'s `shiny.minified` setting like the rest of shiny. (#4461)
+
 * Fixed #4281, #3251: `dateInput()`'s `datesdisabled` now works when `format` is not the default `yyyy-mm-dd`. The dates are now converted to real dates on the client, the same way `min`/`max` already are, instead of being parsed by bootstrap-datepicker with the display format. (#4434)
 
 * Added an agent skill (`inst/skills/shiny-for-r/`) following the

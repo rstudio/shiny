@@ -796,34 +796,19 @@ MockShinySession <- R6Class(
       }
 
       nsPrefix <- namespace
-      allNs <- private$destroyCallbacksByNs$keys()
+      runDestroyCallbacks(private$destroyCallbacksByNs, namespace)
 
-      if (!isRoot) {
-        nsPrefixWithSep <- paste0(nsPrefix, ns.sep)
-        matching <- allNs[allNs == nsPrefix | startsWith(allNs, nsPrefixWithSep)]
-      } else {
-        matching <- allNs
-      }
-
-      if (length(matching) > 0L) {
-        # Sort deepest-first (most separators first); root sentinel always last
-        depths <- nchar(gsub(paste0("[^", ns.sep, "]"), "", matching))
-        isRootSentinel <- matching == destroyNsRoot
-        matching <- matching[order(-depths, isRootSentinel, matching)]
-
-        for (ns in matching) {
-          cbs <- private$destroyCallbacksByNs$get(ns)
-          if (!is.null(cbs)) {
-            cbs$invoke(onError = printError)
-          }
-          private$destroyCallbacksByNs$remove(ns)
-        }
-      }
-
-      # Clean up namespaced inputs
+      # Clean up namespaced inputs, outputs and downloads. The mock has no
+      # reactive clientData or file routes to clean up.
       if (!isRoot) {
         nsPrefixWithSep <- paste0(nsPrefix, ns.sep)
         private$.input$destroyByPrefix(nsPrefixWithSep)
+        outNames <- rlang::names2(private$outs)
+        private$outs[startsWith(outNames, nsPrefixWithSep)] <- NULL
+        fileNames <- private$file_generators$keys()
+        private$file_generators$remove(
+          fileNames[startsWith(fileNames, self$ns(nsPrefixWithSep))]
+        )
       }
     },
 

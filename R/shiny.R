@@ -486,6 +486,36 @@ validateNamespace <- function(namespace, allow_root = FALSE) {
   invisible(namespace)
 }
 
+# Invoke and remove the destroy callbacks in `callbacksByNs` (a fastmap of
+# namespace -> Callbacks) for `namespace` and its children, or for all
+# namespaces when `namespace` is the root (length 0). Deepest namespaces run
+# first; the root sentinel runs last. Shared by `ShinySession` and
+# `MockShinySession`; each then cleans up its own per-namespace state.
+runDestroyCallbacks <- function(callbacksByNs, namespace) {
+  matching <- callbacksByNs$keys()
+  if (length(namespace) > 0) {
+    matching <- matching[
+      matching == namespace | startsWith(matching, paste0(namespace, ns.sep))
+    ]
+  }
+  if (length(matching) == 0L) {
+    return(invisible())
+  }
+
+  depths <- nchar(gsub(paste0("[^", ns.sep, "]"), "", matching))
+  isRootSentinel <- matching == destroyNsRoot
+  matching <- matching[order(-depths, isRootSentinel, matching)]
+
+  for (ns in matching) {
+    cbs <- callbacksByNs$get(ns)
+    if (!is.null(cbs)) {
+      cbs$invoke(onError = printError)
+    }
+    callbacksByNs$remove(ns)
+  }
+  invisible()
+}
+
 #' @include utils.R
 ShinySession <- R6Class(
   'ShinySession',
@@ -870,30 +900,7 @@ ShinySession <- R6Class(
       }
 
       nsPrefix <- namespace
-      allNs <- private$destroyCallbacksByNs$keys()
-
-      if (!isRoot) {
-        nsPrefixWithSep <- paste0(nsPrefix, ns.sep)
-        # Match the namespace itself and any children
-        matching <- allNs[allNs == nsPrefix | startsWith(allNs, nsPrefixWithSep)]
-      } else {
-        matching <- allNs
-      }
-
-      if (length(matching) > 0L) {
-        # Sort deepest-first (most separators first); root sentinel always last
-        depths <- nchar(gsub(paste0("[^", ns.sep, "]"), "", matching))
-        isRootSentinel <- matching == destroyNsRoot
-        matching <- matching[order(-depths, isRootSentinel, matching)]
-
-        for (ns in matching) {
-          cbs <- private$destroyCallbacksByNs$get(ns)
-          if (!is.null(cbs)) {
-            cbs$invoke(onError = printError)
-          }
-          private$destroyCallbacksByNs$remove(ns)
-        }
-      }
+      runDestroyCallbacks(private$destroyCallbacksByNs, namespace)
 
       # Clean up inputs and clientData for matched namespaces
       if (!isRoot) {

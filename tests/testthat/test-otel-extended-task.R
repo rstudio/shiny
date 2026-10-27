@@ -236,3 +236,38 @@ test_that("ExtendedTask logs the add-to-queue label when queueing (#4439)", {
   expect_length(msgs, 1)
   expect_match(msgs, "add to queue")
 })
+
+test_that("ExtendedTask starts a span for queued invocations too (#4439)", {
+  skip_if_not_installed("otelsdk")
+  withr::local_options(list(shiny.otel.collect = "reactivity"))
+
+  spans <- 0
+  local_mocked_bindings(
+    start_otel_span = function(...) {
+      spans <<- spans + 1
+      create_mock_otel_span("extended_task")
+    },
+    otel_is_tracing_enabled = function() TRUE
+  )
+
+  resolvers <- list()
+  with_shiny_otel_record({
+    withReactiveDomain(MockShinySession$new(), {
+      task <- ExtendedTask$new(function() {
+        promises::promise(function(resolve, reject) {
+          resolvers[[length(resolvers) + 1]] <<- resolve
+        })
+      })
+      isolate({
+        task$invoke()
+        task$invoke()
+      })
+      expect_equal(spans, 1)
+
+      resolvers[[1]](1)
+      while (!later::loop_empty()) later::run_now()
+    })
+  })
+
+  expect_equal(spans, 2)
+})

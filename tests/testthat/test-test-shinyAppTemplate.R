@@ -2,6 +2,9 @@
 # tests only ever write new snapshots (each run uses a new temp app), which
 # fail on CI. So check the files each combo creates instead.
 
+# shinyAppTemplate() requires shinytest2 for templates with tests
+suppressWarnings(skip_if_not_installed("shinytest2"))
+
 # test all combos
 make_combos <- function(...) {
   args <- list(...)

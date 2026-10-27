@@ -2854,7 +2854,7 @@ flushPendingSessions <- function() {
     tryCatch(
       shinysession$flushOutput(),
 
-      stop = function(e) {
+      error = function(e) {
         # If there are any uncaught errors that bubbled up to here, close the
         # session.
         shinysession$close()

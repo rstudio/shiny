@@ -30,7 +30,7 @@ local({
   )
 
   ## This test ensures that every documented topic is included in
-  ## staticdocs/index.r, unless explicitly waived by specifying it
+  ## tools/documentation/pkgdown.yml, unless explicitly waived by specifying it
   ## as `@keywords internal`
   no_entry_topics <- setdiff(all_topics, indexed_topics)
   internal_topics <- unlist(lapply(

@@ -845,7 +845,7 @@ MockShinySession <- R6Class(
       file <- file.path(tmpd, download$filename())
       download$content(file)
       if (!file.exists(file))
-        error("downloadHandler for ", name, " did not write a file.")
+        stop("downloadHandler for ", name, " did not write a file.", call. = FALSE)
       file
     },
 

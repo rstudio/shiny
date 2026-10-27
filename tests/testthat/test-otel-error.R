@@ -50,7 +50,11 @@ test_server_with_otel_error <- function(session, server, expr, sanitize = FALSE,
     }
   )
 
-  info$traces
+  # Recording captures spans from the whole process, so keep only this
+  # session's spans in case earlier tests left callbacks behind.
+  Filter(function(trace) {
+    identical(trace$attributes[["session.id"]], session$token)
+  }, info$traces)
 }
 
 
@@ -98,9 +102,6 @@ test_that("set_otel_exception_status() records sanitized errors by default", {
       expect_session_warning(session, "test error in r1")
     }
   )
-
-  # IDK why, I don't have time to debug
-  skip_if(length(traces) > 3, "Too many traces collected; otelsdk traces are polluted. Run in single test file only: testthat::test_file(testthat::test_path('test-otel-error.R'))`")
 
   # Find traces with exception events (should only be one)
   exception_events <- exception_trace_events(traces)

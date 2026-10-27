@@ -29,8 +29,7 @@ const opts: BuildOptions = {
 // Make sure all ts files contain jquery import statements before building
 verifyJqueryImport("srcts/src")
   .then(() => {
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    Promise.all([
+    return Promise.all([
       build({
         ...opts,
         outfile: outDir + "shiny.js",
@@ -44,4 +43,5 @@ verifyJqueryImport("srcts/src")
   })
   .catch((err) => {
     console.error("Error:\n" + err);
+    process.exit(1);
   });

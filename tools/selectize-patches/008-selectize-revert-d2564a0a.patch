@@ -18,15 +18,3 @@ index 767f45e1c..a902fae5b 100644
  			tabindex  : $input.attr('tabindex')
  		};
  
-diff --git a/inst/www/shared/shiny.js b/inst/www/shared/shiny.js
-index aeff68aa3..db9880f26 100644
-Binary files a/inst/www/shared/shiny.js and b/inst/www/shared/shiny.js differ
-diff --git a/inst/www/shared/shiny.js.map b/inst/www/shared/shiny.js.map
-index 34350b024..1abf54644 100644
-Binary files a/inst/www/shared/shiny.js.map and b/inst/www/shared/shiny.js.map differ
-diff --git a/inst/www/shared/shiny.min.js b/inst/www/shared/shiny.min.js
-index 8b8027fd3..eb1994aac 100644
-Binary files a/inst/www/shared/shiny.min.js and b/inst/www/shared/shiny.min.js differ
-diff --git a/inst/www/shared/shiny.min.js.map b/inst/www/shared/shiny.min.js.map
-index 560e1492e..0de12987b 100644
-Binary files a/inst/www/shared/shiny.min.js.map and b/inst/www/shared/shiny.min.js.map differ

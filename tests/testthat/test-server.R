@@ -139,3 +139,22 @@ test_that("a websocket message whose method isn't a single string is rejected (#
   expect_error(send('{"method":["a","b"],"data":{}}'), "single string")
   expect_equal(server_runs, 1)
 })
+
+test_that("decodeMessage() gives no blobs for a binary frame with only JSON (#4439)", {
+  frame <- function(...) {
+    parts <- lapply(list(...), charToRaw)
+    c(
+      writeBin(0x01020202L, raw(), endian = "little"),
+      unlist(lapply(parts, function(p) {
+        c(writeBin(length(p), raw(), endian = "little"), p)
+      }))
+    )
+  }
+
+  msg <- decodeMessage(frame('{"method":"m","args":[]}'))
+  expect_equal(msg$method, "m")
+  expect_length(msg$blobs, 0)
+
+  msg <- decodeMessage(frame('{"method":"m","args":[]}', "ab"))
+  expect_equal(msg$blobs, list(charToRaw("ab")))
+})

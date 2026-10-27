@@ -278,9 +278,10 @@ so the collect level is captured when the object is built.
   bookmark and restore callbacks plus a bookmark-exclude function on the root
   session. They are removed only by that scope's `onDestroy`. Avoid calling
   `makeScope()` speculatively; `destroy(ns)` itself calls `makeScope()` first.
-- **Namespaces must be length 1.** `validateNamespace()` requires a
-  length-1, non-empty string that is not `"..root"`, even though `NS()`
-  accepts vectors. `makeScope()` calls it with `allow_root = TRUE`, so there
+- **Namespaces are joined to one string.** `validateNamespace()` joins a
+  character vector with `ns.sep` (as `NS()` does) and returns it; callers must
+  use the returned value. The result must be a non-empty, non-NA string that
+  is not `"..root"`. `makeScope()` calls it with `allow_root = TRUE`, so there
   `NULL` / `character(0)` (the root scope) are also accepted. Destroy matches by prefix: `destroy("a")`
   also tears down `a-b`.
 - **Inputs are deferred while busy.** `manageInputs()` waits whenever any

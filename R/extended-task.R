@@ -189,7 +189,7 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
           private$invocation_queue$size() > 0
       ) {
         otel_log(
-          private$otel_log_add_to_queue_label,
+          private$otel_log_label_add_to_queue,
           severity = "debug",
           attributes = c(
             private$otel_attrs,

@@ -130,11 +130,11 @@ Run them with `Rscript -e 'devtools::test(filter = "skills")'`.
   in a reference, or anything in `SKILL.md` itself, is unguarded unless you
   add it. The test also ignores non-shiny functions (bslib, promises,
   reactlog).
-- **Only exact ```` ```r ```` fences are parsed.** The test matches
-  `^```r\s*$` and closes on `^```\s*$`. ```` ```R ````, ```` ```{r} ````,
-  indented fences inside lists, and ```` ```js ````/```` ```yaml ```` blocks
-  are not checked. A ```` ```r ```` chunk with no closing fence makes the
-  test error, not fail cleanly.
+- **Only R fences are parsed.** The test parses ```` ```r ````,
+  ```` ```R ```` and ```` ```{r ...} ```` chunks, indented or not, and closes
+  each on the next bare ```` ``` ````. ```` ```js ````/```` ```yaml ```` blocks
+  are not checked. An R chunk with no closing fence fails with its file and
+  line.
 - **Partial snippets must still parse.** A snippet that is only the inside
   of a `server` function is fine; a deliberately incomplete line
   (`ui <- fluidPage(`) is not.

@@ -160,8 +160,9 @@ Bullet style:
   someone regenerates and commits.
 - **`test-pkgdown.R` only runs from a source checkout.** It sources
   `../../tools/documentation/checkPkgdown.R`, which is absent under
-  `R CMD check` (`tools/` is `.Rbuildignore`d), so it skips there. Run
-  `devtools::test(filter = "pkgdown")` locally.
+  `R CMD check` (`tools/` is `.Rbuildignore`d), so it skips there. CI still
+  runs the check: `checkDocsCurrent.sh` (from `routine`) runs
+  `checkPkgdown.R` directly. Locally, use `devtools::test(filter = "pkgdown")`.
 - **Edit param docs in `man-roxygen/`, not in `man/`.** Changing
   `env`/`quoted` wording in one function's roxygen will not reach the
   others that use the template.

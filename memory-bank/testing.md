@@ -66,6 +66,7 @@ reviewing `snapshot_review()`. CI uploads failed snapshots as an artifact
 - `skip_if(!isTRUE(as.logical(Sys.getenv("CI"))), ...)`: in `test-devmode.R` (only runs in CI).
 - `skip_if_shiny_otel_tracer_is_enabled()`: stack-trace tests, which differ when otel is active.
 - `skip_if_not_shinytest2()`: skip on CRAN, skip on Windows/Solaris/emscripten, skip if shinytest2 is missing. Browser tests run on macOS and Linux. They take no screenshots, so results don't depend on the OS.
+- Browser tests run the app in a subprocess. Under `devtools::test()` that subprocess loads the **installed** shiny, not your working tree, so a test for a new fix fails until you `devtools::install()`. `devtools::load_all()` then `testthat::test_file()` uses the working tree. CI installs the package first, so it is not affected.
 
 ## In-process server tests vs browser tests
 

@@ -16,6 +16,8 @@
 
 * With `options(shiny.minified = FALSE)`, `dateInput(language =)` now loads its locale instead of falling back to English. The datepicker and `sliderInput()` now follow `devmode()`'s `shiny.minified` setting like the rest of shiny, so in `devmode()` a page with a `dateInput()` loads every datepicker locale file. (#4461)
 
+* Added an experimental JavaScript API, `Shiny.drive`, for inspecting and driving an app from the browser: list and set inputs, click buttons, upload files, read outputs, and wait for the app to finish updating. Browser extensions, test tools, and AI agents can call it. An input or output with a `data-shiny-drive-access` attribute of `"read-only"`, `"write-only"`, or `"exclude"` limits what it exposes.
+
 * Fixed #4281, #3251: `dateInput()`'s `datesdisabled` now works when `format` is not the default `yyyy-mm-dd`. The dates are now converted to real dates on the client, the same way `min`/`max` already are, instead of being parsed by bootstrap-datepicker with the display format. (#4434)
 
 * Added an agent skill (`inst/skills/shiny-for-r/`) following the

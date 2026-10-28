@@ -31,6 +31,7 @@ import {
 import { createInitStatus, type InitStatusPromise } from "../utils/promise";
 import type { BindInputsCtx, BindScope } from "./bind";
 import { _bindAll, bindAll, unbindAll } from "./bind";
+import { ShinyDrive } from "./drive";
 import type {
   shinyBindAll,
   shinyForgetLastInputValue,
@@ -80,6 +81,7 @@ class ShinyClass {
   renderHtmlAsync: typeof renderHtmlAsync;
   renderHtml: typeof renderHtml;
   addCustomMessageHandler: typeof addCustomMessageHandler;
+  drive: ShinyDrive;
 
   // The following are added in the initialization, by initShiny()
   createSocket?: () => WebSocket;
@@ -132,6 +134,8 @@ class ShinyClass {
     this.renderContent = renderContent;
     this.renderHtmlAsync = renderHtmlAsync;
     this.renderHtml = renderHtml;
+
+    this.drive = new ShinyDrive();
 
     this.initializedPromise = createInitStatus<void>();
 

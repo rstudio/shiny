@@ -91,6 +91,11 @@ console warning.
 - `options(shiny.webmcp = TRUE)` adds `webmcp: true` to the `config`
   message; the client calls `enable()` once, on the first
   `shiny:sessioninitialized`, so a later `disable()` survives reconnects.
+- The same option makes `renderPage()` (`R/shinyui.R`) add
+  `webMcpPolyfillDependency()` (`R/webmcp.R`): `@mcp-b/global` from unpkg,
+  pinned to one version. It is a CDN `htmlDependency`, not vendored, so
+  offline apps get no polyfill. It defers to a native
+  `document.modelContext`.
 
 ## Server side (`R/shiny.R`)
 

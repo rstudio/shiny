@@ -150,7 +150,8 @@ getShinyOption <- function(name, default = NULL) {
 #'   Cairo package. See [plotPNG()] for more information.}
 #' \item{shiny.webmcp (defaults to `FALSE`)}{Experimental. If `TRUE`, the browser registers WebMCP tools that let an AI agent in the
 #'   browser list and set inputs and read outputs. Use [webMcpAccess()] to
-#'   limit what agents can see or change.}
+#'   limit what agents can see or change. The page also loads a WebMCP
+#'   polyfill from a CDN (unpkg.com) for browsers without built-in WebMCP.}
 #' \item{shiny.devmode (defaults to `NULL`)}{Option to enable Shiny Developer Mode. When set,
 #'   different default `getOption(key)` values will be returned. See [devmode()] for more details.}
 ### Not documenting as 'shiny.devmode.verbose' is for niche use only

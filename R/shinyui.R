@@ -69,6 +69,10 @@ renderPage <- function(ui, showcase=0, testMode=FALSE) {
       )
   }
 
+  if (isTRUE(getOption("shiny.webmcp", FALSE))) {
+    shiny_deps[[length(shiny_deps) + 1]] <- webMcpPolyfillDependency()
+  }
+
   if (in_devmode() || in_client_devmode()) {
     # If we're in dev mode, add a simple script to the head that injects a
     # global variable for the client to use to detect dev mode.

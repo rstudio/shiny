@@ -148,6 +148,10 @@ getShinyOption <- function(name, default = NULL) {
 #'   ragg package. See [plotPNG()] for more information.}
 #' \item{shiny.usecairo (defaults to `TRUE`)}{Set to `FALSE` to prevent PNG rendering via the
 #'   Cairo package. See [plotPNG()] for more information.}
+#' \item{shiny.webmcp (defaults to `FALSE`)}{`r lifecycle::badge("experimental")`
+#'   If `TRUE`, the browser registers WebMCP tools that let an AI agent in the
+#'   browser list and set inputs and read outputs. Use [webMcpAccess()] to
+#'   limit what agents can see or change.}
 #' \item{shiny.devmode (defaults to `NULL`)}{Option to enable Shiny Developer Mode. When set,
 #'   different default `getOption(key)` values will be returned. See [devmode()] for more details.}
 ### Not documenting as 'shiny.devmode.verbose' is for niche use only

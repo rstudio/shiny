@@ -1,5 +1,7 @@
 # shiny (development version)
 
+* Fixed #4474: `downloadButton()` and `downloadLink()` once again work inside widgets that stop click propagation and replay Shiny's delegated click handlers themselves, such as `shinyWidgets::dropdownButton()`.
+
 * Fixed #4281, #3251: `dateInput()`'s `datesdisabled` now works when `format` is not the default `yyyy-mm-dd`. The dates are now converted to real dates on the client, the same way `min`/`max` already are, instead of being parsed by bootstrap-datepicker with the display format. (#4434)
 
 * Added an agent skill (`inst/skills/shiny-for-r/`) following the

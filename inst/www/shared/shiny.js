@@ -3097,14 +3097,13 @@
     "click.shinyDownloadLink",
     "a.shiny-download-link",
     function(e4) {
-      const el = e4.currentTarget;
-      if (el.classList.contains("disabled") || !el.getAttribute("href")) {
+      if (this.classList.contains("disabled") || !this.getAttribute("href")) {
         e4.preventDefault();
         return;
       }
       const evt = import_jquery25.default.Event("shiny:filedownload");
-      evt.name = el.id;
-      evt.href = el.href;
+      evt.name = this.id;
+      evt.href = this.href;
       (0, import_jquery25.default)(document).trigger(evt);
       return;
       e4;

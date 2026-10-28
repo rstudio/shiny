@@ -127,8 +127,12 @@ of a shiny app will automatically be sourced.}
 ragg package. See \code{\link[=plotPNG]{plotPNG()}} for more information.}
 \item{shiny.usecairo (defaults to \code{TRUE})}{Set to \code{FALSE} to prevent PNG rendering via the
 Cairo package. See \code{\link[=plotPNG]{plotPNG()}} for more information.}
-\item{shiny.webmcp (defaults to \code{FALSE})}{\code{r\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}} If }TRUE\verb{, the browser registers WebMCP tools that let an AI agent in the browser list and set inputs and read outputs. Use [webMcpAccess()] to limit what agents can see or change.\} \\item\{shiny.devmode (defaults to }NULL\verb{)\}\{Option to enable Shiny Developer Mode. When set, different default }getOption(key)\verb{values will be returned. See [devmode()] for more details.\} \\item\{shiny.otel.collect (defaults to}Sys.getenv("SHINY_OTEL_COLLECT",
-"all")`)}{Determines how Shiny will interact with OpenTelemetry.
+\item{shiny.webmcp (defaults to \code{FALSE})}{Experimental. If \code{TRUE}, the browser registers WebMCP tools that let an AI agent in the
+browser list and set inputs and read outputs. Use \code{\link[=webMcpAccess]{webMcpAccess()}} to
+limit what agents can see or change.}
+\item{shiny.devmode (defaults to \code{NULL})}{Option to enable Shiny Developer Mode. When set,
+different default \code{getOption(key)} values will be returned. See \code{\link[=devmode]{devmode()}} for more details.}
+\item{shiny.otel.collect (defaults to \code{Sys.getenv("SHINY_OTEL_COLLECT", "all")})}{Determines how Shiny will interact with OpenTelemetry.
 
 Supported values:
 \itemize{

@@ -50,3 +50,17 @@ webMcpAccess <- function(tag, access) {
   tag$attribs[["data-shiny-drive-access"]] <- access
   tag
 }
+
+# WebMCP polyfill, for browsers without a native `document.modelContext`. It
+# uses the native API when present. Added to the page when
+# `options(shiny.webmcp = TRUE)`. Loaded from a CDN, so offline apps get no
+# polyfill (the tools still work through `Shiny.webmcp.callTool()`).
+webMcpPolyfillDependency <- function() {
+  version <- "6.0.3"
+  htmlDependency(
+    name = "mcp-b-global",
+    version = version,
+    src = c(href = paste0("https://unpkg.com/@mcp-b/global@", version, "/dist")),
+    script = "index.iife.js"
+  )
+}

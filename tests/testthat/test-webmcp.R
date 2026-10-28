@@ -20,3 +20,13 @@ test_that("webMcpAccess() puts the attribute on a tabset's bound tab input", {
   expect_equal(sum(names(ul$attribs) == "data-shiny-drive-access"), 1)
   expect_equal(ul$attribs[["data-shiny-drive-access"]], "exclude")
 })
+
+test_that("the WebMCP polyfill is added only when shiny.webmcp is TRUE", {
+  ui <- fluidPage("hi")
+  has_polyfill <- function() {
+    grepl("@mcp-b/global@", as.character(renderPage(ui)), fixed = TRUE)
+  }
+
+  withr::with_options(list(shiny.webmcp = TRUE), expect_true(has_polyfill()))
+  withr::with_options(list(shiny.webmcp = NULL), expect_false(has_polyfill()))
+})

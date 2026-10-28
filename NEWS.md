@@ -1,6 +1,6 @@
 # shiny (development version)
 
-* Added an experimental JavaScript API, `Shiny.drive`, for inspecting and driving an app from the browser: list and set inputs, click buttons, upload files, read outputs, and wait for the app to finish updating. Browser extensions, test tools, and AI agents can call it. An input or output with a `data-shiny-drive-access` attribute of `"read-only"`, `"write-only"`, or `"exclude"` limits what it exposes.
+* Added an experimental JavaScript API, `Shiny.drive`, for inspecting and driving an app from the browser: list and set inputs, click buttons, upload files, read outputs, and wait for the app to finish updating. Browser extensions, test tools, and AI agents can call it. An input or output with a `data-shiny-drive-access` attribute of `"read-only"`, `"write-only"`, or `"exclude"` limits what it exposes. (#4469)
 
 * Fixed #4281, #3251: `dateInput()`'s `datesdisabled` now works when `format` is not the default `yyyy-mm-dd`. The dates are now converted to real dates on the client, the same way `min`/`max` already are, instead of being parsed by bootstrap-datepicker with the display format. (#4434)
 

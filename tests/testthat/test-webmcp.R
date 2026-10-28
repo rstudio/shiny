@@ -27,6 +27,24 @@ test_that("the WebMCP polyfill is added only when shiny.webmcp is TRUE", {
     grepl("@mcp-b/global@", as.character(renderPage(ui)), fixed = TRUE)
   }
 
+  withr::local_envvar(SHINY_WEBMCP = NA)
   withr::with_options(list(shiny.webmcp = TRUE), expect_true(has_polyfill()))
   withr::with_options(list(shiny.webmcp = NULL), expect_false(has_polyfill()))
+})
+
+test_that("webmcp_enabled() reads shiny.webmcp, then SHINY_WEBMCP", {
+  withr::local_options(shiny.webmcp = NULL)
+  withr::local_envvar(SHINY_WEBMCP = NA)
+  expect_false(webmcp_enabled())
+
+  withr::with_envvar(c(SHINY_WEBMCP = "true"), expect_true(webmcp_enabled()))
+  withr::with_envvar(c(SHINY_WEBMCP = "TRUE"), expect_true(webmcp_enabled()))
+  withr::with_envvar(c(SHINY_WEBMCP = "false"), expect_false(webmcp_enabled()))
+  withr::with_envvar(c(SHINY_WEBMCP = "1"), expect_false(webmcp_enabled()))
+
+  withr::with_options(list(shiny.webmcp = TRUE), expect_true(webmcp_enabled()))
+
+  # The option wins over the env var
+  withr::local_envvar(SHINY_WEBMCP = "true")
+  withr::with_options(list(shiny.webmcp = FALSE), expect_false(webmcp_enabled()))
 })

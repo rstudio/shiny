@@ -127,7 +127,8 @@ of a shiny app will automatically be sourced.}
 ragg package. See \code{\link[=plotPNG]{plotPNG()}} for more information.}
 \item{shiny.usecairo (defaults to \code{TRUE})}{Set to \code{FALSE} to prevent PNG rendering via the
 Cairo package. See \code{\link[=plotPNG]{plotPNG()}} for more information.}
-\item{shiny.webmcp (defaults to \code{FALSE})}{Experimental. If \code{TRUE}, the browser registers WebMCP tools that let an AI agent in the
+\item{shiny.webmcp (defaults to \code{Sys.getenv("SHINY_WEBMCP")}, read with
+\code{as.logical()})}{Experimental. If \code{TRUE}, the browser registers WebMCP tools that let an AI agent in the
 browser list and set inputs and read outputs. Use \code{\link[=webMcpAccess]{webMcpAccess()}} to
 limit what agents can see or change. The page also loads a WebMCP
 polyfill from a CDN (unpkg.com) for browsers without built-in WebMCP.}

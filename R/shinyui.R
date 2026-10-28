@@ -69,7 +69,7 @@ renderPage <- function(ui, showcase=0, testMode=FALSE) {
       )
   }
 
-  if (isTRUE(getOption("shiny.webmcp", FALSE))) {
+  if (webmcp_enabled()) {
     shiny_deps[[length(shiny_deps) + 1]] <- webMcpPolyfillDependency()
   }
 

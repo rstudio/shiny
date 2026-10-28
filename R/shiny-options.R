@@ -148,7 +148,8 @@ getShinyOption <- function(name, default = NULL) {
 #'   ragg package. See [plotPNG()] for more information.}
 #' \item{shiny.usecairo (defaults to `TRUE`)}{Set to `FALSE` to prevent PNG rendering via the
 #'   Cairo package. See [plotPNG()] for more information.}
-#' \item{shiny.webmcp (defaults to `FALSE`)}{Experimental. If `TRUE`, the browser registers WebMCP tools that let an AI agent in the
+#' \item{shiny.webmcp (defaults to `Sys.getenv("SHINY_WEBMCP")`, read with
+#'   `as.logical()`)}{Experimental. If `TRUE`, the browser registers WebMCP tools that let an AI agent in the
 #'   browser list and set inputs and read outputs. Use [webMcpAccess()] to
 #'   limit what agents can see or change. The page also loads a WebMCP
 #'   polyfill from a CDN (unpkg.com) for browsers without built-in WebMCP.}

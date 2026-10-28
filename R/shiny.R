@@ -1025,7 +1025,7 @@ ShinySession <- R6Class(
           workerId = workerId(),
           sessionId = self$token,
           user = self$user,
-          webmcp = isTRUE(getOption("shiny.webmcp", FALSE))
+          webmcp = webmcp_enabled()
         )
       )
     },

@@ -88,7 +88,10 @@ console warning.
 - `registerTool()`, `unregisterTool()`, `listTools()`, `callTool()` and a
   `toolchange` event manage the registry. Each tool is mirrored with
   `document.modelContext.registerTool(tool, {signal})` when that exists.
-- `options(shiny.webmcp = TRUE)` adds `webmcp: true` to the `config`
+- `webmcp_enabled()` (`R/webmcp.R`) reads `options(shiny.webmcp)`, falling
+  back to the `SHINY_WEBMCP` env var (via `as.logical()`, so `"true"` works
+  and `"1"` doesn't). Use it instead of reading the option directly.
+- When enabled, the server adds `webmcp: true` to the `config`
   message; the client calls `enable()` once, on the first
   `shiny:sessioninitialized`, so a later `disable()` survives reconnects.
 - The same option makes `renderPage()` (`R/shinyui.R`) add

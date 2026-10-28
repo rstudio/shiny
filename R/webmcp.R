@@ -51,6 +51,11 @@ webMcpAccess <- function(tag, access) {
   tag
 }
 
+# `options(shiny.webmcp)`, falling back to the `SHINY_WEBMCP` env var
+webmcp_enabled <- function() {
+  isTRUE(as.logical(getOption("shiny.webmcp", Sys.getenv("SHINY_WEBMCP"))))
+}
+
 # WebMCP polyfill, for browsers without a native `document.modelContext`. It
 # uses the native API when present. Added to the page when
 # `options(shiny.webmcp = TRUE)`. Loaded from a CDN, so offline apps get no

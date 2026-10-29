@@ -158,6 +158,8 @@ modalDialog <- function(..., title = NULL, footer = modalButton("Dismiss"),
 
   size <- match.arg(size)
 
+  has_title <- !is.null(title)
+
   backdrop <- if (!easyClose) "static"
   keyboard <- if (!easyClose) "false"
   div(
@@ -169,13 +171,16 @@ modalDialog <- function(..., title = NULL, footer = modalButton("Dismiss"),
     `data-bs-backdrop` = backdrop,
     `data-keyboard` = keyboard,
     `data-bs-keyboard` = keyboard,
+    if (has_title) `aria-labelledby` = "shiny-modal-title",
 
     div(
       class = "modal-dialog",
       class = switch(size, s = "modal-sm", m = NULL, l = "modal-lg", xl = "modal-xl"),
       div(class = "modal-content",
         if (!is.null(title)) div(class = "modal-header",
-          tags$h4(class = "modal-title", title)
+          div(class = "modal-title",
+              id = "shiny-modal-title", 
+              title)
         ),
         div(class = "modal-body", ...),
         if (!is.null(footer)) div(class = "modal-footer", footer)

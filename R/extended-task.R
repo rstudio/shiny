@@ -200,15 +200,6 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
         )
         private$invocation_queue$add(list(args = args, call = call))
       } else {
-
-        if (private$is_recording_otel) {
-          private$otel_span <- start_otel_span(
-            private$otel_span_label,
-            attributes = private$otel_attrs
-          )
-          otel::local_active_span(private$otel_span)
-        }
-
         private$do_invoke(args, call = call)
       }
       invisible(NULL)
@@ -283,6 +274,14 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
     otel_span = NULL,
 
     do_invoke = function(args, call = NULL) {
+      if (private$is_recording_otel) {
+        private$otel_span <- start_otel_span(
+          private$otel_span_label,
+          attributes = private$otel_attrs
+        )
+        otel::local_active_span(private$otel_span)
+      }
+
       private$rv_status("running")
       private$rv_value(NULL)
       private$rv_error(NULL)

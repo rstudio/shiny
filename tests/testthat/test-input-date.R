@@ -63,3 +63,16 @@ test_that("dateInput() datesdisabled accepts Date objects", {
     as.character(jsonlite::toJSON(c("2012-03-01", "2012-03-02")))
   )
 })
+
+test_that("unminified datepicker also loads its locales (#4439)", {
+  withr::local_options(shiny.minified = TRUE)
+  expect_equal(datePickerScripts(), "js/bootstrap-datepicker.min.js")
+
+  withr::local_options(shiny.minified = FALSE)
+  scripts <- datePickerScripts()
+  expect_equal(scripts[1], "js/bootstrap-datepicker.js")
+  expect_true("js/locales/bootstrap-datepicker.de.min.js" %in% scripts)
+  expect_true(all(file.exists(
+    system_file("www/shared/datepicker", scripts, package = "shiny")
+  )))
+})

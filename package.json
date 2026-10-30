@@ -67,7 +67,7 @@
     "lint": "node --eval \"console.log('linting code...')\" && eslint 'srcts/src/**/*.ts' --fix",
     "build_types": "tsc -p tsconfig.json",
     "test_types": "tsx --test $(find srcts/src -path '*/__tests__/*.test.ts' -print)",
-    "coverage_detailed": "npx --yes type-check --detail",
+    "coverage_detailed": "type-coverage -p tsconfig.json --detail",
     "coverage": "type-coverage -p tsconfig.json --at-least 90",
     "circular": "npx --yes dpdm --transform ./srcts/src/index.ts",
     "prepack": "cp README.md README-orig.md && cp README-npm.md README.md",

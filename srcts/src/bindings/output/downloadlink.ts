@@ -39,21 +39,24 @@ interface FileDownloadEvent extends JQuery.Event {
 $(document).on(
   "click.shinyDownloadLink",
   "a.shiny-download-link",
-  function (e: Event) {
-    const el = e.currentTarget as HTMLAnchorElement;
+  function (this: HTMLAnchorElement, e: Event) {
+    // Use `this` (the matched link) rather than `e.currentTarget`. Some widgets
+    // (e.g. shinyWidgets::dropdownButton()) stop propagation and replay
+    // delegated handlers via `handler.call(link, event)`, in which case
+    // `e.currentTarget` is their container, not the link.
 
     // Prevent clicks when the button is disabled or the URL is not yet set
     // (enabled=TRUE buttons start with href="" before renderValue fires, which
     // would otherwise navigate to the current page URL).
-    if (el.classList.contains("disabled") || !el.getAttribute("href")) {
+    if (this.classList.contains("disabled") || !this.getAttribute("href")) {
       e.preventDefault();
       return;
     }
 
     const evt: FileDownloadEvent = $.Event("shiny:filedownload");
 
-    evt.name = el.id;
-    evt.href = el.href;
+    evt.name = this.id;
+    evt.href = this.href;
     $(document).trigger(evt);
 
     return;

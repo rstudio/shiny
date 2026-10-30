@@ -1111,13 +1111,21 @@ class ShinyApp {
         // there are no ids that need matching). In other words, we're
         // guaranteed to be inserting only one `nav_panel()`.
         let fixupDivId = "";
+        let fixupTabId = "";
         if ($aTag.attr("data-toggle") === "tab") {
           const index = getTabIndex($tabset, tabsetId);
-          const tabId = "tab-" + tabsetId + "-" + index;
+          const panelId = "tab-" + tabsetId + "-" + index;
+          const tabId = panelId + "-tab";
 
-          $liTag.find("> a").attr("href", "#" + tabId);
-          // We'll fixup the div ID after we insert it
-          fixupDivId = tabId;
+          $liTag
+            .find("> a")
+            .attr("id", tabId)
+            .attr("href", "#" + panelId)
+            .attr("aria-controls", panelId);
+          // We'll fixup the panel ID and its accessible-name reference
+          // after inserting the content.
+          fixupDivId = panelId;
+          fixupTabId = tabId;
         }
 
         // actually insert the item into the right place
@@ -1172,7 +1180,11 @@ class ShinyApp {
 
         if (fixupDivId) {
           // We're inserting one nav_panel() and need to fixup the content ID
-          $tabContent.find('[id="tab-tsid-id"]').attr("id", fixupDivId);
+          // and its accessible-name reference to the controlling tab.
+          $tabContent
+            .find('[id="tab-tsid-id"]')
+            .attr("id", fixupDivId)
+            .attr("aria-labelledby", fixupTabId);
         }
 
         if (message.select) {

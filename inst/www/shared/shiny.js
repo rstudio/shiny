@@ -7119,11 +7119,14 @@ ${duplicateIdMsg}`;
             $liTag.removeClass("nav-item").find(".nav-link").removeClass("nav-link").addClass("dropdown-item");
           }
           let fixupDivId = "";
+          let fixupTabId = "";
           if ($aTag.attr("data-toggle") === "tab") {
             const index = getTabIndex($tabset, tabsetId);
-            const tabId = "tab-" + tabsetId + "-" + index;
-            $liTag.find("> a").attr("href", "#" + tabId);
-            fixupDivId = tabId;
+            const panelId = "tab-" + tabsetId + "-" + index;
+            const tabId = panelId + "-tab";
+            $liTag.find("> a").attr("id", tabId).attr("href", "#" + panelId).attr("aria-controls", panelId);
+            fixupDivId = panelId;
+            fixupTabId = tabId;
           }
           if (message.position === "before") {
             if ($targetLiTag) {
@@ -7141,7 +7144,7 @@ ${duplicateIdMsg}`;
           await shinyBindAll($targetLiTag?.parent() || $tabset);
           await renderContentAsync($tabContent[0], message.divTag, "beforeEnd");
           if (fixupDivId) {
-            $tabContent.find('[id="tab-tsid-id"]').attr("id", fixupDivId);
+            $tabContent.find('[id="tab-tsid-id"]').attr("id", fixupDivId).attr("aria-labelledby", fixupTabId);
           }
           if (message.select) {
             $liTag.find("a").tab("show");

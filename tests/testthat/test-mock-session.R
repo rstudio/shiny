@@ -299,3 +299,13 @@ test_that("session supports getTestSnapshotUrl", {
   session$getTestSnapshotUrl(input=1, output=1, export=1, format=1)
   expect_true(TRUE) # testthat insists that every test must have an expectation
 })
+
+test_that("downloadHandler() that writes no file gives a clear error (#4439)", {
+  server <- function(input, output, session) {
+    output$dl <- downloadHandler("x.txt", content = function(file) NULL)
+  }
+
+  testServer(server, {
+    expect_error(output$dl, "did not write a file")
+  })
+})

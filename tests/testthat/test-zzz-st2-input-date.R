@@ -31,8 +31,9 @@ disabled_days_in_next_month <- function(id) {
     "(function() {
        var $i = $('#%s input');
        $i.bsDatepicker('show');
-       $('.datepicker-days .next').last().click();
-       var days = $('.datepicker-days td.day.disabled')
+       var $days = $i.data('datepicker').picker.find('.datepicker-days');
+       $days.find('.next').click();
+       var days = $days.find('td.day.disabled')
          .not('.old, .new').map(function() { return $(this).text(); }).get();
        $i.bsDatepicker('hide');
        return days;

@@ -232,7 +232,7 @@ Implementation: `R/test-server.R`, `R/mock-session.R`, `R/timer.R`
   calls `private$flush()` (`flushCBs`, then `flushReact()`, then `flushedCBs`,
   then `later::run_now()`). `elapse()` advances mock time. `makeScope()`,
   `destroy()`, `close()` and `invokeDestroyCallbacks()` mirror
-  `ShinySession`. Unsupported methods come from `makeExtraMethods()` (noops
+  `ShinySession` (see the teardown pitfall below). Unsupported methods come from `makeExtraMethods()` (noops
   that warn or error).
 
 ## OpenTelemetry (brief)
@@ -270,10 +270,12 @@ so the collect level is captured when the object is built.
   `make_weak_destroy_wrapper()` does. `MockShinySession$close()` must keep the
   same ordering: mark closed first, then ended callbacks, then
   `invokeDestroyCallbacks(allowRoot = TRUE)`.
-- **Duplicated teardown logic.** `MockShinySession`'s private
-  `invokeDestroyCallbacks()` is a copy of the `ShinySession` version, but it
-  only cleans inputs. It skips clientData, outputs and download routes. Change
-  both together.
+- **Teardown is split between shared and per-class code.** Both sessions'
+  private `invokeDestroyCallbacks()` call `runDestroyCallbacks()`
+  (`R/shiny.R`) to run the callbacks, then clean up their own state:
+  `ShinySession` clears inputs, clientData, outputs and download/file routes;
+  `MockShinySession` clears inputs, outputs and download generators (it has no
+  reactive clientData or file routes). Keep the two cleanups in step.
 - **Bookmark callbacks accumulate.** Every `makeScope()` call registers
   bookmark and restore callbacks plus a bookmark-exclude function on the root
   session. They are removed only by that scope's `onDestroy`. Avoid calling

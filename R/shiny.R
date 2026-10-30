@@ -1799,6 +1799,13 @@ ShinySession <- R6Class(
       if (inherits(value, 'try-error')) {
         private$sendErrorResponse(msg, conditionMessage(attr(value, 'condition')))
       }
+      else if (promises::is.promising(value)) {
+        promises::then(
+          value,
+          onFulfilled = function(value) private$sendResponse(msg, value),
+          onRejected = function(e) private$sendErrorResponse(msg, conditionMessage(e))
+        )
+      }
       else {
         private$sendResponse(msg, value)
       }
@@ -2261,6 +2268,14 @@ ShinySession <- R6Class(
       snapshotPreprocessInput(inputId, snapshotPreprocessorFileInput)
 
       invisible()
+    },
+    # Resolves once the session has flushed: every input message sent before
+    # this request has been processed and the resulting outputs sent. Used as
+    # a barrier by `Shiny.drive.flush()` on the client.
+    `@waitForFlush` = function() {
+      promises::promise(function(resolve, reject) {
+        self$onFlushed(function() resolve(TRUE), once = TRUE)
+      })
     },
     # Provides a mechanism for handling direct HTTP requests that are posted
     # to the session (rather than going through the websocket)

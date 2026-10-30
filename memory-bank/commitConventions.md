@@ -16,7 +16,8 @@ not an enforced check: no workflow lints titles.
 
 Conventions seen on `main`:
 
-- Types: `fix`, `feat`, `docs`, `chore`, `refactor`, `ci`, `build`, `test`.
+- Types: `fix`, `feat`, `docs`, `chore`, `refactor`, `ci`, `build`, `test`,
+  `release`.
   Use `!` for a breaking change (`feat!(submitButton): ...`).
 - Scopes name the affected area: `otel`, `test`, `check`, `js`, `scss`,
   `assets`, `license` (e.g. `fix(otel): ...`, `build(js): ...`).
@@ -29,8 +30,10 @@ Conventions seen on `main`:
   two numbers on `main`: `fix: dateInput() datesdisabled ignored
   non-default format (#4281) (#4434)`.
 
-Release and version commits follow fixed wording:
-`v1.13.0 release candidate (#4360)`, `Start v1.14.0 release candidate (#4393)`,
+Release-prep PRs, whose squash commit becomes the release commit, use the
+`release` type: `release: v1.14.0`. Older release and version commits used
+fixed wording instead: `v1.13.0 release candidate (#4360)`,
+`Start v1.14.0 release candidate (#4393)`,
 `Increment version number to 1.14.0.9000 (#4402)`.
 
 ## Merging

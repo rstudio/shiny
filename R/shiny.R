@@ -1024,7 +1024,8 @@ ShinySession <- R6Class(
         config = list(
           workerId = workerId(),
           sessionId = self$token,
-          user = self$user
+          user = self$user,
+          webmcp = webmcp_enabled()
         )
       )
     },

@@ -1117,12 +1117,12 @@ class ShinyApp {
           const panelId = "tab-" + tabsetId + "-" + index;
           const tabId = panelId + "-tab";
 
-          $liTag
-            .find("> a")
+          $aTag
             .attr("id", tabId)
             .attr("href", "#" + panelId)
             .attr("aria-controls", panelId);
-          // We'll fixup the panel ID and its accessible-name reference
+
+          // We'll fixup the panel ID and its reference to the tab
           // after inserting the content.
           fixupDivId = panelId;
           fixupTabId = tabId;
@@ -1179,8 +1179,8 @@ class ShinyApp {
         await renderContentAsync($tabContent[0], message.divTag, "beforeEnd");
 
         if (fixupDivId) {
-          // We're inserting one nav_panel() and need to fixup the content ID
-          // and its accessible-name reference to the controlling tab.
+          // We're inserting one nav_panel() and need to fixup the panel ID
+          // and its reference to the controlling tab.
           $tabContent
             .find('[id="tab-tsid-id"]')
             .attr("id", fixupDivId)

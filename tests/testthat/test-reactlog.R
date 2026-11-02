@@ -68,7 +68,7 @@ test_that("message logger appears", {
       {
         val <- reactiveVal(1, label = "val")
       },
-      "- define: r1:'val' - reactiveVal ' num 1'"
+      "- define: r1:'val' - reactiveVal 'num 1'"
     )
     expect_silent(
       {
@@ -83,7 +83,7 @@ test_that("message logger appears", {
       {
         react <- reactive(val() + values$a)
       },
-      "- define: r3:'reactive({\\n    val() + values$a\\n})' - observable ' NULL'"
+      "- define: r3:'reactive({\\n    val() + values$a\\n})' - observable 'NULL'"
     )
 
     expect_logs(
@@ -95,7 +95,7 @@ test_that("message logger appears", {
       "- createContext: ctx1 - observable",
       "- enter: r3:'reactive({\\n    val() + values$a\\n})' in ctx1 - observable",
       "= - dependsOn: r3:'reactive({\\n    val() + values$a\\n})' on r1:'val' in ctx1",
-      "= - define: r2$a:'values$a' - reactiveValuesKey ' num 2'",
+      "= - define: r2$a:'values$a' - reactiveValuesKey 'num 2'",
       "= - dependsOn: r3:'reactive({\\n    val() + values$a\\n})' on r2$a:'values$a' in ctx1",
       "- exit: r3:'reactive({\\n    val() + values$a\\n})' in ctx1 - observable"
     )
@@ -104,7 +104,7 @@ test_that("message logger appears", {
       {
         val(4)
       },
-      "- valueChange: r1:'val' ' num 4'",
+      "- valueChange: r1:'val' 'num 4'",
       "- invalidateStart: r1:'val'",
       "= - invalidateStart: r3:'reactive({\\n    val() + values$a\\n})' in ctx1 - observable",
       "= = - isolateInvalidateStart: rDummyReactId:'DummyReactId' in ctxDummy",
@@ -118,7 +118,7 @@ test_that("message logger appears", {
 
     expect_logs(
       {values$a <- 5},
-      "- valueChange: r2$a:'values$a' ' num 5'",
+      "- valueChange: r2$a:'values$a' 'num 5'",
       "- invalidateStart: r2$a:'values$a'",
       "- invalidateEnd: r2$a:'values$a'"
     )

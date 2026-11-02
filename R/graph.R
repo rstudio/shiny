@@ -173,6 +173,10 @@ RLog <- R6Class(
         # only capture the first level of the object
         utils::capture.output(utils::str(value, max.level = 1))
       })
+      # R r90805 (2026-10) changed str() to no longer prepend a space to each
+      # line of output. Strip that space when running on older R so that
+      # reactlog output is consistent across R versions.
+      output <- sub("^ ", "", output)
       outputTxt <- paste0(output, collapse = "\n")
       msg$shortenString(outputTxt, n = n)
     },

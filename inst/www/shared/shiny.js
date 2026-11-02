@@ -7124,7 +7124,7 @@ ${duplicateIdMsg}`;
             const index = getTabIndex($tabset, tabsetId);
             const panelId = "tab-" + tabsetId + "-" + index;
             const tabId = panelId + "-tab";
-            $liTag.find("> a").attr("id", tabId).attr("href", "#" + panelId).attr("aria-controls", panelId);
+            $aTag.attr("id", tabId).attr("href", "#" + panelId).attr("aria-controls", panelId);
             fixupDivId = panelId;
             fixupTabId = tabId;
           }

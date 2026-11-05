@@ -900,7 +900,7 @@ ShinySession <- R6Class(
       }
 
       nsPrefix <- namespace
-      runDestroyCallbacks(private$destroyCallbacksByNs, namespace)
+      runDestroyCallbacks(private$destroyCallbacksByNs, nsPrefix)
 
       # Clean up inputs and clientData for matched namespaces
       if (!isRoot) {

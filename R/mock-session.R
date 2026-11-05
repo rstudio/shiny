@@ -796,7 +796,7 @@ MockShinySession <- R6Class(
       }
 
       nsPrefix <- namespace
-      runDestroyCallbacks(private$destroyCallbacksByNs, namespace)
+      runDestroyCallbacks(private$destroyCallbacksByNs, nsPrefix)
 
       # Clean up namespaced inputs, outputs and downloads. The mock has no
       # reactive clientData or file routes to clean up.

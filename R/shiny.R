@@ -457,10 +457,10 @@ destroyNsRoot <- "..root"
 
 # Validate a module `namespace` and return it. A character vector (as accepted
 # by `NS()`) is first joined with `ns.sep`. A namespace must be a single,
-# non-empty, non-NA string and may not be the reserved sentinel. When `allow_root = TRUE`
-# (e.g. `makeScope()`), the root scope -- a length-0 `NULL` / `character(0)` --
-# is also accepted; the destroy entry points pass `allow_root = FALSE` because a
-# child scope must be named explicitly.
+# non-empty, non-NA string and may not be the reserved sentinel. When
+# `allow_root = TRUE` (e.g. `makeScope()`), the root scope -- a length-0
+# `NULL` / `character(0)` -- is also accepted; the destroy entry points pass
+# `allow_root = FALSE` because a child scope must be named explicitly.
 validateNamespace <- function(namespace, allow_root = FALSE) {
   if (allow_root && length(namespace) == 0) {
     return(invisible(namespace))

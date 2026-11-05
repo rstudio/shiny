@@ -12,7 +12,7 @@
 
 * `testServer()` fixes: a `downloadHandler()` whose `content` writes no file now gives a clear error instead of `could not find function "error"`; `session$destroy(id)` now also removes that module's outputs and downloads; and passing a function that is neither a server nor a module server now gives a clear error instead of `missing value where TRUE/FALSE needed`. (#4450, #4451, #4452)
 
-* With `options(shiny.minified = FALSE)`, `dateInput(language =)` now loads its locale instead of falling back to English. The datepicker and `sliderInput()` now follow `devmode()`'s `shiny.minified` setting like the rest of shiny. (#4461)
+* With `options(shiny.minified = FALSE)`, `dateInput(language =)` now loads its locale instead of falling back to English. The datepicker and `sliderInput()` now follow `devmode()`'s `shiny.minified` setting like the rest of shiny, so in `devmode()` a page with a `dateInput()` loads every datepicker locale file. (#4461)
 
 * Fixed #4281, #3251: `dateInput()`'s `datesdisabled` now works when `format` is not the default `yyyy-mm-dd`. The dates are now converted to real dates on the client, the same way `min`/`max` already are, instead of being parsed by bootstrap-datepicker with the display format. (#4434)
 

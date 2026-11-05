@@ -4,7 +4,7 @@
 
 * If flushing a session's outputs throws an unhandled error, that session is now closed as intended, instead of the error escaping the server loop. (#4444)
 
-* A request to an unknown session method now gets an `Unknown method` error response instead of a `do.call()` error. (#4445)
+* A request to an unknown session method now gets an `Unknown method` error response instead of a `do.call()` error. A websocket message whose `method` is not a single string is now rejected; a `method` of `1` used to rerun the server function. (#4445)
 
 * A binary websocket message that has only a JSON part no longer passes two extra `NULL`/JSON arguments to the requested method. (#4446)
 

@@ -39,6 +39,7 @@ declare class FileUploader extends FileProcessor {
     onFile(file: File, cont: () => void): void;
     onComplete(): void;
     onError(message: string): void;
+    $triggerUploadEnd(error: string | null): void;
     onAbort(): void;
     onProgress(file: File | null, completed: number): void;
     $container(): JQuery<HTMLElement>;

@@ -3,6 +3,7 @@ import type { BindingRegistry } from "../bindings/registry";
 import { resetBrush } from "../imageutils/resetBrush";
 import { $escape, compareVersion } from "../utils";
 import { type InitStatusPromise } from "../utils/promise";
+import { ShinyDrive } from "./drive";
 import type { shinyBindAll, shinyForgetLastInputValue, shinyInitializeInputs, shinySetInputValue, shinyUnbindAll } from "./initedMethods";
 import { removeModal, showModal } from "./modal";
 import { removeNotification, showNotification } from "./notifications";
@@ -35,6 +36,7 @@ declare class ShinyClass {
     renderHtmlAsync: typeof renderHtmlAsync;
     renderHtml: typeof renderHtml;
     addCustomMessageHandler: typeof addCustomMessageHandler;
+    drive: ShinyDrive;
     createSocket?: () => WebSocket;
     user?: string;
     progressHandlers?: ShinyApp["progressHandlers"];

@@ -41,6 +41,9 @@ class InputBatchSender implements InputPolicy {
       const currentData = this.pendingData;
 
       this.pendingData = {};
+      // An "event" send can empty the batch before an already-enqueued send
+      // runs; don't send an empty update.
+      if (Object.keys(currentData).length === 0) return;
       this.shinyapp.sendInput(currentData);
     } finally {
       this.reentrant = false;

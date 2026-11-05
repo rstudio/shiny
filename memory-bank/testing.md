@@ -129,8 +129,11 @@ client DOM. Examples: `test-zzz-st2-input-date.R` and
 (`assert = TRUE`) it calls `stop()` if any file fails; pass `assert = FALSE`
 to get back a result whose `$pass` column you can check yourself.
 `test-test-shinyAppTemplate.R` snapshots the files each `examples` combo
-creates; it does not run the template's tests, since their shinytest2
-snapshots are new on every run and fail on CI.
+creates. The template's own tests, including its shinytest2 tests, run only in
+the `app-template` CI job (`tools/testAppTemplate.R`). Their snapshots are new
+in every fresh app, and testthat fails new snapshots on CI, so the script runs
+each combo twice: first with `CI=false` to write snapshots, then with
+`CI=true` to check them.
 
 ## TypeScript tests
 
@@ -154,10 +157,15 @@ script.
 ## CI (`.github/workflows/R-CMD-check.yaml`)
 
 Triggers: pushes to `main` and `rc-**`, every PR, and a cron job on Mondays.
-It calls three reusable workflows from `rstudio/shiny-workflows@v1`:
+It calls three reusable workflows from `rstudio/shiny-workflows@v1`, plus one
+local job:
 
 - **R-CMD-check**: `rcmdcheck` with `--no-manual --as-cran`, `error-on: "warning"`. Matrix: macOS release; Windows release; Ubuntu 24.04 devel, release, and oldrel-1 to oldrel-4; plus a `check-depends-only` job (`_R_CHECK_DEPENDS_ONLY_=true`, so Suggests are absent and `skip_if_not_installed()` must guard every Suggests dependency). Windows oldrels and devel run only for packages with a `src/` dir, which shiny doesn't have. Every check run prints `testthat.Rout`, pass or fail.
 - **routine**: runs on R release and **can auto-commit to non-fork PR branches**. In order, it runs `usethis::use_tidy_description()`, then `devtools::document()` (DESCRIPTION, NAMESPACE, `man/`), then the README build (skipped because shiny has no README.Rmd), then oxipng on `man/figures/*.png`, then `npm ci` and `npm run build`. The build runs `checks` (lint with `--fix`, `build_types`, `test_types`, coverage, circular) and commits `inst/` and `srcts/` changes. Last, it runs the local `.github/shiny-workflows/routine.sh`, which runs `tools/documentation/checkDocsCurrent.sh`. That script **fails** if the roxygen docs or the re-exported htmltools docs are stale. It then syncs the `package.json` version and rebuilds. R code formatting (air) is off by default. On `push` events, and on PRs from forks, any new commit fails the job, so you must commit those changes yourself. There's no `.lintr` or `codecov.yml`, so the lint and coverage steps are skipped. Its `rc-v*` version and URL steps never commit (see `memory-bank/commitConventions.md`).
+- **app-template**: a local job, not a shared workflow. On Ubuntu with R
+  release, it runs `rstudio/shiny-workflows/setup-r-package@v1`, then
+  `Rscript tools/testAppTemplate.R`. It runs the browser-based template tests
+  once instead of in every R-CMD-check matrix entry.
 - **website**: builds the pkgdown site with pkgdown's default config (there is no root `_pkgdown.yml`; see `memory-bank/documentationStyle.md`). It only verifies on PRs and the cron job, and deploys to `gh-pages` on push.
 
 ## Pitfalls

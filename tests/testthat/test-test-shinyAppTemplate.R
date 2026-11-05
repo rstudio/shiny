@@ -1,6 +1,6 @@
-# Running the template's own tests would need a browser, and its shinytest2
-# tests only ever write new snapshots (each run uses a new temp app), which
-# fail on CI. So check the files each combo creates instead.
+# Check the files each combo creates. The template's own tests need a browser
+# and are slow, so they run in tools/testAppTemplate.R, in the `app-template`
+# CI job.
 
 # test all combos
 make_combos <- function(...) {

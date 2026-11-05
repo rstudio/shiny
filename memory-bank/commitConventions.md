@@ -49,7 +49,8 @@ fixed wording instead: `v1.13.0 release candidate (#4360)`,
   meaningful.
 - CI runs `.github/workflows/R-CMD-check.yaml` on pushes to `main` and
   `rc-**`, on all PRs, and weekly. It calls three shared workflows from
-  `rstudio/shiny-workflows@v1`: `website`, `routine`, and `R-CMD-check`.
+  `rstudio/shiny-workflows@v1`: `website`, `routine`, and `R-CMD-check`,
+  plus a local `app-template` job.
 
 ## NEWS.md
 

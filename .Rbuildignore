@@ -41,3 +41,4 @@
 ^LICENSE\.md$
 ^docs$
 ^\.context$
+^\.npmrc$

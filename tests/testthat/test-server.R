@@ -109,3 +109,33 @@ test_that("ShinySession$dispatch() reports an unknown method once (#4439)", {
   dispatch(list(method = "known", args = list(3), tag = 2))
   expect_equal(responses, list(list(value = 6)))
 })
+
+test_that("a websocket message whose method isn't a single string is rejected (#4439)", {
+  server_runs <- 0
+  handlers <- createAppHandlers(NULL, function() {
+    function(input, output) server_runs <<- server_runs + 1
+  })
+
+  on_message <- NULL
+  handlers$ws(list(
+    request = list(),
+    send = function(json) invisible(NULL),
+    close = function() invisible(NULL),
+    onMessage = function(f) on_message <<- f,
+    onClose = function(f) invisible(NULL)
+  ))
+  withr::defer({
+    for (token in appsByToken$keys()) appsByToken$remove(token)
+  })
+
+  # withLogErrors() logs the error as a warning, then rethrows it
+  send <- function(json) suppressWarnings(on_message(FALSE, json))
+
+  send('{"method":"init","data":{}}')
+  expect_equal(server_runs, 1)
+
+  # A number would pick `init` by position in `switch()`
+  expect_error(send('{"method":1,"data":{}}'), "single string")
+  expect_error(send('{"method":["a","b"],"data":{}}'), "single string")
+  expect_equal(server_runs, 1)
+})

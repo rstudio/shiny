@@ -162,7 +162,6 @@ It calls three reusable workflows from `rstudio/shiny-workflows@v1`:
 
 ## Pitfalls
 
-- `test-test-shinyAppTemplate.R` starts with an unconditional `testthat::skip("Refactor test for next release")`, so the app template and `runTests()` round-trip are currently untested.
 - shinytest2 tests never run on Linux or Windows CI, only on the macOS job. A JS regression that only shows up on other platforms won't be caught.
 - Inside `launch_test_app()`, omitting `library(shiny)` makes the app run the *installed* shiny, not your working copy.
 - `test-otel-error.R` calls `skip_if(length(traces) > 3, ...)`. Spans leak between files when the whole suite runs, so these assertions may silently skip. To see them for real, run `testthat::test_file(test_path("test-otel-error.R"))`.

@@ -1791,7 +1791,8 @@ ShinySession <- R6Class(
       method <- paste('@', msg$method, sep='')
       func <- self[[method]]
       if (!is.function(func)) {
-        return(private$sendErrorResponse(msg, paste('Unknown method', msg$method)))
+        private$sendErrorResponse(msg, paste('Unknown method', msg$method))
+        return()
       }
 
       value <- try(do.call(func, as.list(append(msg$args, msg$blobs))),

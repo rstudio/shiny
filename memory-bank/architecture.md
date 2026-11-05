@@ -73,7 +73,10 @@ Implementation: `R/server.R`, `R/shiny.R` (`ShinySession`), `R/runapp.R`,
   serviceApp()`. `startApp()` is non-blocking: it returns a `ShinyAppHandle`
   and drives `serviceNonBlocking()` with `later`. `serviceApp()` runs
   `timerCallbacks$executeElapsed()`, `flushReact()`, `flushPendingSessions()`,
-  then httpuv `service()`, then flushes again.
+  then httpuv `service()`, then flushes again. An error escaping
+  `serviceApp()` stops `runApp()` for every session, so
+  `flushPendingSessions()` closes just the session whose `flushOutput()`
+  errors (e.g. from an `onFlushed()` callback).
 - **Handlers:** `createAppHandlers()` returns `http` (`joinHandlers()` over
   `sessionHandler`, the app handler, `www/`, resource paths and reactlog) and
   `ws`. Each websocket gets a `ShinySession$new(ws)`, which is registered in

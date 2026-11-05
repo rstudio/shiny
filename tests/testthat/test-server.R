@@ -56,15 +56,33 @@ test_that("startHttpuvApp() with quiet = TRUE binds without announcing (#4400)",
   expect_s3_class(server, "mock_server")
 })
 
-test_that("flushPendingSessions() closes a session whose flush errors (#4439)", {
-  closed <- FALSE
-  session <- list(
-    flushOutput = function() stop("boom"),
-    close = function() closed <<- TRUE
-  )
-  appsNeedingFlush$set("test-flush-error", session)
-  withr::defer(appsNeedingFlush$remove("test-flush-error"))
+test_that("flushPendingSessions() closes only the session whose flush errors (#4439)", {
+  # Without the error handler, the error escapes serviceApp() and stops
+  # runApp(), which ends every session. So the healthy session must still
+  # be flushed and left open.
+  flushed <- character()
+  closed <- character()
+  fake_session <- function(name, flush) {
+    list(
+      flushOutput = function() {
+        flushed <<- c(flushed, name)
+        flush()
+      },
+      close = function() closed <<- c(closed, name)
+    )
+  }
+  appsNeedingFlush$set("test-flush-good", fake_session("good", function() NULL))
+  appsNeedingFlush$set("test-flush-bad", fake_session("bad", function() stop("boom")))
+  withr::defer({
+    appsNeedingFlush$remove("test-flush-good")
+    appsNeedingFlush$remove("test-flush-bad")
+  })
+  # The bad session must be flushed first, or the escaping error would not
+  # stop the good one from being flushed.
+  ours <- intersect(appsNeedingFlush$keys(), c("test-flush-bad", "test-flush-good"))
+  expect_equal(ours, c("test-flush-bad", "test-flush-good"))
 
   expect_no_error(flushPendingSessions())
-  expect_true(closed)
+  expect_setequal(flushed, c("bad", "good"))
+  expect_equal(closed, "bad")
 })

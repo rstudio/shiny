@@ -3,20 +3,39 @@ library(magrittr)
 version <- "3.7.1"
 version_types <- "3.5.32"
 
-jq_cdn_download <- function(version) {
+# Install first, then vendor out of `node_modules` rather than off the CDN, so
+# that `package.json` is the single record of which version ships. That is what
+# lets the `license-note` step in the routine workflow report jQuery's license
+# automatically -- see LICENSE.note.
+withr::with_dir(
+  rprojroot::find_package_root_file(),
+  {
+    exit_code <- system(paste0("npm install --save-dev --save-exact jquery@", version))
+    if (exit_code != 0) stop("npm could not install jquery")
+
+    exit_code <- system(paste0("npm install --save --save-exact @types/jquery@", version_types))
+    if (exit_code != 0) stop("npm could not install @types/jquery")
+  }
+)
+
+# The npm `dist/` files are byte-identical to the CDN ones, apart from the
+# source map comment that jQuery strips from its CDN builds and that this
+# script appends below.
+jq_copy_dist <- function() {
   Map(
-    src = c(".min.js", ".min.map", ".js"),
-    dst = c(".min.js", ".min.js.map", ".js"),
+    src = c("jquery.min.js", "jquery.min.map", "jquery.js"),
+    dst = c("jquery.min.js", "jquery.min.js.map", "jquery.js"),
     f = function(src, dst) {
-      download.file(
-        file.path("https://code.jquery.com", paste0("jquery-", version, src)),
-        file.path("inst", "www", "shared",  paste0("jquery", dst))
+      file.copy(
+        rprojroot::find_package_root_file("node_modules", "jquery", "dist", src),
+        file.path("inst", "www", "shared", dst),
+        overwrite = TRUE
       )
     }
   )
 }
 
-jq_cdn_download(version)
+jq_copy_dist()
 
 # Add in source map location
 # Required given comments in https://blog.jquery.com/2014/01/24/jquery-1-11-and-2-1-released/
@@ -49,16 +68,4 @@ writeLines(
     sprintf('version_jquery <- "%s"', version)
   ),
   rprojroot::find_package_root_file("R", "version_jquery.R")
-)
-
-# Update TypeScript installation
-withr::with_dir(
-  rprojroot::find_package_root_file(),
-  {
-    exit_code <- system(paste0("npm install --save-dev --save-exact jquery@", version))
-    if (exit_code != 0) stop("npm could not install jquery")
-
-    exit_code <- system(paste0("npm install --save --save-exact @types/jquery@", version_types))
-    if (exit_code != 0) stop("npm could not install @types/jquery")
-  }
 )

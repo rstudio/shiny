@@ -61,6 +61,7 @@ Other contributors:
   \item Sami Samhuri (Javascript strftime library) [contributor, copyright holder]
   \item  SpryMedia Limited (DataTables library) [contributor, copyright holder]
   \item Ivan Sagalaev (highlight.js library) [contributor, copyright holder]
+  \item  Google LLC (lit library) [contributor, copyright holder]
   \item R Core Team (tar implementation from R) [contributor, copyright holder]
 }
 

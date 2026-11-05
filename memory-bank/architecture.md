@@ -86,7 +86,8 @@ Implementation: `R/server.R`, `R/shiny.R` (`ShinySession`), `R/runapp.R`,
   - `init`: run the server function inside `otel_span_session_start()`.
   - `update`: `manageInputs()`.
   - anything else: `ShinySession$dispatch()`, which calls `self[["@<method>"]]`
-    and sends a `response`.
+    and sends a `response`. If the method returns a promise, the response is
+    sent when it settles (used by `@waitForFlush`; see `webMcp.md`).
 - **Inputs are cycle-gated:** `manageInputs()` goes through
   `cycleStartAction()`. It applies immediately only when `busyCount == 0`.
   Otherwise `decrementBusyCount()` reaching 0 schedules `startCycle()` through
@@ -199,6 +200,8 @@ JS side, in `srcts/src/bindings/`:
   (registration order in `_init()`).
 - `ShinyClass` (`srcts/src/shiny/index.ts`) becomes `window.Shiny` in
   `srcts/src/initialize/index.ts`.
+- `Shiny.drive` and `Shiny.webmcp` read and drive bound inputs and outputs
+  for agents and other JS callers; see `webMcp.md`.
 
 ## Async: Promises, ExtendedTask, bindCache, bindEvent
 

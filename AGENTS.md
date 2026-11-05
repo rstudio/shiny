@@ -42,6 +42,7 @@ Start with:
 - `memory-bank/documentationStyle.md` - roxygen, pkgdown reference index, `NEWS.md`
 - `memory-bank/commitConventions.md` - commit messages, PR titles, merging
 - `memory-bank/agentSkills.md` - the bundled `inst/skills/shiny-for-r/` skill
+- `memory-bank/webMcp.md` - `Shiny.drive`, `Shiny.webmcp` and the flush barrier (R-only; no py-shiny follow-up)
 
 ## Bundled Agent Skill
 

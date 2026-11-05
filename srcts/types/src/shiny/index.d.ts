@@ -10,6 +10,7 @@ import { removeNotification, showNotification } from "./notifications";
 import { hideReconnectDialog, showReconnectDialog } from "./reconnectDialog";
 import { renderContent, renderContentAsync, renderDependencies, renderDependenciesAsync, renderHtml, renderHtmlAsync } from "./render";
 import { addCustomMessageHandler, ShinyApp, type Handler } from "./shinyapp";
+import { ShinyWebMCP } from "./webmcp";
 declare class ShinyClass {
     version: string;
     $escape: typeof $escape;
@@ -37,6 +38,7 @@ declare class ShinyClass {
     renderHtml: typeof renderHtml;
     addCustomMessageHandler: typeof addCustomMessageHandler;
     drive: ShinyDrive;
+    webmcp: ShinyWebMCP;
     createSocket?: () => WebSocket;
     user?: string;
     progressHandlers?: ShinyApp["progressHandlers"];

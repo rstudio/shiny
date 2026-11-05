@@ -128,6 +128,7 @@ class ShinyApp {
   config: {
     workerId: string;
     sessionId: string;
+    webmcp?: boolean;
   } | null = null;
 
   // Cached input values
@@ -873,10 +874,16 @@ class ShinyApp {
 
     addMessageHandler(
       "config",
-      (message: { workerId: string; sessionId: string; user?: string }) => {
+      (message: {
+        workerId: string;
+        sessionId: string;
+        user?: string;
+        webmcp?: boolean;
+      }) => {
         this.config = {
           workerId: message.workerId,
           sessionId: message.sessionId,
+          webmcp: message.webmcp,
         };
         if (message.user) setShinyUser(message.user);
         $(document).trigger("shiny:sessioninitialized");

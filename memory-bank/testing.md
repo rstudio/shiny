@@ -175,7 +175,7 @@ local job:
 - `test-otel-error.R` calls `skip_if(length(traces) > 3, ...)`. Spans leak between files when the whole suite runs, so these assertions may silently skip. To see them for real, run `testthat::test_file(test_path("test-otel-error.R"))`.
 - `test-otel-reactive-update.R` defines its own `create_mock_otel_span(name, attributes, ended)` that shadows the one in `helper-otel.R`, which has a different signature.
 - `with_shiny_otel_record()` errors with a `stopifnot` failure outside testthat, because it checks `Sys.getenv("TESTTHAT")`.
-- `test-built-files.R` checks that the installed `www/shared/shiny.js` has no `{{ VERSION }}` placeholder. After editing `srcts/`, run `npm run build`. Routine will otherwise commit the built JS for you on a PR, or fail on a push.
+- `test-built-files.R` checks that the installed `www/shared/shiny.js` and `shiny.min.js` start with the banner for the `DESCRIPTION` version, so it fails after a version bump until you run `npm run build`. Routine will otherwise commit the built JS for you on a PR, or fail on a push.
 - `test-pkgdown.R` only checks something when `tools/documentation/checkPkgdown.R` is reachable (a source checkout). Under `R CMD check` it skips. A new export missing from `tools/documentation/pkgdown.yml` is caught by routine's `checkDocsCurrent.sh`, not by `R CMD check`.
 - `test-devmode.R`'s message test runs only when `CI=true`, so it's skipped locally.
 - `devtools::test()` sets `NOT_CRAN=true`, so `skip_on_cran()` tests do run locally. Under `R CMD check --as-cran` without `NOT_CRAN`, those files are skipped entirely (for example all of `test-timer.R`).

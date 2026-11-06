@@ -65,7 +65,8 @@ reviewing `snapshot_review()`. CI uploads failed snapshots as an artifact
 - `skip_on_os("windows")`: in `test-shinywrappers.R`, `test-busy-indication.R`, `test-utils.R` (UTF-8).
 - `skip_if(!isTRUE(as.logical(Sys.getenv("CI"))), ...)`: in `test-devmode.R` (only runs in CI).
 - `skip_if_shiny_otel_tracer_is_enabled()`: stack-trace tests, which differ when otel is active.
-- `skip_if_not_shinytest2()`: skip on CRAN, skip on Windows/Linux/Solaris/emscripten, skip if shinytest2 is missing. **Browser tests run only on macOS.**
+- `skip_if_not_shinytest2()`: skip on CRAN, skip on Windows/Solaris/emscripten, skip if shinytest2 is missing. Browser tests run on macOS and Linux. They take no screenshots, so results don't depend on the OS.
+- Browser tests run the app in a subprocess. Under `devtools::test()` that subprocess loads the **installed** shiny, not your working tree, so a test for a new fix fails until you `devtools::install()`. `devtools::load_all()` then `testthat::test_file()` uses the working tree. CI installs the package first, so it is not affected.
 
 ## In-process server tests vs browser tests
 
@@ -170,7 +171,7 @@ local job:
 
 ## Pitfalls
 
-- shinytest2 tests never run on Linux or Windows CI, only on the macOS job. A JS regression that only shows up on other platforms won't be caught.
+- shinytest2 tests never run on Windows CI, only on the macOS and Linux jobs. A JS regression that only shows up on Windows won't be caught.
 - Inside `launch_test_app()`, omitting `library(shiny)` makes the app run the *installed* shiny, not your working copy.
 - `test-otel-error.R` calls `skip_if(length(traces) > 3, ...)`. Spans leak between files when the whole suite runs, so these assertions may silently skip. To see them for real, run `testthat::test_file(test_path("test-otel-error.R"))`.
 - `test-otel-reactive-update.R` defines its own `create_mock_otel_span(name, attributes, ended)` that shadows the one in `helper-otel.R`, which has a different signature.

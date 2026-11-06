@@ -147,11 +147,10 @@ The JavaScript community likes to build many small, effective packages that do m
 
 All config files are located in the root folder to avoid opening two separate VS Code projects.
 
-* `.eslintrc.yml`
+* `eslint.config.mjs`
   * Used with `eslint` and `prettier` to determine how the TypeScript files should be formatted and which lint failures should cause warnings, errors, or be ignored.
-* `.prettierrc.yml`
-  * Used by `prettier` to know how to adjust code when a file is saved in VSCode or within `eslint`'s linting process.
 * `package.json`
+  * The `prettier` key holds the `prettier` config, used to adjust code when a file is saved in VSCode or within `eslint`'s linting process.
   * Contains useful scripts that can be run by `npm` via `npm run SCRIPTNAME`.
   * The scripts described below are intended for developer use. All other scripts are means to an end.
     * `npm run watch` - Watch `srcts/src` for changes and rebuild the JavaScript files.

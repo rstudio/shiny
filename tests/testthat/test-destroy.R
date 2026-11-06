@@ -489,9 +489,24 @@ test_that("session$destroy(id) on an unknown id is a harmless no-op", {
 test_that("session$destroy(namespace) validates the namespace argument", {
   session <- MockShinySession$new()
   expect_error(session$destroy(1), "Invalid `namespace`")
-  expect_error(session$destroy(c("a", "b")), "Invalid `namespace`")
+  expect_error(session$destroy(c("a", NA)), "Invalid `namespace`")
   expect_error(session$destroy(""), "Invalid `namespace`")
   expect_error(session$destroy(NA_character_), "Invalid `namespace`")
+})
+
+test_that("a vector module id works like NS() and can be destroyed (#4439)", {
+  mod <- function(id) moduleServer(id, function(input, output, session) {})
+  testServer(mod, args = list(id = c("a", "b")), {
+    expect_equal(session$ns("x"), NS(c("a", "b"), "x"))
+  })
+
+  session <- MockShinySession$new()
+  scope <- session$makeScope(c("a", "b"))
+  expect_equal(scope$ns("x"), "a-b-x")
+  destroyed <- FALSE
+  scope$onDestroy(function() destroyed <<- TRUE)
+  session$destroy(c("a", "b"))
+  expect_true(destroyed)
 })
 
 test_that("makeScope() accepts a NULL or character(0) root namespace and leaves ids un-prefixed", {

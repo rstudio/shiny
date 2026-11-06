@@ -1,6 +1,6 @@
 # shiny (development version)
 
-* Module ids that are character vectors, such as `c("a", "b")`, work again in `callModule()`, `moduleServer()`, `testServer()` and `session$destroy()`. Since 1.14.0 they failed with ``Invalid `namespace` ``. They are joined the same way `NS()` joins them. (#4447)
+* Module ids that are character vectors, such as `c("a", "b")`, work again in `callModule()`, `moduleServer()`, `testServer()` and `session$destroy()`. Since 1.14.0 they failed with ``Invalid `namespace` ``. They are joined the same way `NS()` joins them, so `c("a", "b")` becomes `"a-b"`. (#4447)
 
 * If flushing a session's outputs throws an unhandled error, that session is now closed as intended, instead of the error escaping the server loop. (#4444)
 

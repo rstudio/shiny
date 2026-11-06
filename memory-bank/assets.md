@@ -63,8 +63,8 @@ npm run watch          # bundle_shiny -- --watch  (esbuild context.watch(), no c
   - `test_types`: `tsx --test` on every `srcts/src/**/__tests__/*.test.ts`
   - `coverage`: `type-coverage -p tsconfig.json --at-least 90`
   - `circular`: `npx --yes dpdm --transform ./srcts/src/index.ts`
-- `coverage_detailed` is not part of `checks`, and it is currently broken:
-  it runs `npx --yes type-check`, a different package from `type-coverage`.
+- `coverage_detailed` (`type-coverage --detail`) is not part of `checks`; it
+  lists each untyped location.
 - The `_jquery.ts` check is not part of `checks` either; only `bundle_shiny`
   runs it, so `npm run checks` can pass while the build fails it.
 

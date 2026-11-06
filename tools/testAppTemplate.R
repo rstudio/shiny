@@ -8,6 +8,10 @@
 
 library(shiny)
 
+# Chrome can take more than chromote's default 10 seconds to start on a cold
+# CI runner
+options(chromote.timeout = 60)
+
 # Every `examples` combo that includes tests
 combos <- list(
   "all",

@@ -157,7 +157,7 @@ turned into URLs by `createWebDependency()` (`R/html-deps.R`, uses `addResourceP
 - `R/bootstrap.R`: `bootstrapLib()` / `bootstrapDependency()`, `dataTableDependency`.
 - `R/input-select.R`: `selectizeDependency()`, `selectizeStaticDependency()`, `selectizeScripts()`.
 - `R/input-slider.R`: `ionRangeSliderDependency()` (+ `strftime`), `ionRangeSliderDependencyCSS()`.
-- `R/input-date.R`: `datePickerDependency()` (adds a `noConflict` head script → `$.fn.bsDatepicker`), `datePickerCSS()`.
+- `R/input-date.R`: `datePickerDependency()` (adds a `noConflict` head script → `$.fn.bsDatepicker`), `datePickerScripts()` (the unminified file has no locales, so it also loads every `js/locales/` file), `datePickerCSS()`.
 - `R/jqueryui.R`: `jqueryuiDependency()`; `R/showcase.R`: `showcaseHead()` (highlight.js + `shiny-showcase.*`).
 - `R/middleware.R` injects `shared/shiny-autoreload.js` directly as a `<script>`.
 

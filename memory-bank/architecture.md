@@ -89,7 +89,11 @@ Implementation: `R/server.R`, `R/shiny.R` (`ShinySession`), `R/runapp.R`,
   - `init`: run the server function inside `otel_span_session_start()`.
   - `update`: `manageInputs()`.
   - anything else: `ShinySession$dispatch()`, which calls `self[["@<method>"]]`
-    and sends a `response`.
+    and sends a `response`, or an `Unknown method` error response when there
+    is no such method.
+  - A `method` that is not a single string is rejected with an error (logged
+    by `withLogErrors()`) before the `switch()`, which would otherwise pick a
+    branch by position for a number (`1` reruns `init`).
 - **Inputs are cycle-gated:** `manageInputs()` goes through
   `cycleStartAction()`. It applies immediately only when `busyCount == 0`.
   Otherwise `decrementBusyCount()` reaching 0 schedules `startCycle()` through

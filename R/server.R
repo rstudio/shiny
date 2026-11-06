@@ -203,6 +203,12 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
 
           msg <- decodeMessage(msg)
 
+          # `switch()` below picks a branch by position when given a number
+          # (`1` would rerun `init`), so the method must be a single string.
+          if (!is.character(msg$method) || length(msg$method) != 1L) {
+            stop("Invalid message: `method` must be a single string.")
+          }
+
           # Set up a restore context from .clientdata_url_search before
           # handling all the input values, because the restore context may be
           # used by an input handler (like the one for "shiny.file"). This

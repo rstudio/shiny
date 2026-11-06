@@ -218,3 +218,21 @@ test_that("Multiple ExtendedTask invocations use same is_recording_otel value", 
     )
   })
 })
+
+test_that("ExtendedTask logs the add-to-queue label when queueing (#4439)", {
+  msgs <- character()
+  local_mocked_bindings(
+    otel_log = function(msg, ...) msgs <<- c(msgs, msg)
+  )
+
+  withReactiveDomain(MockShinySession$new(), {
+    task <- ExtendedTask$new(function() promises::promise(function(resolve, reject) {}))
+    isolate({
+      task$invoke()
+      task$invoke()
+    })
+  })
+
+  expect_length(msgs, 1)
+  expect_match(msgs, "add to queue")
+})

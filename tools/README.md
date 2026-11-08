@@ -34,7 +34,7 @@ To create a new patch:
 
 To create a new patch:
 
-1. Make any necessary changes to files in `inst/www/shared/ion.rangeSlider`
+1. Make any necessary changes to files in `inst/www/shared/ionrangeslider`
 1. **Do not commit your changes.**
 1. Instead, create a patch with a command like `git diff > tools/ion.rangeSlider-patches/0004-a-description.patch`. Patches are applied in alphabetic order (per `list.files`), so you should name your patch based on the last one in `tools/ion.rangeSlider-patches` so that it's applied last.
 1. Run `updateIonRangeSlider.R` to download the library and apply patches.
@@ -42,14 +42,6 @@ To create a new patch:
 1. Run `devtools::document()`.
 1. `git add` the new `.patch` and any resulting changes
 
-
-## Updating Font-Awesome
-
-1. Edit `updateFontAwesome.R` to use the new version, and then run it. This will download and copy the files to the relevant locations.
-1. Update the "font-awesome" htmlDependency in `R/bootstrap.R` to reflect the new version.
-1. Update the documentation for the `icon()` function in `R/bootstrap.R` to reflect the new version.
-1. Run `devtools::document()`.
-1. Commit the changes.
 
 ## Updating jQuery
 

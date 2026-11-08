@@ -342,7 +342,7 @@ MockShinySession <- R6Class(
           call. = FALSE
         )
       }
-      validateNamespace(namespace)
+      namespace <- validateNamespace(namespace)
       self$makeScope(namespace)$destroy()
     },
 
@@ -561,7 +561,7 @@ MockShinySession <- R6Class(
     #' @param namespace Character vector indicating a namespace.
     #' @return A new session proxy.
     makeScope = function(namespace) {
-      validateNamespace(namespace, allow_root = TRUE)
+      namespace <- validateNamespace(namespace, allow_root = TRUE)
       ns <- NS(namespace)
       # The scope's own namespace, captured because the proxy `destroy()` below
       # has a `namespace` parameter that would otherwise shadow it.
@@ -593,7 +593,7 @@ MockShinySession <- R6Class(
             private$invokeDestroyCallbacks(selfNamespace)
           } else {
             # Tear down a named child scope.
-            validateNamespace(namespace)
+            namespace <- validateNamespace(namespace)
             self$makeScope(ns(namespace))$destroy()
           }
         }
@@ -796,34 +796,19 @@ MockShinySession <- R6Class(
       }
 
       nsPrefix <- namespace
-      allNs <- private$destroyCallbacksByNs$keys()
+      runDestroyCallbacks(private$destroyCallbacksByNs, nsPrefix)
 
-      if (!isRoot) {
-        nsPrefixWithSep <- paste0(nsPrefix, ns.sep)
-        matching <- allNs[allNs == nsPrefix | startsWith(allNs, nsPrefixWithSep)]
-      } else {
-        matching <- allNs
-      }
-
-      if (length(matching) > 0L) {
-        # Sort deepest-first (most separators first); root sentinel always last
-        depths <- nchar(gsub(paste0("[^", ns.sep, "]"), "", matching))
-        isRootSentinel <- matching == destroyNsRoot
-        matching <- matching[order(-depths, isRootSentinel, matching)]
-
-        for (ns in matching) {
-          cbs <- private$destroyCallbacksByNs$get(ns)
-          if (!is.null(cbs)) {
-            cbs$invoke(onError = printError)
-          }
-          private$destroyCallbacksByNs$remove(ns)
-        }
-      }
-
-      # Clean up namespaced inputs
+      # Clean up namespaced inputs, outputs and downloads. The mock has no
+      # reactive clientData or file routes to clean up.
       if (!isRoot) {
         nsPrefixWithSep <- paste0(nsPrefix, ns.sep)
         private$.input$destroyByPrefix(nsPrefixWithSep)
+        outNames <- rlang::names2(private$outs)
+        private$outs[startsWith(outNames, nsPrefixWithSep)] <- NULL
+        fileNames <- private$file_generators$keys()
+        private$file_generators$remove(
+          fileNames[startsWith(fileNames, self$ns(nsPrefixWithSep))]
+        )
       }
     },
 
@@ -845,7 +830,7 @@ MockShinySession <- R6Class(
       file <- file.path(tmpd, download$filename())
       download$content(file)
       if (!file.exists(file))
-        error("downloadHandler for ", name, " did not write a file.")
+        stop("downloadHandler for ", name, " did not write a file.", call. = FALSE)
       file
     },
 

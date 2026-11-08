@@ -122,7 +122,7 @@ decodeMessage <- function(data) {
   }
 
   mainMessage <- decodeMessage(parts[[1]])
-  mainMessage$blobs <- parts[2:length(parts)]
+  mainMessage$blobs <- parts[-1]
   return(mainMessage)
 }
 
@@ -202,6 +202,12 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
             return()
 
           msg <- decodeMessage(msg)
+
+          # `switch()` below picks a branch by position when given a number
+          # (`1` would rerun `init`), so the method must be a single string.
+          if (!is.character(msg$method) || length(msg$method) != 1L) {
+            stop("Invalid message: `method` must be a single string.")
+          }
 
           # Set up a restore context from .clientdata_url_search before
           # handling all the input values, because the restore context may be

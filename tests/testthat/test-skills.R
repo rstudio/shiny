@@ -50,10 +50,15 @@ test_that("every R chunk in the skill parses", {
   files <- list.files(skill_dir(), pattern = "\\.md$", recursive = TRUE, full.names = TRUE)
   for (f in files) {
     lines <- readLines(f)
-    starts <- grep("^```r\\s*$", lines)
-    ends <- grep("^```\\s*$", lines)
+    # ```r, ```R and ```{r ...} chunks, possibly indented (e.g. inside a list)
+    starts <- grep("^\\s*```(r|R|\\{[rR]\\b[^}]*\\})\\s*$", lines)
+    ends <- grep("^\\s*```\\s*$", lines)
     for (s in starts) {
       e <- ends[ends > s][1]
+      if (is.na(e)) {
+        fail(sprintf("%s line %d: R chunk is never closed", basename(f), s))
+        next
+      }
       # An empty chunk (``` immediately after ```r) has no body; `(s + 1):(e -
       # 1)` would count backwards and grab the fences themselves.
       code <- if (e > s + 1) paste(lines[(s + 1):(e - 1)], collapse = "\n") else ""

@@ -32,9 +32,13 @@
 ^.ignore$
 ^eslint\.config\.mjs$
 ^_dev$
-^.claude$
+^\.claude$
+^\.agents$
+^AGENTS\.md$
+^memory-bank$
 ^README-npm\.md$
 ^CRAN-SUBMISSION$
 ^LICENSE\.md$
 ^docs$
 ^\.context$
+^\.npmrc$

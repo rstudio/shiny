@@ -19,3 +19,14 @@ jobs:
     uses: rstudio/shiny-workflows/.github/workflows/routine.yaml@v1
   R-CMD-check:
     uses: rstudio/shiny-workflows/.github/workflows/R-CMD-check.yaml@v1
+  app-template:
+    # Runs the tests that each shinyAppTemplate() combo writes, including its
+    # shinytest2 browser tests. They are slow, so they run once here instead
+    # of in every R-CMD-check OS and R version.
+    name: App template tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: rstudio/shiny-workflows/setup-r-package@v1
+      - name: Run the app template's tests
+        run: Rscript tools/testAppTemplate.R

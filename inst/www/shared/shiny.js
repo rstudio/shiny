@@ -5414,6 +5414,7 @@
         if (opts.priority === "event") {
           this._sendNow();
         } else if (!this.sendIsEnqueued) {
+          this.sendIsEnqueued = true;
           this.shinyapp.taskQueue.enqueue(() => {
             this.sendIsEnqueued = false;
             this._sendNow();

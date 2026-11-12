@@ -70,7 +70,7 @@ test_that("webMcpTool() refuses a `fun` that takes `...`", {
   )
   expect_error(
     webMcpTool("t", function(x, ...) x, "d", arguments = list(x = ellmer::type_string())),
-    "type_from_schema()",
+    "wrap it in a defined argument",
     fixed = TRUE
   )
 

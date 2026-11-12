@@ -142,10 +142,8 @@ webMcpTool <- function(
   params <- formals(fun)
   if ("..." %in% names(params)) {
     stop(
-      "`fun` can't take `...`: agents can only send the arguments listed in ",
-      "`arguments`, so name each one. For free-form data, use one argument ",
-      "of type `ellmer::type_from_schema()`, e.g. ",
-      "`'{\"type\": \"object\", \"additionalProperties\": true}'`.",
+      "`fun` can't take `...`. WebMCP can only send the keys listed in ",
+      "`arguments`. If free-form data is needed, wrap it in a defined argument.",
       call. = FALSE
     )
   }

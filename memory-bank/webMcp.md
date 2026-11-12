@@ -144,15 +144,19 @@ console warning.
 
 ## Tools defined in R (`R/webmcp-tools.R`)
 
-`webMcpTool(fun, name, description, arguments, value, annotations)` is
+`webMcpTool(name, fun, description, ..., arguments, value, annotations)` is
 shaped like `ellmer::tool()` but is shiny's own S3 object, so it can be
-documented and extended here. `fun` is called like a module server
-function: `fun(input, output, session, <args>)`, inside `isolate()` and
-`withReactiveDomain()`.
+documented and extended here. `name` comes first (like
+`registerInputHandler(type, fun)`); `...` must be empty, so the optional
+arguments are always named. `fun` takes only the agent's arguments
+(`do.call(fun, args)`), inside `isolate()` and `withReactiveDomain(scope)`, so
+`getDefaultReactiveDomain()` gives the calling (module) session and
+`session$input` its inputs. Outputs can't be read server-side; agents use
+`get_output`. `fun`'s formals without defaults must all have a type.
 
 - **Types:** `arguments` is a named list of ellmer types and `value` an
   `ellmer::type_object()` (`value` mirrors R's "Value" doc section; it becomes
-  WebMCP's `outputSchema`, and avoids clashing with the `output` object).
+  WebMCP's `outputSchema`).
   `webMcpTypeSchema()` turns them into JSON Schema itself, reading props with
   `S7::prop()` (`@` needs R >= 4.3). It doesn't use `ellmer:::as_json()`.
   ellmer and S7 are in Suggests, checked only when types are used.

@@ -11,11 +11,11 @@ app <- launch_test_app(function() {
 
   # Outside the server function: for every session
   registerWebMcpTool(webMcpTool(
-    function(input, output, session, column) {
+    "summarize",
+    function(column) {
       list(column = column, mean = mean(mtcars[[column]]))
     },
-    name = "summarize",
-    description = "Mean of one mtcars column.",
+    "Mean of one mtcars column.",
     arguments = list(column = ellmer::type_enum(c("mpg", "hp"))),
     value = ellmer::type_object(
       column = ellmer::type_string(),
@@ -28,12 +28,12 @@ app <- launch_test_app(function() {
     moduleServer(id, function(input, output, session) {
       # Inside a module: this session only, namespaced
       registerWebMcpTool(webMcpTool(
-        function(input, output, session, by) {
+        "add",
+        function(by) {
           updateNumericInput(session, "n", value = input$n + by)
           paste("Added", by)
         },
-        name = "add",
-        description = "Add to the counter.",
+        "Add to the counter.",
         arguments = list(by = ellmer::type_integer())
       ))
     })

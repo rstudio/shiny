@@ -26,8 +26,8 @@ built-in WebMCP tools. Does nothing unless \code{options(shiny.webmcp = TRUE)}.
 registered for every session that starts afterwards.
 \item \strong{Inside the server function or a module}, it is registered for that
 session only. In a module, the tool's name is prefixed with the module's
-namespace (\code{"filters-summarize"}), and \code{fun} gets the module's \code{input},
-\code{output} and \code{session}.
+namespace (\code{"filters-summarize"}), and \code{getDefaultReactiveDomain()}
+inside \code{fun} returns the module's session.
 }
 
 When an agent calls the tool, the browser sends the arguments to the server,
@@ -49,12 +49,12 @@ server <- function(input, output, session) {
   output$cars <- renderTable(cars())
 
   registerWebMcpTool(webMcpTool(
-    function(input, output, session, column) {
+    "summarize_shown_cars",
+    function(column) {
       x <- cars()[[column]]
       list(mean = mean(x), n = length(x))
     },
-    name = "summarize_shown_cars",
-    description = "Mean of one column for the cars shown in the table.",
+    "Mean of one column for the cars shown in the table.",
     arguments = list(column = ellmer::type_enum(names(mtcars)))
   ))
 }

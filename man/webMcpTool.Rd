@@ -5,23 +5,26 @@
 \title{Define a WebMCP tool in R}
 \usage{
 webMcpTool(
-  fun,
   name,
+  fun,
   description,
+  ...,
   arguments = list(),
   value = NULL,
   annotations = list()
 )
 }
 \arguments{
-\item{fun}{A function taking \code{input}, \code{output} and \code{session}, then one
-argument per entry of \code{arguments}. It returns a string (sent as text),
-a list (sent as JSON), or a promise of either.}
-
 \item{name}{The tool's name: letters, numbers, \verb{_}, \code{.} or \code{-}. Inside a
 module, \code{\link[=registerWebMcpTool]{registerWebMcpTool()}} prefixes it with the module's namespace.}
 
+\item{fun}{A function with one argument per entry of \code{arguments}. It
+returns a string (sent as text), a list (sent as JSON), or a promise of
+either.}
+
 \item{description}{What the tool does and when an agent should use it.}
+
+\item{...}{Must be empty. The arguments after it must be named.}
 
 \item{arguments}{A named list of ellmer types, one per argument of \code{fun}.
 Arguments with \code{required = FALSE} may be missing, in which case \code{fun}'s
@@ -43,9 +46,11 @@ A \code{shiny_webmcp_tool} object.
 Describes an R function that AI agents can call through WebMCP when
 \code{options(shiny.webmcp = TRUE)}. Pass the result to \code{\link[=registerWebMcpTool]{registerWebMcpTool()}}.
 
-Like a module server function, \code{fun} is called with the session's \code{input},
-\code{output} and \code{session}, followed by the arguments the agent sent. It runs
-inside \code{\link[=isolate]{isolate()}}, so it can read reactive values and inputs.
+\code{fun} is called with the arguments the agent sent. It runs inside
+\code{\link[=isolate]{isolate()}} with the calling session as the reactive domain, so it can read
+reactive values and inputs. Inside the server function, \code{fun} can use the
+server's \code{input} and \code{session} directly. Outside it, get the session with
+\code{getDefaultReactiveDomain()} and read inputs from \code{session$input}.
 
 The argument and value types use
 \href{https://ellmer.tidyverse.org/reference/type_boolean.html}{ellmer type specifications}
@@ -57,12 +62,12 @@ arrive as atomic vectors.
 \examples{
 \dontshow{if (rlang::is_installed("ellmer")) withAutoprint(\{ # examplesIf}
 summarize_column <- webMcpTool(
-  function(input, output, session, column) {
+  "summarize_column",
+  function(column) {
     x <- mtcars[[column]]
     list(mean = mean(x), min = min(x), max = max(x))
   },
-  name = "summarize_column",
-  description = "Summary statistics for one column of the mtcars data.",
+  "Summary statistics for one column of the mtcars data.",
   arguments = list(
     column = ellmer::type_enum(names(mtcars), "Column to summarize.")
   ),
@@ -72,6 +77,16 @@ summarize_column <- webMcpTool(
     max = ellmer::type_number()
   ),
   annotations = list(readOnlyHint = TRUE)
+)
+
+# Outside the server function, read inputs through the calling session
+current_cyl <- webMcpTool(
+  "current_cyl",
+  function() {
+    session <- getDefaultReactiveDomain()
+    paste("Cylinders selected:", session$input$cyl)
+  },
+  "The number of cylinders the user selected."
 )
 \dontshow{\}) # examplesIf}
 }

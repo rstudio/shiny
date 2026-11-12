@@ -1,6 +1,6 @@
 # shiny (development version)
 
-* Added experimental `webMcpTool()` and `registerWebMcpTool()` to define WebMCP tools in R. The tool's function is called like a module server function, with `input`, `output`, `session` and the agent's arguments, and its argument and return types are described with ellmer types, which are checked on every call. Register a tool outside the server function for every session, or inside the server function or a module for that session only. (#4480)
+* Added experimental `webMcpTool()` and `registerWebMcpTool()` to define WebMCP tools in R. The tool's function is called with the agent's arguments, and `getDefaultReactiveDomain()` inside it returns the calling session. Its argument and return types are described with ellmer types, which are checked on every call. Register a tool outside the server function for every session, or inside the server function or a module for that session only. (#4480)
 
 * Added experimental WebMCP support. With `options(shiny.webmcp = TRUE)` (or the environment variable `SHINY_WEBMCP=true`), the browser registers tools, built on `Shiny.drive`, that let an AI agent list and set inputs and read outputs. For browsers without built-in WebMCP, the page also loads a WebMCP polyfill from a CDN. The new `webMcpAccess()` marks an input or output as `"read-only"`, `"write-only"`, or `"exclude"` for agents. (#4470)
 

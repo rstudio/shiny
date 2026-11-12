@@ -6,9 +6,11 @@
 #' Describes an R function that AI agents can call through WebMCP when
 #' `options(shiny.webmcp = TRUE)`. Pass the result to [registerWebMcpTool()].
 #'
-#' Like a module server function, `fun` is called with the session's `input`,
-#' `output` and `session`, followed by the arguments the agent sent. It runs
-#' inside [isolate()], so it can read reactive values and inputs.
+#' `fun` is called with the arguments the agent sent. It runs inside
+#' [isolate()] with the calling session as the reactive domain, so it can read
+#' reactive values and inputs. Inside the server function, `fun` can use the
+#' server's `input` and `session` directly. Outside it, get the session with
+#' `getDefaultReactiveDomain()` and read inputs from `session$input`.
 #'
 #' The argument and value types use
 #' [ellmer type specifications](https://ellmer.tidyverse.org/reference/type_boolean.html)
@@ -17,12 +19,13 @@
 #' runs, and the return value before it is sent back. Arrays of scalars
 #' arrive as atomic vectors.
 #'
-#' @param fun A function taking `input`, `output` and `session`, then one
-#'   argument per entry of `arguments`. It returns a string (sent as text),
-#'   a list (sent as JSON), or a promise of either.
 #' @param name The tool's name: letters, numbers, `_`, `.` or `-`. Inside a
 #'   module, [registerWebMcpTool()] prefixes it with the module's namespace.
+#' @param fun A function with one argument per entry of `arguments`. It
+#'   returns a string (sent as text), a list (sent as JSON), or a promise of
+#'   either.
 #' @param description What the tool does and when an agent should use it.
+#' @param ... Must be empty. The arguments after it must be named.
 #' @param arguments A named list of ellmer types, one per argument of `fun`.
 #'   Arguments with `required = FALSE` may be missing, in which case `fun`'s
 #'   default is used.
@@ -36,12 +39,12 @@
 #' @seealso [registerWebMcpTool()], [webMcpAccess()]
 #' @examplesIf rlang::is_installed("ellmer")
 #' summarize_column <- webMcpTool(
-#'   function(input, output, session, column) {
+#'   "summarize_column",
+#'   function(column) {
 #'     x <- mtcars[[column]]
 #'     list(mean = mean(x), min = min(x), max = max(x))
 #'   },
-#'   name = "summarize_column",
-#'   description = "Summary statistics for one column of the mtcars data.",
+#'   "Summary statistics for one column of the mtcars data.",
 #'   arguments = list(
 #'     column = ellmer::type_enum(names(mtcars), "Column to summarize.")
 #'   ),
@@ -52,23 +55,35 @@
 #'   ),
 #'   annotations = list(readOnlyHint = TRUE)
 #' )
+#'
+#' # Outside the server function, read inputs through the calling session
+#' current_cyl <- webMcpTool(
+#'   "current_cyl",
+#'   function() {
+#'     session <- getDefaultReactiveDomain()
+#'     paste("Cylinders selected:", session$input$cyl)
+#'   },
+#'   "The number of cylinders the user selected."
+#' )
 #' @export
 webMcpTool <- function(
-  fun,
   name,
+  fun,
   description,
+  ...,
   arguments = list(),
   value = NULL,
   annotations = list()
 ) {
-  if (!is.function(fun)) {
-    stop("`fun` must be a function.", call. = FALSE)
-  }
+  rlang::check_dots_empty()
   if (!rlang::is_string(name) || !grepl("^[A-Za-z0-9_.-]{1,128}$", name)) {
     stop(
       "`name` must be a string of letters, numbers, `_`, `.` or `-`.",
       call. = FALSE
     )
+  }
+  if (!is.function(fun)) {
+    stop("`fun` must be a function.", call. = FALSE)
   }
   if (!rlang::is_string(description)) {
     stop("`description` must be a string.", call. = FALSE)
@@ -91,28 +106,32 @@ webMcpTool <- function(
     stop("`annotations` must be a named list.", call. = FALSE)
   }
 
-  formalNames <- names(formals(fun))
-  if (!identical(formalNames[1:3], c("input", "output", "session"))) {
-    stop(
-      "`fun` must take `input`, `output` and `session` as its first three ",
-      "arguments, like a module server function.",
-      call. = FALSE
-    )
-  }
-  if (!"..." %in% formalNames) {
-    missingFormals <- setdiff(names(arguments), formalNames)
-    if (length(missingFormals) > 0) {
+  # Every argument needs a formal in `fun`, and every formal without a default
+  # needs a type (or the agent could never supply it)
+  params <- formals(fun)
+  if (!"..." %in% names(params)) {
+    untaken <- setdiff(names(arguments), names(params))
+    if (length(untaken) > 0) {
       stop(
-        "`fun` has no argument for: ", paste(missingFormals, collapse = ", "),
+        "`fun` has no argument for: ", paste(untaken, collapse = ", "),
         call. = FALSE
       )
     }
   }
+  noDefault <- names(params)[vapply(params, rlang::is_missing, logical(1))]
+  untyped <- setdiff(noDefault, c(names(arguments), "..."))
+  if (length(untyped) > 0) {
+    stop(
+      "`arguments` has no type for `fun`'s argument: ",
+      paste(untyped, collapse = ", "),
+      call. = FALSE
+    )
+  }
 
   structure(
     list(
-      fun = fun,
       name = name,
+      fun = fun,
       description = description,
       arguments = arguments,
       value = value,
@@ -143,8 +162,8 @@ print.shiny_webmcp_tool <- function(x, ...) {
 #'   registered for every session that starts afterwards.
 #' * **Inside the server function or a module**, it is registered for that
 #'   session only. In a module, the tool's name is prefixed with the module's
-#'   namespace (`"filters-summarize"`), and `fun` gets the module's `input`,
-#'   `output` and `session`.
+#'   namespace (`"filters-summarize"`), and `getDefaultReactiveDomain()`
+#'   inside `fun` returns the module's session.
 #'
 #' When an agent calls the tool, the browser sends the arguments to the server,
 #' where `fun` runs. Treat the arguments like inputs: anyone with the browser's
@@ -171,12 +190,12 @@ print.shiny_webmcp_tool <- function(x, ...) {
 #'   output$cars <- renderTable(cars())
 #'
 #'   registerWebMcpTool(webMcpTool(
-#'     function(input, output, session, column) {
+#'     "summarize_shown_cars",
+#'     function(column) {
 #'       x <- cars()[[column]]
 #'       list(mean = mean(x), n = length(x))
 #'     },
-#'     name = "summarize_shown_cars",
-#'     description = "Mean of one column for the cars shown in the table.",
+#'     "Mean of one column for the cars shown in the table.",
 #'     arguments = list(column = ellmer::type_enum(names(mtcars)))
 #'   ))
 #' }
@@ -284,12 +303,7 @@ webMcpCall <- function(session, name, args) {
   }
 
   hybrid_chain(
-    withReactiveDomain(scope, isolate(
-      do.call(tool$fun, c(
-        list(input = scope$input, output = scope$output, session = scope),
-        args
-      ))
-    )),
+    withReactiveDomain(scope, isolate(do.call(tool$fun, args))),
     function(result) {
       if (is.null(tool$value)) return(result)
       tryCatch(

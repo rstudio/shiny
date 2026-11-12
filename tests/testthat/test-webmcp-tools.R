@@ -295,6 +295,36 @@ test_that("a tool changes what the app shows through a reactive value", {
   )
 })
 
+test_that("open objects never add parameters to `fun`", {
+  # `additionalProperties: true` is only allowed inside a declared argument.
+  # The top level is always closed, and R enforces it even when the browser's
+  # check is skipped (e.g. a direct `@webmcpCall`).
+  withr::local_options(shiny.webmcp = TRUE)
+  local_mocked_bindings(sendWebMcpTools = function(...) NULL)
+  session <- MockShinySession$new()
+  withr::defer(session$close())
+
+  registerWebMcpTool(session = session, webMcpTool(
+    "filter_rows",
+    function(filters, input) list(args = names(filters)),
+    "d",
+    arguments = list(filters = ellmer::type_from_schema(
+      '{"type": "object", "additionalProperties": true}'
+    ))
+  ))
+  name <- session$ns("filter_rows")
+  expect_false(webMcpToolInfo(webMcpSessionTools[[session$token]][[name]]$tool, name)$inputSchema$additionalProperties)
+
+  # Free-form keys stay inside `filters`
+  expect_equal(
+    webMcpCall(session, name, list(filters = list(cyl = 6, session = "x"))),
+    list(args = c("cyl", "session"))
+  )
+  # Anything else at the top level is refused, including the reserved names
+  expect_error(webMcpCall(session, name, list(filters = list(), cyl = 6)), "Unknown parameter `cyl`")
+  expect_error(webMcpCall(session, name, list(filters = list(), input = list())), "Unknown parameter `input`")
+})
+
 test_that("webMcpCall() supports promises", {
   skip_if_not_installed("later")
   withr::local_options(shiny.webmcp = TRUE)

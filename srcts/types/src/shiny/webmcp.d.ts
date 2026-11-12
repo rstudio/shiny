@@ -34,10 +34,11 @@ declare class ShinyWebMCP extends EventTarget {
     unregisterTool(name: string): void;
     /** Tool descriptors (no `execute`), e.g. to forward to another protocol. */
     listTools(): Array<Omit<AgentTool, "execute">>;
-    /** Call a tool by name. Errors are returned as `isError` results. */
-    callTool(name: string, args?: {
-        [key: string]: unknown;
-    }): Promise<ToolResult>;
+    /**
+     * Call a tool by name. `args` may be an object or a JSON string of one.
+     * Errors are returned as `isError` results.
+     */
+    callTool(name: string, args?: unknown): Promise<ToolResult>;
     /** Unregister the built-in tools. Author-registered tools are untouched. */
     disable(): void;
     /** Register the four built-in tools. Their definitions never change. */

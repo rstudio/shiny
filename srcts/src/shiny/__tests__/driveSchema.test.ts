@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { checkValue, valueSchema } from "../driveSchema";
+import { checkValue, parseToolArgs, valueSchema } from "../driveSchema";
 
 // Fake binding: valueSchema() only reads `name`, `getState()`, `getType()`.
 function binding(name: string, state?: unknown): never {
@@ -102,5 +102,37 @@ void test("checkValue() caps the choices listed in errors", () => {
     () => checkValue({ enum: choices }, "nope"),
     (e: Error) =>
       e.message.includes('"49", ...') && !e.message.includes('"50"'),
+  );
+});
+
+void test("parseToolArgs() accepts objects and JSON strings", () => {
+  const schema = {
+    type: "object",
+    properties: { id: { type: "string" }, n: { type: "integer" } },
+    required: ["id"],
+    additionalProperties: false,
+  };
+
+  assert.deepEqual(parseToolArgs(schema, { id: "x" }), { id: "x" });
+  assert.deepEqual(parseToolArgs(schema, '{"id":"x","n":2}'), {
+    id: "x",
+    n: 2,
+  });
+  assert.deepEqual(parseToolArgs(undefined, undefined), {});
+  assert.deepEqual(parseToolArgs(undefined, ""), {});
+  // Extra keys are allowed unless the schema says otherwise
+  assert.deepEqual(parseToolArgs({ properties: {} }, { a: 1 }), { a: 1 });
+
+  assert.throws(
+    () => parseToolArgs(schema, { offset: 2 }),
+    (e: Error) =>
+      e.message.includes('unknown parameter "offset"') &&
+      e.message.includes('missing required parameter "id"') &&
+      e.message.includes('Example: {"id":"...","n":0}'),
+  );
+  assert.throws(() => parseToolArgs(schema, "{nope"), /not valid JSON/);
+  assert.throws(
+    () => parseToolArgs(schema, [1]),
+    /must be an object; got \[1\]/,
   );
 });

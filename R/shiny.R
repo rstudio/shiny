@@ -1028,6 +1028,7 @@ ShinySession <- R6Class(
           webmcp = webmcp_enabled()
         )
       )
+      sendGlobalWebMcpTools(self)
     },
     startTiming = function(guid) {
       if (!is.null(guid)) {
@@ -2277,6 +2278,11 @@ ShinySession <- R6Class(
       promises::promise(function(resolve, reject) {
         self$onFlushed(function() resolve(TRUE), once = TRUE)
       })
+    },
+    # Runs a tool registered with `registerWebMcpTool()`, for the client's
+    # `Shiny.webmcp` tool of the same name.
+    `@webmcpCall` = function(name, args = list()) {
+      webMcpCall(self, name, args)
     },
     # Provides a mechanism for handling direct HTTP requests that are posted
     # to the session (rather than going through the websocket)

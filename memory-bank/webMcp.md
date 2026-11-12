@@ -142,6 +142,42 @@ console warning.
   offline apps get no polyfill. It defers to a native
   `document.modelContext`.
 
+## Tools defined in R (`R/webmcp-tools.R`)
+
+`webMcpTool(fun, name, description, arguments, value, annotations)` is
+shaped like `ellmer::tool()` but is shiny's own S3 object, so it can be
+documented and extended here. `fun` is called like a module server
+function: `fun(input, output, session, <args>)`, inside `isolate()` and
+`withReactiveDomain()`.
+
+- **Types:** `arguments` is a named list of ellmer types and `value` an
+  `ellmer::type_object()` (`value` mirrors R's "Value" doc section; it becomes
+  WebMCP's `outputSchema`, and avoids clashing with the `output` object).
+  `webMcpTypeSchema()` turns them into JSON Schema itself, reading props with
+  `S7::prop()` (`@` needs R >= 4.3). It doesn't use `ellmer:::as_json()`.
+  ellmer and S7 are in Suggests, checked only when types are used.
+- **Checks:** `webMcpConform()` checks the agent's arguments before `fun`
+  runs (arrays of scalars become atomic vectors) and the returned value
+  after (arrays stay lists, so a length-1 array still serializes as an
+  array). The browser's `parseToolArgs()` has already caught unknown and
+  missing keys; R checks again because any client can send `@webmcpCall`.
+- **Registration:** `registerWebMcpTool(tool, session)`. With no session
+  (outside the server function), the tool goes in `.globals$webMcpTools`
+  and `sendGlobalWebMcpTools()` sends it when each session starts, right
+  after the `config` message. With a session, it goes in
+  `webMcpSessionTools[[token]]` (removed `onSessionEnded`), the name gets
+  `session$ns()` (so modules get `"mod-tool"`), and it is sent right away. Both
+  use the `shiny.webmcp.tools` custom message (`{add, remove}`), handled by
+  `Shiny.webmcp.setServerTools()`. Session tools are a no-op when WebMCP is
+  off. Built-in tool names are refused.
+- **Calls:** the client tool's `execute` calls `@webmcpCall(name, args)`
+  (`webMcpCall()`), which looks in the session's tools first, then the global
+  ones. Errors reach the agent as the RPC error; with
+  `options(shiny.sanitize.errors = TRUE)` only `safeError()`s keep their
+  message, and the original is logged with `message()`.
+- **Tests:** `test-webmcp-tools.R` (unit; note `MockShinySession$ns()`
+  prefixes `mock-session-`) and `test-zzz-st2-webmcp-tools.R` (browser).
+
 ## Server side (`R/shiny.R`)
 
 - `ShinySession$dispatch()` accepts a promise from an `@<method>` RPC and

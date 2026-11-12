@@ -139,6 +139,11 @@ class ShinyClass {
 
     this.drive = new ShinyDrive();
     this.webmcp = new ShinyWebMCP(this.drive);
+    addCustomMessageHandler("shiny.webmcp.tools", (message) =>
+      this.webmcp.setServerTools(
+        message as Parameters<ShinyWebMCP["setServerTools"]>[0],
+      ),
+    );
 
     this.initializedPromise = createInitStatus<void>();
 

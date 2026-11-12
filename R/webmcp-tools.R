@@ -8,13 +8,13 @@
 #'
 #' `fun` is called with the arguments the agent sent. It runs inside
 #' [isolate()] with the calling session as the reactive domain, so it can read
-#' reactive values and inputs. Inside the server function, `fun` can use the
-#' server's `input` and `session` directly. Outside it, give `fun` arguments
-#' with defaults: `session = getDefaultReactiveDomain()` and
-#' `input = session$input`. Defaults are evaluated during the call, so they
-#' get the calling session (in a module, the module's session). Agents can't
-#' set them, because only the names in `arguments` are accepted, and tests can
-#' pass a session directly.
+#' reactive values and inputs.
+#'
+#' Like a server function, `fun` can take `input`, `output` and `session`
+#' arguments, in any position. When it does, they are filled in with the
+#' calling session's (in a module, the module's), like the arguments of a
+#' server function. These names are reserved: `arguments` can't describe
+#' them, so agents can't set them.
 #'
 #' The argument and value types use
 #' [ellmer type specifications](https://ellmer.tidyverse.org/reference/type_boolean.html)
@@ -25,14 +25,14 @@
 #'
 #' @param name The tool's name: letters, numbers, `_`, `.` or `-`. Inside a
 #'   module, [registerWebMcpTool()] prefixes it with the module's namespace.
-#' @param fun A function with one argument per entry of `arguments`. It
-#'   returns a string (sent as text), a list (sent as JSON), or a promise of
-#'   either.
+#' @param fun A function with one argument per entry of `arguments`, plus
+#'   optionally `input`, `output` and `session`. It returns a string (sent as
+#'   text), a list (sent as JSON), or a promise of either.
 #' @param description What the tool does and when an agent should use it.
 #' @param ... Must be empty. The arguments after it must be named.
-#' @param arguments A named list of ellmer types, one per argument of `fun`.
-#'   Arguments with `required = FALSE` may be missing, in which case `fun`'s
-#'   default is used.
+#' @param arguments A named list of ellmer types, one per argument of `fun`
+#'   (except `input`, `output` and `session`). Arguments with
+#'   `required = FALSE` may be missing, in which case `fun`'s default is used.
 #' @param value An `ellmer::type_object()` describing the list `fun` returns.
 #'   It becomes the tool's `outputSchema`. `NULL` (the default) skips the
 #'   check.
@@ -60,12 +60,10 @@
 #'   annotations = list(readOnlyHint = TRUE)
 #' )
 #'
-#' # Outside the server function, get the calling session and its inputs
-#' # through default arguments
+#' # Take `input` and `session` to read the calling session's inputs
 #' filter_cars <- webMcpTool(
 #'   "filter_cars",
-#'   function(column, min,
-#'            session = getDefaultReactiveDomain(), input = session$input) {
+#'   function(column, min, input, session) {
 #'     cars <- mtcars[mtcars$cyl == input$cyl, ]
 #'     cars <- cars[cars[[column]] >= min, ]
 #'     paste(nrow(cars), "of the", input$cyl, "cylinder cars in session",
@@ -88,6 +86,14 @@ webMcpTool <- function(
   annotations = list()
 ) {
   rlang::check_dots_empty()
+  reserved <- intersect(names(arguments), webMcpInjectedArgs)
+  if (length(reserved) > 0) {
+    stop(
+      "`arguments` can't describe `", reserved[[1]], "`; `input`, `output` ",
+      "and `session` are filled in from the calling session.",
+      call. = FALSE
+    )
+  }
   if (!rlang::is_string(name) || !grepl("^[A-Za-z0-9_.-]{1,128}$", name)) {
     stop(
       "`name` must be a string of letters, numbers, `_`, `.` or `-`.",
@@ -131,7 +137,7 @@ webMcpTool <- function(
     }
   }
   noDefault <- names(params)[vapply(params, rlang::is_missing, logical(1))]
-  untyped <- setdiff(noDefault, c(names(arguments), "..."))
+  untyped <- setdiff(noDefault, c(names(arguments), "...", webMcpInjectedArgs))
   if (length(untyped) > 0) {
     stop(
       "`arguments` has no type for `fun`'s argument: ",
@@ -252,6 +258,9 @@ registerWebMcpTool <- function(tool, session = getDefaultReactiveDomain()) {
   })
 }
 
+# Filled in from the calling session when `fun` takes them
+webMcpInjectedArgs <- c("input", "output", "session")
+
 # Per-session tools, keyed by session token, then by (namespaced) tool name
 webMcpSessionTools <- new.env(parent = emptyenv())
 
@@ -301,6 +310,9 @@ webMcpCall <- function(session, name, args) {
 
   tool <- entry$tool
   scope <- entry$session
+  # Like a server function's arguments, only the ones `fun` takes (~1µs)
+  injected <- list(input = scope$input, output = scope$output, session = scope)
+  injected <- injected[names(injected) %in% names(formals(tool$fun))]
   args <- tryCatch(
     webMcpConformObject(tool$arguments, FALSE, args %||% list(), "", simplify = TRUE),
     error = function(e) stop(safeError(paste("Invalid input:", conditionMessage(e))))
@@ -315,7 +327,7 @@ webMcpCall <- function(session, name, args) {
   }
 
   hybrid_chain(
-    withReactiveDomain(scope, isolate(do.call(tool$fun, args))),
+    withReactiveDomain(scope, isolate(do.call(tool$fun, c(args, injected)))),
     function(result) {
       if (is.null(tool$value)) return(result)
       tryCatch(

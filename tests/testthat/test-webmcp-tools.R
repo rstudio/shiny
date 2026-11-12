@@ -39,6 +39,13 @@ test_that("webMcpTool() checks its arguments", {
     "no argument for: y"
   )
   expect_error(webMcpTool("t", f, "d"), "no type for `fun`'s argument: x")
+  # `input`, `output` and `session` are filled in, so they need no type and
+  # can't have one
+  expect_s3_class(webMcpTool("t", function(input, output, session) 1, "d"), "shiny_webmcp_tool")
+  expect_error(
+    webMcpTool("t", function(session) 1, "d", arguments = list(session = ellmer::type_string())),
+    "can't describe `session`"
+  )
   # Defaults and `...` don't need types
   expect_s3_class(webMcpTool("t", function(x = 1) x, "d"), "shiny_webmcp_tool")
   expect_s3_class(
@@ -175,11 +182,11 @@ test_that("webMcpCall() checks arguments, runs the tool, and checks its value", 
   ))
   expect_equal(webMcpCall(session, session$ns("read_n"), list()), list(n = 3L))
 
-  # The documented pattern: session and input as default arguments, which the
-  # agent can't set
+  # `input`, `output` and `session` are filled in when `fun` takes them, in
+  # any position, and agents can't set them
   registerWebMcpTool(session = session, webMcpTool(
     "add_n",
-    function(by, session = getDefaultReactiveDomain(), input = session$input) {
+    function(session, by, input) {
       list(total = input$n + by, same = identical(session, getDefaultReactiveDomain()))
     },
     "d",
@@ -193,6 +200,13 @@ test_that("webMcpCall() checks arguments, runs the tool, and checks its value", 
     webMcpCall(session, session$ns("add_n"), list(by = 2, session = "x")),
     "Unknown parameter `session`"
   )
+  # In a module, they are the module's
+  scope <- session$makeScope("mod")
+  session$setInputs(`mod-n` = 10)
+  registerWebMcpTool(session = scope, webMcpTool(
+    "mod_n", function(input, output) list(n = input$n), "d"
+  ))
+  expect_equal(webMcpCall(session, scope$ns("mod_n"), list()), list(n = 10))
 
   # A value that doesn't match `value`
   registerWebMcpTool(session = session, webMcpTool(

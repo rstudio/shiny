@@ -26,10 +26,11 @@ app <- launch_test_app(function() {
 
   counterServer <- function(id) {
     moduleServer(id, function(input, output, session) {
-      # Inside a module: this session only, namespaced
+      # Inside a module: this session only, namespaced. `input` and `session`
+      # are filled in with the module's.
       registerWebMcpTool(webMcpTool(
         "add",
-        function(by) {
+        function(by, input, session) {
           updateNumericInput(session, "n", value = input$n + by)
           paste("Added", by)
         },

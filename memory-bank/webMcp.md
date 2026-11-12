@@ -148,13 +148,14 @@ console warning.
 shaped like `ellmer::tool()` but is shiny's own S3 object, so it can be
 documented and extended here. `name` comes first (like
 `registerInputHandler(type, fun)`); `...` must be empty, so the optional
-arguments are always named. `fun` takes only the agent's arguments
-(`do.call(fun, args)`), inside `isolate()` and `withReactiveDomain(scope)`, so
-`getDefaultReactiveDomain()` gives the calling (module) session and
-`session$input` its inputs. The documented pattern is default arguments,
-`session = getDefaultReactiveDomain(), input = session$input` (evaluated during
-the call; agents can't set them since only `arguments` names are accepted).
-We chose this over injecting magic `input`/`session` formals. Outputs can't be read server-side; agents use
+arguments are always named. `fun` gets the agent's arguments plus
+`input`, `output` and `session` when its formals name them (any position),
+like `argsForServerFunc()` does for server functions (`R/server.R`). They
+come from the calling (module) session; the lookup runs per call in
+`webMcpCall()` (~1µs, negligible next to the websocket round trip). The names
+are reserved: `arguments` can't describe them, so agents can't set them
+(plumber2 does the same for path args vs. its `query`/`body` names). Runs inside
+`isolate()` and `withReactiveDomain(scope)`. Outputs can't be read server-side; agents use
 `get_output`. `fun`'s formals without defaults must all have a type.
 
 - **Types:** `arguments` is a named list of ellmer types and `value` an

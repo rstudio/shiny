@@ -31,16 +31,16 @@
 #'   module, [registerWebMcpTool()] prefixes it with the module's namespace.
 #' @param fun A function with one argument per entry of `arguments`, plus
 #'   optionally `input` and `session`. It can't take `...`: agents can only
-#'   send the arguments in `arguments`. For free-form data, use one argument
-#'   of type
-#'   `ellmer::type_from_schema('{"type": "object", "additionalProperties": true}')`;
-#'   its value is passed on unchecked, so `fun` should check it. It returns a string (sent as
+#'   send the arguments in `arguments`. For free-form data, declare an
+#'   argument holding an array of name-value pairs (see the examples). It returns a string (sent as
 #'   text), a list (sent as JSON), or a promise of either.
 #' @param description What the tool does and when an agent should use it.
 #' @param ... Must be empty. The arguments after it must be named.
 #' @param arguments A named list of ellmer types, one per argument of `fun`
 #'   (except `input` and `session`). Arguments with
 #'   `required = FALSE` may be missing, in which case `fun`'s default is used.
+#'   Objects must be closed: an `ellmer::type_from_schema()` object needs
+#'   `"additionalProperties": false`.
 #' @param value An `ellmer::type_object()` describing the list `fun` returns.
 #'   It becomes the tool's `outputSchema`. `NULL` (the default) skips the
 #'   check.
@@ -81,6 +81,25 @@
 #'   arguments = list(
 #'     column = ellmer::type_enum(names(mtcars)),
 #'     min = ellmer::type_number()
+#'   )
+#' )
+#'
+#' # For free-form data, take an array of name-value pairs. Every name and value
+#' # is checked, and agents see which names are allowed. Arrays of objects
+#' # arrive in R as a list of lists.
+#' filter_rows <- webMcpTool(
+#'   "filter_rows",
+#'   function(filters) {
+#'     keep <- rep(TRUE, nrow(mtcars))
+#'     for (f in filters) keep <- keep & mtcars[[f$column]] == f$value
+#'     rownames(mtcars)[keep]
+#'   },
+#'   "Names of the cars where each column equals its value.",
+#'   arguments = list(
+#'     filters = ellmer::type_array(ellmer::type_object(
+#'       column = ellmer::type_enum(names(mtcars)),
+#'       value = ellmer::type_number()
+#'     ))
 #'   )
 #' )
 #' @export
@@ -135,10 +154,9 @@ webMcpTool <- function(
   # No `...`: agents can only send the keys in `arguments` (the input schema
   # has `additionalProperties: false`, checked in the browser and in R), so
   # `...` could only ever catch typed arguments that `fun` doesn't name,
-  # hiding them from its signature. Free-form data belongs in a named
-  # argument, e.g. of type
-  # `ellmer::type_from_schema('{"type": "object", "additionalProperties": true}')`
-  # (`type_object(.additional_properties)` is deprecated in ellmer 0.5.0).
+  # hiding them from its signature. Free-form data belongs in a declared
+  # argument: an array of name-value pairs, as ellmer recommends since
+  # deprecating `type_object(.additional_properties)` in 0.5.0.
   params <- formals(fun)
   if ("..." %in% names(params)) {
     stop(
@@ -147,6 +165,22 @@ webMcpTool <- function(
       call. = FALSE
     )
   }
+  # No open objects in the arguments: their keys would go unchecked, and
+  # providers' strict modes can't fill them (ellmer 0.5.0 deprecated
+  # `type_object(.additional_properties)` for this). Free-form data is an
+  # array of name-value pairs instead.
+  if (length(arguments) > 0) {
+    open <- webMcpOpenObjects(webMcpObjectSchema(arguments, FALSE)$properties)
+    if (length(open) > 0) {
+      stop(
+        "`arguments` can't contain open objects (`", open[[1]], "`). Set ",
+        "`\"additionalProperties\": false`, or use an array of name-value ",
+        "pairs for free-form data.",
+        call. = FALSE
+      )
+    }
+  }
+
   # Every argument needs a formal in `fun`, and every formal without a default
   # needs a type (or the agent could never supply it)
   untaken <- setdiff(names(arguments), names(params))
@@ -403,6 +437,24 @@ webMcpTypeSchema <- function(type) {
   description <- prop("description")
   if (!is.null(description)) schema$description <- description
   schema
+}
+
+# Paths of object schemas that allow keys beyond their `properties`. In JSON
+# Schema an object is open unless `additionalProperties` is `false`. Looks
+# through every nested schema (`properties`, `items`, `anyOf`, ...), which
+# matters for `ellmer::type_from_schema()`.
+webMcpOpenObjects <- function(schema, path = "") {
+  if (!is.list(schema)) return(character(0))
+  open <- character(0)
+  if ("object" %in% schema$type && !identical(schema$additionalProperties, FALSE)) {
+    open <- path
+  }
+  keys <- names(schema) %||% rep("", length(schema))
+  for (i in seq_along(schema)) {
+    child <- if (nzchar(keys[[i]])) paste0(path, if (nzchar(path)) ".", keys[[i]]) else paste0(path, "[", i, "]")
+    open <- c(open, webMcpOpenObjects(schema[[i]], child))
+  }
+  open
 }
 
 webMcpObjectSchema <- function(properties, additional) {

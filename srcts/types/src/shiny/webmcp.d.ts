@@ -17,6 +17,7 @@ type AgentTool = {
     description: string;
     title?: string;
     inputSchema?: JSONSchema;
+    outputSchema?: JSONSchema;
     annotations?: {
         readOnlyHint?: boolean;
         consequentialHint?: boolean;
@@ -39,6 +40,14 @@ declare class ShinyWebMCP extends EventTarget {
      * Errors are returned as `isError` results.
      */
     callTool(name: string, args?: unknown): Promise<ToolResult>;
+    /**
+     * Tools defined in R with `registerWebMcpTool()`, sent by the server.
+     * Calling one runs the R function through the `@webmcpCall` RPC.
+     */
+    setServerTools({ add, remove, }: {
+        add?: Array<Omit<AgentTool, "execute">>;
+        remove?: string[];
+    }): void;
     /** Unregister the built-in tools. Author-registered tools are untouched. */
     disable(): void;
     /** Register the four built-in tools. Their definitions never change. */

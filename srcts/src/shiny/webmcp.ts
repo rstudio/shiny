@@ -1,6 +1,7 @@
 import type { Filter, JSONSchema, OutputImage, ShinyDrive } from "./drive";
 import { defaultImageLimit, previewTextLength } from "./drive";
 import { parseToolArgs } from "./driveSchema";
+import { shinyShinyApp } from "./initedMethods";
 
 // WebMCP integration, exposed as `window.Shiny.webmcp`.
 //
@@ -25,6 +26,7 @@ type AgentTool = {
   description: string;
   title?: string;
   inputSchema?: JSONSchema;
+  outputSchema?: JSONSchema;
   annotations?: {
     readOnlyHint?: boolean;
     consequentialHint?: boolean;
@@ -122,6 +124,35 @@ class ShinyWebMCP extends EventTarget {
         content: [{ type: "text", text: String((e as Error)?.message ?? e) }],
       };
     }
+  }
+
+  /**
+   * Tools defined in R with `registerWebMcpTool()`, sent by the server.
+   * Calling one runs the R function through the `@webmcpCall` RPC.
+   */
+  setServerTools({
+    add = [],
+    remove = [],
+  }: {
+    add?: Array<Omit<AgentTool, "execute">>;
+    remove?: string[];
+  }): void {
+    remove.forEach((name) => this.unregisterTool(name));
+    add.forEach((tool) =>
+      this.registerTool({
+        ...tool,
+        execute: (args) =>
+          new Promise((resolve, reject) => {
+            shinyShinyApp().makeRequest(
+              "webmcpCall",
+              [tool.name, args],
+              resolve,
+              (err) => reject(new Error(err)),
+              undefined,
+            );
+          }),
+      }),
+    );
   }
 
   // ---- Built-in tools ----------------------------------------------------

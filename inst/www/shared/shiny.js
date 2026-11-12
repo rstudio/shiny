@@ -6042,6 +6042,42 @@ ${duplicateIdMsg}`;
         return {};
     }
   }
+  function parseToolArgs(schema, args) {
+    const problems = [];
+    let value = args ?? {};
+    if (typeof value === "string") {
+      try {
+        value = value.trim() === "" ? {} : JSON.parse(value);
+      } catch {
+        problems.push("input is a string but not valid JSON");
+      }
+    }
+    const obj = value;
+    if (problems.length === 0) {
+      if (typeof value !== "object" || value === null || Array.isArray(value)) {
+        problems.push(`input must be an object; got ${JSON.stringify(value)}`);
+      } else if (schema) {
+        const props = schema.properties ?? {};
+        if (schema.additionalProperties === false) {
+          Object.keys(obj).filter((k2) => !(k2 in props)).forEach((k2) => problems.push(`unknown parameter "${k2}"`));
+        }
+        (schema.required ?? []).filter((k2) => obj[k2] === void 0).forEach((k2) => problems.push(`missing required parameter "${k2}"`));
+      }
+    }
+    if (problems.length === 0) return obj;
+    throw new Error(
+      `Invalid input: ${problems.join("; ")}.` + (schema ? ` Expected input schema: ${JSON.stringify(schema)}. Example: ${JSON.stringify(exampleArgs(schema))}` : "")
+    );
+  }
+  function exampleArgs(schema) {
+    const props = schema.properties ?? {};
+    return Object.fromEntries(
+      Object.entries(props).map(([key, p3]) => [
+        key,
+        Array.isArray(p3.enum) ? p3.enum[0] : p3.type === "integer" || p3.type === "number" ? 0 : p3.type === "boolean" ? false : p3.type === "array" ? [] : "..."
+      ])
+    );
+  }
 
   // srcts/src/shiny/drive.ts
   var skippedInputBindings = /* @__PURE__ */ new Set();
@@ -6054,6 +6090,7 @@ ${duplicateIdMsg}`;
   var accessValues = ["exclude", "read-only", "write-only"];
   var maxTextLength = 2e4;
   var previewTextLength = 200;
+  var defaultImageLimit = 10;
   var flushTimeoutMs = 1e4;
   function accessAttrOf(el, isInput) {
     const value = el.getAttribute(accessAttr) ?? (isInput ? el.closest(".shiny-input-container")?.getAttribute(accessAttr) ?? null : null);
@@ -6150,16 +6187,72 @@ ${duplicateIdMsg}`;
     };
   }
   function outputInfo(el, adapter) {
-    const img = el.querySelector("img");
     const text = el.innerText ?? "";
     return {
       id: adapter.getId(),
       type: adapter.binding.name,
       status: el.classList.contains("shiny-output-error") ? "error" : el.classList.contains("recalculating") ? "recalculating" : "ready",
       text: text.length > maxTextLength ? text.slice(0, maxTextLength) : text,
-      image: img?.src.startsWith("data:image/") ? img.src : void 0,
+      imageCount: imageEls(el).length,
       hidden: isVisible(el) ? void 0 : true
     };
+  }
+  function imageEls(el) {
+    const shown = isVisible(el);
+    return Array.from(
+      el.querySelectorAll(
+        "img[src], canvas"
+      )
+    ).filter(
+      (x2) => x2.closest(".shiny-bound-output") === el && (!shown || isVisible(x2))
+    );
+  }
+  function imageOf(x2, index) {
+    if (x2 instanceof HTMLImageElement) {
+      const src = x2.currentSrc || x2.src;
+      return {
+        index,
+        type: /^data:image\/[^;,]+;base64,/.test(src) ? "data" : "url",
+        value: src
+      };
+    }
+    const error = (reason) => ({
+      index,
+      type: "error",
+      reason
+    });
+    if (x2.width === 0 || x2.height === 0) {
+      return error("Canvas has zero width or height.");
+    }
+    try {
+      if (isSolidColor(x2)) {
+        return error(
+          "Canvas is blank (one solid color). WebGL canvases read as blank unless the widget created them with preserveDrawingBuffer: true."
+        );
+      }
+      return { index, type: "data", value: x2.toDataURL() };
+    } catch {
+      return error(
+        "Canvas can't be read: it draws images from another site that were served without CORS headers."
+      );
+    }
+  }
+  function isSolidColor(canvas) {
+    const copy = document.createElement("canvas");
+    copy.width = canvas.width;
+    copy.height = canvas.height;
+    const ctx = copy.getContext("2d", { willReadFrequently: true });
+    if (!ctx) return false;
+    ctx.drawImage(canvas, 0, 0);
+    const pixels = new Uint32Array(
+      ctx.getImageData(0, 0, copy.width, copy.height).data.buffer
+    );
+    return pixels.every((p3) => p3 === pixels[0]);
+  }
+  function checkCount(name, x2) {
+    if (!Number.isInteger(x2) || x2 < 0) {
+      throw new Error(`\`${name}\` must be a non-negative integer`);
+    }
   }
   function labelOf(el, id) {
     const label = document.getElementById(id + "-label")?.textContent ?? el.closest("label")?.textContent ?? el.getAttribute("aria-label") ?? (el.tagName === "BUTTON" ? el.textContent : null) ?? "";
@@ -6323,23 +6416,33 @@ ${duplicateIdMsg}`;
      * `includeHidden: true` also lists hidden ones (marked `hidden: true`).
      */
     listOutputs(filter = {}) {
-      return exposedOutputs(filter.includeHidden).filter(({ adapter }) => matchesFilter(filter, adapter.getId())).map(({ el, adapter }) => outputInfo(el, adapter)).map(({ image, ...x2 }) => ({
-        ...x2,
-        text: x2.text.slice(0, previewTextLength),
-        hasImage: image !== void 0
-      }));
+      return exposedOutputs(filter.includeHidden).filter(({ adapter }) => matchesFilter(filter, adapter.getId())).map(({ el, adapter }) => outputInfo(el, adapter)).map((x2) => ({ ...x2, text: x2.text.slice(0, previewTextLength) }));
     }
     /**
      * Waits (up to a timeout) for the output to finish recalculating. Hidden
      * outputs (`includeHidden`) are returned as-is: Shiny suspends them, so
      * they may be stale or `recalculating` until shown.
+     *
+     * Returns up to `imageLimit` (default 10) of the output's images, starting
+     * at `imageOffset`. More remain while `imageOffset + images.length <
+     * imageCount`.
      */
-    async getOutput(id, { includeHidden } = {}) {
+    async getOutput(id, {
+      includeHidden,
+      imageOffset = 0,
+      imageLimit = defaultImageLimit
+    } = {}) {
+      checkCount("imageOffset", imageOffset);
+      checkCount("imageLimit", imageLimit);
       const { el, adapter } = findOutput(id, includeHidden);
       if (isVisible(el) && el.classList.contains("recalculating")) {
         await waitForOutputs(() => [el]);
       }
-      return outputInfo(el, adapter);
+      return {
+        ...outputInfo(el, adapter),
+        imageOffset,
+        images: imageEls(el).slice(imageOffset, imageOffset + imageLimit).map((x2, i5) => imageOf(x2, imageOffset + i5))
+      };
     }
     // TODO: The reply to `waitForFlush` stands in for "the server flushed"; it
     // carries no flush info itself. Explore an explicit server-to-client flush
@@ -7776,7 +7879,8 @@ ${duplicateIdMsg}`;
         type: "string",
         description: 'Only ids inside this Shiny module namespace, e.g. "filters" matches "filters-region". Nested: "outer-inner".'
       }
-    }
+    },
+    additionalProperties: false
   };
   var builtinToolNames = [
     "list_inputs",
@@ -7784,7 +7888,7 @@ ${duplicateIdMsg}`;
     "list_outputs",
     "get_output"
   ];
-  var _drive, _tools, _webmcp, _enabled, _ShinyWebMCP_instances, mirrorToWebMCP_fn;
+  var _drive, _tools, _webmcp, _status, _enabled, _ShinyWebMCP_instances, mirrorToWebMCP_fn, setStatus_fn;
   var ShinyWebMCP = class extends EventTarget {
     constructor(drive) {
       super();
@@ -7792,6 +7896,7 @@ ${duplicateIdMsg}`;
       __privateAdd(this, _drive);
       __privateAdd(this, _tools, /* @__PURE__ */ new Map());
       __privateAdd(this, _webmcp, /* @__PURE__ */ new Map());
+      __privateAdd(this, _status, /* @__PURE__ */ new Map());
       __privateAdd(this, _enabled, false);
       __privateSet(this, _drive, drive);
     }
@@ -7809,6 +7914,7 @@ ${duplicateIdMsg}`;
       if (__privateGet(this, _tools).delete(name)) {
         __privateGet(this, _webmcp).get(name)?.abort();
         __privateGet(this, _webmcp).delete(name);
+        if (__privateGet(this, _status).has(name)) __privateMethod(this, _ShinyWebMCP_instances, setStatus_fn).call(this, name, void 0);
         this.dispatchEvent(new Event("toolchange"));
       }
     }
@@ -7820,12 +7926,21 @@ ${duplicateIdMsg}`;
         ({ execute, ...rest }) => rest
       );
     }
-    /** Call a tool by name. Errors are returned as `isError` results. */
+    /**
+     * Call a tool by name. `args` may be an object or a JSON string of one.
+     * Errors are returned as `isError` results.
+     */
     async callTool(name, args = {}) {
       try {
         const tool = __privateGet(this, _tools).get(name);
-        if (!tool) throw new Error(`Unknown tool "${name}"`);
-        return toToolResult(await tool.execute(args ?? {}));
+        if (!tool) {
+          throw new Error(
+            `Unknown tool "${name}". Tools: ${[...__privateGet(this, _tools).keys()].join(", ")}`
+          );
+        }
+        return toToolResult(
+          await tool.execute(parseToolArgs(tool.inputSchema, args))
+        );
       } catch (e4) {
         return {
           isError: true,
@@ -7860,53 +7975,104 @@ ${duplicateIdMsg}`;
             id: { type: "string", description: "Input id from list_inputs." },
             value: { description: "New value; omit for buttons." }
           },
-          required: ["id"]
+          required: ["id"],
+          additionalProperties: false
         },
         execute: ({ id, value }) => __privateGet(this, _drive).setInput(String(id), value)
       });
       this.registerTool({
         name: "list_outputs",
-        description: `List the outputs currently visible in this Shiny app: id, type, status (ready, recalculating, error), the first ${previewTextLength} characters of displayed text, and whether it shows an image. Filter with \`ids\` and/or a \`module\` namespace.`,
+        description: `List the outputs currently visible in this Shiny app: id, type, status (ready, recalculating, error), the first ${previewTextLength} characters of displayed text, and \`imageCount\` (how many images, such as plots, it shows). Filter with \`ids\` and/or a \`module\` namespace.`,
         inputSchema: filterSchema,
         annotations: { readOnlyHint: true, untrustedContentHint: true },
         execute: (args) => ({ outputs: __privateGet(this, _drive).listOutputs(toFilter(args)) })
       });
       this.registerTool({
         name: "get_output",
-        description: "Get everything a visible output currently displays: status, full visible text, and the image for plots.",
+        description: `Get everything a visible output currently displays: status, full visible text, and up to ${defaultImageLimit} of its images (plots, <img>, <canvas>). Each \`images\` entry has an \`index\` and a \`type\`: "data" (attached as image content, in order), "url", or "error" with a \`reason\`. More images remain while \`imageOffset\` + the number of entries < \`imageCount\`; get them with \`imageOffset\`.`,
         inputSchema: {
           type: "object",
           properties: {
-            id: { type: "string", description: "Output id from list_outputs." }
+            id: { type: "string", description: "Output id from list_outputs." },
+            imageOffset: {
+              type: "integer",
+              minimum: 0,
+              description: "Index of the first image to return. Default 0."
+            },
+            imageLimit: {
+              type: "integer",
+              minimum: 0,
+              maximum: defaultImageLimit,
+              description: `Most images to return. Default ${defaultImageLimit}.`
+            }
           },
-          required: ["id"]
+          required: ["id"],
+          additionalProperties: false
         },
         annotations: { readOnlyHint: true, untrustedContentHint: true },
-        execute: ({ id }) => __privateGet(this, _drive).getOutput(String(id))
+        execute: ({ id, imageOffset, imageLimit }) => __privateGet(this, _drive).getOutput(String(id), {
+          imageOffset,
+          // Hosts may not enforce `maximum`; keep responses bounded
+          imageLimit: Math.min(
+            imageLimit ?? defaultImageLimit,
+            defaultImageLimit
+          )
+        })
       });
     }
   };
   _drive = new WeakMap();
   _tools = new WeakMap();
   _webmcp = new WeakMap();
+  _status = new WeakMap();
   _enabled = new WeakMap();
   _ShinyWebMCP_instances = new WeakSet();
   // ---- WebMCP mirror -----------------------------------------------------
   mirrorToWebMCP_fn = function(tool) {
     const modelContext = document.modelContext;
-    if (!modelContext?.registerTool) return;
+    if (!modelContext?.registerTool) {
+      setStatusAttr("unavailable");
+      return;
+    }
     __privateGet(this, _webmcp).get(tool.name)?.abort();
     const controller = new AbortController();
     __privateGet(this, _webmcp).set(tool.name, controller);
-    modelContext.registerTool(
-      { ...tool, execute: (args) => this.callTool(tool.name, args) },
-      { signal: controller.signal }
-    ).catch((e4) => {
-      if (!controller.signal.aborted) {
+    __privateMethod(this, _ShinyWebMCP_instances, setStatus_fn).call(this, tool.name, "pending");
+    Promise.resolve().then(
+      () => modelContext.registerTool(
+        { ...tool, execute: (args) => this.callTool(tool.name, args) },
+        { signal: controller.signal }
+      )
+    ).then(
+      () => {
+        if (!controller.signal.aborted) {
+          __privateMethod(this, _ShinyWebMCP_instances, setStatus_fn).call(this, tool.name, "registered");
+        }
+      },
+      (e4) => {
+        if (controller.signal.aborted) return;
+        __privateMethod(this, _ShinyWebMCP_instances, setStatus_fn).call(this, tool.name, "failed");
         console.warn(`WebMCP: failed to register tool "${tool.name}"`, e4);
       }
-    });
+    );
   };
+  // `<html data-shiny-webmcp>`: pending, registered, partial (some tools
+  // failed), failed, or unavailable (no `document.modelContext`).
+  setStatus_fn = function(name, status) {
+    if (status) __privateGet(this, _status).set(name, status);
+    else __privateGet(this, _status).delete(name);
+    const all = [...__privateGet(this, _status).values()];
+    if (all.length === 0) {
+      document.documentElement.removeAttribute("data-shiny-webmcp");
+      return;
+    }
+    setStatusAttr(
+      all.includes("pending") ? "pending" : !all.includes("failed") ? "registered" : all.includes("registered") ? "partial" : "failed"
+    );
+  };
+  function setStatusAttr(status) {
+    document.documentElement.setAttribute("data-shiny-webmcp", status);
+  }
   function toFilter({ ids: ids2, module }) {
     if (ids2 !== void 0 && !(Array.isArray(ids2) && ids2.every((id) => typeof id === "string"))) {
       throw new Error("`ids` must be an array of strings");
@@ -7924,12 +8090,28 @@ ${duplicateIdMsg}`;
       return { content: [{ type: "text", text: JSON.stringify(value) }] };
     }
     if (Array.isArray(value.content)) return value;
-    const { image, ...rest } = value;
-    const content = [{ type: "text", text: JSON.stringify(rest) }];
-    const match = image?.match(/^data:(image\/[^;]+);base64,(.*)$/);
-    if (match)
-      content.push({ type: "image", mimeType: match[1], data: match[2] });
-    return { content, structuredContent: rest };
+    const imageContent = [];
+    const { images } = value;
+    const structured = !Array.isArray(images) ? value : {
+      ...value,
+      images: images.map((img) => {
+        const match = img.type === "data" && img.value.match(/^data:(image\/[^;]+);base64,(.*)$/);
+        if (!match) return img;
+        imageContent.push({
+          type: "image",
+          mimeType: match[1],
+          data: match[2]
+        });
+        return { index: img.index, type: img.type };
+      })
+    };
+    return {
+      content: [
+        { type: "text", text: JSON.stringify(structured) },
+        ...imageContent
+      ],
+      structuredContent: structured
+    };
   }
 
   // srcts/src/shiny/index.ts

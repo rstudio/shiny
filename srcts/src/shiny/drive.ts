@@ -36,17 +36,30 @@ type InputInfo = {
   hidden?: true;
 };
 
+// One `<img>` or `<canvas>` shown by an output. `index` is its position among
+// all of the output's images, in page order.
+type OutputImage = { index: number } & (
+  | { type: "data" | "url"; value: string }
+  | { type: "error"; reason: string }
+);
+
 type OutputInfo = {
   id: string;
   type: string;
   status: "error" | "ready" | "recalculating";
   text: string;
-  image?: string;
+  // Number of images the output shows; `images` is one page of them
+  imageCount: number;
+  imageOffset: number;
+  images: OutputImage[];
   hidden?: true;
 };
 
+type OutputSummary = Omit<OutputInfo, "imageOffset" | "images">;
+
 type Filter = { ids?: string[]; module?: string; includeHidden?: boolean };
 type HiddenOpt = { includeHidden?: boolean };
+type ImagePage = { imageOffset?: number; imageLimit?: number };
 
 // Bindings never exposed. Extend via Shiny.drive.skip*Binding().
 const skippedInputBindings = new Set<string>();
@@ -62,6 +75,7 @@ const accessAttr = "data-shiny-drive-access";
 const accessValues = ["exclude", "read-only", "write-only"];
 const maxTextLength = 20000;
 const previewTextLength = 200;
+const defaultImageLimit = 10;
 const flushTimeoutMs = 10000;
 
 function accessAttrOf(el: HTMLElement, isInput: boolean): string | null {
@@ -231,8 +245,7 @@ function inputInfo(el: HTMLElement, binding: InputBinding): InputInfo {
 function outputInfo(
   el: HTMLElement,
   adapter: OutputBindingAdapter,
-): OutputInfo {
-  const img = el.querySelector("img");
+): OutputSummary {
   const text = el.innerText ?? "";
 
   return {
@@ -244,9 +257,88 @@ function outputInfo(
         ? "recalculating"
         : "ready",
     text: text.length > maxTextLength ? text.slice(0, maxTextLength) : text,
-    image: img?.src.startsWith("data:image/") ? img.src : undefined,
+    imageCount: imageEls(el).length,
     hidden: isVisible(el) ? undefined : true,
   };
+}
+
+// The output's own visible <img>/<canvas> elements, in page order. Images in
+// a nested output (e.g. a plotOutput() inside a uiOutput()) belong to it.
+function imageEls(
+  el: HTMLElement,
+): Array<HTMLCanvasElement | HTMLImageElement> {
+  const shown = isVisible(el);
+
+  return Array.from(
+    el.querySelectorAll<HTMLCanvasElement | HTMLImageElement>(
+      "img[src], canvas",
+    ),
+  ).filter(
+    (x) => x.closest(".shiny-bound-output") === el && (!shown || isVisible(x)),
+  );
+}
+
+function imageOf(
+  x: HTMLCanvasElement | HTMLImageElement,
+  index: number,
+): OutputImage {
+  if (x instanceof HTMLImageElement) {
+    const src = x.currentSrc || x.src;
+
+    // Only base64 data can become MCP image content; the rest is a URL
+    return {
+      index,
+      type: /^data:image\/[^;,]+;base64,/.test(src) ? "data" : "url",
+      value: src,
+    };
+  }
+
+  const error = (reason: string): OutputImage => ({
+    index,
+    type: "error",
+    reason,
+  });
+
+  if (x.width === 0 || x.height === 0) {
+    return error("Canvas has zero width or height.");
+  }
+  try {
+    if (isSolidColor(x)) {
+      return error(
+        "Canvas is blank (one solid color). WebGL canvases read as blank unless the widget created them with preserveDrawingBuffer: true.",
+      );
+    }
+    return { index, type: "data", value: x.toDataURL() };
+  } catch {
+    return error(
+      "Canvas can't be read: it draws images from another site that were served without CORS headers.",
+    );
+  }
+}
+
+// Read the pixels of a copy: calling getContext() on the widget's own canvas
+// could create a context the widget doesn't expect. A cleared WebGL buffer
+// reads as transparent, or opaque black with `alpha: false`.
+function isSolidColor(canvas: HTMLCanvasElement): boolean {
+  const copy = document.createElement("canvas");
+
+  copy.width = canvas.width;
+  copy.height = canvas.height;
+  const ctx = copy.getContext("2d", { willReadFrequently: true });
+
+  if (!ctx) return false;
+  ctx.drawImage(canvas, 0, 0);
+  const pixels = new Uint32Array(
+    ctx.getImageData(0, 0, copy.width, copy.height).data.buffer,
+  );
+
+  return pixels.every((p) => p === pixels[0]);
+}
+
+function checkCount(name: string, x: number): void {
+  if (!Number.isInteger(x) || x < 0) {
+    throw new Error(`\`${name}\` must be a non-negative integer`);
+  }
 }
 
 function labelOf(el: HTMLElement, id: string): string {
@@ -474,28 +566,32 @@ class ShinyDrive {
    * full content.
    * `includeHidden: true` also lists hidden ones (marked `hidden: true`).
    */
-  listOutputs(
-    filter: Filter = {},
-  ): Array<Omit<OutputInfo, "image"> & { hasImage: boolean }> {
+  listOutputs(filter: Filter = {}): OutputSummary[] {
     return exposedOutputs(filter.includeHidden)
       .filter(({ adapter }) => matchesFilter(filter, adapter.getId()))
       .map(({ el, adapter }) => outputInfo(el, adapter))
-      .map(({ image, ...x }) => ({
-        ...x,
-        text: x.text.slice(0, previewTextLength),
-        hasImage: image !== undefined,
-      }));
+      .map((x) => ({ ...x, text: x.text.slice(0, previewTextLength) }));
   }
 
   /**
    * Waits (up to a timeout) for the output to finish recalculating. Hidden
    * outputs (`includeHidden`) are returned as-is: Shiny suspends them, so
    * they may be stale or `recalculating` until shown.
+   *
+   * Returns up to `imageLimit` (default 10) of the output's images, starting
+   * at `imageOffset`. More remain while `imageOffset + images.length <
+   * imageCount`.
    */
   async getOutput(
     id: string,
-    { includeHidden }: HiddenOpt = {},
+    {
+      includeHidden,
+      imageOffset = 0,
+      imageLimit = defaultImageLimit,
+    }: HiddenOpt & ImagePage = {},
   ): Promise<OutputInfo> {
+    checkCount("imageOffset", imageOffset);
+    checkCount("imageLimit", imageLimit);
     const { el, adapter } = findOutput(id, includeHidden);
 
     // Unlike after setInputs(), no visibility change is pending; skip the wait
@@ -503,7 +599,13 @@ class ShinyDrive {
     if (isVisible(el) && el.classList.contains("recalculating")) {
       await waitForOutputs(() => [el]);
     }
-    return outputInfo(el, adapter);
+    return {
+      ...outputInfo(el, adapter),
+      imageOffset,
+      images: imageEls(el)
+        .slice(imageOffset, imageOffset + imageLimit)
+        .map((x, i) => imageOf(x, imageOffset + i)),
+    };
   }
 
   // TODO: The reply to `waitForFlush` stands in for "the server flushed"; it
@@ -576,5 +678,12 @@ class ShinyDrive {
   }
 }
 
-export { previewTextLength, ShinyDrive };
-export type { Filter, InputInfo, JSONSchema, OutputInfo };
+export { defaultImageLimit, previewTextLength, ShinyDrive };
+export type {
+  Filter,
+  InputInfo,
+  JSONSchema,
+  OutputImage,
+  OutputInfo,
+  OutputSummary,
+};

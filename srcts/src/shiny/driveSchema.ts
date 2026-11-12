@@ -149,5 +149,70 @@ function valueSchema(
   }
 }
 
-export { checkValue, valueSchema };
+// Tool args come from the agent: accept an object or a JSON string of one
+// (hosts differ), then check the keys against the tool's input schema. The
+// error carries the schema and an example call so the agent can retry
+// rather than give up on the tool.
+function parseToolArgs(
+  schema: JSONSchema | undefined,
+  args: unknown,
+): { [key: string]: unknown } {
+  const problems: string[] = [];
+  let value = args ?? {};
+
+  if (typeof value === "string") {
+    try {
+      value = value.trim() === "" ? {} : JSON.parse(value);
+    } catch {
+      problems.push("input is a string but not valid JSON");
+    }
+  }
+  const obj = value as { [key: string]: unknown };
+
+  if (problems.length === 0) {
+    if (typeof value !== "object" || value === null || Array.isArray(value)) {
+      problems.push(`input must be an object; got ${JSON.stringify(value)}`);
+    } else if (schema) {
+      const props = (schema.properties ?? {}) as { [key: string]: JSONSchema };
+
+      if (schema.additionalProperties === false) {
+        Object.keys(obj)
+          .filter((k) => !(k in props))
+          .forEach((k) => problems.push(`unknown parameter "${k}"`));
+      }
+      ((schema.required ?? []) as string[])
+        .filter((k) => obj[k] === undefined)
+        .forEach((k) => problems.push(`missing required parameter "${k}"`));
+    }
+  }
+  if (problems.length === 0) return obj;
+
+  throw new Error(
+    `Invalid input: ${problems.join("; ")}.` +
+      (schema
+        ? ` Expected input schema: ${JSON.stringify(schema)}. Example: ${JSON.stringify(exampleArgs(schema))}`
+        : ""),
+  );
+}
+
+function exampleArgs(schema: JSONSchema): { [key: string]: unknown } {
+  const props = (schema.properties ?? {}) as { [key: string]: JSONSchema };
+
+  return Object.fromEntries(
+    Object.entries(props).map(([key, p]) => [
+      key,
+      Array.isArray(p.enum)
+        ? p.enum[0]
+        : p.type === "integer" || p.type === "number"
+          ? 0
+          : p.type === "boolean"
+            ? false
+            : p.type === "array"
+              ? []
+              : "...",
+    ]),
+  );
+}
+
+export { checkValue, parseToolArgs, valueSchema };
 export type { JSONSchema };

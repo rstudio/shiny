@@ -35,8 +35,9 @@ Both are created in `ShinyClass`'s constructor (`srcts/src/shiny/index.ts`).
 ## `Shiny.drive`
 
 - **Reading:** `listInputs({ids?, module?})`, `getInput(id)`,
-  `listOutputs({ids?, module?})`, `getOutput(id)`. `module: "filters"`
-  matches ids starting with `"filters-"` (the `NS()` separator).
+  `listOutputs({ids?, module?})`, `getOutput(id, {imageOffset?, imageLimit?})`.
+  `module: "filters"` matches ids starting with `"filters-"` (the `NS()`
+  separator).
 - **Driving:** `setInput(id, value)`, `setInputs({id: value, ...})`,
   `click(id)`, `uploadFiles(id, files)`, `waitForUpload(id)`.
 - **Waiting:** `flush()`, `waitForIdle({duration, timeout})`.
@@ -59,6 +60,32 @@ Rules every method follows:
   reacts once.
 - **Results are current.** After sending, it awaits `flush()` and then polls
   until no visible output has the `recalculating` class.
+
+## Output images
+
+`listOutputs()` gives each output's `imageCount`. `getOutput()` also returns
+one page of `images` (`imageOffset`, default 0; `imageLimit`, default 10;
+the `get_output` tool caps it at 10). More remain while
+`imageOffset + images.length < imageCount`.
+
+- **Which images:** the output's own visible `<img src>` and `<canvas>`
+  elements, in page order. Images inside a nested output (a `plotOutput()` in
+  a `uiOutput()`) belong to that output, so they aren't counted twice.
+- **Entries:** `{index, type: "data", value}` for base64 `data:image/` URLs
+  (`renderPlot()`, `renderImage()`) and readable canvases (`toDataURL()`, PNG);
+  `{index, type: "url", value}` for any other `<img>` (not fetched);
+  `{index, type: "error", reason}` when a canvas has zero size, is one solid
+  color, or is tainted by cross-origin images (`toDataURL()` throws).
+- **WebMCP:** `toToolResult()` turns each `data` entry into MCP image
+  content, in order, and drops its `value` from the JSON. `url` and `error`
+  entries stay in the JSON.
+- **Indexes can shift** if the output re-renders between pages; compare
+  `imageCount` across calls.
+- **Tests:** `tests/testthat/test-zzz-st2-webmcp.R` (shinytest2, macOS CI
+  only) covers each entry type, nesting, paging and the tool's image
+  content, plus `callTool()` argument checks and `data-shiny-webmcp`. It
+  gets a cross-origin image by loading the app's own file from `localhost`
+  while the page is on `127.0.0.1`.
 
 ## Access: `data-shiny-drive-access`
 
@@ -83,11 +110,26 @@ console warning.
 
 - `enable()` registers four tools whose definitions never change, so the
   context cost doesn't grow with app size: `list_inputs {ids?, module?}`,
-  `set_input {id, value?}`, `list_outputs {ids?, module?}`, `get_output {id}`.
+  `set_input {id, value?}`, `list_outputs {ids?, module?}`,
+  `get_output {id, imageOffset?, imageLimit?}`.
   `disable()` removes only those four.
 - `registerTool()`, `unregisterTool()`, `listTools()`, `callTool()` and a
   `toolchange` event manage the registry. Each tool is mirrored with
   `document.modelContext.registerTool(tool, {signal})` when that exists.
+- `callTool()` runs `parseToolArgs()` (`driveSchema.ts`) before `execute`:
+  it accepts an object or a JSON string of one (hosts differ), rejects
+  unknown keys when the schema has `additionalProperties: false` (all four
+  built-in tools do) and missing `required` keys. The error includes the
+  schema and an example call, so the agent retries instead of giving up on
+  the tool. Value checks stay in `Shiny.drive`.
+- `<html data-shiny-webmcp>` shows the mirror's state: `pending`,
+  `registered`, `partial` (some tools failed), `failed`, or `unavailable`
+  (no `document.modelContext`). No attribute means no tools are mirrored.
+- **Origin trials:** native Chrome/Edge WebMCP needs a flag or an
+  origin-trial token. Tokens are per origin (each deployed app needs its
+  own), and third-party tokens must be injected by a script served from the
+  registered origin, so shiny can't ship one. The polyfill works without
+  one.
 - `webmcp_enabled()` (`R/webmcp.R`) reads `options(shiny.webmcp)`, falling
   back to the `SHINY_WEBMCP` env var (via `as.logical()`, so `"true"` works
   and `"1"` doesn't). Use it instead of reading the option directly.
@@ -132,6 +174,13 @@ console warning.
 - **Waits time out** after 10s (`flushTimeoutMs`). `flush()` rejects on
   timeout; `waitForOutputs()` gives up quietly, so results can still show
   `status: "recalculating"`.
+- **WebGL canvases usually read as blank.** Unless the widget created its
+  context with `preserveDrawingBuffer: true`, the browser clears the buffer
+  after each frame, so `toDataURL()` returns an empty image with no error.
+  `isSolidColor()` draws a copy and catches this (transparent, or opaque
+  black with `alpha: false`), returning an `error` entry rather than a blank
+  `data` one. Reading the widget's canvas through `getContext()` is avoided
+  on purpose: it could create a context the widget doesn't expect.
 - **`checkValue()` / `valueSchema()`** live in `driveSchema.ts`, apart from
   `drive.ts` (which listens on `document` at load), so they can be unit tested
   in Node.

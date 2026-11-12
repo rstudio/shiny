@@ -175,6 +175,25 @@ test_that("webMcpCall() checks arguments, runs the tool, and checks its value", 
   ))
   expect_equal(webMcpCall(session, session$ns("read_n"), list()), list(n = 3L))
 
+  # The documented pattern: session and input as default arguments, which the
+  # agent can't set
+  registerWebMcpTool(session = session, webMcpTool(
+    "add_n",
+    function(by, session = getDefaultReactiveDomain(), input = session$input) {
+      list(total = input$n + by, same = identical(session, getDefaultReactiveDomain()))
+    },
+    "d",
+    arguments = list(by = ellmer::type_integer())
+  ))
+  expect_equal(
+    webMcpCall(session, session$ns("add_n"), list(by = 2)),
+    list(total = 5, same = TRUE)
+  )
+  expect_error(
+    webMcpCall(session, session$ns("add_n"), list(by = 2, session = "x")),
+    "Unknown parameter `session`"
+  )
+
   # A value that doesn't match `value`
   registerWebMcpTool(session = session, webMcpTool(
     "bad_value", function() list(n = "three"), "d",

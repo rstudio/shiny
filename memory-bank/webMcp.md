@@ -151,7 +151,10 @@ documented and extended here. `name` comes first (like
 arguments are always named. `fun` takes only the agent's arguments
 (`do.call(fun, args)`), inside `isolate()` and `withReactiveDomain(scope)`, so
 `getDefaultReactiveDomain()` gives the calling (module) session and
-`session$input` its inputs. Outputs can't be read server-side; agents use
+`session$input` its inputs. The documented pattern is default arguments,
+`session = getDefaultReactiveDomain(), input = session$input` (evaluated during
+the call; agents can't set them since only `arguments` names are accepted).
+We chose this over injecting magic `input`/`session` formals. Outputs can't be read server-side; agents use
 `get_output`. `fun`'s formals without defaults must all have a type.
 
 - **Types:** `arguments` is a named list of ellmer types and `value` an

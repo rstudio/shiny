@@ -51,11 +51,43 @@ test_that("webMcpTool() checks its arguments", {
     webMcpTool("t", function(session) 1, "d", arguments = list(session = ellmer::type_string())),
     "can't describe `session`"
   )
-  # Defaults and `...` don't need types
+  # Arguments with defaults don't need types
   expect_s3_class(webMcpTool("t", function(x = 1) x, "d"), "shiny_webmcp_tool")
-  expect_s3_class(
-    webMcpTool("t", function(...) 1, "d", arguments = list(y = ellmer::type_string())),
-    "shiny_webmcp_tool"
+})
+
+test_that("webMcpTool() refuses a `fun` that takes `...`", {
+  # Agents can only send the keys listed in `arguments`: the input schema has
+  # `additionalProperties: false`, and both the browser and R reject unknown
+  # keys. So `...` could only ever receive typed arguments that `fun` doesn't
+  # name, which hides them from its signature. Free-form data goes in a named
+  # argument of type `ellmer::type_from_schema()` with an open object schema.
+  # (`ellmer::type_object(.additional_properties = TRUE)` is deprecated as of
+  # ellmer 0.5.0.)
+  expect_error(webMcpTool("t", function(...) 1, "d"), "can't take `...`")
+  expect_error(
+    webMcpTool("t", function(x, ...) x, "d", arguments = list(x = ellmer::type_string())),
+    "can't take `...`"
+  )
+  expect_error(
+    webMcpTool("t", function(x, ...) x, "d", arguments = list(x = ellmer::type_string())),
+    "type_from_schema()",
+    fixed = TRUE
+  )
+
+  # The supported way to take free-form data
+  open <- webMcpTool(
+    "t", function(filters) names(filters), "d",
+    arguments = list(filters = ellmer::type_from_schema(
+      '{"type": "object", "additionalProperties": true}'
+    ))
+  )
+  expect_equal(
+    webMcpToolInfo(open, "t")$inputSchema$properties$filters,
+    list(type = "object", additionalProperties = TRUE)
+  )
+  expect_equal(
+    webMcpConformObject(open$arguments, FALSE, list(filters = list(cyl = 6, gear = 4)), "", TRUE),
+    list(filters = list(cyl = 6, gear = 4))
   )
 })
 

@@ -30,7 +30,11 @@
 #' @param name The tool's name: letters, numbers, `_`, `.` or `-`. Inside a
 #'   module, [registerWebMcpTool()] prefixes it with the module's namespace.
 #' @param fun A function with one argument per entry of `arguments`, plus
-#'   optionally `input` and `session`. It returns a string (sent as
+#'   optionally `input` and `session`. It can't take `...`: agents can only
+#'   send the arguments in `arguments`. For free-form data, use one argument
+#'   of type
+#'   `ellmer::type_from_schema('{"type": "object", "additionalProperties": true}')`;
+#'   its value is passed on unchecked, so `fun` should check it. It returns a string (sent as
 #'   text), a list (sent as JSON), or a promise of either.
 #' @param description What the tool does and when an agent should use it.
 #' @param ... Must be empty. The arguments after it must be named.
@@ -128,20 +132,34 @@ webMcpTool <- function(
     stop("`annotations` must be a named list.", call. = FALSE)
   }
 
+  # No `...`: agents can only send the keys in `arguments` (the input schema
+  # has `additionalProperties: false`, checked in the browser and in R), so
+  # `...` could only ever catch typed arguments that `fun` doesn't name,
+  # hiding them from its signature. Free-form data belongs in a named
+  # argument, e.g. of type
+  # `ellmer::type_from_schema('{"type": "object", "additionalProperties": true}')`
+  # (`type_object(.additional_properties)` is deprecated in ellmer 0.5.0).
+  params <- formals(fun)
+  if ("..." %in% names(params)) {
+    stop(
+      "`fun` can't take `...`: agents can only send the arguments listed in ",
+      "`arguments`, so name each one. For free-form data, use one argument ",
+      "of type `ellmer::type_from_schema()`, e.g. ",
+      "`'{\"type\": \"object\", \"additionalProperties\": true}'`.",
+      call. = FALSE
+    )
+  }
   # Every argument needs a formal in `fun`, and every formal without a default
   # needs a type (or the agent could never supply it)
-  params <- formals(fun)
-  if (!"..." %in% names(params)) {
-    untaken <- setdiff(names(arguments), names(params))
-    if (length(untaken) > 0) {
-      stop(
-        "`fun` has no argument for: ", paste(untaken, collapse = ", "),
-        call. = FALSE
-      )
-    }
+  untaken <- setdiff(names(arguments), names(params))
+  if (length(untaken) > 0) {
+    stop(
+      "`fun` has no argument for: ", paste(untaken, collapse = ", "),
+      call. = FALSE
+    )
   }
   noDefault <- names(params)[vapply(params, rlang::is_missing, logical(1))]
-  untyped <- setdiff(noDefault, c(names(arguments), "...", webMcpInjectedArgs))
+  untyped <- setdiff(noDefault, c(names(arguments), webMcpInjectedArgs))
   if (length(untyped) > 0) {
     stop(
       "`arguments` has no type for `fun`'s argument: ",

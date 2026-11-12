@@ -40,8 +40,23 @@ app <- launch_test_app(function() {
     })
   }
 
-  ui <- fluidPage(numericInput("counter-n", "n", 1))
-  server <- function(input, output, session) counterServer("counter")
+  ui <- fluidPage(numericInput("counter-n", "n", 1), textOutput("label"))
+  server <- function(input, output, session) {
+    counterServer("counter")
+
+    # A tool changes what the page shows by setting a reactive value
+    label <- reactiveVal("start")
+    output$label <- renderText(label())
+    registerWebMcpTool(webMcpTool(
+      "set_label",
+      function(text) {
+        label(text)
+        "done"
+      },
+      "Set the label.",
+      arguments = list(text = ellmer::type_string())
+    ))
+  }
 
   shinyApp(ui, server)
 })
@@ -54,7 +69,7 @@ test_that("R tools are listed with their schemas", {
   )
   expect_setequal(
     names(tools),
-    c("list_inputs", "set_input", "list_outputs", "get_output", "summarize", "counter-add")
+    c("list_inputs", "set_input", "list_outputs", "get_output", "summarize", "counter-add", "set_label")
   )
   expect_equal(tools$summarize$inputSchema$properties$column$enum, list("mpg", "hp"))
   expect_equal(tools$summarize$outputSchema$required, list("column", "mean"))
@@ -71,6 +86,14 @@ test_that("calling an R tool runs it on the server", {
   expect_equal(res$content[[1]]$text, "Added 2")
   app$wait_for_idle()
   expect_equal(app$get_value(input = "counter-n"), 3)
+})
+
+test_that("a tool that sets a reactive value updates the page", {
+  expect_equal(app$get_value(output = "label"), "start")
+  res <- app$get_js("Shiny.webmcp.callTool('set_label', { text: 'from agent' })")
+  expect_equal(res$content[[1]]$text, "done")
+  app$wait_for_idle()
+  expect_equal(app$get_value(output = "label"), "from agent")
 })
 
 test_that("bad arguments come back as errors", {

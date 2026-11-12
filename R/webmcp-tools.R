@@ -10,11 +10,15 @@
 #' [isolate()] with the calling session as the reactive domain, so it can read
 #' reactive values and inputs.
 #'
-#' Like a server function, `fun` can take `input`, `output` and `session`
-#' arguments, in any position. When it does, they are filled in with the
-#' calling session's (in a module, the module's), like the arguments of a
-#' server function. These names are reserved: `arguments` can't describe
-#' them, so agents can't set them.
+#' Like a server function, `fun` can take `input` and `session` arguments, in
+#' any position. When it does, they are filled in with the calling session's
+#' (in a module, the module's). These names are reserved: `arguments` can't
+#' describe them, so agents can't set them.
+#'
+#' There is no `output`: a tool shouldn't render outputs itself. To change
+#' what the app shows, set a [reactiveVal()] that an output depends on; the
+#' output updates once the tool returns (see the example in
+#' [registerWebMcpTool()]).
 #'
 #' The argument and value types use
 #' [ellmer type specifications](https://ellmer.tidyverse.org/reference/type_boolean.html)
@@ -26,12 +30,12 @@
 #' @param name The tool's name: letters, numbers, `_`, `.` or `-`. Inside a
 #'   module, [registerWebMcpTool()] prefixes it with the module's namespace.
 #' @param fun A function with one argument per entry of `arguments`, plus
-#'   optionally `input`, `output` and `session`. It returns a string (sent as
+#'   optionally `input` and `session`. It returns a string (sent as
 #'   text), a list (sent as JSON), or a promise of either.
 #' @param description What the tool does and when an agent should use it.
 #' @param ... Must be empty. The arguments after it must be named.
 #' @param arguments A named list of ellmer types, one per argument of `fun`
-#'   (except `input`, `output` and `session`). Arguments with
+#'   (except `input` and `session`). Arguments with
 #'   `required = FALSE` may be missing, in which case `fun`'s default is used.
 #' @param value An `ellmer::type_object()` describing the list `fun` returns.
 #'   It becomes the tool's `outputSchema`. `NULL` (the default) skips the
@@ -89,8 +93,8 @@ webMcpTool <- function(
   reserved <- intersect(names(arguments), webMcpInjectedArgs)
   if (length(reserved) > 0) {
     stop(
-      "`arguments` can't describe `", reserved[[1]], "`; `input`, `output` ",
-      "and `session` are filled in from the calling session.",
+      "`arguments` can't describe `", reserved[[1]], "`; `input` and ",
+      "`session` are filled in from the calling session.",
       call. = FALSE
     )
   }
@@ -204,9 +208,15 @@ print.shiny_webmcp_tool <- function(x, ...) {
 #' )
 #'
 #' server <- function(input, output, session) {
-#'   cars <- reactive(mtcars[mtcars$cyl == input$cyl, ])
-#'   output$cars <- renderTable(cars())
+#'   # The table's sort column. The tool below sets it; the table reacts.
+#'   sort_by <- reactiveVal("mpg")
+#'   cars <- reactive({
+#'     shown <- mtcars[mtcars$cyl == input$cyl, ]
+#'     shown[order(shown[[sort_by()]]), ]
+#'   })
+#'   output$cars <- renderTable(cars(), rownames = TRUE)
 #'
+#'   # Read what the user sees
 #'   registerWebMcpTool(webMcpTool(
 #'     "summarize_shown_cars",
 #'     function(column) {
@@ -214,6 +224,18 @@ print.shiny_webmcp_tool <- function(x, ...) {
 #'       list(mean = mean(x), n = length(x))
 #'     },
 #'     "Mean of one column for the cars shown in the table.",
+#'     arguments = list(column = ellmer::type_enum(names(mtcars)))
+#'   ))
+#'
+#'   # Change what the user sees: set a reactive value, not an output. The
+#'   # table re-renders after the tool returns.
+#'   registerWebMcpTool(webMcpTool(
+#'     "sort_shown_cars",
+#'     function(column) {
+#'       sort_by(column)
+#'       paste("The table is now sorted by", column)
+#'     },
+#'     "Sort the cars table by one column.",
 #'     arguments = list(column = ellmer::type_enum(names(mtcars)))
 #'   ))
 #' }
@@ -259,7 +281,7 @@ registerWebMcpTool <- function(tool, session = getDefaultReactiveDomain()) {
 }
 
 # Filled in from the calling session when `fun` takes them
-webMcpInjectedArgs <- c("input", "output", "session")
+webMcpInjectedArgs <- c("input", "session")
 
 # Per-session tools, keyed by session token, then by (namespaced) tool name
 webMcpSessionTools <- new.env(parent = emptyenv())
@@ -311,7 +333,7 @@ webMcpCall <- function(session, name, args) {
   tool <- entry$tool
   scope <- entry$session
   # Like a server function's arguments, only the ones `fun` takes (~1µs)
-  injected <- list(input = scope$input, output = scope$output, session = scope)
+  injected <- list(input = scope$input, session = scope)
   injected <- injected[names(injected) %in% names(formals(tool$fun))]
   args <- tryCatch(
     webMcpConformObject(tool$arguments, FALSE, args %||% list(), "", simplify = TRUE),

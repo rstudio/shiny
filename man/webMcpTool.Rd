@@ -19,7 +19,7 @@ webMcpTool(
 module, \code{\link[=registerWebMcpTool]{registerWebMcpTool()}} prefixes it with the module's namespace.}
 
 \item{fun}{A function with one argument per entry of \code{arguments}, plus
-optionally \code{input}, \code{output} and \code{session}. It returns a string (sent as
+optionally \code{input} and \code{session}. It returns a string (sent as
 text), a list (sent as JSON), or a promise of either.}
 
 \item{description}{What the tool does and when an agent should use it.}
@@ -27,7 +27,7 @@ text), a list (sent as JSON), or a promise of either.}
 \item{...}{Must be empty. The arguments after it must be named.}
 
 \item{arguments}{A named list of ellmer types, one per argument of \code{fun}
-(except \code{input}, \code{output} and \code{session}). Arguments with
+(except \code{input} and \code{session}). Arguments with
 \code{required = FALSE} may be missing, in which case \code{fun}'s default is used.}
 
 \item{value}{An \code{ellmer::type_object()} describing the list \code{fun} returns.
@@ -50,11 +50,15 @@ Describes an R function that AI agents can call through WebMCP when
 \code{\link[=isolate]{isolate()}} with the calling session as the reactive domain, so it can read
 reactive values and inputs.
 
-Like a server function, \code{fun} can take \code{input}, \code{output} and \code{session}
-arguments, in any position. When it does, they are filled in with the
-calling session's (in a module, the module's), like the arguments of a
-server function. These names are reserved: \code{arguments} can't describe
-them, so agents can't set them.
+Like a server function, \code{fun} can take \code{input} and \code{session} arguments, in
+any position. When it does, they are filled in with the calling session's
+(in a module, the module's). These names are reserved: \code{arguments} can't
+describe them, so agents can't set them.
+
+There is no \code{output}: a tool shouldn't render outputs itself. To change
+what the app shows, set a \code{\link[=reactiveVal]{reactiveVal()}} that an output depends on; the
+output updates once the tool returns (see the example in
+\code{\link[=registerWebMcpTool]{registerWebMcpTool()}}).
 
 The argument and value types use
 \href{https://ellmer.tidyverse.org/reference/type_boolean.html}{ellmer type specifications}

@@ -45,9 +45,15 @@ ui <- fluidPage(
 )
 
 server <- function(input, output, session) {
-  cars <- reactive(mtcars[mtcars$cyl == input$cyl, ])
-  output$cars <- renderTable(cars())
+  # The table's sort column. The tool below sets it; the table reacts.
+  sort_by <- reactiveVal("mpg")
+  cars <- reactive({
+    shown <- mtcars[mtcars$cyl == input$cyl, ]
+    shown[order(shown[[sort_by()]]), ]
+  })
+  output$cars <- renderTable(cars(), rownames = TRUE)
 
+  # Read what the user sees
   registerWebMcpTool(webMcpTool(
     "summarize_shown_cars",
     function(column) {
@@ -55,6 +61,18 @@ server <- function(input, output, session) {
       list(mean = mean(x), n = length(x))
     },
     "Mean of one column for the cars shown in the table.",
+    arguments = list(column = ellmer::type_enum(names(mtcars)))
+  ))
+
+  # Change what the user sees: set a reactive value, not an output. The
+  # table re-renders after the tool returns.
+  registerWebMcpTool(webMcpTool(
+    "sort_shown_cars",
+    function(column) {
+      sort_by(column)
+      paste("The table is now sorted by", column)
+    },
+    "Sort the cars table by one column.",
     arguments = list(column = ellmer::type_enum(names(mtcars)))
   ))
 }

@@ -39,9 +39,14 @@ test_that("webMcpTool() checks its arguments", {
     "no argument for: y"
   )
   expect_error(webMcpTool("t", f, "d"), "no type for `fun`'s argument: x")
-  # `input`, `output` and `session` are filled in, so they need no type and
-  # can't have one
-  expect_s3_class(webMcpTool("t", function(input, output, session) 1, "d"), "shiny_webmcp_tool")
+  # `input` and `session` are filled in, so they need no type and can't have
+  # one. `output` isn't special.
+  expect_s3_class(webMcpTool("t", function(input, session) 1, "d"), "shiny_webmcp_tool")
+  expect_error(webMcpTool("t", function(output) 1, "d"), "no type for `fun`'s argument: output")
+  expect_s3_class(
+    webMcpTool("t", function(output) 1, "d", arguments = list(output = ellmer::type_string())),
+    "shiny_webmcp_tool"
+  )
   expect_error(
     webMcpTool("t", function(session) 1, "d", arguments = list(session = ellmer::type_string())),
     "can't describe `session`"
@@ -182,7 +187,7 @@ test_that("webMcpCall() checks arguments, runs the tool, and checks its value", 
   ))
   expect_equal(webMcpCall(session, session$ns("read_n"), list()), list(n = 3L))
 
-  # `input`, `output` and `session` are filled in when `fun` takes them, in
+  # `input` and `session` are filled in when `fun` takes them, in
   # any position, and agents can't set them
   registerWebMcpTool(session = session, webMcpTool(
     "add_n",
@@ -204,7 +209,7 @@ test_that("webMcpCall() checks arguments, runs the tool, and checks its value", 
   scope <- session$makeScope("mod")
   session$setInputs(`mod-n` = 10)
   registerWebMcpTool(session = scope, webMcpTool(
-    "mod_n", function(input, output) list(n = input$n), "d"
+    "mod_n", function(input) list(n = input$n), "d"
   ))
   expect_equal(webMcpCall(session, scope$ns("mod_n"), list()), list(n = 10))
 
@@ -229,6 +234,33 @@ test_that("webMcpCall() checks arguments, runs the tool, and checks its value", 
 
   withr::local_options(shiny.webmcp = FALSE)
   expect_error(webMcpCall(session, session$ns("summarize"), list(column = "mpg")), "not enabled")
+})
+
+test_that("a tool changes what the app shows through a reactive value", {
+  withr::local_options(shiny.webmcp = TRUE)
+  local_mocked_bindings(sendWebMcpTools = function(...) NULL)
+
+  testServer(
+    function(input, output, session) {
+      label <- reactiveVal("start")
+      output$label <- renderText(label())
+      registerWebMcpTool(webMcpTool(
+        "set_label",
+        function(text) {
+          label(text)
+          "done"
+        },
+        "Set the label.",
+        arguments = list(text = ellmer::type_string())
+      ))
+    },
+    {
+      expect_equal(output$label, "start")
+      expect_equal(webMcpCall(session, session$ns("set_label"), list(text = "agent")), "done")
+      session$flushReact()
+      expect_equal(output$label, "agent")
+    }
+  )
 })
 
 test_that("webMcpCall() supports promises", {

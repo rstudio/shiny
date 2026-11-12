@@ -149,14 +149,16 @@ shaped like `ellmer::tool()` but is shiny's own S3 object, so it can be
 documented and extended here. `name` comes first (like
 `registerInputHandler(type, fun)`); `...` must be empty, so the optional
 arguments are always named. `fun` gets the agent's arguments plus
-`input`, `output` and `session` when its formals name them (any position),
+`input` and `session` when its formals name them (any position),
 like `argsForServerFunc()` does for server functions (`R/server.R`). They
 come from the calling (module) session; the lookup runs per call in
 `webMcpCall()` (~1µs, negligible next to the websocket round trip). The names
 are reserved: `arguments` can't describe them, so agents can't set them
 (plumber2 does the same for path args vs. its `query`/`body` names). Runs inside
-`isolate()` and `withReactiveDomain(scope)`. Outputs can't be read server-side; agents use
-`get_output`. `fun`'s formals without defaults must all have a type.
+`isolate()` and `withReactiveDomain(scope)`. No `output` (Barret's call): a
+tool shouldn't render outputs; it sets a `reactiveVal()` that an output reads,
+and `serviceApp()`'s `flushReact()` after the RPC message updates the page.
+Outputs can't be read server-side either; agents use `get_output`. `fun`'s formals without defaults must all have a type.
 
 - **Types:** `arguments` is a named list of ellmer types and `value` an
   `ellmer::type_object()` (`value` mirrors R's "Value" doc section; it becomes

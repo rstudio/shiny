@@ -59,10 +59,10 @@ test_that("webMcpTool() refuses a `fun` that takes `...`", {
   # Agents can only send the keys listed in `arguments`: the input schema has
   # `additionalProperties: false`, and both the browser and R reject unknown
   # keys. So `...` could only ever receive typed arguments that `fun` doesn't
-  # name, which hides them from its signature. Free-form data goes in a named
-  # argument of type `ellmer::type_from_schema()` with an open object schema.
+  # name, which hides them from its signature. Free-form data goes in a
+  # declared argument: an array of name-value pairs, as ellmer recommends.
   # (`ellmer::type_object(.additional_properties = TRUE)` is deprecated as of
-  # ellmer 0.5.0.)
+  # ellmer 0.5.0 because providers' structured output can't fill open objects.)
   expect_error(webMcpTool("t", function(...) 1, "d"), "can't take `...`")
   expect_error(
     webMcpTool("t", function(x, ...) x, "d", arguments = list(x = ellmer::type_string())),
@@ -74,20 +74,28 @@ test_that("webMcpTool() refuses a `fun` that takes `...`", {
     fixed = TRUE
   )
 
-  # The supported way to take free-form data
-  open <- webMcpTool(
-    "t", function(filters) names(filters), "d",
-    arguments = list(filters = ellmer::type_from_schema(
-      '{"type": "object", "additionalProperties": true}'
-    ))
+  # The supported way to take free-form data: name-value pairs, all checked
+  pairs <- webMcpTool(
+    "t", function(filters) vapply(filters, `[[`, "", "column"), "d",
+    arguments = list(filters = ellmer::type_array(ellmer::type_object(
+      column = ellmer::type_enum(c("cyl", "gear")),
+      value = ellmer::type_number()
+    )))
   )
+  filters <- webMcpToolInfo(pairs, "t")$inputSchema$properties$filters
+  expect_equal(filters$type, "array")
+  expect_false(filters$items$additionalProperties)
   expect_equal(
-    webMcpToolInfo(open, "t")$inputSchema$properties$filters,
-    list(type = "object", additionalProperties = TRUE)
+    webMcpConformObject(
+      pairs$arguments, FALSE,
+      list(filters = list(list(column = "cyl", value = 6), list(column = "gear", value = 4))),
+      "", TRUE
+    ),
+    list(filters = list(list(column = "cyl", value = 6), list(column = "gear", value = 4)))
   )
-  expect_equal(
-    webMcpConformObject(open$arguments, FALSE, list(filters = list(cyl = 6, gear = 4)), "", TRUE),
-    list(filters = list(cyl = 6, gear = 4))
+  expect_error(
+    webMcpConformObject(pairs$arguments, FALSE, list(filters = list(list(column = "hp", value = 1))), "", TRUE),
+    "`filters\\[1\\].column` must be one of"
   )
 })
 
@@ -295,8 +303,51 @@ test_that("a tool changes what the app shows through a reactive value", {
   )
 })
 
-test_that("open objects never add parameters to `fun`", {
-  # `additionalProperties: true` is only allowed inside a declared argument.
+test_that("webMcpTool() refuses open objects in `arguments`", {
+  # An open object's keys would go unchecked, and providers' strict modes
+  # can't fill them (ellmer 0.5.0 deprecated `type_object(.additional_properties)`
+  # for this). Free-form data is an array of name-value pairs instead.
+  f <- function(x) x
+  open_tool <- function(type) webMcpTool("t", f, "d", arguments = list(x = type))
+
+  expect_error(
+    open_tool(ellmer::type_from_schema('{"type": "object", "additionalProperties": true}')),
+    "can't contain open objects \\(`x`\\)"
+  )
+  # In JSON Schema, an object without `additionalProperties` is open
+  expect_error(
+    open_tool(ellmer::type_from_schema('{"type": "object", "properties": {"a": {"type": "string"}}}')),
+    "open objects"
+  )
+  # Nested anywhere: in arrays, in `anyOf`, in ellmer objects
+  expect_error(
+    open_tool(ellmer::type_from_schema('{"type": "array", "items": {"type": "object"}}')),
+    "`x.items`"
+  )
+  expect_error(
+    open_tool(ellmer::type_from_schema('{"anyOf": [{"type": "string"}, {"type": ["object", "null"]}]}')),
+    "`x.anyOf\\[2\\]`"
+  )
+  expect_error(
+    open_tool(ellmer::type_object(
+      inner = ellmer::type_from_schema('{"type": "object", "additionalProperties": {"type": "string"}}')
+    )),
+    "`x.properties.inner`"
+  )
+  rlang::local_options(lifecycle_verbosity = "quiet")
+  expect_error(open_tool(ellmer::type_object(.additional_properties = TRUE)), "open objects")
+
+  # Closed objects are fine, from ellmer types or from a schema
+  expect_s3_class(open_tool(ellmer::type_object(a = ellmer::type_string())), "shiny_webmcp_tool")
+  expect_s3_class(
+    open_tool(ellmer::type_from_schema(
+      '{"type": "object", "properties": {"a": {"type": "string"}}, "additionalProperties": false}'
+    )),
+    "shiny_webmcp_tool"
+  )
+})
+
+test_that("agents can't add parameters to `fun`", {
   # The top level is always closed, and R enforces it even when the browser's
   # check is skipped (e.g. a direct `@webmcpCall`).
   withr::local_options(shiny.webmcp = TRUE)
@@ -305,24 +356,14 @@ test_that("open objects never add parameters to `fun`", {
   withr::defer(session$close())
 
   registerWebMcpTool(session = session, webMcpTool(
-    "filter_rows",
-    function(filters, input) list(args = names(filters)),
-    "d",
-    arguments = list(filters = ellmer::type_from_schema(
-      '{"type": "object", "additionalProperties": true}'
-    ))
+    "count", function(column, input) length(column), "d",
+    arguments = list(column = ellmer::type_string())
   ))
-  name <- session$ns("filter_rows")
-  expect_false(webMcpToolInfo(webMcpSessionTools[[session$token]][[name]]$tool, name)$inputSchema$additionalProperties)
-
-  # Free-form keys stay inside `filters`
-  expect_equal(
-    webMcpCall(session, name, list(filters = list(cyl = 6, session = "x"))),
-    list(args = c("cyl", "session"))
-  )
+  name <- session$ns("count")
+  expect_equal(webMcpCall(session, name, list(column = "mpg")), 1L)
   # Anything else at the top level is refused, including the reserved names
-  expect_error(webMcpCall(session, name, list(filters = list(), cyl = 6)), "Unknown parameter `cyl`")
-  expect_error(webMcpCall(session, name, list(filters = list(), input = list())), "Unknown parameter `input`")
+  expect_error(webMcpCall(session, name, list(column = "mpg", cyl = 6)), "Unknown parameter `cyl`")
+  expect_error(webMcpCall(session, name, list(column = "mpg", input = list())), "Unknown parameter `input`")
 })
 
 test_that("webMcpCall() supports promises", {

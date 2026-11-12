@@ -160,9 +160,15 @@ tool shouldn't render outputs; it sets a `reactiveVal()` that an output reads,
 and `serviceApp()`'s `flushReact()` after the RPC message updates the page.
 Outputs can't be read server-side either; agents use `get_output`. `fun`'s formals without defaults must all have a type, and `fun`
 can't take `...` (agents can only send `arguments` keys, so it would only hide
-typed args; free-form data uses one `type_from_schema()` argument with an open
-object schema, passed on unchecked. `type_object(.additional_properties)` is
-deprecated as of ellmer 0.5.0).
+typed args). Free-form data: a declared array of name-value pairs
+(`type_array(type_object(name = type_enum(...), value = ...))`), fully checked.
+Don't recommend open objects: ellmer 0.5.0 deprecated
+`type_object(.additional_properties)` because no provider's structured output
+can fill them (strict modes need closed objects). `webMcpTool()` refuses any
+open object in `arguments` (`webMcpOpenObjects()` walks the whole schema,
+including `type_from_schema()` JSON; an object without `additionalProperties`
+counts as open, per JSON Schema). Note `type_from_schema()` values are still
+not checked in R beyond that. `value` may contain open objects.
 
 - **Types:** `arguments` is a named list of ellmer types and `value` an
   `ellmer::type_object()` (`value` mirrors R's "Value" doc section; it becomes

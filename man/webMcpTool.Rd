@@ -20,10 +20,8 @@ module, \code{\link[=registerWebMcpTool]{registerWebMcpTool()}} prefixes it with
 
 \item{fun}{A function with one argument per entry of \code{arguments}, plus
 optionally \code{input} and \code{session}. It can't take \code{...}: agents can only
-send the arguments in \code{arguments}. For free-form data, use one argument
-of type
-\code{ellmer::type_from_schema('{"type": "object", "additionalProperties": true}')};
-its value is passed on unchecked, so \code{fun} should check it. It returns a string (sent as
+send the arguments in \code{arguments}. For free-form data, declare an
+argument holding an array of name-value pairs (see the examples). It returns a string (sent as
 text), a list (sent as JSON), or a promise of either.}
 
 \item{description}{What the tool does and when an agent should use it.}
@@ -32,7 +30,9 @@ text), a list (sent as JSON), or a promise of either.}
 
 \item{arguments}{A named list of ellmer types, one per argument of \code{fun}
 (except \code{input} and \code{session}). Arguments with
-\code{required = FALSE} may be missing, in which case \code{fun}'s default is used.}
+\code{required = FALSE} may be missing, in which case \code{fun}'s default is used.
+Objects must be closed: an \code{ellmer::type_from_schema()} object needs
+\code{"additionalProperties": false}.}
 
 \item{value}{An \code{ellmer::type_object()} describing the list \code{fun} returns.
 It becomes the tool's \code{outputSchema}. \code{NULL} (the default) skips the
@@ -104,6 +104,25 @@ filter_cars <- webMcpTool(
   arguments = list(
     column = ellmer::type_enum(names(mtcars)),
     min = ellmer::type_number()
+  )
+)
+
+# For free-form data, take an array of name-value pairs. Every name and value
+# is checked, and agents see which names are allowed. Arrays of objects
+# arrive in R as a list of lists.
+filter_rows <- webMcpTool(
+  "filter_rows",
+  function(filters) {
+    keep <- rep(TRUE, nrow(mtcars))
+    for (f in filters) keep <- keep & mtcars[[f$column]] == f$value
+    rownames(mtcars)[keep]
+  },
+  "Names of the cars where each column equals its value.",
+  arguments = list(
+    filters = ellmer::type_array(ellmer::type_object(
+      column = ellmer::type_enum(names(mtcars)),
+      value = ellmer::type_number()
+    ))
   )
 )
 \dontshow{\}) # examplesIf}

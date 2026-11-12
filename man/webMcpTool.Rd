@@ -18,17 +18,17 @@ webMcpTool(
 \item{name}{The tool's name: letters, numbers, \verb{_}, \code{.} or \code{-}. Inside a
 module, \code{\link[=registerWebMcpTool]{registerWebMcpTool()}} prefixes it with the module's namespace.}
 
-\item{fun}{A function with one argument per entry of \code{arguments}. It
-returns a string (sent as text), a list (sent as JSON), or a promise of
-either.}
+\item{fun}{A function with one argument per entry of \code{arguments}, plus
+optionally \code{input}, \code{output} and \code{session}. It returns a string (sent as
+text), a list (sent as JSON), or a promise of either.}
 
 \item{description}{What the tool does and when an agent should use it.}
 
 \item{...}{Must be empty. The arguments after it must be named.}
 
-\item{arguments}{A named list of ellmer types, one per argument of \code{fun}.
-Arguments with \code{required = FALSE} may be missing, in which case \code{fun}'s
-default is used.}
+\item{arguments}{A named list of ellmer types, one per argument of \code{fun}
+(except \code{input}, \code{output} and \code{session}). Arguments with
+\code{required = FALSE} may be missing, in which case \code{fun}'s default is used.}
 
 \item{value}{An \code{ellmer::type_object()} describing the list \code{fun} returns.
 It becomes the tool's \code{outputSchema}. \code{NULL} (the default) skips the
@@ -48,13 +48,13 @@ Describes an R function that AI agents can call through WebMCP when
 
 \code{fun} is called with the arguments the agent sent. It runs inside
 \code{\link[=isolate]{isolate()}} with the calling session as the reactive domain, so it can read
-reactive values and inputs. Inside the server function, \code{fun} can use the
-server's \code{input} and \code{session} directly. Outside it, give \code{fun} arguments
-with defaults: \code{session = getDefaultReactiveDomain()} and
-\code{input = session$input}. Defaults are evaluated during the call, so they
-get the calling session (in a module, the module's session). Agents can't
-set them, because only the names in \code{arguments} are accepted, and tests can
-pass a session directly.
+reactive values and inputs.
+
+Like a server function, \code{fun} can take \code{input}, \code{output} and \code{session}
+arguments, in any position. When it does, they are filled in with the
+calling session's (in a module, the module's), like the arguments of a
+server function. These names are reserved: \code{arguments} can't describe
+them, so agents can't set them.
 
 The argument and value types use
 \href{https://ellmer.tidyverse.org/reference/type_boolean.html}{ellmer type specifications}
@@ -83,12 +83,10 @@ summarize_column <- webMcpTool(
   annotations = list(readOnlyHint = TRUE)
 )
 
-# Outside the server function, get the calling session and its inputs
-# through default arguments
+# Take `input` and `session` to read the calling session's inputs
 filter_cars <- webMcpTool(
   "filter_cars",
-  function(column, min,
-           session = getDefaultReactiveDomain(), input = session$input) {
+  function(column, min, input, session) {
     cars <- mtcars[mtcars$cyl == input$cyl, ]
     cars <- cars[cars[[column]] >= min, ]
     paste(nrow(cars), "of the", input$cyl, "cylinder cars in session",

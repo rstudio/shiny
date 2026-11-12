@@ -28,6 +28,7 @@
 #'   * `"write-only"`: the value can be set but not read back.
 #'   * `"exclude"`: not listed, read, or set at all.
 #' @return `tag`, with the `data-shiny-drive-access` attribute set.
+#' @seealso [webMcpTool()] to define WebMCP tools in R.
 #'
 #' @examples
 #' textInput("api_key", "API key") |> webMcpAccess("exclude")

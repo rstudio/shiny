@@ -213,6 +213,11 @@ JS side, in `srcts/src/bindings/`:
   switches to promise chaining when needed. Outputs, observers and caches all
   use it. Async observers hold `busyCount > 0` until they resolve, which
   defers input updates and output flushes.
+- `quoToSimpleFunction()` (`R/utils-lang.R`), which every expression helper
+  ends in, runs code that calls `await()`/`await_each()` as a
+  `coro::async()` function (`awaitToAsyncFunction()`). The user's code is
+  kept in the `shinyUserBody` attribute; label and cache-key code reads it
+  with `fnUserBody()`, so it must not use `fn_body()`/`body()` directly.
 - `ExtendedTask` (`R/extended-task.R`) keeps private `reactiveVal`s for
   status, value and error. `invoke()` runs `func` under
   `maskReactiveContext()` and queues the call if a run is already active.

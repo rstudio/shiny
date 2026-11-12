@@ -61,6 +61,26 @@ expressions that depend on each other.
 See the \href{https://shiny.posit.co/tutorial/}{Shiny tutorial} for
 more information about reactive expressions.
 }
+\section{Async code with \code{await()}}{
+
+
+If the code calls \code{await()} or \code{await_each()} from the \pkg{coro} package,
+Shiny runs it as a \code{coro::async()} function, so the reactive returns a
+promise. Inputs and reactives read after an \code{await()} are still tracked.
+The same applies to \code{\link[=observe]{observe()}}, \code{\link[=observeEvent]{observeEvent()}}, \code{\link[=eventReactive]{eventReactive()}}, and
+the \verb{render*()} functions.
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{r <- reactive(\{
+  data <- await(fetch_data(input$id))
+  head(data, input$n)
+\})
+}\if{html}{\out{</div>}}
+
+\pkg{coro} only allows \code{await()} as a statement of its own or on the right
+of \verb{<-}. Use \verb{x <- await(p); f(x)}, not \code{f(await(p))}. \code{await()} inside a
+nested \verb{function()} is left alone.
+}
+
 \examples{
 library(rlang)
 values <- reactiveValues(A=1)

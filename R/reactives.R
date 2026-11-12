@@ -1121,7 +1121,7 @@ Observable <- R6Class(
       invisible()
     },
     format = function() {
-      simpleExprToFunction(fn_body(.origFunc), "reactive")
+      simpleExprToFunction(fnUserBody(.origFunc), "reactive")
     },
     .updateValue = function() {
       ctx <- Context$new(
@@ -1209,6 +1209,25 @@ Observable <- R6Class(
 #' See the [Shiny tutorial](https://shiny.posit.co/tutorial/) for
 #' more information about reactive expressions.
 #'
+#' @section Async code with `await()`:
+#'
+#' If the code calls `await()` or `await_each()` from the \pkg{coro} package,
+#' Shiny runs it as a `coro::async()` function, so the reactive returns a
+#' promise. Inputs and reactives read after an `await()` are still tracked.
+#' The same applies to [observe()], [observeEvent()], [eventReactive()], and
+#' the `render*()` functions.
+#'
+#' ```r
+#' r <- reactive({
+#'   data <- await(fetch_data(input$id))
+#'   head(data, input$n)
+#' })
+#' ```
+#'
+#' \pkg{coro} only allows `await()` as a statement of its own or on the right
+#' of `<-`. Use `x <- await(p); f(x)`, not `f(await(p))`. `await()` inside a
+#' nested `function()` is left alone.
+#'
 #' @param x For `is.reactive()`, an object to test. For `reactive()`, an
 #'   expression. When passing in a [`rlang::quo()`]sure with `reactive()`,
 #'   remember to use [`rlang::inject()`] to distinguish that you are passing in
@@ -1271,7 +1290,7 @@ reactive <- function(
 
   func <- installExprFunction(x, "func", env, quoted, wrappedWithLabel = FALSE)
   # Attach a label and a reference to the original user source for debugging
-  userExpr <- fn_body(func)
+  userExpr <- fnUserBody(func)
   label <- exprToLabel(userExpr, "reactive", label)
 
   o <- Observable$new(func, label, domain, ..stacktraceon = ..stacktraceon)
@@ -2725,7 +2744,7 @@ eventReactive <- function(eventExpr, valueExpr,
 
   func <- installExprFunction(eventExpr, "func", event.env, event.quoted, wrappedWithLabel = FALSE)
   # Attach a label and a reference to the original user source for debugging
-  userEventExpr <- fn_body(func)
+  userEventExpr <- fnUserBody(func)
 
   call_srcref <- get_call_srcref()
   if (is.null(label)) {

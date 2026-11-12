@@ -46,7 +46,7 @@ formalsAndBody <- function(x) {
 
   list(
     formals = formals(x),
-    body = body(zap_srcref(x))
+    body = zap_srcref(fnUserBody(x, body))
   )
 }
 
@@ -102,7 +102,76 @@ quoToSimpleFunction <- function(q) {
   # args.
   fn_fmls(fun) <- list()
 
-  fun
+  awaitToAsyncFunction(fun)
+}
+
+# If the body of `fun` calls `await()` or `await_each()` at its own level, run
+# it as a `coro::async()` function so it returns a promise. The user's code is
+# kept in the "shinyUserBody" attribute for labels and cache keys (see
+# `fnUserBody()`).
+awaitToAsyncFunction <- function(fun) {
+  body <- fn_body(fun)
+  if (!hasAwait(body)) {
+    return(fun)
+  }
+  rlang::check_installed("coro", "to use `await()` in reactive code.")
+
+  # Bind `await()` so that a misplaced call (such as `f(await(p))`) gets coro's
+  # error message instead of "could not find function", even when coro is not
+  # attached
+  env <- new.env(parent = environment(fun))
+  env$await <- coro::await
+  env$await_each <- coro::await_each
+
+  # `coro::async()` only accepts a `function` written out in the call
+  asyncFun <- eval(
+    as.call(list(quote(coro::async), call("function", NULL, body))),
+    env
+  )
+  out <- function() asyncFun()
+  attr(out, "shinyUserBody") <- body
+  out
+}
+
+# The user's code for a function made by `quoToSimpleFunction()`
+fnUserBody <- function(fun, getBody = fn_body) {
+  attr(fun, "shinyUserBody", exact = TRUE) %||% getBody(fun)
+}
+
+awaitCalls <- c("await", "await_each")
+# Calls that start their own scope; `await()` inside them is not ours
+awaitScopeCalls <- c(
+  "function", "quote", "async", "async_generator", "generator"
+)
+isCallTo <- function(head, names) {
+  if (is.symbol(head)) {
+    return(as.character(head) %in% names)
+  }
+  is.call(head) &&
+    identical(head[[1]], quote(`::`)) &&
+    identical(head[[2]], quote(coro)) &&
+    as.character(head[[3]]) %in% names
+}
+
+# Does `expr` call `await()` or `await_each()` outside a nested scope?
+hasAwait <- function(expr) {
+  if (!is.call(expr)) {
+    return(FALSE)
+  }
+  head <- expr[[1]]
+  if (isCallTo(head, awaitCalls)) {
+    return(TRUE)
+  }
+  if (isCallTo(head, awaitScopeCalls)) {
+    return(FALSE)
+  }
+  for (i in seq_along(expr)) {
+    # `is.call()` is safe on empty args such as `x[, 1]`
+    if (is.call(expr[[i]]) && hasAwait(expr[[i]])) {
+      return(TRUE)
+    }
+  }
+  FALSE
 }
 
 
@@ -222,7 +291,7 @@ simpleExprToFunction <- function(expr, function_name) {
 }
 
 installedFuncExpr <- function(func) {
-  fn_body(attr(func, "wrappedFunc", exact = TRUE))
+  fnUserBody(attr(func, "wrappedFunc", exact = TRUE))
 }
 
 funcToLabelBody <- function(func) {

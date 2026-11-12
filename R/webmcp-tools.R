@@ -493,7 +493,8 @@ webMcpConform <- function(type, x, path, simplify) {
       boolean = if (!scalar(is.logical(x))) fail("a boolean"),
       number = if (!scalar(is.numeric(x))) fail("a number"),
       integer = {
-        if (!scalar(is.numeric(x) && x == round(x))) fail("an integer")
+        isInt <- scalar(is.numeric(x) && x == round(x) && abs(x) <= .Machine$integer.max)
+        if (!isInt) fail("an integer")
         x <- as.integer(x)
       }
     )

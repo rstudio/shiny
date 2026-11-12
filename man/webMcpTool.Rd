@@ -19,7 +19,11 @@ webMcpTool(
 module, \code{\link[=registerWebMcpTool]{registerWebMcpTool()}} prefixes it with the module's namespace.}
 
 \item{fun}{A function with one argument per entry of \code{arguments}, plus
-optionally \code{input} and \code{session}. It returns a string (sent as
+optionally \code{input} and \code{session}. It can't take \code{...}: agents can only
+send the arguments in \code{arguments}. For free-form data, use one argument
+of type
+\code{ellmer::type_from_schema('{"type": "object", "additionalProperties": true}')};
+its value is passed on unchecked, so \code{fun} should check it. It returns a string (sent as
 text), a list (sent as JSON), or a promise of either.}
 
 \item{description}{What the tool does and when an agent should use it.}

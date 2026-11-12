@@ -158,7 +158,11 @@ are reserved: `arguments` can't describe them, so agents can't set them
 `isolate()` and `withReactiveDomain(scope)`. No `output` (Barret's call): a
 tool shouldn't render outputs; it sets a `reactiveVal()` that an output reads,
 and `serviceApp()`'s `flushReact()` after the RPC message updates the page.
-Outputs can't be read server-side either; agents use `get_output`. `fun`'s formals without defaults must all have a type.
+Outputs can't be read server-side either; agents use `get_output`. `fun`'s formals without defaults must all have a type, and `fun`
+can't take `...` (agents can only send `arguments` keys, so it would only hide
+typed args; free-form data uses one `type_from_schema()` argument with an open
+object schema, passed on unchecked. `type_object(.additional_properties)` is
+deprecated as of ellmer 0.5.0).
 
 - **Types:** `arguments` is a named list of ellmer types and `value` an
   `ellmer::type_object()` (`value` mirrors R's "Value" doc section; it becomes

@@ -195,7 +195,7 @@ not checked in R beyond that. `value` may contain open objects.
   ones. Errors reach the agent as the RPC error; with
   `options(shiny.sanitize.errors = TRUE)` only `safeError()`s keep their
   message, and the original is logged with `message()`.
-- **Tests:** `test-webmcp-tools.R` (unit; note `MockShinySession$ns()`
+- **Tests:** `test-webmcp-tools-types.R` (the shape of `arguments`/`value`: defining, JSON Schema, checking JSON input and serialized output; one place per behavior), `test-webmcp-tools.R` (unit; note `MockShinySession$ns()`
   prefixes `mock-session-`) and `test-zzz-st2-webmcp-tools.R` (browser).
 
 ## Server side (`R/shiny.R`)

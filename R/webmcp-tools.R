@@ -42,8 +42,11 @@
 #'   Objects must be closed: an `ellmer::type_from_schema()` object needs
 #'   `"additionalProperties": false`.
 #' @param value An `ellmer::type_object()` describing the list `fun` returns.
-#'   It becomes the tool's `outputSchema`. `NULL` (the default) skips the
-#'   check.
+#'   It becomes the tool's `outputSchema`, and the result is checked and
+#'   shaped to it before being sent: arrays are always sent as JSON arrays,
+#'   even with length 0 or 1. `NULL` (the default) skips this. Declare `value`
+#'   if the result contains arrays; otherwise a length-1 vector is sent as a
+#'   single value.
 #' @param annotations A named list of WebMCP tool annotations, e.g.
 #'   `list(readOnlyHint = TRUE)`.
 #' @return A `shiny_webmcp_tool` object.

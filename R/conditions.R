@@ -695,6 +695,23 @@ offsetSrcrefs <- function(calls, offset = TRUE) {
     # E.g. for "foo [bar.R:10]", line 10 of bar.R will be part of
     # the definition of foo().
     srcrefs <- c(utils::tail(srcrefs, -1), list(NULL))
+
+    # A call's srcref is a location in its parent's code, and the parent is
+    # usually the frame just before it. When code is run with `eval()` in
+    # another frame's env (as `coro::async()` does after `await()`), the parent
+    # is further back, and the frame just before it is often pruned. So give
+    # each frame the srcref of its latest child call that has one.
+    parents <- attr(calls, "parents", exact = TRUE)
+    if (length(parents) == length(calls)) {
+      original <- getSrcRefs(calls)
+      for (k in seq_along(parents)) {
+        parent <- parents[[k]]
+        if (parent > 0 && parent < k - 1 && !is.null(original[[k]])) {
+          srcrefs[[parent]] <- original[[k]]
+        }
+      }
+    }
+
     calls <- setSrcRefs(calls, srcrefs)
   }
 

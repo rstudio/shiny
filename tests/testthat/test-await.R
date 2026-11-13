@@ -654,3 +654,24 @@ test_that("render functions with await() and bindCache() cache by key", {
     expect_identical(runs, 2)
   })
 })
+
+# ---- Stack traces -------------------------------------------------------------
+
+test_that("a stack trace after await() shows the user's line", {
+  skip_if_not_installed("coro")
+  lines <- c(
+    "captureStackTraces(isolate(reactive({",
+    "  x <- await(promises::promise_resolve(1))",
+    "  stop('boom')",
+    "})()))"
+  )
+  p <- eval(parse(
+    text = lines,
+    keep.source = TRUE,
+    srcfile = srcfilecopy("app.R", lines)
+  ))
+  err <- tryCatch(resolve(p), error = identity)
+  expect_match(conditionMessage(err), "boom")
+  out <- capture.output(printStackTrace(err), type = "message")
+  expect_match(out, "app.R#3", fixed = TRUE, all = FALSE)
+})

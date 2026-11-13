@@ -657,21 +657,55 @@ test_that("render functions with await() and bindCache() cache by key", {
 
 # ---- Stack traces -------------------------------------------------------------
 
-test_that("a stack trace after await() shows the user's line", {
+# Run reactive code from `lines` (as file "app.R") and return the printed error
+# header and stack trace
+printedAsyncError <- function(lines) {
+  # coro throws an error before the first `await()` right away
+  err <- tryCatch(
+    resolve(eval(parse(
+      text = lines,
+      keep.source = TRUE,
+      srcfile = srcfilecopy("app.R", lines)
+    ))),
+    error = identity
+  )
+  header <- NULL
+  trace <- capture.output(
+    withCallingHandlers(
+      printError(err),
+      warning = function(w) {
+        header <<- conditionMessage(w)
+        invokeRestart("muffleWarning")
+      }
+    ),
+    type = "message"
+  )
+  list(header = header, trace = trace)
+}
+
+test_that("a stack trace after await() shows the reactive and the user's line", {
   skip_if_not_installed("coro")
-  lines <- c(
-    "captureStackTraces(isolate(reactive({",
+  out <- printedAsyncError(c(
+    "captureStackTraces(isolate(reactive(label = 'r', {",
     "  x <- await(promises::promise_resolve(1))",
     "  stop('boom')",
     "})()))"
-  )
-  p <- eval(parse(
-    text = lines,
-    keep.source = TRUE,
-    srcfile = srcfilecopy("app.R", lines)
   ))
-  err <- tryCatch(resolve(p), error = identity)
-  expect_match(conditionMessage(err), "boom")
-  out <- capture.output(printStackTrace(err), type = "message")
-  expect_match(out, "app.R#3", fixed = TRUE, all = FALSE)
+  expect_identical(out$header, "Error in <reactive:r>: boom")
+  expect_match(out$trace, "<reactive:r> [app.R#3]", fixed = TRUE, all = FALSE)
+  # coro's frames tell the user nothing
+  expect_no_match(out$trace, "eval_bare|evalq|wrapOnFulfilled")
+})
+
+test_that("a stack trace before await() hides coro's frames", {
+  skip_if_not_installed("coro")
+  out <- printedAsyncError(c(
+    "captureStackTraces(isolate(reactive(label = 'r', {",
+    "  stop('boom')",
+    "  x <- await(promises::promise_resolve(1))",
+    "})()))"
+  ))
+  expect_identical(out$header, "Error in <reactive:r>: boom")
+  expect_match(out$trace, "<reactive:r> [app.R#2]", fixed = TRUE, all = FALSE)
+  expect_no_match(out$trace, "eval_bare|evalq|instance")
 })

@@ -187,6 +187,34 @@ test_that("webMcpCall() checks arguments, runs the tool, and checks its value", 
   expect_error(webMcpCall(session, session$ns("summarize"), list(column = "mpg")), "not enabled")
 })
 
+test_that("the calling session is the default reactive domain, wherever the tool was registered", {
+  withr::local_options(shiny.webmcp = TRUE)
+  local_mocked_bindings(sendWebMcpTools = function(...) NULL)
+  whoami <- function(name) {
+    webMcpTool(name, function() {
+      domain <- getDefaultReactiveDomain()
+      list(token = domain$token, ns = domain$ns("x"))
+    }, "d")
+  }
+
+  # For every session: each call runs in the session that made it
+  unregister <- registerWebMcpTool(whoami("global"), session = NULL)
+  withr::defer(unregister())
+  s1 <- MockShinySession$new()
+  s2 <- MockShinySession$new()
+  withr::defer({ s1$close(); s2$close() })
+  expect_equal(webMcpCall(s1, "global", list())$token, s1$token)
+  expect_equal(webMcpCall(s2, "global", list())$token, s2$token)
+
+  # For one session, and in a module: the module's scope
+  registerWebMcpTool(whoami("own"), session = s1)
+  expect_equal(webMcpCall(s1, s1$ns("own"), list()), list(token = s1$token, ns = s1$ns("x")))
+
+  scope <- s1$makeScope("mod")
+  registerWebMcpTool(whoami("own"), session = scope)
+  expect_equal(webMcpCall(s1, scope$ns("own"), list()), list(token = s1$token, ns = scope$ns("x")))
+})
+
 test_that("a tool changes what the app shows through a reactive value", {
   withr::local_options(shiny.webmcp = TRUE)
   local_mocked_bindings(sendWebMcpTools = function(...) NULL)

@@ -658,7 +658,7 @@ test_that("render functions with await() and bindCache() cache by key", {
 # ---- Stack traces -------------------------------------------------------------
 
 # Run reactive code from `lines` (as file "app.R") and return the printed error
-# header and stack trace
+# header and stack trace, and whether Shiny captured the stack
 printedAsyncError <- function(lines) {
   # coro throws an error before the first `await()` right away
   err <- tryCatch(
@@ -680,10 +680,14 @@ printedAsyncError <- function(lines) {
     ),
     type = "message"
   )
-  list(header = header, trace = trace)
+  list(
+    header = header,
+    trace = trace,
+    captured = !is.null(attr(err, "stack.trace", exact = TRUE))
+  )
 }
 
-test_that("a stack trace after await() shows the reactive and the user's line", {
+test_that("a stack trace after await() shows async() with the user's line", {
   skip_if_not_installed("coro")
   out <- printedAsyncError(c(
     "captureStackTraces(isolate(reactive(label = 'r', {",
@@ -692,7 +696,7 @@ test_that("a stack trace after await() shows the reactive and the user's line", 
     "})()))"
   ))
   expect_identical(out$header, "Error in <reactive:r>: boom")
-  expect_match(out$trace, "<reactive:r> [app.R#3]", fixed = TRUE, all = FALSE)
+  expect_match(out$trace, "async [app.R#3]", fixed = TRUE, all = FALSE)
   # coro's frames tell the user nothing
   expect_no_match(out$trace, "eval_bare|evalq|wrapOnFulfilled")
 })
@@ -705,7 +709,31 @@ test_that("a stack trace before await() hides coro's frames", {
     "  x <- await(promises::promise_resolve(1))",
     "})()))"
   ))
+  if (!out$captured) {
+    # https://github.com/r-lib/coro/pull/81 rejects these errors with an
+    # exiting `tryCatch()`, so Shiny's calling handler never sees them
+    skip("coro catches errors before the first await() before Shiny can capture the stack")
+  }
   expect_identical(out$header, "Error in <reactive:r>: boom")
-  expect_match(out$trace, "<reactive:r> [app.R#2]", fixed = TRUE, all = FALSE)
+  # `async` runs inside the reactive that called it
+  async_line <- grep("async [app.R#2]", out$trace, fixed = TRUE)
+  reactive_line <- grep("<reactive:r>", out$trace, fixed = TRUE)
+  expect_length(async_line, 1)
+  expect_true(any(reactive_line == async_line + 1))
   expect_no_match(out$trace, "eval_bare|evalq|instance")
+})
+
+test_that("relabelAsyncFrames() stops at a frame that is its own parent", {
+  labelEnv <- new.env()
+  labelEnv$.shinyAsyncLabel <- "observe"
+  userEnv <- new.env(parent = labelEnv)
+  calls <- list(quote(a()), quote(b()), quote(c()), quote(evalq(x)), quote(stop("x")))
+  # Frame 2 lists itself as its parent
+  parents <- c(0L, 2L, 2L, 3L, 4L)
+  frames <- list(globalenv(), globalenv(), globalenv(), userEnv, globalenv())
+  out <- relabelAsyncFrames(calls, parents, frames)
+  expect_identical(attr(out, "asyncLabel"), "observe")
+  expect_identical(out[[4]], quote(async()))
+  expect_identical(out[[3]], quote(..stacktraceon..()))
+  expect_identical(out[[1]], quote(..stacktraceoff..()))
 })

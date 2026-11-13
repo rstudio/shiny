@@ -344,11 +344,11 @@ doCaptureStack <- function(e) {
 
 # Code that uses `await()` runs as a `coro::async()` function (see
 # `awaitToAsyncFunction()`). coro evaluates the user's code in a frame of its
-# own (an `evalq()` of `user_env`), under several more of its frames. Name
-# that frame after the reactive, as `wrapFunctionLabel()` does for code
-# without `await()`, and hide coro's frames around it:
+# own (an `evalq()` of `user_env`), under several more of its frames. Show
+# that frame as `async`, the function the user's code is the body of, and
+# hide coro's frames around it:
 # - before the first `await()`, those between it and the call to the async
-#   function (which it replaces);
+#   function, which keeps its label (`renderText`, `<reactive:r>`, ...);
 # - after an `await()`, everything outside it, which is promise and event loop
 #   plumbing. The deep stack trace shows where the code started.
 # The label of the innermost such frame is returned as the "asyncLabel" attr.
@@ -368,25 +368,28 @@ relabelAsyncFrames <- function(calls, parents, frames, atThen = FALSE) {
     innermost <- label
     innermostIndex <- i
     calls[[i]] <- structure(
-      call(label),
+      quote(async()),
       srcref = attr(calls[[i]], "srcref", exact = TRUE)
     )
-    if (parents[[i]] > 0) {
-      calls[[parents[[i]]]] <- quote(..stacktraceon..())
+    parent <- parents[[i]]
+    if (parent <= 0) {
+      next
     }
-    # Close the hidden region at the call to the async function, if this is
-    # before the first `await()`; otherwise at the outermost frame
-    caller <- outermost
-    j <- parents[[i]]
+    # Close the hidden region just inside the call to the async function, if
+    # this is before the first `await()`; otherwise at the outermost frame
+    first <- outermost
+    j <- parent
     while (j > 0) {
       if (isCallNamed(calls[[j]], label)) {
-        caller <- j
+        first <- j + 1L
         break
       }
-      j <- parents[[j]]
+      # A frame can list itself (or a later frame) as its parent; stop there
+      j <- if (parents[[j]] < j) parents[[j]] else 0L
     }
-    if (caller < parents[[i]]) {
-      calls[[caller]] <- quote(..stacktraceoff..())
+    if (first < parent) {
+      calls[[parent]] <- quote(..stacktraceon..())
+      calls[[first]] <- quote(..stacktraceoff..())
     }
   }
   # When the stack is saved at a `then()` (for the deep stack trace), and the
@@ -738,6 +741,11 @@ dropTrivialFrames <- function(callnames) {
   # the last *contiguous* block of them, and then, only if they are the
   # last thing in the calls list.
   hideable <- callnames %in% c(".handleSimpleError", "h", "base$wrapOnFulfilled")
+  # Nothing to keep, e.g. an empty stack when the error was caught before its
+  # stack was captured (as coro does for errors before the first `await()`)
+  if (all(hideable)) {
+    return(rep_len(TRUE, length(callnames)))
+  }
   # What's the last that *didn't* match stop/.handleSimpleError/h?
   lastGoodCall <- max(which(!hideable))
   toRemove <- length(callnames) - lastGoodCall

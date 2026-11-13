@@ -348,3 +348,10 @@ test_that("markRenderFunction preserves user frames outside reactive domain", {
   expect_true("userFunc" %in% df$call)
 })
 
+
+test_that("dropTrivialFrames() keeps a stack with nothing to keep", {
+  # An error caught before its stack was captured has an empty stack
+  expect_identical(dropTrivialFrames(character()), logical())
+  expect_identical(dropTrivialFrames(c("h", "h")), c(TRUE, TRUE))
+  expect_identical(dropTrivialFrames(c("f", "h")), c(TRUE, FALSE))
+})

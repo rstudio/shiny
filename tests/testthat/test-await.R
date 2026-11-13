@@ -687,7 +687,7 @@ printedAsyncError <- function(lines) {
   )
 }
 
-test_that("a stack trace after await() shows async() with the user's line", {
+test_that("a stack trace after await() shows the reactive and the user's line", {
   skip_if_not_installed("coro")
   out <- printedAsyncError(c(
     "captureStackTraces(isolate(reactive(label = 'r', {",
@@ -696,7 +696,7 @@ test_that("a stack trace after await() shows async() with the user's line", {
     "})()))"
   ))
   expect_identical(out$header, "Error in <reactive:r>: boom")
-  expect_match(out$trace, "async [app.R#3]", fixed = TRUE, all = FALSE)
+  expect_match(out$trace, "<reactive:r> [app.R#3]", fixed = TRUE, all = FALSE)
   # coro's frames tell the user nothing
   expect_no_match(out$trace, "eval_bare|evalq|wrapOnFulfilled")
 })
@@ -715,11 +715,11 @@ test_that("a stack trace before await() hides coro's frames", {
     skip("coro catches errors before the first await() before Shiny can capture the stack")
   }
   expect_identical(out$header, "Error in <reactive:r>: boom")
-  # `async` runs inside the reactive that called it
-  async_line <- grep("async [app.R#2]", out$trace, fixed = TRUE)
-  reactive_line <- grep("<reactive:r>", out$trace, fixed = TRUE)
-  expect_length(async_line, 1)
-  expect_true(any(reactive_line == async_line + 1))
+  # The reactive's frame shows once, with the user's line
+  expect_identical(
+    grep("<reactive:r>", out$trace, fixed = TRUE),
+    grep("<reactive:r> [app.R#2]", out$trace, fixed = TRUE)
+  )
   expect_no_match(out$trace, "eval_bare|evalq|instance")
 })
 
@@ -733,7 +733,7 @@ test_that("relabelAsyncFrames() stops at a frame that is its own parent", {
   frames <- list(globalenv(), globalenv(), globalenv(), userEnv, globalenv())
   out <- relabelAsyncFrames(calls, parents, frames)
   expect_identical(attr(out, "asyncLabel"), "observe")
-  expect_identical(out[[4]], quote(async()))
+  expect_identical(out[[4]], quote(observe()))
   expect_identical(out[[3]], quote(..stacktraceon..()))
   expect_identical(out[[1]], quote(..stacktraceoff..()))
 })

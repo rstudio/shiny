@@ -344,11 +344,12 @@ doCaptureStack <- function(e) {
 
 # Code that uses `await()` runs as a `coro::async()` function (see
 # `awaitToAsyncFunction()`). coro evaluates the user's code in a frame of its
-# own (an `evalq()` of `user_env`), under several more of its frames. Show
-# that frame as `async`, the function the user's code is the body of, and
-# hide coro's frames around it:
+# own (an `evalq()` of `user_env`), under several more of its frames. Name
+# that frame after the reactive (`renderText`, `<reactive:r>`, ...), as
+# `wrapFunctionLabel()` does for code without `await()`, and hide coro's
+# frames around it:
 # - before the first `await()`, those between it and the call to the async
-#   function, which keeps its label (`renderText`, `<reactive:r>`, ...);
+#   function (which it replaces);
 # - after an `await()`, everything outside it, which is promise and event loop
 #   plumbing. The deep stack trace shows where the code started.
 # The label of the innermost such frame is returned as the "asyncLabel" attr.
@@ -368,20 +369,20 @@ relabelAsyncFrames <- function(calls, parents, frames, atThen = FALSE) {
     innermost <- label
     innermostIndex <- i
     calls[[i]] <- structure(
-      quote(async()),
+      call(label),
       srcref = attr(calls[[i]], "srcref", exact = TRUE)
     )
     parent <- parents[[i]]
     if (parent <= 0) {
       next
     }
-    # Close the hidden region just inside the call to the async function, if
-    # this is before the first `await()`; otherwise at the outermost frame
+    # Close the hidden region at the call to the async function, if this is
+    # before the first `await()`; otherwise at the outermost frame
     first <- outermost
     j <- parent
     while (j > 0) {
       if (isCallNamed(calls[[j]], label)) {
-        first <- j + 1L
+        first <- j
         break
       }
       # A frame can list itself (or a later frame) as its parent; stop there

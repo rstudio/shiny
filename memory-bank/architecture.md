@@ -223,8 +223,8 @@ JS side, in `srcts/src/bindings/`:
   `fn_body()`/`body()` directly.
   Stack traces: `wrapFunctionLabel()` records its label in the coro
   function's env, and `relabelAsyncFrames()` (`R/conditions.R`, called when a
-  stack is captured) uses it for the error call, shows coro's frame that runs
-  the user's code as `async`, and
+  stack is captured) uses it for the error call and to name coro's frame that
+  runs the user's code, and
   hides coro's frames with `..stacktraceon..`/`..stacktraceoff..` fences.
 - `ExtendedTask` (`R/extended-task.R`) keeps private `reactiveVal`s for
   status, value and error. `invoke()` runs `func` under

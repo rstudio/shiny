@@ -393,6 +393,7 @@ function unbindInputs(
     const id = binding.getId(el);
 
     $(el).removeClass("shiny-bound-input");
+    $(el).removeData("shiny-input-binding");
 
     bindingsRegistry.removeBinding(id, "input");
     binding.unsubscribe(el);

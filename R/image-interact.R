@@ -454,7 +454,7 @@ fortifyDiscreteLimits <- function(coord) {
 panelMatch <- function(search_value, x) {
   if (is.null(search_value)) return(is.na(x))
   if (is.numeric(x)) search_value <- as.numeric(search_value)
-  x == search_value
+  !is.na(x) & (x == search_value)
 }
 
 #  ----------------------------------------------------------------------------

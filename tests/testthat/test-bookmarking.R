@@ -59,4 +59,12 @@ test_that("Inputs and values in query string", {
   expect_identical(rc$input$asList(), list())
   expect_identical(as.list(rc$values), list())
   expect_identical(rc$dir, NULL)
+
+  # encodeShinySaveState should not emit empty `_values_&=` when values only has hidden keys
+  rv <- ReactiveValues$new()
+  rv$set("a", 1L)
+  state <- ShinySaveState$new(input = .createReactiveValues(rv), exclude = character(0))
+  state$values$.hidden <- "secret"
+  encoded <- encodeShinySaveState(state)
+  expect_equal(encoded, "_inputs_&a=1")
 })

@@ -293,16 +293,18 @@ class DateInputBinding extends DateInputBindingBase {
     const $el = $(el);
     const $input = $el.find("input");
 
-    let min = $input.data("datepicker").startDate;
-    let max = $input.data("datepicker").endDate;
+    const min = $input.bsDatepicker("getStartDate");
+    const max = $input.bsDatepicker("getEndDate");
 
     // Stringify min and max. If min and max aren't set, they will be
     // -Infinity and Infinity; replace these with null.
-    min = min === -Infinity ? null : formatDateUTC(min);
-    max = max === Infinity ? null : formatDateUTC(max);
+    const minStr = min === -Infinity ? null : formatDateUTC(min as Date);
+    const maxStr = max === Infinity ? null : formatDateUTC(max as Date);
+
+    const dpOpts = $input.data("datepicker").o;
 
     // startViewMode is stored as a number; convert to string
-    let startview = $input.data("datepicker").startViewMode;
+    let startview = dpOpts.startView;
 
     if (startview === 2) startview = "decade";
     else if (startview === 1) startview = "year";
@@ -312,11 +314,14 @@ class DateInputBinding extends DateInputBindingBase {
       label: this._getLabelNode(el).text(),
       value: this.getValue(el),
       valueString: $input.val() as NotUndefined<ReturnType<typeof $input.val>>,
-      min: min,
-      max: max,
-      language: $input.data("datepicker").language,
-      weekstart: $input.data("datepicker").weekStart,
-      format: this._formatToString($input.data("datepicker").format),
+      min: minStr,
+      max: maxStr,
+      language: dpOpts.language,
+      weekstart: dpOpts.weekStart,
+      format:
+        typeof dpOpts.format === "string"
+          ? dpOpts.format
+          : this._formatToString(dpOpts.format),
       startview: startview,
     };
   }

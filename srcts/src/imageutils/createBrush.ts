@@ -333,8 +333,8 @@ function createBrush(
     };
 
     // Positions in data space
-    const minData = panel.scaleImgToData(cssToImg(minCss));
-    const maxData = panel.scaleImgToData(cssToImg(maxCss));
+    const minData = panel.scaleImgToData(cssToImg(minCss), opts.brushClip);
+    const maxData = panel.scaleImgToData(cssToImg(maxCss), opts.brushClip);
     // For reversed scales, the min and max can be reversed, so use findBox
     // to ensure correct order.
 
@@ -363,7 +363,7 @@ function createBrush(
       return { ...state.boundsData };
     }
 
-    let boxCss = imgToCss(state.panel!.scaleDataToImg(boxData));
+    let boxCss = imgToCss(state.panel!.scaleDataToImg(boxData, opts.brushClip));
     // Round to 13 significant digits to avoid spurious changes in FP values
     // (#2197).
 
@@ -576,7 +576,7 @@ function createBrush(
     if (state.resizeSides.left) {
       const xminImg = shiftToRange(
         bImg.xmin + dImg.x,
-        panelBoundsImg.left,
+        opts.brushClip ? panelBoundsImg.left : -Infinity,
         bImg.xmax,
       )[0];
 
@@ -585,7 +585,7 @@ function createBrush(
       const xmaxImg = shiftToRange(
         bImg.xmax + dImg.x,
         bImg.xmin,
-        panelBoundsImg.right,
+        opts.brushClip ? panelBoundsImg.right : Infinity,
       )[0];
 
       bImg.xmax = xmaxImg;
@@ -594,7 +594,7 @@ function createBrush(
     if (state.resizeSides.top) {
       const yminImg = shiftToRange(
         bImg.ymin + dImg.y,
-        panelBoundsImg.top,
+        opts.brushClip ? panelBoundsImg.top : -Infinity,
         bImg.ymax,
       )[0];
 
@@ -603,7 +603,7 @@ function createBrush(
       const ymaxImg = shiftToRange(
         bImg.ymax + dImg.y,
         bImg.ymin,
-        panelBoundsImg.bottom,
+        opts.brushClip ? panelBoundsImg.bottom : Infinity,
       )[0];
 
       bImg.ymax = ymaxImg;

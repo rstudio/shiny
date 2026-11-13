@@ -85,3 +85,16 @@ test_that("once=TRUE works", {
   flushReact()
   expect_identical(n, 1)
 })
+
+test_that("bindEvent on render function disallows duplicate bindEvent and preserves cache hooks", {
+  v <- reactiveVal(1)
+  custom_rf <- createRenderFunction(
+    function() v(),
+    cacheWriteHook = function(val) val + 1,
+    cacheReadHook = function(val) val - 1
+  )
+  rf <- bindEvent(custom_rf, v())
+  expect_true(is.function(attr(rf, "cacheWriteHook", exact = TRUE)))
+  expect_true(is.function(attr(rf, "cacheReadHook", exact = TRUE)))
+  expect_error(bindEvent(rf, v()), "bindEvent\\(\\) has already been called on the object")
+})

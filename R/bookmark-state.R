@@ -134,16 +134,18 @@ encodeShinySaveState <- function(state) {
       USE.NAMES = TRUE
     )
 
-    res <- paste0(res,
-      if (length(inputVals != 0)) "&",  # Add separator if there were inputs
-      "_values_&",
-      paste0(
-        encodeURIComponent(names(values)),
-        "=",
-        encodeURIComponent(values),
-        collapse = "&"
+    if (length(values) != 0) {
+      res <- paste0(res,
+        if (length(inputVals) != 0) "&",  # Add separator if there were inputs
+        "_values_&",
+        paste0(
+          encodeURIComponent(names(values)),
+          "=",
+          encodeURIComponent(values),
+          collapse = "&"
+        )
       )
-    )
+    }
   }
 
   res

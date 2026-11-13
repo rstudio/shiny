@@ -53,9 +53,9 @@ numericInput <- function(
     value = formatNoSci(value),
     `data-update-on` = updateOn
   )
-  if (!is.na(min)) inputTag$attribs$min = min
-  if (!is.na(max)) inputTag$attribs$max = max
-  if (!is.na(step)) inputTag$attribs$step = step
+  if (!is.null(min) && !is.na(min)) inputTag$attribs$min = formatNoSci(min)
+  if (!is.null(max) && !is.na(max)) inputTag$attribs$max = formatNoSci(max)
+  if (!is.null(step) && !is.na(step)) inputTag$attribs$step = formatNoSci(step)
 
   div(
     class = "form-group shiny-input-container",

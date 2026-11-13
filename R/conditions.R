@@ -649,6 +649,9 @@ dropTrivialFrames <- function(callnames) {
   # the last *contiguous* block of them, and then, only if they are the
   # last thing in the calls list.
   hideable <- callnames %in% c(".handleSimpleError", "h", "base$wrapOnFulfilled")
+  if (!any(!hideable)) {
+    return(rep_len(FALSE, length(callnames)))
+  }
   # What's the last that *didn't* match stop/.handleSimpleError/h?
   lastGoodCall <- max(which(!hideable))
   toRemove <- length(callnames) - lastGoodCall
@@ -676,6 +679,10 @@ dropTrivialTestFrames <- function(callnames) {
     "test_local",
     "testthat::test_local"
   )
+
+  if (!any(hideable)) {
+    return(rep_len(TRUE, length(callnames)))
+  }
 
   # Remove everything from inception to calling the test
   # It shouldn't matter how you get there, just that you're finally testing

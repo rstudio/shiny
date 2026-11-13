@@ -48,12 +48,17 @@ Dependents <- R6Class(
         )
       }
       lapply(
-        .dependents$values(sort = TRUE),
-        function(ctx) {
+        .dependents$keys(sort = TRUE),
+        function(key) {
+          ctx <- .dependents$get(key)
+          if (is.null(ctx)) {
+            return()
+          }
           if (rlang::is_weakref(ctx)) {
             ctx <- rlang::wref_key(ctx)
             if (is.null(ctx)) {
               # Can get here if weakref target was GC'd
+              .dependents$remove(key)
               return()
             }
           }
@@ -168,7 +173,7 @@ ReactiveVal <- R6Class(
         otel_log(
           .otelLabel,
           severity = "info",
-          attributes = c(private$.otelAttrs, otel_session_id_attrs(domain))
+          attributes = c(.otelAttrs, otel_session_id_attrs(domain))
         )
       }
       rLog$valueChange(private$reactId, value, domain)
@@ -588,6 +593,7 @@ ReactiveValues <- R6Class(
     },
 
     names = function() {
+      if (.destroyed) stop(destroyedReactiveError(.label))
       if (!isTRUE(.hasRetrieved$names)) {
         domain <- getDefaultReactiveDomain()
         rLog$defineNames(.reactId, .nameOrder, .label, domain)
@@ -642,6 +648,7 @@ ReactiveValues <- R6Class(
     },
 
     toList = function(all.names=FALSE) {
+      if (.destroyed) stop(destroyedReactiveError(.label))
       listValue <- .values$mget(.nameOrder)
       if (!all.names) {
         listValue <- listValue[!grepl("^\\.", base::names(listValue))]
@@ -667,7 +674,7 @@ ReactiveValues <- R6Class(
     },
 
     destroyByPrefix = function(nsPrefix) {
-      keys <- .values$keys()
+      keys <- unique(c(.values$keys(), .dependents$keys(), .metadata$keys()))
       matching <- keys[startsWith(keys, nsPrefix)]
       if (length(matching) == 0L) return(invisible())
 
@@ -940,6 +947,9 @@ reactiveValuesToList <- function(x, all.names=FALSE) {
 
     # Remove namespace prefix
     names(res) <- substring(fullNames, nchar(prefix) + 1)
+    if (!all.names) {
+      res <- res[!grepl("^\\.", names(res))]
+    }
   }
 
   res
@@ -1479,11 +1489,13 @@ Observer <- R6Class(
 
         continue <- function() {
           ctx$addPendingFlush(.priority)
-          if (!is.null(.domain)) {
+          if (!is.null(.domain) && is.function(.domain$incrementBusyCount)) {
             .domain$incrementBusyCount()
           }
         }
 
+        if (.destroyed)
+          return()
         if (.suspended == FALSE)
           continue()
         else
@@ -1551,10 +1563,12 @@ Observer <- R6Class(
 
       if (autoDestroy) {
         if (!.destroyed && !is.null(.domain)) { # Make sure to not try to destroy twice.
-          if (.domain$isEnded()) {
+          if (is.function(.domain$isEnded) && .domain$isEnded()) {
             destroy()
           } else {
-            .autoDestroyHandle <<- onReactiveDomainEnded(.domain, .onDomainEnded)
+            if (is.function(.domain$onEnded)) {
+              .autoDestroyHandle <<- onReactiveDomainEnded(.domain, .onDomainEnded)
+            }
             if (is.function(.domain$onDestroy)) {
               wr <- rlang::new_weakref(key = self)
               .autoDestroyOnDestroyHandle <<- .domain$onDestroy(make_weak_destroy_wrapper(wr, .domain))
@@ -1584,6 +1598,8 @@ Observer <- R6Class(
       "Causes this observer to start re-executing in response to invalidations.
       If the observer was invalidated while suspended, then it will schedule
       itself for re-execution (pending flush)."
+      if (.destroyed)
+        return(invisible())
       if (.suspended) {
         .suspended <<- FALSE
         .onResume()
@@ -1601,6 +1617,7 @@ Observer <- R6Class(
 
       suspend()
       .destroyed <<- TRUE
+      .onResume <<- function() NULL
 
       if (!is.null(.autoDestroyHandle)) {
         .autoDestroyHandle()
@@ -1930,9 +1947,10 @@ reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain())
   scheduler <- defineScheduler(session)
 
   dependents <- Map$new()
+  cancelled <- FALSE
   timerHandle <- scheduler(intervalMs, function() {
-    # Quit if the session is closed
-    if (!is.null(session) && session$isClosed()) {
+    # Quit if the session is closed or timer was cancelled
+    if (cancelled || (!is.null(session) && session$isClosed())) {
       return(invisible())
     }
 
@@ -1958,7 +1976,14 @@ reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain())
   })
 
   if (!is.null(session)) {
-    session$onEnded(timerHandle)
+    cancelTimer <- function() {
+      cancelled <<- TRUE
+      timerHandle()
+    }
+    session$onEnded(cancelTimer)
+    if (is.function(session$onDestroy)) {
+      session$onDestroy(cancelTimer)
+    }
   }
 
   return(function() {
@@ -2072,10 +2097,12 @@ invalidateLater <- function(millis, session = getDefaultReactiveDomain()) {
     # Also register with onDestroy so module destroy cancels pending timers.
     # Cross-deregister: when destroy fires, clean up the onEnded registration
     # (and vice versa — the timer callback above already clears both).
-    clear_on_destroy_callback <- session$onDestroy(function() {
-      timerHandle()
-      clear_on_ended_callback()
-    })
+    if (is.function(session$onDestroy)) {
+      clear_on_destroy_callback <- session$onDestroy(function() {
+        timerHandle()
+        clear_on_ended_callback()
+      })
+    }
   }
 
   invisible()
@@ -2190,10 +2217,12 @@ reactive_poll_impl <- function(
   env <- environment()
 
   with_no_otel_collect({
-    cookie <- reactiveVal(
-      isolate(checkFunc()),
-      label = sprintf("%s %s cookie", fnName, label)
-    )
+    cookie <- withReactiveDomain(session, {
+      reactiveVal(
+        isolate(checkFunc()),
+        label = sprintf("%s %s cookie", fnName, label)
+      )
+    })
 
     o <- observe({
       # When no one holds a reference to the reactive returned from
@@ -2207,10 +2236,10 @@ reactive_poll_impl <- function(
 
       cookie(checkFunc())
       invalidateLater(intervalMillis(), session)
-    }, label = sprintf("%s %s cleanup", fnName, label))
+    }, label = sprintf("%s %s cleanup", fnName, label), domain = session)
   })
 
-  re <- reactive(label = sprintf("%s %s", fnName, label), {
+  re <- reactive(label = sprintf("%s %s", fnName, label), domain = session, {
     # Take a dependency on the cookie, so that when it changes, this
     # reactive expression is invalidated.
     cookie()
@@ -2685,7 +2714,7 @@ observeEvent <- function(eventExpr, handlerExpr,
       suspended = suspended,
       priority = priority,
       domain = domain,
-      autoDestroy = TRUE,
+      autoDestroy = autoDestroy,
       ..stacktraceon = TRUE
     ))
 
@@ -2889,9 +2918,11 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
   }
 
   with_no_otel_collect({
-    trigger <- reactiveVal(NULL, label = sprintf("debounce %s trigger", label))
-    # the deadline for the timer to fire; NULL if not scheduled
-    when <- reactiveVal(NULL, label = sprintf("debounce %s when", label))
+    withReactiveDomain(domain, {
+      trigger <- reactiveVal(NULL, label = sprintf("debounce %s trigger", label))
+      # the deadline for the timer to fire; NULL if not scheduled
+      when <- reactiveVal(NULL, label = sprintf("debounce %s when", label))
+    })
 
     # Responsible for tracking when r() changes.
     firstRun <- TRUE
@@ -2993,11 +3024,13 @@ throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
   }
 
   with_no_otel_collect({
-    trigger <- reactiveVal(0, label = sprintf("throttle %s trigger", label))
-    # Last time we fired; NULL if never
-    lastTriggeredAt <- reactiveVal(NULL, label = sprintf("throttle %s last triggered at", label))
-    # If TRUE, trigger again when timer elapses
-    pending <- reactiveVal(FALSE, label = sprintf("throttle %s pending", label))
+    withReactiveDomain(domain, {
+      trigger <- reactiveVal(0, label = sprintf("throttle %s trigger", label))
+      # Last time we fired; NULL if never
+      lastTriggeredAt <- reactiveVal(NULL, label = sprintf("throttle %s last triggered at", label))
+      # If TRUE, trigger again when timer elapses
+      pending <- reactiveVal(FALSE, label = sprintf("throttle %s pending", label))
+    })
   })
 
   blackoutMillisLeft <- function() {

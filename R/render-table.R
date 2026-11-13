@@ -156,7 +156,13 @@ renderTable <- function(expr, striped = FALSE, hover = FALSE,
           cols <- if (rownames) align else paste0("r", align)
           defaults <- grep("\\?", strsplit(cols,"")[[1]])
           if (length(defaults) != 0) {
-            vals <- vapply(data[,defaults-1], defaultAlignment, character(1))
+            vals <- vapply(defaults, function(idx) {
+              if (idx == 1) {
+                defaultAlignment(attr(data, "row.names"))
+              } else {
+                defaultAlignment(data[[idx - 1]])
+              }
+            }, character(1))
             for (i in seq_len(length(defaults))) {
               substr(cols, defaults[i], defaults[i]) <- vals[i]
             }

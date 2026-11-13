@@ -55,6 +55,10 @@ createMockDomain <- function() {
   domain$isEnded <- function() {
     ended
   }
+  domain$isClosed <- domain$isEnded
+  domain$cycleStartAction <- function(callback) {
+    callback()
+  }
   domain$onDestroy <- function(callback) {
     return(destroyCBs$register(callback))
   }

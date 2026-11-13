@@ -42,20 +42,29 @@ startPNG <- function(filename, width, height, res, ...) {
   }
 
   do.call(pngfun, args)
-  # Call plot.new() so that even if no plotting operations are performed at
-  # least we have a blank background. N.B. we need to set the margin to 0
-  # temporarily before plot.new() because when the plot size is small (e.g.
-  # 200x50), we will get an error "figure margin too large", which is triggered
-  # by plot.new() with the default (large) margin. However, this does not
-  # guarantee user's code in func() will not trigger the error -- they may have
-  # to set par(mar = smaller_value) before they draw base graphics.
-  op <- graphics::par(mar = rep(0, 4))
+  dv <- grDevices::dev.cur()
   tryCatch(
-    graphics::plot.new(),
-    finally = graphics::par(op)
+    {
+      # Call plot.new() so that even if no plotting operations are performed at
+      # least we have a blank background. N.B. we need to set the margin to 0
+      # temporarily before plot.new() because when the plot size is small (e.g.
+      # 200x50), we will get an error "figure margin too large", which is triggered
+      # by plot.new() with the default (large) margin. However, this does not
+      # guarantee user's code in func() will not trigger the error -- they may have
+      # to set par(mar = smaller_value) before they draw base graphics.
+      op <- graphics::par(mar = rep(0, 4))
+      tryCatch(
+        graphics::plot.new(),
+        finally = graphics::par(op)
+      )
+    },
+    error = function(e) {
+      grDevices::dev.off(dv)
+      stop(e)
+    }
   )
 
-  grDevices::dev.cur()
+  dv
 }
 
 #' Capture a plot as a PNG file.

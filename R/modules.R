@@ -45,12 +45,12 @@ createSessionProxy <- function(parentSession, ...) {
 `[[<-.session_proxy` <- `$<-.session_proxy`
 
 # Given a session_proxy, search `parent` recursively to find the real
-# ShinySession object. If given a ShinySession, simply return it.
+# ShinySession (or MockShinySession) object. If given one directly, return it.
 find_ancestor_session <- function(x, depth = 20) {
   if (depth < 0) {
     stop("ShinySession not found")
   }
-  if (inherits(x, "ShinySession")) {
+  if (inherits(x, c("ShinySession", "MockShinySession"))) {
     return(x)
   }
   if (inherits(x, "session_proxy")) {

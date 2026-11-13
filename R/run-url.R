@@ -52,7 +52,7 @@ runUrl <- function(url, filetype = NULL, subdir = NULL, destdir = NULL, ...) {
     fileDir  <- tempfile('shinyapp')
   } else {
     fileDir <- destdir
-    filePath <- paste(destdir, fileext)
+    filePath <- paste(destdir, fileext, sep = "")
   }
 
   dir.create(fileDir, showWarnings = FALSE)

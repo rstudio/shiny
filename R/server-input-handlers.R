@@ -151,7 +151,7 @@ on_load({
 
   registerInputHandler("shiny.password", function(val, shinysession, name) {
     # Mark passwords as not serializable
-    setSerializer(name, serializerUnserializable)
+    setSerializer(name, serializerUnserializable, session = shinysession)
     val
   })
 
@@ -200,7 +200,7 @@ on_load({
     val <- as.data.frame(lapply(val, unlist), stringsAsFactors = FALSE)
 
     # `val$datapath` should be a filename without a path, for security reasons.
-    if (basename(val$datapath) != val$datapath) {
+    if (any(basename(val$datapath) != val$datapath)) {
       stop("Invalid '/' found in file input path.")
     }
 
@@ -217,9 +217,9 @@ on_load({
     # Need to mark this input value with the correct serializer. When a file is
     # uploaded the usual way (instead of being restored), this occurs in
     # session$`@uploadEnd`.
-    setSerializer(name, serializerFileInput)
+    setSerializer(name, serializerFileInput, session = shinysession)
 
-    snapshotPreprocessInput(name, snapshotPreprocessorFileInput)
+    snapshotPreprocessInput(name, snapshotPreprocessorFileInput, session = shinysession)
 
     val
   })

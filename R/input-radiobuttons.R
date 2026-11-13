@@ -94,7 +94,11 @@ radioButtons <- function(inputId, label, choices = NULL, selected = NULL,
   selected <- restoreInput(id = inputId, default = selected)
 
   # default value if it's not specified
-  selected <- if (is.null(selected)) args$choiceValues[[1]] else as.character(selected)
+  selected <- if (is.null(selected)) {
+    if (length(args$choiceValues) > 0) args$choiceValues[[1]] else character(0)
+  } else {
+    as.character(selected)
+  }
 
   if (length(selected) > 1) stop("The 'selected' argument must be of length 1")
 

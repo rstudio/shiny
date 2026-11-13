@@ -57,6 +57,7 @@ declare class ShinyApp {
     private scheduledReconnect;
     reconnect(): void;
     createSocket(): ShinyWebSocket;
+    private $actionQueueLoopRunning;
     startActionQueueLoop(): Promise<void>;
     sendInput(values: InputValues): void;
     $notifyDisconnected(): void;

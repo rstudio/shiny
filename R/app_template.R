@@ -175,12 +175,13 @@ shinyAppTemplate <- function(path = NULL, examples = "default", dryrun = FALSE)
     }
 
     if (!dryrun) {
-      is_template <- any(grepl("{{", readLines(from), fixed = TRUE))
+      lines <- readLines(from, warn = FALSE)
+      is_template <- any(grepl("{{", lines, fixed = TRUE))
 
       if (is_template) {
         writeChar(
           as.character(htmlTemplate(
-            from,
+            text_ = lines,
             rdir = "rdir" %in% examples,
             module = "module" %in% examples
           )),

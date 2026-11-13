@@ -287,7 +287,10 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
       private$rv_error(NULL)
 
       p <- promise_resolve(
-        maskReactiveContext(do.call(private$func, args))
+        tryCatch(
+          maskReactiveContext(do.call(private$func, args)),
+          error = promises::promise_reject
+        )
       )
 
       p <- promises::then(
@@ -312,7 +315,13 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
       promises::finally(p, onFinally = function() {
         if (private$invocation_queue$size() > 0) {
           next_call <- private$invocation_queue$remove()
-          private$do_invoke(next_call$args, next_call$call)
+          tryCatch(
+            private$do_invoke(next_call$args, next_call$call),
+            shiny.destroyed.error = function(e) {
+              private$invocation_queue$clear()
+              NULL
+            }
+          )
         }
       })
 
@@ -325,13 +334,23 @@ ExtendedTask <- R6Class("ExtendedTask", portable = TRUE, cloneable = FALSE,
         parent = err,
         call = call
       )
-      private$rv_status("error")
-      private$rv_error(err)
+      tryCatch(
+        {
+          private$rv_status("error")
+          private$rv_error(err)
+        },
+        shiny.destroyed.error = function(e) NULL
+      )
     },
 
     on_success = function(value) {
-      private$rv_status("success")
-      private$rv_value(value)
+      tryCatch(
+        {
+          private$rv_status("success")
+          private$rv_value(value)
+        },
+        shiny.destroyed.error = function(e) NULL
+      )
     }
   )
 )

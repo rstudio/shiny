@@ -179,7 +179,7 @@ otel_label_upgrade <- function(label, ..., domain) {
     # label <- sprintf("<anonymous> - %s", label)
   }
 
-  if (is.null(domain)) {
+  if (is.null(domain) || !is.function(domain$ns)) {
     return(label)
   }
 

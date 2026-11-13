@@ -254,6 +254,9 @@ bindEvent.reactiveExpr <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE
 
 #' @export
 bindEvent.shiny.render.function <- function(x, ..., ignoreNULL = TRUE, ignoreInit = FALSE) {
+  if (inherits(x, "shiny.render.function.event")) {
+    stop("bindEvent() has already been called on the object.")
+  }
   eventFunc <- quos_to_func(enquos0(...))
 
   valueFunc <- x

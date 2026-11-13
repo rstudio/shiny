@@ -81,6 +81,13 @@ FileUploadOperation <- R6Class(
     },
     fileEnd = function() {
       close(.currentFileData)
+      .currentFileData <<- NULL
+    },
+    closeCurrentFile = function() {
+      if (!is.null(.currentFileData)) {
+        tryCatch(close(.currentFileData), error = function(e) NULL)
+        .currentFileData <<- NULL
+      }
     },
     finish = function() {
       if (length(.pendingFileInfos) > 0)
@@ -132,6 +139,11 @@ FileUploadContext <- R6Class(
         stop("Won't remove upload path ", private$basedir,
           "because it is not under tempdir(): ", tempdir())
       }
+
+      for (op in private$operations$values()) {
+        op$closeCurrentFile()
+      }
+      private$operations$clear()
 
       all_paths <- file.path(private$basedir, private$ids)
       unlink(all_paths, recursive = TRUE)

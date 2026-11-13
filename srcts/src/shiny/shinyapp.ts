@@ -284,7 +284,12 @@ class ShinyApp {
     return socket;
   }
 
+  private $actionQueueLoopRunning = false;
+
   async startActionQueueLoop(): Promise<void> {
+    if (this.$actionQueueLoopRunning) return;
+    this.$actionQueueLoopRunning = true;
+
     while (true) {
       try {
         const action = await this.taskQueue.dequeue();
@@ -475,7 +480,7 @@ class ShinyApp {
   }
 
   $sendMsg(msg: MessageValue): void {
-    if (this.$socket && this.$socket.readyState) {
+    if (this.$socket && this.$socket.readyState === 1) {
       this.$socket.send(msg);
     } else {
       this.$pendingMessages.push(msg);

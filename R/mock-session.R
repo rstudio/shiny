@@ -253,6 +253,7 @@ MockShinySession <- R6Class(
       private$flushCBs <- Callbacks$new()
       private$flushedCBs <- Callbacks$new()
       private$endedCBs <- Callbacks$new()
+      private$unhandledErrorCallbacks <- Callbacks$new()
       private$destroyCallbacksByNs <- Map$new()
 
       private$file_generators <- fastmap()
@@ -355,8 +356,10 @@ MockShinySession <- R6Class(
       # Mark closed first, mirroring `ShinySession$wsClosed()`: teardown needs
       # to be able to tell a whole-session close from an explicit `destroy()`.
       private$was_closed <- TRUE
-      for (output in private$output) {
-        output$suspend()
+      for (output in private$outs) {
+        if (!is.null(output$obs)) {
+          output$obs$suspend()
+        }
       }
       withReactiveDomain(self, {
         private$endedCBs$invoke(onError = printError, ..stacktraceon = TRUE)
@@ -373,7 +376,7 @@ MockShinySession <- R6Class(
     #'   including those registered by module scopes.
     getBookmarkExclude = function() {
       scopedExcludes <- lapply(private$getBookmarkExcludeFuns, function(f) f())
-      scopedExcludes <- unlist(scopedExcludes)
+      scopedExcludes <- unlist(scopedExcludes, use.names = FALSE)
       c(private$bookmarkExclude, scopedExcludes)
     },
 
@@ -601,7 +604,7 @@ MockShinySession <- R6Class(
 
       unsub_exclude <- private$registerBookmarkExclude(function() {
         excluded <- scope$getBookmarkExclude()
-        ns(excluded)
+        if (length(excluded) == 0) character(0) else ns(excluded)
       })
 
       scope$onDestroy(function() {
@@ -746,7 +749,7 @@ MockShinySession <- R6Class(
     },
     # @field unhandledErrorCallbacks `Callbacks` called when an unhandled error
     #   occurs.
-    unhandledErrorCallbacks = Callbacks$new(),
+    unhandledErrorCallbacks = NULL,
     # @field timer `MockableTimerCallbacks` called at particular times.
     timer = NULL,
     # @field was_closed Set to `TRUE` once the session is closed.
@@ -800,15 +803,23 @@ MockShinySession <- R6Class(
 
       # Clean up namespaced inputs, outputs and downloads. The mock has no
       # reactive clientData or file routes to clean up.
+      outNames <- rlang::names2(private$outs)
       if (!isRoot) {
         nsPrefixWithSep <- paste0(nsPrefix, ns.sep)
         private$.input$destroyByPrefix(nsPrefixWithSep)
-        outNames <- rlang::names2(private$outs)
-        private$outs[startsWith(outNames, nsPrefixWithSep)] <- NULL
+        matchingOutputs <- outNames[startsWith(outNames, nsPrefixWithSep)]
         fileNames <- private$file_generators$keys()
         private$file_generators$remove(
           fileNames[startsWith(fileNames, self$ns(nsPrefixWithSep))]
         )
+      } else {
+        matchingOutputs <- outNames
+      }
+      for (outName in matchingOutputs) {
+        if (!is.null(private$outs[[outName]]$obs)) {
+          private$outs[[outName]]$obs$destroy()
+        }
+        private$outs[[outName]] <- NULL
       }
     },
 

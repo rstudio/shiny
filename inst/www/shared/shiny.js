@@ -32,7 +32,6 @@
   var __accessCheck = (obj, member, msg) => member.has(obj) || __typeError("Cannot " + msg);
   var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read from private field"), getter ? getter.call(obj) : member.get(obj));
   var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
-  var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
   var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "access private method"), method);
 
   // globals:jquery
@@ -1516,11 +1515,12 @@
     getState(el) {
       const $el = (0, import_jquery10.default)(el);
       const $input = $el.find("input");
-      let min = $input.data("datepicker").startDate;
-      let max = $input.data("datepicker").endDate;
-      min = min === -Infinity ? null : formatDateUTC(min);
-      max = max === Infinity ? null : formatDateUTC(max);
-      let startview = $input.data("datepicker").startViewMode;
+      const min = $input.bsDatepicker("getStartDate");
+      const max = $input.bsDatepicker("getEndDate");
+      const minStr = min === -Infinity ? null : formatDateUTC(min);
+      const maxStr = max === Infinity ? null : formatDateUTC(max);
+      const dpOpts = $input.data("datepicker").o;
+      let startview = dpOpts.startView;
       if (startview === 2) startview = "decade";
       else if (startview === 1) startview = "year";
       else if (startview === 0) startview = "month";
@@ -1528,11 +1528,11 @@
         label: this._getLabelNode(el).text(),
         value: this.getValue(el),
         valueString: $input.val(),
-        min,
-        max,
-        language: $input.data("datepicker").language,
-        weekstart: $input.data("datepicker").weekStart,
-        format: this._formatToString($input.data("datepicker").format),
+        min: minStr,
+        max: maxStr,
+        language: dpOpts.language,
+        weekstart: dpOpts.weekStart,
+        format: typeof dpOpts.format === "string" ? dpOpts.format : this._formatToString(dpOpts.format),
         startview
       };
     }
@@ -1596,7 +1596,8 @@
       const max = $startinput.bsDatepicker("getEndDate");
       const minStr = min === -Infinity ? null : formatDateUTC(min);
       const maxStr = max === Infinity ? null : formatDateUTC(max);
-      let startview = $startinput.data("datepicker").startView;
+      const dpOpts = $startinput.data("datepicker").o;
+      let startview = dpOpts.startView;
       if (startview === 2) startview = "decade";
       else if (startview === 1) startview = "year";
       else if (startview === 0) startview = "month";
@@ -1606,9 +1607,9 @@
         valueString: [$startinput.val(), $endinput.val()],
         min: minStr,
         max: maxStr,
-        weekstart: $startinput.data("datepicker").weekStart,
-        format: this._formatToString($startinput.data("datepicker").format),
-        language: $startinput.data("datepicker").language,
+        weekstart: dpOpts.weekStart,
+        format: typeof dpOpts.format === "string" ? dpOpts.format : this._formatToString(dpOpts.format),
+        language: dpOpts.language,
         startview
       };
     }
@@ -1639,13 +1640,18 @@
       let start = $startinput.data("initial-date");
       let end = $endinput.data("initial-date");
       if (start === void 0 || start === null)
-        start = this._dateAsUTC(/* @__PURE__ */ new Date());
-      if (end === void 0 || end === null) end = this._dateAsUTC(/* @__PURE__ */ new Date());
+        start = this._floorDateTime(this._dateAsUTC(/* @__PURE__ */ new Date()));
+      if (end === void 0 || end === null)
+        end = this._floorDateTime(this._dateAsUTC(/* @__PURE__ */ new Date()));
       this.setValue(el, { start, end });
-      this._setMin($startinput[0], $startinput.data("min-date"));
-      this._setMin($endinput[0], $startinput.data("min-date"));
-      this._setMax($startinput[0], $endinput.data("max-date"));
-      this._setMax($endinput[0], $endinput.data("max-date"));
+      if ($startinput.data("min-date") !== void 0) {
+        this._setMin($startinput[0], $startinput.data("min-date"));
+        this._setMin($endinput[0], $startinput.data("min-date"));
+      }
+      if ($endinput.data("max-date") !== void 0) {
+        this._setMax($startinput[0], $endinput.data("max-date"));
+        this._setMax($endinput[0], $endinput.data("max-date"));
+      }
     }
     subscribe(el, callback) {
       (0, import_jquery11.default)(el).on(
@@ -2421,16 +2427,18 @@
             success: function(res) {
               import_jquery19.default.each(res, function(index, elem) {
                 const optgroupId = elem[settings.optgroupField || "optgroup"];
-                const optgroup = {};
-                optgroup[settings.optgroupLabelField || "label"] = optgroupId;
-                optgroup[settings.optgroupValueField || "value"] = optgroupId;
-                selectize.addOptionGroup(optgroupId, optgroup);
+                if (optgroupId) {
+                  const optgroup = {};
+                  optgroup[settings.optgroupLabelField || "label"] = optgroupId;
+                  optgroup[settings.optgroupValueField || "value"] = optgroupId;
+                  selectize.addOptionGroup(optgroupId, optgroup);
+                }
               });
               callback(res);
               if (!loaded) {
                 if (hasDefinedProperty(data, "value")) {
                   selectize.setValue(data.value);
-                } else if (settings.maxItems === 1) {
+                } else if (settings.maxItems === 1 && res.length > 0) {
                   selectize.setValue(res[0].value);
                 }
               }
@@ -2876,7 +2884,7 @@
   var TextareaInputBinding = class extends TextInputBinding {
     constructor() {
       super(...arguments);
-      __privateAdd(this, _inputHandler, null);
+      __privateAdd(this, _inputHandler, (e4) => updateHeight(e4.target));
     }
     find(scope) {
       return (0, import_jquery22.default)(scope).find("textarea");
@@ -2885,15 +2893,18 @@
       super.initialize(el);
       updateHeight(el);
     }
+    setValue(el, value) {
+      super.setValue(el, value);
+      updateHeight(el);
+    }
     subscribe(el, callback) {
       super.subscribe(el, callback);
-      __privateSet(this, _inputHandler, (e4) => updateHeight(e4.target));
       el.addEventListener("input", __privateGet(this, _inputHandler));
       intersectObserver.observe(el);
     }
     unsubscribe(el) {
       super.unsubscribe(el);
-      if (__privateGet(this, _inputHandler)) el.removeEventListener("input", __privateGet(this, _inputHandler));
+      el.removeEventListener("input", __privateGet(this, _inputHandler));
       intersectObserver.unobserve(el);
     }
   };
@@ -3137,7 +3148,6 @@
 
   // srcts/src/imageutils/initPanelScales.ts
   function mapLinear(x2, domainMin, domainMax, rangeMin, rangeMax, clip = true) {
-    clip = clip || true;
     const factor = (rangeMax - rangeMin) / (domainMax - domainMin);
     const val = x2 - domainMin;
     let newval = val * factor + rangeMin;
@@ -3562,8 +3572,8 @@
         ymin: minCss.y,
         ymax: maxCss.y
       };
-      const minData = panel.scaleImgToData(cssToImg(minCss));
-      const maxData = panel.scaleImgToData(cssToImg(maxCss));
+      const minData = panel.scaleImgToData(cssToImg(minCss), opts.brushClip);
+      const maxData = panel.scaleImgToData(cssToImg(maxCss), opts.brushClip);
       state.boundsData = findBox(minData, maxData);
       state.boundsData = mapValues(
         state.boundsData,
@@ -3577,7 +3587,7 @@
       if (typeof boxData === "undefined") {
         return { ...state.boundsData };
       }
-      let boxCss = imgToCss(state.panel.scaleDataToImg(boxData));
+      let boxCss = imgToCss(state.panel.scaleDataToImg(boxData, opts.brushClip));
       boxCss = mapValues(boxCss, (val) => roundSignif(val, 13));
       boundsCss({
         xmin: Math.min(boxCss.xmin, boxCss.xmax),
@@ -3723,7 +3733,7 @@
       if (state.resizeSides.left) {
         const xminImg = shiftToRange(
           bImg.xmin + dImg.x,
-          panelBoundsImg.left,
+          opts.brushClip ? panelBoundsImg.left : -Infinity,
           bImg.xmax
         )[0];
         bImg.xmin = xminImg;
@@ -3731,14 +3741,14 @@
         const xmaxImg = shiftToRange(
           bImg.xmax + dImg.x,
           bImg.xmin,
-          panelBoundsImg.right
+          opts.brushClip ? panelBoundsImg.right : Infinity
         )[0];
         bImg.xmax = xmaxImg;
       }
       if (state.resizeSides.top) {
         const yminImg = shiftToRange(
           bImg.ymin + dImg.y,
-          panelBoundsImg.top,
+          opts.brushClip ? panelBoundsImg.top : -Infinity,
           bImg.ymax
         )[0];
         bImg.ymin = yminImg;
@@ -3746,7 +3756,7 @@
         const ymaxImg = shiftToRange(
           bImg.ymax + dImg.y,
           bImg.ymin,
-          panelBoundsImg.bottom
+          opts.brushClip ? panelBoundsImg.bottom : Infinity
         )[0];
         bImg.ymax = ymaxImg;
       }
@@ -4182,7 +4192,7 @@
           disableDrag($el, $img);
           const dblclickHandler = createClickHandler(
             opts.dblclickId,
-            opts.clickClip,
+            opts.dblclickClip,
             optsCoordmap
           );
           $el.on("dblclick2.image_output", dblclickHandler.mousedown);
@@ -5414,6 +5424,7 @@
         if (opts.priority === "event") {
           this._sendNow();
         } else if (!this.sendIsEnqueued) {
+          this.sendIsEnqueued = true;
           this.shinyapp.taskQueue.enqueue(() => {
             this.sendIsEnqueued = false;
             this._sendNow();
@@ -5430,7 +5441,9 @@
         this.lastChanceCallback.forEach((callback) => callback());
         const currentData = this.pendingData;
         this.pendingData = {};
-        this.shinyapp.sendInput(currentData);
+        if (Object.keys(currentData).length > 0) {
+          this.shinyapp.sendInput(currentData);
+        }
       } finally {
         this.reentrant = false;
       }
@@ -5865,6 +5878,7 @@ ${duplicateIdMsg}`;
       if (!binding) continue;
       const id = binding.getId(el);
       (0, import_jquery35.default)(el).removeClass("shiny-bound-input");
+      (0, import_jquery35.default)(el).removeData("shiny-input-binding");
       bindingsRegistry.removeBinding(id, "input");
       binding.unsubscribe(el);
       (0, import_jquery35.default)(el).trigger({
@@ -5950,6 +5964,7 @@ ${duplicateIdMsg}`;
         }
       });
     }
+    $modal.off("keydown.shinymodal");
     $modal.on("keydown.shinymodal", function(e4) {
       if ((0, import_jquery36.default)("#shiny-modal").data("keyboard") === false) return;
       if (e4.keyCode === 27) {
@@ -5988,7 +6003,11 @@ ${duplicateIdMsg}`;
     await renderDependenciesAsync(deps);
     createPanel();
     let $notificationInit = get(id);
-    if ($notificationInit?.length === 0) $notificationInit = create(id);
+    if ($notificationInit?.length === 0) {
+      $notificationInit = create(id);
+    } else {
+      $notificationInit?.stop(true, false).show();
+    }
     const $notification = $notificationInit;
     const newHtml = `<div class="shiny-notification-content-text">${html}</div><div class="shiny-notification-content-action">${action}</div>`;
     const $content = $notification.find(".shiny-notification-content");
@@ -6011,6 +6030,7 @@ ${duplicateIdMsg}`;
     return id;
   }
   function remove2(id) {
+    clearRemovalCallback(id);
     get(id)?.fadeOut(fadeDuration, function() {
       shinyUnbindAll(this);
       (0, import_jquery37.default)(this).remove();
@@ -6035,7 +6055,7 @@ ${duplicateIdMsg}`;
     const $panel = getPanel();
     if ($panel.length > 0) return $panel;
     (0, import_jquery37.default)(document.body).append('<div id="shiny-notification-panel">');
-    return $panel;
+    return getPanel();
   }
   function create(id) {
     let $notification = get(id);
@@ -6379,6 +6399,7 @@ ${duplicateIdMsg}`;
       this.$nextRequestId = 0;
       this.$allowReconnect = false;
       this.scheduledReconnect = void 0;
+      this.$actionQueueLoopRunning = false;
       // How long should we wait before trying the next reconnection?
       // The delay will increase with subsequent attempts.
       // .next: Return the time to wait for next connection, and increment counter.
@@ -6580,6 +6601,8 @@ ${duplicateIdMsg}`;
       return socket;
     }
     async startActionQueueLoop() {
+      if (this.$actionQueueLoopRunning) return;
+      this.$actionQueueLoopRunning = true;
       while (true) {
         try {
           const action = await this.taskQueue.dequeue();
@@ -6693,7 +6716,7 @@ ${duplicateIdMsg}`;
       this.$sendMsg(msg);
     }
     $sendMsg(msg) {
-      if (this.$socket && this.$socket.readyState) {
+      if (this.$socket && this.$socket.readyState === 1) {
         this.$socket.send(msg);
       } else {
         this.$pendingMessages.push(msg);

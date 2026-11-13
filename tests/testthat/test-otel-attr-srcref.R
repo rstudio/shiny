@@ -749,3 +749,12 @@ test_that("nested reactive expressions preserve individual srcrefs", {
     expect_false(inner_attrs[["code.line.number"]] == outer_attrs[["code.line.number"]])
   })
 })
+
+test_that("ExtendedTask with formal arguments captures function srcref", {
+  task_with_args <- ExtendedTask$new(function(a, b) {
+    promises::promise_resolve(a + b)
+  })
+  attrs <- task_with_args$.__enclos_env__$private$otel_attrs
+  expect_equal(attrs[["code.file.path"]], "test-otel-attr-srcref.R")
+  expect_true(is.numeric(attrs[["code.line.number"]]))
+})

@@ -72,7 +72,7 @@ serializeReactiveValues <- function(values, exclude, stateDir = NULL) {
 
   # Get values and apply serializer functions
   vals <- lapply(vals, function(name) {
-    val <- impl$get(name)
+    val <- isolate(impl$get(name))
 
     # Get the serializer function for this input value. If none specified, use
     # the default.

@@ -70,6 +70,36 @@ code uses the `%...>%` operator for this — recognize it when reading, but
 write `then()` with `|>`, which needs no special operator and puts the
 handler where every other pipeline puts it.
 
+## Write steps in order with `await()`
+
+If {coro} is installed, a `reactive()`, `observe()`, `observeEvent()`,
+`eventReactive()`, or `render*()` body can call `coro::await()` directly.
+Shiny sees the `await()` and runs the code as a `coro::async()` function, so
+it returns a promise. Inputs read after an `await()` are still tracked.
+
+```r
+# Partial snippet: inside the server function
+data <- reactive({
+  rows <- await(mirai::mirai(slow_query(n), n = input$n))
+  head(rows, input$show)
+})
+
+output$table <- renderTable({
+  rows <- await(data())
+  rows
+})
+```
+
+The event code of `observeEvent()`/`eventReactive()` and the keys of
+`bindCache()`/`bindEvent()` can use `await()` too; Shiny waits for the value.
+
+`await()` must be its own statement or on the right of `<-`. Write
+`x <- await(p)` and then use `x`; `f(await(p))` errors when the code runs.
+
+If the code is invalidated while it waits, the next run starts without
+waiting for the old one. Use `ExtendedTask` for slow work that should not
+overlap.
+
 ## Handle errors and cleanup
 
 `promises::catch(promise, onRejected)` runs a handler only when the
@@ -125,6 +155,8 @@ like `then()`, so the whole chain is one `|>` pipeline.
 - Calling `future::future()` directly for the slow work → it blocks the
   main R process when {future}'s workers are all busy; wrap it with
   `promises::future_promise()`, which queues instead.
+- Calling `await()` inside another call, such as `paste(await(p))` →
+  coro does not allow it; assign first with `x <- await(p)`.
 - Mixing up `then()`'s `onRejected` with `catch()` → both handle rejection,
   but `catch()` is clearer when you only care about errors and not the
   success path.

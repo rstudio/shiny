@@ -345,9 +345,9 @@ doCaptureStack <- function(e) {
 # Code that uses `await()` runs as a `coro::async()` function (see
 # `awaitToAsyncFunction()`). coro evaluates the user's code in a frame of its
 # own (an `evalq()` of `user_env`), under several more of its frames. Name
-# that frame after the reactive (`renderText`, `<reactive:r>`, ...), as
-# `wrapFunctionLabel()` does for code without `await()`, and hide coro's
-# frames around it:
+# that frame after the reactive, as `wrapFunctionLabel()` does for code
+# without `await()`, marked as async (`renderText (coro::async)`), and hide
+# coro's frames around it:
 # - before the first `await()`, those between it and the call to the async
 #   function (which it replaces);
 # - after an `await()`, everything outside it, which is promise and event loop
@@ -369,7 +369,7 @@ relabelAsyncFrames <- function(calls, parents, frames, atThen = FALSE) {
     innermost <- label
     innermostIndex <- i
     calls[[i]] <- structure(
-      call(label),
+      call(paste0(label, " (coro::async)")),
       srcref = attr(calls[[i]], "srcref", exact = TRUE)
     )
     parent <- parents[[i]]

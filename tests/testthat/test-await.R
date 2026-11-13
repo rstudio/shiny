@@ -696,7 +696,12 @@ test_that("a stack trace after await() shows the reactive and the user's line", 
     "})()))"
   ))
   expect_identical(out$header, "Error in <reactive:r>: boom")
-  expect_match(out$trace, "<reactive:r> [app.R#3]", fixed = TRUE, all = FALSE)
+  expect_match(
+    out$trace,
+    "<reactive:r> (coro::async) [app.R#3]",
+    fixed = TRUE,
+    all = FALSE
+  )
   # coro's frames tell the user nothing
   expect_no_match(out$trace, "eval_bare|evalq|wrapOnFulfilled")
 })
@@ -718,7 +723,7 @@ test_that("a stack trace before await() hides coro's frames", {
   # The reactive's frame shows once, with the user's line
   expect_identical(
     grep("<reactive:r>", out$trace, fixed = TRUE),
-    grep("<reactive:r> [app.R#2]", out$trace, fixed = TRUE)
+    grep("<reactive:r> (coro::async) [app.R#2]", out$trace, fixed = TRUE)
   )
   expect_no_match(out$trace, "eval_bare|evalq|instance")
 })
@@ -733,7 +738,7 @@ test_that("relabelAsyncFrames() stops at a frame that is its own parent", {
   frames <- list(globalenv(), globalenv(), globalenv(), userEnv, globalenv())
   out <- relabelAsyncFrames(calls, parents, frames)
   expect_identical(attr(out, "asyncLabel"), "observe")
-  expect_identical(out[[4]], quote(observe()))
+  expect_identical(out[[4]], call("observe (coro::async)"))
   expect_identical(out[[3]], quote(..stacktraceon..()))
   expect_identical(out[[1]], quote(..stacktraceoff..()))
 })

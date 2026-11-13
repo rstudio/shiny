@@ -46,7 +46,7 @@ formalsAndBody <- function(x) {
 
   list(
     formals = formals(x),
-    body = zap_srcref(fnUserBody(x, body))
+    body = zap_srcref(fnSourceBody(x, body))
   )
 }
 
@@ -106,9 +106,8 @@ quoToSimpleFunction <- function(q) {
 }
 
 # If the body of `fun` calls `await()` or `await_each()` at its own level, run
-# it as a `coro::async()` function so it returns a promise. The user's code is
-# kept in the "shinyUserBody" attribute for labels and cache keys (see
-# `fnUserBody()`).
+# it as a `coro::async()` function so it returns a promise. Labels and cache
+# keys read the user's code back with `fnSourceBody()`.
 awaitToAsyncFunction <- function(fun) {
   body <- fn_body(fun)
   if (!hasAwait(body)) {
@@ -124,14 +123,19 @@ awaitToAsyncFunction <- function(fun) {
   env$await_each <- coro::await_each
 
   # `coro::async()` only accepts a `function` written out in the call
-  out <- inject(coro::async(function() !!body), env)
-  attr(out, "shinyUserBody") <- body
-  out
+  inject(coro::async(function() !!body), env)
 }
 
-# The user's code for a function made by `quoToSimpleFunction()`
-fnUserBody <- function(fun, getBody = fn_body) {
-  attr(fun, "shinyUserBody", exact = TRUE) %||% getBody(fun)
+# The user's code for a function made by `quoToSimpleFunction()`. For a
+# `coro::async()` function, that is the body of the function coro was given.
+fnSourceBody <- function(fun, getBody = fn_body) {
+  if (inherits(fun, "coro_async")) {
+    # Relies on coro internals (coro 1.1.0): the closure env holds the original
+    # function as `fn`. The labels and cache-key tests in test-await.R fail if
+    # this changes.
+    fun <- environment(fun)$fn
+  }
+  getBody(fun)
 }
 
 awaitCalls <- c("await", "await_each")
@@ -287,7 +291,7 @@ simpleExprToFunction <- function(expr, function_name) {
 }
 
 installedFuncExpr <- function(func) {
-  fnUserBody(attr(func, "wrappedFunc", exact = TRUE))
+  fnSourceBody(attr(func, "wrappedFunc", exact = TRUE))
 }
 
 funcToLabelBody <- function(func) {

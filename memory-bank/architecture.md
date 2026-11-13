@@ -215,9 +215,10 @@ JS side, in `srcts/src/bindings/`:
   defers input updates and output flushes.
 - `quoToSimpleFunction()` (`R/utils-lang.R`), which every expression helper
   ends in, runs code that calls `await()`/`await_each()` as a
-  `coro::async()` function (`awaitToAsyncFunction()`). The user's code is
-  kept in the `shinyUserBody` attribute; label and cache-key code reads it
-  with `fnUserBody()`, so it must not use `fn_body()`/`body()` directly.
+  `coro::async()` function (`awaitToAsyncFunction()`). Its body is coro's
+  machinery, so label and cache-key code reads the user's code with
+  `fnSourceBody()` (which reads coro's internal `fn`), never
+  `fn_body()`/`body()` directly.
 - `ExtendedTask` (`R/extended-task.R`) keeps private `reactiveVal`s for
   status, value and error. `invoke()` runs `func` under
   `maskReactiveContext()` and queues the call if a run is already active.

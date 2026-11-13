@@ -1121,7 +1121,7 @@ Observable <- R6Class(
       invisible()
     },
     format = function() {
-      simpleExprToFunction(fnUserBody(.origFunc), "reactive")
+      simpleExprToFunction(fnSourceBody(.origFunc), "reactive")
     },
     .updateValue = function() {
       ctx <- Context$new(
@@ -1290,7 +1290,7 @@ reactive <- function(
 
   func <- installExprFunction(x, "func", env, quoted, wrappedWithLabel = FALSE)
   # Attach a label and a reference to the original user source for debugging
-  userExpr <- fnUserBody(func)
+  userExpr <- fnSourceBody(func)
   label <- exprToLabel(userExpr, "reactive", label)
 
   o <- Observable$new(func, label, domain, ..stacktraceon = ..stacktraceon)
@@ -2744,7 +2744,7 @@ eventReactive <- function(eventExpr, valueExpr,
 
   func <- installExprFunction(eventExpr, "func", event.env, event.quoted, wrappedWithLabel = FALSE)
   # Attach a label and a reference to the original user source for debugging
-  userEventExpr <- fnUserBody(func)
+  userEventExpr <- fnSourceBody(func)
 
   call_srcref <- get_call_srcref()
   if (is.null(label)) {

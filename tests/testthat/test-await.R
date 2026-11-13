@@ -96,12 +96,12 @@ test_that("expression helpers leave code without await() alone", {
   f <- asFunc(quote({
     1 + 1
   }))
-  expect_null(attr(f, "shinyUserBody"))
+  expect_false(inherits(f, "coro_async"))
   expect_identical(f(), 2)
   expect_identical(fn_body(f), quote({
     1 + 1
   }))
-  expect_identical(fnUserBody(f), fn_body(f))
+  expect_identical(fnSourceBody(f), fn_body(f))
 })
 
 test_that("exprToFunction() turns await() code into a promise", {
@@ -115,7 +115,7 @@ test_that("exprToFunction() turns await() code into a promise", {
   expect_true(promises::is.promise(p))
   expect_identical(resolve(p), 11)
   expect_identical(
-    fnUserBody(f),
+    fnSourceBody(f),
     quote({
       x <- await(promises::promise_resolve(1))
       x + y

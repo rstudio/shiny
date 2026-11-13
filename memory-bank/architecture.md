@@ -217,7 +217,7 @@ JS side, in `srcts/src/bindings/`:
   ends in, runs code that calls `await()`/`await_each()` as a
   `coro::async()` function (`awaitToAsyncFunction()`). Its body is coro's
   machinery, so label and cache-key code reads the user's code with
-  `fnSourceBody()` (which reads coro's internal `fn`), never
+  `fnSourceBody()` (which reads coro's internal `fn` via `coroSourceFn()`), never
   `fn_body()`/`body()` directly.
 - `ExtendedTask` (`R/extended-task.R`) keeps private `reactiveVal`s for
   status, value and error. `invoke()` runs `func` under

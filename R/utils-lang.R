@@ -130,15 +130,26 @@ awaitToAsyncFunction <- function(fun) {
 # `coro::async()` function, that is the body of the function coro was given.
 fnSourceBody <- function(fun, getBody = fn_body) {
   if (inherits(fun, "coro_async")) {
-    # Relies on coro internals (coro 1.1.0): the closure env holds the original
-    # function as `fn`. The labels and cache-key tests in test-await.R fail if
-    # this changes.
-    # TODO-future: Use `coro::coro_fn(fun)` once it is released
-    # (https://github.com/r-lib/coro/pull/78) and bump the coro version in
-    # Suggests.
-    fun <- environment(fun)$fn
+    fun <- coroSourceFn(fun)
   }
   getBody(fun)
+}
+
+# The function a `coro::async()` function was built from.
+# Relies on coro internals: coro keeps it as `fn` in its "static" env. In coro
+# 1.1.0 that is the closure env; later versions find it with `static_env()`.
+# The labels and cache-key tests in test-await.R fail if this changes.
+# TODO-future: Use `coro::coro_fn(fun)` once it is released
+# (https://github.com/r-lib/coro/pull/78) and bump the coro version in
+# Suggests.
+coroSourceFn <- function(fun) {
+  staticEnv <-
+    if (exists("static_env", envir = asNamespace("coro"), inherits = FALSE)) {
+      utils::getFromNamespace("static_env", "coro")(fun)
+    } else {
+      environment(fun)
+    }
+  get("fn", envir = staticEnv)
 }
 
 awaitCalls <- c("await", "await_each")

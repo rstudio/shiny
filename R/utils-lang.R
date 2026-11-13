@@ -124,10 +124,7 @@ awaitToAsyncFunction <- function(fun) {
   env$await_each <- coro::await_each
 
   # `coro::async()` only accepts a `function` written out in the call
-  asyncFun <- eval(
-    as.call(list(quote(coro::async), call("function", NULL, body))),
-    env
-  )
+  asyncFun <- inject(coro::async(function() !!body), env)
   out <- function() asyncFun()
   attr(out, "shinyUserBody") <- body
   out

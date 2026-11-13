@@ -259,5 +259,7 @@ test_that("coro async generator deep stack count is low", {
   wait_for_it()
 
   expect_s3_class(cgerr, "error", exact = FALSE)
-  expect_length(attr(cgerr, "deep.stack.trace"), 2L)
+  # The count must not grow with the 50 steps. It is 2 with coro 1.1.0 and 3
+  # once coro wraps the first step in a `tryCatch()` (r-lib/coro#81)
+  expect_lte(length(attr(cgerr, "deep.stack.trace")), 3L)
 })

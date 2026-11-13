@@ -1505,6 +1505,12 @@ wrapFunctionLabel <- function(func, name, ..stacktraceon = FALSE, dots = TRUE) {
   assign(name, func, environment())
   registerDebugHook(name, environment(), name)
 
+  if (inherits(func, "coro_async")) {
+    # Stack traces name the frame that runs the code after `await()` with this
+    # label; see `relabelAsyncFrames()`
+    assign(".shinyAsyncLabel", name, envir = environment(coroSourceFn(func)))
+  }
+
   if (isTRUE(dots)) {
     if (..stacktraceon) {
       # We need to wrap the `...` in `!!quote(...)` so that R CMD check won't

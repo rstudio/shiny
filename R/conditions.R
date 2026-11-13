@@ -262,8 +262,8 @@ createStackTracePromiseDomain <- function() {
       force(onFulfilled)
       # Subscription time
       if (deepStacksEnabled()) {
-        currentStack <- sys.calls()
         currentParents <- sys.parents()
+        currentStack <- relabelAsyncFrames(sys.calls(), currentParents, sys.frames(), atThen = TRUE)
         attr(currentStack, "parents") <- currentParents
         currentStack <- saveCallStackDigest(currentStack)
         currentDeepStack <- .globals$deepStack
@@ -286,8 +286,8 @@ createStackTracePromiseDomain <- function() {
       force(onRejected)
       # Subscription time
       if (deepStacksEnabled()) {
-        currentStack <- sys.calls()
         currentParents <- sys.parents()
+        currentStack <- relabelAsyncFrames(sys.calls(), currentParents, sys.frames(), atThen = TRUE)
         attr(currentStack, "parents") <- currentParents
         currentStack <- saveCallStackDigest(currentStack)
         currentDeepStack <- .globals$deepStack
@@ -323,6 +323,13 @@ doCaptureStack <- function(e) {
   if (is.null(attr(e, "stack.trace", exact = TRUE))) {
     calls <- sys.calls()
     parents <- sys.parents()
+    calls <- relabelAsyncFrames(calls, parents, sys.frames())
+    label <- attr(calls, "asyncLabel", exact = TRUE)
+    # coro evaluates the user's code with `eval_bare()`, which tells the user
+    # nothing; use the reactive's label, as for code without `await()`
+    if (!is.null(label) && isCoroEvalCall(conditionCall(e))) {
+      e$call <- call(label)
+    }
     attr(calls, "parents") <- parents
     calls <- saveCallStackDigest(calls)
     attr(e, "stack.trace") <- calls
@@ -333,6 +340,100 @@ doCaptureStack <- function(e) {
     }
   }
   stop(e)
+}
+
+# Code that uses `await()` runs as a `coro::async()` function (see
+# `awaitToAsyncFunction()`). coro evaluates the user's code in a frame of its
+# own (an `evalq()` of `user_env`), under several more of its frames. Name
+# that frame after the reactive, as `wrapFunctionLabel()` does for code
+# without `await()`, marked as async (`renderText (coro::async)`), and hide
+# coro's frames around it:
+# - before the first `await()`, those between it and the call to the async
+#   function (which it replaces);
+# - after an `await()`, everything outside it, which is promise and event loop
+#   plumbing. The deep stack trace shows where the code started.
+# The label of the innermost such frame is returned as the "asyncLabel" attr.
+# `atThen` is TRUE when the stack is saved at a `then()` rather than an error.
+relabelAsyncFrames <- function(calls, parents, frames, atThen = FALSE) {
+  innermost <- NULL
+  innermostIndex <- NULL
+  # Fences at or before the last `..stacktracefloor..` are ignored, so the
+  # outermost frame that can close a hidden region is the one just inside it
+  floors <- which(vapply(calls, isCallNamed, logical(1), "..stacktracefloor.."))
+  outermost <- if (length(floors)) max(floors) + 1L else 1L
+  # Frames whose env's parent is an async function's env. Besides the frame
+  # running the user's code, coro's own setup frames can match, so keep only
+  # the innermost match for each async function.
+  labelEnvs <- lapply(frames, asyncLabelEnv)
+  for (i in seq_along(frames)) {
+    if (is.null(labelEnvs[[i]])) {
+      next
+    }
+    later <- utils::tail(labelEnvs, -i)
+    if (any(vapply(later, identical, logical(1), labelEnvs[[i]]))) {
+      next
+    }
+    label <- labelEnvs[[i]]$.shinyAsyncLabel
+    innermost <- label
+    innermostIndex <- i
+    calls[[i]] <- structure(
+      call(paste0(label, " (coro::async)")),
+      srcref = attr(calls[[i]], "srcref", exact = TRUE)
+    )
+    parent <- parents[[i]]
+    if (parent <= 0) {
+      next
+    }
+    # Close the hidden region at the call to the async function, if this is
+    # before the first `await()`; otherwise at the outermost frame
+    # Scan back rather than follow `parents`: a frame can list itself (or a
+    # later frame) as its parent, which breaks the chain
+    first <- outermost
+    for (j in rev(seq_len(parent))) {
+      if (isCallNamed(calls[[j]], label)) {
+        first <- j
+        break
+      }
+    }
+    if (first < parent) {
+      calls[[parent]] <- quote(..stacktraceon..())
+      calls[[first]] <- quote(..stacktraceoff..())
+    }
+  }
+  # When the stack is saved at a `then()` (for the deep stack trace), and the
+  # `then()` is coro's at an `await()`, the frames inside the user's are
+  # coro's and the promise package's; hide them
+  n <- length(calls)
+  if (
+    atThen &&
+      !is.null(innermostIndex) &&
+      innermostIndex + 1 < n &&
+      identical(calls[[innermostIndex + 1]][[1]], quote(base::evalq))
+  ) {
+    calls[[innermostIndex + 1]] <- quote(..stacktraceoff..())
+    calls[[n]] <- quote(..stacktraceon..())
+  }
+  attr(calls, "asyncLabel") <- innermost
+  calls
+}
+
+# The async function's env holding the label set by `wrapFunctionLabel()`, if
+# `env` is a child of it, such as the env running the user's code
+asyncLabelEnv <- function(env) {
+  if (identical(env, emptyenv())) {
+    return(NULL)
+  }
+  parent <- parent.env(env)
+  if (exists(".shinyAsyncLabel", envir = parent, inherits = FALSE)) parent
+}
+
+isCallNamed <- function(call, name) {
+  head <- if (is.call(call)) call[[1]]
+  (is.symbol(head) || is.character(head)) && identical(as.character(head), name)
+}
+
+isCoroEvalCall <- function(call) {
+  is.call(call) && identical(call[[1]], quote(eval_bare))
 }
 
 #' @details `withLogErrors` captures stack traces and logs errors that
@@ -649,6 +750,11 @@ dropTrivialFrames <- function(callnames) {
   # the last *contiguous* block of them, and then, only if they are the
   # last thing in the calls list.
   hideable <- callnames %in% c(".handleSimpleError", "h", "base$wrapOnFulfilled")
+  # Nothing to keep, e.g. an empty stack when the error was caught before its
+  # stack was captured (as coro does for errors before the first `await()`)
+  if (all(hideable)) {
+    return(rep_len(TRUE, length(callnames)))
+  }
   # What's the last that *didn't* match stop/.handleSimpleError/h?
   lastGoodCall <- max(which(!hideable))
   toRemove <- length(callnames) - lastGoodCall
@@ -695,6 +801,23 @@ offsetSrcrefs <- function(calls, offset = TRUE) {
     # E.g. for "foo [bar.R:10]", line 10 of bar.R will be part of
     # the definition of foo().
     srcrefs <- c(utils::tail(srcrefs, -1), list(NULL))
+
+    # A call's srcref is a location in its parent's code, and the parent is
+    # usually the frame just before it. When code is run with `eval()` in
+    # another frame's env (as `coro::async()` does after `await()`), the parent
+    # is further back, and the frame just before it is often pruned. So give
+    # each frame the srcref of its latest child call that has one.
+    parents <- attr(calls, "parents", exact = TRUE)
+    if (length(parents) == length(calls)) {
+      original <- getSrcRefs(calls)
+      for (k in seq_along(parents)) {
+        parent <- parents[[k]]
+        if (parent > 0 && parent < k - 1 && !is.null(original[[k]])) {
+          srcrefs[[parent]] <- original[[k]]
+        }
+      }
+    }
+
     calls <- setSrcRefs(calls, srcrefs)
   }
 

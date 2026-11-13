@@ -221,6 +221,11 @@ JS side, in `srcts/src/bindings/`:
   machinery, so label and cache-key code reads the user's code with
   `fnSourceBody()` (which reads coro's internal `fn` via `coroSourceFn()`), never
   `fn_body()`/`body()` directly.
+  Stack traces: `wrapFunctionLabel()` records its label in the coro
+  function's env, and `relabelAsyncFrames()` (`R/conditions.R`, called when a
+  stack is captured) uses it for the error call and to name coro's frame that
+  runs the user's code, and
+  hides coro's frames with `..stacktraceon..`/`..stacktraceoff..` fences.
 - `ExtendedTask` (`R/extended-task.R`) keeps private `reactiveVal`s for
   status, value and error. `invoke()` runs `func` under
   `maskReactiveContext()` and queues the call if a run is already active.

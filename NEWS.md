@@ -2,7 +2,7 @@
 
 * `reactive()`, `observe()`, `observeEvent()`, `eventReactive()`, and `render*()` code, and `bindCache()`/`bindEvent()` keys, can now call `await()` (and `await_each()`) from {coro} directly. When the code uses `await()`, Shiny runs it as a `coro::async()` function, so it returns a promise. Inputs read after an `await()` are still tracked. Code without `await()`, or that calls its own `await()` function, is unchanged. (#4481)
 
-* Stack traces for errors after `await()` now show the line of the user's code. Shiny's stack trace pruning used to hide the frame that held it.
+* Stack traces for errors after `await()` now show the line of the user's code. Shiny's stack trace pruning used to hide the frame that held it. (#4483)
 
 * Module ids that are character vectors, such as `c("a", "b")`, work again in `callModule()`, `moduleServer()`, `testServer()` and `session$destroy()`. Since 1.14.0 they failed with ``Invalid `namespace` ``. They are joined the same way `NS()` joins them, so `c("a", "b")` becomes `"a-b"`. (#4447)
 

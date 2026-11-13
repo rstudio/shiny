@@ -355,3 +355,143 @@ test_that("dropTrivialFrames() keeps a stack with nothing to keep", {
   expect_identical(dropTrivialFrames(c("h", "h")), c(TRUE, TRUE))
   expect_identical(dropTrivialFrames(c("f", "h")), c(TRUE, FALSE))
 })
+
+# ---- await() ------------------------------------------------------------------
+
+# "test-stacks.R#<line>]", where <line> is the line of this file that is just
+# `text`
+srcLoc <- function(text) {
+  line <- which(trimws(readLines(test_path("test-stacks.R"))) == text)
+  stopifnot(length(line) == 1)
+  paste0("test-stacks.R#", line, "]")
+}
+
+# Run `expr` the way `runApp()` does, wait for its promises, and return the
+# error passed to `caught()` along with its printed stack trace
+catchAsyncError <- function(expr) {
+  caught <- NULL
+  caught_fn <- function(e) caught <<- e
+  ..stacktraceoff..(
+    ..stacktracefloor..({
+      expr(caught_fn)
+      flushReact()
+      wait_for_it()
+    })
+  )
+  list(
+    cond = caught,
+    trace = capture.output(printStackTrace(caught), type = "message")
+  )
+}
+
+test_that("an error after await() in a reactive shows the reactive and its line", {
+  skip_if_not_installed("coro")
+  out <- catchAsyncError(function(caught) {
+    r <- reactive(label = "r", {
+      x <- await(promises::promise_resolve(1))
+      stop("boom after await in reactive")
+    })
+    observeEvent(1, {
+      captureStackTraces(promises::catch(r(), caught))
+    })
+  })
+  expect_identical(getCallNames(list(conditionCall(out$cond))), "<reactive:r>")
+  expect_match(
+    out$trace,
+    paste0(
+      "<reactive:r> (coro::async) [",
+      srcLoc('stop("boom after await in reactive")')
+    ),
+    fixed = TRUE,
+    all = FALSE
+  )
+  # coro's and the promise package's frames tell the user nothing
+  expect_no_match(out$trace, "eval_bare|evalq|onFulfilled|then")
+  # The deep stack trace shows where the code started
+  expect_match(out$trace, "From earlier call:", fixed = TRUE, all = FALSE)
+  expect_match(out$trace, "observeEvent(1)", fixed = TRUE, all = FALSE)
+})
+
+test_that("an error after await() in renderText() shows renderText and its line", {
+  skip_if_not_installed("coro")
+  out <- catchAsyncError(function(caught) {
+    p <- isolate(captureStackTraces(renderText({
+      x <- await(promises::promise_resolve(1))
+      stop("boom after await in renderText")
+    })()))
+    promises::catch(p, caught)
+  })
+  expect_identical(getCallNames(list(conditionCall(out$cond))), "renderText")
+  expect_match(
+    out$trace,
+    paste0(
+      "renderText (coro::async) [",
+      srcLoc('stop("boom after await in renderText")')
+    ),
+    fixed = TRUE,
+    all = FALSE
+  )
+  expect_no_match(out$trace, "eval_bare|evalq|onFulfilled|then")
+})
+
+test_that("an error before await() shows the reactive once, with its line", {
+  skip_if_not_installed("coro")
+  out <- catchAsyncError(function(caught) {
+    r <- reactive(label = "r", {
+      stop("boom before await")
+      x <- await(promises::promise_resolve(1))
+    })
+    observeEvent(1, {
+      captureStackTraces(tryCatch(promises::catch(r(), caught), error = caught))
+    })
+  })
+  if (is.null(conditionStackTrace(out$cond))) {
+    # https://github.com/r-lib/coro/pull/81 rejects these errors with an
+    # exiting `tryCatch()`, so Shiny's calling handler never sees them
+    skip("coro catches errors before the first await() before Shiny can capture the stack")
+  }
+  expect_identical(getCallNames(list(conditionCall(out$cond))), "<reactive:r>")
+  frames <- grep("<reactive:r>", out$trace, fixed = TRUE, value = TRUE)
+  expect_length(frames, 1)
+  expect_match(
+    frames,
+    paste0("<reactive:r> (coro::async) [", srcLoc('stop("boom before await")')),
+    fixed = TRUE
+  )
+  expect_no_match(out$trace, "eval_bare|evalq|instance")
+})
+
+test_that("relabelAsyncFrames() handles a frame that is its own parent", {
+  labelEnv <- new.env()
+  labelEnv$.shinyAsyncLabel <- "observe"
+  userEnv <- new.env(parent = labelEnv)
+  calls <- list(quote(a()), quote(b()), quote(c()), quote(evalq(x)), quote(stop("x")))
+  # Frame 2 lists itself as its parent
+  parents <- c(0L, 2L, 2L, 3L, 4L)
+  frames <- list(globalenv(), globalenv(), globalenv(), userEnv, globalenv())
+  out <- relabelAsyncFrames(calls, parents, frames)
+  expect_identical(attr(out, "asyncLabel"), "observe")
+  expect_identical(out[[4]], call("observe (coro::async)"))
+  expect_identical(out[[3]], quote(..stacktraceon..()))
+  expect_identical(out[[1]], quote(..stacktraceoff..()))
+})
+
+test_that("relabelAsyncFrames() names only the innermost frame of each async function", {
+  # coro's own setup frames can also run in children of the async function's
+  # env; only the innermost one runs the user's code
+  labelEnv <- new.env()
+  labelEnv$.shinyAsyncLabel <- "observe"
+  calls <- list(quote(observe()), quote(local()), quote(eval()), quote(evalq()), quote(stop("x")))
+  parents <- c(0L, 1L, 2L, 3L, 4L)
+  frames <- list(
+    globalenv(),
+    globalenv(),
+    new.env(parent = labelEnv),
+    new.env(parent = labelEnv),
+    globalenv()
+  )
+  out <- relabelAsyncFrames(calls, parents, frames)
+  expect_identical(out[[4]], call("observe (coro::async)"))
+  expect_identical(out[[3]], quote(..stacktraceon..()))
+  expect_identical(out[[1]], quote(..stacktraceoff..()))
+})

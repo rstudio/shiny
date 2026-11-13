@@ -361,11 +361,19 @@ relabelAsyncFrames <- function(calls, parents, frames, atThen = FALSE) {
   # outermost frame that can close a hidden region is the one just inside it
   floors <- which(vapply(calls, isCallNamed, logical(1), "..stacktracefloor.."))
   outermost <- if (length(floors)) max(floors) + 1L else 1L
+  # Frames whose env's parent is an async function's env. Besides the frame
+  # running the user's code, coro's own setup frames can match, so keep only
+  # the innermost match for each async function.
+  labelEnvs <- lapply(frames, asyncLabelEnv)
   for (i in seq_along(frames)) {
-    label <- asyncFrameLabel(frames[[i]])
-    if (is.null(label)) {
+    if (is.null(labelEnvs[[i]])) {
       next
     }
+    later <- utils::tail(labelEnvs, -i)
+    if (any(vapply(later, identical, logical(1), labelEnvs[[i]]))) {
+      next
+    }
+    label <- labelEnvs[[i]]$.shinyAsyncLabel
     innermost <- label
     innermostIndex <- i
     calls[[i]] <- structure(
@@ -378,15 +386,14 @@ relabelAsyncFrames <- function(calls, parents, frames, atThen = FALSE) {
     }
     # Close the hidden region at the call to the async function, if this is
     # before the first `await()`; otherwise at the outermost frame
+    # Scan back rather than follow `parents`: a frame can list itself (or a
+    # later frame) as its parent, which breaks the chain
     first <- outermost
-    j <- parent
-    while (j > 0) {
+    for (j in rev(seq_len(parent))) {
       if (isCallNamed(calls[[j]], label)) {
         first <- j
         break
       }
-      # A frame can list itself (or a later frame) as its parent; stop there
-      j <- if (parents[[j]] < j) parents[[j]] else 0L
     }
     if (first < parent) {
       calls[[parent]] <- quote(..stacktraceon..())
@@ -410,13 +417,14 @@ relabelAsyncFrames <- function(calls, parents, frames, atThen = FALSE) {
   calls
 }
 
-# The label set by `wrapFunctionLabel()` when `env` runs the user's code of
-# an async function
-asyncFrameLabel <- function(env) {
+# The async function's env holding the label set by `wrapFunctionLabel()`, if
+# `env` is a child of it, such as the env running the user's code
+asyncLabelEnv <- function(env) {
   if (identical(env, emptyenv())) {
     return(NULL)
   }
-  get0(".shinyAsyncLabel", envir = parent.env(env), inherits = FALSE)
+  parent <- parent.env(env)
+  if (exists(".shinyAsyncLabel", envir = parent, inherits = FALSE)) parent
 }
 
 isCallNamed <- function(call, name) {

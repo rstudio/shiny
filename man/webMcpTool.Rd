@@ -35,8 +35,11 @@ Objects must be closed: an \code{ellmer::type_from_schema()} object needs
 \code{"additionalProperties": false}.}
 
 \item{value}{An \code{ellmer::type_object()} describing the list \code{fun} returns.
-It becomes the tool's \code{outputSchema}. \code{NULL} (the default) skips the
-check.}
+It becomes the tool's \code{outputSchema}, and the result is checked and
+shaped to it before being sent: arrays are always sent as JSON arrays,
+even with length 0 or 1. \code{NULL} (the default) skips this. Declare \code{value}
+if the result contains arrays; otherwise a length-1 vector is sent as a
+single value.}
 
 \item{annotations}{A named list of WebMCP tool annotations, e.g.
 \code{list(readOnlyHint = TRUE)}.}

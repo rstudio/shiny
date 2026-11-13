@@ -133,6 +133,9 @@ fnSourceBody <- function(fun, getBody = fn_body) {
     # Relies on coro internals (coro 1.1.0): the closure env holds the original
     # function as `fn`. The labels and cache-key tests in test-await.R fail if
     # this changes.
+    # TODO-future: Use `coro::coro_fn(fun)` once it is released
+    # (https://github.com/r-lib/coro/pull/78) and bump the coro version in
+    # Suggests.
     fun <- environment(fun)$fn
   }
   getBody(fun)

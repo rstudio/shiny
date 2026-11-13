@@ -205,7 +205,7 @@ class ImageOutputBinding extends OutputBinding {
         // our custom 'dblclick2' event.
         const dblclickHandler = createClickHandler(
           opts.dblclickId,
-          opts.clickClip,
+          opts.dblclickClip,
           optsCoordmap,
         );
 

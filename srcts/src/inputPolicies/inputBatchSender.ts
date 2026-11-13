@@ -22,6 +22,7 @@ class InputBatchSender implements InputPolicy {
       if (opts.priority === "event") {
         this._sendNow();
       } else if (!this.sendIsEnqueued) {
+        this.sendIsEnqueued = true;
         this.shinyapp.taskQueue.enqueue(() => {
           this.sendIsEnqueued = false;
           this._sendNow();
@@ -41,7 +42,9 @@ class InputBatchSender implements InputPolicy {
       const currentData = this.pendingData;
 
       this.pendingData = {};
-      this.shinyapp.sendInput(currentData);
+      if (Object.keys(currentData).length > 0) {
+        this.shinyapp.sendInput(currentData);
+      }
     } finally {
       this.reentrant = false;
     }

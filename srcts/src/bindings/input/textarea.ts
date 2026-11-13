@@ -12,7 +12,8 @@ const intersectObserver = new IntersectionObserver((entries) => {
 });
 
 class TextareaInputBinding extends TextInputBinding {
-  #inputHandler: EventListener | null = null;
+  #inputHandler: EventListener = (e: Event) =>
+    updateHeight(e.target as HTMLInputElement);
 
   find(scope: HTMLElement): JQuery<HTMLElement> {
     // Inputs now also have the .shiny-input-textarea class
@@ -24,10 +25,14 @@ class TextareaInputBinding extends TextInputBinding {
     updateHeight(el);
   }
 
+  setValue(el: HTMLInputElement, value: string): void {
+    super.setValue(el, value);
+    updateHeight(el);
+  }
+
   subscribe(el: HTMLInputElement, callback: (x: boolean) => void): void {
     super.subscribe(el, callback);
 
-    this.#inputHandler = (e) => updateHeight(e.target as HTMLInputElement);
     el.addEventListener("input", this.#inputHandler);
     intersectObserver.observe(el);
   }
@@ -35,7 +40,7 @@ class TextareaInputBinding extends TextInputBinding {
   unsubscribe(el: HTMLInputElement): void {
     super.unsubscribe(el);
 
-    if (this.#inputHandler) el.removeEventListener("input", this.#inputHandler);
+    el.removeEventListener("input", this.#inputHandler);
     intersectObserver.unobserve(el);
   }
 }

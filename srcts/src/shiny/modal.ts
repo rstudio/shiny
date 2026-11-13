@@ -45,6 +45,7 @@ async function show({
     });
   }
 
+  $modal.off("keydown.shinymodal");
   $modal.on("keydown.shinymodal", function (e) {
     // If we're listening for Esc, don't let the event propagate. See
     // https://github.com/rstudio/shiny/issues/1453. The value of

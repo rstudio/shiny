@@ -611,8 +611,8 @@ updateRadioButtons <- function(session = getDefaultReactiveDomain(), inputId, la
 
   # you must select at least one radio button
   if (is.null(selected)) {
-    if (!is.null(choices)) selected <- choices[[1]]
-    else if (!is.null(choiceValues)) selected <- choiceValues[[1]]
+    if (!is.null(choices) && length(choices) > 0) selected <- choices[[1]]
+    else if (!is.null(choiceValues) && length(choiceValues) > 0) selected <- choiceValues[[1]]
   }
   updateInputOptions(session, inputId, label, choices, selected,
     inline, 'radio', choiceNames, choiceValues)
@@ -701,16 +701,7 @@ updateSelectizeInput <- function(session = getDefaultReactiveDomain(), inputId, 
     return(updateSelectInput(session, inputId, label, choices, selected))
   }
 
-  noOptGroup <- TRUE
-  if (is.list(choices)) {
-    # check if list is nested
-    for (i in seq_along(choices)) {
-      if (is.list(choices[[i]]) || length(choices[[i]]) > 1) {
-        noOptGroup <- FALSE
-        break()
-      }
-    }
-  }
+  noOptGroup <- !hasGroups(choices)
   # convert choices to a data frame so it returns [{label: , value: , optgroup: },...]
   choices <- if (is.data.frame(choices)) {
     # jcheng 2018/09/25: I don't think we ever said data frames were OK to pass
@@ -734,7 +725,7 @@ updateSelectizeInput <- function(session = getDefaultReactiveDomain(), inputId, 
       empty_names_indices <- lab == ""
       lab[empty_names_indices] <- as.character(choices[empty_names_indices])
     }
-    data.frame(label = lab, value = choices, stringsAsFactors = FALSE)
+    data.frame(label = lab, value = as.character(choices), stringsAsFactors = FALSE)
   } else {
     # slow path for nested lists/optgroups
     list_names <- names(choices)
@@ -743,13 +734,16 @@ updateSelectizeInput <- function(session = getDefaultReactiveDomain(), inputId, 
     }
 
     choice_list <- mapply(choices, list_names, FUN = function (choice, name) {
-      group <- ""
-      lab <- name
-      if (lab == "") lab <- as.character(choice)
-
-      if (is.list(choice) || length(choice) > 1) {
-        group <- rep(name, length(choice))
+      if (isGroup(choice)) {
         choice <- unlist(choice)
+        if (length(choice) == 0) {
+          return(list(
+            label = character(0),
+            value = character(0),
+            optgroup = character(0)
+          ))
+        }
+        group <- rep(name, length(choice))
 
         if (is.null(names(choice))) {
           lab <- as.character(choice)
@@ -761,6 +755,9 @@ updateSelectizeInput <- function(session = getDefaultReactiveDomain(), inputId, 
           empty_names_indices <- lab == ""
           lab[empty_names_indices] <- as.character(choice[empty_names_indices])
         }
+      } else {
+        group <- ""
+        lab <- if (name == "") as.character(choice) else name
       }
 
       list(
@@ -775,7 +772,7 @@ updateSelectizeInput <- function(session = getDefaultReactiveDomain(), inputId, 
 
     extract_vector <- function(x, name) {
       vecs <- lapply(x, `[[`, name)
-      do.call(c, vecs)
+      as.character(do.call(c, vecs))
     }
 
     data.frame(
@@ -790,7 +787,7 @@ updateSelectizeInput <- function(session = getDefaultReactiveDomain(), inputId, 
   attr(choices, 'selected_value') <- value
 
   message <- dropNulls(list(
-    label = label,
+    label = if (!is.null(label)) processDeps(label, session),
     value = value,
     url = session$registerDataObj(inputId, choices, selectizeJSON)
   ))
@@ -849,8 +846,8 @@ selectizeJSON <- function(data, req) {
 
   # all keywords in lower-case, for case-insensitive matching
   key <- unique(strsplit(tolower(query$query), '\\s+')[[1]])
+  key <- key[nzchar(key)]
 
-  if (identical(key, '')) key <- character(0)
   mop <- as.numeric(query$maxop)
   vfd <- query$value  # the value field name
   sel <- attr(data, 'selected_value', exact = TRUE)
@@ -881,7 +878,7 @@ selectizeJSON <- function(data, req) {
     i <- stats::na.omit(match(sel, data[, vfd]))
     if (length(i)) idx <- sort(utils::head(unique(c(i, idx)), mop))
   }
-  data <- data[idx, ]
+  data <- data[idx, , drop = FALSE]
 
   res <- toJSON(columnToRowData(data))
   httpResponse(200, 'application/json', enc2utf8(res))

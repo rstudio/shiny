@@ -962,7 +962,7 @@ find_panel_info_non_api <- function(b, ggplot_format) {
       col     = l$COL,
       panel_vars = panel_vars,
       scale_x = scale_x,
-      scale_y = scale_x,
+      scale_y = scale_y,
       log     = check_log_scales(b, scale_x, scale_y),
       domain  = find_panel_domain(b, l$PANEL, scale_x, scale_y),
       mapping = mapping

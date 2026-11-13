@@ -191,17 +191,19 @@ class SelectInputBinding extends InputBinding {
               // the group's label and value. We use the current settings of
               // the selectize object to decide the fieldnames of that obj.
               const optgroupId = elem[settings.optgroupField || "optgroup"];
-              const optgroup: { [key: string]: string } = {};
+              if (optgroupId) {
+                const optgroup: { [key: string]: string } = {};
 
-              optgroup[settings.optgroupLabelField || "label"] = optgroupId;
-              optgroup[settings.optgroupValueField || "value"] = optgroupId;
-              selectize.addOptionGroup(optgroupId, optgroup);
+                optgroup[settings.optgroupLabelField || "label"] = optgroupId;
+                optgroup[settings.optgroupValueField || "value"] = optgroupId;
+                selectize.addOptionGroup(optgroupId, optgroup);
+              }
             });
             callback(res);
             if (!loaded) {
               if (hasDefinedProperty(data, "value")) {
                 selectize.setValue(data.value as any);
-              } else if (settings.maxItems === 1) {
+              } else if (settings.maxItems === 1 && res.length > 0) {
                 // first item selected by default only for single-select
                 selectize.setValue(res[0].value);
               }

@@ -42,7 +42,11 @@ async function show({
   // Get existing DOM element for this ID, or create if needed.
   let $notificationInit = get(id);
 
-  if ($notificationInit?.length === 0) $notificationInit = create(id);
+  if ($notificationInit?.length === 0) {
+    $notificationInit = create(id);
+  } else {
+    $notificationInit?.stop(true, false).show();
+  }
   const $notification = $notificationInit as JQuery<HTMLElement>;
 
   // Render html and dependencies
@@ -91,6 +95,7 @@ async function show({
 }
 
 function remove(id: string): void {
+  clearRemovalCallback(id);
   get(id)?.fadeOut(fadeDuration, function () {
     shinyUnbindAll(this);
     $(this).remove();
@@ -132,7 +137,7 @@ function createPanel() {
 
   $(document.body).append('<div id="shiny-notification-panel">');
 
-  return $panel;
+  return getPanel();
 }
 
 // Create a notification DOM element and return the jQuery object. If the

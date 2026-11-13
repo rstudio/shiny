@@ -157,4 +157,17 @@ test_that("decodeMessage() gives no blobs for a binary frame with only JSON (#44
 
   msg <- decodeMessage(frame('{"method":"m","args":[]}', "ab"))
   expect_equal(msg$blobs, list(charToRaw("ab")))
+
+  # Short UTF-8 JSON messages (< 4 bytes, e.g. "{}") should decode without subscript error
+  expect_equal(decodeMessage(charToRaw("{}")), empty_named_list())
+
+  # Truncated or malformed binary messages should error cleanly instead of hanging or reading out of bounds
+  magic <- as.raw(c(0x02, 0x02, 0x02, 0x01))
+  expect_error(decodeMessage(magic), "Empty binary message")
+  expect_error(decodeMessage(c(magic, as.raw(c(0x01, 0x02)))), "Truncated binary message header")
+  # Negative length (-4L = 0xfc 0xff 0xff 0xff) previously caused an infinite loop
+  expect_error(
+    decodeMessage(c(magic, as.raw(c(0xfc, 0xff, 0xff, 0xff)))),
+    "Invalid binary message part length"
+  )
 })

@@ -4,7 +4,9 @@
 # however, this works when the function does not have a srcref attr set
 otel_srcref_attributes <- function(srcref, fn_name = NULL) {
   if (is.function(srcref)) {
-    srcref <- getSrcRefs(srcref)[[1]][[1]]
+    refs <- getSrcRefs(srcref)
+    body_ref <- refs[[max(1L, length(refs))]]
+    srcref <- if (inherits(body_ref, "srcref")) body_ref else body_ref[[1]]
   }
 
   if (is.null(srcref)) {

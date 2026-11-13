@@ -1,6 +1,7 @@
 import type { BuildOptions } from "esbuild";
 import esbuild from "esbuild";
 
+import fs from "fs";
 import { basename } from "path";
 import process from "process";
 
@@ -11,7 +12,9 @@ import readcontrol from "readcontrol";
 const outDir = "./inst/www/shared/";
 
 type ShinyDesc = { version: string; package: string; license: string };
-const shinyDesc = readcontrol.readSync("./DESCRIPTION") as ShinyDesc;
+const shinyDesc = readcontrol.parse(
+  fs.readFileSync("./DESCRIPTION", "utf8").replace(/\r\n/g, "\n"),
+) as ShinyDesc;
 
 const bannerTxt = [
   `/*! ${shinyDesc.package} ${shinyDesc.version}`,

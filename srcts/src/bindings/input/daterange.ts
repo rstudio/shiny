@@ -87,8 +87,10 @@ class DateRangeInputBinding extends DateInputBindingBase {
     const minStr = min === -Infinity ? null : formatDateUTC(min as Date);
     const maxStr = max === Infinity ? null : formatDateUTC(max as Date);
 
+    const dpOpts = $startinput.data("datepicker").o;
+
     // startViewMode is stored as a number; convert to string
-    let startview = $startinput.data("datepicker").startView;
+    let startview = dpOpts.startView;
 
     if (startview === 2) startview = "decade";
     else if (startview === 1) startview = "year";
@@ -100,9 +102,12 @@ class DateRangeInputBinding extends DateInputBindingBase {
       valueString: [$startinput.val() as string, $endinput.val() as string],
       min: minStr,
       max: maxStr,
-      weekstart: $startinput.data("datepicker").weekStart,
-      format: this._formatToString($startinput.data("datepicker").format),
-      language: $startinput.data("datepicker").language,
+      weekstart: dpOpts.weekStart,
+      format:
+        typeof dpOpts.format === "string"
+          ? dpOpts.format
+          : this._formatToString(dpOpts.format),
+      language: dpOpts.language,
       startview: startview,
     };
   }
@@ -148,20 +153,25 @@ class DateRangeInputBinding extends DateInputBindingBase {
 
     // If empty/null, use local date, but as UTC
     if (start === undefined || start === null)
-      start = this._dateAsUTC(new Date());
+      start = this._floorDateTime(this._dateAsUTC(new Date()));
 
-    if (end === undefined || end === null) end = this._dateAsUTC(new Date());
+    if (end === undefined || end === null)
+      end = this._floorDateTime(this._dateAsUTC(new Date()));
 
     this.setValue(el, { start: start, end: end });
 
-    // // Set the start and end dates, from min-date and max-date. These always
-    // // use yyyy-mm-dd format, instead of bootstrap-datepicker's built-in
-    // // support for date-startdate and data-enddate, which use the current
-    // // date format.
-    this._setMin($startinput[0], $startinput.data("min-date"));
-    this._setMin($endinput[0], $startinput.data("min-date"));
-    this._setMax($startinput[0], $endinput.data("max-date"));
-    this._setMax($endinput[0], $endinput.data("max-date"));
+    // Set the start and end dates, from min-date and max-date. These always
+    // use yyyy-mm-dd format, instead of bootstrap-datepicker's built-in
+    // support for date-startdate and data-enddate, which use the current
+    // date format.
+    if ($startinput.data("min-date") !== undefined) {
+      this._setMin($startinput[0], $startinput.data("min-date"));
+      this._setMin($endinput[0], $startinput.data("min-date"));
+    }
+    if ($endinput.data("max-date") !== undefined) {
+      this._setMax($startinput[0], $endinput.data("max-date"));
+      this._setMax($endinput[0], $endinput.data("max-date"));
+    }
   }
   subscribe(el: HTMLElement, callback: (x: boolean) => void): void {
     // Don't update when in the middle of typing; listening on keyup or input

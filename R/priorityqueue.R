@@ -29,7 +29,7 @@ PriorityQueue <- R6Class(
       } else {
         .itemsByPriority$set(
           .key(priority),
-          c(.itemsByPriority$get(.key(priority)), item)
+          c(.itemsByPriority$get(.key(priority)), list(item))
         )
       }
       return(invisible())
@@ -92,7 +92,7 @@ normalizePriority <- function(priority) {
   }
 
   # NA == 0
-  if (is.na(priority))
+  if (is.na(priority) || priority == 0)
     priority <- 0
 
   return(priority)

@@ -305,7 +305,23 @@ test_that("downloadHandler() that writes no file gives a clear error (#4439)", {
     output$dl <- downloadHandler("x.txt", content = function(file) NULL)
   }
 
-  testServer(server, {
+  testServer(function(input, output, session) server(input, output, session), {
     expect_error(output$dl, "did not write a file")
   })
+})
+
+test_that("MockShinySession isolates unhandledErrorCallbacks and bookmark excludes across scopes", {
+  s1 <- MockShinySession$new()
+  s2 <- MockShinySession$new()
+
+  called1 <- 0L
+  s1$onUnhandledError(function(err) called1 <<- called1 + 1L)
+  expect_equal(called1, 0L)
+
+  scope <- s1$makeScope("sub")
+  expect_equal(s1$getBookmarkExclude(), character(0))
+  scope$setBookmarkExclude("foo")
+  expect_equal(s1$getBookmarkExclude(), "sub-foo")
+  scope$setBookmarkExclude(character(0))
+  expect_equal(s1$getBookmarkExclude(), character(0))
 })

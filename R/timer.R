@@ -28,6 +28,10 @@ TimerCallbacks <- R6Class(
       force(millis)
       force(func)
 
+      if (!is.numeric(millis) || length(millis) != 1L || is.na(millis) || is.infinite(millis)) {
+        stop("Invalid millis: must be a finite numeric value of length 1")
+      }
+
       id <- .nextId
       .nextId <<- .nextId + 1L
 
@@ -48,11 +52,16 @@ TimerCallbacks <- R6Class(
       toRemoveIds <- .times[toRemoveIndices, "id", drop = TRUE]
       if (length(toRemoveIds) > 0) {
         .times <<- .times[!toRemoveIndices,]
-        for (toRemoveId in as.character(toRemoveIds)) {
-          .funcs$remove(toRemoveId)
-        }
       }
-      return(id %in% toRemoveIds)
+      removedFromFuncs <- vapply(as.character(id), function(idStr) {
+        if (.funcs$containsKey(idStr)) {
+          .funcs$remove(idStr)
+          TRUE
+        } else {
+          FALSE
+        }
+      }, logical(1), USE.NAMES = FALSE)
+      return((id %in% toRemoveIds) | removedFromFuncs)
     },
     timeToNextEvent = function() {
       if (dim(.times)[1] == 0)
@@ -78,9 +87,9 @@ TimerCallbacks <- R6Class(
 
       for (id in elapsed$id) {
         thisFunc <- .funcs$remove(as.character(id))
-        # TODO: Catch exception, and...?
-        # TODO: Detect NULL, and...?
-        thisFunc()
+        if (is.function(thisFunc)) {
+          thisFunc()
+        }
       }
       return(TRUE)
     }

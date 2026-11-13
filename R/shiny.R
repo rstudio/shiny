@@ -925,13 +925,17 @@ ShinySession <- R6Class(
         }
         private$.outputs[[outName]] <- NULL
         private$.outputOptions[[outName]] <- NULL
+        private$outputInfo[[outName]] <- NULL
+        private$outputValues[[outName]] <- NULL
         private$invalidatedOutputValues$remove(outName)
         private$invalidatedOutputErrors$remove(outName)
       }
 
-      # Clean up dynamic routes
+      # Clean up testExports and dynamic routes
       if (!isRoot) {
         nsPrefixWithSep <- paste0(nsPrefix, ns.sep)
+        exportNames <- rlang::names2(private$testExportExprs)
+        private$testExportExprs[startsWith(exportNames, nsPrefixWithSep)] <- NULL
         downloadNames <- self$downloads$keys()
         for (name in downloadNames[startsWith(downloadNames, nsPrefixWithSep)]) {
           self$downloads$remove(name)
@@ -940,6 +944,8 @@ ShinySession <- R6Class(
         for (name in fileNames[startsWith(fileNames, nsPrefixWithSep)]) {
           self$files$remove(name)
         }
+      } else {
+        private$testExportExprs <- list()
       }
 
       invisible()
@@ -1092,7 +1098,7 @@ ShinySession <- R6Class(
           bookmarkExclude
         },
         onBookmark = function(fun) {
-          if (!is.function(fun) || length(fun) != 1) {
+          if (!is.function(fun) || length(formals(fun)) != 1) {
             stop("`fun` must be a function that takes one argument")
           }
           bookmarkCallbacks$register(fun)
@@ -1101,13 +1107,13 @@ ShinySession <- R6Class(
           stop("onBookmarked() can't be used in a module.")
         },
         onRestore = function(fun) {
-          if (!is.function(fun) || length(fun) != 1) {
+          if (!is.function(fun) || length(formals(fun)) != 1) {
             stop("`fun` must be a function that takes one argument")
           }
           restoreCallbacks$register(fun)
         },
         onRestored = function(fun) {
-          if (!is.function(fun) || length(fun) != 1) {
+          if (!is.function(fun) || length(formals(fun)) != 1) {
             stop("`fun` must be a function that takes one argument")
           }
           restoredCallbacks$register(fun)
@@ -1122,7 +1128,9 @@ ShinySession <- R6Class(
           if (any_unnamed(dots))
             stop("exportTestValues: all arguments must be named.")
 
-          names(dots) <- ns(names(dots))
+          if (length(dots) > 0) {
+            names(dots) <- ns(names(dots))
+          }
 
           do.call(
             .subset2(self, "exportTestValues"),
@@ -1265,7 +1273,7 @@ ShinySession <- R6Class(
       # Returns the excluded names with the scope's ns prefix on them.
       unsub_exclude <- private$registerBookmarkExclude(function() {
         excluded <- scope$getBookmarkExclude()
-        ns(excluded)
+        if (length(excluded) == 0) character(0) else ns(excluded)
       })
 
       # Clean up bookmark registrations when this scope is destroyed
@@ -1452,6 +1460,7 @@ ShinySession <- R6Class(
       if (!is.null(private$.outputs[[name]])) {
         private$.outputs[[name]]$destroy()
       }
+      private$outputInfo[[name]] <- NULL
 
       if (is.null(func)) {
         # If func is null, give it an "empty" output function so it can go
@@ -2052,31 +2061,31 @@ ShinySession <- R6Class(
     },
     getBookmarkExclude = function() {
       scopedExcludes <- lapply(private$getBookmarkExcludeFuns, function(f) f())
-      scopedExcludes <- unlist(scopedExcludes)
+      scopedExcludes <- unlist(scopedExcludes, use.names = FALSE)
 
       c(private$bookmarkExclude, scopedExcludes)
     },
 
     onBookmark = function(fun) {
-      if (!is.function(fun) || length(fun) != 1) {
+      if (!is.function(fun) || length(formals(fun)) != 1) {
         stop("`fun` must be a function that takes one argument")
       }
       private$bookmarkCallbacks$register(fun)
     },
     onBookmarked = function(fun) {
-      if (!is.function(fun) || length(fun) != 1) {
+      if (!is.function(fun) || length(formals(fun)) != 1) {
         stop("`fun` must be a function that takes one argument")
       }
       private$bookmarkedCallbacks$register(fun)
     },
     onRestore = function(fun) {
-      if (!is.function(fun) || length(fun) != 1) {
+      if (!is.function(fun) || length(formals(fun)) != 1) {
         stop("`fun` must be a function that takes one argument")
       }
       private$restoreCallbacks$register(fun)
     },
     onRestored = function(fun) {
-      if (!is.function(fun) || length(fun) != 1) {
+      if (!is.function(fun) || length(formals(fun)) != 1) {
         stop("`fun` must be a function that takes one argument")
       }
       private$restoredCallbacks$register(fun)
@@ -2286,9 +2295,14 @@ ShinySession <- R6Class(
                                     ignore.case=TRUE))[[1]]
       if (length(matches) == 0)
         return(httpResponse(400, 'text/html', '<h1>Bad Request</h1>'))
+      if (!nzchar(matches[3]))
+        return(httpResponse(404, 'text/html', '<h1>Not Found</h1>'))
 
       if (matches[2] == 'file') {
-        savedFile <- self$files$get(URLdecode(matches[3]))
+        fileKey <- URLdecode(matches[3])
+        if (!nzchar(fileKey))
+          return(httpResponse(404, 'text/html', '<h1>Not Found</h1>'))
+        savedFile <- self$files$get(fileKey)
         if (is.null(savedFile))
           return(httpResponse(404, 'text/html', '<h1>Not Found</h1>'))
 
@@ -2337,9 +2351,13 @@ ShinySession <- R6Class(
         dlmatches <- regmatches(matches[3],
                                 regexec("^([^/]+)(/[^/]+)?$",
                                         matches[3]))[[1]]
+        if (length(dlmatches) == 0)
+          return(httpResponse(404, 'text/html', '<h1>Not Found</h1>'))
         dlname <- URLdecode(dlmatches[2])
+        if (!nzchar(dlname))
+          return(httpResponse(404, 'text/html', '<h1>Not Found</h1>'))
         download <- self$downloads$get(dlname)
-        if (is.null(download))
+        if (is.null(download) || !is.function(download$func))
           return(httpResponse(404, 'text/html', '<h1>Not Found</h1>'))
 
         filename <- ifelse(is.function(download$filename),
@@ -2416,8 +2434,14 @@ ShinySession <- R6Class(
         dlmatches <- regmatches(matches[3],
                                 regexec("^([^/]+)(/[^/]+)?$",
                                         matches[3]))[[1]]
+        if (length(dlmatches) == 0)
+          return(httpResponse(404, 'text/html', '<h1>Not Found</h1>'))
         dlname <- URLdecode(dlmatches[2])
+        if (!nzchar(dlname))
+          return(httpResponse(404, 'text/html', '<h1>Not Found</h1>'))
         download <- self$downloads$get(dlname)
+        if (is.null(download) || !is.function(download$filter))
+          return(httpResponse(404, 'text/html', '<h1>Not Found</h1>'))
         return(download$filter(download$data, req))
       }
 

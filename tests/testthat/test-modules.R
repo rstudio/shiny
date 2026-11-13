@@ -53,6 +53,17 @@ test_that("reactiveValues with namespace", {
   expect_setequal(isolate(names(rv)), c("bar-baz", "bar-qux-quux", "baz", "foo"))
   expect_setequal(isolate(names(rv1)), c("baz", "qux-quux"))
   expect_setequal(isolate(names(rv2)), c("quux"))
+
+  # Dot-prefixed names within a module namespace are filtered by reactiveValuesToList(all.names = FALSE)
+  rv1$.secret <- 99
+  expect_equal(isolate(reactiveValuesToList(rv1, all.names = FALSE)), list(baz = 20, `qux-quux` = 30))
+  expect_equal(isolate(reactiveValuesToList(rv1, all.names = TRUE)), list(baz = 20, `qux-quux` = 30, .secret = 99))
+})
+
+test_that("find_ancestor_session resolves MockShinySession for module scopes", {
+  root <- MockShinySession$new()
+  child <- root$makeScope("child")
+  expect_identical(find_ancestor_session(child), root)
 })
 
 test_that("implicit output respects module namespace", {

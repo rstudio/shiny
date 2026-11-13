@@ -102,7 +102,7 @@ decodeMessage <- function(data) {
     packBits(rawToBits(data[pos:(pos+3)]), type='integer')
   }
 
-  if (readInt(1) != 0x01020202L) {
+  if (length(data) < 4L || readInt(1) != 0x01020202L) {
     # Treat message as UTF-8
     charData <- rawToChar(data)
     Encoding(charData) <- 'UTF-8'
@@ -112,7 +112,13 @@ decodeMessage <- function(data) {
   i <- 5
   parts <- list()
   while (i <= length(data)) {
+    if (i + 3L > length(data)) {
+      stop("Truncated binary message header")
+    }
     length <- readInt(i)
+    if (is.na(length) || length < 0L || (i + 4L + length - 1L) > length(data)) {
+      stop("Invalid binary message part length")
+    }
     i <- i + 4
     if (length != 0)
       parts <- append(parts, list(data[i:(i+length-1)]))
@@ -121,6 +127,9 @@ decodeMessage <- function(data) {
     i <- i + length
   }
 
+  if (length(parts) < 1L) {
+    stop("Empty binary message")
+  }
   mainMessage <- decodeMessage(parts[[1]])
   mainMessage$blobs <- parts[-1]
   return(mainMessage)

@@ -1225,3 +1225,86 @@ test_that("MockShinySession destroy(ns) removes that module's outputs and downlo
     expect_error(session$getOutput("m-dl"), "hasn't been defined")
   })
 })
+
+test_that("destroyed reactiveValues errors on names() and reactiveValuesToList()", {
+  session <- MockShinySession$new()
+  scope <- session$makeScope("mod1")
+  withReactiveDomain(scope, {
+    rv <- reactiveValues(a = 1, b = 2)
+  })
+
+  session$destroy("mod1")
+
+  expect_error(isolate(names(rv)), class = "shiny.destroyed.error")
+  expect_error(isolate(reactiveValuesToList(rv)), class = "shiny.destroyed.error")
+})
+
+test_that("destroyByPrefix invalidates dependents of unset input keys", {
+  session <- MockShinySession$new()
+  scope <- session$makeScope("mod1")
+  runs <- 0L
+  withReactiveDomain(session, {
+    observe({
+      scope$input$unset_key
+      runs <<- runs + 1L
+    })
+  })
+  flushReact()
+  expect_equal(runs, 1L)
+
+  session$destroy("mod1")
+  flushReact()
+  expect_equal(runs, 2L)
+})
+
+test_that("Observer$resume() is a no-op after destroy()", {
+  v <- reactiveVal(1)
+  runs <- 0L
+  o <- observe({
+    v()
+    runs <<- runs + 1L
+  }, suspended = TRUE)
+
+  v(2)
+  o$destroy()
+  o$resume()
+  flushReact()
+  expect_equal(runs, 0L)
+})
+
+test_that("ExtendedTask catches synchronous errors and settles cleanly after module destroy", {
+  session <- MockShinySession$new()
+  scope <- session$makeScope("mod1")
+
+  withReactiveDomain(scope, {
+    sync_err_task <- ExtendedTask$new(function() {
+      stop("sync failure")
+    })
+  })
+
+  withReactiveDomain(scope, sync_err_task$invoke())
+  expect_warning(
+    pumpEvents(),
+    "An error occurred when invoking the ExtendedTask"
+  )
+  expect_equal(isolate(sync_err_task$status()), "error")
+  expect_error(isolate(sync_err_task$result()), "sync failure")
+
+  # Async task settling after module scope is destroyed does not throw unhandled shiny.destroyed.error
+  resolve_fn <- NULL
+  withReactiveDomain(scope, {
+    async_task <- ExtendedTask$new(function() {
+      promises::promise(function(resolve, reject) {
+        resolve_fn <<- resolve
+      })
+    })
+    async_task$invoke()
+  })
+  pumpEvents()
+
+  session$destroy("mod1")
+  expect_no_error({
+    resolve_fn("done")
+    pumpEvents()
+  })
+})

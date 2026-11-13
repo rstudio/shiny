@@ -373,6 +373,7 @@ RLog <- R6Class(
       }
     },
     invalidateLater = function(reactId, runningCtx, millis, domain) {
+      runningCtx <- self$ctxIdStr(runningCtx)
       msg$log("invalidateLater: ", millis, "ms", msg$reactStr(reactId), msg$ctxStr(runningCtx))
       private$appendEntry(domain, list(
         action = "invalidateLater",

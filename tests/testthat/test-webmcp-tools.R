@@ -248,13 +248,148 @@ test_that("webMcpCall() supports promises", {
   local_mocked_bindings(sendWebMcpTools = function(...) NULL)
   session <- MockShinySession$new()
   withr::defer(session$close())
+  register <- function(name, fun, ...) {
+    registerWebMcpTool(session = session, webMcpTool(name, fun, "d", ...))
+  }
+  # The promise's value, or its error message
+  settle <- function(name) {
+    done <- FALSE
+    out <- NULL
+    promises::then(
+      webMcpCall(session, session$ns(name), list()),
+      onFulfilled = function(x) out <<- x,
+      onRejected = function(e) out <<- paste("error:", conditionMessage(e))
+    ) |> promises::finally(function() done <<- TRUE)
+    while (!done) later::run_now()
+    out
+  }
 
-  registerWebMcpTool(session = session, webMcpTool(
-    "later_ok", function() promises::promise_resolve(list(ok = TRUE)), "d",
+  register(
+    "later_ok", function() promises::promise_resolve(list(ok = TRUE)),
     value = ellmer::type_object(ok = ellmer::type_boolean())
-  ))
-  result <- NULL
-  promises::then(webMcpCall(session, session$ns("later_ok"), list()), function(x) result <<- x)
-  while (is.null(result) && !later::loop_empty()) later::run_now()
-  expect_equal(result, list(ok = TRUE))
+  )
+  expect_equal(settle("later_ok"), list(ok = TRUE))
+
+  # The resolved value is checked against `value`
+  register(
+    "later_bad", function() promises::promise_resolve(list(ok = "yes")),
+    value = ellmer::type_object(ok = ellmer::type_boolean())
+  )
+  expect_match(settle("later_bad"), "does not match its `value` type: `value.ok` must be a boolean")
+
+  # Rejections are sanitized like synchronous errors
+  register("later_boom", function() promises::promise_reject(simpleError("secret")))
+  expect_match(settle("later_boom"), "error: secret")
+  withr::local_options(shiny.sanitize.errors = TRUE)
+  # capture_messages(): expect_message() lets a message from a later callback
+  # leak into the test output
+  logged <- capture_messages(out <- settle("later_boom"))
+  expect_match(out, "failed. Check the app logs")
+  expect_length(logged, 1)
+  expect_match(logged, "secret")
+})
+
+test_that("registering a name again replaces the tool", {
+  withr::local_options(shiny.webmcp = TRUE)
+  sent <- list()
+  local_mocked_bindings(sendWebMcpTools = function(session, add = list(), remove = list()) {
+    sent[[length(sent) + 1]] <<- list(add = add, remove = remove)
+  })
+  answer <- function(x) webMcpTool("answer", function() x, "d")
+  session <- MockShinySession$new()
+  withr::defer(session$close())
+
+  # For every session: the last one wins
+  off <- registerWebMcpTool(answer("first"), session = NULL)
+  registerWebMcpTool(answer("second"), session = NULL)
+  withr::defer(off())
+  expect_equal(webMcpCall(session, "answer", list()), "second")
+  expect_length(.globals$webMcpTools, 1)
+
+  # In one session: the last one wins, and each is sent to the browser
+  # (which replaces a tool registered under the same name)
+  name <- session$ns("answer")
+  registerWebMcpTool(answer("third"), session = session)
+  registerWebMcpTool(answer("fourth"), session = session)
+  expect_equal(webMcpCall(session, name, list()), "fourth")
+  expect_equal(vapply(sent, function(m) m$add[[1]]$name, ""), c(name, name))
+})
+
+test_that("a session's own tool comes before a tool for every session", {
+  withr::local_options(shiny.webmcp = TRUE)
+  local_mocked_bindings(sendWebMcpTools = function(...) NULL)
+  session <- MockShinySession$new()
+  withr::defer(session$close())
+  # The mock session prefixes its own ids, so register for every session under
+  # the name this session's tool will have
+  name <- session$ns("answer")
+
+  off <- registerWebMcpTool(webMcpTool(name, function() "everyone", "d"), session = NULL)
+  withr::defer(off())
+  expect_equal(webMcpCall(session, name, list()), "everyone")
+
+  off_own <- registerWebMcpTool(webMcpTool("answer", function() "own", "d"), session = session)
+  expect_equal(webMcpCall(session, name, list()), "own")
+  # Unregistering the session's tool falls back to the one for every session
+  off_own()
+  expect_equal(webMcpCall(session, name, list()), "everyone")
+})
+
+test_that("unregistering removes the tool once", {
+  withr::local_options(shiny.webmcp = TRUE)
+  sent <- list()
+  local_mocked_bindings(sendWebMcpTools = function(session, add = list(), remove = list()) {
+    sent[[length(sent) + 1]] <<- list(add = add, remove = remove)
+  })
+  session <- MockShinySession$new()
+  withr::defer(session$close())
+  tool <- webMcpTool("t", function() 1, "d")
+
+  off <- registerWebMcpTool(tool, session = NULL)
+  off()
+  expect_null(.globals$webMcpTools[["t"]])
+  expect_error(webMcpCall(session, "t", list()), 'No R tool named "t"')
+
+  off <- registerWebMcpTool(tool, session = session)
+  off()
+  off()
+  removes <- Filter(function(m) length(m$remove) > 0, sent)
+  expect_length(removes, 1)
+  expect_error(webMcpCall(session, session$ns("t"), list()), "No R tool named")
+})
+
+test_that("tools for every session are sent only when there are some and WebMCP is on", {
+  sent <- 0
+  local_mocked_bindings(sendWebMcpTools = function(...) sent <<- sent + 1)
+  session <- MockShinySession$new()
+  withr::defer(session$close())
+
+  withr::local_options(shiny.webmcp = TRUE)
+  sendGlobalWebMcpTools(session)
+  expect_equal(sent, 0)
+
+  off <- registerWebMcpTool(webMcpTool("t", function() 1, "d"), session = NULL)
+  withr::defer(off())
+  withr::local_options(shiny.webmcp = FALSE)
+  sendGlobalWebMcpTools(session)
+  expect_equal(sent, 0)
+
+  withr::local_options(shiny.webmcp = TRUE)
+  sendGlobalWebMcpTools(session)
+  expect_equal(sent, 1)
+})
+
+test_that("the tools message always has `add` and `remove` arrays", {
+  message <- NULL
+  fake_session <- list(sendCustomMessage = function(type, msg) message <<- list(type = type, msg = msg))
+  info <- webMcpToolInfo(webMcpTool("t", function() 1, "d"), "t")
+
+  sendWebMcpTools(fake_session, add = list(info))
+  expect_equal(message$type, "shiny.webmcp.tools")
+  json <- as.character(toJSON(message$msg))
+  expect_match(json, '^\\{"add":\\[\\{"name":"t",')
+  expect_match(json, '"remove":\\[\\]\\}$')
+
+  sendWebMcpTools(fake_session, remove = list("t"))
+  expect_equal(as.character(toJSON(message$msg)), '{"add":[],"remove":["t"]}')
 })

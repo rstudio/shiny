@@ -400,7 +400,7 @@ test_that("eventReactive() default label shows the user's event code", {
   r <- isolate(eventReactive({ x <- await(promises::promise_resolve(1)); x }, 1))
   label <- as.character(attr(r, "observable")$.label)
   expect_match(label, "x <- await(promises::promise_resolve(1))", fixed = TRUE)
-  expect_no_match(label, "asyncFun", fixed = TRUE)
+  expect_no_match(label, "_private", fixed = TRUE)
 })
 
 test_that("eventReactive() value code supports await()", {

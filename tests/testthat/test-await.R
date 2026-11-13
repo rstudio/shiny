@@ -60,6 +60,10 @@ test_that("hasAwait() ignores code without await()", {
     x[, 1]
   })))
   expect_false(hasAwait(quote(other::await(p))))
+  expect_true(hasAwait(quote(coro:::await(p))))
+  # Bare names count only when listed; `coro::` always does
+  expect_false(hasAwait(quote(await(p)), names = character()))
+  expect_true(hasAwait(quote(coro::await(p)), names = character()))
   expect_false(hasAwait(quote(awaiting(p))))
   expect_false(hasAwait(quote(p %...>% print())))
 })
@@ -77,6 +81,10 @@ test_that("hasAwait() skips await() inside nested scopes", {
   expect_false(hasAwait(quote(async_generator(function() await(p)))))
   expect_false(hasAwait(quote(coro::async_generator(function() await(p)))))
   expect_false(hasAwait(quote(generator(function() yield(1)))))
+  expect_false(hasAwait(quote(lapply(xs, ~ await(.x)))))
+  expect_false(hasAwait(quote(expr(await(p)))))
+  expect_false(hasAwait(quote(rlang::expr(await(p)))))
+  expect_false(hasAwait(quote(expression(await(p)))))
   # A nested scope does not hide an await() next to it
   expect_true(hasAwait(quote({
     f <- function() await(p)
@@ -199,6 +207,36 @@ test_that("a misplaced await() gets coro's error, not 'could not find'", {
     paste("x", await(promises::promise_resolve(1)))
   }))
   expect_error(resolve(f()), "can't be called directly or within function")
+})
+
+test_that("a user's own await() function is left alone", {
+  await <- function(x) paste("mine", x)
+  f <- asFunc(quote({
+    y <- await(1)
+    y
+  }))
+  expect_false(inherits(f, "coro_async"))
+  expect_identical(f(), "mine 1")
+})
+
+test_that("an attached coro's await() still counts", {
+  skip_if_not_installed("coro")
+  await <- coro::await
+  f <- asFunc(quote({
+    y <- await(promises::promise_resolve(1))
+    y
+  }))
+  expect_s3_class(f, "coro_async")
+  expect_identical(resolve(f()), 1)
+})
+
+test_that("the user's srcrefs are kept on the coro code", {
+  skip_if_not_installed("coro")
+  src <- "quo({\n  x <- await(promises::promise_resolve(1))\n  x\n})"
+  q <- eval(parse(text = src, keep.source = TRUE))
+  f <- quoToSimpleFunction(q)
+  expect_s3_class(f, "coro_async")
+  expect_false(is.null(attr(fnSourceBody(f), "srcref")))
 })
 
 test_that("assignments and `<<-` reach the user's environment", {
@@ -401,6 +439,40 @@ test_that("eventReactive() default label shows the user's event code", {
   label <- as.character(attr(r, "observable")$.label)
   expect_match(label, "x <- await(promises::promise_resolve(1))", fixed = TRUE)
   expect_no_match(label, "_private", fixed = TRUE)
+})
+
+test_that("eventReactive() and observeEvent() event code supports await()", {
+  skip_if_not_installed("coro")
+  seen <- c()
+  server <- function(input, output, session) {
+    r <- eventReactive({
+      v <- await(promises::promise_resolve(input$go))
+      v
+    }, input$go * 10)
+    observeEvent({
+      v <- await(promises::promise_resolve(input$go))
+      v
+    }, {
+      seen <<- c(seen, input$go)
+    })
+  }
+  testServer(server, {
+    # ignoreNULL looks at the resolved value
+    session$setInputs(x = 1)
+    expect_identical(seen, c())
+    session$setInputs(go = 1)
+    expect_identical(resolve(r()), 10)
+    expect_identical(seen, 1)
+  })
+})
+
+test_that("await() in one of several keys gives a clear error", {
+  skip_if_not_installed("coro")
+  r <- reactive(1)
+  expect_error(
+    bindEvent(r, 1, { x <- await(p); x }),
+    "single cache key or event expression"
+  )
 })
 
 test_that("eventReactive() value code supports await()", {

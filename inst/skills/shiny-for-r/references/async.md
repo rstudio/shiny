@@ -90,8 +90,15 @@ output$table <- renderTable({
 })
 ```
 
+The event code of `observeEvent()`/`eventReactive()` and the keys of
+`bindCache()`/`bindEvent()` can use `await()` too; Shiny waits for the value.
+
 `await()` must be its own statement or on the right of `<-`. Write
-`x <- await(p)` and then use `x`; `f(await(p))` fails.
+`x <- await(p)` and then use `x`; `f(await(p))` errors when the code runs.
+
+If the code is invalidated while it waits, the next run starts without
+waiting for the old one. Use `ExtendedTask` for slow work that should not
+overlap.
 
 ## Handle errors and cleanup
 

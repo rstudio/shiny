@@ -215,7 +215,9 @@ JS side, in `srcts/src/bindings/`:
   defers input updates and output flushes.
 - `quoToSimpleFunction()` (`R/utils-lang.R`), which every expression helper
   ends in, runs code that calls `await()`/`await_each()` as a
-  `coro::async()` function (`awaitToAsyncFunction()`). Its body is coro's
+  `coro::async()` function (`awaitToAsyncFunction()`); `quos_to_func()` does
+  the same for a single `bindCache()`/`bindEvent()` key. A bare `await()`
+  only counts when it resolves to coro's or to nothing. Its body is coro's
   machinery, so label and cache-key code reads the user's code with
   `fnSourceBody()` (which reads coro's internal `fn` via `coroSourceFn()`), never
   `fn_body()`/`body()` directly.

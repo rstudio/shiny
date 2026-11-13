@@ -1214,8 +1214,9 @@ Observable <- R6Class(
 #' If the code calls `await()` or `await_each()` from the \pkg{coro} package,
 #' Shiny runs it as a `coro::async()` function, so the reactive returns a
 #' promise. Inputs and reactives read after an `await()` are still tracked.
-#' The same applies to [observe()], [observeEvent()], [eventReactive()], and
-#' the `render*()` functions.
+#' The same applies to [observe()], [observeEvent()], [eventReactive()], the
+#' `render*()` functions, and the key and event code of [bindCache()] and
+#' [bindEvent()]. When an event or key is a promise, Shiny waits for its value.
 #'
 #' ```r
 #' r <- reactive({
@@ -1225,8 +1226,14 @@ Observable <- R6Class(
 #' ```
 #'
 #' \pkg{coro} only allows `await()` as a statement of its own or on the right
-#' of `<-`. Use `x <- await(p); f(x)`, not `f(await(p))`. `await()` inside a
-#' nested `function()` is left alone.
+#' of `<-`. Use `x <- await(p); f(x)`, not `f(await(p))`, which errors when
+#' the code runs. `await()` inside a nested `function()`, formula, `quote()`,
+#' `expr()`, or `expression()` is left alone, as is code that calls your own
+#' function named `await()`.
+#'
+#' If the code is invalidated while it waits, the next run starts without
+#' waiting for the old one to finish. For slow work that should not overlap,
+#' use [ExtendedTask].
 #'
 #' @param x For `is.reactive()`, an object to test. For `reactive()`, an
 #'   expression. When passing in a [`rlang::quo()`]sure with `reactive()`,

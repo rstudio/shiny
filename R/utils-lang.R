@@ -13,11 +13,22 @@ quos_to_func <- function(qs) {
     # even clear what it would mean to mix promises and non-promises in the
     # key.)
     qs <- qs[[1]]
+    if (usesCoroAwait(quo_get_expr(qs), get_env(qs))) {
+      return(quoToSimpleFunction(qs))
+    }
     function() {
       eval_tidy(qs)
     }
 
   } else {
+    for (q in qs) {
+      if (usesCoroAwait(quo_get_expr(q), get_env(q))) {
+        rlang::abort(c(
+          "`await()` only works when there is a single cache key or event expression.",
+          i = "Combine them into one `{ }` block that returns a list."
+        ))
+      }
+    }
     function() {
       lapply(qs, eval_tidy)
     }
@@ -110,7 +121,7 @@ quoToSimpleFunction <- function(q) {
 # keys read the user's code back with `fnSourceBody()`.
 awaitToAsyncFunction <- function(fun) {
   body <- fn_body(fun)
-  if (!hasAwait(body)) {
+  if (!usesCoroAwait(body, environment(fun))) {
     return(fun)
   }
   rlang::check_installed("coro", "to use `await()` in reactive code.")
@@ -119,8 +130,9 @@ awaitToAsyncFunction <- function(fun) {
   # error message instead of "could not find function", even when coro is not
   # attached
   env <- new.env(parent = environment(fun))
-  env$await <- coro::await
-  env$await_each <- coro::await_each
+  for (name in coroAwaitNames(environment(fun))) {
+    env[[name]] <- getExportedValue("coro", name)
+  }
 
   # `coro::async()` only accepts a `function` written out in the call
   inject(coro::async(function() !!body), env)
@@ -153,35 +165,68 @@ coroSourceFn <- function(fun) {
 }
 
 awaitCalls <- c("await", "await_each")
-# Calls that start their own scope; `await()` inside them is not ours
+# Calls that start their own scope or quote code; `await()` inside them is not
+# ours
 awaitScopeCalls <- c(
-  "function", "quote", "async", "async_generator", "generator"
+  "function", "quote", "async", "async_generator", "generator",
+  "~", "expr", "expression"
 )
-isCallTo <- function(head, names) {
-  if (is.symbol(head)) {
-    return(as.character(head) %in% names)
-  }
-  is.call(head) &&
-    identical(head[[1]], quote(`::`)) &&
-    identical(head[[2]], quote(coro)) &&
-    as.character(head[[3]]) %in% names
+
+# The bare `await` names that mean coro's in `env`: those not bound to a
+# function, or bound to coro's own. A user's own `await()` is left alone.
+coroAwaitNames <- function(env) {
+  Filter(
+    function(name) {
+      fn <- get0(name, envir = env, mode = "function")
+      is.null(fn) ||
+        (rlang::is_installed("coro") &&
+          identical(fn, getExportedValue("coro", name)))
+    },
+    awaitCalls
+  )
 }
 
-# Does `expr` call `await()` or `await_each()` outside a nested scope?
-hasAwait <- function(expr) {
-  if (!is.call(expr)) {
+# Does `expr`, run in `env`, call coro's `await()` or `await_each()`?
+usesCoroAwait <- function(expr, env) {
+  # Look up the bindings only when the code mentions `await`
+  hasAwait(expr) && hasAwait(expr, coroAwaitNames(env))
+}
+
+# `pkg::name` or `pkg:::name`; any `pkg` when `pkg` is NULL
+isNsCall <- function(head, pkg = NULL) {
+  is.call(head) &&
+    length(head) == 3 &&
+    (identical(head[[1]], quote(`::`)) || identical(head[[1]], quote(`:::`))) &&
+    (is.null(pkg) || identical(head[[2]], as.symbol(pkg)))
+}
+
+# Does `expr` call `await()` or `await_each()` outside a nested scope? Bare
+# calls only count when their name is in `names`; `coro::await()` always does.
+hasAwait <- function(expr, names = awaitCalls) {
+  if (!is.call(expr) || is_quosure(expr)) {
     return(FALSE)
   }
   head <- expr[[1]]
-  if (isCallTo(head, awaitCalls)) {
-    return(TRUE)
-  }
-  if (isCallTo(head, awaitScopeCalls)) {
-    return(FALSE)
+  if (is.symbol(head)) {
+    headName <- as.character(head)
+    if (headName %in% names) {
+      return(TRUE)
+    }
+    if (headName %in% awaitScopeCalls) {
+      return(FALSE)
+    }
+  } else if (isNsCall(head)) {
+    headName <- as.character(head[[3]])
+    if (isNsCall(head, "coro") && headName %in% awaitCalls) {
+      return(TRUE)
+    }
+    if (headName %in% awaitScopeCalls) {
+      return(FALSE)
+    }
   }
   for (i in seq_along(expr)) {
     # `is.call()` is safe on empty args such as `x[, 1]`
-    if (is.call(expr[[i]]) && hasAwait(expr[[i]])) {
+    if (is.call(expr[[i]]) && hasAwait(expr[[i]], names)) {
       return(TRUE)
     }
   }

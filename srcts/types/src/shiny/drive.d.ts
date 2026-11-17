@@ -10,14 +10,26 @@ type InputInfo = {
     disabled: boolean;
     hidden?: true;
 };
+type OutputImage = {
+    index: number;
+} & ({
+    type: "data" | "url";
+    value: string;
+} | {
+    type: "error";
+    reason: string;
+});
 type OutputInfo = {
     id: string;
     type: string;
     status: "error" | "ready" | "recalculating";
     text: string;
-    image?: string;
+    imageCount: number;
+    imageOffset: number;
+    images: OutputImage[];
     hidden?: true;
 };
+type OutputSummary = Omit<OutputInfo, "imageOffset" | "images">;
 type Filter = {
     ids?: string[];
     module?: string;
@@ -26,7 +38,12 @@ type Filter = {
 type HiddenOpt = {
     includeHidden?: boolean;
 };
+type ImagePage = {
+    imageOffset?: number;
+    imageLimit?: number;
+};
 declare const previewTextLength = 200;
+declare const defaultImageLimit = 10;
 type DriveErrorCode = "disabled" | "disconnected" | "invalid-argument" | "invalid-value" | "not-found" | "read-only" | "server-error" | "timeout" | "update-failed" | "upload-failed" | "wrong-type";
 /**
  * Every error `Shiny.drive` throws. `code` says what went wrong, so callers
@@ -107,15 +124,17 @@ declare class ShinyDrive {
      * `includeHidden: true` also lists hidden ones (marked `hidden: true`).
      * Shiny suspends hidden outputs, so their content may be stale until shown.
      */
-    listOutputs(filter?: Filter): Array<Omit<OutputInfo, "image"> & {
-        hasImage: boolean;
-    }>;
+    listOutputs(filter?: Filter): OutputSummary[];
     /**
      * Waits (up to a timeout) for the output to finish recalculating. Hidden
      * outputs (`includeHidden`) are returned as-is: Shiny suspends them, so
      * they may be stale or `recalculating` until shown.
+     *
+     * Returns up to `imageLimit` (default 10) of the output's images, starting
+     * at `imageOffset`. More remain while `imageOffset + images.length <
+     * imageCount`.
      */
-    getOutput(id: string, { includeHidden }?: HiddenOpt): Promise<OutputInfo>;
+    getOutput(id: string, { includeHidden, imageOffset, imageLimit, }?: HiddenOpt & ImagePage): Promise<OutputInfo>;
     /**
      * Resolve once the server has processed all sent inputs and flushed.
      * Rejects with a `"disconnected"` error if the session is or becomes
@@ -144,5 +163,5 @@ declare class ShinyDrive {
         timeout?: number | null;
     }): Promise<void>;
 }
-export { DriveError, previewTextLength, ShinyDrive };
-export type { Filter, InputInfo, JSONSchema, OutputInfo };
+export { defaultImageLimit, DriveError, previewTextLength, ShinyDrive };
+export type { Filter, InputInfo, JSONSchema, OutputImage, OutputInfo, OutputSummary, };

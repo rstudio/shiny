@@ -90,7 +90,8 @@ Implementation: `R/server.R`, `R/shiny.R` (`ShinySession`), `R/runapp.R`,
   - `update`: `manageInputs()`.
   - anything else: `ShinySession$dispatch()`, which calls `self[["@<method>"]]`
     and sends a `response`, or an `Unknown method` error response when there
-    is no such method.
+    is no such method. If the method returns a promise, the response is sent
+    when it settles (used by `@waitForFlush`; see `webMcp.md`).
   - A `method` that is not a single string is rejected with an error (logged
     by `withLogErrors()`) before the `switch()`, which would otherwise pick a
     branch by position for a number (`1` reruns `init`).
@@ -206,6 +207,8 @@ JS side, in `srcts/src/bindings/`:
   (registration order in `_init()`).
 - `ShinyClass` (`srcts/src/shiny/index.ts`) becomes `window.Shiny` in
   `srcts/src/initialize/index.ts`.
+- `Shiny.drive` and `Shiny.webmcp` read and drive bound inputs and outputs
+  for agents and other JS callers; see `webMcp.md`.
 
 ## Async: Promises, ExtendedTask, bindCache, bindEvent
 

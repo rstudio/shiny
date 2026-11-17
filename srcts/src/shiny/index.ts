@@ -55,6 +55,7 @@ import {
 import { sendOutputInfoFns } from "./sendOutputInfo";
 import { addCustomMessageHandler, ShinyApp, type Handler } from "./shinyapp";
 import { registerNames as singletonsRegisterNames } from "./singletons";
+import { ShinyWebMCP } from "./webmcp";
 
 class ShinyClass {
   version: string;
@@ -82,6 +83,7 @@ class ShinyClass {
   renderHtml: typeof renderHtml;
   addCustomMessageHandler: typeof addCustomMessageHandler;
   drive: ShinyDrive;
+  webmcp: ShinyWebMCP;
 
   // The following are added in the initialization, by initShiny()
   createSocket?: () => WebSocket;
@@ -138,6 +140,7 @@ class ShinyClass {
     this.initializedPromise = createInitStatus<void>();
 
     this.drive = new ShinyDrive(this.initializedPromise);
+    this.webmcp = new ShinyWebMCP(this.drive);
 
     $(() => {
       // Init Shiny a little later than document ready, so user code can
@@ -623,6 +626,12 @@ class ShinyClass {
 
     $(document).one("shiny:sessioninitialized", () => {
       this.initializedPromise.resolve();
+    });
+
+    // `options(shiny.webmcp = TRUE)`. Only on the first connect, so a later
+    // `Shiny.webmcp.disable()` survives reconnects.
+    $(document).one("shiny:sessioninitialized", () => {
+      if (shinyapp.config?.webmcp) this.webmcp.enable();
     });
   }
 }

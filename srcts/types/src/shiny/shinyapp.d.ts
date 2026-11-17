@@ -28,6 +28,7 @@ declare class ShinyApp {
     config: {
         workerId: string;
         sessionId: string;
+        webmcp?: boolean;
     } | null;
     $inputValues: InputValues;
     $initialInput: InputValues | null;

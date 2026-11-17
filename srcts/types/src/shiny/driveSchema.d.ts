@@ -4,5 +4,8 @@ type JSONSchema = {
 };
 declare function checkValue(schema: JSONSchema, value: unknown, path?: string): void;
 declare function valueSchema(el: HTMLElement, binding: InputBinding): JSONSchema | null;
-export { checkValue, valueSchema };
+declare function parseToolArgs(schema: JSONSchema | undefined, args: unknown): {
+    [key: string]: unknown;
+};
+export { checkValue, parseToolArgs, valueSchema };
 export type { JSONSchema };

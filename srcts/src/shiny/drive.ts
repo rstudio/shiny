@@ -196,8 +196,9 @@ async function settleInput(
 
 // By default only what the user can currently see: hidden tabs, closed
 // conditional panels, and not-yet-rendered dynamic UI are skipped.
-// `includeHidden` (JS API only, never the agent tools) lifts that, e.g. for
-// tests that set inputs on inactive tabs. Access control always applies.
+// `includeHidden` lifts that, e.g. for tests that set inputs on inactive tabs.
+// The WebMCP list tools pass it only to list hidden items, never to set or
+// read them. Access control always applies.
 function exposedInputs(
   includeHidden = false,
 ): Array<{ el: HTMLElement; binding: InputBinding }> {

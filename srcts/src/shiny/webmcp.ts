@@ -46,6 +46,11 @@ const filterSchema = {
       description:
         'Only ids inside this Shiny module namespace, e.g. "filters" matches "filters-region". Nested: "outer-inner".',
     },
+    includeHidden: {
+      type: "boolean",
+      description:
+        "Also list hidden items (on another tab, in a closed panel), marked `hidden: true`. They can't be set or read with the other tools until shown; show them by changing the input that controls them, e.g. the tab. A hidden output's content may be stale. Default false.",
+    },
   },
   additionalProperties: false,
 };
@@ -279,7 +284,13 @@ function setStatusAttr(status: string): void {
 }
 
 // Tool args come from the agent; don't trust that the host checked them.
-function toFilter({ ids, module }: { [key: string]: unknown }): Filter {
+function toFilter({
+  ids,
+  module,
+  includeHidden,
+}: {
+  [key: string]: unknown;
+}): Filter {
   if (
     ids !== undefined &&
     !(Array.isArray(ids) && ids.every((id) => typeof id === "string"))
@@ -289,7 +300,10 @@ function toFilter({ ids, module }: { [key: string]: unknown }): Filter {
   if (module !== undefined && typeof module !== "string") {
     throw new Error("`module` must be a string");
   }
-  return { ids: ids as string[] | undefined, module };
+  if (includeHidden !== undefined && typeof includeHidden !== "boolean") {
+    throw new Error("`includeHidden` must be true or false");
+  }
+  return { ids: ids as string[] | undefined, module, includeHidden };
 }
 
 // MCP-style CallToolResult. "data" entries in `images` (e.g. plots) become

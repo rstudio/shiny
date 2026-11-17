@@ -742,3 +742,59 @@ test_that("stripStackTraces() leaves hidden frames out of fence matching", {
     list(c("user1", "internal"), c("asyncFrame", "stop"))
   )
 })
+
+test_that("stripStackTraces() keeps earlier segments when the event loop runs inside reactive code", {
+  deep <- c("user1", "..stacktraceoff..", "internal")
+  # A callback run by the main event loop
+  topLevel <- c(
+    "runApp", "..stacktraceoff..", "..stacktracefloor..",
+    "run_now", "execCallbacks", "callback"
+  )
+  # The same callback, run by an event loop that an observer started. The
+  # observer's `..stacktraceon..` is matched by the `..stacktraceoff..` in the
+  # prefix
+  nested <- c(
+    "runApp", "..stacktraceoff..", "..stacktracefloor..",
+    "flush", "..stacktraceon..", "observer", "run_now", "execCallbacks", "callback"
+  )
+  expect_identical(
+    stripStackTraces(list(deep, topLevel), values = TRUE),
+    list(c("user1", "internal"), c("run_now", "execCallbacks", "callback"))
+  )
+  expect_identical(
+    stripStackTraces(list(deep, nested), values = TRUE),
+    list(c("user1", "internal"), c("observer", "run_now", "execCallbacks", "callback"))
+  )
+  # A callback that starts with `..stacktraceon..` still hides the end of the
+  # segment before it
+  expect_identical(
+    stripStackTraces(list(deep, c(nested, "..stacktraceon..", "user2")), values = TRUE),
+    list("user1", "user2")
+  )
+  # If later's `execCallbacks()` frame is not found, nothing is cancelled
+  renamed <- sub("execCallbacks", "runCallbacks", nested, fixed = TRUE)
+  expect_identical(
+    stripStackTraces(list(deep, renamed), values = TRUE),
+    list("user1", c("observer", "run_now", "runCallbacks", "callback"))
+  )
+})
+
+test_that("an error in a promise callback keeps the deep stack when run from a nested event loop", {
+  out <- catchAsyncError(function(caught) {
+    r <- reactive(label = "r", {
+      promises::then(promises::promise_resolve(1), function(value) {
+        stop("boom in then() in nested loop")
+      })
+    })
+    observeEvent(1, {
+      captureStackTraces(promises::catch(r(), caught))
+      wait_for_it()
+    })
+  })
+  expect_no_match(out$trace, "No stack trace available", fixed = TRUE)
+  earlier <- which(out$trace == "From earlier call:")
+  expect_length(earlier, 1)
+  deep <- out$trace[-seq_len(earlier)]
+  expect_match(deep, "<reactive:r>", fixed = TRUE, all = FALSE)
+  expect_match(deep, "observeEvent(1)", fixed = TRUE, all = FALSE)
+})

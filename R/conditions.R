@@ -735,6 +735,8 @@ stripStackTraces <- function(stackTraces, values = FALSE, hidden = NULL) {
   # 1. Identify prefix elements (at/before last ..stacktracefloor.. in segs 2+)
   # Prefix elements are always hidden and excluded from fence scoring.
   is_active <- rep.int(TRUE, total)
+  # The index (in `all`) of each segment's last floor; NA if it has none
+  seg_floors <- rep.int(NA_integer_, n_segs)
   if (n_segs >= 2L) {
     for (i in 2:n_segs) {
       if (seg_lengths[i] == 0L) next
@@ -742,6 +744,7 @@ stripStackTraces <- function(stackTraces, values = FALSE, hidden = NULL) {
       floor_pos <- which(all[seg_idx] == "..stacktracefloor..")
       if (length(floor_pos)) {
         is_active[seg_idx[seq_len(floor_pos[length(floor_pos)])]] <- FALSE
+        seg_floors[i] <- seg_idx[floor_pos[length(floor_pos)]]
       }
     }
   }
@@ -768,9 +771,27 @@ stripStackTraces <- function(stackTraces, values = FALSE, hidden = NULL) {
   # running total through unchanged.
   #
   # Vectorized via the identity: clamped_cumsum = cumsum - pmin(0, cummin(cumsum))
-  rs <- rev(scores)
-  cs <- cumsum(rs)
-  depth <- rev(cs - pmin.int(0L, cummin(cs)))
+  #
+  # A hidden region that is still open at the outer end of a segment carries
+  # on into the segment before it. That is meant for a callback that starts
+  # with `..stacktraceon..`. It is not meant for fences of the code that ran
+  # the event loop, when the loop is run from inside reactive code (such as a
+  # `later::run_now()` in an observer): those are matched by a
+  # `..stacktraceoff..` in the prefix, which is not scored. Left alone, they
+  # would hide all the earlier segments. So cancel them at the floor, which
+  # is hidden anyway.
+  # Relies on later internals: `execCallbacks()` is the frame that runs the
+  # event loop's callbacks. If it is renamed, nothing is cancelled, which is
+  # how this worked before.
+  for (i in which(!is.na(seg_floors))) {
+    loop_pos <- which(all[seg_floors[i]:seg_ends[i]] == "execCallbacks")
+    if (length(loop_pos) && max(loop_pos) > 1L) {
+      outside_loop <- seg_floors[i] + seq_len(max(loop_pos) - 1L)
+      open <- reverseClampedCumsum(scores[outside_loop])[[1L]]
+      scores[seg_floors[i]] <- -open
+    }
+  }
+  depth <- reverseClampedCumsum(scores)
 
   # 4. Compute visibility (vectorized) and split back into segments
   toShow <- is_active & depth == 0L & !is_marker
@@ -782,6 +803,13 @@ stripStackTraces <- function(stackTraces, values = FALSE, hidden = NULL) {
     idx <- seg_starts[i]:seg_ends[i]
     if (values) as.character(all[idx[toShow[idx]]]) else toShow[idx]
   })
+}
+
+# The running total of `scores` from the last element to the first, never
+# going below 0
+reverseClampedCumsum <- function(scores) {
+  cs <- cumsum(rev(scores))
+  rev(cs - pmin.int(0L, cummin(cs)))
 }
 
 # Given sys.parents() (which corresponds to sys.calls()), return a logical index

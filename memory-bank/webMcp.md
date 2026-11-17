@@ -1,6 +1,6 @@
 ---
 title: "WebMCP and the Shiny.drive JS API"
-description: "How window.Shiny.drive (public JS methods to read and drive inputs/outputs) and window.Shiny.webmcp (WebMCP tool registry and the four built-in tools) work, the data-shiny-drive-access attribute and webMcpAccess(), the server-side flush barrier, and the R-only scope. Read before changing srcts/src/shiny/drive.ts, srcts/src/shiny/webmcp.ts, or ShinySession$dispatch()."
+description: "How window.Shiny.drive (public JS methods to read and drive inputs/outputs) and window.Shiny.webmcp (WebMCP tool registry and the four built-in tools) work, typed errors, timeouts and waiting, what hidden means, the data-shiny-drive-access attribute and webMcpAccess(), the server-side flush barrier, and the R-only scope. Read before changing srcts/src/shiny/drive.ts, srcts/src/shiny/webmcp.ts, or ShinySession$dispatch()."
 ---
 
 # WebMCP and the `Shiny.drive` JS API
@@ -40,8 +40,12 @@ Both are created in `ShinyClass`'s constructor (`srcts/src/shiny/index.ts`).
   separator).
 - **Driving:** `setInput(id, value)`, `setInputs({id: value, ...})`,
   `click(id)`, `uploadFiles(id, files)`, `waitForUpload(id)`.
-- **Waiting:** `flush()`, `waitForIdle({duration, timeout})`.
-- **Config:** `skipInputBinding(name)`, `skipOutputBinding(name)`.
+- **Waiting:** `ready()`, `flush()`, `waitForIdle({duration, timeout})`.
+- **Config:** `skipInputBinding(name)`, `skipOutputBinding(name)`,
+  `setDefaultTimeout(ms | null)`.
+- **Version:** `version` (a number, `apiVersion` in `drive.ts`). Bump it
+  when the API changes, so callers can check for features; development
+  installs share a package version with and without a change.
 
 Rules every method follows:
 
@@ -58,8 +62,52 @@ Rules every method follows:
   `shiny:inputchanged` events while doing so, then sends every value in one
   websocket message (the last with `priority: "event"`), so the server
   reacts once.
-- **Results are current.** After sending, it awaits `flush()` and then polls
+- **Results are current.** After sending, it awaits `flush()` and then waits
   until no visible output has the `recalculating` class.
+- **Errors are typed.** Everything throws `DriveError` (`name:
+  "ShinyDriveError"`) with a `code`: `not-found`, `read-only`, `disabled`,
+  `invalid-value`, `invalid-argument`, `wrong-type`, `update-failed` (with
+  `applied`, the ids set before the failure), `upload-failed`,
+  `disconnected`, `server-error`, `timeout`. Callers match on `code`, never
+  on `message`. Messages don't name WebMCP tools: JS callers have none.
+
+## Waiting and timeouts
+
+- **No timeout by default.** `setDefaultTimeout(ms)` sets one for every
+  wait; methods with a `timeout` option use it when the option is missing.
+  Slow apps (a database warehouse waking up) can take minutes, so a fixed
+  limit would report a still-running change as a failure.
+- **On timeout,** waits on the server (`flush()`, `waitForIdle()`,
+  `ready()`, uploads) reject with code `timeout`. Waits on outputs give up
+  quietly; the outputs then show `status: "recalculating"`.
+- **`flush()` rejects with `disconnected`** if the socket closes while it
+  waits. Without that, a closed socket would leave it waiting forever.
+- **No polling.** `waitForClasses()` re-checks on a `MutationObserver` of
+  `class` changes (`shiny-busy`, `recalculating`). Browsers throttle timers
+  in background tabs (to about once a minute in Chrome), but not observers.
+  Two single timers remain: the 150ms wait for the client to report new
+  output visibility, and `waitForIdle()`'s `duration`.
+- **`ready()`** waits for Shiny's `initializedPromise` (first
+  `shiny:sessioninitialized`), then `flush()` and visible outputs. It is
+  passed to the `ShinyDrive` constructor.
+
+## Hidden inputs and outputs
+
+"Hidden" means the element has no size and it, or a parent, has
+`display: none` (`isVisible()` in `srcts/src/utils/index.ts`). Inputs are
+judged by their `.shiny-input-container` (selectize and sliders hide the
+bound element). Common causes: an inactive tab, a closed
+`conditionalPanel()` or accordion panel, a collapsed sidebar.
+
+- Hidden items are not listed, read or set unless the caller passes
+  `includeHidden: true`. Listed hidden items have `hidden: true`.
+- **Hidden outputs may be stale.** Shiny suspends hidden outputs
+  (`outputOptions(suspendWhenHidden = TRUE)` is the default), so their
+  content is whatever they showed last, or nothing if they were never shown.
+  To get a current value, show the output (switch tab, open the panel) first.
+- **Only elements, not the page.** A page in a background tab, or an
+  iframe the host hid, still counts as visible: browsers keep the last
+  layout. Hosts that care check `document.visibilityState` themselves.
 
 ## Output images
 
@@ -171,9 +219,8 @@ console warning.
 - **Selectize** keeps only the selected `<option>`s in the `<select>`; choices
   come from `el.selectize.options`, which for server-side selectize holds only
   the loaded choices.
-- **Waits time out** after 10s (`flushTimeoutMs`). `flush()` rejects on
-  timeout; `waitForOutputs()` gives up quietly, so results can still show
-  `status: "recalculating"`.
+- **Waits have no timeout by default** (see "Waiting and timeouts"). Tests
+  that may hang should set one with `setDefaultTimeout()`.
 - **WebGL canvases usually read as blank.** Unless the widget created its
   context with `preserveDrawingBuffer: true`, the browser clears the buffer
   after each frame, so `toDataURL()` returns an empty image with no error.

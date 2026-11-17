@@ -53,7 +53,7 @@ Rules every method follows:
   `conditionalPanel()`s or not-yet-rendered dynamic UI are not listed or
   settable. The `includeHidden: true` option lifts this. The WebMCP
   `list_inputs`/`list_outputs` tools take it too, so an agent learns that
-  hidden items exist; `set_input` and `get_output` never pass it.
+  hidden items exist; `set_inputs` and `get_output` never pass it.
 - **Values are checked first.** Each input row has a `schema` (JSON Schema)
   built per binding in `valueSchema()`. `setInputs()` checks every value
   before touching any widget, so one bad value changes nothing. Errors list
@@ -164,9 +164,15 @@ console warning.
 
 - `enable()` registers four tools whose definitions never change, so the
   context cost doesn't grow with app size: `list_inputs {ids?, module?, includeHidden?}`,
-  `set_input {id, value?}`, `list_outputs {ids?, module?, includeHidden?}`,
+  `set_inputs {inputs}`, `list_outputs {ids?, module?, includeHidden?}`,
   `get_output {id, imageOffset?, imageLimit?}`.
   `disable()` removes only those four.
+- `set_inputs` takes one `{id, value?}` or a list of them (`anyOf`), so
+  there is no separate single-input tool. `toInputValues()` checks the
+  entries (object, string `id`, no other keys, no repeated id) and passes
+  them to `drive.setInputs()`: every value is checked before any widget
+  changes, and all of them, button clicks included, reach the server in
+  one message. The schema's `examples` feeds `parseToolArgs()`'s example.
 - `registerTool()`, `unregisterTool()`, `listTools()`, `callTool()` and a
   `toolchange` event manage the registry. Each tool is mirrored with
   `document.modelContext.registerTool(tool, {signal})` when that exists.

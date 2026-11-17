@@ -750,11 +750,6 @@ dropTrivialFrames <- function(callnames) {
   # the last *contiguous* block of them, and then, only if they are the
   # last thing in the calls list.
   hideable <- callnames %in% c(".handleSimpleError", "h", "base$wrapOnFulfilled")
-  # Nothing to keep, e.g. an empty stack when the error was caught before its
-  # stack was captured (as coro does for errors before the first `await()`)
-  if (all(hideable)) {
-    return(rep_len(TRUE, length(callnames)))
-  }
   # What's the last that *didn't* match stop/.handleSimpleError/h?
   lastGoodCall <- max(which(!hideable))
   toRemove <- length(callnames) - lastGoodCall

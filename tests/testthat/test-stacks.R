@@ -349,13 +349,6 @@ test_that("markRenderFunction preserves user frames outside reactive domain", {
 })
 
 
-test_that("dropTrivialFrames() keeps a stack with nothing to keep", {
-  # An error caught before its stack was captured has an empty stack
-  expect_identical(dropTrivialFrames(character()), logical())
-  expect_identical(dropTrivialFrames(c("h", "h")), c(TRUE, TRUE))
-  expect_identical(dropTrivialFrames(c("f", "h")), c(TRUE, FALSE))
-})
-
 # ---- await() ------------------------------------------------------------------
 
 # "test-stacks.R#<line>]", where <line> is the line of this file that is just
@@ -445,11 +438,6 @@ test_that("an error before await() shows the reactive once, with its line", {
       captureStackTraces(tryCatch(promises::catch(r(), caught), error = caught))
     })
   })
-  if (is.null(conditionStackTrace(out$cond))) {
-    # https://github.com/r-lib/coro/pull/81 rejects these errors with an
-    # exiting `tryCatch()`, so Shiny's calling handler never sees them
-    skip("coro catches errors before the first await() before Shiny can capture the stack")
-  }
   expect_identical(getCallNames(list(conditionCall(out$cond))), "<reactive:r>")
   frames <- grep("<reactive:r>", out$trace, fixed = TRUE, value = TRUE)
   expect_length(frames, 1)

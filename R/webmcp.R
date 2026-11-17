@@ -56,10 +56,21 @@ webmcp_enabled <- function() {
   isTRUE(as.logical(getOption("shiny.webmcp", Sys.getenv("SHINY_WEBMCP"))))
 }
 
+# `options(shiny.webmcp.polyfill)`, falling back to the `SHINY_WEBMCP_POLYFILL`
+# env var, then to `webmcp_enabled()`. Never on without WebMCP: the polyfill
+# only mirrors the tools. Hosts that relay `Shiny.webmcp` over their own
+# transport turn it off.
+webmcp_polyfill_enabled <- function() {
+  if (!webmcp_enabled()) return(FALSE)
+  value <- getOption("shiny.webmcp.polyfill", Sys.getenv("SHINY_WEBMCP_POLYFILL"))
+  if (identical(value, "")) return(TRUE)
+  isTRUE(as.logical(value))
+}
+
 # WebMCP polyfill, for browsers without a native `document.modelContext`. It
 # uses the native API when present. Added to the page when
-# `options(shiny.webmcp = TRUE)`. Loaded from a CDN, so offline apps get no
-# polyfill (the tools still work through `Shiny.webmcp.callTool()`).
+# `options(shiny.webmcp = TRUE)`, unless `shiny.webmcp.polyfill` is `FALSE`.
+# Loaded from a CDN, so offline apps get no polyfill (the tools still work through `Shiny.webmcp.callTool()`).
 webMcpPolyfillDependency <- function() {
   version <- "6.0.3"
   htmlDependency(

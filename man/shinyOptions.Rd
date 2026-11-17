@@ -131,7 +131,13 @@ Cairo package. See \code{\link[=plotPNG]{plotPNG()}} for more information.}
 \code{as.logical()})}{Experimental. If \code{TRUE}, the browser registers WebMCP tools that let an AI agent in the
 browser list and set inputs and read outputs. Use \code{\link[=webMcpAccess]{webMcpAccess()}} to
 limit what agents can see or change. The page also loads a WebMCP
-polyfill from a CDN (unpkg.com) for browsers without built-in WebMCP.}
+polyfill from a CDN (unpkg.com) for browsers without built-in WebMCP;
+see \code{shiny.webmcp.polyfill}.}
+\item{shiny.webmcp.polyfill (defaults to \code{Sys.getenv("SHINY_WEBMCP_POLYFILL")},
+read with \code{as.logical()}, or else the value of \code{shiny.webmcp})}{Experimental.
+Set to \code{FALSE} to keep the WebMCP tools but not load the polyfill, e.g.
+for offline apps, or when a host calls the tools through
+\code{Shiny.webmcp.callTool()} itself. Has no effect unless \code{shiny.webmcp} is \code{TRUE}.}
 \item{shiny.devmode (defaults to \code{NULL})}{Option to enable Shiny Developer Mode. When set,
 different default \code{getOption(key)} values will be returned. See \code{\link[=devmode]{devmode()}} for more details.}
 \item{shiny.otel.collect (defaults to \code{Sys.getenv("SHINY_OTEL_COLLECT", "all")})}{Determines how Shiny will interact with OpenTelemetry.

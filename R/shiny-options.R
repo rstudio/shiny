@@ -152,7 +152,13 @@ getShinyOption <- function(name, default = NULL) {
 #'   `as.logical()`)}{Experimental. If `TRUE`, the browser registers WebMCP tools that let an AI agent in the
 #'   browser list and set inputs and read outputs. Use [webMcpAccess()] to
 #'   limit what agents can see or change. The page also loads a WebMCP
-#'   polyfill from a CDN (unpkg.com) for browsers without built-in WebMCP.}
+#'   polyfill from a CDN (unpkg.com) for browsers without built-in WebMCP;
+#'   see `shiny.webmcp.polyfill`.}
+#' \item{shiny.webmcp.polyfill (defaults to `Sys.getenv("SHINY_WEBMCP_POLYFILL")`,
+#'   read with `as.logical()`, or else the value of `shiny.webmcp`)}{Experimental.
+#'   Set to `FALSE` to keep the WebMCP tools but not load the polyfill, e.g.
+#'   for offline apps, or when a host calls the tools through
+#'   `Shiny.webmcp.callTool()` itself. Has no effect unless `shiny.webmcp` is `TRUE`.}
 #' \item{shiny.devmode (defaults to `NULL`)}{Option to enable Shiny Developer Mode. When set,
 #'   different default `getOption(key)` values will be returned. See [devmode()] for more details.}
 ### Not documenting as 'shiny.devmode.verbose' is for niche use only

@@ -48,3 +48,35 @@ test_that("webmcp_enabled() reads shiny.webmcp, then SHINY_WEBMCP", {
   withr::local_envvar(SHINY_WEBMCP = "true")
   withr::with_options(list(shiny.webmcp = FALSE), expect_false(webmcp_enabled()))
 })
+
+test_that("shiny.webmcp.polyfill turns off the polyfill but not WebMCP", {
+  ui <- fluidPage("hi")
+  has_polyfill <- function() {
+    grepl("@mcp-b/global@", as.character(renderPage(ui)), fixed = TRUE)
+  }
+  withr::local_envvar(SHINY_WEBMCP = NA, SHINY_WEBMCP_POLYFILL = NA)
+  withr::local_options(shiny.webmcp = TRUE, shiny.webmcp.polyfill = NULL)
+
+  # Defaults to shiny.webmcp
+  expect_true(webmcp_polyfill_enabled())
+
+  withr::with_options(list(shiny.webmcp.polyfill = FALSE), {
+    expect_false(webmcp_polyfill_enabled())
+    expect_false(has_polyfill())
+    expect_true(webmcp_enabled())
+  })
+  withr::with_envvar(c(SHINY_WEBMCP_POLYFILL = "false"), {
+    expect_false(webmcp_polyfill_enabled())
+  })
+  # The option wins over the env var
+  withr::with_envvar(c(SHINY_WEBMCP_POLYFILL = "false"), {
+    withr::with_options(list(shiny.webmcp.polyfill = TRUE), {
+      expect_true(webmcp_polyfill_enabled())
+    })
+  })
+  # Never on without WebMCP
+  withr::with_options(list(shiny.webmcp = FALSE, shiny.webmcp.polyfill = TRUE), {
+    expect_false(webmcp_polyfill_enabled())
+    expect_false(has_polyfill())
+  })
+})

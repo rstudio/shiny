@@ -2,6 +2,15 @@ import $ from "jquery";
 import type { ErrorsMessageValue } from "../../shiny/shinyapp";
 import { asArray } from "../../utils";
 
+// What an agent should see of an output; see OutputBinding.getSnapshot()
+type OutputSnapshot = {
+  // Images, as `data:` (or other) URLs, in order. Replaces the <img> and
+  // <canvas> elements `Shiny.drive.getOutput()` would read from the page.
+  images?: string[];
+  // Any JSON value, e.g. a table's rows or a chart's data
+  data?: unknown;
+};
+
 class OutputBinding {
   name!: string;
 
@@ -15,6 +24,19 @@ class OutputBinding {
     throw "Not implemented";
     el; // eslint-disable-line @typescript-eslint/no-unused-expressions
     data; // eslint-disable-line @typescript-eslint/no-unused-expressions
+  }
+
+  /**
+   * Optional: what `Shiny.drive.getOutput()` (and the WebMCP `get_output`
+   * tool) should return for this output beyond its text, when reading the
+   * page isn't enough, e.g. an image of a chart drawn in SVG or WebGL, or a
+   * table's rows. Return `undefined` (the default) to read the page.
+   */
+  getSnapshot(
+    el: HTMLElement,
+  ): OutputSnapshot | Promise<OutputSnapshot | undefined> | undefined {
+    return undefined;
+    el; // eslint-disable-line @typescript-eslint/no-unused-expressions
   }
 
   getId(el: HTMLElement): string {
@@ -62,3 +84,4 @@ class OutputBinding {
 }
 
 export { OutputBinding };
+export type { OutputSnapshot };

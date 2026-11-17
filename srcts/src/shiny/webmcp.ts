@@ -223,7 +223,7 @@ class ShinyWebMCP extends EventTarget {
     });
     this.registerTool({
       name: "get_output",
-      description: `Get everything a visible output currently displays: status, full visible text, and up to ${defaultImageLimit} of its images (plots, <img>, <canvas>). Each \`images\` entry has an \`index\` and a \`type\`: "data" (attached as image content, in order), "url", or "error" with a \`reason\`. More images remain while \`imageOffset\` + the number of entries < \`imageCount\`; get them with \`imageOffset\`.`,
+      description: `Get everything a visible output currently displays: status, full visible text, and up to ${defaultImageLimit} of its images (plots, <img>, <canvas>). Each \`images\` entry has an \`index\` and a \`type\`: "data" (attached as image content, in order), "url", or "error" with a \`reason\`. More images remain while \`imageOffset\` + the number of entries < \`imageCount\`; get them with \`imageOffset\`. Some outputs (charts, tables) also return \`data\`, structured content such as rows or series.`,
       inputSchema: {
         type: "object",
         properties: {

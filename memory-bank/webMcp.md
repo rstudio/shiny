@@ -1,6 +1,6 @@
 ---
 title: "WebMCP and the Shiny.drive JS API"
-description: "How window.Shiny.drive (public JS methods to read and drive inputs/outputs) and window.Shiny.webmcp (WebMCP tool registry and the four built-in tools) work, typed errors, timeouts and waiting, what hidden means, the data-shiny-drive-access attribute and webMcpAccess(), the server-side flush barrier, and the R-only scope. Read before changing srcts/src/shiny/drive.ts, srcts/src/shiny/webmcp.ts, or ShinySession$dispatch()."
+description: "How window.Shiny.drive (public JS methods to read and drive inputs/outputs) and window.Shiny.webmcp (WebMCP tool registry and the four built-in tools) work, typed errors, timeouts and waiting, output snapshots (getSnapshot), what hidden means, the data-shiny-drive-access attribute and webMcpAccess(), the server-side flush barrier, and the R-only scope. Read before changing srcts/src/shiny/drive.ts, srcts/src/shiny/webmcp.ts, or ShinySession$dispatch()."
 ---
 
 # WebMCP and the `Shiny.drive` JS API
@@ -140,6 +140,24 @@ the `get_output` tool caps it at 10). More remain while
   content, plus `callTool()` argument checks and `data-shiny-webmcp`. It
   gets a cross-origin image by loading the app's own file from `localhost`
   while the page is on `127.0.0.1`.
+
+## Output snapshots: `OutputBinding.getSnapshot()`
+
+Reading the page misses what widgets draw in SVG or WebGL, and gives tables
+only as text. An output binding can define `getSnapshot(el)` (base class:
+`srcts/src/bindings/output/outputBinding.ts`, returns `undefined`). It may be
+async and returns `{images?: string[], data?: unknown}` or `undefined`.
+
+- Only `getOutput()` calls it (`snapshotOf()` in `drive.ts`); `listOutputs()`
+  doesn't, so its `imageCount` counts the page's images.
+- `images` (URLs, usually `data:`) **replace** the page's images and are paged
+  the same way; `imageCount` becomes their number. `data` is returned as is
+  and lands in the tool's `structuredContent`.
+- `undefined` means "read the page". A throw, or `images` that isn't an
+  array of strings, also reads the page and sets `snapshotError`.
+- Meant for htmlwidgets: its per-widget bindings can forward to a widget's
+  own `getSnapshot` (e.g. plotly's `Plotly.toImage()` plus trace data, DT's
+  rows). Tests: `test-zzz-st2-drive-snapshot.R`.
 
 ## Access: `data-shiny-drive-access`
 

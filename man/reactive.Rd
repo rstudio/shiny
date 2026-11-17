@@ -61,6 +61,33 @@ expressions that depend on each other.
 See the \href{https://shiny.posit.co/tutorial/}{Shiny tutorial} for
 more information about reactive expressions.
 }
+\section{Async code with \code{await()}}{
+
+
+If the code calls \code{await()} or \code{await_each()} from the \pkg{coro} package,
+Shiny runs it as a \code{coro::async()} function, so the reactive returns a
+promise. Inputs and reactives read after an \code{await()} are still tracked.
+The same applies to \code{\link[=observe]{observe()}}, \code{\link[=observeEvent]{observeEvent()}}, \code{\link[=eventReactive]{eventReactive()}}, the
+\verb{render*()} functions, and the key and event code of \code{\link[=bindCache]{bindCache()}} and
+\code{\link[=bindEvent]{bindEvent()}}. When an event or key is a promise, Shiny waits for its value.
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{r <- reactive(\{
+  data <- await(fetch_data(input$id))
+  head(data, input$n)
+\})
+}\if{html}{\out{</div>}}
+
+\pkg{coro} only allows \code{await()} as a statement of its own or on the right
+of \verb{<-}. Use \verb{x <- await(p); f(x)}, not \code{f(await(p))}, which errors when
+the code runs. \code{await()} inside a nested \verb{function()}, formula, \code{quote()},
+\code{expr()}, or \code{expression()} is left alone, as is code that calls your own
+function named \code{await()}.
+
+If the code is invalidated while it waits, the next run starts without
+waiting for the old one to finish. For slow work that should not overlap,
+use \link{ExtendedTask}.
+}
+
 \examples{
 library(rlang)
 values <- reactiveValues(A=1)

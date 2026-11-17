@@ -498,6 +498,44 @@ test_that("a lazily forced argument does not change the await() frame's line", {
   )
 })
 
+test_that("the deep stack trace shows the file and line of each await()", {
+  skip_if_not_installed("coro")
+  out <- catchAsyncError(function(caught) {
+    r <- reactive(label = "r", {
+      x <- await(promises::promise_resolve("first await"))
+      y <- await(promises::promise_resolve("second await"))
+      z <- await(
+        promises::promise_resolve("third await")
+      )
+      stop("boom after three awaits")
+    })
+    observeEvent(1, {
+      captureStackTraces(promises::catch(r(), caught))
+    })
+  })
+  asyncLoc <- function(text) {
+    paste0("<reactive:r> (coro::async) [", srcLoc(text))
+  }
+  earlier <- which(out$trace == "From earlier call:")
+  expect_length(earlier, 2)
+  errorTrace <- out$trace[seq_len(earlier[[1]] - 1)]
+  latestAwait <- out$trace[(earlier[[1]] + 1):(earlier[[2]] - 1)]
+  firstAwait <- out$trace[-seq_len(earlier[[2]])]
+
+  expect_match(errorTrace, asyncLoc('stop("boom after three awaits")'), fixed = TRUE, all = FALSE)
+  # The stacks saved at the second and third `await()` are the same but for
+  # the line; the latest one is kept
+  expect_match(latestAwait, asyncLoc("z <- await("), fixed = TRUE)
+  expect_match(
+    firstAwait,
+    asyncLoc('x <- await(promises::promise_resolve("first await"))'),
+    fixed = TRUE,
+    all = FALSE
+  )
+  expect_match(firstAwait, "observeEvent(1)", fixed = TRUE, all = FALSE)
+  expect_no_match(out$trace, "second await", fixed = TRUE)
+})
+
 test_that("an error with no call of its own after await() shows the reactive and its line", {
   skip_if_not_installed("coro")
   out <- catchAsyncError(function(caught) {

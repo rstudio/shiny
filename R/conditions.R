@@ -247,6 +247,11 @@ appendCallStackWithDedupe <- function(lst, x) {
   stopifnot(length(xdigest) == 1)
   stopifnot(nzchar(xdigest))
   if (xdigest %in% digests) {
+    # Stacks saved at different `await()`s of the same code have the same
+    # digest. Keep the latest, as it has the line of the latest `await()`.
+    if (!is.null(attr(x, "asyncFrames", exact = TRUE))) {
+      lst[[match(xdigest, digests)]] <- x
+    }
     return(lst)
   } else {
     return(c(lst, list(x)))
@@ -353,7 +358,7 @@ doCaptureStack <- function(e) {
 #   function (which it replaces);
 # - after an `await()`, everything outside it, which is promise and event loop
 #   plumbing. The deep stack trace shows where the code started.
-# No other call is changed, so a full stack trace still shows every frame.
+# No other call is replaced, so a full stack trace still shows every frame.
 # `atThen` is TRUE when the stack is saved at a `then()` rather than an error.
 #
 # When the stack has such a frame, these attrs are set on the result:
@@ -427,7 +432,19 @@ relabelAsyncFrames <- function(calls, parents, frames, atThen = FALSE) {
       innermostIndex < n &&
       identical(calls[[innermostIndex + 1]][[1]], quote(base::evalq))
   ) {
-    hidden[(innermostIndex + 1):n] <- TRUE
+    inner <- (innermostIndex + 1):n
+    hidden[inner] <- TRUE
+    # Give the user's frame the line of the `await()`. A frame is shown with
+    # the srcref of the call after it (see `offsetSrcrefs()`).
+    for (k in inner) {
+      if (isCallNamed(calls[[k]], "then")) {
+        srcref <- coroAwaitSrcref(calls[[k]])
+        if (!is.null(srcref)) {
+          attr(calls[[innermostIndex + 1]], "srcref") <- srcref
+        }
+        break
+      }
+    }
   }
   attr(calls, "asyncLabel") <- innermost
   attr(calls, "asyncFrames") <- asyncFrames
@@ -452,6 +469,19 @@ isCallNamed <- function(call, name) {
 
 isCoroEvalCall <- function(call) {
   is.call(call) && identical(call[[1]], quote(eval_bare))
+}
+
+# The srcref of the user's `await()` statement, given coro's call to `then()`
+# for it: `then(as_promise(user({ <code up to the await> })), callback = .self)`.
+# The block keeps the srcrefs of the user's statements; the last is the
+# `await()`. NULL if the call does not look like that.
+coroAwaitSrcref <- function(call) {
+  block <- tryCatch(call[[2]][[2]][[2]], error = function(e) NULL)
+  if (!is.call(block) || !identical(block[[1]], quote(`{`))) {
+    return(NULL)
+  }
+  srcrefs <- attr(block, "srcref", exact = TRUE)
+  if (length(srcrefs)) srcrefs[[length(srcrefs)]]
 }
 
 # The index of coro's `eval_bare()` frame that runs the user's code for the

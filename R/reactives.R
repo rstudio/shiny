@@ -2098,10 +2098,12 @@ invalidateLater <- function(millis, session = getDefaultReactiveDomain()) {
     # Also register with onDestroy so module destroy cancels pending timers.
     # Cross-deregister: when destroy fires, clean up the onEnded registration
     # (and vice versa — the timer callback above already clears both).
-    clear_on_destroy_callback <- session$onDestroy(function() {
-      timerHandle()
-      clear_on_ended_callback()
-    })
+    if (is.function(session$onDestroy)) {
+      clear_on_destroy_callback <- session$onDestroy(function() {
+        timerHandle()
+        clear_on_ended_callback()
+      })
+    }
   }
 
   invisible()

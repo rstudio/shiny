@@ -449,6 +449,131 @@ test_that("an error before await() shows the reactive once, with its line", {
   expect_no_match(out$trace, "eval_bare|evalq|instance")
 })
 
+# Not at the top level of the file, so that their srcrefs are kept
+local({
+  lazyHelper <<- function(x) {
+    y <- 1
+    x + y
+  }
+  lazyBoom <<- function() {
+    stop("boom in a lazily forced argument")
+  }
+  lazyCaller <<- function() {
+    lazyHelper(lazyBoom())
+  }
+})
+
+test_that("a lazily forced argument does not change its caller's line", {
+  # `lazyBoom()` runs when `lazyHelper()` forces `x`, so its srcref is a line
+  # of `lazyHelper()`, though its parent frame is `lazyCaller()`
+  err <- tryCatch(captureStackTraces(lazyCaller()), error = identity)
+  trace <- capture.output(printStackTrace(err), type = "message")
+  expect_match(
+    trace,
+    paste0("lazyCaller [", srcLoc("lazyHelper(lazyBoom())")),
+    fixed = TRUE,
+    all = FALSE
+  )
+})
+
+test_that("a lazily forced argument does not change the await() frame's line", {
+  skip_if_not_installed("coro")
+  out <- catchAsyncError(function(caught) {
+    r <- reactive(label = "r", {
+      x <- await(promises::promise_resolve(1))
+      lazyHelper(lazyBoom()) # after await
+    })
+    observeEvent(1, {
+      captureStackTraces(promises::catch(r(), caught))
+    })
+  })
+  expect_match(
+    out$trace,
+    paste0(
+      "<reactive:r> (coro::async) [",
+      srcLoc("lazyHelper(lazyBoom()) # after await")
+    ),
+    fixed = TRUE,
+    all = FALSE
+  )
+})
+
+test_that("an error with no call of its own after await() shows the reactive and its line", {
+  skip_if_not_installed("coro")
+  out <- catchAsyncError(function(caught) {
+    r <- reactive(label = "r", {
+      x <- await(promises::promise_resolve(1))
+      x + "not a number"
+    })
+    observeEvent(1, {
+      captureStackTraces(promises::catch(r(), caught))
+    })
+  })
+  expect_match(
+    out$trace,
+    paste0("<reactive:r> (coro::async) [", srcLoc('x + "not a number"')),
+    fixed = TRUE,
+    all = FALSE
+  )
+  expect_no_match(out$trace, "eval_bare|evalq|user|onFulfilled")
+})
+
+test_that("an error after await() keeps the deep stack when run from a nested event loop", {
+  skip_if_not_installed("coro")
+  out <- catchAsyncError(function(caught) {
+    r <- reactive(label = "r", {
+      x <- await(promises::promise_resolve(1))
+      stop("boom after await in nested loop")
+    })
+    observeEvent(1, {
+      captureStackTraces(promises::catch(r(), caught))
+      # The code after `await()` runs under this observer's frames, which
+      # include `..stacktraceon..` fences
+      wait_for_it()
+    })
+  })
+  expect_match(
+    out$trace,
+    paste0(
+      "<reactive:r> (coro::async) [",
+      srcLoc('stop("boom after await in nested loop")')
+    ),
+    fixed = TRUE,
+    all = FALSE
+  )
+  expect_match(out$trace, "From earlier call:", fixed = TRUE, all = FALSE)
+  expect_match(out$trace, "observeEvent(1)", fixed = TRUE, all = FALSE)
+  expect_no_match(out$trace, "No stack trace available", fixed = TRUE)
+  expect_no_match(out$trace, "eval_bare|evalq|onFulfilled|run_now")
+})
+
+test_that("a full stack trace keeps every frame of code using await()", {
+  skip_if_not_installed("coro")
+  out <- catchAsyncError(function(caught) {
+    r <- reactive(label = "r", {
+      x <- await(promises::promise_resolve(1))
+      stop("boom after await, full trace")
+    })
+    observeEvent(1, {
+      captureStackTraces(promises::catch(r(), caught))
+    })
+  })
+  full <- capture.output(printStackTrace(out$cond, full = TRUE), type = "message")
+  # Frames that are hidden by default
+  expect_match(full, "eval_bare", fixed = TRUE, all = FALSE)
+  expect_match(full, "domain$wrapOnFulfilled", fixed = TRUE, all = FALSE)
+  expect_match(full, ": <reactive:r>$", all = FALSE)
+  # Every `..stacktraceon..` in the trace is a real call, which has arguments
+  traces <- c(
+    attr(out$cond, "deep.stack.trace", exact = TRUE),
+    list(conditionStackTrace(out$cond))
+  )
+  for (trace in traces) {
+    fences <- Filter(function(call) isCallNamed(call, "..stacktraceon.."), trace)
+    expect_true(all(lengths(fences) > 1))
+  }
+})
+
 test_that("relabelAsyncFrames() handles a frame that is its own parent", {
   labelEnv <- new.env()
   labelEnv$.shinyAsyncLabel <- "observe"
@@ -459,9 +584,11 @@ test_that("relabelAsyncFrames() handles a frame that is its own parent", {
   frames <- list(globalenv(), globalenv(), globalenv(), userEnv, globalenv())
   out <- relabelAsyncFrames(calls, parents, frames)
   expect_identical(attr(out, "asyncLabel"), "observe")
+  expect_identical(attr(out, "asyncFrames"), 4L)
   expect_identical(out[[4]], call("observe (coro::async)"))
-  expect_identical(out[[3]], quote(..stacktraceon..()))
-  expect_identical(out[[1]], quote(..stacktraceoff..()))
+  expect_identical(attr(out, "asyncHidden"), c(TRUE, TRUE, TRUE, FALSE, FALSE))
+  # The other calls are left as they are
+  expect_identical(out[-4], calls[-4])
 })
 
 test_that("relabelAsyncFrames() names only the innermost frame of each async function", {
@@ -469,9 +596,10 @@ test_that("relabelAsyncFrames() names only the innermost frame of each async fun
   # env; only the innermost one runs the user's code
   labelEnv <- new.env()
   labelEnv$.shinyAsyncLabel <- "observe"
-  calls <- list(quote(observe()), quote(local()), quote(eval()), quote(evalq()), quote(stop("x")))
-  parents <- c(0L, 1L, 2L, 3L, 4L)
+  calls <- list(quote(outer()), quote(observe()), quote(local()), quote(eval()), quote(evalq()), quote(stop("x")))
+  parents <- c(0L, 1L, 2L, 3L, 4L, 5L)
   frames <- list(
+    globalenv(),
     globalenv(),
     globalenv(),
     new.env(parent = labelEnv),
@@ -479,7 +607,37 @@ test_that("relabelAsyncFrames() names only the innermost frame of each async fun
     globalenv()
   )
   out <- relabelAsyncFrames(calls, parents, frames)
-  expect_identical(out[[4]], call("observe (coro::async)"))
-  expect_identical(out[[3]], quote(..stacktraceon..()))
-  expect_identical(out[[1]], quote(..stacktraceoff..()))
+  expect_identical(attr(out, "asyncFrames"), 5L)
+  expect_identical(out[[5]], call("observe (coro::async)"))
+  # Hidden from the call to the async function to the frame's parent
+  expect_identical(
+    attr(out, "asyncHidden"),
+    c(FALSE, TRUE, TRUE, TRUE, FALSE, FALSE)
+  )
+  expect_identical(out[-5], calls[-5])
+})
+
+test_that("relabelAsyncFrames() leaves a stack with no await() code alone", {
+  calls <- list(quote(a()), quote(b()))
+  out <- relabelAsyncFrames(calls, c(0L, 1L), list(globalenv(), globalenv()))
+  expect_identical(out, calls)
+})
+
+test_that("stripStackTraces() leaves hidden frames out of fence matching", {
+  deep <- c("user1", "..stacktraceoff..", "internal")
+  current <- c("..stacktraceon..", "plumbing", "asyncFrame", "stop")
+  # The unmatched fence in `current` hides `internal`, unless the fence is
+  # marked as hidden
+  expect_identical(
+    stripStackTraces(list(deep, current), values = TRUE),
+    list("user1", c("plumbing", "asyncFrame", "stop"))
+  )
+  expect_identical(
+    stripStackTraces(
+      list(deep, current),
+      values = TRUE,
+      hidden = list(NULL, c(TRUE, TRUE, FALSE, FALSE))
+    ),
+    list(c("user1", "internal"), c("asyncFrame", "stop"))
+  )
 })

@@ -346,19 +346,29 @@ doCaptureStack <- function(e) {
 # `awaitToAsyncFunction()`). coro evaluates the user's code in a frame of its
 # own (an `evalq()` of `user_env`), under several more of its frames. Name
 # that frame after the reactive, as `wrapFunctionLabel()` does for code
-# without `await()`, marked as async (`renderText (coro::async)`), and hide
-# coro's frames around it:
+# without `await()`, marked as async (`renderText (coro::async)`), and mark
+# coro's frames around it as hidden:
+# - those between it and the user's code, up to coro's `eval_bare()`;
 # - before the first `await()`, those between it and the call to the async
 #   function (which it replaces);
 # - after an `await()`, everything outside it, which is promise and event loop
 #   plumbing. The deep stack trace shows where the code started.
-# The label of the innermost such frame is returned as the "asyncLabel" attr.
+# No other call is changed, so a full stack trace still shows every frame.
 # `atThen` is TRUE when the stack is saved at a `then()` rather than an error.
+#
+# When the stack has such a frame, these attrs are set on the result:
+# - "asyncLabel": the label of the innermost one;
+# - "asyncFrames": the indexes of the renamed frames;
+# - "asyncHidden": a logical vector, TRUE for the frames to hide. They are
+#   hidden by `stripStackTraces()`, which also leaves them out of fence
+#   matching, so fences inside a hidden region can't hide anything else.
 relabelAsyncFrames <- function(calls, parents, frames, atThen = FALSE) {
   innermost <- NULL
-  innermostIndex <- NULL
-  # Fences at or before the last `..stacktracefloor..` are ignored, so the
-  # outermost frame that can close a hidden region is the one just inside it
+  asyncFrames <- integer()
+  hidden <- rep(FALSE, length(calls))
+  # Frames at or before the last `..stacktracefloor..` are handled by
+  # `stripStackTraces()`, so the outermost frame to hide is the one just
+  # inside it
   floors <- which(vapply(calls, isCallNamed, logical(1), "..stacktracefloor.."))
   outermost <- if (length(floors)) max(floors) + 1L else 1L
   # Frames whose env's parent is an async function's env. Besides the frame
@@ -375,17 +385,22 @@ relabelAsyncFrames <- function(calls, parents, frames, atThen = FALSE) {
     }
     label <- labelEnvs[[i]]$.shinyAsyncLabel
     innermost <- label
-    innermostIndex <- i
+    asyncFrames <- c(asyncFrames, i)
     calls[[i]] <- structure(
       call(paste0(label, " (coro::async)")),
       srcref = attr(calls[[i]], "srcref", exact = TRUE)
     )
+    # coro's frames between the user's frame and the user's code
+    evalFrame <- coroEvalFrame(calls, i)
+    if (!is.null(evalFrame)) {
+      hidden[(i + 1):evalFrame] <- TRUE
+    }
     parent <- parents[[i]]
-    if (parent <= 0) {
+    if (parent <= 0 || parent >= i) {
       next
     }
-    # Close the hidden region at the call to the async function, if this is
-    # before the first `await()`; otherwise at the outermost frame
+    # Hide from the call to the async function, if this is before the first
+    # `await()`; otherwise from the outermost frame.
     # Scan back rather than follow `parents`: a frame can list itself (or a
     # later frame) as its parent, which breaks the chain
     first <- outermost
@@ -395,25 +410,28 @@ relabelAsyncFrames <- function(calls, parents, frames, atThen = FALSE) {
         break
       }
     }
-    if (first < parent) {
-      calls[[parent]] <- quote(..stacktraceon..())
-      calls[[first]] <- quote(..stacktraceoff..())
+    if (first <= parent) {
+      hidden[first:parent] <- TRUE
     }
+  }
+  if (!length(asyncFrames)) {
+    return(calls)
   }
   # When the stack is saved at a `then()` (for the deep stack trace), and the
   # `then()` is coro's at an `await()`, the frames inside the user's are
   # coro's and the promise package's; hide them
   n <- length(calls)
+  innermostIndex <- max(asyncFrames)
   if (
     atThen &&
-      !is.null(innermostIndex) &&
-      innermostIndex + 1 < n &&
+      innermostIndex < n &&
       identical(calls[[innermostIndex + 1]][[1]], quote(base::evalq))
   ) {
-    calls[[innermostIndex + 1]] <- quote(..stacktraceoff..())
-    calls[[n]] <- quote(..stacktraceon..())
+    hidden[(innermostIndex + 1):n] <- TRUE
   }
   attr(calls, "asyncLabel") <- innermost
+  attr(calls, "asyncFrames") <- asyncFrames
+  attr(calls, "asyncHidden") <- hidden
   calls
 }
 
@@ -434,6 +452,18 @@ isCallNamed <- function(call, name) {
 
 isCoroEvalCall <- function(call) {
   is.call(call) && identical(call[[1]], quote(eval_bare))
+}
+
+# The index of coro's `eval_bare()` frame that runs the user's code for the
+# frame at index `i` (see `relabelAsyncFrames()`): the first one after it.
+# NULL if there is none, as when the stack is saved at an `await()`.
+coroEvalFrame <- function(calls, i) {
+  for (k in seq_along(calls)) {
+    if (k > i && isCoroEvalCall(calls[[k]])) {
+      return(k)
+    }
+  }
+  NULL
 }
 
 #' @details `withLogErrors` captures stack traces and logs errors that
@@ -517,7 +547,10 @@ printStackTrace <- function(cond,
   # interact. So we need to do this in one go, instead of individually within
   # printOneStackTrace.
   if (!full) {
-    stripResults <- stripStackTraces(lapply(stackTraces, getCallNames))
+    stripResults <- stripStackTraces(
+      lapply(stackTraces, getCallNames),
+      hidden = lapply(stackTraces, attr, "asyncHidden", exact = TRUE)
+    )
   } else {
     # If full is TRUE, we don't want to strip anything
     stripResults <- rep_len(list(TRUE), length(stackTraces))
@@ -636,7 +669,11 @@ printOneStackTrace <- function(stackTrace, stripResult, full, offset) {
 # Fence matching works globally across segments so that a `..stacktraceoff..`
 # at the end of one segment can pair with a `..stacktraceon..` at the start
 # of the next.
-stripStackTraces <- function(stackTraces, values = FALSE) {
+#
+# `hidden` is an optional list with a logical vector (or NULL) per segment,
+# TRUE for frames that are always hidden and, like the prefix, take no part in
+# fence matching (see `relabelAsyncFrames()`).
+stripStackTraces <- function(stackTraces, values = FALSE, hidden = NULL) {
   n_segs <- length(stackTraces)
   if (n_segs == 0L) return(list())
 
@@ -669,6 +706,12 @@ stripStackTraces <- function(stackTraces, values = FALSE) {
       if (length(floor_pos)) {
         is_active[seg_idx[seq_len(floor_pos[length(floor_pos)])]] <- FALSE
       }
+    }
+  }
+
+  for (i in seq_along(hidden)) {
+    if (seg_lengths[i] > 0L && length(hidden[[i]]) == seg_lengths[i]) {
+      is_active[(seg_starts[i]:seg_ends[i])[hidden[[i]]]] <- FALSE
     }
   }
 
@@ -797,18 +840,19 @@ offsetSrcrefs <- function(calls, offset = TRUE) {
     # the definition of foo().
     srcrefs <- c(utils::tail(srcrefs, -1), list(NULL))
 
-    # A call's srcref is a location in its parent's code, and the parent is
-    # usually the frame just before it. When code is run with `eval()` in
-    # another frame's env (as `coro::async()` does after `await()`), the parent
-    # is further back, and the frame just before it is often pruned. So give
-    # each frame the srcref of its latest child call that has one.
-    parents <- attr(calls, "parents", exact = TRUE)
-    if (length(parents) == length(calls)) {
+    # The frame running the user's `await()` code (see `relabelAsyncFrames()`)
+    # is not followed by the call it makes, but by coro's own frames, the last
+    # of which is `eval_bare()`. So use the srcref of the call after that.
+    # Looking for the latest call whose parent is the user's frame is not
+    # enough: a lazily forced argument has such a parent, but the srcref of
+    # the code that forced it.
+    asyncFrames <- attr(calls, "asyncFrames", exact = TRUE)
+    if (length(asyncFrames)) {
       original <- getSrcRefs(calls)
-      for (k in seq_along(parents)) {
-        parent <- parents[[k]]
-        if (parent > 0 && parent < k - 1 && !is.null(original[[k]])) {
-          srcrefs[[parent]] <- original[[k]]
+      for (i in asyncFrames) {
+        evalFrame <- coroEvalFrame(calls, i)
+        if (!is.null(evalFrame) && evalFrame < length(calls)) {
+          srcrefs[i] <- list(original[[evalFrame + 1]])
         }
       }
     }

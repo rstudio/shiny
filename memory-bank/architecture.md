@@ -224,8 +224,9 @@ JS side, in `srcts/src/bindings/`:
   Stack traces: `wrapFunctionLabel()` records its label in the coro
   function's env, and `relabelAsyncFrames()` (`R/conditions.R`, called when a
   stack is captured) uses it for the error call and to name coro's frame that
-  runs the user's code, and
-  hides coro's frames with `..stacktraceon..`/`..stacktraceoff..` fences.
+  runs the user's code. It marks coro's frames around it in an `asyncHidden`
+  attr, which `stripStackTraces()` hides (and leaves out of fence matching);
+  the calls themselves are kept, so full stack traces show them.
 - `ExtendedTask` (`R/extended-task.R`) keeps private `reactiveVal`s for
   status, value and error. `invoke()` runs `func` under
   `maskReactiveContext()` and queues the call if a run is already active.

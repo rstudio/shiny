@@ -655,6 +655,69 @@ test_that("relabelAsyncFrames() names only the innermost frame of each async fun
   expect_identical(out[-5], calls[-5])
 })
 
+test_that("coroAwaitSrcref() reads the await() line from coro's then() call", {
+  srcref <- structure(c(3L, 1L, 3L, 9L, 1L, 9L, 3L, 3L), class = "srcref")
+  block <- structure(
+    quote({
+      a <- 1
+      p
+    }),
+    srcref = list("brace", "first statement", srcref)
+  )
+  thenCall <- bquote(then(as_promise(user(.(block))), callback = .self))
+  expect_identical(coroAwaitSrcref(thenCall), srcref)
+})
+
+test_that("coroAwaitSrcref() returns NULL for a then() call of another shape", {
+  block <- structure(quote({ p }), srcref = list("brace", "statement"))
+  # Not a call, too short, not nested deep enough, not a block, no srcrefs
+  expect_null(coroAwaitSrcref(quote(then)))
+  expect_null(coroAwaitSrcref(quote(then())))
+  expect_null(coroAwaitSrcref(quote(then(p, callback = .self))))
+  expect_null(coroAwaitSrcref(quote(then(as_promise(p), callback = .self))))
+  expect_null(coroAwaitSrcref(quote(then(as_promise(user(p)), callback = .self))))
+  bare <- structure(block, srcref = NULL)
+  expect_null(coroAwaitSrcref(bquote(then(as_promise(user(.(bare))), callback = .self))))
+  expect_null(coroAwaitSrcref(bquote(then(.(block), callback = .self))))
+  expect_null(coroAwaitSrcref(NULL))
+})
+
+test_that("relabelAsyncFrames() drops only the await() line when coro's then() call changes", {
+  labelEnv <- new.env()
+  labelEnv$.shinyAsyncLabel <- "observe"
+  frames <- list(globalenv(), new.env(parent = labelEnv), globalenv(), globalenv(), globalenv())
+  parents <- c(0L, 1L, 2L, 3L, 4L)
+  srcref <- structure(c(3L, 1L, 3L, 9L, 1L, 9L, 3L, 3L), class = "srcref")
+  block <- structure(quote({ p }), srcref = list("brace", srcref))
+  stackWith <- function(thenCall) {
+    calls <- list(
+      quote(run_now()),
+      quote(base::evalq(x, user_env)),
+      quote(base::evalq(y)),
+      thenCall,
+      quote(domain$wrapOnFulfilled(onFulfilled))
+    )
+    relabelAsyncFrames(calls, parents, frames, atThen = TRUE)
+  }
+
+  known <- stackWith(bquote(then(as_promise(user(.(block))), callback = .self)))
+  # The line is put on the call after the user's frame
+  expect_identical(attr(known[[3]], "srcref"), srcref)
+
+  # The frame is still named and coro's frames are still hidden
+  expectNoLine <- function(out) {
+    expect_null(attr(out[[3]], "srcref"))
+    expect_identical(out[[2]], call("observe (coro::async)"))
+    expect_identical(attr(out, "asyncLabel"), "observe")
+    expect_identical(attr(out, "asyncHidden"), attr(known, "asyncHidden"))
+  }
+  # A `then()` call of another shape
+  expectNoLine(stackWith(quote(then(new_wrapper(p), callback = .self))))
+  expectNoLine(stackWith(quote(then())))
+  # No `then()` call at all
+  expectNoLine(stackWith(quote(chain(p))))
+})
+
 test_that("relabelAsyncFrames() leaves a stack with no await() code alone", {
   calls <- list(quote(a()), quote(b()))
   out <- relabelAsyncFrames(calls, c(0L, 1L), list(globalenv(), globalenv()))

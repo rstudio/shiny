@@ -435,7 +435,9 @@ relabelAsyncFrames <- function(calls, parents, frames, atThen = FALSE) {
     inner <- (innermostIndex + 1):n
     hidden[inner] <- TRUE
     # Give the user's frame the line of the `await()`. A frame is shown with
-    # the srcref of the call after it (see `offsetSrcrefs()`).
+    # the srcref of the call after it (see `offsetSrcrefs()`). If coro's
+    # `then()` call is not found, or is not as `coroAwaitSrcref()` expects,
+    # the frame is left with no line.
     for (k in inner) {
       if (isCallNamed(calls[[k]], "then")) {
         srcref <- coroAwaitSrcref(calls[[k]])
@@ -474,7 +476,12 @@ isCoroEvalCall <- function(call) {
 # The srcref of the user's `await()` statement, given coro's call to `then()`
 # for it: `then(as_promise(user({ <code up to the await> })), callback = .self)`.
 # The block keeps the srcrefs of the user's statements; the last is the
-# `await()`. NULL if the call does not look like that.
+# `await()`.
+# Relies on coro internals: the shape of that call. If coro changes it, this
+# returns NULL instead of failing, so the frame is shown without a file and
+# line and the rest of the stack trace is unchanged. The "deep stack trace
+# shows the file and line of each await()" test in test-stacks.R fails if that
+# happens.
 coroAwaitSrcref <- function(call) {
   block <- tryCatch(call[[2]][[2]][[2]], error = function(e) NULL)
   if (!is.call(block) || !identical(block[[1]], quote(`{`))) {

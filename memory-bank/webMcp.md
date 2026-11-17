@@ -206,6 +206,62 @@ console warning.
   offline apps get no polyfill. It defers to a native
   `document.modelContext`.
 
+## Tools defined in R (`R/webmcp-tools.R`)
+
+`webMcpTool(name, fun, description, ..., arguments, value, annotations)` is
+shaped like `ellmer::tool()` but is shiny's own S3 object, so it can be
+documented and extended here. `name` comes first (like
+`registerInputHandler(type, fun)`); `...` must be empty, so the optional
+arguments are always named. `fun` gets the agent's arguments plus
+`input` and `session` when its formals name them (any position),
+like `argsForServerFunc()` does for server functions (`R/server.R`). They
+come from the calling (module) session; the lookup runs per call in
+`webMcpCall()` (~1µs, negligible next to the websocket round trip). The names
+are reserved: `arguments` can't describe them, so agents can't set them
+(plumber2 does the same for path args vs. its `query`/`body` names). Runs inside
+`isolate()` and `withReactiveDomain(scope)`. No `output` (Barret's call): a
+tool shouldn't render outputs; it sets a `reactiveVal()` that an output reads,
+and `serviceApp()`'s `flushReact()` after the RPC message updates the page.
+Outputs can't be read server-side either; agents use `get_output`. `fun`'s formals without defaults must all have a type, and `fun`
+can't take `...` (agents can only send `arguments` keys, so it would only hide
+typed args). Free-form data: a declared array of name-value pairs
+(`type_array(type_object(name = type_enum(...), value = ...))`), fully checked.
+Don't recommend open objects: ellmer 0.5.0 deprecated
+`type_object(.additional_properties)` because no provider's structured output
+can fill them (strict modes need closed objects). `webMcpTool()` refuses any
+open object in `arguments` (`webMcpOpenObjects()` walks the whole schema,
+including `type_from_schema()` JSON; an object without `additionalProperties`
+counts as open, per JSON Schema). Note `type_from_schema()` values are still
+not checked in R beyond that. `value` may contain open objects.
+
+- **Types:** `arguments` is a named list of ellmer types and `value` an
+  `ellmer::type_object()` (`value` mirrors R's "Value" doc section; it becomes
+  WebMCP's `outputSchema`).
+  `webMcpTypeSchema()` turns them into JSON Schema itself, reading props with
+  `S7::prop()` (`@` needs R >= 4.3). It doesn't use `ellmer:::as_json()`.
+  ellmer and S7 are in Suggests, checked only when types are used.
+- **Checks:** `webMcpConform()` checks the agent's arguments before `fun`
+  runs (arrays of scalars become atomic vectors) and the returned value
+  after (arrays stay lists, so a length-1 array still serializes as an
+  array). The browser's `parseToolArgs()` has already caught unknown and
+  missing keys; R checks again because any client can send `@webmcpCall`.
+- **Registration:** `registerWebMcpTool(tool, session)`. With no session
+  (outside the server function), the tool goes in `.globals$webMcpTools`
+  and `sendGlobalWebMcpTools()` sends it when each session starts, right
+  after the `config` message. With a session, it goes in
+  `webMcpSessionTools[[token]]` (removed `onSessionEnded`), the name gets
+  `session$ns()` (so modules get `"mod-tool"`), and it is sent right away. Both
+  use the `shiny.webmcp.tools` custom message (`{add, remove}`), handled by
+  `Shiny.webmcp.setServerTools()`. Session tools are a no-op when WebMCP is
+  off. Built-in tool names are refused.
+- **Calls:** the client tool's `execute` calls `@webmcpCall(name, args)`
+  (`webMcpCall()`), which looks in the session's tools first, then the global
+  ones. Errors reach the agent as the RPC error; with
+  `options(shiny.sanitize.errors = TRUE)` only `safeError()`s keep their
+  message, and the original is logged with `message()`.
+- **Tests:** `test-webmcp-tools-types.R` (the shape of `arguments`/`value`: defining, JSON Schema, checking JSON input and serialized output; one place per behavior), `test-webmcp-tools.R` (unit; note `MockShinySession$ns()`
+  prefixes `mock-session-`) and `test-zzz-st2-webmcp-tools.R` (browser).
+
 ## Server side (`R/shiny.R`)
 
 - `ShinySession$dispatch()` accepts a promise from an `@<method>` RPC and

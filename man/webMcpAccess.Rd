@@ -47,3 +47,6 @@ selectInput("region", "Region", c("East", "West")) |> webMcpAccess("read-only")
 verbatimTextOutput("debug_log") |> webMcpAccess("exclude")
 tabsetPanel(id = "tab", tabPanel("A"), tabPanel("B")) |> webMcpAccess("read-only")
 }
+\seealso{
+\code{\link[=webMcpTool]{webMcpTool()}} to define WebMCP tools in R.
+}

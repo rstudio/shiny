@@ -249,6 +249,7 @@ class FileUploader extends FileProcessor {
         // Reset the file input's value to "". This allows the same file to be
         // uploaded again. https://stackoverflow.com/a/22521275
         $(evt.el as HTMLElement).val("");
+        this.$triggerUploadEnd(null);
       },
       (error) => {
         this.onError(error);
@@ -260,6 +261,19 @@ class FileUploader extends FileProcessor {
   onError(message: string): void {
     this.$setError(message || "");
     this.$setActive(false);
+    this.$triggerUploadEnd(message || "Upload failed");
+  }
+  // `shiny:uploadend` fires on the file input once the server has the files
+  // (`error` is null) or the upload failed. Used by `Shiny.drive.waitForUpload()`.
+  $triggerUploadEnd(error: string | null): void {
+    const evt = $.Event("shiny:uploadend") as JQuery.Event & {
+      name: string;
+      error: string | null;
+    };
+
+    evt.name = this.id;
+    evt.error = error;
+    $(this.el).trigger(evt);
   }
   onAbort(): void {
     this.$setVisible(false);

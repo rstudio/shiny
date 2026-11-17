@@ -130,7 +130,7 @@
   }
 
   // srcts/src/shiny/index.ts
-  var import_jquery40 = __toESM(require_jquery());
+  var import_jquery42 = __toESM(require_jquery());
 
   // srcts/src/utils/index.ts
   var import_jquery6 = __toESM(require_jquery());
@@ -1846,6 +1846,7 @@
           this.onProgress(null, 1);
           this.$bar().text("Upload complete");
           (0, import_jquery13.default)(evt.el).val("");
+          this.$triggerUploadEnd(null);
         },
         (error) => {
           this.onError(error);
@@ -1857,6 +1858,15 @@
     onError(message) {
       this.$setError(message || "");
       this.$setActive(false);
+      this.$triggerUploadEnd(message || "Upload failed");
+    }
+    // `shiny:uploadend` fires on the file input once the server has the files
+    // (`error` is null) or the upload failed. Used by `Shiny.drive.waitForUpload()`.
+    $triggerUploadEnd(error) {
+      const evt = import_jquery13.default.Event("shiny:uploadend");
+      evt.name = this.id;
+      evt.error = error;
+      (0, import_jquery13.default)(this.el).trigger(evt);
     }
     onAbort() {
       this.$setVisible(false);
@@ -5430,6 +5440,7 @@
         this.lastChanceCallback.forEach((callback) => callback());
         const currentData = this.pendingData;
         this.pendingData = {};
+        if (Object.keys(currentData).length === 0) return;
         this.shinyapp.sendInput(currentData);
       } finally {
         this.reentrant = false;
@@ -5931,27 +5942,643 @@ ${duplicateIdMsg}`;
     shinyCtx.initDeferredIframes();
   }
 
-  // srcts/src/shiny/modal.ts
+  // srcts/src/shiny/drive.ts
+  var import_jquery37 = __toESM(require_jquery());
+
+  // srcts/src/shiny/driveSchema.ts
   var import_jquery36 = __toESM(require_jquery());
+  var maxChoicesInError = 50;
+  function checkValue(schema, value, path = "value") {
+    const show3 = (x2) => JSON.stringify(x2);
+    if (Array.isArray(schema.enum) && !schema.enum.includes(value)) {
+      const choices = schema.enum.slice(0, maxChoicesInError).map(show3);
+      const more = schema.enum.length > maxChoicesInError ? ", ..." : "";
+      throw new Error(
+        `${path} must be one of ${choices.join(", ")}${more}; got ${show3(value)}`
+      );
+    }
+    if (schema.type === "array") {
+      if (!Array.isArray(value)) {
+        throw new Error(`${path} must be an array; got ${show3(value)}`);
+      }
+      const { minItems, maxItems } = schema;
+      if (minItems !== void 0 && value.length < minItems || maxItems !== void 0 && value.length > maxItems) {
+        throw new Error(`${path} must have ${minItems ?? 0}-${maxItems} items`);
+      }
+      value.forEach(
+        (v2, i5) => checkValue(schema.items ?? {}, v2, `${path}[${i5}]`)
+      );
+      return;
+    }
+    if (typeof schema.type === "string" && typeof value !== schema.type) {
+      throw new Error(`${path} must be a ${schema.type}; got ${show3(value)}`);
+    }
+    const { minimum, maximum } = schema;
+    if (typeof value === "number" && (minimum !== void 0 && value < minimum || maximum !== void 0 && value > maximum)) {
+      throw new Error(`${path} must be between ${minimum} and ${maximum}`);
+    }
+  }
+  function stateOf(el, binding) {
+    try {
+      const state = binding.getState(el);
+      if (state && typeof state === "object") {
+        return JSON.parse(
+          JSON.stringify({ ...state, label: void 0 })
+        );
+      }
+    } catch {
+    }
+    return {};
+  }
+  function valueSchema(el, binding) {
+    const state = stateOf(el, binding);
+    const choices = Array.isArray(state.options) ? state.options.map((o5) => o5.value) : void 0;
+    switch (binding.name) {
+      case "shiny.actionButtonInput":
+        return null;
+      case "shiny.checkboxInput":
+        return { type: "boolean" };
+      case "shiny.textInput":
+      case "shiny.textareaInput":
+      case "shiny.passwordInput":
+        return { type: "string" };
+      case "shiny.numberInput": {
+        const { min, max } = el;
+        return {
+          type: "number",
+          minimum: min === "" ? void 0 : Number(min),
+          maximum: max === "" ? void 0 : Number(max)
+        };
+      }
+      case "shiny.dateInput":
+        return { type: "string", format: "date" };
+      case "shiny.dateRangeInput":
+        return {
+          type: "array",
+          items: { type: "string", format: "date" },
+          minItems: 2,
+          maxItems: 2
+        };
+      case "shiny.radioInput":
+        return { enum: choices };
+      case "shiny.checkboxGroupInput":
+        return { type: "array", items: { enum: choices } };
+      case "shiny.selectInput": {
+        const selectize = el.selectize;
+        const opts = selectize ? Object.keys(selectize.options) : choices;
+        return el.multiple ? { type: "array", items: { enum: opts } } : { enum: opts };
+      }
+      case "shiny.bootstrapTabInput":
+        return {
+          enum: (0, import_jquery36.default)(el).find("a[data-value]").toArray().map((a3) => a3.getAttribute("data-value"))
+        };
+      case "shiny.sliderInput": {
+        if (binding.getType(el)) return {};
+        const opts = (0, import_jquery36.default)(el).data("ionRangeSlider")?.options ?? {};
+        const num = { type: "number", minimum: opts.min, maximum: opts.max };
+        return opts.type === "double" ? { type: "array", items: num, minItems: 2, maxItems: 2 } : num;
+      }
+      case "bslib.accordion": {
+        const panels = Array.from(
+          el.querySelectorAll(":scope > .accordion-item")
+        ).map((x2) => x2.dataset.value);
+        return {
+          type: "array",
+          items: { enum: panels },
+          // An autoclose accordion keeps only one panel open
+          maxItems: el.classList.contains("autoclose") ? 1 : void 0
+        };
+      }
+      case "bslib.sidebar":
+        return { type: "boolean" };
+      default:
+        return {};
+    }
+  }
+
+  // srcts/src/shiny/drive.ts
+  var skippedInputBindings = /* @__PURE__ */ new Set();
+  var skippedOutputBindings = /* @__PURE__ */ new Set();
+  var defaultInputAccess = /* @__PURE__ */ new Map([
+    ["shiny.passwordInput", "write-only"],
+    ["shiny.fileInputBinding", "read-only"]
+  ]);
+  var accessAttr = "data-shiny-drive-access";
+  var accessValues = ["exclude", "read-only", "write-only"];
+  var maxTextLength = 2e4;
+  var previewTextLength = 200;
+  var apiVersion = 1;
+  var defaultTimeout = null;
+  var DriveError = class extends Error {
+    constructor(code, message, { applied } = {}) {
+      super(message);
+      this.name = "ShinyDriveError";
+      this.code = code;
+      if (applied) this.applied = applied;
+    }
+  };
+  function accessAttrOf(el, isInput) {
+    const value = el.getAttribute(accessAttr) ?? (isInput ? el.closest(".shiny-input-container")?.getAttribute(accessAttr) ?? null : null);
+    if (value !== null && !accessValues.includes(value)) {
+      console.warn(
+        `Unknown ${accessAttr}="${value}"; expected one of ${accessValues.join(", ")}`
+      );
+    }
+    return value;
+  }
+  function inputAccess(el, binding) {
+    const value = accessAttrOf(el, true);
+    if (value === "exclude" || value === "read-only" || value === "write-only") {
+      return value;
+    }
+    return defaultInputAccess.get(binding.name) ?? "read-write";
+  }
+  function isShownInput(el) {
+    return isVisible(
+      el.closest(".shiny-input-container") ?? (el.classList.contains("bslib-sidebar-input") ? el.parentElement : el) ?? el
+    );
+  }
+  function inputMessage(binding, value) {
+    switch (binding.name) {
+      case "shiny.dateRangeInput":
+        return Array.isArray(value) ? { value: { start: value[0], end: value[1] } } : { value };
+      case "bslib.accordion":
+        return { method: "set", values: value };
+      case "bslib.sidebar":
+        return { method: value ? "open" : "close" };
+      default:
+        return { value };
+    }
+  }
+  async function settleInput(el, binding) {
+    if (binding.name === "bslib.accordion") {
+      await waitForClasses(
+        () => !el.querySelector(":scope > .accordion-item > .collapsing"),
+        defaultTimeout
+      );
+    }
+  }
+  function exposedInputs(includeHidden = false) {
+    return (0, import_jquery37.default)(".shiny-bound-input").toArray().map((el) => ({ el, binding: (0, import_jquery37.default)(el).data("shiny-input-binding") })).filter(
+      ({ el, binding }) => binding && !skippedInputBindings.has(binding.name) && inputAccess(el, binding) !== "exclude" && (includeHidden || isShownInput(el))
+    );
+  }
+  function exposedOutputs(includeHidden = false) {
+    return (0, import_jquery37.default)(".shiny-bound-output").toArray().map((el) => ({ el, adapter: (0, import_jquery37.default)(el).data("shiny-output-binding") })).filter(
+      ({ el, adapter }) => adapter && !skippedOutputBindings.has(adapter.binding.name) && // Outputs are inherently read-only; only "exclude" applies
+      accessAttrOf(el, false) !== "exclude" && (includeHidden || isVisible(el))
+    );
+  }
+  function findInput(id, includeHidden = false) {
+    const found = exposedInputs(includeHidden).find(
+      ({ el, binding }) => binding.getId(el) === id
+    );
+    if (!found) {
+      throw new DriveError(
+        "not-found",
+        `No visible input with id "${id}". List the inputs to see the current ids.`
+      );
+    }
+    return found;
+  }
+  function findOutput(id, includeHidden = false) {
+    const found = exposedOutputs(includeHidden).find(
+      ({ adapter }) => adapter.getId() === id
+    );
+    if (!found) {
+      throw new DriveError(
+        "not-found",
+        `No visible output with id "${id}". List the outputs to see the current ids.`
+      );
+    }
+    return found;
+  }
+  function checkTimeout(timeout) {
+    if (timeout !== null && !(Number.isFinite(timeout) && timeout >= 0)) {
+      throw new DriveError(
+        "invalid-argument",
+        "`timeout` must be a non-negative number of milliseconds, or null"
+      );
+    }
+  }
+  function timeLeft(timeout) {
+    const deadline = timeout === null ? null : Date.now() + timeout;
+    return () => deadline === null ? null : Math.max(0, deadline - Date.now());
+  }
+  function timeoutError(what, timeout) {
+    return new DriveError("timeout", `${what} within ${timeout}ms`);
+  }
+  function waitForClasses(done, timeout) {
+    if (done()) return Promise.resolve(true);
+    return new Promise((resolve) => {
+      const observer = new MutationObserver(() => {
+        if (done()) finish(true);
+      });
+      const timer = timeout === null ? void 0 : setTimeout(() => finish(false), timeout);
+      const finish = (ok) => {
+        observer.disconnect();
+        clearTimeout(timer);
+        resolve(ok);
+      };
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["class"],
+        subtree: true
+      });
+    });
+  }
+  async function waitForOutputs(els, timeout = defaultTimeout) {
+    await new Promise((r4) => setTimeout(r4, 150));
+    await waitForClasses(
+      () => !els().some((el) => el.classList.contains("recalculating")),
+      timeout
+    );
+  }
+  function matchesFilter({ ids: ids2, module }, id) {
+    return (!ids2 || ids2.includes(id)) && (!module || id.startsWith(module + "-"));
+  }
+  var applying = false;
+  var uploadedFiles = /* @__PURE__ */ new Map();
+  (0, import_jquery37.default)(document).on("shiny:inputchanged", (e4) => {
+    const evt = e4;
+    if (evt.inputType === "shiny.fileupload") {
+      uploadedFiles.set(evt.name, evt.value);
+    } else if (applying) {
+      e4.preventDefault();
+    }
+  });
+  function inputValue(el, binding) {
+    if (binding.name === "shiny.fileInputBinding") {
+      return uploadedFiles.get(binding.getId(el)) ?? [];
+    }
+    return binding.getValue(el);
+  }
+  function inputInfo(el, binding) {
+    const id = binding.getId(el);
+    const access = inputAccess(el, binding);
+    return {
+      id,
+      label: labelOf(el, id),
+      type: binding.name,
+      access,
+      value: access === "write-only" ? void 0 : inputValue(el, binding),
+      schema: access === "read-only" ? void 0 : valueSchema(el, binding),
+      disabled: el.matches(":disabled"),
+      hidden: isShownInput(el) ? void 0 : true
+    };
+  }
+  function outputInfo(el, adapter) {
+    const img = el.querySelector("img");
+    const text = el.innerText ?? "";
+    return {
+      id: adapter.getId(),
+      type: adapter.binding.name,
+      status: el.classList.contains("shiny-output-error") ? "error" : el.classList.contains("recalculating") ? "recalculating" : "ready",
+      text: text.length > maxTextLength ? text.slice(0, maxTextLength) : text,
+      image: img?.src.startsWith("data:image/") ? img.src : void 0,
+      hidden: isVisible(el) ? void 0 : true
+    };
+  }
+  function checkWritable(id, el, access) {
+    if (access === "read-only") {
+      throw new DriveError("read-only", `Input "${id}" is read-only`);
+    }
+    if (el.matches(":disabled")) {
+      throw new DriveError("disabled", `Input "${id}" is disabled`);
+    }
+  }
+  function labelOf(el, id) {
+    const label = document.getElementById(id + "-label")?.textContent ?? el.closest("label")?.textContent ?? el.getAttribute("aria-label") ?? (el.tagName === "BUTTON" ? el.textContent : null) ?? "";
+    return label.trim() || id;
+  }
+  var _initialized;
+  var ShinyDrive = class {
+    // Resolves on the first `shiny:sessioninitialized`
+    constructor(initialized) {
+      /** API version; bumped when the API changes. */
+      this.version = apiVersion;
+      __privateAdd(this, _initialized);
+      __privateSet(this, _initialized, initialized);
+    }
+    /**
+     * Set how many ms every wait (`flush()`, `setInputs()`, `click()`,
+     * `uploadFiles()`, `waitForIdle()`, `ready()`, ...) gives up after; `null`
+     * (the default) waits as long as it takes. Methods with a `timeout`
+     * option use this when it isn't given. On timeout, waits for the server
+     * reject with a `"timeout"` error; waits for outputs give up quietly, and
+     * the outputs then show `status: "recalculating"`.
+     */
+    setDefaultTimeout(timeout) {
+      checkTimeout(timeout);
+      defaultTimeout = timeout;
+    }
+    /** Never expose inputs using this binding (e.g. `"shiny.passwordInput"`). */
+    skipInputBinding(bindingName) {
+      skippedInputBindings.add(bindingName);
+    }
+    /** Never expose outputs using this binding (e.g. `"shiny.htmlOutput"`). */
+    skipOutputBinding(bindingName) {
+      skippedOutputBindings.add(bindingName);
+    }
+    /**
+     * Visible inputs, optionally filtered by exact `ids` and/or `module`
+     * (ids inside that module namespace, e.g. `"filters"` for `filters-region`).
+     * `includeHidden: true` also lists hidden ones (marked `hidden: true`).
+     */
+    listInputs(filter = {}) {
+      return exposedInputs(filter.includeHidden).filter(({ el, binding }) => matchesFilter(filter, binding.getId(el))).map(({ el, binding }) => inputInfo(el, binding));
+    }
+    getInput(id, { includeHidden } = {}) {
+      const { el, binding } = findInput(id, includeHidden);
+      return inputInfo(el, binding);
+    }
+    /**
+     * Update an input's UI widget (as `update*Input()` would), send the value to
+     * the server, wait for the app to update, and return the input's new state.
+     * Buttons are clicked; `value` is ignored.
+     */
+    async setInput(id, value, opts = {}) {
+      const [info] = await this.setInputs({ [id]: value }, opts);
+      return info;
+    }
+    /**
+     * Set several inputs at once, like shinytest2's `AppDriver$set_inputs()`:
+     * every value is validated before any widget changes, all values reach the
+     * server in one message (so one reactive flush), then waits for the app to
+     * update. Buttons are clicked. Returns the inputs' new states, in order.
+     */
+    async setInputs(values, { includeHidden } = {}) {
+      const items = Object.entries(values).map(([id, value]) => {
+        const { el, binding } = findInput(id, includeHidden);
+        if (binding.name === "shiny.fileInputBinding") {
+          throw new DriveError(
+            "wrong-type",
+            `Input "${id}" is a file input; use uploadFiles()`
+          );
+        }
+        checkWritable(id, el, inputAccess(el, binding));
+        const schema = valueSchema(el, binding);
+        if (schema !== null) {
+          try {
+            checkValue(schema, value);
+          } catch (e4) {
+            throw new DriveError("invalid-value", e4.message);
+          }
+        }
+        return { id, value, el, binding, schema };
+      });
+      if (items.length === 0) return [];
+      let applied = 0;
+      let failure;
+      applying = true;
+      try {
+        for (const { value, el, binding, schema } of items) {
+          if (schema === null) {
+            el.click();
+          } else {
+            await binding.receiveMessage(el, inputMessage(binding, value));
+            await settleInput(el, binding);
+          }
+          applied++;
+        }
+      } catch (e4) {
+        failure = e4;
+      } finally {
+        applying = false;
+      }
+      const sent = items.slice(0, applied);
+      sent.forEach(({ id, el, binding }, i5) => {
+        const type = binding.getType(el);
+        shinySetInputValue(type ? id + ":" + type : id, binding.getValue(el), {
+          priority: i5 === sent.length - 1 ? "event" : "immediate"
+        });
+      });
+      if (sent.length > 0) {
+        await this.flush();
+        await waitForOutputs(() => exposedOutputs().map((x2) => x2.el));
+      }
+      if (applied < items.length) {
+        const reason = failure instanceof Error ? failure.message : failure;
+        const done = sent.map((x2) => x2.id);
+        throw new DriveError(
+          "update-failed",
+          `Input "${items[applied].id}" failed to update: ${reason}. Already applied: ${done.join(", ") || "none"}.`,
+          { applied: done }
+        );
+      }
+      return items.map(({ el, binding }) => inputInfo(el, binding));
+    }
+    /**
+     * Click an action button or link, wait for the app to update, and return
+     * the button's new state.
+     */
+    async click(id, opts = {}) {
+      const { el, binding } = findInput(id, opts.includeHidden);
+      if (valueSchema(el, binding) !== null) {
+        throw new DriveError(
+          "wrong-type",
+          `Input "${id}" is not a button; use setInput()`
+        );
+      }
+      return this.setInput(id, void 0, opts);
+    }
+    /**
+     * Upload files to a file input, as if the user picked them, and resolve
+     * once the server has received them and the app has updated. Returns the
+     * input's new state (`value` lists the uploaded files).
+     */
+    async uploadFiles(id, files, { includeHidden, timeout } = {}) {
+      const { el, binding } = findInput(id, includeHidden);
+      if (binding.name !== "shiny.fileInputBinding") {
+        throw new DriveError("wrong-type", `Input "${id}" is not a file input`);
+      }
+      checkWritable(id, el, accessAttrOf(el, true));
+      const done = this.waitForUpload(id, { timeout });
+      const transfer = new DataTransfer();
+      Array.from(files).forEach((f3) => transfer.items.add(f3));
+      el.files = transfer.files;
+      (0, import_jquery37.default)(el).trigger("change");
+      await done;
+      return inputInfo(el, binding);
+    }
+    /**
+     * Resolve once the next upload to file input `id` finishes and the app has
+     * updated; reject if it fails or takes longer than `timeout` ms. Call it
+     * *before* the upload starts (e.g. before attaching files via DevTools).
+     */
+    async waitForUpload(id, { timeout = defaultTimeout } = {}) {
+      checkTimeout(timeout);
+      await new Promise((resolve, reject) => {
+        const handler = (e4) => {
+          const evt = e4;
+          if (evt.name !== id) return;
+          cleanup();
+          if (evt.error === null) resolve();
+          else {
+            reject(
+              new DriveError(
+                "upload-failed",
+                `Upload to "${id}" failed: ${evt.error}`
+              )
+            );
+          }
+        };
+        const timer = timeout === null ? void 0 : setTimeout(() => {
+          cleanup();
+          reject(timeoutError(`Upload to "${id}" did not finish`, timeout));
+        }, timeout);
+        const cleanup = () => {
+          clearTimeout(timer);
+          (0, import_jquery37.default)(document).off("shiny:uploadend", handler);
+        };
+        (0, import_jquery37.default)(document).on("shiny:uploadend", handler);
+      });
+      await this.flush({ timeout });
+      await waitForOutputs(() => exposedOutputs().map((x2) => x2.el), timeout);
+    }
+    /**
+     * Visible outputs, optionally filtered by exact `ids` and/or
+     * `module` namespace. Text is truncated to a short preview; use getOutput() for the
+     * full content.
+     * `includeHidden: true` also lists hidden ones (marked `hidden: true`).
+     * Shiny suspends hidden outputs, so their content may be stale until shown.
+     */
+    listOutputs(filter = {}) {
+      return exposedOutputs(filter.includeHidden).filter(({ adapter }) => matchesFilter(filter, adapter.getId())).map(({ el, adapter }) => outputInfo(el, adapter)).map(({ image, ...x2 }) => ({
+        ...x2,
+        text: x2.text.slice(0, previewTextLength),
+        hasImage: image !== void 0
+      }));
+    }
+    /**
+     * Waits (up to a timeout) for the output to finish recalculating. Hidden
+     * outputs (`includeHidden`) are returned as-is: Shiny suspends them, so
+     * they may be stale or `recalculating` until shown.
+     */
+    async getOutput(id, { includeHidden } = {}) {
+      const { el, adapter } = findOutput(id, includeHidden);
+      if (isVisible(el) && el.classList.contains("recalculating")) {
+        await waitForOutputs(() => [el]);
+      }
+      return outputInfo(el, adapter);
+    }
+    // TODO: The reply to `waitForFlush` stands in for "the server flushed"; it
+    // carries no flush info itself. Explore an explicit server-to-client flush
+    // signal instead (not test mode's empty `values` message, which has the
+    // same problem).
+    /**
+     * Resolve once the server has processed all sent inputs and flushed.
+     * Rejects with a `"disconnected"` error if the session is or becomes
+     * disconnected, and a `"timeout"` error after `timeout` ms.
+     */
+    flush({
+      timeout = defaultTimeout
+    } = {}) {
+      checkTimeout(timeout);
+      return new Promise((resolve, reject) => {
+        const shinyapp = shinyShinyApp();
+        const disconnected = () => new DriveError("disconnected", "Shiny is disconnected from the server");
+        if (!shinyapp.isConnected()) {
+          reject(disconnected());
+          return;
+        }
+        const onDisconnect = () => finish(() => reject(disconnected()));
+        const timer = timeout === null ? void 0 : setTimeout(
+          () => finish(
+            () => reject(
+              timeoutError("Shiny did not finish processing", timeout)
+            )
+          ),
+          timeout
+        );
+        const finish = (settle) => {
+          clearTimeout(timer);
+          (0, import_jquery37.default)(document).off("shiny:disconnected", onDisconnect);
+          settle();
+        };
+        (0, import_jquery37.default)(document).on("shiny:disconnected", onDisconnect);
+        shinyapp.makeRequest(
+          "waitForFlush",
+          [],
+          () => finish(resolve),
+          (err) => finish(() => reject(new DriveError("server-error", err))),
+          void 0
+        );
+      });
+    }
+    /**
+     * Like shinytest2's `AppDriver$wait_for_idle()`: after a server `flush()`,
+     * resolve once the app has been idle (server not busy, no visible output
+     * recalculating) for `duration` ms. Rejects with a `"timeout"` error after
+     * `timeout` ms (default: see `setDefaultTimeout()`).
+     */
+    async waitForIdle({
+      duration = 500,
+      timeout = defaultTimeout
+    } = {}) {
+      checkTimeout(timeout);
+      const left = timeLeft(timeout);
+      const busy = () => document.documentElement.classList.contains("shiny-busy") || exposedOutputs().some(({ el }) => el.classList.contains("recalculating"));
+      await this.flush({ timeout: left() });
+      for (; ; ) {
+        if (!await waitForClasses(() => !busy(), left())) break;
+        const quietFor = Math.min(duration, left() ?? duration);
+        if (!await waitForClasses(busy, quietFor)) {
+          if (quietFor === duration) return;
+          break;
+        }
+      }
+      throw timeoutError("Shiny did not become idle", timeout);
+    }
+    /**
+     * Resolve once the session has started and the app has finished its first
+     * update (the server has flushed and no visible output is recalculating).
+     * Safe to call at any time, even before Shiny connects; later calls cost
+     * one round trip to the server. Rejects like `flush()`.
+     */
+    async ready({
+      timeout = defaultTimeout
+    } = {}) {
+      checkTimeout(timeout);
+      const left = timeLeft(timeout);
+      let timer;
+      await Promise.race([
+        __privateGet(this, _initialized),
+        new Promise((resolveNever, reject) => {
+          if (timeout === null) return;
+          timer = setTimeout(
+            () => reject(timeoutError("Shiny did not start", timeout)),
+            timeout
+          );
+        })
+      ]).finally(() => clearTimeout(timer));
+      await this.flush({ timeout: left() });
+      await waitForOutputs(() => exposedOutputs().map((x2) => x2.el), left());
+    }
+  };
+  _initialized = new WeakMap();
+
+  // srcts/src/shiny/modal.ts
+  var import_jquery38 = __toESM(require_jquery());
   async function show({
     html = "",
     deps = []
   } = {}) {
     await renderDependenciesAsync(deps);
-    (0, import_jquery36.default)(".modal-backdrop").remove();
-    let $modal = (0, import_jquery36.default)("#shiny-modal-wrapper");
+    (0, import_jquery38.default)(".modal-backdrop").remove();
+    let $modal = (0, import_jquery38.default)("#shiny-modal-wrapper");
     if ($modal.length === 0) {
-      $modal = (0, import_jquery36.default)('<div id="shiny-modal-wrapper"></div>');
-      (0, import_jquery36.default)(document.body).append($modal);
+      $modal = (0, import_jquery38.default)('<div id="shiny-modal-wrapper"></div>');
+      (0, import_jquery38.default)(document.body).append($modal);
       $modal.on("hidden.bs.modal", function(e4) {
-        if (e4.target === (0, import_jquery36.default)("#shiny-modal")[0]) {
+        if (e4.target === (0, import_jquery38.default)("#shiny-modal")[0]) {
           shinyUnbindAll($modal);
           $modal.remove();
         }
       });
     }
     $modal.on("keydown.shinymodal", function(e4) {
-      if ((0, import_jquery36.default)("#shiny-modal").data("keyboard") === false) return;
+      if ((0, import_jquery38.default)("#shiny-modal").data("keyboard") === false) return;
       if (e4.keyCode === 27) {
         e4.stopPropagation();
         e4.preventDefault();
@@ -5960,7 +6587,7 @@ ${duplicateIdMsg}`;
     await renderContentAsync($modal, { html });
   }
   function remove() {
-    const $modal = (0, import_jquery36.default)("#shiny-modal-wrapper");
+    const $modal = (0, import_jquery38.default)("#shiny-modal-wrapper");
     $modal.off("keydown.shinymodal");
     const $bsModal = $modal.find(".modal");
     if ($bsModal.length > 0) {
@@ -5973,7 +6600,7 @@ ${duplicateIdMsg}`;
   }
 
   // srcts/src/shiny/notifications.ts
-  var import_jquery37 = __toESM(require_jquery());
+  var import_jquery39 = __toESM(require_jquery());
   var fadeDuration = 250;
   async function show2({
     html = "",
@@ -6013,7 +6640,7 @@ ${duplicateIdMsg}`;
   function remove2(id) {
     get(id)?.fadeOut(fadeDuration, function() {
       shinyUnbindAll(this);
-      (0, import_jquery37.default)(this).remove();
+      (0, import_jquery39.default)(this).remove();
       if (ids().length === 0) {
         getPanel().remove();
       }
@@ -6029,18 +6656,18 @@ ${duplicateIdMsg}`;
     }).get();
   }
   function getPanel() {
-    return (0, import_jquery37.default)("#shiny-notification-panel");
+    return (0, import_jquery39.default)("#shiny-notification-panel");
   }
   function createPanel() {
     const $panel = getPanel();
     if ($panel.length > 0) return $panel;
-    (0, import_jquery37.default)(document.body).append('<div id="shiny-notification-panel">');
+    (0, import_jquery39.default)(document.body).append('<div id="shiny-notification-panel">');
     return $panel;
   }
   function create(id) {
     let $notification = get(id);
     if ($notification?.length === 0) {
-      $notification = (0, import_jquery37.default)(
+      $notification = (0, import_jquery39.default)(
         `<div id="shiny-notification-${id}" class="shiny-notification"><div class="shiny-notification-close">&times;</div><div class="shiny-notification-content"></div></div>`
       );
       $notification.find(".shiny-notification-close").on("click", (e4) => {
@@ -6068,9 +6695,9 @@ ${duplicateIdMsg}`;
   }
 
   // srcts/src/shiny/reconnectDialog.ts
-  var import_jquery38 = __toESM(require_jquery());
+  var import_jquery40 = __toESM(require_jquery());
   function updateTime(reconnectTime) {
-    const $time = (0, import_jquery38.default)("#shiny-reconnect-time");
+    const $time = (0, import_jquery40.default)("#shiny-reconnect-time");
     if ($time.length === 0) return;
     const seconds = Math.floor((reconnectTime - (/* @__PURE__ */ new Date()).getTime()) / 1e3);
     if (seconds > 0) {
@@ -6084,7 +6711,7 @@ ${duplicateIdMsg}`;
   }
   async function showReconnectDialog(delay) {
     const reconnectTime = (/* @__PURE__ */ new Date()).getTime() + delay;
-    if ((0, import_jquery38.default)("#shiny-reconnect-text").length > 0) return;
+    if ((0, import_jquery40.default)("#shiny-reconnect-text").length > 0) return;
     const html = '<span id="shiny-reconnect-text">Attempting to reconnect</span><span id="shiny-reconnect-time"></span>';
     const action = '<a id="shiny-reconnect-now" href="#" onclick="Shiny.shinyapp.reconnect();">Try now</a>';
     await show2({
@@ -6102,7 +6729,7 @@ ${duplicateIdMsg}`;
   }
 
   // srcts/src/shiny/shinyapp.ts
-  var import_jquery39 = __toESM(require_jquery());
+  var import_jquery41 = __toESM(require_jquery());
 
   // srcts/src/utils/asyncQueue.ts
   var AsyncQueue = class {
@@ -6407,7 +7034,7 @@ ${duplicateIdMsg}`;
           const key = message.id;
           const binding = this.$bindings[key];
           if (binding) {
-            (0, import_jquery39.default)(binding.el).trigger({
+            (0, import_jquery41.default)(binding.el).trigger({
               type: "shiny:outputinvalidated",
               // @ts-expect-error; Can not remove info on a established, malformed Event object
               binding,
@@ -6425,13 +7052,13 @@ ${duplicateIdMsg}`;
               duration: null
             });
           } else if (message.style === "old") {
-            let $container = (0, import_jquery39.default)(".shiny-progress-container");
+            let $container = (0, import_jquery41.default)(".shiny-progress-container");
             if ($container.length === 0) {
-              $container = (0, import_jquery39.default)('<div class="shiny-progress-container"></div>');
-              (0, import_jquery39.default)(document.body).append($container);
+              $container = (0, import_jquery41.default)('<div class="shiny-progress-container"></div>');
+              (0, import_jquery41.default)(document.body).append($container);
             }
-            const depth = (0, import_jquery39.default)(".shiny-progress.open").length;
-            const $progress = (0, import_jquery39.default)(
+            const depth = (0, import_jquery41.default)(".shiny-progress.open").length;
+            const $progress = (0, import_jquery41.default)(
               '<div class="shiny-progress open"><div class="progress active"><div class="progress-bar bar"></div></div><div class="progress-text"><span class="progress-message">message</span><span class="progress-detail"></span></div></div>'
             );
             $progress.attr("id", message.id);
@@ -6454,7 +7081,7 @@ ${duplicateIdMsg}`;
         // Update page-level progress bar
         update: function(message) {
           if (message.style === "notification") {
-            const $progress = (0, import_jquery39.default)("#shiny-progress-" + message.id);
+            const $progress = (0, import_jquery41.default)("#shiny-progress-" + message.id);
             if ($progress.length === 0) return;
             if (typeof message.message !== "undefined") {
               $progress.find(".progress-message").text(message.message);
@@ -6467,7 +7094,7 @@ ${duplicateIdMsg}`;
               $progress.find(".progress-bar").width(message.value * 100 + "%");
             }
           } else if (message.style === "old") {
-            const $progress = (0, import_jquery39.default)("#" + message.id + ".shiny-progress");
+            const $progress = (0, import_jquery41.default)("#" + message.id + ".shiny-progress");
             if (typeof message.message !== "undefined") {
               $progress.find(".progress-message").text(message.message);
             }
@@ -6486,13 +7113,13 @@ ${duplicateIdMsg}`;
           if (message.style === "notification") {
             remove2(message.id);
           } else if (message.style === "old") {
-            const $progress = (0, import_jquery39.default)("#" + message.id + ".shiny-progress");
+            const $progress = (0, import_jquery41.default)("#" + message.id + ".shiny-progress");
             $progress.removeClass("open");
             $progress.fadeOut({
               complete: function() {
                 $progress.remove();
-                if ((0, import_jquery39.default)(".shiny-progress").length === 0)
-                  (0, import_jquery39.default)(".shiny-progress-container").remove();
+                if ((0, import_jquery41.default)(".shiny-progress").length === 0)
+                  (0, import_jquery41.default)(".shiny-progress-container").remove();
               }
             });
           }
@@ -6505,7 +7132,7 @@ ${duplicateIdMsg}`;
         throw "Connect was already called on this application object";
       this.$socket = this.createSocket();
       this.$initialInput = initialInput;
-      import_jquery39.default.extend(this.$inputValues, initialInput);
+      import_jquery41.default.extend(this.$inputValues, initialInput);
       this.$updateConditionals();
     }
     isConnected() {
@@ -6517,7 +7144,7 @@ ${duplicateIdMsg}`;
         throw "Attempted to reconnect, but already connected.";
       this.$outputProgress.reset();
       this.$socket = this.createSocket();
-      this.$initialInput = import_jquery39.default.extend({}, this.$inputValues);
+      this.$initialInput = import_jquery41.default.extend({}, this.$inputValues);
       this.$updateConditionals();
     }
     createSocket() {
@@ -6543,7 +7170,7 @@ ${duplicateIdMsg}`;
       let hasOpened = false;
       socket.onopen = () => {
         hasOpened = true;
-        (0, import_jquery39.default)(document).trigger({
+        (0, import_jquery41.default)(document).trigger({
           type: "shiny:connected",
           // @ts-expect-error; Can not remove info on a established, malformed Event object
           socket
@@ -6567,7 +7194,7 @@ ${duplicateIdMsg}`;
       socket.onclose = (e4) => {
         const restarting = e4.code === 1012;
         if (hasOpened) {
-          (0, import_jquery39.default)(document).trigger({
+          (0, import_jquery41.default)(document).trigger({
             type: "shiny:disconnected",
             // @ts-expect-error; Can not remove info on a established, malformed Event object
             socket
@@ -6596,7 +7223,7 @@ ${duplicateIdMsg}`;
         data: values
       });
       this.$sendMsg(msg);
-      import_jquery39.default.extend(this.$inputValues, values);
+      import_jquery41.default.extend(this.$inputValues, values);
       this.$updateConditionals();
     }
     $notifyDisconnected() {
@@ -6613,10 +7240,10 @@ ${duplicateIdMsg}`;
       }, delay);
     }
     onDisconnected(reloading = false) {
-      if ((0, import_jquery39.default)("#shiny-disconnected-overlay").length === 0) {
-        (0, import_jquery39.default)(document.body).append('<div id="shiny-disconnected-overlay"></div>');
+      if ((0, import_jquery41.default)("#shiny-disconnected-overlay").length === 0) {
+        (0, import_jquery41.default)(document.body).append('<div id="shiny-disconnected-overlay"></div>');
       }
-      (0, import_jquery39.default)("#shiny-disconnected-overlay").toggleClass("reloading", reloading);
+      (0, import_jquery41.default)("#shiny-disconnected-overlay").toggleClass("reloading", reloading);
       if (this.$allowReconnect === true && this.$socket.allowReconnect === true || this.$allowReconnect === "force") {
         const delay = this.reconnectDelay.next();
         showReconnectDialog(delay);
@@ -6624,7 +7251,7 @@ ${duplicateIdMsg}`;
       }
     }
     onConnected() {
-      (0, import_jquery39.default)("#shiny-disconnected-overlay").remove();
+      (0, import_jquery41.default)("#shiny-disconnected-overlay").remove();
       hideReconnectDialog();
       this.reconnectDelay.reset();
     }
@@ -6704,28 +7331,28 @@ ${duplicateIdMsg}`;
       this.$errors[name] = error;
       delete this.$values[name];
       const binding = this.$bindings[name];
-      const evt = import_jquery39.default.Event("shiny:error");
+      const evt = import_jquery41.default.Event("shiny:error");
       evt.name = name;
       evt.error = error;
       evt.binding = binding;
-      (0, import_jquery39.default)(binding ? binding.el : document).trigger(evt);
+      (0, import_jquery41.default)(binding ? binding.el : document).trigger(evt);
       if (!evt.isDefaultPrevented() && binding && binding.onValueError) {
         binding.onValueError(evt.error);
       }
     }
     async receiveOutput(name, value) {
       const binding = this.$bindings[name];
-      const evt = import_jquery39.default.Event("shiny:value");
+      const evt = import_jquery41.default.Event("shiny:value");
       evt.name = name;
       evt.value = value;
       evt.binding = binding;
       if (this.$values[name] === value) {
-        (0, import_jquery39.default)(binding ? binding.el : document).trigger(evt);
+        (0, import_jquery41.default)(binding ? binding.el : document).trigger(evt);
         return void 0;
       }
       this.$values[name] = value;
       delete this.$errors[name];
-      (0, import_jquery39.default)(binding ? binding.el : document).trigger(evt);
+      (0, import_jquery41.default)(binding ? binding.el : document).trigger(evt);
       if (!evt.isDefaultPrevented() && binding) {
         await binding.onValueChange(evt.value);
       }
@@ -6752,7 +7379,7 @@ ${duplicateIdMsg}`;
     // by nsPrefix. Returns a new object with keys removed and renamed as
     // necessary.
     _narrowScopeComponent(scopeComponent, nsPrefix) {
-      return Object.keys(scopeComponent).filter((k2) => k2.indexOf(nsPrefix) === 0).map((k2) => ({ [k2.substring(nsPrefix.length)]: scopeComponent[k2] })).reduce((obj, pair) => import_jquery39.default.extend(obj, pair), {});
+      return Object.keys(scopeComponent).filter((k2) => k2.indexOf(nsPrefix) === 0).map((k2) => ({ [k2.substring(nsPrefix.length)]: scopeComponent[k2] })).reduce((obj, pair) => import_jquery41.default.extend(obj, pair), {});
     }
     // Narrows a scope -- an object with input and output "subComponents" -- to
     // one constrained by the nsPrefix string.
@@ -6771,7 +7398,7 @@ ${duplicateIdMsg}`;
       return scope;
     }
     $updateConditionals() {
-      (0, import_jquery39.default)(document).trigger({
+      (0, import_jquery41.default)(document).trigger({
         type: "shiny:conditional"
       });
       const inputs = {};
@@ -6782,9 +7409,9 @@ ${duplicateIdMsg}`;
         }
       }
       const scope = { input: inputs, output: this.$values };
-      const conditionals = (0, import_jquery39.default)(document).find("[data-display-if]");
+      const conditionals = (0, import_jquery41.default)(document).find("[data-display-if]");
       for (let i5 = 0; i5 < conditionals.length; i5++) {
-        const el = (0, import_jquery39.default)(conditionals[i5]);
+        const el = (0, import_jquery41.default)(conditionals[i5]);
         let condFunc = el.data("data-display-if-func");
         if (!condFunc) {
           const condExpr = el.attr("data-display-if");
@@ -6827,9 +7454,9 @@ ${duplicateIdMsg}`;
         msgObj.custom = {};
         msgObj.custom[type] = data;
       }
-      const evt = import_jquery39.default.Event("shiny:message");
+      const evt = import_jquery41.default.Event("shiny:message");
       evt.message = msgObj;
-      (0, import_jquery39.default)(document).trigger(evt);
+      (0, import_jquery41.default)(document).trigger(evt);
       if (evt.isDefaultPrevented()) return;
       this.$outputProgress.updateStateFromMessage(evt.message);
       await this._sendMessagesToHandlers(
@@ -6887,15 +7514,15 @@ ${duplicateIdMsg}`;
         "inputMessages",
         async (message) => {
           for (let i5 = 0; i5 < message.length; i5++) {
-            const $obj = (0, import_jquery39.default)(".shiny-bound-input#" + $escape(message[i5].id));
+            const $obj = (0, import_jquery41.default)(".shiny-bound-input#" + $escape(message[i5].id));
             const inputBinding = $obj.data("shiny-input-binding");
             if ($obj.length > 0) {
               if (!$obj.attr("aria-live")) $obj.attr("aria-live", "polite");
               const el = $obj[0];
-              const evt = import_jquery39.default.Event("shiny:updateinput");
+              const evt = import_jquery41.default.Event("shiny:updateinput");
               evt.message = message[i5].message;
               evt.binding = inputBinding;
-              (0, import_jquery39.default)(el).trigger(evt);
+              (0, import_jquery41.default)(el).trigger(evt);
               if (!evt.isDefaultPrevented()) {
                 try {
                   await inputBinding.receiveMessage(el, evt.message);
@@ -6984,16 +7611,16 @@ ${duplicateIdMsg}`;
             sessionId: message.sessionId
           };
           if (message.user) setShinyUser(message.user);
-          (0, import_jquery39.default)(document).trigger("shiny:sessioninitialized");
+          (0, import_jquery41.default)(document).trigger("shiny:sessioninitialized");
         }
       );
       addMessageHandler("busy", (message) => {
         if (message === "busy") {
-          (0, import_jquery39.default)(document.documentElement).addClass("shiny-busy");
-          (0, import_jquery39.default)(document).trigger("shiny:busy");
+          (0, import_jquery41.default)(document.documentElement).addClass("shiny-busy");
+          (0, import_jquery41.default)(document).trigger("shiny:busy");
         } else if (message === "idle") {
-          (0, import_jquery39.default)(document.documentElement).removeClass("shiny-busy");
-          (0, import_jquery39.default)(document).trigger("shiny:idle");
+          (0, import_jquery41.default)(document.documentElement).removeClass("shiny-busy");
+          (0, import_jquery41.default)(document).trigger("shiny:idle");
         }
       });
       addMessageHandler(
@@ -7002,9 +7629,9 @@ ${duplicateIdMsg}`;
           if (hasOwnProperty(message, "name") && hasOwnProperty(message, "status")) {
             const binding = this.$bindings[message.name];
             if (binding) {
-              (0, import_jquery39.default)(binding.el).trigger("shiny:" + message.status);
+              (0, import_jquery41.default)(binding.el).trigger("shiny:" + message.status);
             } else {
-              (0, import_jquery39.default)().trigger("shiny:" + message.status);
+              (0, import_jquery41.default)().trigger("shiny:" + message.status);
             }
           }
         }
@@ -7017,14 +7644,14 @@ ${duplicateIdMsg}`;
       addMessageHandler(
         "shiny-insert-ui",
         async (message) => {
-          const targets = (0, import_jquery39.default)(message.selector);
+          const targets = (0, import_jquery41.default)(message.selector);
           if (targets.length === 0) {
             console.warn(
               'The selector you chose ("' + message.selector + '") could not be found in the DOM.'
             );
             await renderHtmlAsync(
               message.content.html,
-              (0, import_jquery39.default)([]),
+              (0, import_jquery41.default)([]),
               message.content.deps
             );
           } else {
@@ -7038,10 +7665,10 @@ ${duplicateIdMsg}`;
       addMessageHandler(
         "shiny-remove-ui",
         (message) => {
-          const els = (0, import_jquery39.default)(message.selector);
+          const els = (0, import_jquery41.default)(message.selector);
           els.each(function(i5, el) {
             shinyUnbindAll(el, true);
-            (0, import_jquery39.default)(el).remove();
+            (0, import_jquery41.default)(el).remove();
             return message.multiple === false ? false : void 0;
           });
         }
@@ -7052,14 +7679,14 @@ ${duplicateIdMsg}`;
         }
       });
       function getTabset(id) {
-        const $tabset = (0, import_jquery39.default)("#" + $escape(id));
+        const $tabset = (0, import_jquery41.default)("#" + $escape(id));
         if ($tabset.length === 0)
           throw "There is no tabsetPanel (or navbarPage or navlistPanel) with id equal to '" + id + "'";
         return $tabset;
       }
       function getTabContent($tabset) {
         const tabsetId = $tabset.attr("data-tabsetid");
-        const $tabContent = (0, import_jquery39.default)(
+        const $tabContent = (0, import_jquery41.default)(
           "div.tab-content[data-tabsetid='" + $escape(tabsetId) + "']"
         );
         return $tabContent;
@@ -7078,12 +7705,12 @@ ${duplicateIdMsg}`;
           const dropdownId = $dropdownTabset.attr("data-tabsetid");
           const $dropdownLiTags = $dropdownTabset.find("a[data-toggle='tab']").parent("li");
           $dropdownLiTags.each(function(i5, el) {
-            $liTags.push((0, import_jquery39.default)(el));
+            $liTags.push((0, import_jquery41.default)(el));
           });
           const selector = "div.tab-pane[id^='tab-" + $escape(dropdownId) + "']";
           const $dropdownDivs = $tabContent.find(selector);
           $dropdownDivs.each(function(i5, el) {
-            $divTags.push((0, import_jquery39.default)(el));
+            $divTags.push((0, import_jquery41.default)(el));
           });
         } else {
           $divTags.push($tabContent.find("div" + dataValue));
@@ -7097,9 +7724,9 @@ ${duplicateIdMsg}`;
           let $tabset = $parentTabset;
           const $tabContent = getTabContent($tabset);
           let tabsetId = $parentTabset.attr("data-tabsetid");
-          const $fragLi = (0, import_jquery39.default)("<div>");
+          const $fragLi = (0, import_jquery41.default)("<div>");
           await renderContentAsync($fragLi, message.liTag, "afterBegin");
-          const $liTag = (0, import_jquery39.default)($fragLi).find("> li");
+          const $liTag = (0, import_jquery41.default)($fragLi).find("> li");
           const $aTag = $liTag.find("> a");
           let $targetLiTag = null;
           if (message.target !== null) {
@@ -7149,7 +7776,7 @@ ${duplicateIdMsg}`;
           function getTabIndex($tabset2, tabsetId2) {
             const existingTabIds = [0];
             $tabset2.find("> li").each(function() {
-              const $tab = (0, import_jquery39.default)(this).find("> a[data-toggle='tab']");
+              const $tab = (0, import_jquery41.default)(this).find("> a[data-toggle='tab']");
               if ($tab.length > 0) {
                 const href = $tab.attr("href").replace(/.*(?=#[^\s]+$)/, "");
                 const index = href.replace("#tab-" + tabsetId2 + "-", "");
@@ -7160,7 +7787,7 @@ ${duplicateIdMsg}`;
           }
           function getDropdown() {
             if (message.menuName !== null) {
-              const $dropdownATag = (0, import_jquery39.default)(
+              const $dropdownATag = (0, import_jquery41.default)(
                 "a.dropdown-toggle[data-value='" + $escape(message.menuName) + "']"
               );
               if ($dropdownATag.length === 0) {
@@ -7184,7 +7811,7 @@ ${duplicateIdMsg}`;
         const inputBinding = $tabset.data("shiny-input-binding");
         if (!inputBinding.getValue($tabset)) {
           const destTabValue = getFirstTab($tabset);
-          const evt = import_jquery39.default.Event("shiny:updateinput");
+          const evt = import_jquery41.default.Event("shiny:updateinput");
           evt.binding = inputBinding;
           $tabset.trigger(evt);
           inputBinding.setValue($tabset[0], destTabValue);
@@ -7194,18 +7821,18 @@ ${duplicateIdMsg}`;
         return $ul.find("li:visible a[data-toggle='tab']").first().attr("data-value") || null;
       }
       function tabApplyFunction(target, func, liTags = false) {
-        import_jquery39.default.each(target, function(key, el) {
+        import_jquery41.default.each(target, function(key, el) {
           if (key === "$liTag") {
             func(el);
           } else if (key === "$divTags") {
-            import_jquery39.default.each(
+            import_jquery41.default.each(
               el,
               function(i5, div) {
                 func(div);
               }
             );
           } else if (liTags && key === "$liTags") {
-            import_jquery39.default.each(
+            import_jquery41.default.each(
               el,
               function(i5, div) {
                 func(div);
@@ -7266,7 +7893,7 @@ ${duplicateIdMsg}`;
           window.history.pushState(null, null, relURL);
           if (message.queryString.indexOf("#") !== -1) what = "hash";
           if (window.location.hash !== oldHash) what = "hash";
-          if (what === "hash") (0, import_jquery39.default)(document).trigger("hashchange");
+          if (what === "hash") (0, import_jquery41.default)(document).trigger("hashchange");
         }
       );
       addMessageHandler(
@@ -7321,7 +7948,8 @@ ${duplicateIdMsg}`;
       this.renderHtmlAsync = renderHtmlAsync;
       this.renderHtml = renderHtml2;
       this.initializedPromise = createInitStatus();
-      (0, import_jquery40.default)(() => {
+      this.drive = new ShinyDrive(this.initializedPromise);
+      (0, import_jquery42.default)(() => {
         setTimeout(async () => {
           try {
             await this.initialize();
@@ -7396,7 +8024,7 @@ ${duplicateIdMsg}`;
           const inputObjects = binding.find(scope);
           if (inputObjects) {
             for (let j2 = 0; j2 < inputObjects.length; j2++) {
-              const $inputObjectJ = (0, import_jquery40.default)(inputObjects[j2]);
+              const $inputObjectJ = (0, import_jquery42.default)(inputObjects[j2]);
               if (!$inputObjectJ.data("_shiny_initialized")) {
                 $inputObjectJ.data("_shiny_initialized", true);
                 binding.initialize(inputObjects[j2]);
@@ -7407,7 +8035,7 @@ ${duplicateIdMsg}`;
       }
       this.initializeInputs = initializeInputs;
       function getIdFromEl(el) {
-        const $el = (0, import_jquery40.default)(el);
+        const $el = (0, import_jquery42.default)(el);
         const bindingAdapter = $el.data("shiny-output-binding");
         return bindingAdapter ? bindingAdapter.getId() : null;
       }
@@ -7433,7 +8061,7 @@ ${duplicateIdMsg}`;
         }
       }
       function doTriggerResize(el) {
-        const $el = (0, import_jquery40.default)(el), binding = $el.data("shiny-output-binding");
+        const $el = (0, import_jquery42.default)(el), binding = $el.data("shiny-output-binding");
         if (!binding) return;
         $el.trigger({
           type: "shiny:visualchange",
@@ -7522,7 +8150,7 @@ ${duplicateIdMsg}`;
         if (reportsTheme(el)) doSendTheme(el, initial);
       }
       function refreshThemeOutputs(initial = false) {
-        (0, import_jquery40.default)(".shiny-bound-output").each(function() {
+        (0, import_jquery42.default)(".shiny-bound-output").each(function() {
           const el = this;
           if (reportsTheme(el)) doSendTheme(el, initial);
         });
@@ -7532,10 +8160,10 @@ ${duplicateIdMsg}`;
           100,
           () => refreshThemeOutputs()
         );
-        (0, import_jquery40.default)(window).resize(function() {
+        (0, import_jquery42.default)(window).resize(function() {
           scheduleThemeInfoRefresh();
         });
-        (0, import_jquery40.default)(document).on("shiny:themechange", function() {
+        (0, import_jquery42.default)(document).on("shiny:themechange", function() {
           scheduleThemeInfoRefresh();
         });
       }
@@ -7556,7 +8184,7 @@ ${duplicateIdMsg}`;
         return el;
       }
       function ensureObservers(el) {
-        const $el = (0, import_jquery40.default)(el);
+        const $el = (0, import_jquery42.default)(el);
         if (!$el.data("shiny-resize-observer")) {
           const onResize = sendOutputInfoFns.createObserverCallback(
             100,
@@ -7592,7 +8220,7 @@ ${duplicateIdMsg}`;
       }
       function doSendOutputInfo(initial = false) {
         const outputIds = /* @__PURE__ */ new Set();
-        (0, import_jquery40.default)(".shiny-bound-output").each(function() {
+        (0, import_jquery42.default)(".shiny-bound-output").each(function() {
           const el = this;
           const id = getIdFromEl(el);
           if (id) outputIds.add(id);
@@ -7610,7 +8238,7 @@ ${duplicateIdMsg}`;
       sendOutputInfoFns.setSendMethod(inputBatchSender, doSendOutputInfo);
       registerThemeRefreshSignals();
       initialValues[".clientdata_pixelratio"] = pixelRatio();
-      (0, import_jquery40.default)(window).resize(function() {
+      (0, import_jquery42.default)(window).resize(function() {
         inputs.setInput(".clientdata_pixelratio", pixelRatio());
       });
       initialValues[".clientdata_url_protocol"] = window.location.protocol;
@@ -7618,31 +8246,31 @@ ${duplicateIdMsg}`;
       initialValues[".clientdata_url_port"] = window.location.port;
       initialValues[".clientdata_url_pathname"] = window.location.pathname;
       initialValues[".clientdata_url_search"] = window.location.search;
-      (0, import_jquery40.default)(window).on("pushstate", function(e4) {
+      (0, import_jquery42.default)(window).on("pushstate", function(e4) {
         inputs.setInput(".clientdata_url_search", window.location.search);
         return;
         e4;
       });
-      (0, import_jquery40.default)(window).on("popstate", function(e4) {
+      (0, import_jquery42.default)(window).on("popstate", function(e4) {
         inputs.setInput(".clientdata_url_search", window.location.search);
         return;
         e4;
       });
       initialValues[".clientdata_url_hash_initial"] = window.location.hash;
       initialValues[".clientdata_url_hash"] = window.location.hash;
-      (0, import_jquery40.default)(window).on("hashchange", function(e4) {
+      (0, import_jquery42.default)(window).on("hashchange", function(e4) {
         inputs.setInput(".clientdata_url_hash", window.location.hash);
         return;
         e4;
       });
-      const singletonText = initialValues[".clientdata_singletons"] = (0, import_jquery40.default)(
+      const singletonText = initialValues[".clientdata_singletons"] = (0, import_jquery42.default)(
         'script[type="application/shiny-singletons"]'
       ).text();
       registerNames(singletonText.split(/,/));
-      const dependencyText = (0, import_jquery40.default)(
+      const dependencyText = (0, import_jquery42.default)(
         'script[type="application/html-dependencies"]'
       ).text();
-      import_jquery40.default.each(dependencyText.split(/;/), function(i5, depStr) {
+      import_jquery42.default.each(dependencyText.split(/;/), function(i5, depStr) {
         const match = /\s*^(.+)\[(.+)\]\s*$/.exec(depStr);
         if (match) {
           registerDependency(match[1], match[2]);
@@ -7650,10 +8278,10 @@ ${duplicateIdMsg}`;
       });
       inputsNoResend.reset(initialValues);
       shinyapp.connect(initialValues);
-      (0, import_jquery40.default)(document).one("shiny:connected", () => {
+      (0, import_jquery42.default)(document).one("shiny:connected", () => {
         initDeferredIframes();
       });
-      (0, import_jquery40.default)(document).one("shiny:sessioninitialized", () => {
+      (0, import_jquery42.default)(document).one("shiny:sessioninitialized", () => {
         this.initializedPromise.resolve();
       });
     }
@@ -7673,8 +8301,8 @@ ${duplicateIdMsg}`;
     ) {
       return;
     }
-    (0, import_jquery40.default)(".shiny-frame-deferred").each(function(i5, el) {
-      const $el = (0, import_jquery40.default)(el);
+    (0, import_jquery42.default)(".shiny-frame-deferred").each(function(i5, el) {
+      const $el = (0, import_jquery42.default)(el);
       $el.removeClass("shiny-frame-deferred");
       $el.attr("src", $el.attr("data-deferred-src"));
       $el.attr("data-deferred-src", null);
@@ -7687,19 +8315,19 @@ ${duplicateIdMsg}`;
   }
 
   // srcts/src/shiny/reactlog.ts
-  var import_jquery41 = __toESM(require_jquery());
+  var import_jquery43 = __toESM(require_jquery());
   function shinyAppConfig() {
     return shinyShinyApp().config;
   }
   function initReactlog() {
-    (0, import_jquery41.default)(document).on("keydown", function(e4) {
+    (0, import_jquery43.default)(document).on("keydown", function(e4) {
       if (e4.which !== 114 || !e4.ctrlKey && !e4.metaKey || e4.shiftKey || e4.altKey)
         return;
       const url = "reactlog?w=" + window.escape(shinyAppConfig().workerId) + "&s=" + window.escape(shinyAppConfig().sessionId);
       window.open(url);
       e4.preventDefault();
     });
-    (0, import_jquery41.default)(document).on("keydown", function(e4) {
+    (0, import_jquery43.default)(document).on("keydown", function(e4) {
       if (
         // if not one of the key combos below
         !// cmd/ctrl + fn + f4
@@ -7709,7 +8337,7 @@ ${duplicateIdMsg}`;
         return;
       }
       const url = "reactlog/mark?w=" + window.escape(shinyAppConfig().workerId) + "&s=" + window.escape(shinyAppConfig().sessionId);
-      import_jquery41.default.get(url, function(result) {
+      import_jquery43.default.get(url, function(result) {
         if (result !== "marked") return;
         const html = '<span id="shiny-reactlog-mark-text">Marked time point in reactlog</span>';
         show2({

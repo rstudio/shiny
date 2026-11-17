@@ -135,10 +135,48 @@ function inputAccess(
 }
 
 function isShownInput(el: HTMLElement): boolean {
-  // Selectize/slider hide the bound element; judge by its container
+  // Selectize/slider hide the bound element; judge by its container. A
+  // closed bslib sidebar hides itself; judge it by its layout.
   return isVisible(
-    (el.closest(".shiny-input-container") as HTMLElement | null) ?? el,
+    (el.closest(".shiny-input-container") as HTMLElement | null) ??
+      (el.classList.contains("bslib-sidebar-input") ? el.parentElement : el) ??
+      el,
   );
+}
+
+// The message setInputs() passes to the binding's receiveMessage(), as the
+// matching update*() function in R would send it. Most bindings take
+// `{value}`; bslib's take a `method`.
+function inputMessage(binding: InputBinding, value: unknown): unknown {
+  switch (binding.name) {
+    case "shiny.dateRangeInput":
+      return Array.isArray(value)
+        ? { value: { start: value[0], end: value[1] } }
+        : { value };
+    case "bslib.accordion":
+      // Like accordion_panel_set()
+      return { method: "set", values: value };
+    case "bslib.sidebar":
+      // Like toggle_sidebar(open = TRUE/FALSE)
+      return { method: value ? "open" : "close" };
+    default:
+      return { value };
+  }
+}
+
+// Wait for a widget whose value only changes once its animation ends, so the
+// value sent to the server is the new one.
+async function settleInput(
+  el: HTMLElement,
+  binding: InputBinding,
+): Promise<void> {
+  if (binding.name === "bslib.accordion") {
+    // Bootstrap adds `show` to a panel only after its `collapsing` animation
+    await waitForClasses(
+      () => !el.querySelector(":scope > .accordion-item > .collapsing"),
+      defaultTimeout,
+    );
+  }
 }
 
 // By default only what the user can currently see: hidden tabs, closed
@@ -481,12 +519,8 @@ class ShinyDrive {
         if (schema === null) {
           el.click();
         } else {
-          const msgValue =
-            binding.name === "shiny.dateRangeInput" && Array.isArray(value)
-              ? { start: value[0], end: value[1] }
-              : value;
-
-          await binding.receiveMessage(el, { value: msgValue });
+          await binding.receiveMessage(el, inputMessage(binding, value));
+          await settleInput(el, binding);
         }
         applied++;
       }

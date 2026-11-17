@@ -6038,6 +6038,19 @@ ${duplicateIdMsg}`;
         const num = { type: "number", minimum: opts.min, maximum: opts.max };
         return opts.type === "double" ? { type: "array", items: num, minItems: 2, maxItems: 2 } : num;
       }
+      case "bslib.accordion": {
+        const panels = Array.from(
+          el.querySelectorAll(":scope > .accordion-item")
+        ).map((x2) => x2.dataset.value);
+        return {
+          type: "array",
+          items: { enum: panels },
+          // An autoclose accordion keeps only one panel open
+          maxItems: el.classList.contains("autoclose") ? 1 : void 0
+        };
+      }
+      case "bslib.sidebar":
+        return { type: "boolean" };
       default:
         return {};
     }
@@ -6082,8 +6095,28 @@ ${duplicateIdMsg}`;
   }
   function isShownInput(el) {
     return isVisible(
-      el.closest(".shiny-input-container") ?? el
+      el.closest(".shiny-input-container") ?? (el.classList.contains("bslib-sidebar-input") ? el.parentElement : el) ?? el
     );
+  }
+  function inputMessage(binding, value) {
+    switch (binding.name) {
+      case "shiny.dateRangeInput":
+        return Array.isArray(value) ? { value: { start: value[0], end: value[1] } } : { value };
+      case "bslib.accordion":
+        return { method: "set", values: value };
+      case "bslib.sidebar":
+        return { method: value ? "open" : "close" };
+      default:
+        return { value };
+    }
+  }
+  async function settleInput(el, binding) {
+    if (binding.name === "bslib.accordion") {
+      await waitForClasses(
+        () => !el.querySelector(":scope > .accordion-item > .collapsing"),
+        defaultTimeout
+      );
+    }
   }
   function exposedInputs(includeHidden = false) {
     return (0, import_jquery37.default)(".shiny-bound-input").toArray().map((el) => ({ el, binding: (0, import_jquery37.default)(el).data("shiny-input-binding") })).filter(
@@ -6303,8 +6336,8 @@ ${duplicateIdMsg}`;
           if (schema === null) {
             el.click();
           } else {
-            const msgValue = binding.name === "shiny.dateRangeInput" && Array.isArray(value) ? { start: value[0], end: value[1] } : value;
-            await binding.receiveMessage(el, { value: msgValue });
+            await binding.receiveMessage(el, inputMessage(binding, value));
+            await settleInput(el, binding);
           }
           applied++;
         }

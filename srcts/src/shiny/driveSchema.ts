@@ -143,6 +143,22 @@ function valueSchema(
         ? { type: "array", items: num, minItems: 2, maxItems: 2 }
         : num;
     }
+    case "bslib.accordion": {
+      // The values of the panels to open; all others close
+      const panels = Array.from(
+        el.querySelectorAll<HTMLElement>(":scope > .accordion-item"),
+      ).map((x) => x.dataset.value);
+
+      return {
+        type: "array",
+        items: { enum: panels },
+        // An autoclose accordion keeps only one panel open
+        maxItems: el.classList.contains("autoclose") ? 1 : undefined,
+      };
+    }
+    case "bslib.sidebar":
+      // true = open
+      return { type: "boolean" };
     default:
       // Custom bindings: passed through as `receiveMessage(el, {value})`
       return {};

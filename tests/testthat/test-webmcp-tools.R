@@ -97,7 +97,7 @@ test_that("registerWebMcpTool() registers for all sessions or one session", {
   expect_null(webMcpSessionTools[[session$token]])
 
   expect_error(
-    registerWebMcpTool(webMcpTool("set_input", function() 1, "d"), NULL),
+    registerWebMcpTool(webMcpTool("set_inputs", function() 1, "d"), NULL),
     "built-in"
   )
   expect_error(registerWebMcpTool(list()), "made by `webMcpTool\\(\\)`")

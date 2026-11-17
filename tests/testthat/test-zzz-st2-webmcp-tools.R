@@ -69,7 +69,7 @@ test_that("R tools are listed with their schemas", {
   )
   expect_setequal(
     names(tools),
-    c("list_inputs", "set_input", "list_outputs", "get_output", "summarize", "counter-add", "set_label")
+    c("list_inputs", "set_inputs", "list_outputs", "get_output", "summarize", "counter-add", "set_label")
   )
   expect_equal(tools$summarize$inputSchema$properties$column$enum, list("mpg", "hp"))
   expect_equal(tools$summarize$outputSchema$required, list("column", "mean"))

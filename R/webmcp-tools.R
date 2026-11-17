@@ -339,7 +339,7 @@ webMcpInjectedArgs <- c("input", "session")
 # Per-session tools, keyed by session token, then by (namespaced) tool name
 webMcpSessionTools <- new.env(parent = emptyenv())
 
-webMcpBuiltinToolNames <- c("list_inputs", "set_input", "list_outputs", "get_output")
+webMcpBuiltinToolNames <- c("list_inputs", "set_inputs", "list_outputs", "get_output")
 
 checkWebMcpToolName <- function(name) {
   if (name %in% webMcpBuiltinToolNames) {

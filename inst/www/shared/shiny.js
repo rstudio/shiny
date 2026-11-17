@@ -8121,6 +8121,30 @@ ${duplicateIdMsg}`;
         };
       }
     }
+    /**
+     * Tools defined in R with `registerWebMcpTool()`, sent by the server.
+     * Calling one runs the R function through the `@webmcpCall` RPC.
+     */
+    setServerTools({
+      add = [],
+      remove: remove3 = []
+    }) {
+      remove3.forEach((name) => this.unregisterTool(name));
+      add.forEach(
+        (tool) => this.registerTool({
+          ...tool,
+          execute: (args) => new Promise((resolve, reject) => {
+            shinyShinyApp().makeRequest(
+              "webmcpCall",
+              [tool.name, args],
+              resolve,
+              (err) => reject(new Error(err)),
+              void 0
+            );
+          })
+        })
+      );
+    }
     // ---- Built-in tools ----------------------------------------------------
     /** Unregister the built-in tools. Author-registered tools are untouched. */
     disable() {
@@ -8354,6 +8378,12 @@ ${duplicateIdMsg}`;
       this.initializedPromise = createInitStatus();
       this.drive = new ShinyDrive(this.initializedPromise);
       this.webmcp = new ShinyWebMCP(this.drive);
+      addCustomMessageHandler(
+        "shiny.webmcp.tools",
+        (message) => this.webmcp.setServerTools(
+          message
+        )
+      );
       (0, import_jquery42.default)(() => {
         setTimeout(async () => {
           try {

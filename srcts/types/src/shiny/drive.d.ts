@@ -27,9 +27,11 @@ type OutputInfo = {
     imageCount: number;
     imageOffset: number;
     images: OutputImage[];
+    data?: unknown;
+    snapshotError?: string;
     hidden?: true;
 };
-type OutputSummary = Omit<OutputInfo, "imageOffset" | "images">;
+type OutputSummary = Omit<OutputInfo, "data" | "imageOffset" | "images" | "snapshotError">;
 type Filter = {
     ids?: string[];
     module?: string;
@@ -133,6 +135,11 @@ declare class ShinyDrive {
      * Returns up to `imageLimit` (default 10) of the output's images, starting
      * at `imageOffset`. More remain while `imageOffset + images.length <
      * imageCount`.
+     *
+     * If the output binding has a `getSnapshot()` that returns something, its
+     * `images` replace the ones read from the page (so `imageCount` can differ
+     * from listOutputs()'s), and its `data` is returned as `data`. If it fails,
+     * the page is read and `snapshotError` says why.
      */
     getOutput(id: string, { includeHidden, imageOffset, imageLimit, }?: HiddenOpt & ImagePage): Promise<OutputInfo>;
     /**

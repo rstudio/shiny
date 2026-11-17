@@ -52,12 +52,19 @@ type OutputInfo = {
   imageCount: number;
   imageOffset: number;
   images: OutputImage[];
+  // From the binding's getSnapshot(), when it gives any
+  data?: unknown;
+  // Why the binding's getSnapshot() failed; the page was read instead
+  snapshotError?: string;
   // Only present (true) for hidden outputs, i.e. with `includeHidden`. Shiny
   // suspends hidden outputs, so their content may be stale.
   hidden?: true;
 };
 
-type OutputSummary = Omit<OutputInfo, "imageOffset" | "images">;
+type OutputSummary = Omit<
+  OutputInfo,
+  "data" | "imageOffset" | "images" | "snapshotError"
+>;
 
 type Filter = { ids?: string[]; module?: string; includeHidden?: boolean };
 type HiddenOpt = { includeHidden?: boolean };
@@ -414,20 +421,48 @@ function imageEls(
   );
 }
 
+// Only base64 data can become MCP image content; the rest is a URL
+function srcImage(src: string, index: number): OutputImage {
+  return {
+    index,
+    type: /^data:image\/[^;,]+;base64,/.test(src) ? "data" : "url",
+    value: src,
+  };
+}
+
+// The binding's getSnapshot(), checked. On failure, `error` says why and the
+// caller reads the page instead.
+async function snapshotOf(
+  el: HTMLElement,
+  adapter: OutputBindingAdapter,
+): Promise<{ images?: string[]; data?: unknown; error?: string }> {
+  const { binding } = adapter;
+
+  if (typeof binding.getSnapshot !== "function") return {};
+  try {
+    const snap = await binding.getSnapshot(el);
+
+    if (snap === undefined || snap === null) return {};
+    const { images, data } = snap;
+
+    if (
+      images !== undefined &&
+      !(Array.isArray(images) && images.every((x) => typeof x === "string"))
+    ) {
+      return { error: "getSnapshot() `images` must be an array of strings" };
+    }
+    return { images, data };
+  } catch (e) {
+    return { error: String((e as Error)?.message ?? e) };
+  }
+}
+
 function imageOf(
   x: HTMLCanvasElement | HTMLImageElement,
   index: number,
 ): OutputImage {
-  if (x instanceof HTMLImageElement) {
-    const src = x.currentSrc || x.src;
-
-    // Only base64 data can become MCP image content; the rest is a URL
-    return {
-      index,
-      type: /^data:image\/[^;,]+;base64,/.test(src) ? "data" : "url",
-      value: src,
-    };
-  }
+  if (x instanceof HTMLImageElement)
+    return srcImage(x.currentSrc || x.src, index);
 
   const error = (reason: string): OutputImage => ({
     index,
@@ -769,6 +804,11 @@ class ShinyDrive {
    * Returns up to `imageLimit` (default 10) of the output's images, starting
    * at `imageOffset`. More remain while `imageOffset + images.length <
    * imageCount`.
+   *
+   * If the output binding has a `getSnapshot()` that returns something, its
+   * `images` replace the ones read from the page (so `imageCount` can differ
+   * from listOutputs()'s), and its `data` is returned as `data`. If it fails,
+   * the page is read and `snapshotError` says why.
    */
   async getOutput(
     id: string,
@@ -787,12 +827,23 @@ class ShinyDrive {
     if (isVisible(el) && el.classList.contains("recalculating")) {
       await waitForOutputs(() => [el]);
     }
+    const snap = await snapshotOf(el, adapter);
+    const page = (x: unknown[]) =>
+      x.slice(imageOffset, imageOffset + imageLimit);
+
     return {
       ...outputInfo(el, adapter),
+      ...(snap.images ? { imageCount: snap.images.length } : {}),
       imageOffset,
-      images: imageEls(el)
-        .slice(imageOffset, imageOffset + imageLimit)
-        .map((x, i) => imageOf(x, imageOffset + i)),
+      images: snap.images
+        ? page(snap.images).map((x, i) =>
+            srcImage(x as string, imageOffset + i),
+          )
+        : page(imageEls(el)).map((x, i) =>
+            imageOf(x as HTMLCanvasElement | HTMLImageElement, imageOffset + i),
+          ),
+      data: snap.data,
+      snapshotError: snap.error,
     };
   }
 

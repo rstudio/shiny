@@ -2966,6 +2966,16 @@
       el;
       data;
     }
+    /**
+     * Optional: what `Shiny.drive.getOutput()` (and the WebMCP `get_output`
+     * tool) should return for this output beyond its text, when reading the
+     * page isn't enough, e.g. an image of a chart drawn in SVG or WebGL, or a
+     * table's rows. Return `undefined` (the default) to read the page.
+     */
+    getSnapshot(el) {
+      return void 0;
+      el;
+    }
     getId(el) {
       return el.getAttribute("data-input-id") || el.id;
     }
@@ -6285,15 +6295,31 @@ ${duplicateIdMsg}`;
       (x2) => x2.closest(".shiny-bound-output") === el && (!shown || isVisible(x2))
     );
   }
-  function imageOf(x2, index) {
-    if (x2 instanceof HTMLImageElement) {
-      const src = x2.currentSrc || x2.src;
-      return {
-        index,
-        type: /^data:image\/[^;,]+;base64,/.test(src) ? "data" : "url",
-        value: src
-      };
+  function srcImage(src, index) {
+    return {
+      index,
+      type: /^data:image\/[^;,]+;base64,/.test(src) ? "data" : "url",
+      value: src
+    };
+  }
+  async function snapshotOf(el, adapter) {
+    const { binding } = adapter;
+    if (typeof binding.getSnapshot !== "function") return {};
+    try {
+      const snap = await binding.getSnapshot(el);
+      if (snap === void 0 || snap === null) return {};
+      const { images, data } = snap;
+      if (images !== void 0 && !(Array.isArray(images) && images.every((x2) => typeof x2 === "string"))) {
+        return { error: "getSnapshot() `images` must be an array of strings" };
+      }
+      return { images, data };
+    } catch (e4) {
+      return { error: String(e4?.message ?? e4) };
     }
+  }
+  function imageOf(x2, index) {
+    if (x2 instanceof HTMLImageElement)
+      return srcImage(x2.currentSrc || x2.src, index);
     const error = (reason) => ({
       index,
       type: "error",
@@ -6550,6 +6576,11 @@ ${duplicateIdMsg}`;
      * Returns up to `imageLimit` (default 10) of the output's images, starting
      * at `imageOffset`. More remain while `imageOffset + images.length <
      * imageCount`.
+     *
+     * If the output binding has a `getSnapshot()` that returns something, its
+     * `images` replace the ones read from the page (so `imageCount` can differ
+     * from listOutputs()'s), and its `data` is returned as `data`. If it fails,
+     * the page is read and `snapshotError` says why.
      */
     async getOutput(id, {
       includeHidden,
@@ -6562,10 +6593,19 @@ ${duplicateIdMsg}`;
       if (isVisible(el) && el.classList.contains("recalculating")) {
         await waitForOutputs(() => [el]);
       }
+      const snap = await snapshotOf(el, adapter);
+      const page = (x2) => x2.slice(imageOffset, imageOffset + imageLimit);
       return {
         ...outputInfo(el, adapter),
+        ...snap.images ? { imageCount: snap.images.length } : {},
         imageOffset,
-        images: imageEls(el).slice(imageOffset, imageOffset + imageLimit).map((x2, i5) => imageOf(x2, imageOffset + i5))
+        images: snap.images ? page(snap.images).map(
+          (x2, i5) => srcImage(x2, imageOffset + i5)
+        ) : page(imageEls(el)).map(
+          (x2, i5) => imageOf(x2, imageOffset + i5)
+        ),
+        data: snap.data,
+        snapshotError: snap.error
       };
     }
     // TODO: The reply to `waitForFlush` stands in for "the server flushed"; it
@@ -8191,7 +8231,7 @@ ${duplicateIdMsg}`;
       });
       this.registerTool({
         name: "get_output",
-        description: `Get everything a visible output currently displays: status, full visible text, and up to ${defaultImageLimit} of its images (plots, <img>, <canvas>). Each \`images\` entry has an \`index\` and a \`type\`: "data" (attached as image content, in order), "url", or "error" with a \`reason\`. More images remain while \`imageOffset\` + the number of entries < \`imageCount\`; get them with \`imageOffset\`.`,
+        description: `Get everything a visible output currently displays: status, full visible text, and up to ${defaultImageLimit} of its images (plots, <img>, <canvas>). Each \`images\` entry has an \`index\` and a \`type\`: "data" (attached as image content, in order), "url", or "error" with a \`reason\`. More images remain while \`imageOffset\` + the number of entries < \`imageCount\`; get them with \`imageOffset\`. Some outputs (charts, tables) also return \`data\`, structured content such as rows or series.`,
         inputSchema: {
           type: "object",
           properties: {

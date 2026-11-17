@@ -2,6 +2,10 @@
 
 * `reactive()`, `observe()`, `observeEvent()`, `eventReactive()`, and `render*()` code, and `bindCache()`/`bindEvent()` keys, can now call `await()` (and `await_each()`) from {coro} directly. When the code uses `await()`, Shiny runs it as a `coro::async()` function, so it returns a promise. Inputs read after an `await()` are still tracked. Code without `await()`, or that calls its own `await()` function, is unchanged. (#4481)
 
+* Stack traces for errors in code that uses `await()` now read like those for code without it: the error is named after the reactive, observer, or output (not coro's `eval_bare`), the frame running the user's code is named after it too, marked as async (`renderText (coro::async)`), and shows the line of the user's code, and coro's and the promise package's frames are hidden. (#4483)
+
+* Stack traces for errors in promise callbacks keep their "From earlier call" sections when the event loop is run from inside reactive code, such as a `later::run_now()` in an observer. They were replaced with `[No stack trace available]`. (#4483)
+
 * `invalidateLater()`, `reactiveTimer()` and `reactivePoll()` work again with a custom session object that has no `onDestroy()` method. Since 1.14.0 they failed with `attempt to apply non-function`. (#4485)
 
 * Module ids that are character vectors, such as `c("a", "b")`, work again in `callModule()`, `moduleServer()`, `testServer()` and `session$destroy()`. Since 1.14.0 they failed with ``Invalid `namespace` ``. They are joined the same way `NS()` joins them, so `c("a", "b")` becomes `"a-b"`. (#4447)

@@ -59,7 +59,12 @@ Rules every method follows:
   before touching any widget, so one bad value changes nothing. Errors list
   the allowed values so an agent can retry.
 - **Widgets are updated like `update*Input()`.** `setInputs()` calls the
-  binding's `receiveMessage()`, suppresses the bindings' own
+  binding's `receiveMessage()` with what the R update function would send
+  (`inputMessage()`: `{value}` for most; bslib's accordion and sidebar take
+  `{method}`, as `accordion_panel_set()` / `toggle_sidebar()` send). A closed
+  bslib sidebar hides its own `<aside>`, so `isShownInput()` judges it by its
+  layout. `settleInput()` waits for accordion panels to finish animating,
+  since their value changes only then. It suppresses the bindings' own
   `shiny:inputchanged` events while doing so, then sends every value in one
   websocket message (the last with `priority: "event"`), so the server
   reacts once.

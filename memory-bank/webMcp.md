@@ -51,8 +51,9 @@ Rules every method follows:
 
 - **Only visible UI.** Inputs and outputs in hidden tabs, closed
   `conditionalPanel()`s or not-yet-rendered dynamic UI are not listed or
-  settable. The JS-only `includeHidden: true` option lifts this; the WebMCP
-  tools never pass it.
+  settable. The `includeHidden: true` option lifts this. The WebMCP
+  `list_inputs`/`list_outputs` tools take it too, so an agent learns that
+  hidden items exist; `set_input` and `get_output` never pass it.
 - **Values are checked first.** Each input row has a `schema` (JSON Schema)
   built per binding in `valueSchema()`. `setInputs()` checks every value
   before touching any widget, so one bad value changes nothing. Errors list
@@ -157,8 +158,8 @@ console warning.
 ## `Shiny.webmcp`
 
 - `enable()` registers four tools whose definitions never change, so the
-  context cost doesn't grow with app size: `list_inputs {ids?, module?}`,
-  `set_input {id, value?}`, `list_outputs {ids?, module?}`,
+  context cost doesn't grow with app size: `list_inputs {ids?, module?, includeHidden?}`,
+  `set_input {id, value?}`, `list_outputs {ids?, module?, includeHidden?}`,
   `get_output {id, imageOffset?, imageLimit?}`.
   `disable()` removes only those four.
 - `registerTool()`, `unregisterTool()`, `listTools()`, `callTool()` and a
@@ -178,13 +179,17 @@ console warning.
   own), and third-party tokens must be injected by a script served from the
   registered origin, so shiny can't ship one. The polyfill works without
   one.
+- `webmcp_polyfill_enabled()` reads `options(shiny.webmcp.polyfill)`, then
+  `SHINY_WEBMCP_POLYFILL`, else follows `webmcp_enabled()`; it is never
+  `TRUE` without WebMCP. Hosts that relay `Shiny.webmcp` over their own
+  transport (and offline apps) set it to `FALSE`.
 - `webmcp_enabled()` (`R/webmcp.R`) reads `options(shiny.webmcp)`, falling
   back to the `SHINY_WEBMCP` env var (via `as.logical()`, so `"true"` works
   and `"1"` doesn't). Use it instead of reading the option directly.
 - When enabled, the server adds `webmcp: true` to the `config`
   message; the client calls `enable()` once, on the first
   `shiny:sessioninitialized`, so a later `disable()` survives reconnects.
-- The same option makes `renderPage()` (`R/shinyui.R`) add
+- Unless the polyfill is off, the same option makes `renderPage()` (`R/shinyui.R`) add
   `webMcpPolyfillDependency()` (`R/webmcp.R`): `@mcp-b/global` from unpkg,
   pinned to one version. It is a CDN `htmlDependency`, not vendored, so
   offline apps get no polyfill. It defers to a native

@@ -42,6 +42,8 @@ type OutputInfo = {
   status: "error" | "ready" | "recalculating";
   text: string;
   image?: string;
+  // Only present (true) for hidden outputs, i.e. with `includeHidden`. Shiny
+  // suspends hidden outputs, so their content may be stale.
   hidden?: true;
 };
 
@@ -62,7 +64,48 @@ const accessAttr = "data-shiny-drive-access";
 const accessValues = ["exclude", "read-only", "write-only"];
 const maxTextLength = 20000;
 const previewTextLength = 200;
-const flushTimeoutMs = 10000;
+// Bumped when the API changes, so callers can check for features without
+// relying on the package version (development installs may or may not have
+// a change).
+const apiVersion = 1;
+
+// Milliseconds every wait gives up after, or null to wait as long as it
+// takes. Set with Shiny.drive.setDefaultTimeout().
+let defaultTimeout: number | null = null;
+
+type DriveErrorCode =
+  | "disabled"
+  | "disconnected"
+  | "invalid-argument"
+  | "invalid-value"
+  | "not-found"
+  | "read-only"
+  | "server-error"
+  | "timeout"
+  | "update-failed"
+  | "upload-failed"
+  | "wrong-type";
+
+/**
+ * Every error `Shiny.drive` throws. `code` says what went wrong, so callers
+ * don't need to match on `message`.
+ */
+class DriveError extends Error {
+  code: DriveErrorCode;
+  // For "update-failed": ids that were set before the failure
+  applied?: string[];
+
+  constructor(
+    code: DriveErrorCode,
+    message: string,
+    { applied }: { applied?: string[] } = {},
+  ) {
+    super(message);
+    this.name = "ShinyDriveError";
+    this.code = code;
+    if (applied) this.applied = applied;
+  }
+}
 
 function accessAttrOf(el: HTMLElement, isInput: boolean): string | null {
   const value =
@@ -143,8 +186,9 @@ function findInput(
   );
 
   if (!found) {
-    throw new Error(
-      `No visible input with id "${id}". Call list_inputs to see the current inputs.`,
+    throw new DriveError(
+      "not-found",
+      `No visible input with id "${id}". List the inputs to see the current ids.`,
     );
   }
   return found;
@@ -162,25 +206,77 @@ function findOutput(
   );
 
   if (!found) {
-    throw new Error(
-      `No visible output with id "${id}". Call list_outputs to see the current outputs.`,
+    throw new DriveError(
+      "not-found",
+      `No visible output with id "${id}". List the outputs to see the current ids.`,
     );
   }
   return found;
 }
 
+function checkTimeout(timeout: number | null): void {
+  if (timeout !== null && !(Number.isFinite(timeout) && timeout >= 0)) {
+    throw new DriveError(
+      "invalid-argument",
+      "`timeout` must be a non-negative number of milliseconds, or null",
+    );
+  }
+}
+
+// For waits made of several steps that share one `timeout`: ms left, or null
+function timeLeft(timeout: number | null): () => number | null {
+  const deadline = timeout === null ? null : Date.now() + timeout;
+
+  return () => (deadline === null ? null : Math.max(0, deadline - Date.now()));
+}
+
+function timeoutError(what: string, timeout: number): DriveError {
+  return new DriveError("timeout", `${what} within ${timeout}ms`);
+}
+
+// Resolve with true once `done()` is true, or false after `timeout` ms.
+// Re-checks whenever a `class` attribute changes anywhere in the page (Shiny
+// marks progress with `shiny-busy` and `recalculating`) instead of polling:
+// browsers throttle timers in background tabs, but not MutationObservers.
+function waitForClasses(
+  done: () => boolean,
+  timeout: number | null,
+): Promise<boolean> {
+  if (done()) return Promise.resolve(true);
+  return new Promise((resolve) => {
+    const observer = new MutationObserver(() => {
+      if (done()) finish(true);
+    });
+    const timer =
+      timeout === null ? undefined : setTimeout(() => finish(false), timeout);
+    const finish = (ok: boolean) => {
+      observer.disconnect();
+      clearTimeout(timer);
+      resolve(ok);
+    };
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+      subtree: true,
+    });
+  });
+}
+
 // The flush barrier can't see work the server does in a *later* flush: outputs
 // added by insertUI()/renderUI(), or outputs that were hidden (suspended) and
-// recompute once the client reports them visible. Wait those out.
-async function waitForOutputs(els: () => HTMLElement[]): Promise<void> {
-  const deadline = Date.now() + flushTimeoutMs;
-
-  // ponytail: polling; a 'shiny:value'/'shiny:idle' listener if it matters.
-  while (Date.now() < deadline) {
-    // Let the client report new visibility (debounced ~100ms) first
-    await new Promise((r) => setTimeout(r, 150));
-    if (!els().some((el) => el.classList.contains("recalculating"))) return;
-  }
+// recompute once the client reports them visible. Wait those out. Gives up
+// quietly on timeout; the outputs then show `status: "recalculating"`.
+async function waitForOutputs(
+  els: () => HTMLElement[],
+  timeout = defaultTimeout,
+): Promise<void> {
+  // Let the client report new visibility (debounced ~100ms) first
+  await new Promise((r) => setTimeout(r, 150));
+  await waitForClasses(
+    () => !els().some((el) => el.classList.contains("recalculating")),
+    timeout,
+  );
 }
 
 function matchesFilter({ ids, module }: Filter, id: string): boolean {
@@ -249,6 +345,19 @@ function outputInfo(
   };
 }
 
+function checkWritable(
+  id: string,
+  el: HTMLElement,
+  access: string | null,
+): void {
+  if (access === "read-only") {
+    throw new DriveError("read-only", `Input "${id}" is read-only`);
+  }
+  if (el.matches(":disabled")) {
+    throw new DriveError("disabled", `Input "${id}" is disabled`);
+  }
+}
+
 function labelOf(el: HTMLElement, id: string): string {
   const label =
     document.getElementById(id + "-label")?.textContent ??
@@ -261,6 +370,28 @@ function labelOf(el: HTMLElement, id: string): string {
 }
 
 class ShinyDrive {
+  /** API version; bumped when the API changes. */
+  readonly version = apiVersion;
+  #initialized: PromiseLike<void>;
+
+  // Resolves on the first `shiny:sessioninitialized`
+  constructor(initialized: PromiseLike<void>) {
+    this.#initialized = initialized;
+  }
+
+  /**
+   * Set how many ms every wait (`flush()`, `setInputs()`, `click()`,
+   * `uploadFiles()`, `waitForIdle()`, `ready()`, ...) gives up after; `null`
+   * (the default) waits as long as it takes. Methods with a `timeout`
+   * option use this when it isn't given. On timeout, waits for the server
+   * reject with a `"timeout"` error; waits for outputs give up quietly, and
+   * the outputs then show `status: "recalculating"`.
+   */
+  setDefaultTimeout(timeout: number | null): void {
+    checkTimeout(timeout);
+    defaultTimeout = timeout;
+  }
+
   /** Never expose inputs using this binding (e.g. `"shiny.passwordInput"`). */
   skipInputBinding(bindingName: string): void {
     skippedInputBindings.add(bindingName);
@@ -317,15 +448,21 @@ class ShinyDrive {
       const { el, binding } = findInput(id, includeHidden);
 
       if (binding.name === "shiny.fileInputBinding") {
-        throw new Error(`Input "${id}" is a file input; use uploadFiles()`);
+        throw new DriveError(
+          "wrong-type",
+          `Input "${id}" is a file input; use uploadFiles()`,
+        );
       }
-      if (inputAccess(el, binding) === "read-only") {
-        throw new Error(`Input "${id}" is read-only`);
-      }
-      if (el.matches(":disabled")) throw new Error(`Input "${id}" is disabled`);
+      checkWritable(id, el, inputAccess(el, binding));
       const schema = valueSchema(el, binding);
 
-      if (schema !== null) checkValue(schema, value);
+      if (schema !== null) {
+        try {
+          checkValue(schema, value);
+        } catch (e) {
+          throw new DriveError("invalid-value", (e as Error).message);
+        }
+      }
       return { id, value, el, binding, schema };
     });
 
@@ -375,10 +512,12 @@ class ShinyDrive {
     }
     if (applied < items.length) {
       const reason = failure instanceof Error ? failure.message : failure;
-      const done = sent.map((x) => x.id).join(", ") || "none";
+      const done = sent.map((x) => x.id);
 
-      throw new Error(
-        `Input "${items[applied].id}" failed to update: ${reason}. Already applied: ${done}.`,
+      throw new DriveError(
+        "update-failed",
+        `Input "${items[applied].id}" failed to update: ${reason}. Already applied: ${done.join(", ") || "none"}.`,
+        { applied: done },
       );
     }
     return items.map(({ el, binding }) => inputInfo(el, binding));
@@ -392,7 +531,10 @@ class ShinyDrive {
     const { el, binding } = findInput(id, opts.includeHidden);
 
     if (valueSchema(el, binding) !== null) {
-      throw new Error(`Input "${id}" is not a button; use setInput()`);
+      throw new DriveError(
+        "wrong-type",
+        `Input "${id}" is not a button; use setInput()`,
+      );
     }
     return this.setInput(id, undefined, opts);
   }
@@ -405,19 +547,16 @@ class ShinyDrive {
   async uploadFiles(
     id: string,
     files: File[] | FileList,
-    { includeHidden, timeout }: HiddenOpt & { timeout?: number } = {},
+    { includeHidden, timeout }: HiddenOpt & { timeout?: number | null } = {},
   ): Promise<InputInfo> {
     const { el, binding } = findInput(id, includeHidden);
 
     if (binding.name !== "shiny.fileInputBinding") {
-      throw new Error(`Input "${id}" is not a file input`);
+      throw new DriveError("wrong-type", `Input "${id}" is not a file input`);
     }
     // File inputs are read-only by default only because agents can't send
     // file contents; an explicit `read-only` still blocks uploads.
-    if (accessAttrOf(el, true) === "read-only") {
-      throw new Error(`Input "${id}" is read-only`);
-    }
-    if (el.matches(":disabled")) throw new Error(`Input "${id}" is disabled`);
+    checkWritable(id, el, accessAttrOf(el, true));
 
     const done = this.waitForUpload(id, { timeout });
     const transfer = new DataTransfer();
@@ -436,8 +575,9 @@ class ShinyDrive {
    */
   async waitForUpload(
     id: string,
-    { timeout = 30000 }: { timeout?: number } = {},
+    { timeout = defaultTimeout }: { timeout?: number | null } = {},
   ): Promise<void> {
+    checkTimeout(timeout);
     await new Promise<void>((resolve, reject) => {
       const handler = (e: JQuery.TriggeredEvent) => {
         const evt = e as JQuery.TriggeredEvent & {
@@ -448,14 +588,22 @@ class ShinyDrive {
         if (evt.name !== id) return;
         cleanup();
         if (evt.error === null) resolve();
-        else reject(new Error(`Upload to "${id}" failed: ${evt.error}`));
+        else {
+          reject(
+            new DriveError(
+              "upload-failed",
+              `Upload to "${id}" failed: ${evt.error}`,
+            ),
+          );
+        }
       };
-      const timer = setTimeout(() => {
-        cleanup();
-        reject(
-          new Error(`Upload to "${id}" did not finish within ${timeout}ms`),
-        );
-      }, timeout);
+      const timer =
+        timeout === null
+          ? undefined
+          : setTimeout(() => {
+              cleanup();
+              reject(timeoutError(`Upload to "${id}" did not finish`, timeout));
+            }, timeout);
       const cleanup = () => {
         clearTimeout(timer);
         $(document).off("shiny:uploadend", handler);
@@ -464,8 +612,8 @@ class ShinyDrive {
       $(document).on("shiny:uploadend", handler);
     });
     // The upload's final RPC replies before the server's reactive flush
-    await this.flush();
-    await waitForOutputs(() => exposedOutputs().map((x) => x.el));
+    await this.flush({ timeout });
+    await waitForOutputs(() => exposedOutputs().map((x) => x.el), timeout);
   }
 
   /**
@@ -473,6 +621,7 @@ class ShinyDrive {
    * `module` namespace. Text is truncated to a short preview; use getOutput() for the
    * full content.
    * `includeHidden: true` also lists hidden ones (marked `hidden: true`).
+   * Shiny suspends hidden outputs, so their content may be stale until shown.
    */
   listOutputs(
     filter: Filter = {},
@@ -510,36 +659,50 @@ class ShinyDrive {
   // carries no flush info itself. Explore an explicit server-to-client flush
   // signal instead (not test mode's empty `values` message, which has the
   // same problem).
-  /** Resolve once the server has processed all sent inputs and flushed. */
-  flush(): Promise<void> {
+  /**
+   * Resolve once the server has processed all sent inputs and flushed.
+   * Rejects with a `"disconnected"` error if the session is or becomes
+   * disconnected, and a `"timeout"` error after `timeout` ms.
+   */
+  flush({
+    timeout = defaultTimeout,
+  }: { timeout?: number | null } = {}): Promise<void> {
+    checkTimeout(timeout);
     return new Promise((resolve, reject) => {
       const shinyapp = shinyShinyApp();
+      const disconnected = () =>
+        new DriveError("disconnected", "Shiny is disconnected from the server");
 
       if (!shinyapp.isConnected()) {
-        reject(new Error("Shiny is disconnected from the server"));
+        reject(disconnected());
         return;
       }
-      const timer = setTimeout(
-        () =>
-          reject(
-            new Error(
-              `Shiny did not finish processing within ${flushTimeoutMs}ms`,
-            ),
-          ),
-        flushTimeoutMs,
-      );
+      // Without this, a closed socket would leave the request waiting forever
+      const onDisconnect = () => finish(() => reject(disconnected()));
+      const timer =
+        timeout === null
+          ? undefined
+          : setTimeout(
+              () =>
+                finish(() =>
+                  reject(
+                    timeoutError("Shiny did not finish processing", timeout),
+                  ),
+                ),
+              timeout,
+            );
+      const finish = (settle: () => void) => {
+        clearTimeout(timer);
+        $(document).off("shiny:disconnected", onDisconnect);
+        settle();
+      };
 
+      $(document).on("shiny:disconnected", onDisconnect);
       shinyapp.makeRequest(
         "waitForFlush",
         [],
-        () => {
-          clearTimeout(timer);
-          resolve();
-        },
-        (err) => {
-          clearTimeout(timer);
-          reject(new Error(err));
-        },
+        () => finish(resolve),
+        (err) => finish(() => reject(new DriveError("server-error", err))),
         undefined,
       );
     });
@@ -548,33 +711,62 @@ class ShinyDrive {
   /**
    * Like shinytest2's `AppDriver$wait_for_idle()`: after a server `flush()`,
    * resolve once the app has been idle (server not busy, no visible output
-   * recalculating) for `duration` ms. Rejects after `timeout` ms.
+   * recalculating) for `duration` ms. Rejects with a `"timeout"` error after
+   * `timeout` ms (default: see `setDefaultTimeout()`).
    */
   async waitForIdle({
     duration = 500,
-    timeout = 10000,
-  }: { duration?: number; timeout?: number } = {}): Promise<void> {
-    const deadline = Date.now() + timeout;
+    timeout = defaultTimeout,
+  }: { duration?: number; timeout?: number | null } = {}): Promise<void> {
+    checkTimeout(timeout);
+    const left = timeLeft(timeout);
+    const busy = () =>
+      document.documentElement.classList.contains("shiny-busy") ||
+      exposedOutputs().some(({ el }) => el.classList.contains("recalculating"));
 
-    await this.flush();
+    await this.flush({ timeout: left() });
 
-    let idleSince = Date.now();
+    // Wait until not busy, then for `duration` ms without becoming busy
+    // again. Busy/idle changes are seen through class changes, not polling.
+    for (;;) {
+      if (!(await waitForClasses(() => !busy(), left()))) break;
+      const quietFor = Math.min(duration, left() ?? duration);
 
-    while (Date.now() - idleSince < duration) {
-      if (Date.now() > deadline) {
-        throw new Error(`Shiny did not become idle within ${timeout}ms`);
+      if (!(await waitForClasses(busy, quietFor))) {
+        if (quietFor === duration) return;
+        break;
       }
-      await new Promise((r) => setTimeout(r, 50));
-      const busy =
-        document.documentElement.classList.contains("shiny-busy") ||
-        exposedOutputs().some(({ el }) =>
-          el.classList.contains("recalculating"),
-        );
-
-      if (busy) idleSince = Date.now();
     }
+    throw timeoutError("Shiny did not become idle", timeout as number);
+  }
+
+  /**
+   * Resolve once the session has started and the app has finished its first
+   * update (the server has flushed and no visible output is recalculating).
+   * Safe to call at any time, even before Shiny connects; later calls cost
+   * one round trip to the server. Rejects like `flush()`.
+   */
+  async ready({
+    timeout = defaultTimeout,
+  }: { timeout?: number | null } = {}): Promise<void> {
+    checkTimeout(timeout);
+    const left = timeLeft(timeout);
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    await Promise.race([
+      this.#initialized,
+      new Promise<never>((resolveNever, reject) => {
+        if (timeout === null) return;
+        timer = setTimeout(
+          () => reject(timeoutError("Shiny did not start", timeout)),
+          timeout,
+        );
+      }),
+    ]).finally(() => clearTimeout(timer));
+    await this.flush({ timeout: left() });
+    await waitForOutputs(() => exposedOutputs().map((x) => x.el), left());
   }
 }
 
-export { previewTextLength, ShinyDrive };
+export { DriveError, previewTextLength, ShinyDrive };
 export type { Filter, InputInfo, JSONSchema, OutputInfo };

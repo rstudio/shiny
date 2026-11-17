@@ -135,9 +135,9 @@ class ShinyClass {
     this.renderHtmlAsync = renderHtmlAsync;
     this.renderHtml = renderHtml;
 
-    this.drive = new ShinyDrive();
-
     this.initializedPromise = createInitStatus<void>();
+
+    this.drive = new ShinyDrive(this.initializedPromise);
 
     $(() => {
       // Init Shiny a little later than document ready, so user code can

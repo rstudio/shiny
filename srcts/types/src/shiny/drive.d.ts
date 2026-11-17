@@ -27,7 +27,32 @@ type HiddenOpt = {
     includeHidden?: boolean;
 };
 declare const previewTextLength = 200;
+type DriveErrorCode = "disabled" | "disconnected" | "invalid-argument" | "invalid-value" | "not-found" | "read-only" | "server-error" | "timeout" | "update-failed" | "upload-failed" | "wrong-type";
+/**
+ * Every error `Shiny.drive` throws. `code` says what went wrong, so callers
+ * don't need to match on `message`.
+ */
+declare class DriveError extends Error {
+    code: DriveErrorCode;
+    applied?: string[];
+    constructor(code: DriveErrorCode, message: string, { applied }?: {
+        applied?: string[];
+    });
+}
 declare class ShinyDrive {
+    #private;
+    /** API version; bumped when the API changes. */
+    readonly version = 1;
+    constructor(initialized: PromiseLike<void>);
+    /**
+     * Set how many ms every wait (`flush()`, `setInputs()`, `click()`,
+     * `uploadFiles()`, `waitForIdle()`, `ready()`, ...) gives up after; `null`
+     * (the default) waits as long as it takes. Methods with a `timeout`
+     * option use this when it isn't given. On timeout, waits for the server
+     * reject with a `"timeout"` error; waits for outputs give up quietly, and
+     * the outputs then show `status: "recalculating"`.
+     */
+    setDefaultTimeout(timeout: number | null): void;
     /** Never expose inputs using this binding (e.g. `"shiny.passwordInput"`). */
     skipInputBinding(bindingName: string): void;
     /** Never expose outputs using this binding (e.g. `"shiny.htmlOutput"`). */
@@ -65,7 +90,7 @@ declare class ShinyDrive {
      * input's new state (`value` lists the uploaded files).
      */
     uploadFiles(id: string, files: File[] | FileList, { includeHidden, timeout }?: HiddenOpt & {
-        timeout?: number;
+        timeout?: number | null;
     }): Promise<InputInfo>;
     /**
      * Resolve once the next upload to file input `id` finishes and the app has
@@ -73,13 +98,14 @@ declare class ShinyDrive {
      * *before* the upload starts (e.g. before attaching files via DevTools).
      */
     waitForUpload(id: string, { timeout }?: {
-        timeout?: number;
+        timeout?: number | null;
     }): Promise<void>;
     /**
      * Visible outputs, optionally filtered by exact `ids` and/or
      * `module` namespace. Text is truncated to a short preview; use getOutput() for the
      * full content.
      * `includeHidden: true` also lists hidden ones (marked `hidden: true`).
+     * Shiny suspends hidden outputs, so their content may be stale until shown.
      */
     listOutputs(filter?: Filter): Array<Omit<OutputInfo, "image"> & {
         hasImage: boolean;
@@ -90,17 +116,33 @@ declare class ShinyDrive {
      * they may be stale or `recalculating` until shown.
      */
     getOutput(id: string, { includeHidden }?: HiddenOpt): Promise<OutputInfo>;
-    /** Resolve once the server has processed all sent inputs and flushed. */
-    flush(): Promise<void>;
+    /**
+     * Resolve once the server has processed all sent inputs and flushed.
+     * Rejects with a `"disconnected"` error if the session is or becomes
+     * disconnected, and a `"timeout"` error after `timeout` ms.
+     */
+    flush({ timeout, }?: {
+        timeout?: number | null;
+    }): Promise<void>;
     /**
      * Like shinytest2's `AppDriver$wait_for_idle()`: after a server `flush()`,
      * resolve once the app has been idle (server not busy, no visible output
-     * recalculating) for `duration` ms. Rejects after `timeout` ms.
+     * recalculating) for `duration` ms. Rejects with a `"timeout"` error after
+     * `timeout` ms (default: see `setDefaultTimeout()`).
      */
     waitForIdle({ duration, timeout, }?: {
         duration?: number;
-        timeout?: number;
+        timeout?: number | null;
+    }): Promise<void>;
+    /**
+     * Resolve once the session has started and the app has finished its first
+     * update (the server has flushed and no visible output is recalculating).
+     * Safe to call at any time, even before Shiny connects; later calls cost
+     * one round trip to the server. Rejects like `flush()`.
+     */
+    ready({ timeout, }?: {
+        timeout?: number | null;
     }): Promise<void>;
 }
-export { previewTextLength, ShinyDrive };
+export { DriveError, previewTextLength, ShinyDrive };
 export type { Filter, InputInfo, JSONSchema, OutputInfo };

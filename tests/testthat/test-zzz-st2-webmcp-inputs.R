@@ -10,13 +10,19 @@ app <- launch_test_app(function() {
   ui <- fluidPage(
     tabsetPanel(
       id = "tab",
-      tabPanel("A", textInput("shown", "Shown"), textOutput("out_a")),
+      tabPanel(
+        "A",
+        textInput("shown", "Shown"),
+        selectInput("pick", "Pick", c("a", "b")),
+        actionButton("go", "Go"),
+        textOutput("out_a")
+      ),
       tabPanel("B", textInput("hidden", "Hidden"), textOutput("out_b"))
     )
   )
 
   server <- function(input, output) {
-    output$out_a <- renderText("a")
+    output$out_a <- renderText(paste(input$shown, input$pick, input$go))
     output$out_b <- renderText("b")
   }
 
@@ -53,7 +59,7 @@ test_that("list tools mark hidden items only when asked", {
 })
 
 test_that("hidden items still can't be set or read through the tools", {
-  res <- tool("set_input", list(id = "hidden", value = "x"))
+  res <- tool("set_inputs", list(inputs = list(id = "hidden", value = "x")))
   expect_true(res$isError)
   res <- tool("get_output", list(id = "out_b"))
   expect_true(res$isError)
@@ -62,4 +68,54 @@ test_that("hidden items still can't be set or read through the tools", {
 test_that("includeHidden must be a boolean", {
   res <- tool("list_inputs", list(includeHidden = "yes"))
   expect_true(res$isError)
+})
+
+test_that("set_inputs takes one input or a list, and changes all or nothing", {
+  states <- function(res) res$structuredContent$inputs
+  out_a <- function() {
+    tool("get_output", list(id = "out_a"))$structuredContent$text
+  }
+
+  # One input, not in a list
+  res <- tool("set_inputs", list(inputs = list(id = "shown", value = "hi")))
+  expect_null(res$isError)
+  expect_equal(states(res)[[1]]$value, "hi")
+
+  # A list, with a button (no value), in one update
+  res <- tool("set_inputs", list(inputs = list(
+    list(id = "shown", value = "yo"),
+    list(id = "pick", value = "b"),
+    list(id = "go")
+  )))
+  expect_equal(ids(states(res)), c("shown", "pick", "go"))
+  expect_equal(out_a(), "yo b 1")
+
+  # One bad value changes nothing
+  res <- tool("set_inputs", list(inputs = list(
+    list(id = "shown", value = "nope"),
+    list(id = "pick", value = "z")
+  )))
+  expect_true(res$isError)
+  expect_match(res$content[[1]]$text, "must be one of")
+  expect_equal(out_a(), "yo b 1")
+
+  expect_match(
+    tool("set_inputs", list(inputs = list(
+      list(id = "shown", value = "a"),
+      list(id = "shown", value = "b")
+    )))$content[[1]]$text,
+    "more than once"
+  )
+  expect_match(
+    tool("set_inputs", list(inputs = list(id = "shown", val = "a")))$content[[1]]$text,
+    "unknown keys: val"
+  )
+  expect_match(
+    tool("set_inputs", list(inputs = list()))$content[[1]]$text,
+    "empty"
+  )
+  expect_match(
+    tool("set_inputs", list(id = "shown"))$content[[1]]$text,
+    'missing required parameter "inputs"'
+  )
 })

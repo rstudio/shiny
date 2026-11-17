@@ -153,7 +153,7 @@ test_that("callTool() accepts JSON strings and rejects unknown arguments", {
   expect_match(bad$content[[1]]$text, 'Example: {"id":"..."', fixed = TRUE)
 
   unknown <- app$get_js("Shiny.webmcp.callTool('nope')")
-  expect_match(unknown$content[[1]]$text, "Tools: list_inputs, set_input")
+  expect_match(unknown$content[[1]]$text, "Tools: list_inputs, set_inputs, list_outputs")
 })
 
 test_that("<html data-shiny-webmcp> reports registration", {

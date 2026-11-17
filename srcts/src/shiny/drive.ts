@@ -28,7 +28,7 @@ type InputInfo = {
   access: Access;
   // Omitted for write-only inputs
   value?: unknown;
-  // JSON Schema `value` must satisfy in set_input; null = button (click it).
+  // JSON Schema `value` must satisfy in setInputs(); null = button (click it).
   // Omitted for read-only inputs.
   schema?: JSONSchema | null;
   disabled: boolean;

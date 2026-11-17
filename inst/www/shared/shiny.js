@@ -6087,7 +6087,7 @@ ${duplicateIdMsg}`;
     return Object.fromEntries(
       Object.entries(props).map(([key, p3]) => [
         key,
-        Array.isArray(p3.enum) ? p3.enum[0] : p3.type === "integer" || p3.type === "number" ? 0 : p3.type === "boolean" ? false : p3.type === "array" ? [] : "..."
+        Array.isArray(p3.examples) ? p3.examples[0] : Array.isArray(p3.enum) ? p3.enum[0] : p3.type === "integer" || p3.type === "number" ? 0 : p3.type === "boolean" ? false : p3.type === "array" ? [] : "..."
       ])
     );
   }
@@ -8046,9 +8046,18 @@ ${duplicateIdMsg}`;
     },
     additionalProperties: false
   };
+  var inputSchema = {
+    type: "object",
+    properties: {
+      id: { type: "string", description: "Input id from list_inputs." },
+      value: { description: "New value; omit for buttons." }
+    },
+    required: ["id"],
+    additionalProperties: false
+  };
   var builtinToolNames = [
     "list_inputs",
-    "set_input",
+    "set_inputs",
     "list_outputs",
     "get_output"
   ];
@@ -8125,24 +8134,29 @@ ${duplicateIdMsg}`;
       __privateSet(this, _enabled, true);
       this.registerTool({
         name: "list_inputs",
-        description: "List the inputs currently visible in this Shiny app: id, label, type, access (read-write, read-only, or write-only), current value (omitted when write-only), disabled, and `schema` (the JSON Schema that set_input's `value` must satisfy; null means a button that set_input clicks; omitted when read-only). Filter with `ids` and/or a `module` namespace to keep results small. The visible UI changes as inputs change (tabs, dynamic UI), so list again if an id goes missing.",
+        description: "List the inputs currently visible in this Shiny app: id, label, type, access (read-write, read-only, or write-only), current value (omitted when write-only), disabled, and `schema` (the JSON Schema that a `value` given to set_inputs must satisfy; null means a button that set_inputs clicks; omitted when read-only). Filter with `ids` and/or a `module` namespace to keep results small. The visible UI changes as inputs change (tabs, dynamic UI), so list again if an id goes missing.",
         inputSchema: filterSchema,
         annotations: { readOnlyHint: true },
         execute: (args) => ({ inputs: __privateGet(this, _drive).listInputs(toFilter(args)) })
       });
       this.registerTool({
-        name: "set_input",
-        description: "Set a visible input as if the user changed it, wait for the app to finish updating, and return the input's new state. `value` must satisfy the input's `schema` from list_inputs; omit it to click a button. If the app has a submit/apply button, changes may not take effect until you click it. Can trigger application side effects.",
+        name: "set_inputs",
+        description: "Set one or more visible inputs as if the user changed them, wait for the app to finish updating, and return the inputs' new states. Each `value` must satisfy that input's `schema` from list_inputs; omit it to click a button. Every value is checked before any input changes, so one bad value changes nothing. All changes, button clicks included, reach the app together, so it updates once: to set filters and press an apply button, send them in one call. Can trigger application side effects.",
         inputSchema: {
           type: "object",
           properties: {
-            id: { type: "string", description: "Input id from list_inputs." },
-            value: { description: "New value; omit for buttons." }
+            inputs: {
+              description: "One `{id, value}` or a list of them. Each id at most once.",
+              anyOf: [inputSchema, { type: "array", items: inputSchema }],
+              examples: [{ id: "region", value: "West" }]
+            }
           },
-          required: ["id"],
+          required: ["inputs"],
           additionalProperties: false
         },
-        execute: ({ id, value }) => __privateGet(this, _drive).setInput(String(id), value)
+        execute: async ({ inputs }) => ({
+          inputs: await __privateGet(this, _drive).setInputs(toInputValues(inputs))
+        })
       });
       this.registerTool({
         name: "list_outputs",
@@ -8252,6 +8266,30 @@ ${duplicateIdMsg}`;
       throw new Error("`includeHidden` must be true or false");
     }
     return { ids: ids2, module, includeHidden };
+  }
+  function toInputValues(inputs) {
+    const list = Array.isArray(inputs) ? inputs : [inputs];
+    const values = /* @__PURE__ */ new Map();
+    if (list.length === 0) throw new Error("`inputs` is empty");
+    list.forEach((x2, i5) => {
+      const where = Array.isArray(inputs) ? `\`inputs[${i5}]\`` : "`inputs`";
+      if (typeof x2 !== "object" || x2 === null || Array.isArray(x2)) {
+        throw new Error(
+          `${where} must be an object like {"id": ..., "value": ...}`
+        );
+      }
+      const { id, value, ...rest } = x2;
+      const extra = Object.keys(rest);
+      if (typeof id !== "string") throw new Error(`${where}.id must be a string`);
+      if (extra.length > 0) {
+        throw new Error(`${where} has unknown keys: ${extra.join(", ")}`);
+      }
+      if (values.has(id)) {
+        throw new Error(`Input "${id}" is given more than once`);
+      }
+      values.set(id, value);
+    });
+    return Object.fromEntries(values);
   }
   function toToolResult(value) {
     if (typeof value !== "object" || value === null) {

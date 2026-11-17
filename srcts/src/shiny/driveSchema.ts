@@ -72,7 +72,7 @@ function stateOf(el: HTMLElement, binding: InputBinding): JSONSchema {
   return {};
 }
 
-// JSON Schema for the `value` argument of a set_input tool. `null` means the
+// JSON Schema for an input's `value` (in setInputs() and the set_inputs tool). `null` means the
 // input is not settable by value (action buttons are clicked instead).
 function valueSchema(
   el: HTMLElement,
@@ -217,15 +217,17 @@ function exampleArgs(schema: JSONSchema): { [key: string]: unknown } {
   return Object.fromEntries(
     Object.entries(props).map(([key, p]) => [
       key,
-      Array.isArray(p.enum)
-        ? p.enum[0]
-        : p.type === "integer" || p.type === "number"
-          ? 0
-          : p.type === "boolean"
-            ? false
-            : p.type === "array"
-              ? []
-              : "...",
+      Array.isArray(p.examples)
+        ? p.examples[0]
+        : Array.isArray(p.enum)
+          ? p.enum[0]
+          : p.type === "integer" || p.type === "number"
+            ? 0
+            : p.type === "boolean"
+              ? false
+              : p.type === "array"
+                ? []
+                : "...",
     ]),
   );
 }

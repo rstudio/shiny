@@ -130,6 +130,17 @@ void test("parseToolArgs() accepts objects and JSON strings", () => {
       e.message.includes('missing required parameter "id"') &&
       e.message.includes('Example: {"id":"...","n":0}'),
   );
+  assert.throws(
+    () =>
+      parseToolArgs(
+        {
+          properties: { inputs: { anyOf: [], examples: [{ id: "a" }] } },
+          required: ["inputs"],
+        },
+        {},
+      ),
+    (e: Error) => e.message.includes('Example: {"inputs":{"id":"a"}}'),
+  );
   assert.throws(() => parseToolArgs(schema, "{nope"), /not valid JSON/);
   assert.throws(
     () => parseToolArgs(schema, [1]),

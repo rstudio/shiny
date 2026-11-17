@@ -1,5 +1,7 @@
 # shiny (development version)
 
+* `invalidateLater()`, `reactiveTimer()` and `reactivePoll()` work again with a custom session object that has no `onDestroy()` method. Since 1.14.0 they failed with `attempt to apply non-function`.
+
 * Module ids that are character vectors, such as `c("a", "b")`, work again in `callModule()`, `moduleServer()`, `testServer()` and `session$destroy()`. Since 1.14.0 they failed with ``Invalid `namespace` ``. They are joined the same way `NS()` joins them, so `c("a", "b")` becomes `"a-b"`. (#4447)
 
 * If flushing a session's outputs throws an unhandled error, that session is now closed as intended, instead of the error escaping the server loop. (#4444)

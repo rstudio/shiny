@@ -30,7 +30,7 @@
 
 * The `session$destroy()` parameter is now documented as `namespace` to match the implemented argument name. (#4419)
 
-* `{watcher}` is now always used for autoreload file watching, and the legacy polling-based file watcher has been removed. `{watcher}` stays a suggested package: with `options(shiny.autoreload = TRUE)`, an interactive session offers to install it, and a non-interactive session warns and runs the app without autoreload. (#4403)
+* `{watcher}` is now always used for autoreload file watching, and the legacy polling-based file watcher has been removed. `{watcher}` stays a suggested package: with `options(shiny.autoreload = TRUE)`, an interactive session offers to install it, and a non-interactive session warns and runs the app without autoreload. (#4403, #4490)
 
 * The `Listening on http://…` startup message is now printed only after the listening socket has been bound, so the announced URL is guaranteed to be accepting connections. Previously the message could be emitted just before the bind, leaving a window (widened under load) where the advertised port refused connections. (thanks @nbenn, #4400)
 

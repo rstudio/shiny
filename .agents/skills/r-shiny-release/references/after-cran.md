@@ -60,12 +60,17 @@ To make the new release:
 
 1. Branch from the new shiny tag `vX.Y.Z` and reapply the fork commits.
 2. Compare shiny's `Imports` with the `Config/Needs/wasm` list and add any new
-   dependencies. Every dependency must exist in webR's package repo:
+   dependencies that shinylive needs. The build only includes the packages in
+   that list: it calls `rwasm::add_pkg()` with `dependencies = FALSE`, so it
+   never follows `Imports`. Leave off packages that shinylive never uses. For
+   example, `watcher` is only used for autoreload and is not in the list.
+   Shiny still loads without it, because `NAMESPACE` never imports it. Only
+   skip packages like this; a package that `NAMESPACE` imports must be in the
+   list. Check that each package you add exists in webR's package repo:
    ```bash
    curl -s https://repo.r-wasm.org/bin/emscripten/contrib/4.6/PACKAGES \
      | grep -A1 '^Package: <pkg>$'
    ```
-   If one is missing, it has to be built for webR, or the fork has to drop it.
 3. Tag `vX.Y.Z.8000` and publish a GitHub release named `Shiny X.Y.Z.8000`
    ("Shiny X.Y.Z, modified for use with webR."). Wait for the workflow to
    attach `library.data.gz` and `library.js.metadata`.

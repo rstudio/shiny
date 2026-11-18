@@ -1,7 +1,9 @@
 # Given a list of quosures, return a function that will evaluate them and return
 # a list of resulting values. If the list contains a single expression, unwrap
 # it from the list.
-quos_to_func <- function(qs) {
+# `label` names the code in stack traces when it uses `await()`, such as
+# "eventExpr (coro::async)".
+quos_to_func <- function(qs, label) {
   if (length(qs) == 0) {
     stop("Need at least one item in `...` to use as cache key or event.")
   }
@@ -14,7 +16,14 @@ quos_to_func <- function(qs) {
     # key.)
     qs <- qs[[1]]
     if (usesCoroAwait(quo_get_expr(qs), get_env(qs))) {
-      return(quoToSimpleFunction(qs))
+      # Labelled like the value code, so stack traces name it and hide the
+      # frames that run it
+      return(wrapFunctionLabel(
+        quoToSimpleFunction(qs),
+        label,
+        ..stacktraceon = TRUE,
+        dots = FALSE
+      ))
     }
     function() {
       eval_tidy(qs)

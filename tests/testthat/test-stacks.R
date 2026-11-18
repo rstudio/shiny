@@ -449,6 +449,147 @@ test_that("an error before await() shows the reactive once, with its line", {
   expect_no_match(out$trace, "eval_bare|evalq|instance")
 })
 
+# Run `setup()` the way `runApp()` does and wait for its promises. Return the
+# "Error in" heading and the stack trace that an observer printed for an error
+printedObserverError <- function(setup) {
+  heading <- NULL
+  trace <- capture.output(type = "message", {
+    withCallingHandlers(
+      ..stacktraceoff..(
+        ..stacktracefloor..({
+          setup()
+          flushReact()
+          wait_for_it()
+        })
+      ),
+      warning = function(w) {
+        heading <<- conditionMessage(w)
+        invokeRestart("muffleWarning")
+      }
+    )
+  })
+  list(heading = heading, trace = trace)
+}
+
+# Each kind of code that can use `await()`: the label its errors and frame get
+# (the same as without `await()`, except for event and cache key code, which
+# is `eval_tidy` there), and a function that makes it from `body`. Reactives
+# and render functions are read by an observer.
+asyncLabelCases <- list(
+  list("reactive()", "<reactive:r>", function(body) {
+    r <- inject(reactive(label = "r", !!body))
+    observe(r())
+  }),
+  list("observe()", "observe", function(body) {
+    inject(observe(!!body))
+  }),
+  list("eventReactive() event", "eventExpr", function(body) {
+    r <- inject(eventReactive(!!body, 1))
+    observe(r())
+  }),
+  list("eventReactive() value", "eventReactiveValueFunc", function(body) {
+    r <- inject(eventReactive(1, !!body))
+    observe(r())
+  }),
+  list("observeEvent() event", "eventExpr", function(body) {
+    inject(observeEvent(!!body, 1))
+  }),
+  list("observeEvent() handler", "observe", function(body) {
+    inject(observeEvent(1, !!body))
+  }),
+  list("bindEvent() event of reactive()", "eventExpr", function(body) {
+    r <- inject(bindEvent(reactive(1), !!body))
+    observe(r())
+  }),
+  list("reactive() with bindEvent()", "eventReactiveValueFunc", function(body) {
+    r <- inject(bindEvent(reactive(!!body), 1))
+    observe(r())
+  }),
+  list("bindEvent() event of observe()", "eventExpr", function(body) {
+    inject(bindEvent(observe(1), !!body))
+  }),
+  list("observe() with bindEvent()", "observe", function(body) {
+    inject(bindEvent(observe(!!body), 1))
+  }),
+  list("bindCache() key of reactive()", "cacheKeyExpr", function(body) {
+    r <- inject(bindCache(reactive(1), !!body, cache = cachem::cache_mem()))
+    observe(r())
+  }),
+  list("reactive() with bindCache()", "cachedReactiveValueFunc", function(body) {
+    r <- inject(bindCache(reactive(!!body), 1, cache = cachem::cache_mem()))
+    observe(r())
+  }),
+  list("renderText()", "renderText", function(body) {
+    f <- inject(renderText(!!body))
+    observe(f())
+  }),
+  list("bindEvent() event of renderText()", "eventExpr", function(body) {
+    f <- inject(bindEvent(renderText(1), !!body))
+    observe(f())
+  }),
+  list("bindCache() key of renderText()", "cacheKeyExpr", function(body) {
+    f <- inject(bindCache(renderText(1), !!body, cache = cachem::cache_mem()))
+    observe(f())
+  })
+)
+
+asyncErrorBodies <- list(
+  before = quote({
+    stop("labelled boom before await")
+    x <- await(promises::promise_resolve(1))
+  }),
+  after = quote({
+    x <- await(promises::promise_resolve(1))
+    stop("labelled boom after await")
+  })
+)
+
+# Frames of coro, the promise package, the event loop, and Shiny's reactive
+# plumbing
+asyncNoise <- paste(
+  "eval_bare", "eval_tidy", "evalq", "instance", "onFulfilled", "then",
+  "execCallbacks", "run_now", "<Anonymous>", "contextFunc", "runWith",
+  "ctx\\$run", "\\.func",
+  sep = "|"
+)
+
+for (case in asyncLabelCases) {
+  local({
+    desc <- case[[1]]
+    label <- case[[2]]
+    make <- case[[3]]
+    for (when in names(asyncErrorBodies)) {
+      test_that(paste0("an error ", when, " await() in ", desc, " is labelled ", label), {
+        skip_if_not_installed("coro")
+        out <- printedObserverError(function() make(asyncErrorBodies[[when]]))
+        expect_identical(
+          out$heading,
+          paste0("Error in ", label, ": labelled boom ", when, " await")
+        )
+        frames <- grep("^ +[0-9]+: ", out$trace, value = TRUE)
+        expect_match(
+          frames,
+          paste0(": ", label, " (coro::async)"),
+          fixed = TRUE,
+          all = FALSE
+        )
+        expect_no_match(frames, asyncNoise)
+        if (when == "after") {
+          # The deep stack trace shows where the code started, and the
+          # frame shows the line it was at
+          expect_match(out$trace, "From earlier call:", fixed = TRUE, all = FALSE)
+          expect_match(
+            frames,
+            paste0(": ", label, " (coro::async) [test-stacks.R#"),
+            fixed = TRUE,
+            all = FALSE
+          )
+        }
+      })
+    }
+  })
+}
+
 # Not at the top level of the file, so that their srcrefs are kept
 local({
   lazyHelper <<- function(x) {

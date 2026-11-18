@@ -34,7 +34,10 @@ Use these level 2 headings, in sentence case, and leave out empty ones:
 
 - `## Lifecycle changes`: deprecated, defunct, and experimental changes.
 - `## New features`
-- `## Bug fixes and minor improvements`
+- `## Changes`: behavior users may notice that is neither a new feature nor a
+  fix, such as a new required dependency or input that is now rejected.
+- `## Improvements`: clearer errors, docs, logging, and other polish.
+- `## Bug fixes`: only pure fixes, so users can scan them on their own.
 
 In each section, bullets with no function come first, then the rest sorted by
 first function.

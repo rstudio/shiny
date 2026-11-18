@@ -138,6 +138,24 @@ awaitToAsyncFunction <- function(fun) {
   inject(coro::async(function() !!body), env)
 }
 
+# Record `label` on a function made by `awaitToAsyncFunction()`, for stack
+# traces to name the frame that runs the user's code (see
+# `relabelAsyncFrames()`). It is kept in the env of the function coro was
+# given, so all wrappers of `fun` share it. If `fun` already has another label
+# (as when `bindEvent()` or `bindCache()` wraps a reactive's function again),
+# label a new async function with an env of its own instead.
+labelAsyncFunction <- function(fun, label) {
+  src <- coroSourceFn(fun)
+  env <- environment(src)
+  current <- env$.shinyAsyncLabel
+  if (!is.null(current) && !identical(current, label)) {
+    env <- new.env(parent = env)
+    fun <- inject(coro::async(function() !!fn_body(src)), env)
+  }
+  env$.shinyAsyncLabel <- label
+  fun
+}
+
 # The user's code for a function made by `quoToSimpleFunction()`. For a
 # `coro::async()` function, that is the body of the function coro was given.
 fnSourceBody <- function(fun, getBody = fn_body) {

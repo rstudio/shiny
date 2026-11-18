@@ -476,6 +476,26 @@ test_that("a lazily forced argument does not change its caller's line", {
   )
 })
 
+test_that("bindEvent() does not rename a reactive that uses await()", {
+  skip_if_not_installed("coro")
+  out <- catchAsyncError(function(caught) {
+    r <- reactive(label = "r", {
+      stop("boom before await, also bound")
+      x <- await(promises::promise_resolve(1))
+    })
+    # Wraps the same async function under another label
+    bound <- bindEvent(r, 1)
+    observeEvent(1, {
+      captureStackTraces(tryCatch(promises::catch(r(), caught), error = caught))
+    })
+  })
+  expect_identical(getCallNames(list(conditionCall(out$cond))), "<reactive:r>")
+  expect_match(out$trace, "<reactive:r> (coro::async)", fixed = TRUE, all = FALSE)
+  expect_no_match(out$trace, "eventReactiveValueFunc", fixed = TRUE)
+  # The frames that called the reactive are still shown
+  expect_match(out$trace, "observeEvent(1)", fixed = TRUE, all = FALSE)
+})
+
 test_that("a lazily forced argument does not change the await() frame's line", {
   skip_if_not_installed("coro")
   out <- catchAsyncError(function(caught) {

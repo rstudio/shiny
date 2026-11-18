@@ -222,7 +222,8 @@ JS side, in `srcts/src/bindings/`:
   `fnSourceBody()` (which reads coro's internal `fn` via `coroSourceFn()`), never
   `fn_body()`/`body()` directly.
   Stack traces: `wrapFunctionLabel()` records its label in the coro
-  function's env, and `relabelAsyncFrames()` (`R/conditions.R`, called when a
+  function's env with `labelAsyncFunction()` (which makes a new coro function
+  if one already has another label, as for `bindEvent()`), and `relabelAsyncFrames()` (`R/conditions.R`, called when a
   stack is captured) uses it for the error call and to name coro's frame that
   runs the user's code. It marks coro's frames around it in an `asyncHidden`
   attr, which `stripStackTraces()` hides (and leaves out of fence matching);

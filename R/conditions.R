@@ -214,6 +214,11 @@ captureStackTraces <- function(expr) {
 
 #' @include globals.R
 .globals$deepStack <- NULL
+# TRUE once code using `await()` has been labelled (see
+# `labelAsyncFunction()`). Until then, stacks are saved without
+# `relabelAsyncFrames()`, which would find nothing to do but costs time at
+# every `then()`.
+.globals$hasAsyncLabels <- FALSE
 
 getCallStackDigest <- function(callStack, warn = FALSE) {
   dg <- attr(callStack, "shiny.stack.digest", exact = TRUE)
@@ -268,7 +273,10 @@ createStackTracePromiseDomain <- function() {
       # Subscription time
       if (deepStacksEnabled()) {
         currentParents <- sys.parents()
-        currentStack <- relabelAsyncFrames(sys.calls(), currentParents, sys.frames(), atThen = TRUE)
+        currentStack <- sys.calls()
+        if (.globals$hasAsyncLabels) {
+          currentStack <- relabelAsyncFrames(currentStack, currentParents, sys.frames(), atThen = TRUE)
+        }
         attr(currentStack, "parents") <- currentParents
         currentStack <- saveCallStackDigest(currentStack)
         currentDeepStack <- .globals$deepStack
@@ -292,7 +300,10 @@ createStackTracePromiseDomain <- function() {
       # Subscription time
       if (deepStacksEnabled()) {
         currentParents <- sys.parents()
-        currentStack <- relabelAsyncFrames(sys.calls(), currentParents, sys.frames(), atThen = TRUE)
+        currentStack <- sys.calls()
+        if (.globals$hasAsyncLabels) {
+          currentStack <- relabelAsyncFrames(currentStack, currentParents, sys.frames(), atThen = TRUE)
+        }
         attr(currentStack, "parents") <- currentParents
         currentStack <- saveCallStackDigest(currentStack)
         currentDeepStack <- .globals$deepStack
@@ -328,7 +339,9 @@ doCaptureStack <- function(e) {
   if (is.null(attr(e, "stack.trace", exact = TRUE))) {
     calls <- sys.calls()
     parents <- sys.parents()
-    calls <- relabelAsyncFrames(calls, parents, sys.frames())
+    if (.globals$hasAsyncLabels) {
+      calls <- relabelAsyncFrames(calls, parents, sys.frames())
+    }
     label <- attr(calls, "asyncLabel", exact = TRUE)
     # coro evaluates the user's code with `eval_bare()`, which tells the user
     # nothing; use the reactive's label, as for code without `await()`
@@ -371,11 +384,8 @@ relabelAsyncFrames <- function(calls, parents, frames, atThen = FALSE) {
   innermost <- NULL
   asyncFrames <- integer()
   hidden <- rep(FALSE, length(calls))
-  # Frames at or before the last `..stacktracefloor..` are handled by
-  # `stripStackTraces()`, so the outermost frame to hide is the one just
-  # inside it
-  floors <- which(vapply(calls, isCallNamed, logical(1), "..stacktracefloor.."))
-  outermost <- if (length(floors)) max(floors) + 1L else 1L
+  # Found when first needed
+  outermost <- NULL
   # Frames whose env's parent is an async function's env. Besides the frame
   # running the user's code, coro's own setup frames can match, so keep only
   # the innermost match for each async function.
@@ -408,6 +418,13 @@ relabelAsyncFrames <- function(calls, parents, frames, atThen = FALSE) {
     # `await()`; otherwise from the outermost frame.
     # Scan back rather than follow `parents`: a frame can list itself (or a
     # later frame) as its parent, which breaks the chain
+    if (is.null(outermost)) {
+      # Frames at or before the last `..stacktracefloor..` are handled by
+      # `stripStackTraces()`, so the outermost frame to hide is the one just
+      # inside it
+      floors <- which(vapply(calls, isCallNamed, logical(1), "..stacktracefloor.."))
+      outermost <- if (length(floors)) max(floors) + 1L else 1L
+    }
     first <- outermost
     for (j in rev(seq_len(parent))) {
       if (isCallNamed(calls[[j]], label)) {
@@ -455,13 +472,11 @@ relabelAsyncFrames <- function(calls, parents, frames, atThen = FALSE) {
 }
 
 # The async function's env holding the label set by `wrapFunctionLabel()`, if
-# `env` is a child of it, such as the env running the user's code
+# `env` is a child of it, such as the env running the user's code. Runs for
+# every frame, so kept cheap: `$` does not look in parent envs.
 asyncLabelEnv <- function(env) {
-  if (identical(env, emptyenv())) {
-    return(NULL)
-  }
   parent <- parent.env(env)
-  if (exists(".shinyAsyncLabel", envir = parent, inherits = FALSE)) parent
+  if (!is.null(parent$.shinyAsyncLabel)) parent
 }
 
 isCallNamed <- function(call, name) {

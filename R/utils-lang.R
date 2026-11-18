@@ -153,6 +153,7 @@ labelAsyncFunction <- function(fun, label) {
     fun <- inject(coro::async(function() !!fn_body(src)), env)
   }
   env$.shinyAsyncLabel <- label
+  .globals$hasAsyncLabels <- TRUE
   fun
 }
 

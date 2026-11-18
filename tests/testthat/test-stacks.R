@@ -744,6 +744,17 @@ test_that("relabelAsyncFrames() leaves a stack with no await() code alone", {
   expect_identical(out, calls)
 })
 
+test_that("stacks are relabelled once code using await() is made", {
+  skip_if_not_installed("coro")
+  old <- .globals$hasAsyncLabels
+  on.exit(.globals$hasAsyncLabels <- old, add = TRUE)
+  .globals$hasAsyncLabels <- FALSE
+  r <- reactive(label = "r", 1)
+  expect_false(.globals$hasAsyncLabels)
+  r <- reactive(label = "r", await(promises::promise_resolve(1)))
+  expect_true(.globals$hasAsyncLabels)
+})
+
 test_that("stripStackTraces() leaves hidden frames out of fence matching", {
   deep <- c("user1", "..stacktraceoff..", "internal")
   current <- c("..stacktraceon..", "plumbing", "asyncFrame", "stop")

@@ -9,11 +9,38 @@
   Coding agents that use [btw](https://posit-dev.github.io/btw/) automatically
   find this skill when shiny is attached (#4427).
 
-## Bug fixes and minor improvements
+## Changes
 
 * `{watcher}` is now a required dependency and is always used for autoreload
   file watching, so it no longer needs to be installed separately. The old
   polling-based file watcher is removed (#4403).
+
+* A request to an unknown session method now gets an `Unknown method` error
+  response instead of a `do.call()` error. A websocket message whose `method`
+  is not a single string is now rejected (#4445).
+
+## Improvements
+
+* `ExtendedTask`'s OpenTelemetry "add to queue" log now has its message, and
+  invocations that were queued behind a running one now get their own span
+  (#4448, #4449).
+
+* `runApp()` now prints its `Listening on http://…` message only after the
+  listening socket is bound, so the announced URL always accepts connections
+  (@nbenn, #4400).
+
+* `session$destroy()`'s parameter is now documented as `namespace`, to match
+  its real name (#4419).
+
+* `testServer()` now gives a clear error when a `downloadHandler()`'s
+  `content` writes no file, instead of `could not find function "error"`
+  (#4450).
+
+* `testServer()` now gives a clear error when passed a function that is
+  neither a server nor a module server, instead of
+  `missing value where TRUE/FALSE needed` (#4452).
+
+## Bug fixes
 
 * Closing a session now leaves its reactives readable at their last value, so
   an `ExtendedTask`, promise, or `later()` callback that finishes after the
@@ -28,10 +55,6 @@
 
 * A session whose outputs throw an unhandled error while being flushed is now
   closed, instead of the error escaping the server loop (#4444).
-
-* A request to an unknown session method now gets an `Unknown method` error
-  response instead of a `do.call()` error. A websocket message whose `method`
-  is not a single string is now rejected (#4445).
 
 * A binary websocket message that has only a JSON part now passes only its
   own arguments to the requested method, instead of two extra `NULL`/JSON
@@ -54,31 +77,12 @@
   setting like the rest of shiny, so in `devmode()` a page with a
   `dateInput()` loads every datepicker locale file (#4461).
 
-* `ExtendedTask`'s OpenTelemetry "add to queue" log now has its message, and
-  invocations that were queued behind a running one now get their own span
-  (#4448, #4449).
-
 * `invalidateLater()`, `reactivePoll()` and `reactiveTimer()` work again with a
   custom session object that has no `onDestroy()` method. Since 1.14.0 they
   failed with `attempt to apply non-function` (#4485).
 
-* `runApp()` now prints its `Listening on http://…` message only after the
-  listening socket is bound, so the announced URL always accepts connections
-  (@nbenn, #4400).
-
-* `session$destroy()`'s parameter is now documented as `namespace`, to match
-  its real name (#4419).
-
-* `testServer()` now gives a clear error when a `downloadHandler()`'s
-  `content` writes no file, instead of `could not find function "error"`
-  (#4450).
-
 * `testServer()` now removes a module's outputs and downloads when
   `session$destroy(id)` is called (#4451).
-
-* `testServer()` now gives a clear error when passed a function that is
-  neither a server nor a module server, instead of
-  `missing value where TRUE/FALSE needed` (#4452).
 
 # shiny 1.14.0
 

@@ -306,6 +306,9 @@ initAutoReloadMonitor <- function(dir) {
   if (!get_devmode_option("shiny.autoreload", FALSE)) {
     return(function(){})
   }
+  if (!autoReloadWatcherAvailable()) {
+    return(function(){})
+  }
 
   filePattern <- getOption(
     "shiny.autoreload.pattern",
@@ -336,6 +339,33 @@ initAutoReloadMonitor <- function(dir) {
   watcher$start()
 
   invisible(watcher$stop)
+}
+
+# Autoreload needs {watcher}, which is only suggested. In an interactive
+# session, offer to install it. Otherwise (or if the user declines), warn and
+# run the app without autoreload instead of stopping it.
+autoReloadWatcherAvailable <- function() {
+  if (rlang::is_installed("watcher", version = "0.2.0")) {
+    return(TRUE)
+  }
+
+  tryCatch(
+    {
+      rlang::check_installed(
+        "watcher",
+        version = "0.2.0",
+        reason = "to use `shiny.autoreload`."
+      )
+      TRUE
+    },
+    error = function(e) {
+      rlang::warn(c(
+        "Autoreload is off because the {watcher} package is not installed.",
+        i = "Install it with `install.packages(\"watcher\")`."
+      ))
+      FALSE
+    }
+  )
 }
 
 #' Load an app's supporting R files

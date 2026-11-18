@@ -66,7 +66,9 @@ getShinyOption <- function(name, default = NULL) {
 #'   allows for fast feedback loops when tweaking Shiny UI.
 #'
 #'   Shiny uses the \pkg{watcher} package to efficiently monitor for changes,
-#'   but this feature is still intended only for development.
+#'   but this feature is still intended only for development. If \pkg{watcher}
+#'   is not installed, an interactive session offers to install it; otherwise,
+#'   Shiny warns and runs the app without autoreload.
 #'
 #'   You can customize the file patterns Shiny will monitor by setting the
 #'   shiny.autoreload.pattern option. For example, to monitor only `ui.R`:

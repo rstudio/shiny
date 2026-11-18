@@ -93,11 +93,10 @@ Imports:
     otel,
     promises (>= 1.5.0),
     R6 (>= 2.0),
-    rlang (>= 0.4.10),
+    rlang (>= 1.0.0),
     sourcetools,
     tools,
     utils,
-    watcher (>= 0.2.0),
     withr,
     xtable
 Suggests:
@@ -120,6 +119,7 @@ Suggests:
     shinytest2,
     showtext,
     testthat (>= 3.2.1),
+    watcher (>= 0.2.0),
     yaml
 Config/Needs/check: shinyjs
 Config/roxygen2/version: 8.1.1

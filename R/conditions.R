@@ -373,6 +373,7 @@ doCaptureStack <- function(e) {
 #   plumbing. The deep stack trace shows where the code started.
 # No other call is replaced, so a full stack trace still shows every frame.
 # `atThen` is TRUE when the stack is saved at a `then()` rather than an error.
+# `getFunction(j)` is the function of frame `j`; replaced in tests.
 #
 # When the stack has such a frame, these attrs are set on the result:
 # - "asyncLabel": the label of the innermost one;
@@ -380,7 +381,13 @@ doCaptureStack <- function(e) {
 # - "asyncHidden": a logical vector, TRUE for the frames to hide. They are
 #   hidden by `stripStackTraces()`, which also leaves them out of fence
 #   matching, so fences inside a hidden region can't hide anything else.
-relabelAsyncFrames <- function(calls, parents, frames, atThen = FALSE) {
+relabelAsyncFrames <- function(
+  calls,
+  parents,
+  frames,
+  atThen = FALSE,
+  getFunction = sys.function
+) {
   innermost <- NULL
   asyncFrames <- integer()
   hidden <- rep(FALSE, length(calls))
@@ -417,7 +424,10 @@ relabelAsyncFrames <- function(calls, parents, frames, atThen = FALSE) {
     # Hide from the call to the async function, if this is before the first
     # `await()`; otherwise from the outermost frame.
     # Scan back rather than follow `parents`: a frame can list itself (or a
-    # later frame) as its parent, which breaks the chain
+    # later frame) as its parent, which breaks the chain. Check the function
+    # too, not only the name: labels such as `observe` are shared, and after
+    # an `await()` another frame can have the same one (when the event loop is
+    # run from inside other reactive code).
     if (is.null(outermost)) {
       # Frames at or before the last `..stacktracefloor..` are handled by
       # `stripStackTraces()`, so the outermost frame to hide is the one just
@@ -427,7 +437,10 @@ relabelAsyncFrames <- function(calls, parents, frames, atThen = FALSE) {
     }
     first <- outermost
     for (j in rev(seq_len(parent))) {
-      if (isCallNamed(calls[[j]], label)) {
+      if (
+        isCallNamed(calls[[j]], label) &&
+          isAsyncFunctionFor(getFunction(j), labelEnvs[[i]])
+      ) {
         first <- j
         break
       }
@@ -477,6 +490,12 @@ relabelAsyncFrames <- function(calls, parents, frames, atThen = FALSE) {
 asyncLabelEnv <- function(env) {
   parent <- parent.env(env)
   if (!is.null(parent$.shinyAsyncLabel)) parent
+}
+
+# Whether `fun` is the async function whose label is kept in `labelEnv`
+isAsyncFunctionFor <- function(fun, labelEnv) {
+  inherits(fun, "coro_async") &&
+    identical(environment(coroSourceFn(fun)), labelEnv)
 }
 
 isCallNamed <- function(call, name) {

@@ -605,6 +605,39 @@ test_that("an error after await() keeps the deep stack when run from a nested ev
   expect_no_match(out$trace, "eval_bare|evalq|onFulfilled|run_now")
 })
 
+test_that("an error after await() is not matched to another frame with its label", {
+  skip_if_not_installed("coro")
+  out <- catchAsyncError(function(caught) {
+    p <- isolate(captureStackTraces(renderText({
+      x <- await(promises::promise_resolve(1))
+      stop("boom after await, label shared")
+    })()))
+    promises::catch(p, caught)
+    # Code with the same label runs the event loop, so the code after
+    # `await()` runs under its frames
+    isolate(renderText({
+      wait_for_it() # outer renderText
+      "done"
+    })())
+  })
+  earlier <- which(out$trace == "From earlier call:")
+  expect_length(earlier, 1)
+  errorTrace <- out$trace[seq_len(earlier - 1)]
+  expect_match(
+    errorTrace,
+    paste0(
+      "renderText (coro::async) [",
+      srcLoc('stop("boom after await, label shared")')
+    ),
+    fixed = TRUE,
+    all = FALSE
+  )
+  # Frames outside the code after `await()`, including the other
+  # renderText's, are hidden, as when the event loop is not run from inside
+  # other code
+  expect_match(errorTrace, ": (stop|renderText \\(coro::async\\) \\[.*)$")
+})
+
 test_that("a full stack trace keeps every frame of code using await()", {
   skip_if_not_installed("coro")
   out <- catchAsyncError(function(caught) {
@@ -652,8 +685,12 @@ test_that("relabelAsyncFrames() handles a frame that is its own parent", {
 test_that("relabelAsyncFrames() names only the innermost frame of each async function", {
   # coro's own setup frames can also run in children of the async function's
   # env; only the innermost one runs the user's code
-  labelEnv <- new.env()
-  labelEnv$.shinyAsyncLabel <- "observe"
+  skip_if_not_installed("coro")
+  asyncFun <- labelAsyncFunction(
+    awaitToAsyncFunction(function() await(1)),
+    "observe"
+  )
+  labelEnv <- environment(coroSourceFn(asyncFun))
   calls <- list(quote(outer()), quote(observe()), quote(local()), quote(eval()), quote(evalq()), quote(stop("x")))
   parents <- c(0L, 1L, 2L, 3L, 4L, 5L)
   frames <- list(
@@ -664,7 +701,11 @@ test_that("relabelAsyncFrames() names only the innermost frame of each async fun
     new.env(parent = labelEnv),
     globalenv()
   )
-  out <- relabelAsyncFrames(calls, parents, frames)
+  # Frame 2 calls the async function
+  functionsWith <- function(caller) {
+    function(j) if (j == 2L) caller else identity
+  }
+  out <- relabelAsyncFrames(calls, parents, frames, getFunction = functionsWith(asyncFun))
   expect_identical(attr(out, "asyncFrames"), 5L)
   expect_identical(out[[5]], call("observe (coro::async)"))
   # Hidden from the call to the async function to the frame's parent
@@ -673,6 +714,18 @@ test_that("relabelAsyncFrames() names only the innermost frame of each async fun
     c(FALSE, TRUE, TRUE, TRUE, FALSE, FALSE)
   )
   expect_identical(out[-5], calls[-5])
+
+  # A frame with the same name that calls another function is not the
+  # caller, so everything outside is hidden, as after an `await()`
+  other <- labelAsyncFunction(
+    awaitToAsyncFunction(function() await(2)),
+    "observe"
+  )
+  out <- relabelAsyncFrames(calls, parents, frames, getFunction = functionsWith(other))
+  expect_identical(
+    attr(out, "asyncHidden"),
+    c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
+  )
 })
 
 test_that("coroAwaitSrcref() reads the await() line from coro's then() call", {

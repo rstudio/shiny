@@ -3,10 +3,11 @@
 ## New features
 
 * shiny now ships an agent skill in `inst/skills/shiny-for-r/` that follows
-  the [Agent Skills](https://agentskills.io) convention. Coding agents that
-  use [btw](https://posit-dev.github.io/btw/) find it automatically when
-  shiny is attached. Use `btw::btw_skill_install_package("shiny")` to copy it
-  into a project (#4427).
+  the [Agent Skills](https://agentskills.io) convention. Installing this skill
+  can be done via `btw::btw_skill_install_package("shiny")`, which can install
+  it for a project (the default) or at the user level (`scope = "user"`).
+  Coding agents that use [btw](https://posit-dev.github.io/btw/) automatically
+  find this skill when shiny is attached (#4427).
 
 ## Bug fixes and minor improvements
 

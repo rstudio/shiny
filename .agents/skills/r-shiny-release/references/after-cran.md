@@ -10,8 +10,29 @@ Do these in order once CRAN has accepted the release.
    usethis::use_github_release()
    ```
    The release name is `shiny X.Y.Z` and the body is the NEWS section.
-3. `usethis::use_dev_version(push = TRUE)` from `main`, then sync
-   `package.json` and run `npm run build` as for the version bump.
+   - It tags the `SHA` in `CRAN-SUBMISSION`, which is the rc branch commit
+     that was submitted. That commit is not on `main` after a squash merge.
+     First check that the squash commit has the same files
+     (`git diff <submitted-sha> origin/main` is empty), then set `SHA:` in
+     `CRAN-SUBMISSION` to the squash commit.
+   - `submit_cran()` does not write `CRAN-SUBMISSION` in a git worktree
+     (where `.git` is a file). If it is missing, write it by hand with
+     `Version`, `Date` and `SHA`.
+   - It pushes the current branch. If the rc branch was deleted on merge,
+     this pushes it again; delete it afterward.
+3. Bump to the dev version in a PR. `main` requires PRs, so do not use
+   `push = TRUE`:
+   ```bash
+   git checkout -b <user>/dev-version-X.Y.Z.9000 origin/main
+   Rscript -e 'usethis::use_dev_version(push = FALSE)'
+   Rscript tools/updatePackageJsonVersion.R
+   npm run build
+   ```
+   Check that the built files in `inst/www/shared/` only change their version
+   text (the source map also shifts columns). Commit as
+   `chore: Increment version number to X.Y.Z.9000`, open a PR with the same
+   title, and squash merge it once CI passes. Check the issue's
+   `use_dev_version` box after the merge.
 4. Publish the blog post. The issue's "Add link to blog post in pkgdown news
    menu" item does not apply: shiny has no pkgdown site of its own
    (`tools/documentation/pkgdown.yml` only defines the reference index that

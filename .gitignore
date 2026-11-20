@@ -33,3 +33,4 @@ madge.svg
 !/.agents/skills/
 /.agents/skills/*
 !/.agents/skills/memory-bank/
+!/.agents/skills/r-shiny-release/

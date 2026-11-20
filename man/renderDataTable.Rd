@@ -25,7 +25,7 @@ renderDataTable(
 
 \item{options}{A list of initialization options to be passed to DataTables,
 or a function to return such a list.  You can find a complete list of
-options at \url{https://datatables.net/reference/option/}.
+options at \url{https://datatables.net/ref/core/option/}.
 
 Any top-level strings with class \code{"AsIs"} (as created by \code{\link[=I]{I()}}) will be
 evaluated in JavaScript. This is useful when the type of the option value

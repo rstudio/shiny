@@ -857,7 +857,7 @@ downloadHandler <- function(filename, content, contentType=NULL, outputArgs=list
 #' @inheritParams renderTable
 #' @param options A list of initialization options to be passed to DataTables,
 #'   or a function to return such a list.  You can find a complete list of
-#'   options at <https://datatables.net/reference/option/>.
+#'   options at <https://datatables.net/ref/core/option/>.
 #'
 #'   Any top-level strings with class `"AsIs"` (as created by [I()]) will be
 #'   evaluated in JavaScript. This is useful when the type of the option value

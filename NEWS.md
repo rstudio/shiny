@@ -1,5 +1,9 @@
 # shiny (development version)
 
+## Bug fixes
+
+* The file upload progress bar keeps the bytes already uploaded when the next file starts (#4493).
+
 # shiny 1.15.0
 
 ## New features

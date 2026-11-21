@@ -180,7 +180,10 @@ class FileUploader extends FileProcessor {
     );
   }
   onFile(file: File, cont: () => void): void {
-    this.onProgress(file, 0);
+    this.onProgress(
+      file,
+      this.totalBytes > 0 ? this.progressBytes / this.totalBytes : 0,
+    );
 
     $.ajax(this.uploadUrl, {
       type: "POST",
@@ -193,7 +196,7 @@ class FileUploader extends FileProcessor {
 
         if (xhrVal.upload) {
           xhrVal.upload.onprogress = (e) => {
-            if (e.lengthComputable) {
+            if (e.lengthComputable && this.totalBytes > 0) {
               this.onProgress(
                 file,
                 (this.progressBytes + e.loaded) / this.totalBytes,

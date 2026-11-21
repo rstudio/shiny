@@ -1787,7 +1787,10 @@
       );
     }
     onFile(file, cont) {
-      this.onProgress(file, 0);
+      this.onProgress(
+        file,
+        this.totalBytes > 0 ? this.progressBytes / this.totalBytes : 0
+      );
       import_jquery13.default.ajax(this.uploadUrl, {
         type: "POST",
         cache: false,
@@ -1797,7 +1800,7 @@
           const xhrVal = import_jquery13.default.ajaxSettings.xhr();
           if (xhrVal.upload) {
             xhrVal.upload.onprogress = (e4) => {
-              if (e4.lengthComputable) {
+              if (e4.lengthComputable && this.totalBytes > 0) {
                 this.onProgress(
                   file,
                   (this.progressBytes + e4.loaded) / this.totalBytes

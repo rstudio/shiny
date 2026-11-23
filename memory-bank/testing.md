@@ -66,7 +66,7 @@ reviewing `snapshot_review()`. CI uploads failed snapshots as an artifact
 - `skip_if(!isTRUE(as.logical(Sys.getenv("CI"))), ...)`: in `test-devmode.R` (only runs in CI).
 - `skip_if_shiny_otel_tracer_is_enabled()`: stack-trace tests, which differ when otel is active.
 - `skip_if_not_shinytest2()`: skip on CRAN, skip on Windows/Solaris/emscripten, skip if shinytest2 is missing. Browser tests run on macOS and Linux. They take no screenshots, so results don't depend on the OS.
-- Browser tests run the app in a subprocess. Under `devtools::test()` that subprocess loads the **installed** shiny, not your working tree, so a test for a new fix fails until you `devtools::install()`. `devtools::load_all()` then `testthat::test_file()` uses the working tree. CI installs the package first, so it is not affected.
+- Browser tests run the app in a subprocess. callr sends `app_fn` to it, and under `devtools::test()` the function's environment inherits from the shiny namespace, which would make the subprocess load the **installed** shiny. `launch_test_app()` sets `environment(app_fn) <- globalenv()` to avoid this, so `library(shiny)` inside `app_fn` loads the working tree. Without this step, shinytest2's `library()` shim only helps packages other than shiny. Because of this, `app_fn` can't use variables from the test file; define everything inside it. Under `R CMD check` shinytest2 skips the shim and the subprocess uses the installed (just built) package.
 
 ## In-process server tests vs browser tests
 

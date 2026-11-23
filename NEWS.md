@@ -1,38 +1,92 @@
 # shiny (development version)
 
-* Module ids that are character vectors, such as `c("a", "b")`, work again in `callModule()`, `moduleServer()`, `testServer()` and `session$destroy()`. Since 1.14.0 they failed with ``Invalid `namespace` ``. They are joined the same way `NS()` joins them, so `c("a", "b")` becomes `"a-b"`. (#4447)
+# shiny 1.15.0
 
-* If flushing a session's outputs throws an unhandled error, that session is now closed as intended, instead of the error escaping the server loop. (#4444)
+## New features
 
-* A request to an unknown session method now gets an `Unknown method` error response instead of a `do.call()` error. A websocket message whose `method` is not a single string is now rejected; a `method` of `1` used to rerun the server function. (#4445)
+* shiny now ships an agent skill in `inst/skills/shiny-for-r/` that follows
+  the [Agent Skills](https://agentskills.io) convention. Installing this skill
+  can be done via `btw::btw_skill_install_package("shiny")`, which can install
+  it for a project (the default) or at the user level (`scope = "user"`).
+  Coding agents that use [btw](https://posit-dev.github.io/btw/) automatically
+  find this skill when shiny is attached (#4427).
 
-* A binary websocket message that has only a JSON part no longer passes two extra `NULL`/JSON arguments to the requested method. (#4446)
+## Changes
 
-* `ExtendedTask` OpenTelemetry fixes: the "add to queue" log now has its message, and invocations that were queued behind a running one now get their own span. (#4448, #4449)
+* `{watcher}` is now a required dependency and is always used for autoreload
+  file watching, so it no longer needs to be installed separately. The old
+  polling-based file watcher is removed (#4403).
 
-* `testServer()` fixes: a `downloadHandler()` whose `content` writes no file now gives a clear error instead of `could not find function "error"`; `session$destroy(id)` now also removes that module's outputs and downloads; and passing a function that is neither a server nor a module server now gives a clear error instead of `missing value where TRUE/FALSE needed`. (#4450, #4451, #4452)
+* A request to an unknown session method now gets an `Unknown method` error
+  response instead of a `do.call()` error. A websocket message whose `method`
+  is not a single string is now rejected (#4445).
 
-* With `options(shiny.minified = FALSE)`, `dateInput(language =)` now loads its locale instead of falling back to English. The datepicker and `sliderInput()` now follow `devmode()`'s `shiny.minified` setting like the rest of shiny, so in `devmode()` a page with a `dateInput()` loads every datepicker locale file. (#4461)
-
-* Fixed #4281, #3251: `dateInput()`'s `datesdisabled` now works when `format` is not the default `yyyy-mm-dd`. The dates are now converted to real dates on the client, the same way `min`/`max` already are, instead of being parsed by bootstrap-datepicker with the display format. (#4434)
+## Improvements
 
 * Fixed #4436: deferred input values now share one queued send, avoiding empty WebSocket messages when several inputs are set in the same batch. (#4438)
 
-* Added an agent skill (`inst/skills/shiny-for-r/`) following the
-  [Agent Skills](https://agentskills.io) convention. Coding agents using
-  [btw](https://posit-dev.github.io/btw/) discover it automatically when
-  shiny is attached; use `btw::btw_skill_install_package("shiny")` to copy
-  it into a project. (#4427)
+* `ExtendedTask`'s OpenTelemetry "add to queue" log now has its message, and
+  invocations that were queued behind a running one now get their own span
+  (#4448, #4449).
 
-* Fixed #4424: reconnecting no longer throws `the output is in an unexpected state of: 'value'` errors in the client console, and no longer drops the first output value the reconnected session sends. The client's output progress state machine kept the previous session's state across the reconnect, so the new session's `recalculating`/`recalculated`/value messages all looked like illegal transitions; since the state update runs before the message handlers, each throw also skipped the handler that would have rendered the value, leaving outputs showing the old session's results. (#4425)
+* `runApp()` now prints its `Listening on http://…` message only after the
+  listening socket is bound, so the announced URL always accepts connections
+  (@nbenn, #4400).
 
-* Fixed #4420: closing a session no longer destroys the reactive values and expressions created in it, so async work that outlives the connection does not error. Since 1.14.0, refreshing the page while an `ExtendedTask` (or any promise or `later()` callback) was in flight could raise ``Can't access reactive `<NAME>`; its module session has been destroyed`` once it settled. Reactives are now left readable at their last value on close and reclaimed by garbage collection, while an explicit `session$destroy(namespace)` on a live session still tears them down. (#4421, #4423)
+* `session$destroy()`'s parameter is now documented as `namespace`, to match
+  its real name (#4419).
 
-* The `session$destroy()` parameter is now documented as `namespace` to match the implemented argument name. (#4419)
+* `testServer()` now gives a clear error when a `downloadHandler()`'s
+  `content` writes no file, instead of `could not find function "error"`
+  (#4450).
 
-* `{watcher}` is now a required dependency and is always used for autoreload file watching, so it no longer needs to be installed separately. The legacy polling-based file watcher has been removed. (#4403)
+* `testServer()` now gives a clear error when passed a function that is
+  neither a server nor a module server, instead of
+  `missing value where TRUE/FALSE needed` (#4452).
 
-* The `Listening on http://…` startup message is now printed only after the listening socket has been bound, so the announced URL is guaranteed to be accepting connections. Previously the message could be emitted just before the bind, leaving a window (widened under load) where the advertised port refused connections. (thanks @nbenn, #4400)
+## Bug fixes
+
+* Closing a session now leaves its reactives readable at their last value, so
+  an `ExtendedTask`, promise, or `later()` callback that finishes after the
+  page is refreshed no longer errors (#4420, #4421, #4423).
+
+* Reconnecting to a session now renders the first output value that the new
+  session sends, and no longer throws
+  `the output is in an unexpected state of: 'value'` errors in the browser
+  console. Before, the client kept the old session's output state across the
+  reconnect, so outputs could keep showing the old session's results
+  (#4424, #4425).
+
+* A session whose outputs throw an unhandled error while being flushed is now
+  closed, instead of the error escaping the server loop (#4444).
+
+* A binary websocket message that has only a JSON part now passes only its
+  own arguments to the requested method, instead of two extra `NULL`/JSON
+  arguments (#4446).
+
+* `callModule()`, `moduleServer()`, `testServer()` and `session$destroy()`
+  work again with module ids that are character vectors, such as
+  `c("a", "b")`. Since 1.14.0 they failed with ``Invalid `namespace` ``. The
+  parts are joined the same way `NS()` joins them, so `c("a", "b")` becomes
+  `"a-b"` (#4447).
+
+* `dateInput()`'s `datesdisabled` now works when `format` is not the default
+  `yyyy-mm-dd`. The dates are now converted to real dates on the client, the
+  same way `min` and `max` already are, instead of being parsed by
+  bootstrap-datepicker with the display format (#3251, #4281, #4434).
+
+* `dateInput(language =)` now loads its locale with
+  `options(shiny.minified = FALSE)`, instead of falling back to English. The
+  datepicker and `sliderInput()` now follow `devmode()`'s `shiny.minified`
+  setting like the rest of shiny, so in `devmode()` a page with a
+  `dateInput()` loads every datepicker locale file (#4461).
+
+* `invalidateLater()`, `reactivePoll()` and `reactiveTimer()` work again with a
+  custom session object that has no `onDestroy()` method. Since 1.14.0 they
+  failed with `attempt to apply non-function` (#4485).
+
+* `testServer()` now removes a module's outputs and downloads when
+  `session$destroy(id)` is called (#4451).
 
 # shiny 1.14.0
 

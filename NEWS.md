@@ -23,6 +23,8 @@
 
 ## Improvements
 
+* Fixed #4436: deferred input values now share one queued send, avoiding empty WebSocket messages when several inputs are set in the same batch. (#4438)
+
 * `ExtendedTask`'s OpenTelemetry "add to queue" log now has its message, and
   invocations that were queued behind a running one now get their own span
   (#4448, #4449).

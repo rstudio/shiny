@@ -12,6 +12,7 @@
   find this skill when shiny is attached (#4427).
 
 ## Changes
+* Resolved [#2519](https://github.com/rstudio/shiny/issues/2519): While running the app in showcase mode, clicking the `AuthorUrl` provided in the metadata will now open the window in a new tab instead of navigating away from the application.
 
 * `{watcher}` is now a required dependency and is always used for autoreload
   file watching, so it no longer needs to be installed separately. The old

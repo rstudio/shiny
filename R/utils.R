@@ -1502,7 +1502,8 @@ wrapFunctionLabel <- function(func, name, ..stacktraceon = FALSE, dots = TRUE) {
     name <- substr(name, 1, 5000)
   }
 
-  if (inherits(func, "coro_async")) {
+  async <- inherits(func, "coro_async")
+  if (async) {
     func <- labelAsyncFunction(func, name)
     # coro looks these up from the wrapper below, which calls `func`. NULL
     # leaves coro's own.
@@ -1516,24 +1517,22 @@ wrapFunctionLabel <- function(func, name, ..stacktraceon = FALSE, dots = TRUE) {
   assign(name, func, environment())
   registerDebugHook(name, environment(), name)
 
-  if (isTRUE(dots)) {
-    if (..stacktraceon) {
-      # We need to wrap the `...` in `!!quote(...)` so that R CMD check won't
-      # complain about "... may be used in an incorrect context"
-      body <- expr({ ..stacktraceon..((!!name)(!!quote(...))) })
-    } else {
-      body <- expr({ (!!name)(!!quote(...)) })
-    }
-    relabelWrapper <- new_function(pairlist2(... =), body, environment())
-  } else {
-    # Same logic as when `dots = TRUE`, but without the `...`
-    if (..stacktraceon) {
-      body <- expr({ ..stacktraceon..((!!name)()) })
-    } else {
-      body <- expr({ (!!name)() })
-    }
-    relabelWrapper <- new_function(list(), body, environment())
+  # We need to wrap the `...` in `!!quote(...)` so that R CMD check won't
+  # complain about "... may be used in an incorrect context"
+  body <- if (isTRUE(dots)) expr((!!name)(!!quote(...))) else expr((!!name)())
+  if (async) {
+    # Code using `await()` sets up its own stack traces: here until the first
+    # `await()`, and in `asyncCallback()` after each one
+    body <- expr(withCallingHandlers(!!body, error = doCaptureAsyncStack))
   }
+  if (..stacktraceon) {
+    body <- expr(..stacktraceon..(!!body))
+  }
+  relabelWrapper <- new_function(
+    if (isTRUE(dots)) pairlist2(... =) else list(),
+    expr({ !!body }),
+    environment()
+  )
 
   # Preserve the original function that was passed in; is used for caching.
   attr(relabelWrapper, "wrappedFunc") <- func

@@ -223,17 +223,30 @@ JS side, in `srcts/src/bindings/`:
   `fn_body()`/`body()` directly.
   Stack traces: `wrapFunctionLabel()` records its label in the coro
   function's env with `labelAsyncFunction()` (which makes a new coro function
-  if one already has another label, as for `bindEvent()`), and `relabelAsyncFrames()` (`R/conditions.R`, called when a
-  stack is captured) uses it for the error call and to name coro's frame that
-  runs the user's code. It marks coro's frames around it in an `asyncHidden`
-  attr, which `stripStackTraces()` hides (and leaves out of fence matching);
-  the calls themselves are kept, so full stack traces show them. Of the
-  stacks saved at a `then()`, only those for coro's `then()` at an `await()`
-  are relabelled. The wrapper binds `.__coro_async_ops__.` (made by
-  `shimAsyncOps()`), which coro looks up from where it is called (see
-  `?coro::async_ops`). Its `then()` calls the one coro would otherwise use,
-  with `.globals$inCoroThen` set for the promise domain. So other promises,
-  including ones started from code using `await()`, pay nothing.
+  if one already has another label, as for `bindEvent()`).
+  `relabelAsyncFrames()` (`R/conditions.R`) uses it for the error call and to
+  name coro's frame that runs the user's code. It marks coro's frames around
+  it in an `asyncHidden` attr, which `stripStackTraces()` hides (and leaves
+  out of fence matching); the calls themselves are kept, so full stack traces
+  show them.
+  No global state says when to relabel: the code using `await()` does it for
+  its own stacks, so it is right whichever promise domain or session runs
+  next, and other code pays nothing. There are two places, both with
+  `doCaptureAsyncStack()` as their error handler. Up to the first `await()`
+  it is the `wrapFunctionLabel()` wrapper. After each `await()` it is the
+  callback made by `asyncCallback()`, which also holds the relabelled stack
+  saved at that `await()` and puts it on the deep stack while the code runs.
+  coro is handed that callback through `.__coro_async_ops__.` (made by
+  `shimAsyncOps()`), which the wrapper binds and coro looks up from where it
+  is called (see `?coro::async_ops`). `doCaptureAsyncStack()` also relabels a
+  stack that a handler nearer the error saved (as when the code reads a
+  reactive that fails), but only while those frames still run
+  (`isRunningStack()`).
+  `asyncCallback()` resumes coro with `callWithoutCompiling()`: coro makes a
+  new function body for each run, so R's JIT would compile it on every run
+  (10 ms or more), for one use.
+  `sys.calls()` and `sys.frames()` are pairlists: loop over them or use
+  `as.list()`; indexing them in a loop is slow.
 - `ExtendedTask` (`R/extended-task.R`) keeps private `reactiveVal`s for
   status, value and error. `invoke()` runs `func` under
   `maskReactiveContext()` and queues the call if a run is already active.

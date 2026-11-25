@@ -793,7 +793,7 @@ test_that("a full stack trace keeps every frame of code using await()", {
   full <- capture.output(printStackTrace(out$cond, full = TRUE), type = "message")
   # Frames that are hidden by default
   expect_match(full, "eval_bare", fixed = TRUE, all = FALSE)
-  expect_match(full, "domain$wrapOnFulfilled", fixed = TRUE, all = FALSE)
+  expect_match(full, "asyncCallback", fixed = TRUE, all = FALSE)
   expect_match(full, ": <reactive:r>$", all = FALSE)
   # Every `..stacktraceon..` in the trace is a real call, which has arguments
   traces <- c(
@@ -938,48 +938,107 @@ test_that("relabelAsyncFrames() leaves a stack with no await() code alone", {
   expect_identical(out, calls)
 })
 
-test_that("stacks are relabelled once code using await() is made", {
-  skip_if_not_installed("coro")
-  old <- .globals$hasAsyncLabels
-  on.exit(.globals$hasAsyncLabels <- old, add = TRUE)
-  .globals$hasAsyncLabels <- FALSE
-  r <- reactive(label = "r", 1)
-  expect_false(.globals$hasAsyncLabels)
-  r <- reactive(label = "r", await(promises::promise_resolve(1)))
-  expect_true(.globals$hasAsyncLabels)
-})
+# ---- await(): who relabels a stack -------------------------------------------
+# Code using `await()` relabels its own stacks (see `doCaptureAsyncStack()` and
+# `asyncCallback()`). Nothing global says that such code exists or is running,
+# so these tests run it in turns with other code.
 
-test_that("only stacks saved at coro's then() for an await() are relabelled", {
-  skip_if_not_installed("coro")
-  relabelled <- 0L
+# Counts the calls to `relabelAsyncFrames()` made while the test runs
+local_count_relabels <- function(env = parent.frame()) {
+  counts <- new.env()
+  counts$atThen <- 0L
+  counts$atError <- 0L
   origRelabel <- relabelAsyncFrames
-  # Count only stacks saved at a `then()`; errors are always relabelled
-  local_mocked_bindings(relabelAsyncFrames = function(..., atThen = FALSE) {
-    if (atThen) relabelled <<- relabelled + 1L
-    origRelabel(..., atThen = atThen)
-  })
-  # Code using `await()` exists, but only promises outside it run
+  local_mocked_bindings(
+    relabelAsyncFrames = function(..., atThen = FALSE) {
+      if (atThen) {
+        counts$atThen <- counts$atThen + 1L
+      } else {
+        counts$atError <- counts$atError + 1L
+      }
+      origRelabel(..., atThen = atThen)
+    },
+    .env = env
+  )
+  counts
+}
+
+# A promise, and `resolve()` to resolve it and run what was waiting for it
+pendingPromise <- function() {
+  resolver <- NULL
+  promise <- promises::promise(function(resolve, reject) resolver <<- resolve)
+  list(
+    promise = promise,
+    resolve = function(value = 1) {
+      resolver(value)
+      wait_for_it()
+    }
+  )
+}
+
+# Run `expr` the way `runApp()` does. `expr` is given `caught(name)`, which
+# makes a function that saves an error as `name`. Returns the errors.
+catchAsyncErrors <- function(expr) {
+  errors <- list()
+  caught <- function(name) function(e) errors[[name]] <<- e
+  ..stacktraceoff..(
+    ..stacktracefloor..({
+      expr(caught)
+      wait_for_it()
+    })
+  )
+  errors
+}
+
+printedTrace <- function(cond) {
+  capture.output(printStackTrace(cond), type = "message")
+}
+
+hasAsyncAttrs <- function(calls) {
+  !is.null(attr(calls, "asyncFrames", exact = TRUE)) ||
+    !is.null(attr(calls, "asyncHidden", exact = TRUE))
+}
+
+test_that("code without await() is never relabelled", {
+  skip_if_not_installed("coro")
+  counts <- local_count_relabels()
+  # Code using `await()` exists, and has run
   r <- reactive(label = "r", await(promises::promise_resolve(1)))
-  printedObserverError(function() {
+  errors <- catchAsyncErrors(function(caught) {
+    observe(captureStackTraces(promises::catch(r(), caught("unused"))))
+    flushReact()
+  })
+  expect_length(errors, 0)
+  awaitCounts <- c(counts$atThen, counts$atError)
+
+  errors <- catchAsyncErrors(function(caught) {
     observe({
-      promises::then(promises::promise_resolve(1), function(x) {
+      p <- promises::then(promises::promise_resolve(1), function(x) {
         promises::then(promises::promise_resolve(x), function(y) stop("plain boom"))
       })
+      captureStackTraces(promises::catch(p, caught("plain")))
     })
+    observe(tryCatch(
+      captureStackTraces(stop("sync boom")),
+      error = caught("sync")
+    ))
+    flushReact()
   })
-  expect_identical(relabelled, 0L)
+  expect_named(errors, c("sync", "plain"))
+  expect_identical(c(counts$atThen, counts$atError), awaitCounts)
+  for (e in errors) {
+    expect_false(hasAsyncAttrs(conditionStackTrace(e)))
+    for (deep in attr(e, "deep.stack.trace", exact = TRUE)) {
+      expect_false(hasAsyncAttrs(deep))
+    }
+  }
+})
 
-  # One `await()`. Each nested stack trace promise domain saves a stack for
-  # coro's `then()`, so count them
-  printedObserverError(function() {
-    observe(await(promises::promise_resolve(1)))
-  })
-  perAwait <- relabelled
-  expect_gt(perAwait, 0L)
-
+test_that("each await() is relabelled once, and its error once", {
+  skip_if_not_installed("coro")
+  counts <- local_count_relabels()
   # Two `await()`s, then a plain promise chain started from that code: only
-  # coro's two `then()`s count
-  relabelled <- 0L
+  # the two `await()`s count, however many promise domains are entered
   out <- printedObserverError(function() {
     observe({
       x <- await(promises::promise_resolve(1))
@@ -989,9 +1048,312 @@ test_that("only stacks saved at coro's then() for an await() are relabelled", {
       })
     })
   })
-  expect_identical(relabelled, 2L * perAwait)
   expect_match(out$heading, "chain boom", fixed = TRUE)
-  expect_false(.globals$inCoroThen)
+  expect_identical(counts$atThen, 2L)
+  expect_identical(counts$atError, 0L)
+
+  out <- printedObserverError(function() {
+    observe({
+      x <- await(promises::promise_resolve(1))
+      stop("await boom")
+    })
+  })
+  expect_match(out$heading, "await boom", fixed = TRUE)
+  expect_identical(counts$atThen, 3L)
+  expect_identical(counts$atError, 1L)
+})
+
+test_that("code using await() that takes turns keeps its own stack traces", {
+  skip_if_not_installed("coro")
+  counts <- local_count_relabels()
+  a <- list(pendingPromise(), pendingPromise())
+  b <- list(pendingPromise(), pendingPromise())
+  plain <- list(pendingPromise(), pendingPromise())
+
+  errors <- catchAsyncErrors(function(caught) {
+    rA <- reactive(label = "rA", {
+      x <- await(a[[1]]$promise) # A1
+      y <- await(a[[2]]$promise) # A2
+      stop("boom A")
+    })
+    rB <- reactive(label = "rB", {
+      x <- await(b[[1]]$promise) # B1
+      y <- await(b[[2]]$promise) # B2
+      stop("boom B")
+    })
+    startA <- function() captureStackTraces(promises::catch(rA(), caught("a")))
+    startB <- function() captureStackTraces(promises::catch(rB(), caught("b")))
+    startPlain <- function() {
+      p <- promises::then(plain[[1]]$promise, function(x) {
+        promises::then(plain[[2]]$promise, function(y) stop("boom plain"))
+      })
+      captureStackTraces(promises::catch(p, caught("plain")))
+    }
+    observe(startA())
+    observe(startPlain())
+    observe(startB())
+    flushReact()
+    # One step of each at a time, so a different kind of code runs each turn
+    a[[1]]$resolve()
+    plain[[1]]$resolve()
+    b[[1]]$resolve()
+    a[[2]]$resolve()
+    b[[2]]$resolve()
+    plain[[2]]$resolve()
+  })
+  expect_named(errors, c("a", "b", "plain"))
+  # Four `await()`s and two errors in code using it
+  expect_identical(counts$atThen, 4L)
+  expect_identical(counts$atError, 2L)
+
+  loc <- function(label, text) {
+    paste0("<reactive:", label, "> (coro::async) [", srcLoc(text))
+  }
+  traceA <- printedTrace(errors$a)
+  expect_match(traceA, loc("rA", 'stop("boom A")'), fixed = TRUE, all = FALSE)
+  expect_match(traceA, loc("rA", "x <- await(a[[1]]$promise) # A1"), fixed = TRUE, all = FALSE)
+  expect_match(traceA, loc("rA", "y <- await(a[[2]]$promise) # A2"), fixed = TRUE, all = FALSE)
+  expect_match(traceA, "startA", fixed = TRUE, all = FALSE)
+  expect_no_match(traceA, "rB|startB|startPlain|eval_bare|evalq|onFulfilled")
+
+  traceB <- printedTrace(errors$b)
+  expect_match(traceB, loc("rB", 'stop("boom B")'), fixed = TRUE, all = FALSE)
+  expect_match(traceB, loc("rB", "x <- await(b[[1]]$promise) # B1"), fixed = TRUE, all = FALSE)
+  expect_match(traceB, loc("rB", "y <- await(b[[2]]$promise) # B2"), fixed = TRUE, all = FALSE)
+  expect_match(traceB, "startB", fixed = TRUE, all = FALSE)
+  expect_no_match(traceB, "rA|startA|startPlain|eval_bare|evalq|onFulfilled")
+
+  tracePlain <- printedTrace(errors$plain)
+  expect_match(tracePlain, "startPlain", fixed = TRUE, all = FALSE)
+  expect_no_match(tracePlain, "coro::async|rA|rB|startA|startB")
+  expect_false(hasAsyncAttrs(conditionStackTrace(errors$plain)))
+  for (deep in attr(errors$plain, "deep.stack.trace", exact = TRUE)) {
+    expect_false(hasAsyncAttrs(deep))
+  }
+})
+
+test_that("two runs of the same await() code keep their own deep stack traces", {
+  skip_if_not_installed("coro")
+  waiting <- list(pendingPromise(), pendingPromise())
+  runs <- 0L
+  nextPromise <- function() {
+    runs <<- runs + 1L
+    waiting[[runs]]$promise
+  }
+  errors <- catchAsyncErrors(function(caught) {
+    shared <- renderText({
+      x <- await(nextPromise())
+      stop("boom shared")
+    })
+    startFirst <- function() promises::catch(shared(), caught("first"))
+    startSecond <- function() promises::catch(shared(), caught("second"))
+    isolate(captureStackTraces({
+      startFirst()
+      startSecond()
+    }))
+    # The run that started last carries on first
+    waiting[[2]]$resolve()
+    waiting[[1]]$resolve()
+  })
+  expect_named(errors, c("second", "first"))
+  first <- printedTrace(errors$first)
+  second <- printedTrace(errors$second)
+  expect_match(first, "renderText (coro::async)", fixed = TRUE, all = FALSE)
+  expect_match(first, "startFirst", fixed = TRUE, all = FALSE)
+  expect_no_match(first, "startSecond", fixed = TRUE)
+  expect_match(second, "renderText (coro::async)", fixed = TRUE, all = FALSE)
+  expect_match(second, "startSecond", fixed = TRUE, all = FALSE)
+  expect_no_match(second, "startFirst", fixed = TRUE)
+})
+
+test_that("code resumed in an event loop run by other code leaves that code's errors alone", {
+  skip_if_not_installed("coro")
+  counts <- local_count_relabels()
+  waiting <- pendingPromise()
+  errors <- catchAsyncErrors(function(caught) {
+    r <- reactive(label = "r", {
+      x <- await(waiting$promise)
+      stop("boom resumed")
+    })
+    observe(captureStackTraces(promises::catch(r(), caught("resumed"))))
+    flushReact()
+    runsTheLoop <- function() {
+      # The code after `await()` runs, and fails, under these frames
+      waiting$resolve()
+      stop("boom outer")
+    }
+    tryCatch(captureStackTraces(runsTheLoop()), error = caught("outer"))
+  })
+  expect_named(errors, c("resumed", "outer"))
+  expect_identical(counts$atError, 1L)
+  expect_false(hasAsyncAttrs(conditionStackTrace(errors$outer)))
+  expect_match(printedTrace(errors$outer), "runsTheLoop", fixed = TRUE, all = FALSE)
+  resumed <- printedTrace(errors$resumed)
+  expect_match(resumed, "<reactive:r> (coro::async)", fixed = TRUE, all = FALSE)
+  expect_no_match(resumed, "runsTheLoop|eval_bare|evalq|onFulfilled")
+})
+
+for (when in c("before", "after")) {
+  test_that(paste0("an error from a reactive read ", when, " await() is relabelled"), {
+    skip_if_not_installed("coro")
+    counts <- local_count_relabels()
+    errors <- catchAsyncErrors(function(caught) {
+      inner <- reactive(label = "inner", stop("boom inner"))
+      r <- if (when == "before") {
+        reactive(label = "r", {
+          inner()
+          x <- await(promises::promise_resolve(1))
+        })
+      } else {
+        reactive(label = "r", {
+          x <- await(promises::promise_resolve(1))
+          inner()
+        })
+      }
+      observe(tryCatch(
+        captureStackTraces(promises::catch(r(), caught("read"))),
+        error = caught("read")
+      ))
+      flushReact()
+    })
+    expect_named(errors, "read")
+    # `inner` saved the stack, with a handler of its own; the code using
+    # `await()` relabels that stack
+    expect_identical(counts$atError, 1L)
+    trace <- printedTrace(errors$read)
+    expect_match(trace, "<reactive:inner>", fixed = TRUE, all = FALSE)
+    expect_match(trace, "<reactive:r> (coro::async)", fixed = TRUE, all = FALSE)
+    expect_no_match(trace, "eval_bare|evalq|onFulfilled")
+  })
+}
+
+test_that("code using await() called by other code using await() is relabelled once", {
+  skip_if_not_installed("coro")
+  counts <- local_count_relabels()
+  errors <- catchAsyncErrors(function(caught) {
+    inner <- reactive(label = "inner", {
+      stop("boom nested")
+      x <- await(promises::promise_resolve(1))
+    })
+    outer <- reactive(label = "outer", {
+      p <- inner()
+      x <- await(p)
+    })
+    observe(tryCatch(
+      captureStackTraces(promises::catch(outer(), caught("nested"))),
+      error = caught("nested")
+    ))
+    flushReact()
+  })
+  expect_named(errors, "nested")
+  expect_identical(counts$atError, 1L)
+  trace <- printedTrace(errors$nested)
+  expect_match(trace, "<reactive:inner> (coro::async)", fixed = TRUE, all = FALSE)
+  expect_match(trace, "<reactive:outer> (coro::async)", fixed = TRUE, all = FALSE)
+  expect_no_match(trace, "eval_bare|evalq")
+})
+
+test_that("an error that brings its own stack trace to an await() keeps it", {
+  skip_if_not_installed("coro")
+  counts <- local_count_relabels()
+  elsewhere <- function() stop("boom elsewhere")
+  old <- tryCatch(captureStackTraces(elsewhere()), error = identity)
+  errors <- catchAsyncErrors(function(caught) {
+    r <- reactive(label = "r", {
+      x <- await(promises::promise_reject(old))
+      "not reached"
+    })
+    observe(captureStackTraces(promises::catch(r(), caught("rejected"))))
+    flushReact()
+  })
+  expect_named(errors, "rejected")
+  expect_identical(counts$atError, 0L)
+  expect_identical(
+    conditionStackTrace(errors$rejected),
+    conditionStackTrace(old)
+  )
+  expect_match(printedTrace(errors$rejected), "elsewhere", fixed = TRUE, all = FALSE)
+})
+
+test_that("code using await() runs with deep stack traces turned off", {
+  skip_if_not_installed("coro")
+  withr::local_options(shiny.deepstacktrace = FALSE)
+  counts <- local_count_relabels()
+  errors <- catchAsyncErrors(function(caught) {
+    r <- reactive(label = "r", {
+      x <- await(promises::promise_resolve(1))
+      stop("boom no deep stacks")
+    })
+    observe(captureStackTraces(promises::catch(r(), caught("shallow"))))
+    flushReact()
+  })
+  expect_identical(counts$atThen, 0L)
+  expect_null(attr(errors$shallow, "deep.stack.trace", exact = TRUE))
+  expect_match(
+    printedTrace(errors$shallow),
+    "<reactive:r> (coro::async)",
+    fixed = TRUE,
+    all = FALSE
+  )
+})
+
+test_that("callWithoutCompiling() only turns the JIT off while the function is entered", {
+  jit <- compiler::enableJIT(3L)
+  on.exit(compiler::enableJIT(jit), add = TRUE)
+  level <- function() {
+    current <- compiler::enableJIT(-1L)
+    current
+  }
+  seen <- list()
+  fun <- function(arg) {
+    seen$entered <<- level()
+    arg
+    seen$afterArg <<- level()
+    "result"
+  }
+  expect_identical(callWithoutCompiling(fun, 1), "result")
+  expect_identical(seen, list(entered = 0L, afterArg = 3L))
+  expect_identical(level(), 3L)
+
+  # The argument is never read
+  expect_identical(callWithoutCompiling(function(arg) level(), 1), 0L)
+  expect_identical(level(), 3L)
+
+  # The argument is an error, as coro passes for a rejected promise
+  expect_error(callWithoutCompiling(fun, stop("rejected")), "rejected")
+  expect_identical(level(), 3L)
+})
+
+test_that("code resumed after an await() is entered with the JIT off, and runs with it on", {
+  skip_if_not_installed("coro")
+  jit <- compiler::enableJIT(3L)
+  on.exit(compiler::enableJIT(jit), add = TRUE)
+  levelInUserCode <- NULL
+  enteredAt <- NULL
+  origCall <- callWithoutCompiling
+  local_mocked_bindings(callWithoutCompiling = function(fun, arg) {
+    origCall(
+      function(value) {
+        enteredAt <<- compiler::enableJIT(-1L)
+        fun(value)
+      },
+      arg
+    )
+  })
+  errors <- catchAsyncErrors(function(caught) {
+    r <- reactive(label = "r", {
+      x <- await(promises::promise_resolve(1))
+      levelInUserCode <<- compiler::enableJIT(-1L)
+      x
+    })
+    observe(captureStackTraces(promises::catch(r(), caught("unused"))))
+    flushReact()
+  })
+  expect_length(errors, 0)
+  expect_identical(levelInUserCode, 3L)
+  expect_identical(compiler::enableJIT(-1L), 3L)
+  # The JIT was off when coro's function for this run was entered
+  expect_identical(enteredAt, 0L)
 })
 
 test_that("stripStackTraces() leaves hidden frames out of fence matching", {

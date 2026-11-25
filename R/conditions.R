@@ -214,13 +214,6 @@ captureStackTraces <- function(expr) {
 
 #' @include globals.R
 .globals$deepStack <- NULL
-# TRUE once code using `await()` has been labelled (see
-# `labelAsyncFunction()`). Until then, errors are captured without
-# `relabelAsyncFrames()`, which would find nothing to do.
-.globals$hasAsyncLabels <- FALSE
-# TRUE while coro calls `then()` at an `await()` (see `shimAsyncOps()`). Only
-# the stacks saved then are relabelled, so other promises pay nothing for it.
-.globals$inCoroThen <- FALSE
 
 getCallStackDigest <- function(callStack, warn = FALSE) {
   dg <- attr(callStack, "shiny.stack.digest", exact = TRUE)
@@ -274,11 +267,8 @@ createStackTracePromiseDomain <- function() {
       force(onFulfilled)
       # Subscription time
       if (deepStacksEnabled()) {
-        currentParents <- sys.parents()
         currentStack <- sys.calls()
-        if (.globals$inCoroThen) {
-          currentStack <- relabelAsyncFrames(currentStack, currentParents, sys.frames(), atThen = TRUE)
-        }
+        currentParents <- sys.parents()
         attr(currentStack, "parents") <- currentParents
         currentStack <- saveCallStackDigest(currentStack)
         currentDeepStack <- .globals$deepStack
@@ -301,11 +291,8 @@ createStackTracePromiseDomain <- function() {
       force(onRejected)
       # Subscription time
       if (deepStacksEnabled()) {
-        currentParents <- sys.parents()
         currentStack <- sys.calls()
-        if (.globals$inCoroThen) {
-          currentStack <- relabelAsyncFrames(currentStack, currentParents, sys.frames(), atThen = TRUE)
-        }
+        currentParents <- sys.parents()
         attr(currentStack, "parents") <- currentParents
         currentStack <- saveCallStackDigest(currentStack)
         currentDeepStack <- .globals$deepStack
@@ -341,25 +328,118 @@ doCaptureStack <- function(e) {
   if (is.null(attr(e, "stack.trace", exact = TRUE))) {
     calls <- sys.calls()
     parents <- sys.parents()
-    if (.globals$hasAsyncLabels) {
-      calls <- relabelAsyncFrames(calls, parents, sys.frames())
-    }
-    label <- attr(calls, "asyncLabel", exact = TRUE)
-    # coro evaluates the user's code with `eval_bare()`, which tells the user
-    # nothing; use the reactive's label, as for code without `await()`
-    if (!is.null(label) && isCoroEvalCall(conditionCall(e))) {
-      e$call <- call(label)
-    }
     attr(calls, "parents") <- parents
     calls <- saveCallStackDigest(calls)
     attr(e, "stack.trace") <- calls
   }
-  if (deepStacksEnabled()) {
-    if (is.null(attr(e, "deep.stack.trace", exact = TRUE)) && !is.null(.globals$deepStack)) {
-      attr(e, "deep.stack.trace") <- .globals$deepStack
-    }
+  stop(withDeepStackTrace(e))
+}
+
+withDeepStackTrace <- function(e) {
+  if (
+    deepStacksEnabled() &&
+      is.null(attr(e, "deep.stack.trace", exact = TRUE)) &&
+      !is.null(.globals$deepStack)
+  ) {
+    attr(e, "deep.stack.trace") <- .globals$deepStack
   }
-  stop(e)
+  e
+}
+
+# Like `doCaptureStack()`, for errors that pass through code using `await()`.
+# It is the error handler of the two places that run such code: the wrapper
+# made by `wrapFunctionLabel()` (up to the first `await()`) and the callback
+# made by `asyncCallback()` (after each `await()`). So the code itself says
+# that its stack needs `relabelAsyncFrames()`; nothing outside it has to know
+# or check, whichever promise domain or session runs next.
+#
+# A handler nearer the error may have saved the stack already, as when the
+# code reads a reactive that fails. That stack is relabelled too, if its
+# frames are still running. An error that brought its stack from elsewhere
+# (such as the reason of a rejected promise) is left alone.
+doCaptureAsyncStack <- function(e) {
+  calls <- attr(e, "stack.trace", exact = TRUE)
+  if (is.null(calls)) {
+    calls <- sys.calls()
+    parents <- sys.parents()
+    frames <- sys.frames()
+  } else if (
+    is.null(attr(calls, "asyncFrames", exact = TRUE)) && isRunningStack(calls)
+  ) {
+    parents <- attr(calls, "parents", exact = TRUE)
+    frames <- sys.frames()[seq_along(calls)]
+  } else {
+    return()
+  }
+  calls <- relabelAsyncFrames(calls, parents, frames)
+  label <- attr(calls, "asyncLabel", exact = TRUE)
+  # coro evaluates the user's code with `eval_bare()`, which tells the user
+  # nothing; use the reactive's label, as for code without `await()`
+  if (!is.null(label) && isCoroEvalCall(conditionCall(e))) {
+    e$call <- call(label)
+  }
+  attr(calls, "parents") <- parents
+  # The names changed, so the digest does too
+  attr(calls, "shiny.stack.digest") <- NULL
+  calls <- saveCallStackDigest(calls)
+  attr(e, "stack.trace") <- calls
+  stop(withDeepStackTrace(e))
+}
+
+# Whether `calls` was saved by a `doCaptureStack()` that is still on the
+# stack: it is then the `calls` of the frame at its last index, and the frames
+# before it are the ones it lists.
+isRunningStack <- function(calls) {
+  n <- length(calls)
+  n > 0 && n < sys.nframe() && identical(sys.frame(n)$calls, calls)
+}
+
+# The callback for coro to run when the promise of an `await()` resolves; used
+# in place of coro's own `callback` (see `shimAsyncOps()`). It carries what the
+# code after the `await()` needs for its stack traces, so that is found
+# without asking what else is running:
+# - the stack at the `await()`, relabelled, for the deep stack trace. A stack
+#   trace promise domain saves that stack too, but as it is; this one takes
+#   its place.
+# - `doCaptureAsyncStack()` as the error handler.
+# `value` is not forced here: for a rejected promise, coro passes a `stop()`
+# to raise inside the user's code.
+asyncCallback <- function(callback) {
+  force(callback)
+  deep <- deepStacksEnabled()
+  if (deep) {
+    parents <- sys.parents()
+    stack <- relabelAsyncFrames(sys.calls(), parents, sys.frames(), atThen = TRUE)
+    attr(stack, "parents") <- parents
+    stack <- saveCallStackDigest(stack)
+    deepStack <- .globals$deepStack
+  }
+  function(value) {
+    if (deep) {
+      origDeepStack <- .globals$deepStack
+      .globals$deepStack <- appendCallStackWithDedupe(deepStack, stack)
+      on.exit(.globals$deepStack <- origDeepStack, add = TRUE)
+    }
+    withCallingHandlers(
+      callWithoutCompiling(callback, value),
+      error = doCaptureAsyncStack
+    )
+  }
+}
+
+# Call `fun(arg)` without letting R's JIT compile `fun`.
+# coro makes a new function, with a new body, for each run of code using
+# `await()`. R compiles it the first time it is resumed, which takes far longer
+# (10 ms or more) than running it, and the result is used for that one run.
+# The JIT is only off while `fun` is entered: `arg` is lazy, and coro reads it
+# just before it carries on with the user's code, which turns the JIT back on.
+callWithoutCompiling <- function(fun, arg) {
+  jit <- compiler::enableJIT(0L)
+  on.exit(compiler::enableJIT(jit), add = TRUE)
+  fun({
+    compiler::enableJIT(jit)
+    arg
+  })
 }
 
 # Code that uses `await()` runs as a `coro::async()` function (see
@@ -398,24 +478,38 @@ relabelAsyncFrames <- function(
   # Frames whose env's parent is an async function's env. Besides the frame
   # running the user's code, coro's own setup frames can match, so keep only
   # the innermost match for each async function.
-  labelEnvs <- lapply(frames, asyncLabelEnv)
-  for (i in seq_along(frames)) {
-    if (is.null(labelEnvs[[i]])) {
-      next
+  # This runs for every frame, so it is kept cheap: `$` does not look in
+  # parent envs, and `sys.frames()` is a pairlist, which is slow to index.
+  labelEnvs <- vector("list", length(frames))
+  i <- 0L
+  for (frame in frames) {
+    i <- i + 1L
+    env <- parent.env(frame)
+    if (!is.null(env$.shinyAsyncLabel)) {
+      labelEnvs[[i]] <- env
     }
-    later <- utils::tail(labelEnvs, -i)
+  }
+  matched <- which(lengths(labelEnvs) > 0L)
+  if (!length(matched)) {
+    return(calls)
+  }
+  # `sys.calls()` is a pairlist too; read the calls from a list
+  callList <- as.list(calls)
+  for (i in matched) {
+    later <- labelEnvs[matched[matched > i]]
     if (any(vapply(later, identical, logical(1), labelEnvs[[i]]))) {
       next
     }
     label <- labelEnvs[[i]]$.shinyAsyncLabel
     innermost <- label
     asyncFrames <- c(asyncFrames, i)
-    calls[[i]] <- structure(
+    callList[[i]] <- structure(
       call(paste0(label, " (coro::async)")),
-      srcref = attr(calls[[i]], "srcref", exact = TRUE)
+      srcref = attr(callList[[i]], "srcref", exact = TRUE)
     )
+    calls[[i]] <- callList[[i]]
     # coro's frames between the user's frame and the user's code
-    evalFrame <- coroEvalFrame(calls, i)
+    evalFrame <- coroEvalFrame(callList, i)
     if (!is.null(evalFrame)) {
       hidden[(i + 1):evalFrame] <- TRUE
     }
@@ -434,25 +528,31 @@ relabelAsyncFrames <- function(
       # Frames at or before the last `..stacktracefloor..` are handled by
       # `stripStackTraces()`, so the outermost frame to hide is the one just
       # inside it
-      floors <- which(vapply(calls, isCallNamed, logical(1), "..stacktracefloor.."))
-      outermost <- if (length(floors)) max(floors) + 1L else 1L
+      outermost <- 1L
+      for (j in rev(seq_along(callList))) {
+        if (identical(callList[[j]][[1]], stackTraceFloorSym)) {
+          outermost <- j + 1L
+          break
+        }
+      }
     }
     first <- outermost
     for (j in rev(seq_len(parent))) {
       if (
-        isCallNamed(calls[[j]], label) &&
+        isCallNamed(callList[[j]], label) &&
           isAsyncFunctionFor(getFunction(j), labelEnvs[[i]])
       ) {
         first <- j
         break
       }
     }
+    # The wrapper's error handler is around that call
+    if (first > 1L && isCallNamed(callList[[first - 1L]], "withCallingHandlers")) {
+      first <- first - 1L
+    }
     if (first <= parent) {
       hidden[first:parent] <- TRUE
     }
-  }
-  if (!length(asyncFrames)) {
-    return(calls)
   }
   # When the stack is saved at a `then()` (for the deep stack trace), and the
   # `then()` is coro's at an `await()`, the frames inside the user's are
@@ -462,7 +562,7 @@ relabelAsyncFrames <- function(
   if (
     atThen &&
       innermostIndex < n &&
-      identical(calls[[innermostIndex + 1]][[1]], quote(base::evalq))
+      identical(callList[[innermostIndex + 1]][[1]], quote(base::evalq))
   ) {
     inner <- (innermostIndex + 1):n
     hidden[inner] <- TRUE
@@ -471,8 +571,8 @@ relabelAsyncFrames <- function(
     # `then()` call is not found, or is not as `coroAwaitSrcref()` expects,
     # the frame is left with no line.
     for (k in inner) {
-      if (isCallNamed(calls[[k]], "then")) {
-        srcref <- coroAwaitSrcref(calls[[k]])
+      if (isCallNamed(callList[[k]], "then")) {
+        srcref <- coroAwaitSrcref(callList[[k]])
         if (!is.null(srcref)) {
           attr(calls[[innermostIndex + 1]], "srcref") <- srcref
         }
@@ -486,13 +586,7 @@ relabelAsyncFrames <- function(
   calls
 }
 
-# The async function's env holding the label set by `wrapFunctionLabel()`, if
-# `env` is a child of it, such as the env running the user's code. Runs for
-# every frame, so kept cheap: `$` does not look in parent envs.
-asyncLabelEnv <- function(env) {
-  parent <- parent.env(env)
-  if (!is.null(parent$.shinyAsyncLabel)) parent
-}
+stackTraceFloorSym <- quote(..stacktracefloor..)
 
 # Whether `fun` is the async function whose label is kept in `labelEnv`
 isAsyncFunctionFor <- function(fun, labelEnv) {
@@ -531,8 +625,8 @@ coroAwaitSrcref <- function(call) {
 # frame at index `i` (see `relabelAsyncFrames()`): the first one after it.
 # NULL if there is none, as when the stack is saved at an `await()`.
 coroEvalFrame <- function(calls, i) {
-  for (k in seq_along(calls)) {
-    if (k > i && isCoroEvalCall(calls[[k]])) {
+  for (k in seq_along(calls)[-seq_len(i)]) {
+    if (isCoroEvalCall(calls[[k]])) {
       return(k)
     }
   }

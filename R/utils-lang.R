@@ -162,7 +162,6 @@ labelAsyncFunction <- function(fun, label) {
     fun <- inject(coro::async(function() !!fn_body(src)), env)
   }
   env$.shinyAsyncLabel <- label
-  .globals$hasAsyncLabels <- TRUE
   fun
 }
 
@@ -170,11 +169,11 @@ labelAsyncFunction <- function(fun, label) {
 # `awaitToAsyncFunction()` is called from `env`. coro finds them as
 # `.__coro_async_ops__.` in the env it is called from (see `?coro::async_ops`);
 # `wrapFunctionLabel()` binds them in its wrapper's env. They are the ones
-# coro would otherwise use (found from `env`), except that `then()` marks the
-# stack saved for it as coro's, for the promise domain to relabel (see
-# `.globals$inCoroThen`).
+# coro would otherwise use (found from `env`), except that `then()` is given
+# `asyncCallback()`'s callback, which sets up stack traces for the code after
+# the `await()`.
 # Relies on coro internals: `get_async_ops()`. If it is gone, returns NULL
-# and coro uses its own; then the frame after an `await()` has no line.
+# and coro uses its own; then errors after an `await()` show coro's frames.
 shimAsyncOps <- function(env) {
   coroNs <- asNamespace("coro")
   if (!exists("get_async_ops", envir = coroNs, inherits = FALSE)) {
@@ -184,9 +183,10 @@ shimAsyncOps <- function(env) {
   coro::async_ops(
     package = ops$package,
     then = function(x, callback) {
-      orig <- .globals$inCoroThen
-      .globals$inCoroThen <- TRUE
-      on.exit(.globals$inCoroThen <- orig, add = TRUE)
+      # `x` runs the user's code up to the `await()`. Run it first, so that
+      # nothing is set up for an `await()` that is not reached.
+      force(x)
+      callback <- asyncCallback(callback)
       ops$then(x, callback)
     },
     as_promise = ops$as_promise

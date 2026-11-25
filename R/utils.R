@@ -1504,6 +1504,13 @@ wrapFunctionLabel <- function(func, name, ..stacktraceon = FALSE, dots = TRUE) {
 
   if (inherits(func, "coro_async")) {
     func <- labelAsyncFunction(func, name)
+    # coro looks these up from the wrapper below, which calls `func`. NULL
+    # leaves coro's own.
+    assign(
+      ".__coro_async_ops__.",
+      shimAsyncOps(parent.env(environment())),
+      environment()
+    )
   }
 
   assign(name, func, environment())
@@ -1517,7 +1524,7 @@ wrapFunctionLabel <- function(func, name, ..stacktraceon = FALSE, dots = TRUE) {
     } else {
       body <- expr({ (!!name)(!!quote(...)) })
     }
-    relabelWrapper <- new_function(pairlist2(... =), asyncWrapperBody(body, func), environment())
+    relabelWrapper <- new_function(pairlist2(... =), body, environment())
   } else {
     # Same logic as when `dots = TRUE`, but without the `...`
     if (..stacktraceon) {
@@ -1525,7 +1532,7 @@ wrapFunctionLabel <- function(func, name, ..stacktraceon = FALSE, dots = TRUE) {
     } else {
       body <- expr({ (!!name)() })
     }
-    relabelWrapper <- new_function(list(), asyncWrapperBody(body, func), environment())
+    relabelWrapper <- new_function(list(), body, environment())
   }
 
   # Preserve the original function that was passed in; is used for caching.

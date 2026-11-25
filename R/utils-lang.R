@@ -166,18 +166,31 @@ labelAsyncFunction <- function(fun, label) {
   fun
 }
 
-# The body for `wrapFunctionLabel()`'s wrapper of `fun`. If `fun` uses
-# `await()`, mark it as running during the call, for stacks saved at a
-# `then()` (see `.globals$asyncDepth`).
-asyncWrapperBody <- function(body, fun) {
-  if (!inherits(fun, "coro_async")) {
-    return(body)
+# The async operations for coro to use when a function made by
+# `awaitToAsyncFunction()` is called from `env`. coro finds them as
+# `.__coro_async_ops__.` in the env it is called from (see `?coro::async_ops`);
+# `wrapFunctionLabel()` binds them in its wrapper's env. They are the ones
+# coro would otherwise use (found from `env`), except that `then()` marks the
+# stack saved for it as coro's, for the promise domain to relabel (see
+# `.globals$inCoroThen`).
+# Relies on coro internals: `get_async_ops()`. If it is gone, returns NULL
+# and coro uses its own; then the frame after an `await()` has no line.
+shimAsyncOps <- function(env) {
+  coroNs <- asNamespace("coro")
+  if (!exists("get_async_ops", envir = coroNs, inherits = FALSE)) {
+    return(NULL)
   }
-  expr({
-    origAsyncDepth <- enterAsyncCode()
-    on.exit(exitAsyncCode(origAsyncDepth), add = TRUE)
-    !!!as.list(body)[-1]
-  })
+  ops <- utils::getFromNamespace("get_async_ops", "coro")(env)
+  coro::async_ops(
+    package = ops$package,
+    then = function(x, callback) {
+      orig <- .globals$inCoroThen
+      .globals$inCoroThen <- TRUE
+      on.exit(.globals$inCoroThen <- orig, add = TRUE)
+      ops$then(x, callback)
+    },
+    as_promise = ops$as_promise
+  )
 }
 
 # The user's code for a function made by `quoToSimpleFunction()`. For a

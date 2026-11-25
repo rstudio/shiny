@@ -218,24 +218,9 @@ captureStackTraces <- function(expr) {
 # `labelAsyncFunction()`). Until then, errors are captured without
 # `relabelAsyncFrames()`, which would find nothing to do.
 .globals$hasAsyncLabels <- FALSE
-# Above 0 while code using `await()` may be running: during a call to such a
-# function (see `wrapFunctionLabel()`), and during a promise callback set up
-# while it was above 0, which is how coro runs the code after an `await()`.
-# Stacks saved at a `then()` are relabelled only then, so other promises pay
-# nothing for it.
-.globals$asyncDepth <- 0L
-
-# Run by the wrapper of a function using `await()` (see `wrapFunctionLabel()`)
-# around each call. Returns the depth to restore with `exitAsyncCode()`.
-enterAsyncCode <- function() {
-  depth <- .globals$asyncDepth
-  .globals$asyncDepth <- depth + 1L
-  depth
-}
-
-exitAsyncCode <- function(depth) {
-  .globals$asyncDepth <- depth
-}
+# TRUE while coro calls `then()` at an `await()` (see `shimAsyncOps()`). Only
+# the stacks saved then are relabelled, so other promises pay nothing for it.
+.globals$inCoroThen <- FALSE
 
 getCallStackDigest <- function(callStack, warn = FALSE) {
   dg <- attr(callStack, "shiny.stack.digest", exact = TRUE)
@@ -287,13 +272,11 @@ createStackTracePromiseDomain <- function() {
   d <- new_promise_domain(
     wrapOnFulfilled = function(onFulfilled) {
       force(onFulfilled)
-      inAsync <- FALSE
       # Subscription time
       if (deepStacksEnabled()) {
         currentParents <- sys.parents()
         currentStack <- sys.calls()
-        inAsync <- .globals$asyncDepth > 0L
-        if (inAsync) {
+        if (.globals$inCoroThen) {
           currentStack <- relabelAsyncFrames(currentStack, currentParents, sys.frames(), atThen = TRUE)
         }
         attr(currentStack, "parents") <- currentParents
@@ -306,10 +289,6 @@ createStackTracePromiseDomain <- function() {
           origDeepStack <- .globals$deepStack
           .globals$deepStack <- appendCallStackWithDedupe(currentDeepStack, currentStack)
           on.exit(.globals$deepStack <- origDeepStack, add = TRUE)
-        }
-        if (inAsync) {
-          origAsyncDepth <- enterAsyncCode()
-          on.exit(exitAsyncCode(origAsyncDepth), add = TRUE)
         }
 
         withCallingHandlers(
@@ -320,13 +299,11 @@ createStackTracePromiseDomain <- function() {
     },
     wrapOnRejected = function(onRejected) {
       force(onRejected)
-      inAsync <- FALSE
       # Subscription time
       if (deepStacksEnabled()) {
         currentParents <- sys.parents()
         currentStack <- sys.calls()
-        inAsync <- .globals$asyncDepth > 0L
-        if (inAsync) {
+        if (.globals$inCoroThen) {
           currentStack <- relabelAsyncFrames(currentStack, currentParents, sys.frames(), atThen = TRUE)
         }
         attr(currentStack, "parents") <- currentParents
@@ -339,10 +316,6 @@ createStackTracePromiseDomain <- function() {
           origDeepStack <- .globals$deepStack
           .globals$deepStack <- appendCallStackWithDedupe(currentDeepStack, currentStack)
           on.exit(.globals$deepStack <- origDeepStack, add = TRUE)
-        }
-        if (inAsync) {
-          origAsyncDepth <- enterAsyncCode()
-          on.exit(exitAsyncCode(origAsyncDepth), add = TRUE)
         }
 
         withCallingHandlers(

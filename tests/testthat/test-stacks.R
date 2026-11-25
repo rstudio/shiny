@@ -949,7 +949,7 @@ test_that("stacks are relabelled once code using await() is made", {
   expect_true(.globals$hasAsyncLabels)
 })
 
-test_that("only stacks saved at a then() inside await() code are relabelled", {
+test_that("only stacks saved at coro's then() for an await() are relabelled", {
   skip_if_not_installed("coro")
   relabelled <- 0L
   origRelabel <- relabelAsyncFrames
@@ -968,19 +968,30 @@ test_that("only stacks saved at a then() inside await() code are relabelled", {
     })
   })
   expect_identical(relabelled, 0L)
-  expect_identical(.globals$asyncDepth, 0L)
 
-  # Code using `await()` runs, before and after the `await()`, then errors
+  # One `await()`. Each nested stack trace promise domain saves a stack for
+  # coro's `then()`, so count them
+  printedObserverError(function() {
+    observe(await(promises::promise_resolve(1)))
+  })
+  perAwait <- relabelled
+  expect_gt(perAwait, 0L)
+
+  # Two `await()`s, then a plain promise chain started from that code: only
+  # coro's two `then()`s count
+  relabelled <- 0L
   out <- printedObserverError(function() {
     observe({
       x <- await(promises::promise_resolve(1))
       x <- await(promises::promise_resolve(x))
-      stop("async boom")
+      promises::then(promises::promise_resolve(x), function(y) {
+        promises::then(promises::promise_resolve(y), function(z) stop("chain boom"))
+      })
     })
   })
-  expect_gt(relabelled, 0L)
-  expect_identical(out$heading, "Error in observe: async boom")
-  expect_identical(.globals$asyncDepth, 0L)
+  expect_identical(relabelled, 2L * perAwait)
+  expect_match(out$heading, "chain boom", fixed = TRUE)
+  expect_false(.globals$inCoroThen)
 })
 
 test_that("stripStackTraces() leaves hidden frames out of fence matching", {

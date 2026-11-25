@@ -1132,6 +1132,61 @@ test_that("code using await() that takes turns keeps its own stack traces", {
   }
 })
 
+test_that("promises made by code using await() keep its deep stack, and other promises do not get it", {
+  skip_if_not_installed("coro")
+  gate <- pendingPromise()
+  inside <- list(pendingPromise(), pendingPromise())
+  outside <- list(pendingPromise(), pendingPromise())
+  deepStackBetween <- list()
+
+  errors <- catchAsyncErrors(function(caught) {
+    r <- reactive(label = "r", {
+      x <- await(gate$promise) # gate
+      insideChain <- promises::then(inside[[1]]$promise, function(v) {
+        promises::then(inside[[2]]$promise, function(w) stop("boom inside"))
+      })
+      promises::catch(insideChain, caught("inside"))
+      x
+    })
+    startAwait <- function() captureStackTraces(promises::catch(r(), caught("unused")))
+    startOutside <- function() {
+      p <- promises::then(outside[[1]]$promise, function(v) {
+        promises::then(outside[[2]]$promise, function(w) stop("boom outside"))
+      })
+      captureStackTraces(promises::catch(p, caught("outside")))
+    }
+    observe(startAwait())
+    observe(startOutside())
+    flushReact()
+    step <- function(pending) {
+      pending$resolve()
+      # Nothing is left behind for whatever runs next
+      deepStackBetween <<- c(deepStackBetween, list(.globals$deepStack))
+    }
+    # The first step of the other chain runs before the code after `await()`
+    step(outside[[1]])
+    step(gate)
+    step(inside[[1]])
+    step(outside[[2]])
+    step(inside[[2]])
+  })
+  expect_named(errors, c("outside", "inside"))
+  expect_identical(deepStackBetween, rep(list(NULL), 5))
+
+  awaitLine <- paste0("<reactive:r> (coro::async) [", srcLoc("x <- await(gate$promise) # gate"))
+  insideTrace <- printedTrace(errors$inside)
+  expect_match(insideTrace, awaitLine, fixed = TRUE, all = FALSE)
+  expect_match(insideTrace, "startAwait", fixed = TRUE, all = FALSE)
+  expect_no_match(insideTrace, "startOutside", fixed = TRUE)
+
+  outsideTrace <- printedTrace(errors$outside)
+  expect_match(outsideTrace, "startOutside", fixed = TRUE, all = FALSE)
+  expect_no_match(outsideTrace, "coro::async|startAwait")
+  for (deep in attr(errors$outside, "deep.stack.trace", exact = TRUE)) {
+    expect_false(hasAsyncAttrs(deep))
+  }
+})
+
 test_that("two runs of the same await() code keep their own deep stack traces", {
   skip_if_not_installed("coro")
   waiting <- list(pendingPromise(), pendingPromise())

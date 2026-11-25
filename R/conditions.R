@@ -416,6 +416,9 @@ asyncCallback <- function(callback) {
   }
   function(value) {
     if (deep) {
+      # Set only while this call runs, as the stack trace promise domain does.
+      # A `then()` made by the code keeps its own copy, so callbacks of other
+      # promises that run in between are not affected.
       origDeepStack <- .globals$deepStack
       .globals$deepStack <- appendCallStackWithDedupe(deepStack, stack)
       on.exit(.globals$deepStack <- origDeepStack, add = TRUE)
@@ -433,6 +436,10 @@ asyncCallback <- function(callback) {
 # (10 ms or more) than running it, and the result is used for that one run.
 # The JIT is only off while `fun` is entered: `arg` is lazy, and coro reads it
 # just before it carries on with the user's code, which turns the JIT back on.
+# TODO-future: Remove this, and `compiler` from Imports, once coro's fix is
+# released (https://github.com/r-lib/coro/pull/72; it is in coro 1.1.0.9000),
+# and bump the coro version in Suggests. With that fix R reuses the compiled
+# code, and this makes no difference.
 callWithoutCompiling <- function(fun, arg) {
   jit <- compiler::enableJIT(0L)
   on.exit(compiler::enableJIT(jit), add = TRUE)

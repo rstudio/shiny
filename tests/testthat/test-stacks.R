@@ -949,6 +949,40 @@ test_that("stacks are relabelled once code using await() is made", {
   expect_true(.globals$hasAsyncLabels)
 })
 
+test_that("only stacks saved at a then() inside await() code are relabelled", {
+  skip_if_not_installed("coro")
+  relabelled <- 0L
+  origRelabel <- relabelAsyncFrames
+  # Count only stacks saved at a `then()`; errors are always relabelled
+  local_mocked_bindings(relabelAsyncFrames = function(..., atThen = FALSE) {
+    if (atThen) relabelled <<- relabelled + 1L
+    origRelabel(..., atThen = atThen)
+  })
+  # Code using `await()` exists, but only promises outside it run
+  r <- reactive(label = "r", await(promises::promise_resolve(1)))
+  printedObserverError(function() {
+    observe({
+      promises::then(promises::promise_resolve(1), function(x) {
+        promises::then(promises::promise_resolve(x), function(y) stop("plain boom"))
+      })
+    })
+  })
+  expect_identical(relabelled, 0L)
+  expect_identical(.globals$asyncDepth, 0L)
+
+  # Code using `await()` runs, before and after the `await()`, then errors
+  out <- printedObserverError(function() {
+    observe({
+      x <- await(promises::promise_resolve(1))
+      x <- await(promises::promise_resolve(x))
+      stop("async boom")
+    })
+  })
+  expect_gt(relabelled, 0L)
+  expect_identical(out$heading, "Error in observe: async boom")
+  expect_identical(.globals$asyncDepth, 0L)
+})
+
 test_that("stripStackTraces() leaves hidden frames out of fence matching", {
   deep <- c("user1", "..stacktraceoff..", "internal")
   current <- c("..stacktraceon..", "plumbing", "asyncFrame", "stop")

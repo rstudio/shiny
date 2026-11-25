@@ -1517,7 +1517,7 @@ wrapFunctionLabel <- function(func, name, ..stacktraceon = FALSE, dots = TRUE) {
     } else {
       body <- expr({ (!!name)(!!quote(...)) })
     }
-    relabelWrapper <- new_function(pairlist2(... =), body, environment())
+    relabelWrapper <- new_function(pairlist2(... =), asyncWrapperBody(body, func), environment())
   } else {
     # Same logic as when `dots = TRUE`, but without the `...`
     if (..stacktraceon) {
@@ -1525,7 +1525,7 @@ wrapFunctionLabel <- function(func, name, ..stacktraceon = FALSE, dots = TRUE) {
     } else {
       body <- expr({ (!!name)() })
     }
-    relabelWrapper <- new_function(list(), body, environment())
+    relabelWrapper <- new_function(list(), asyncWrapperBody(body, func), environment())
   }
 
   # Preserve the original function that was passed in; is used for caching.

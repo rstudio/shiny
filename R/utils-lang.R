@@ -166,6 +166,20 @@ labelAsyncFunction <- function(fun, label) {
   fun
 }
 
+# The body for `wrapFunctionLabel()`'s wrapper of `fun`. If `fun` uses
+# `await()`, mark it as running during the call, for stacks saved at a
+# `then()` (see `.globals$asyncDepth`).
+asyncWrapperBody <- function(body, fun) {
+  if (!inherits(fun, "coro_async")) {
+    return(body)
+  }
+  expr({
+    origAsyncDepth <- enterAsyncCode()
+    on.exit(exitAsyncCode(origAsyncDepth), add = TRUE)
+    !!!as.list(body)[-1]
+  })
+}
+
 # The user's code for a function made by `quoToSimpleFunction()`. For a
 # `coro::async()` function, that is the body of the function coro was given.
 fnSourceBody <- function(fun, getBody = fn_body) {

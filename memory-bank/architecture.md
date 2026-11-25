@@ -227,7 +227,11 @@ JS side, in `srcts/src/bindings/`:
   stack is captured) uses it for the error call and to name coro's frame that
   runs the user's code. It marks coro's frames around it in an `asyncHidden`
   attr, which `stripStackTraces()` hides (and leaves out of fence matching);
-  the calls themselves are kept, so full stack traces show them.
+  the calls themselves are kept, so full stack traces show them. Stacks
+  saved at a `then()` are relabelled only while `.globals$asyncDepth` is
+  above 0: the wrapper raises it around each call of a coro function, and a
+  promise callback set up while it was above 0 raises it again (that is how
+  coro runs the code after an `await()`). So other promises pay nothing.
 - `ExtendedTask` (`R/extended-task.R`) keeps private `reactiveVal`s for
   status, value and error. `invoke()` runs `func` under
   `maskReactiveContext()` and queues the call if a run is already active.

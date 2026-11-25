@@ -1521,9 +1521,11 @@ wrapFunctionLabel <- function(func, name, ..stacktraceon = FALSE, dots = TRUE) {
   # complain about "... may be used in an incorrect context"
   body <- if (isTRUE(dots)) expr((!!name)(!!quote(...))) else expr((!!name)())
   if (async) {
-    # Code using `await()` sets up its own stack traces: here until the first
-    # `await()`, and in `asyncCallback()` after each one
-    body <- expr(withCallingHandlers(!!body, error = doCaptureAsyncStack))
+    # Code using `await()` sets up its own stack traces.
+    # Use `promises::` as it shows up in the stack trace
+    body <- expr(
+      promises::with_promise_domain(asyncStackPromiseDomain(), !!body)
+    )
   }
   if (..stacktraceon) {
     body <- expr(..stacktraceon..(!!body))

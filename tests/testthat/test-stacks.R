@@ -793,7 +793,7 @@ test_that("a full stack trace keeps every frame of code using await()", {
   full <- capture.output(printStackTrace(out$cond, full = TRUE), type = "message")
   # Frames that are hidden by default
   expect_match(full, "eval_bare", fixed = TRUE, all = FALSE)
-  expect_match(full, "asyncCallback", fixed = TRUE, all = FALSE)
+  expect_match(full, "domain$wrapOnFulfilled", fixed = TRUE, all = FALSE)
   expect_match(full, ": <reactive:r>$", all = FALSE)
   # Every `..stacktraceon..` in the trace is a real call, which has arguments
   traces <- c(
@@ -1034,11 +1034,12 @@ test_that("code without await() is never relabelled", {
   }
 })
 
-test_that("each await() is relabelled once, and its error once", {
+test_that("each then() made by code using await() is checked once, and each error once", {
   skip_if_not_installed("coro")
   counts <- local_count_relabels()
-  # Two `await()`s, then a plain promise chain started from that code: only
-  # the two `await()`s count, however many promise domains are entered
+  # Two `await()`s, then a plain promise chain of two `then()`s started from
+  # that code. Each `then()` has two callbacks and is inside several promise
+  # domains, but is checked once.
   out <- printedObserverError(function() {
     observe({
       x <- await(promises::promise_resolve(1))
@@ -1049,8 +1050,8 @@ test_that("each await() is relabelled once, and its error once", {
     })
   })
   expect_match(out$heading, "chain boom", fixed = TRUE)
-  expect_identical(counts$atThen, 2L)
-  expect_identical(counts$atError, 0L)
+  expect_identical(counts$atThen, 4L)
+  expect_identical(counts$atError, 1L)
 
   out <- printedObserverError(function() {
     observe({
@@ -1059,8 +1060,29 @@ test_that("each await() is relabelled once, and its error once", {
     })
   })
   expect_match(out$heading, "await boom", fixed = TRUE)
-  expect_identical(counts$atThen, 3L)
-  expect_identical(counts$atError, 1L)
+  expect_identical(counts$atThen, 5L)
+  expect_identical(counts$atError, 2L)
+})
+
+test_that("the two callbacks of a then() are relabelled separately if its frame is not found", {
+  skip_if_not_installed("coro")
+  counts <- local_count_relabels()
+  local_mocked_bindings(promiseOnThenFrame = function() NULL)
+  out <- catchAsyncError(function(caught) {
+    r <- reactive(label = "r", {
+      x <- await(promises::promise_resolve(1))
+      stop("boom, then() frame not found")
+    })
+    observe(captureStackTraces(promises::catch(r(), caught)))
+  })
+  expect_identical(counts$atThen, 2L)
+  expect_match(
+    out$trace,
+    paste0("<reactive:r> (coro::async) [", srcLoc('stop("boom, then() frame not found")')),
+    fixed = TRUE,
+    all = FALSE
+  )
+  expect_match(out$trace, "From earlier call:", fixed = TRUE, all = FALSE)
 })
 
 test_that("code using await() that takes turns keeps its own stack traces", {
@@ -1178,6 +1200,18 @@ test_that("promises made by code using await() keep its deep stack, and other pr
   expect_match(insideTrace, awaitLine, fixed = TRUE, all = FALSE)
   expect_match(insideTrace, "startAwait", fixed = TRUE, all = FALSE)
   expect_no_match(insideTrace, "startOutside", fixed = TRUE)
+  # The stack saved at the chain's own `then()` names the reactive too, and
+  # hides coro's frames
+  expect_match(
+    insideTrace,
+    paste0(
+      "<reactive:r> (coro::async) [",
+      srcLoc("insideChain <- promises::then(inside[[1]]$promise, function(v) {")
+    ),
+    fixed = TRUE,
+    all = FALSE
+  )
+  expect_no_match(insideTrace, "evalq|eval_bare")
 
   outsideTrace <- printedTrace(errors$outside)
   expect_match(outsideTrace, "startOutside", fixed = TRUE, all = FALSE)

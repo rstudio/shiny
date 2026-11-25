@@ -169,11 +169,11 @@ labelAsyncFunction <- function(fun, label) {
 # `awaitToAsyncFunction()` is called from `env`. coro finds them as
 # `.__coro_async_ops__.` in the env it is called from (see `?coro::async_ops`);
 # `wrapFunctionLabel()` binds them in its wrapper's env. They are the ones
-# coro would otherwise use (found from `env`), except that `then()` is given
-# `asyncCallback()`'s callback, which sets up stack traces for the code after
-# the `await()`.
+# coro would otherwise use (found from `env`), except that the callback given
+# to `then()` is called with `callWithoutCompiling()`.
 # Relies on coro internals: `get_async_ops()`. If it is gone, returns NULL
-# and coro uses its own; then errors after an `await()` show coro's frames.
+# and coro uses its own.
+# TODO-future: Remove this along with `callWithoutCompiling()`.
 shimAsyncOps <- function(env) {
   coroNs <- asNamespace("coro")
   if (!exists("get_async_ops", envir = coroNs, inherits = FALSE)) {
@@ -183,11 +183,7 @@ shimAsyncOps <- function(env) {
   coro::async_ops(
     package = ops$package,
     then = function(x, callback) {
-      # `x` runs the user's code up to the `await()`. Run it first, so that
-      # nothing is set up for an `await()` that is not reached.
-      force(x)
-      callback <- asyncCallback(callback)
-      ops$then(x, callback)
+      ops$then(x, function(value) callWithoutCompiling(callback, value))
     },
     as_promise = ops$as_promise
   )

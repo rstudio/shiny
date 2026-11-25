@@ -347,11 +347,10 @@ withDeepStackTrace <- function(e) {
 }
 
 # Like `doCaptureStack()`, for errors that pass through code using `await()`.
-# It is the error handler of the two places that run such code: the wrapper
-# made by `wrapFunctionLabel()` (up to the first `await()`) and the callback
-# made by `asyncCallback()` (after each `await()`). So the code itself says
-# that its stack needs `relabelAsyncFrames()`; nothing outside it has to know
-# or check, whichever promise domain or session runs next.
+# It is the error handler of `asyncStackPromiseDomain()`, which that code
+# runs in. So the code itself says that its stack needs
+# `relabelAsyncFrames()`; nothing outside it has to know or check, whichever
+# promise domain or session runs next.
 #
 # A handler nearer the error may have saved the stack already, as when the
 # code reads a reactive that fails. That stack is relabelled too, if its
@@ -394,40 +393,97 @@ isRunningStack <- function(calls) {
   n > 0 && n < sys.nframe() && identical(sys.frame(n)$calls, calls)
 }
 
-# The callback for coro to run when the promise of an `await()` resolves; used
-# in place of coro's own `callback` (see `shimAsyncOps()`). It carries what the
-# code after the `await()` needs for its stack traces, so that is found
+# The promise domain that code using `await()` runs in (see
+# `wrapFunctionLabel()`). It sets up stack traces for that code, and for the
+# promises it makes:
+# - up to the first `await()`, `wrapSync()` handles errors;
+# - at each `await()`, coro calls `then()`, so the code after it is a promise
+#   callback. `asyncStackCallback()` wraps it.
+# A domain is passed on to every `then()` made while it is active, so promise
+# chains started by the code are wrapped too, and no others are.
+# It is entered inside the stack trace promise domains, so its wrapper is the
+# nearest to the callback.
+asyncStackPromiseDomain <- function() {
+  if (is.null(.globals$asyncStackPromiseDomain)) {
+    .globals$asyncStackPromiseDomain <- new_promise_domain(
+      wrapOnFulfilled = asyncStackCallback,
+      wrapOnRejected = asyncStackCallback,
+      wrapSync = function(expr) {
+        withCallingHandlers(expr, error = doCaptureAsyncStack)
+      }
+    )
+  }
+  .globals$asyncStackPromiseDomain
+}
+
+# Wrap a promise callback made in `asyncStackPromiseDomain()`. The wrapper
+# carries what the callback needs for its stack traces, so that is found
 # without asking what else is running:
-# - the stack at the `await()`, relabelled, for the deep stack trace. A stack
-#   trace promise domain saves that stack too, but as it is; this one takes
-#   its place.
+# - the stack at the `then()`, for the deep stack trace, if it has frames of
+#   code using `await()`. A stack trace promise domain saves that stack too,
+#   but as it is; the relabelled one takes its place.
 # - `doCaptureAsyncStack()` as the error handler.
-# `value` is not forced here: for a rejected promise, coro passes a `stop()`
-# to raise inside the user's code.
-asyncCallback <- function(callback) {
+asyncStackCallback <- function(callback) {
   force(callback)
-  deep <- deepStacksEnabled()
-  if (deep) {
-    parents <- sys.parents()
-    stack <- relabelAsyncFrames(sys.calls(), parents, sys.frames(), atThen = TRUE)
-    attr(stack, "parents") <- parents
-    stack <- saveCallStackDigest(stack)
+  stack <- NULL
+  if (deepStacksEnabled()) {
+    stack <- asyncThenStack()
     deepStack <- .globals$deepStack
   }
-  function(value) {
-    if (deep) {
+  function(...) {
+    if (!is.null(stack)) {
       # Set only while this call runs, as the stack trace promise domain does.
-      # A `then()` made by the code keeps its own copy, so callbacks of other
-      # promises that run in between are not affected.
+      # A `then()` made by the callback keeps its own copy, so callbacks of
+      # other promises that run in between are not affected.
       origDeepStack <- .globals$deepStack
       .globals$deepStack <- appendCallStackWithDedupe(deepStack, stack)
       on.exit(.globals$deepStack <- origDeepStack, add = TRUE)
     }
-    withCallingHandlers(
-      callWithoutCompiling(callback, value),
-      error = doCaptureAsyncStack
-    )
+    withCallingHandlers(callback(...), error = doCaptureAsyncStack)
   }
+}
+
+# The relabelled stack at the `then()` whose callback is being wrapped, or
+# NULL if it has no frames of code using `await()`.
+# A `then()` wraps both of its callbacks, one after the other, from the same
+# frame. The stack is the same but for the last few frames, which are hidden,
+# so the second one uses the stack saved for the first. It is saved in that
+# frame, so it cannot be taken for another `then()`'s, and goes away with it.
+# This is a function of its own so that the callback's wrapper does not keep
+# the frames alive.
+asyncThenStack <- function() {
+  thenFrame <- promiseOnThenFrame()
+  saved <- thenFrame$.shinyAsyncThenStack
+  if (!is.null(saved)) {
+    return(saved$stack)
+  }
+  parents <- sys.parents()
+  stack <- relabelAsyncFrames(sys.calls(), parents, sys.frames(), atThen = TRUE)
+  if (is.null(attr(stack, "asyncFrames", exact = TRUE))) {
+    stack <- NULL
+  } else {
+    attr(stack, "parents") <- parents
+    stack <- saveCallStackDigest(stack)
+  }
+  if (!is.null(thenFrame)) {
+    thenFrame$.shinyAsyncThenStack <- list(stack = stack)
+  }
+  stack
+}
+
+# The frame of the promise package's `onThen()` that is wrapping a callback
+# now, or NULL if it is not found among the nearest frames.
+# Relies on promises internals: the name of that call. If it changes, each
+# callback of a `then()` has its stack relabelled separately, which is slower
+# but gives the same result.
+promiseOnThenFrame <- function() {
+  n <- sys.nframe() - 1L
+  for (i in rev(seq.int(max(n - 12L, 1L), n))) {
+    if (identical(sys.call(i)[[1]], quote(promiseDomain$onThen))) {
+      return(sys.frame(i))
+    }
+  }
+  NULL
 }
 
 # Call `fun(arg)` without letting R's JIT compile `fun`.
@@ -436,6 +492,8 @@ asyncCallback <- function(callback) {
 # (10 ms or more) than running it, and the result is used for that one run.
 # The JIT is only off while `fun` is entered: `arg` is lazy, and coro reads it
 # just before it carries on with the user's code, which turns the JIT back on.
+# `arg` is not forced here for another reason: for a rejected promise, coro
+# passes a `stop()` to raise inside the user's code.
 # TODO-future: Remove this, and `compiler` from Imports, once coro's fix is
 # released (https://github.com/r-lib/coro/pull/72; it is in coro 1.1.0.9000),
 # and bump the coro version in Suggests. With that fix R reuses the compiled
@@ -553,8 +611,8 @@ relabelAsyncFrames <- function(
         break
       }
     }
-    # The wrapper's error handler is around that call
-    if (first > 1L && isCallNamed(callList[[first - 1L]], "withCallingHandlers")) {
+    # The wrapper enters `asyncStackPromiseDomain()` around that call
+    while (first > 1L && isAsyncDomainCall(callList[[first - 1L]])) {
       first <- first - 1L
     }
     if (first <= parent) {
@@ -566,10 +624,13 @@ relabelAsyncFrames <- function(
   # coro's and the promise package's; hide them
   n <- length(calls)
   innermostIndex <- max(asyncFrames)
+  # A `then()` called by the user's code is under coro's `eval_bare()`, like
+  # an error; those frames are the user's and stay
   if (
     atThen &&
       innermostIndex < n &&
-      identical(callList[[innermostIndex + 1]][[1]], quote(base::evalq))
+      identical(callList[[innermostIndex + 1]][[1]], quote(base::evalq)) &&
+      is.null(coroEvalFrame(callList, innermostIndex))
   ) {
     inner <- (innermostIndex + 1):n
     hidden[inner] <- TRUE
@@ -594,6 +655,15 @@ relabelAsyncFrames <- function(
 }
 
 stackTraceFloorSym <- quote(..stacktracefloor..)
+
+# Whether `call` is one of the frames that enter `asyncStackPromiseDomain()`
+# in the wrapper made by `wrapFunctionLabel()`
+isAsyncDomainCall <- function(call) {
+  head <- call[[1]]
+  identical(head, quote(withCallingHandlers)) ||
+    identical(head, quote(domain$wrapSync)) ||
+    identical(head, quote(promises::with_promise_domain))
+}
 
 # Whether `fun` is the async function whose label is kept in `labelEnv`
 isAsyncFunctionFor <- function(fun, labelEnv) {

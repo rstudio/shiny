@@ -182,7 +182,7 @@
   content: "";
   display: block;
   position: relative;
-  cursor: s-resize;
+  cursor: pointer;
   width: 100%;
   height: 22px;
   top: -9px;
@@ -195,7 +195,7 @@
   border-top: 1px solid #428bca;
   border-bottom: 1px solid #428bca;
   background: #428bca;
-  cursor: s-resize;
+  cursor: pointer;
   z-index: 2;
 }
 

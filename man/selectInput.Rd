@@ -13,7 +13,8 @@ selectInput(
   multiple = FALSE,
   selectize = TRUE,
   width = NULL,
-  size = NULL
+  size = NULL,
+  keepNA = FALSE
 )
 
 selectizeInput(inputId, ..., options = NULL, width = NULL)
@@ -45,6 +46,10 @@ see \code{\link[=validateCssUnit]{validateCssUnit()}}.}
 will result in a taller box. Not compatible with \code{selectize=TRUE}.
 Normally, when \code{multiple=FALSE}, a select input will be a drop-down list,
 but when \code{size} is set, it will be a box instead.}
+
+\item{keepNA}{If \code{keepNA = FALSE}, an \code{NA} value in \code{choices} is converted
+to the string "NA" the returned selection. If \code{keepNA = TRUE}, an \code{NA}
+value in \code{choices} is still an \code{NA} in the returned selection.}
 
 \item{...}{Arguments passed to \code{selectInput()}.}
 
